@@ -71,7 +71,7 @@ function renderHelp() {
         </div>
         <div class="faq-item">
           <div class="faq-q">Website</div>
-          <div class="faq-a"><a href="https://jumpkit.app" target="_blank" style="color:var(--turq)">jumpkit.app</a></div>
+          <div class="faq-a"><a href="https://jumpkit.ai" target="_blank" style="color:var(--turq)">jumpkit.ai</a></div>
         </div>
         <div class="faq-item">
           <div class="faq-q">About JumpKit</div>

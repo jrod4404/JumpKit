@@ -1180,10 +1180,10 @@ window.showPaywall = function() {
         You've used all 250 free launches.<br>Upgrade to keep jumping — no limits, plus team sharing and more.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
-        <button class="btn btn-primary" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.app/#pricing'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700">
+        <button class="btn btn-primary" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700">
           <i class="ti ti-rocket" style="color:#fff"></i> Upgrade to JumpKit — $5/mo
         </button>
-        <button class="btn btn-subtle" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.app/#pricing'); Modal.close();" style="padding:12px;font-size:0.9rem">
+        <button class="btn btn-subtle" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:12px;font-size:0.9rem">
           <i class="ti ti-brain"></i> JumpKit + Jet AI — $25/mo
         </button>
         <button class="btn btn-ghost" onclick="Modal.close();" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
