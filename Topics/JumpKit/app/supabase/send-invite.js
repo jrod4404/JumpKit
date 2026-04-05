@@ -77,7 +77,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         // TODO: Jeff fill this in — replace with your verified Resend sender domain
-        from: 'JumpKit <noreply@jumpkit.app>',
+        from: 'JumpKit <noreply@jumpkit.ai>',
         to: email,
         subject: `You've been invited to join ${teamName} on JumpKit`,
         html,
