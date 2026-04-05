@@ -43,6 +43,14 @@ async function initAuth() {
 }
 
 // Placeholder — real initApp() wraps all startup logic below
+// ── Auto-update banner ────────────────────────────────────────────
+if (window.electronAPI?.onUpdateReady) {
+  window.electronAPI.onUpdateReady(() => {
+    const banner = document.getElementById('updateBanner');
+    if (banner) banner.style.display = 'flex';
+  });
+}
+
 async function initApp() {
   // Clean up old localStorage app data keys (post-SQLite migration)
   try {
