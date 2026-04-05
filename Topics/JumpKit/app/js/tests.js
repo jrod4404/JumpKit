@@ -18,7 +18,10 @@ const JK_TESTS = [
   {
     id: 1, category: 'Auth',
     title: 'Session persists after reload',
+    purpose: 'Confirms the user remains authenticated after the app loads. If this fails, the login flow or session storage is broken.',
+    prerequisites: 'None — runs automatically on app load.',
     description: 'window._supabaseUser is set after app load',
+    input: 'window._supabaseUser',
     expected: 'window._supabaseUser is not null',
     test: async () => {
       if (window._supabaseUser == null) throw new Error('_supabaseUser is null');
@@ -28,6 +31,9 @@ const JK_TESTS = [
   {
     id: 2, category: 'Auth',
     title: 'currentUser is set',
+    purpose: 'Verifies the local currentUser object is properly populated. This object drives nearly all DB reads/writes — if missing, the entire app will malfunction.',
+    prerequisites: 'Must be logged in. Test 1 (session persists) should pass first.',
+    input: 'currentUser.id, currentUser.email',
     description: 'currentUser has .id and .email',
     expected: 'currentUser is not null and has .id and .email',
     test: async () => {
@@ -40,6 +46,9 @@ const JK_TESTS = [
   {
     id: 3, category: 'Auth',
     title: 'Supabase profile loaded',
+    purpose: 'Checks that the user\'s Supabase profile row was fetched on startup. Role, org_id, and subscription data all live here — missing profile breaks teams, billing, and settings.',
+    prerequisites: 'Must be logged in. A matching row must exist in the Supabase profiles table for this user.',
+    input: 'window._supabaseProfile',
     description: 'window._supabaseProfile is set after initApp',
     expected: 'window._supabaseProfile is not null',
     test: async () => {
@@ -50,6 +59,9 @@ const JK_TESTS = [
   {
     id: 4, category: 'Auth',
     title: 'Subscription status cached',
+    purpose: 'Ensures subscription status was written to localStorage on login. This cache is used to gate features without a Supabase round-trip on every action.',
+    prerequisites: 'Must be logged in. Subscription status must have been fetched and cached during initApp.',
+    input: 'localStorage.getItem("jk_subscription_status")',
     description: 'jk_subscription_status is in localStorage',
     expected: 'localStorage.getItem("jk_subscription_status") is not null',
     test: async () => {
@@ -61,6 +73,9 @@ const JK_TESTS = [
   {
     id: 5, category: 'Auth',
     title: 'Sign out clears session',
+    purpose: 'Manually confirms that signing out fully ends the session and prevents access to the app without re-authenticating. Critical for security.',
+    prerequisites: 'Must be logged in. Have your credentials ready to log back in after signing out.',
+    input: 'User menu → Logout action',
     description: 'Click sign out and verify redirect to login page',
     expected: 'User is redirected to login screen and cannot navigate back to the app without logging in again.',
     steps: 'Click the user menu (top-right) → click Logout → verify you are redirected to the login screen and cannot navigate back without logging in again.',
@@ -71,6 +86,9 @@ const JK_TESTS = [
   {
     id: 6, category: 'Navigation',
     title: 'Home page renders',
+    purpose: 'Confirms the home page mounts correctly and the tips grid is present. A failure here indicates a rendering crash or missing DOM element on the default landing page.',
+    prerequisites: 'None — does not require any jumps or columns.',
+    input: 'navigateTo("home") → document.querySelector(".tips-grid")',
     description: 'Navigate to home page and check for tips-grid',
     expected: '.tips-grid exists after navigating to home',
     test: async () => {
@@ -85,6 +103,9 @@ const JK_TESTS = [
   {
     id: 7, category: 'Navigation',
     title: 'Jumps page renders',
+    purpose: 'Verifies the Jumps page loads and shows either jump columns or an empty-state placeholder. Catches rendering regressions in the core feature page.',
+    prerequisites: 'None — passes even with zero jumps (empty state counts).',
+    input: 'navigateTo("jumps") → document.querySelector(".columns-area, .no-columns")',
     description: 'Navigate to jumps and check for jump content',
     expected: '.columns-area or .no-columns exists on jumps page',
     test: async () => {
@@ -99,6 +120,9 @@ const JK_TESTS = [
   {
     id: 8, category: 'Navigation',
     title: 'Archive page renders',
+    purpose: 'Confirms the Archive page mounts and its list container exists. Ensures users can always access their archived jumps.',
+    prerequisites: 'None — passes even with an empty archive.',
+    input: 'navigateTo("archive") → document.querySelector("#archiveList")',
     description: 'Navigate to archive and check for archive content',
     expected: '#archiveList or .no-columns exists on archive page',
     test: async () => {
@@ -113,6 +137,9 @@ const JK_TESTS = [
   {
     id: 9, category: 'Navigation',
     title: 'Stats page renders',
+    purpose: 'Confirms the Stats page renders its wrapper without crashing. A failure suggests a chart library issue or broken renderStats() function.',
+    prerequisites: 'None — renders with zero data.',
+    input: 'navigateTo("stats") → document.querySelector(".stats-wrap")',
     description: 'Navigate to stats and check pageContent has content',
     expected: 'Stats page renders without error',
     test: async () => {
@@ -127,6 +154,9 @@ const JK_TESTS = [
   {
     id: 10, category: 'Navigation',
     title: 'Account page renders',
+    purpose: 'Verifies the Account page loads its grid layout. Failures here indicate renderAccount() is broken or user profile data is missing.',
+    prerequisites: 'Must be logged in with a valid Supabase profile.',
+    input: 'navigateTo("account") → document.querySelector(".acct-grid, .acct-section")',
     description: 'Navigate to account and check for .acct-card or .acct-cards',
     expected: '.acct-card or .acct-cards exists after navigation',
     test: async () => {
@@ -143,7 +173,10 @@ const JK_TESTS = [
   {
     id: 11, category: 'Jumps',
     title: 'DB.getActiveJumps returns array',
+    purpose: 'Isolates the core data accessor for jumps. If this returns a non-array, every jump render and loop in the app will crash.',
+    prerequisites: 'None — returns empty array if no jumps exist.',
     description: 'Call DB.getActiveJumps(currentUser.id) and verify result is array',
+    input: 'DB.getActiveJumps(currentUser.id)',
     expected: 'Returns an array (possibly empty)',
     test: async () => {
       const result = DB.getActiveJumps(currentUser.id);
@@ -154,6 +187,9 @@ const JK_TESTS = [
   {
     id: 12, category: 'Jumps',
     title: 'DB.getColumns returns array',
+    purpose: 'Verifies the column data accessor works. Columns are required to display or add jumps — if this fails, the Jumps page will be empty or crash.',
+    prerequisites: 'None — returns empty array if no columns exist.',
+    input: 'DB.getColumns(currentUser.id)',
     description: 'Call DB.getColumns(currentUser.id) and verify result is array',
     expected: 'Returns an array (possibly empty)',
     test: async () => {
@@ -165,6 +201,9 @@ const JK_TESTS = [
   {
     id: 13, category: 'Jumps',
     title: 'Add jump saves to DB',
+    purpose: 'Tests the full create→read→delete lifecycle for a jump. Confirms DB.createJump persists correctly and DB.deleteJump removes it cleanly.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning — creates and deletes its own jump.',
+    input: 'DB.createJump(currentUser.id, { name, url, columnId }) → DB.deleteJump(currentUser.id, id)',
     description: 'Create a test jump via DB.saveJump, verify it exists, then delete it',
     expected: 'Test jump appears in getActiveJumps after save, then removed after delete',
     test: async () => {
@@ -195,6 +234,9 @@ const JK_TESTS = [
   {
     id: 14, category: 'Jumps',
     title: 'Archive jump removes from active',
+    purpose: 'Confirms that archiving a jump correctly removes it from the active list. Catches bugs where archive doesn\'t persist or the active filter doesn\'t exclude archived items.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning — creates, archives, and deletes its own jump.',
+    input: 'DB.createJump() → DB.archiveJump(currentUser.id, id) → DB.getActiveJumps(currentUser.id)',
     description: 'Archive a temp jump, verify it is no longer in getActiveJumps',
     expected: 'Jump absent from active list after archiving, then cleaned up',
     test: async () => {
@@ -223,6 +265,9 @@ const JK_TESTS = [
   {
     id: 15, category: 'Jumps',
     title: 'Hotkey not duplicated',
+    purpose: 'Ensures no two jumps share a hotkey, which would cause unpredictable behavior when that key is pressed. Catches data corruption from imports or manual edits.',
+    prerequisites: 'None — passes if no jumps exist or no hotkeys are set.',
+    input: 'DB.getActiveJumps(currentUser.id).map(j => j.hotkey)',
     description: 'Check no two active jumps share the same non-empty hotkey',
     expected: 'All non-empty hotkeys are unique across active jumps',
     test: async () => {
@@ -239,6 +284,9 @@ const JK_TESTS = [
   {
     id: 16, category: 'Jumps',
     title: 'Jump click launches URL',
+    purpose: 'Manually verifies the core user action — clicking a jump opens the correct URL or file path in the system browser or file explorer.',
+    prerequisites: 'At least one jump with a valid URL must exist on the Jumps page.',
+    input: 'Click on any jump card on the Jumps page',
     description: 'Click a jump in the app and verify it opens in browser',
     expected: 'Jump URL opens in the default browser or file explorer, and the click count increments on the jump card.',
     steps: 'Go to the Jumps page → click any jump with a URL (e.g. www.google.com) → verify it opens in your browser or file explorer → check that the click count on the jump card increments.',
@@ -249,6 +297,9 @@ const JK_TESTS = [
   {
     id: 17, category: 'Columns',
     title: 'Columns have unique IDs',
+    purpose: 'Guards against duplicate column IDs which would cause jumps to appear in wrong columns or be overwritten during saves.',
+    prerequisites: 'None — passes with zero columns.',
+    input: 'DB.getColumns(currentUser.id).map(c => c.id)',
     description: 'All column IDs are unique',
     expected: 'No two columns share the same ID',
     test: async () => {
@@ -262,6 +313,9 @@ const JK_TESTS = [
   {
     id: 18, category: 'Columns',
     title: 'Column order is sequential',
+    purpose: 'Confirms column ordering is intact so the Jumps page renders columns in the correct left-to-right sequence. Catches issues after drag-reorder or bulk saves.',
+    prerequisites: 'None — passes with zero columns.',
+    input: 'DB.getColumns(currentUser.id).sort((a,b) => a.order - b.order).map(c => c.order)',
     description: 'Column .order values are sequential integers starting from 0 or 1',
     expected: 'Columns sorted by .order have contiguous integer values',
     test: async () => {
@@ -277,6 +331,9 @@ const JK_TESTS = [
   {
     id: 19, category: 'Columns',
     title: 'At least one column exists',
+    purpose: 'Ensures the user has a column set up, which is required for adding jumps. If zero columns exist, the Add Jump modal will fail silently.',
+    prerequisites: 'User must have created at least one column via Configure Columns.',
+    input: 'DB.getColumns(currentUser.id).length',
     description: 'User has at least one column',
     expected: 'DB.getColumns(currentUser.id).length >= 1',
     test: async () => {
@@ -288,6 +345,9 @@ const JK_TESTS = [
   {
     id: 20, category: 'Columns',
     title: 'Visible columns count',
+    purpose: 'Confirms at least one column is visible so the Jumps page is not blank. Catches cases where all columns were accidentally hidden.',
+    prerequisites: 'At least one column must exist and have visibility enabled.',
+    input: 'DB.getColumns(currentUser.id).filter(c => c.visible)',
     description: 'At least one column has visible = true or 1',
     expected: 'At least one column is visible',
     test: async () => {
@@ -302,6 +362,9 @@ const JK_TESTS = [
   {
     id: 21, category: 'Archive',
     title: 'DB.getArchivedJumps returns array',
+    purpose: 'Verifies the archive data accessor is functional. A non-array return would crash the Archive page render loop.',
+    prerequisites: 'None — returns empty array if no archived jumps exist.',
+    input: 'DB.getArchivedJumps(currentUser.id)',
     description: 'Call DB.getArchivedJumps(currentUser.id) and verify result is array',
     expected: 'Returns an array (possibly empty)',
     test: async () => {
@@ -313,6 +376,9 @@ const JK_TESTS = [
   {
     id: 22, category: 'Archive',
     title: 'Unarchive restores jump to active',
+    purpose: 'Tests the full archive→unarchive round-trip. Confirms a jump removed from active can be fully restored, which is a key user-facing recovery action.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning.',
+    input: 'DB.createJump() → DB.archiveJump() → DB.unarchiveJump(currentUser.id, id)',
     description: 'Archive then unarchive a temp jump, verify it appears in active list',
     expected: 'Jump is in getActiveJumps after unarchiving',
     test: async () => {
@@ -342,6 +408,9 @@ const JK_TESTS = [
   {
     id: 23, category: 'Archive',
     title: 'Archive page renders archived list',
+    purpose: 'Confirms the Archive page mounts its list container in the DOM. Catches render failures that would leave users with a blank archive page.',
+    prerequisites: 'None — passes even with an empty archive.',
+    input: 'navigateTo("archive") → document.querySelector("#archiveList")',
     description: 'Navigate to archive page and verify DOM has content',
     expected: 'Archive page renders without error',
     test: async () => {
@@ -358,6 +427,9 @@ const JK_TESTS = [
   {
     id: 24, category: 'Stats',
     title: 'Click log is array',
+    purpose: 'Verifies the click log data accessor works. All stats charts depend on this — a non-array return would crash every chart on the Stats page.',
+    prerequisites: 'None — returns empty array if no clicks recorded.',
+    input: 'DB.getClickLog(currentUser.id)',
     description: 'DB.getClickLog(currentUser.id) returns an array',
     expected: 'Returns an array (possibly empty)',
     test: async () => {
@@ -369,6 +441,9 @@ const JK_TESTS = [
   {
     id: 25, category: 'Stats',
     title: 'Trial launches used is number',
+    purpose: 'Confirms the trial launch counter is a valid number. This value gates free-tier access — if it\'s null or NaN the paywall logic will behave unpredictably.',
+    prerequisites: 'Supabase profile must be loaded (Test 3 must pass).',
+    input: 'window._supabaseProfile.trial_launches_used',
     description: 'window._supabaseProfile.trial_launches_used is a number',
     expected: 'typeof trial_launches_used === "number"',
     test: async () => {
@@ -380,6 +455,9 @@ const JK_TESTS = [
   {
     id: 26, category: 'Stats',
     title: 'Stats page renders charts',
+    purpose: 'End-to-end check that the Stats page renders its full wrapper with chart content. Catches regressions in renderStats() or missing chart dependencies.',
+    prerequisites: 'None — renders with zero data.',
+    input: 'navigateTo("stats") → document.querySelector(".stats-wrap")',
     description: 'Navigate to stats, check page content is populated',
     expected: '.stats-wrap or chart-related elements exist after navigation',
     test: async () => {
@@ -396,6 +474,9 @@ const JK_TESTS = [
   {
     id: 27, category: 'Account',
     title: 'Profile first name displayed',
+    purpose: 'Confirms the account page loads and displays user profile data. Verifies that renderAccount() correctly reads from _supabaseProfile.',
+    prerequisites: 'Must be logged in with a valid Supabase profile.',
+    input: 'navigateTo("account") → document.querySelector(".acct-grid")',
     description: 'Account page shows first name from _supabaseProfile',
     expected: 'First name input has value matching _supabaseProfile.first_name',
     test: async () => {
@@ -410,6 +491,9 @@ const JK_TESTS = [
   {
     id: 28, category: 'Account',
     title: 'Profile email displayed',
+    purpose: 'Confirms the user\'s email is visible on the Account page. If missing, it indicates the profile render or email binding is broken.',
+    prerequisites: 'Must be logged in. Test 2 (currentUser is set) must pass.',
+    input: 'navigateTo("account") → document.querySelectorAll(".acct-row") containing _supabaseUser.email',
     description: 'Account page shows correct user email',
     expected: 'Email visible in .acct-profile-email matches _supabaseUser.email',
     test: async () => {
@@ -427,6 +511,9 @@ const JK_TESTS = [
   {
     id: 29, category: 'Account',
     title: 'Subscription tier badge shows',
+    purpose: 'Verifies the subscription tier is visible on the Account page. Users rely on this to understand their plan — missing it suggests billing data isn\'t being read.',
+    prerequisites: 'Test 4 (subscription status cached) must pass.',
+    input: 'navigateTo("account") → document.querySelectorAll(".acct-row") containing "account type" or tier label',
     description: 'Account page displays a subscription tier badge',
     expected: '.acct-tier-badge exists on account page',
     test: async () => {
@@ -443,6 +530,9 @@ const JK_TESTS = [
   {
     id: 30, category: 'Account',
     title: 'Change password form exists',
+    purpose: 'Confirms action buttons are present on the Account page. A missing button would block users from managing their credentials or sending feedback.',
+    prerequisites: 'Must be logged in. Account page must render (Test 10 must pass).',
+    input: 'navigateTo("account") → document.querySelectorAll("#pageContent button, #pageContent a.btn")',
     description: 'Account page has Change Password button/UI',
     expected: 'Change Password button visible on account page',
     test: async () => {
@@ -460,6 +550,9 @@ const JK_TESTS = [
   {
     id: 31, category: 'Subscription',
     title: 'Free tier limit check',
+    purpose: 'Validates free-tier users haven\'t exceeded the launch limit. Catches cases where the counter is out of sync with what the paywall should enforce.',
+    prerequisites: 'Skipped automatically for paid subscribers. Requires Test 3 (Supabase profile loaded) to pass.',
+    input: 'window._supabaseProfile.subscription_status, window._supabaseProfile.trial_launches_used',
     description: 'If status is free, trial_launches_used should be <= 250',
     expected: 'Free tier users have trial_launches_used <= 250',
     test: async () => {
@@ -473,6 +566,9 @@ const JK_TESTS = [
   {
     id: 32, category: 'Subscription',
     title: 'showPaywall function exists',
+    purpose: 'Confirms the paywall function is globally accessible. If missing, free-tier users could use the app indefinitely without ever seeing the upgrade prompt.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof window.showPaywall',
     description: 'window.showPaywall is a function',
     expected: 'typeof window.showPaywall === "function"',
     test: async () => {
@@ -485,6 +581,9 @@ const JK_TESTS = [
   {
     id: 33, category: 'Subscription',
     title: 'Paid tier bypasses limit',
+    purpose: 'Confirms paid subscribers are not blocked by the paywall on load. A failure here means paying customers are being incorrectly gated.',
+    prerequisites: 'Skipped automatically for non-active subscribers. Must be logged in as a paid user to fully exercise this test.',
+    input: 'window._supabaseProfile.subscription_status, document.getElementById("modalOverlay").style.display',
     description: 'If status is active, modal overlay should not be visible on page load',
     expected: 'No paywall modal visible immediately after checking on active subscription',
     test: async () => {
@@ -502,6 +601,9 @@ const JK_TESTS = [
   {
     id: 34, category: 'Teams',
     title: 'Teams page renders',
+    purpose: 'Verifies the Teams page loads without error. A blank page here indicates renderTeams() is crashing or the user\'s role/org data is missing.',
+    prerequisites: 'Must be logged in. Supabase profile must be loaded.',
+    input: 'navigateTo("teams") → document.getElementById("pageContent").innerHTML',
     description: 'Navigate to teams and check pageContent has content',
     expected: 'Teams page renders without error',
     test: async () => {
@@ -516,6 +618,9 @@ const JK_TESTS = [
   {
     id: 35, category: 'Teams',
     title: 'supabaseClient accessible',
+    purpose: 'Confirms the Supabase client is initialized. Every team sharing, invite, and sync operation depends on this — if undefined, all cloud features fail silently.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof supabaseClient',
     description: 'window.supabaseClient is defined',
     expected: 'typeof supabaseClient !== "undefined"',
     test: async () => {
@@ -528,6 +633,9 @@ const JK_TESTS = [
   {
     id: 36, category: 'Teams',
     title: 'Role stored in localStorage',
+    purpose: 'Confirms the user\'s role was cached locally after login. Role is used for UI gating (org-owner vs team-member views) — missing it causes incorrect page rendering.',
+    prerequisites: 'Must be logged in. Role must have been set during initApp.',
+    input: 'localStorage.getItem("jk_role")',
     description: 'jk_role is present in localStorage',
     expected: 'localStorage.getItem("jk_role") is not null',
     test: async () => {
@@ -541,6 +649,9 @@ const JK_TESTS = [
   {
     id: 37, category: 'UI',
     title: 'Dark/light mode toggle works',
+    purpose: 'Confirms the theme attribute is set to a valid value. An invalid or missing theme would cause the CSS variables to fall back incorrectly, breaking the entire visual design.',
+    prerequisites: 'None.',
+    input: 'document.documentElement.dataset.theme',
     description: 'document.documentElement.dataset.theme is "dark" or "light"',
     expected: 'data-theme attribute is "dark" or "light"',
     test: async () => {
@@ -554,6 +665,9 @@ const JK_TESTS = [
   {
     id: 38, category: 'UI',
     title: 'Toast function accessible',
+    purpose: 'Verifies the Toast notification system is available. Save, delete, error, and feedback operations all call Toast — if missing, users get no feedback on their actions.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof Toast, typeof Toast.success, typeof Toast.danger',
     description: 'Toast is defined with .success and .danger methods',
     expected: 'typeof Toast !== "undefined" && typeof Toast.success === "function"',
     test: async () => {
@@ -566,6 +680,9 @@ const JK_TESTS = [
   {
     id: 39, category: 'UI',
     title: 'Modal function accessible',
+    purpose: 'Confirms the Modal system is available globally. Add Jump, Configure Columns, Feedback, and team actions all use Modal — a missing definition would silently break all of them.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof Modal, typeof Modal.open, typeof Modal.close',
     description: 'Modal is defined with .open and .close methods',
     expected: 'typeof Modal !== "undefined" && Modal.open/close are functions',
     test: async () => {
@@ -578,6 +695,9 @@ const JK_TESTS = [
   {
     id: 40, category: 'UI',
     title: 'Sidebar nav has items',
+    purpose: 'Ensures the sidebar navigation rendered all its buttons. Fewer than 5 nav items means a page is missing from the nav — users wouldn\'t be able to reach it.',
+    prerequisites: 'None — sidebar renders on app load.',
+    input: 'document.querySelectorAll(".nav-item[data-page]").length',
     description: 'Sidebar has >= 5 nav buttons',
     expected: 'At least 5 .nav-item[data-page] buttons in sidebar',
     test: async () => {
@@ -591,6 +711,9 @@ const JK_TESTS = [
   {
     id: 41, category: 'UI',
     title: 'CtxMenu is accessible',
+    purpose: 'Confirms the context menu system is initialized. Right-clicking any jump relies on CtxMenu.show/hide — if missing, right-click actions (edit, archive, delete) are broken.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof window.CtxMenu, typeof window.CtxMenu.show, typeof window.CtxMenu.hide',
     description: 'window.CtxMenu and its show/hide methods are defined',
     expected: 'window.CtxMenu.show and window.CtxMenu.hide are functions',
     test: async () => {
@@ -603,6 +726,9 @@ const JK_TESTS = [
   {
     id: 42, category: 'UI',
     title: 'Jump context menu renders on right-click',
+    purpose: 'Simulates a right-click on a jump and confirms the context menu appears with sufficient items. Directly tests the most common jump management interaction.',
+    prerequisites: 'At least one jump must exist on the Jumps page.',
+    input: 'document.querySelector(".jump-item").dispatchEvent(new MouseEvent("contextmenu")) → document.getElementById("ctxMenu")',
     description: 'Right-clicking a jump item shows the context menu with expected items',
     expected: '#ctxMenu becomes visible with at least 3 items after right-clicking a jump',
     test: async () => {
@@ -628,11 +754,69 @@ const JK_TESTS = [
     }
   },
 
+  // ── Settings persistence ──────────────────────────────────────
+  {
+    id: 43, category: 'Settings',
+    title: 'saveAccountPrefs is accessible',
+    purpose: 'Confirms the account preferences save function is globally accessible. Without it, any settings change on the Account page would silently fail.',
+    prerequisites: 'None — checks window scope only.',
+    input: 'typeof window.saveAccountPrefs',
+    description: 'window.saveAccountPrefs is defined as a function',
+    expected: 'typeof window.saveAccountPrefs === "function"',
+    test: async () => {
+      if (typeof window.saveAccountPrefs !== 'function') throw new Error('window.saveAccountPrefs is not defined');
+      return true;
+    }
+  },
+  {
+    id: 44, category: 'Settings',
+    title: 'Prefs persist to SQLite',
+    purpose: 'Writes a preference change to the local SQLite DB and reads it back. Confirms the IPC write path is working so user settings actually survive app restarts.',
+    prerequisites: 'Must be logged in with a valid currentUser. Test is self-restoring — original value is written back after the check.',
+    input: 'DB.savePrefs(currentUser.id, { timePerClick: testVal }) → DB.getPrefs(currentUser.id).timePerClick',
+    description: 'Save a pref change via DB.savePrefs and verify it reads back correctly',
+    expected: 'timePerClick value saved to SQLite reads back unchanged after DB.init would reload it',
+    test: async () => {
+      const orig = DB.getPrefs(currentUser.id);
+      const testVal = orig.timePerClick === 99 ? 88 : 99;
+      DB.savePrefs(currentUser.id, { timePerClick: testVal });
+      await new Promise(r => setTimeout(r, 200)); // allow IPC to flush
+      // Verify in-memory cache updated
+      const updated = DB.getPrefs(currentUser.id);
+      // Restore original
+      DB.savePrefs(currentUser.id, { timePerClick: orig.timePerClick });
+      if (updated.timePerClick !== testVal) throw new Error(`Expected ${testVal} but got ${updated.timePerClick}`);
+      return true;
+    }
+  },
+  {
+    id: 45, category: 'Settings',
+    title: 'startPage pref saves and reads back',
+    purpose: 'Specifically tests the startPage preference — the page the app opens to on launch. If this pref doesn\'t persist, the user\'s chosen start page resets every session.',
+    prerequisites: 'Must be logged in. Test is self-restoring — original startPage is written back after the check.',
+    input: 'DB.savePrefs(currentUser.id, { startPage: "stats" }) → DB.getPrefs(currentUser.id).startPage',
+    description: 'Change startPage pref to "stats", verify it reads back, then restore',
+    expected: 'startPage "stats" persists in DB cache after save',
+    test: async () => {
+      const orig = DB.getPrefs(currentUser.id);
+      const testPage = orig.startPage === 'stats' ? 'home' : 'stats';
+      DB.savePrefs(currentUser.id, { startPage: testPage });
+      await new Promise(r => setTimeout(r, 200));
+      const updated = DB.getPrefs(currentUser.id);
+      DB.savePrefs(currentUser.id, { startPage: orig.startPage });
+      if (updated.startPage !== testPage) throw new Error(`Expected startPage "${testPage}" but got "${updated.startPage}"`);
+      return true;
+    }
+  },
+
   // ── Team Sharing ──────────────────────────────────────────────
   {
     id: 46, category: 'Teams',
-    title: 'T1: Create test team → verified in Supabase',
+    title: 'Create test team → verified in Supabase',
+    purpose: 'Verifies that the team creation write path correctly inserts a row into Supabase and returns the created record. Foundation for all subsequent team sharing tests.',
+    prerequisites: 'Must be logged in as org-owner. Profile must have a valid org_id (visit Teams page first to auto-assign). Run before Tests 47–51.',
     description: 'Creates a test team in Supabase and queries it back to confirm correct creation',
+    input: 'supabaseClient.from("teams").insert({ org_id, name: "__TEST_TEAM_<ts>", team_password_hash, owner_id })',
     expected: 'team row exists in Supabase with matching name and org_id',
     test: async () => {
       // Requires org-owner role
@@ -675,7 +859,10 @@ const JK_TESTS = [
 
   {
     id: 47, category: 'Teams',
-    title: 'T2: Share column to test team → verified in Supabase',
+    title: 'Share column to test team → verified in Supabase',
+    purpose: 'Confirms that sharing a column writes the correct rows to shared_columns and shared_jumps in Supabase. Tests the core data sync that makes jump sharing work for teams.',
+    prerequisites: 'Test 46 must have run successfully first. At least one personal (unshared) column with jumps must exist.',
+    input: 'supabaseClient.from("shared_columns").insert({ column_id, team_id }) + shared_jumps for each jump',
     description: 'Shares first personal column + its jumps to the test team, queries shared_columns and shared_jumps tables to confirm',
     expected: 'Row exists in shared_columns; all jumps in that column exist in shared_jumps',
     test: async () => {
@@ -749,7 +936,10 @@ const JK_TESTS = [
 
   {
     id: 48, category: 'Teams',
-    title: 'T3: Invite user to test team → pending status in Supabase',
+    title: 'Invite user to test team → pending status in Supabase',
+    purpose: 'Tests that the invite creation flow correctly writes a pending invite row to Supabase. An invite email is only useful if the DB row is correct — this catches mismatches.',
+    prerequisites: 'Tests 46 and 47 must have run successfully first (window._testTeamId must be set).',
+    input: 'supabaseClient.from("team_invites").insert({ team_id, email, status: "pending" })',
     description: 'Inserts a pending invite for a test email into team_invites, then queries to verify status=pending',
     expected: 'team_invites row exists with status = "pending" for the test email',
     test: async () => {
@@ -788,7 +978,10 @@ const JK_TESTS = [
 
   {
     id: 49, category: 'Teams',
-    title: 'T4: Accept invitation → status updated to "accepted" in Supabase',
+    title: 'Accept invitation → status updated to "accepted" in Supabase',
+    purpose: 'Simulates a user accepting a team invite and verifies the DB status transitions from pending to accepted. If this fails, users who accept invites won\'t gain team access.',
+    prerequisites: 'Test 48 must have run successfully first (window._testInviteId must be set).',
+    input: 'supabaseClient.from("team_invites").update({ status: "accepted" }).eq("id", _testInviteId)',
     description: 'Simulates invite acceptance by updating team_invites status to "accepted", then queries to confirm',
     expected: 'team_invites row has status = "accepted" after update',
     test: async () => {
@@ -817,7 +1010,10 @@ const JK_TESTS = [
 
   {
     id: 50, category: 'Teams',
-    title: 'T5: Remove user from team → member row deleted in Supabase',
+    title: 'Remove user from team → member row deleted in Supabase',
+    purpose: 'Confirms the member removal path correctly deletes the team_members row from Supabase. If this fails, removed members retain access to shared jumps.',
+    prerequisites: 'Test 46 must have run successfully first (window._testTeamId must be set).',
+    input: 'supabaseClient.from("team_members").insert({ team_id, user_id }) → .delete().eq("id", memberId)',
     description: 'Inserts a test team_members row for the current user, then removes it and verifies deletion',
     expected: 'team_members row no longer exists after delete',
     test: async () => {
@@ -862,7 +1058,10 @@ const JK_TESTS = [
 
   {
     id: 51, category: 'Teams',
-    title: 'T6: Unshare column from team → rows removed from shared_columns + shared_jumps',
+    title: 'Unshare column from team → rows removed from shared_columns + shared_jumps',
+    purpose: 'Tests that unsharing a column fully cleans up both shared_columns and shared_jumps in Supabase. Also cleans up all test data from the T1–T6 chain.',
+    prerequisites: 'Tests 46 and 47 must have run successfully first (window._testTeamId and window._testSharedColId must be set). This test is the final cleanup step.',
+    input: 'supabaseClient.from("shared_jumps").delete() + from("shared_columns").delete() + from("team_members").delete() + from("teams").delete()',
     description: 'Deletes the shared_columns and shared_jumps rows for the test column/team, then verifies removal',
     expected: 'No rows remain in shared_columns or shared_jumps for the test column + team',
     test: async () => {
@@ -919,51 +1118,6 @@ const JK_TESTS = [
     }
   },
 
-  // ── Settings persistence ──────────────────────────────────────
-  {
-    id: 43, category: 'Settings',
-    title: 'saveAccountPrefs is accessible',
-    description: 'window.saveAccountPrefs is defined as a function',
-    expected: 'typeof window.saveAccountPrefs === "function"',
-    test: async () => {
-      if (typeof window.saveAccountPrefs !== 'function') throw new Error('window.saveAccountPrefs is not defined');
-      return true;
-    }
-  },
-  {
-    id: 44, category: 'Settings',
-    title: 'Prefs persist to SQLite',
-    description: 'Save a pref change via DB.savePrefs and verify it reads back correctly',
-    expected: 'timePerClick value saved to SQLite reads back unchanged after DB.init would reload it',
-    test: async () => {
-      const orig = DB.getPrefs(currentUser.id);
-      const testVal = orig.timePerClick === 99 ? 88 : 99;
-      DB.savePrefs(currentUser.id, { timePerClick: testVal });
-      await new Promise(r => setTimeout(r, 200)); // allow IPC to flush
-      // Verify in-memory cache updated
-      const updated = DB.getPrefs(currentUser.id);
-      // Restore original
-      DB.savePrefs(currentUser.id, { timePerClick: orig.timePerClick });
-      if (updated.timePerClick !== testVal) throw new Error(`Expected ${testVal} but got ${updated.timePerClick}`);
-      return true;
-    }
-  },
-  {
-    id: 45, category: 'Settings',
-    title: 'startPage pref saves and reads back',
-    description: 'Change startPage pref to "stats", verify it reads back, then restore',
-    expected: 'startPage "stats" persists in DB cache after save',
-    test: async () => {
-      const orig = DB.getPrefs(currentUser.id);
-      const testPage = orig.startPage === 'stats' ? 'home' : 'stats';
-      DB.savePrefs(currentUser.id, { startPage: testPage });
-      await new Promise(r => setTimeout(r, 200));
-      const updated = DB.getPrefs(currentUser.id);
-      DB.savePrefs(currentUser.id, { startPage: orig.startPage });
-      if (updated.startPage !== testPage) throw new Error(`Expected startPage "${testPage}" but got "${updated.startPage}"`);
-      return true;
-    }
-  },
 ];
 
 // ── Render Function ────────────────────────────────────────────────
@@ -985,11 +1139,11 @@ function renderTests() {
     <div id="pageTests">
 
       <!-- Summary bar -->
-      <div id="testSummary" style="display:flex;margin-bottom:1rem;padding:12px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);font-size:0.9rem;font-weight:600;align-items:center;gap:1rem;flex-wrap:wrap">
-        <span id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:5px"><i class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"></i>0 passed</span>
-        <span id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:5px"><i class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"></i>0 failed</span>
-        <span id="summaryManual" style="color:var(--text-muted);display:flex;align-items:center;gap:5px"><i class="ti ti-alert-triangle" style="font-size:1.1rem;color:var(--text-muted)"></i>0 manual</span>
-        <span style="color:var(--text-muted);font-size:0.8rem;margin-left:auto" id="summaryTime"></span>
+      <div id="testSummary" style="margin:0 0 10px 0;padding:10px 24px 8px 24px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;gap:32px">
+        <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Passed</div>
+        <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Failed</div>
+        <div id="summaryManual" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-alert-triangle" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Manual</div>
+        <div style="color:var(--text-muted);font-size:0.8rem;margin-left:auto" id="summaryTime"></div>
       </div>
 
       <!-- Buttons -->
@@ -1012,6 +1166,7 @@ function renderTests() {
               <th style="padding:10px 12px;text-align:left;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">CATEGORY</th>
               <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">TITLE</th>
               <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXPECTED</th>
+              <th style="padding:10px 12px;text-align:center;width:80px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RUN</th>
               <th style="padding:10px 12px;text-align:center;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RESULT</th>
             </tr>
           </thead>
@@ -1060,11 +1215,24 @@ function _buildTestRows() {
         <div style="font-weight:600;font-size:0.87rem;color:var(--text)">${_esc(t.title)}</div>
         <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${_esc(t.description)}</div>
       </td>
-      <td style="padding:10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;max-width:220px">${_esc(t.expected)}</td>
+      <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
+      <td style="padding:10px 12px;text-align:center">
+        <button onclick="_runSingleTest(${t.id})" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
+          <i class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i><span style="line-height:1">Run</span>
+        </button>
+      </td>
       <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
         <span style="color:var(--text-muted)">—</span>
       </td>
     </tr>`).join('');
+}
+
+function _markManualResult(id, result) {
+  if (!window._jkTestResults) window._jkTestResults = {};
+  window._jkTestResults[id] = { state: result, received: result === 'pass' ? 'Manually marked as passed' : 'Manually marked as failed', message: result === 'fail' ? 'Manually marked as failed' : null };
+  _setRowResult(id, result, result === 'fail' ? 'Manually marked as failed' : null);
+  _refreshSummary();
+  _openTestDetail(id, result, result === 'fail' ? 'Manually marked as failed' : null);
 }
 
 function _openTestDetail(id, state, message) {
@@ -1072,40 +1240,72 @@ function _openTestDetail(id, state, message) {
   if (!testDef) return;
 
   let color, iconName, stateLabel, detailsText, detailsColor;
-  if (state === 'pass') {
+  const isManualTest = !!(testDef.steps);
+  const manualInstructions = testDef.steps || testDef.expected;
+  if (!state || state === 'null') {
+    color = 'var(--text-muted)'; iconName = 'clock'; stateLabel = 'Not Run';
+    detailsText = isManualTest ? manualInstructions : '—'; detailsColor = 'var(--text-muted)';
+  } else if (state === 'pass') {
     color = '#22c55e'; iconName = 'check'; stateLabel = 'Pass';
-    detailsText = 'Test passed successfully.'; detailsColor = 'var(--text-muted)';
+    detailsText = isManualTest ? manualInstructions : 'Test passed successfully.'; detailsColor = 'var(--text-muted)';
   } else if (state === 'fail') {
     color = '#ef4444'; iconName = 'x'; stateLabel = 'Fail';
-    detailsText = message || 'Test failed.'; detailsColor = '#ef4444';
+    detailsText = isManualTest ? manualInstructions : (message || 'Test failed.'); detailsColor = 'var(--text-muted)';
   } else {
     color = '#f59e0b'; iconName = 'alert-triangle'; stateLabel = 'Manual';
-    detailsText = testDef.steps || testDef.expected; detailsColor = '#f59e0b';
+    detailsText = manualInstructions; detailsColor = 'var(--text-muted)';
   }
 
-  const modalTitle = `${_esc(testDef.title)}`;
+  const modalTitle = `<i class="ti ti-test-pipe"></i> Unit Test ${id} — ${_esc(testDef.title)}`;
   const catColor = _CATEGORY_COLORS[testDef.category] || '#6b7280';
   const catPill = `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${catColor}22;color:${catColor}">${_esc(testDef.category)}</span>`;
+  const stored = (window._jkTestResults || {})[id] || {};
+  const receivedText = stored.received || '—';
+  const tdLabel = `padding:8px 32px 8px 0;color:var(--text-muted);font-weight:600;width:100px;vertical-align:top;white-space:nowrap;font-size:0.88rem`;
+  const tdValue     = `padding:8px 0;color:var(--text);line-height:1.6;font-size:0.88rem`;
+  const tdValueMuted = `padding:8px 0;color:var(--text-muted);line-height:1.6;font-size:0.88rem`;
+  const codeStyle   = `font-size:0.82rem;background:var(--bg-input);padding:3px 8px;border-radius:6px`;
+  const receivedColor = state==='pass'?'#22c55e':state==='fail'?'#ef4444':'var(--text-muted)';
   const bodyHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
     <tr>
-      <td style="padding:8px 12px 8px 0;color:var(--text-muted);font-weight:600;width:100px;vertical-align:top">ID</td>
-      <td style="padding:8px 0;color:var(--text)">${id}</td>
+      <td style="${tdLabel}">ID</td>
+      <td style="${tdValueMuted}">${id}</td>
     </tr>
     <tr>
-      <td style="padding:8px 12px 8px 0;color:var(--text-muted);font-weight:600;vertical-align:top">Category</td>
+      <td style="${tdLabel}">Category</td>
       <td style="padding:8px 0">${catPill}</td>
     </tr>
     <tr>
-      <td style="padding:8px 12px 8px 0;color:var(--text-muted);font-weight:600;vertical-align:top">Expected</td>
-      <td style="padding:8px 0;color:var(--text);line-height:1.5">${_esc(testDef.expected)}</td>
+      <td style="${tdLabel}">Title</td>
+      <td style="${tdValueMuted}">${_esc(testDef.title)}</td>
+    </tr>
+    ${testDef.purpose ? `<tr>
+      <td style="${tdLabel}">Purpose</td>
+      <td style="${tdValueMuted}">${_esc(testDef.purpose)}</td>
+    </tr>` : ''}
+    <tr>
+      <td style="${tdLabel}">Prerequisites</td>
+      <td style="${tdValueMuted}">${_esc(testDef.prerequisites || 'None')}</td>
     </tr>
     <tr>
-      <td style="padding:8px 12px 8px 0;color:var(--text-muted);font-weight:600;vertical-align:top">Details</td>
-      <td style="padding:8px 0;color:var(--text);line-height:1.5">${_esc(detailsText)}</td>
+      <td style="${tdLabel}">Inputs</td>
+      <td style="${tdValueMuted}">${testDef.input ? `<code style="${codeStyle};color:var(--text-muted)">${_esc(testDef.input)}</code>` : '—'}</td>
     </tr>
     <tr>
-      <td style="padding:8px 12px 8px 0;color:var(--text-muted);font-weight:600;vertical-align:top">Result</td>
-      <td style="padding:8px 0;font-weight:700"><i class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color}"></i> <span style="color:${color}">${stateLabel}</span></td>
+      <td style="${tdLabel}">Expected</td>
+      <td style="${tdValueMuted}">${_esc(testDef.expected)}</td>
+    </tr>
+    <tr>
+      <td style="${tdLabel}">Outputs</td>
+      <td style="${tdValue}"><code style="${codeStyle};color:${receivedColor}">${_esc(receivedText)}</code></td>
+    </tr>
+    <tr>
+      <td style="${tdLabel}">Result</td>
+      <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<i class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color}"></i> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
+    </tr>
+    <tr>
+      <td style="${tdLabel}">Details</td>
+      <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
     </tr>
   </table>`;
 
@@ -1114,21 +1314,26 @@ function _openTestDetail(id, state, message) {
   const nextId = currentIdx < JK_TESTS.length - 1 ? JK_TESTS[currentIdx + 1].id : null;
 
   const _results = window._jkTestResults || {};
-  const prevRes = prevId ? (_results[prevId] || {state:'pass'}) : null;
-  const nextRes = nextId ? (_results[nextId] || {state:'pass'}) : null;
+  const prevRes = prevId ? (_results[prevId] || null) : null;
+  const nextRes = nextId ? (_results[nextId] || null) : null;
+
+  const manualBtns = isManualTest ? `
+      <button class="btn btn-subtle" onclick="_markManualResult(${id},'pass')" style="color:#22c55e;border-color:rgba(34,197,94,0.3)"><i class="ti ti-check" style="color:#22c55e"></i> Mark as Pass</button>
+      <button class="btn btn-subtle" onclick="_markManualResult(${id},'fail')" style="color:#ef4444;border-color:rgba(239,68,68,0.3)"><i class="ti ti-x" style="color:#ef4444"></i> Mark as Fail</button>` : '';
 
   const footerHTML = `
     <div style="display:flex;gap:8px;align-items:center;width:100%">
-      <button class="btn btn-subtle" ${prevId ? '' : 'disabled'} onclick="${prevId ? `_openTestDetail(${prevId},'${(prevRes.state||'pass')}',${prevRes.message ? JSON.stringify(prevRes.message) : 'null'})` : ''}">
+      <button class="btn btn-subtle" ${prevId ? '' : 'disabled'} onclick="${prevId ? `_openTestDetail(${prevId},${prevRes ? `'${prevRes.state}'` : 'null'},${prevRes?.message ? JSON.stringify(prevRes.message) : 'null'})` : ''}">
         <i class="ti ti-chevron-left"></i> Prev
       </button>
-      <button class="btn btn-subtle" ${nextId ? '' : 'disabled'} onclick="${nextId ? `_openTestDetail(${nextId},'${(nextRes.state||'pass')}',${nextRes.message ? JSON.stringify(nextRes.message) : 'null'})` : ''}">
+      <button class="btn btn-subtle" ${nextId ? '' : 'disabled'} onclick="${nextId ? `_openTestDetail(${nextId},${nextRes ? `'${nextRes.state}'` : 'null'},${nextRes?.message ? JSON.stringify(nextRes.message) : 'null'})` : ''}">
         Next <i class="ti ti-chevron-right"></i>
       </button>
+      ${manualBtns}
       <button class="btn btn-subtle" onclick="Modal.close()" style="margin-left:auto"><i class="ti ti-x"></i> Close</button>
     </div>`;
 
-  Modal.open(modalTitle, bodyHTML, footerHTML);
+  Modal.open(modalTitle, bodyHTML, footerHTML, 'xl');
 }
 
 function _setRowResult(id, state, message) {
@@ -1142,20 +1347,63 @@ function _setRowResult(id, state, message) {
     cell.onclick = null;
     if (row) row.style.background = '';
   } else if (state === 'pass') {
-    cell.innerHTML = `<span style="color:#22c55e;font-weight:700;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-check" style="color:#22c55e"></i> Pass</span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3);cursor:pointer"><i class="ti ti-check" style="font-size:0.85rem;line-height:1;color:#22c55e"></i><span style="line-height:1">Pass</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(34,197,94,0.04)';
   } else if (state === 'fail') {
-    cell.innerHTML = `<span style="color:#ef4444;font-weight:700;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-x" style="color:#ef4444"></i> Fail</span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);cursor:pointer"><i class="ti ti-x" style="font-size:0.85rem;line-height:1;color:#ef4444"></i><span style="line-height:1">Fail</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(239,68,68,0.04)';
   } else if (state === 'manual') {
-    cell.innerHTML = `<span style="color:#f59e0b;font-weight:700;display:inline-flex;align-items:center;gap:4px"><i class="ti ti-alert-triangle" style="color:#f59e0b"></i> Manual</span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:pointer"><i class="ti ti-alert-triangle" style="font-size:0.85rem;line-height:1;color:#f59e0b"></i><span style="line-height:1">Manual</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(245,158,11,0.04)';
+  }
+}
+
+function _refreshSummary() {
+  let passed = 0, failed = 0, manual = 0;
+  JK_TESTS.forEach(t => {
+    const cell = document.getElementById(`test-result-${t.id}`);
+    if (!cell) return;
+    if (cell.querySelector('.ti-check'))               passed++;
+    else if (cell.querySelector('.ti-x'))              failed++;
+    else if (cell.querySelector('.ti-alert-triangle')) manual++;
+  });
+  const sp = document.getElementById('summaryPass');
+  const sf = document.getElementById('summaryFail');
+  const sm = document.getElementById('summaryManual');
+  if (sp) { sp.innerHTML = `<i class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#22c55e':'var(--text-muted)'}"></i>${passed} Passed`; sp.style.color = passed>0?'#22c55e':'var(--text-muted)'; }
+  if (sf) { sf.innerHTML = `<i class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#ef4444':'var(--text-muted)'}"></i>${failed} Failed`; sf.style.color = failed>0?'#ef4444':'var(--text-muted)'; }
+  if (sm) { sm.innerHTML = `<i class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"></i>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
+}
+
+async function _runSingleTest(id) {
+  const testDef = JK_TESTS.find(t => t.id === id);
+  if (!testDef) return;
+  const btn = document.getElementById(`test-run-btn-${id}`);
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 jk-spin" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i>'; }
+  _setRowResult(id, 'running');
+  if (!window._jkTestResults) window._jkTestResults = {};
+  try {
+    const result = await testDef.test();
+    if (result === 'manual') {
+      window._jkTestResults[id] = { state: 'manual', received: 'Manual verification required', message: null };
+      _setRowResult(id, 'manual');
+    } else {
+      window._jkTestResults[id] = { state: 'pass', received: String(result === true ? 'true' : JSON.stringify(result)), message: null };
+      _setRowResult(id, 'pass');
+    }
+  } catch (err) {
+    const msg = err.message || String(err);
+    window._jkTestResults[id] = { state: 'fail', received: msg, message: msg };
+    _setRowResult(id, 'fail', msg);
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i><span style="line-height:1">Run</span>'; }
+    _refreshSummary();
   }
 }
 
@@ -1202,20 +1450,21 @@ async function _runAllTests() {
       const result = await t.test();
       if (result === 'manual') {
         _setRowResult(t.id, 'manual');
-        _results[t.id] = {state:'manual'};
+        _results[t.id] = {state:'manual', received:'Manual verification required'};
         manual++;
       } else if (result === true) {
         _setRowResult(t.id, 'pass');
-        _results[t.id] = {state:'pass'};
+        _results[t.id] = {state:'pass', received:'true'};
         passed++;
       } else {
         _setRowResult(t.id, 'fail', 'Test returned false');
-        _results[t.id] = {state:'fail', message:'Test returned false'};
+        _results[t.id] = {state:'fail', received:'false', message:'Test returned false'};
         failed++;
       }
     } catch (err) {
-      _setRowResult(t.id, 'fail', err.message || String(err));
-      _results[t.id] = {state:'fail', message: err.message || String(err)};
+      const msg = err.message || String(err);
+      _setRowResult(t.id, 'fail', msg);
+      _results[t.id] = {state:'fail', received: msg, message: msg};
       failed++;
     }
 
@@ -1241,9 +1490,9 @@ async function _runAllTests() {
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<i class="ti ti-check" style="font-size:1.1rem;color:#22c55e"></i><span>${passed} passed</span>`;
-    document.getElementById('summaryFail').innerHTML = `<i class="ti ti-x" style="font-size:1.1rem;color:#ef4444"></i><span>${failed} failed</span>`;
-    document.getElementById('summaryManual').innerHTML = `<i class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b"></i><span>${manual} manual</span>`;
+    document.getElementById('summaryPass').innerHTML = `<i class="ti ti-check" style="font-size:1.4rem;color:#22c55e"></i>${passed} Passed`;
+    document.getElementById('summaryFail').innerHTML = `<i class="ti ti-x" style="font-size:1.4rem;color:#ef4444"></i>${failed} Failed`;
+    document.getElementById('summaryManual').innerHTML = `<i class="ti ti-alert-triangle" style="font-size:1.4rem;color:#f59e0b"></i>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
   }
 

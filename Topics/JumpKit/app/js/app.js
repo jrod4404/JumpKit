@@ -315,9 +315,7 @@ const Modal = window.Modal = {
   close() { this.overlay.style.display = 'none'; },
 };
 document.getElementById('modalClose').addEventListener('click', () => Modal.close());
-document.getElementById('modalOverlay').addEventListener('click', e => {
-  if (e.target === document.getElementById('modalOverlay')) Modal.close();
-});
+// Overlay click intentionally does NOT close the modal — use Save or Close buttons.
 
 // ── Context Menu ───────────────────────────────────────────────────
 const CtxMenu = window.CtxMenu = {
@@ -702,7 +700,7 @@ window.wireDropdown = function wireDropdown({ dropId, triggerId, menuId, labelId
 
   function confirmOpt(opt) {
     if (!opt) return;
-    if (label) label.textContent = opt.textContent;
+    if (label) { label.textContent = opt.textContent; label.style.color = ''; }
     if (input) { input.value = opt.dataset.value; input.style && (input.style.color = ''); }
     getOpts().forEach(o => o.classList.remove('selected', 'kbfocus'));
     opt.classList.add('selected');
@@ -771,7 +769,7 @@ window.saveAccountPrefs = function saveAccountPrefs() {
   // Re-render jumps live if on jumps page so description/hotkey toggles apply immediately
   if (activePage === 'jumps' && typeof renderColumns === 'function') renderColumns();
 }
-function openFeedbackModal() {
+window.openFeedbackModal = function openFeedbackModal() {
   const body = `
     <div class="form-group">
       <label class="form-label">Your Name</label>
@@ -804,7 +802,7 @@ function openFeedbackModal() {
 
   Modal.open('<i class="ti ti-message-circle"></i> Feedback', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="submitFeedback()"><i class="ti ti-check"></i> Submit</button>`);
+     <button class="btn btn-subtle" onclick="submitFeedback()"><i class="ti ti-check"></i> Submit</button>`);
 
   wireDropdown({
     dropId: 'fbCatDrop', triggerId: 'fbCatTrigger', menuId: 'fbCatMenu',
@@ -813,7 +811,7 @@ function openFeedbackModal() {
   });
 }
 
-async function submitFeedback() {
+window.submitFeedback = async function submitFeedback() {
   let ok = true;
   const cat = document.getElementById('fbCat').value;
   const msg = document.getElementById('fbMsg').value.trim();
@@ -830,9 +828,14 @@ async function submitFeedback() {
 
   try {
     const SUPABASE_URL = 'https://iuexwdjnqfidcwvwbgwr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0';
+    console.log('[Feedback] Calling edge function…');
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
       body: JSON.stringify({
         name: currentUser?.name || '',
         email: currentUser?.email || '',
@@ -841,6 +844,7 @@ async function submitFeedback() {
       }),
     });
     const data = await res.json().catch(() => ({}));
+    console.log('[Feedback] HTTP status:', res.status, '| response:', JSON.stringify(data));
     if (!res.ok && !data.ok) throw new Error(data.error || 'Send failed');
   } catch (e) {
     console.warn('Feedback send error:', e);

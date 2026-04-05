@@ -270,7 +270,7 @@ function renderColumns() {
       colEl.className = 'jump-column';
       colEl.innerHTML = `
         <div class="col-header">
-          <span>${col.name}</span>
+          <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
           <span class="col-count">${colJumps.length}</span>
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
@@ -291,7 +291,7 @@ function renderColumns() {
     colEl.className = 'jump-column';
     colEl.innerHTML = `
       <div class="col-header">
-        <span>${col.name}</span>
+        <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
         <span class="col-count">${colJumps.length}</span>
       </div>
       <div class="col-items" id="col-${col.id}">
@@ -572,7 +572,7 @@ function openJumpFormModal(editId) {
 
   const footer = `
     <button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-    <button class="btn btn-save" onclick="saveJump('${editId || ''}')"><i class="ti ti-check"></i> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
+    <button class="btn btn-subtle" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><i class="ti ti-check"></i> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
   Modal.open(editId ? '<i class="ti ti-pencil"></i> Edit Jump' : '<i class="ti ti-plus"></i> Add Jump', body, footer);
 
@@ -653,6 +653,10 @@ function saveJump(editId) {
   if (!colVal) { document.getElementById('jColDrop')?.classList.add('error'); ok = false; }
   if (!ok) return;
 
+  // Show spinner on save button
+  const saveBtn = document.getElementById('btnSaveJump');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Saving…'; }
+
   const data = {
     name, url,
     description: document.getElementById('jDesc').value.trim(),
@@ -670,28 +674,36 @@ function saveJump(editId) {
     timeSavedUnit: document.getElementById('jTimeSavedUnit')?.value || 'seconds',
   };
 
-  if (editId) {
-    DB.updateJump(currentUser.id, editId, data);
-    // If shared jump owned by this user, push update to Supabase
-    const updatedJump = DB.getJumps(currentUser.id).find(j => j.id === editId);
-    if (updatedJump?.isShared && updatedJump?.supabaseId) {
-      const col = DB.getColumns(currentUser.id).find(c => c.id === updatedJump.columnId);
-      if (col?.supabaseId) {
-        supabaseClient.from('shared_jumps').update({
-          name: data.name,
-          url: data.url,
-          description: data.description || '',
-          reason: data.reason || '',
-        }).eq('id', updatedJump.supabaseId).then(({ error }) => {
-          if (error) console.warn('shared_jumps update:', error.message);
-        });
+  setTimeout(() => {
+    try {
+      if (editId) {
+        DB.updateJump(currentUser.id, editId, data);
+        // If shared jump owned by this user, push update to Supabase
+        const updatedJump = DB.getJumps(currentUser.id).find(j => j.id === editId);
+        if (updatedJump?.isShared && updatedJump?.supabaseId) {
+          const col = DB.getColumns(currentUser.id).find(c => c.id === updatedJump.columnId);
+          if (col?.supabaseId) {
+            supabaseClient.from('shared_jumps').update({
+              name: data.name,
+              url: data.url,
+              description: data.description || '',
+              reason: data.reason || '',
+            }).eq('id', updatedJump.supabaseId).then(({ error }) => {
+              if (error) console.warn('shared_jumps update:', error.message);
+            });
+          }
+        }
+      } else {
+        DB.createJump(currentUser.id, data);
       }
+      Modal.close();
+      renderColumns();
+      Toast.success(editId ? 'Jump updated!' : 'Jump added!');
+    } catch (err) {
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="ti ti-check"></i> ' + (editId ? 'Save Changes' : 'Add Jump'); }
+      Toast.danger('Failed to save jump: ' + (err.message || 'Unknown error'));
     }
-  } else {
-    DB.createJump(currentUser.id, data);
-  }
-  Modal.close();
-  renderColumns();
+  }, 1000);
 }
 
 // ── Details Modal ──────────────────────────────────────────────────
@@ -820,7 +832,7 @@ function renderColConfigModal(cols) {
 
   Modal.open('<i class="ti ti-layout-columns"></i> Configure Columns', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="saveColumns()"><i class="ti ti-check"></i> Save Columns</button>`, 'lg');
+     <button class="btn btn-subtle" id="btnSaveColumns" onclick="saveColumns()"><i class="ti ti-check"></i> Save Columns</button>`, 'lg');
   initColDragDrop();
   
   // Wire up custom-select dropdowns for team sharing
@@ -908,6 +920,12 @@ function initColDragDrop() {
 }
 
 async function saveColumns() {
+  // Show spinner on save button
+  const saveBtn = document.getElementById('btnSaveColumns');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Saving…'; }
+
+  await new Promise(r => setTimeout(r, 1000));
+
   const items    = document.querySelectorAll('.col-config-item');
   const existing = DB.getColumns(currentUser.id);
   const updated  = [];
@@ -972,6 +990,7 @@ async function saveColumns() {
 
   Modal.close();
   renderColumns();
+  Toast.success('Columns saved!');
 }
 
 async function syncColumnToSupabase(col) {
