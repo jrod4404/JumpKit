@@ -371,7 +371,11 @@
   <section class="section cta-section" id="cta">
     <div class="section-inner cta-inner">
       <h2 class="section-title">Ready to stop searching?</h2>
-      <a href="#pricing" class="btn btn-primary btn-lg">Get JumpKit Now</a>
+      <form class="cta-form" onsubmit="handleSubmit(event)">
+        <input type="email" class="cta-input" placeholder="Enter your email" required />
+        <button type="submit" class="btn btn-primary btn-lg">Notify Me</button>
+      </form>
+      <p class="cta-note">Be the first to know when JumpKit launches. No spam, ever.</p>
     </div>
   </section>
 
