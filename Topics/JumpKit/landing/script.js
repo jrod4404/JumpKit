@@ -41,16 +41,42 @@ document.querySelectorAll('.mock-item').forEach(item => {
 });
 
 // ─── EMAIL FORM ───────────────────────────────────────────────
-function handleSubmit(e) {
+const SUPABASE_URL  = 'https://iuexwdjnqfidcwvwbgwr.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0';
+
+async function handleSubmit(e) {
   e.preventDefault();
   const form  = e.target;
   const input = form.querySelector('input[type="email"]');
   const btn   = form.querySelector('button');
-  btn.textContent = '✅ You\'re on the list!';
+
+  const email = input.value.trim();
+  btn.textContent = 'Signing up...';
   btn.disabled = true;
   input.disabled = true;
-  input.value = '';
-  input.placeholder = 'See you soon!';
+
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/waitlist-signup`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (res.ok) {
+      btn.textContent = "✅ You're on the list!";
+      input.value = '';
+      input.placeholder = 'See you soon!';
+    } else {
+      throw new Error('Server error');
+    }
+  } catch {
+    btn.textContent = 'Something went wrong — try again';
+    btn.disabled = false;
+    input.disabled = false;
+  }
 }
 
 // ─── SCROLL FADE-IN ───────────────────────────────────────────
