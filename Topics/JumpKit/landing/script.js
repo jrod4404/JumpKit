@@ -66,9 +66,16 @@ async function handleSubmit(e) {
     });
 
     if (res.ok) {
-      btn.textContent = "✅ You're on the list!";
-      input.value = '';
-      input.placeholder = 'See you soon!';
+      const data = await res.json();
+      if (data.duplicate) {
+        btn.textContent = "You're already signed up!";
+        input.value = '';
+        input.placeholder = 'See you soon!';
+      } else {
+        btn.textContent = "✅ You're on the list!";
+        input.value = '';
+        input.placeholder = 'See you soon!';
+      }
     } else {
       throw new Error('Server error');
     }
