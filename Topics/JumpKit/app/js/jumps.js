@@ -359,12 +359,12 @@ function bindJumpEvents() {
 const FAVE_COLORS = ['#ff4d4f','#ff7a45','#faad14','#d4b106','#a0d911','#389e0d','#69c0ff','#1890ff','#9254de','#eb2f96'];
 
 function jumpItemHTML(j, colIndex) {
-  const icon = isURL(j.url) ? 'ti-link' : 'ti-folder';
+  const iconName = isURL(j.url) ? 'link' : 'folder';
   const iconColor = j.favorite ? `color:${FAVE_COLORS[colIndex % FAVE_COLORS.length]}` : '';
   const prefs = DB.getPrefs(currentUser.id);
   const isShared = j.isShared || j.teamId;
   return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
-    <span class="jump-icon"><i class="ti ${icon}" style="${iconColor}"></i></span>
+    <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg></span>
     <div class="jump-info">
       <div class="jump-name">
         ${esc(j.name)}
