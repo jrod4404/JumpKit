@@ -285,7 +285,7 @@ window.navigateTo = function navigateTo(page) {
     iconEl.innerHTML = `<svg class="ti ti-${iconName}" style="width:1.6rem;height:1.6rem;vertical-align:-0.15em"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg>`;
   }
   const pageSubs = {
-    stats:    'Track your click history and time saved',
+    stats:    'Track your launch history and time saved',
     account:  'Manage your profile, preferences, and productivity settings',
     settings: 'Configure display, productivity, and app behavior',
     help:     'Tips, features, and frequently asked questions',
@@ -390,7 +390,7 @@ function getStatsHTML(filter) {
   const totalClicks = allActive.reduce((a, j) => a + (j.clickCount || 0), 0);
   const timeSaved   = (totalClicks / 6).toFixed(1);
   if (!filter || filter === 'active') {
-    return `<p class="stats-summary"><strong>${allActive.length}</strong> active jumps · <strong>${totalClicks}</strong> total clicks · <strong>${timeSaved}</strong> min saved</p>`;
+    return `<p class="stats-summary"><strong>${allActive.length}</strong> active jumps · <strong>${totalClicks}</strong> total launches · <strong>${timeSaved}</strong> min saved</p>`;
   }
   if (filter === 'favorites') {
     const n = allActive.filter(j => j.favorite).length;
@@ -442,7 +442,7 @@ function renderHome() {
       </div>
       <div class="tip-card">
         <h3><span class="tip-icon"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your Time Saved</h3>
-        <p>JumpKit counts every click and calculates how much time you've saved. Check the <strong>Statistics</strong> page to see your ROI.</p>
+        <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong>Statistics</strong> page to see your ROI.</p>
       </div>
     </div>`;
 }
@@ -947,7 +947,7 @@ function renderStatsDash() {
   const fmtUSD = v => '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   if (n === 0) {
-    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p>No click data yet for this period.</p></div>`;
+    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p>No launch data yet for this period.</p></div>`;
     return;
   }
 
@@ -1012,7 +1012,7 @@ function renderStatsDash() {
 
     dash.innerHTML = `
       <div class="stats-cards" style="grid-template-columns:repeat(4,1fr)">
-        <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Clicks</div></div>
+        <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
         <div class="stat-card"><div class="stat-card-value">${mins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${jumps.length}</div><div class="stat-card-label">Active Jumps</div></div>
@@ -1026,7 +1026,7 @@ function renderStatsDash() {
           <div style="overflow-y:auto;max-height:220px">${topRows}</div>
         </div>
         <div class="stats-chart-box">
-          <div class="stats-chart-title">Clicks by Column</div>
+          <div class="stats-chart-title">Launches by Column</div>
           <div style="height:200px"><canvas id="chCol"></canvas></div>
         </div>
       </div>`;
@@ -1046,7 +1046,7 @@ function renderStatsDash() {
 
   if (currentStatView === 'daily') {
     // This week — one bar per day
-    chartTitle = `Clicks by Day — Week of ${new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    chartTitle = `Launches by Day — Week of ${new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
     ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((_,i)=>{
       const ds = s + i*86400000;
       chartLabels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]);
@@ -1054,7 +1054,7 @@ function renderStatsDash() {
     });
   } else if (currentStatView === 'weekly') {
     // Last 52 calendar weeks — one bar per week
-    chartTitle = `Clicks by Week — Last 52 Weeks`;
+    chartTitle = `Launches by Week — Last 52 Weeks`;
     const weekStart = startOf('week') - 51*7*86400000;
     for (let w=0; w<52; w++) {
       const ws = weekStart + w*7*86400000;
@@ -1066,7 +1066,7 @@ function renderStatsDash() {
     }
   } else if (currentStatView === 'monthly') {
     // This year — one bar per month
-    chartTitle = `Clicks by Month — ${now.getFullYear()}`;
+    chartTitle = `Launches by Month — ${now.getFullYear()}`;
     ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((_,i)=>{
       const ms=new Date(now.getFullYear(),i,1).getTime();
       const me=new Date(now.getFullYear(),i+1,1).getTime();
@@ -1075,7 +1075,7 @@ function renderStatsDash() {
     });
   } else if (currentStatView === 'yearly') {
     // Last 4 full years + current year YTD
-    chartTitle = `Clicks by Year — ${now.getFullYear()-4} to ${now.getFullYear()}`;
+    chartTitle = `Launches by Year — ${now.getFullYear()-4} to ${now.getFullYear()}`;
     for (let yr=now.getFullYear()-4; yr<=now.getFullYear(); yr++) {
       const ys=new Date(yr,0,1).getTime();
       const ye=new Date(yr+1,0,1).getTime();
