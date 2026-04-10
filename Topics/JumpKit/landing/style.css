@@ -372,20 +372,21 @@ img { max-width: 100%; }
 .section-dark { background: var(--bg-dark); }
 .section-inner { max-width: 1200px; margin: 0 auto; }
 .section-label {
-  font-size: 0.82rem;
+  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--turq);
-  margin-bottom: 12px;
+  margin-bottom: 14px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   justify-content: center;
   text-align: center;
   width: 100%;
 }
-.section-label .ti { font-size: 1rem; }
+.section-label .ti { font-size: 1.3rem; }
+svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .section-title {
   font-size: clamp(2rem, 4vw, 3.2rem);
   font-weight: 900;
