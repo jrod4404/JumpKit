@@ -74,7 +74,7 @@
 }
 .topbar-title { font-size: 1.3rem; font-weight: 800; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
 .topbar-title { flex-shrink: 0; display: flex; align-items: center; }
-.topbar-subtitle { flex: 1; font-size: 0.9rem; color: var(--text-dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; margin-top: 8px; }
+.topbar-subtitle { flex: 1; font-size: 1rem; color: var(--text-dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; justify-content: center; margin-top: 8px; }
 @media (max-width: 900px) {
   .topbar { flex-wrap: wrap; height: auto; min-height: var(--topbar-h); padding: 8px 24px; }
   .topbar-subtitle { order: 3; flex-basis: 100%; text-align: left; font-size: 0.75rem; padding-bottom: 6px; }
