@@ -135,14 +135,14 @@ notifBtn.addEventListener('click', () => {
           <div style="font-size:0.85rem;color:var(--text)">${esc(n.message)}</div>
           <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px">${new Date(n.ts).toLocaleString()}</div>
         </div>`).join('');
-  Modal.open('<i class="ti ti-bell"></i> Notifications', listHTML,
-    `<button class="btn btn-subtle" onclick="markAllNotificationsRead(); Modal.close()"><i class="ti ti-checks"></i> Mark all read</button>
-     <button class="btn btn-subtle" onclick="clearAllNotifications(); notifBtn.click()" style="color:var(--text-muted)"><i class="ti ti-trash"></i> Clear</button>`
+  Modal.open('<svg class="ti ti-bell"><use href="img/tabler-sprite.svg#tabler-bell"/></svg> Notifications', listHTML,
+    `<button class="btn btn-subtle" onclick="markAllNotificationsRead(); Modal.close()"><svg class="ti ti-checks"><use href="img/tabler-sprite.svg#tabler-checks"/></svg> Mark all read</button>
+     <button class="btn btn-subtle" onclick="clearAllNotifications(); notifBtn.click()" style="color:var(--text-muted)"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Clear</button>`
   );
   markAllNotificationsRead();
 });
 function updateThemeIcon(t) {
-  themeBtn.innerHTML = t === 'dark' ? '<i class="ti ti-sun"></i>' : '<i class="ti ti-moon"></i>';
+  themeBtn.innerHTML = t === 'dark' ? '<svg class="ti ti-sun"><use href="img/tabler-sprite.svg#tabler-sun"/></svg>' : '<svg class="ti ti-moon"><use href="img/tabler-sprite.svg#tabler-moon"/></svg>';
   const logo = document.getElementById('sidebarLogo');
   if (logo) logo.src = t === 'dark' ? 'img/logo-dark-mode.png' : 'img/logo.png';
 }
@@ -426,23 +426,23 @@ function renderHome() {
         <p>Go to the <strong>Jumps</strong> page and click the <strong>Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><i class="ti ti-layout-columns"></i></span>Organize with Columns</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize with Columns</h3>
         <p>Click the <strong>Configure Columns</strong> button on the Jumps page to create up to 10 custom categories. Arrange them however you work.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><i class="ti ti-mouse"></i></span>Left-Click to Jump</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-mouse"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
         <p>Left-click any jump to instantly launch it. Web links open in your browser. Local paths open in your OS. One click, you're there.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><i class="ti ti-keyboard"></i></span>Assign Hotkeys</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
         <p>Give each jump a hotkey code when you create or edit it. JumpKit will register it as a global shortcut so you can launch any jump without touching the mouse.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><i class="ti ti-link"></i></span>Mark Favorites</h3>
-        <p>Toggle the favorite flag on any jump — <i class="ti ti-link"></i> web links and <i class="ti ti-folder"></i> local paths — to highlight your most-used jumps in every column.</p>
+        <h3><span class="tip-icon"><svg class="ti ti-link"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
+        <p>Toggle the favorite flag on any jump — <svg class="ti ti-link"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><i class="ti ti-chart-bar"></i></span>Track Your Time Saved</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your Time Saved</h3>
         <p>JumpKit counts every click and calculates how much time you've saved. Check the <strong>Statistics</strong> page to see your ROI.</p>
       </div>
     </div>`;
@@ -457,8 +457,8 @@ const Toast = window.Toast = (() => {
     if (timer) clearTimeout(timer);
     el.className = `toast toast-${type} toast-visible`;
     const icon = type === 'success'
-      ? '<i class="ti ti-circle-check toast-icon"></i>'
-      : '<i class="ti ti-alert-circle toast-icon"></i>';
+      ? '<svg class="ti ti-circle-check toast-icon"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>'
+      : '<svg class="ti ti-alert-circle toast-icon"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>';
     el.innerHTML = `${icon}<span>${msg}</span>`;
     timer = setTimeout(() => {
       el.classList.remove('toast-visible');
@@ -483,7 +483,7 @@ function renderSettings() {
     <div class="acct-grid">
 
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-adjustments-horizontal"></i> Preferences</div>
+        <div class="acct-section-title"><svg class="ti ti-adjustments-horizontal"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg> Preferences</div>
 
         <div class="acct-row">
           <div class="acct-row-label">
@@ -493,7 +493,7 @@ function renderSettings() {
           <div class="custom-select acct-select" id="startPageDrop">
             <div class="custom-select-trigger" id="startPageTrigger">
               <span id="startPageLabel">${pageTitles[p.startPage]||p.startPage}</span>
-              <i class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"></i>
+              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
             </div>
             <div class="custom-select-menu" id="startPageMenu">${pageChoices}</div>
           </div>
@@ -507,7 +507,7 @@ function renderSettings() {
           <div class="custom-select acct-select" id="navStateDrop">
             <div class="custom-select-trigger" id="navStateTrigger">
               <span id="navStateLabel">${p.navDefaultCollapsed ? 'Collapsed' : 'Expanded'}</span>
-              <i class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"></i>
+              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
             </div>
             <div class="custom-select-menu" id="navStateMenu">
               <div class="custom-select-option${!p.navDefaultCollapsed ? ' selected' : ''}" data-value="expanded">Expanded</div>
@@ -534,13 +534,13 @@ function renderSettings() {
         <div class="acct-row" style="border-bottom:none">
           <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
           <button class="btn btn-subtle" onclick="forceBackup()">
-            <i class="ti ti-download"></i> Export
+            <svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export
           </button>
         </div>
       </div>
 
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-rocket"></i> Productivity</div>
+        <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
 
         <div class="acct-row">
           <div class="acct-row-label">
@@ -583,7 +583,7 @@ function renderSettings() {
       </div>
 
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-tool"></i> Maintenance</div>
+        <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
 
         <div class="acct-row">
           <div class="acct-row-label">
@@ -593,7 +593,7 @@ function renderSettings() {
           <div class="custom-select acct-select" id="autoArchiveDrop">
             <div class="custom-select-trigger" id="autoArchiveTrigger">
               <span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span>
-              <i class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"></i>
+              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
             </div>
             <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
           </div>
@@ -601,7 +601,7 @@ function renderSettings() {
       </div>
 
       <div class="acct-save-row">
-        <button class="btn btn-save" onclick="saveAccountPrefs()"><i class="ti ti-check"></i> Save Preferences</button>
+        <button class="btn btn-save" onclick="saveAccountPrefs()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Preferences</button>
       </div>
     </div>`;
 
@@ -630,7 +630,7 @@ function renderAccount() {
   document.getElementById('pageContent').innerHTML = `
     <div class="acct-grid">
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-user-circle"></i> Profile</div>
+        <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
         <div class="acct-row">
           <div class="acct-row-label"><span>Name</span></div>
           <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '—'}</span>
@@ -641,7 +641,7 @@ function renderAccount() {
         </div>
       </div>
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-id-badge"></i> Account</div>
+        <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.svg#tabler-id-badge"/></svg> Account</div>
         <div class="acct-row">
           <div class="acct-row-label"><span>Account Type</span></div>
           <span style="font-size:0.88rem;color:var(--text-muted)">${tierLabel}</span>
@@ -665,8 +665,8 @@ function renderAccount() {
         </div>
       </div>
       <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
-        <button class="btn btn-subtle" onclick="openFeedbackModal()"><i class="ti ti-message-circle"></i> Send Feedback</button>
-        ${tier === 'free' ? `<a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" target="_blank" class="btn btn-primary"><i class="ti ti-bolt"></i> Upgrade to JumpKit</a>` : ''}
+        <button class="btn btn-subtle" onclick="openFeedbackModal()"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
+        ${tier === 'free' ? `<a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" target="_blank" class="btn btn-primary"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to JumpKit</a>` : ''}
       </div>
     </div>`;
 }
@@ -793,7 +793,7 @@ window.openFeedbackModal = function openFeedbackModal() {
       <div class="custom-select" id="fbCatDrop">
         <div class="custom-select-trigger" id="fbCatTrigger" tabindex="1">
           <span id="fbCatLabel" style="color:var(--text-dim)">— Select a category —</span>
-          <i class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"></i>
+          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="fbCatMenu">
           ${['Bug','Positive Feedback','Negative Feedback','Feature Request','Other'].map(c =>
@@ -808,9 +808,9 @@ window.openFeedbackModal = function openFeedbackModal() {
       <span class="form-error" id="fbMsgErr">A message is required.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-message-circle"></i> Feedback', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-subtle" onclick="submitFeedback()"><i class="ti ti-check"></i> Submit</button>`);
+  Modal.open('<svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Feedback', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-subtle" onclick="submitFeedback()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Submit</button>`);
 
   wireDropdown({
     dropId: 'fbCatDrop', triggerId: 'fbCatTrigger', menuId: 'fbCatMenu',
@@ -832,7 +832,7 @@ window.submitFeedback = async function submitFeedback() {
 
   // Show sending state
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" disabled><i class="ti ti-loader-2 spin"></i> Sending…</button>`;
+    `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending…</button>`;
 
   try {
     const SUPABASE_URL = 'https://iuexwdjnqfidcwvwbgwr.supabase.co';
@@ -861,12 +861,12 @@ window.submitFeedback = async function submitFeedback() {
 
   document.getElementById('modalBody').innerHTML = `
     <div style="text-align:center;padding:32px 0">
-      <i class="ti ti-circle-check" style="font-size:3rem;color:var(--hover-accent);display:block;margin-bottom:16px;-webkit-font-smoothing:antialiased"></i>
+      <svg class="ti ti-circle-check" style="font-size:3rem;color:var(--hover-accent);display:block;margin-bottom:16px;-webkit-font-smoothing:antialiased"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
       <p style="color:var(--text-card-title);font-size:1rem;font-weight:600;margin-bottom:8px">Thanks for your feedback!</p>
       <p style="color:var(--text-muted);font-size:0.88rem">We'll review it and be in touch if needed.</p>
     </div>`;
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Close</button>`;
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
 }
 let currentStatView = 'summary';
 const STAT_VIEWS  = ['summary','daily','weekly','monthly','yearly'];
@@ -947,7 +947,7 @@ function renderStatsDash() {
   const fmtUSD = v => '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   if (n === 0) {
-    dash.innerHTML = `<div class="stats-empty"><i class="ti ti-chart-bar-off" style="font-size:2.5rem;display:block;margin-bottom:12px"></i><p>No click data yet for this period.</p></div>`;
+    dash.innerHTML = `<div class="stats-empty"><svg class="ti ti-chart-bar-off" style="font-size:2.5rem;display:block;margin-bottom:12px"><use href="img/tabler-sprite.svg#tabler-chart-bar-off"/></svg><p>No click data yet for this period.</p></div>`;
     return;
   }
 
@@ -1127,18 +1127,18 @@ function renderJet() {
   if (!hasAccess) {
     document.getElementById('pageContent').innerHTML = `
       <div class="placeholder-page">
-        <div class="big-icon"><i class="ti ti-lock" style="color:var(--turq)"></i></div>
+        <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
         <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — JumpKit + Jet AI Plan</h3>
         <p style="color:var(--text-muted);line-height:1.6">Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
         <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
-        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><i class="ti ti-bolt"></i> Upgrade to unlock Jet AI</a>
+        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Jet AI</a>
       </div>`;
     return;
   }
 
   document.getElementById('pageContent').innerHTML = `
     <div class="placeholder-page">
-      <div class="big-icon"><i class="ti ti-brain"></i></div>
+      <div class="big-icon"><svg class="ti ti-brain"><use href="img/tabler-sprite.svg#tabler-brain"/></svg></div>
       <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — Coming Soon</h3>
       <p>Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
       <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
@@ -1190,17 +1190,17 @@ window.unshareColumn = async (columnId) => {
 window.showPaywall = function() {
   const body = `
     <div style="text-align:center;padding:16px 0">
-      <i class="ti ti-lock" style="font-size:3rem;color:var(--turq);display:block;margin-bottom:16px"></i>
+      <svg class="ti ti-lock" style="font-size:3rem;color:var(--turq);display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px">Your free trial has ended</h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;line-height:1.6">
         You've used all 250 free launches.<br>Upgrade to keep jumping — no limits, plus team sharing and more.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700">
-          <i class="ti ti-rocket" style="color:#fff"></i> Upgrade to JumpKit — $5/mo
+          <svg class="ti ti-rocket" style="color:#fff"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to JumpKit — $5/mo
         </button>
         <button class="btn btn-subtle" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:12px;font-size:0.9rem">
-          <i class="ti ti-brain"></i> JumpKit + Jet AI — $25/mo
+          <svg class="ti ti-brain"><use href="img/tabler-sprite.svg#tabler-brain"/></svg> JumpKit + Jet AI — $25/mo
         </button>
         <button class="btn btn-ghost" onclick="Modal.close();" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
           Maybe later
@@ -1208,7 +1208,7 @@ window.showPaywall = function() {
       </div>
     </div>
   `;
-  Modal.open('<i class="ti ti-rocket"></i> Upgrade JumpKit', body, '', { closeable: false });
+  Modal.open('<svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade JumpKit', body, '', { closeable: false });
 };
 
 // ── Notifications ────────────────────────────────────────────────
@@ -1293,15 +1293,15 @@ window.forceBackup = async function forceBackup() {
     const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
     if (result?.ok) {
       addNotification({ type: 'backup', message: `Backup saved to: ${result.path}`, ts: Date.now() });
-      Modal.open('<i class="ti ti-circle-check" style="color:#22c55e"></i> Backup Saved',
+      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Backup Saved',
         `<div style="text-align:center;padding:8px 0">
           <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">Your data has been exported successfully.</p>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.82rem;font-family:monospace;color:var(--text);word-break:break-all;text-align:left">${esc(result.path)}</div>
         </div>`,
-        `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-check"></i> Got it</button>`
+        `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
       );
     } else {
-      Modal.open('<i class="ti ti-alert-circle" style="color:#ef4444"></i> Backup Failed',
+      Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Backup Failed',
         `<p style="color:var(--text-muted);font-size:0.9rem">${esc(result?.reason || 'Unknown error')}</p>`,
         `<button class="btn btn-subtle" onclick="Modal.close()">Close</button>`
       );
@@ -1362,7 +1362,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
     const teamNames = invites.map(inv => inv.teams?.name || 'a team').join(', ');
     const body = `
       <div style="text-align:center;padding:8px 0">
-        <i class="ti ti-users" style="font-size:2.5rem;color:var(--turq);display:block;margin-bottom:16px"></i>
+        <svg class="ti ti-users" style="font-size:2.5rem;color:var(--turq);display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
         <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">You have a team invitation!</h3>
         <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:0">
           You've been invited to join <strong>${esc(teamNames)}</strong>.<br>
@@ -1370,9 +1370,9 @@ window.checkPendingInvites = async function checkPendingInvites() {
         </p>
       </div>`;
 
-    Modal.open('<i class="ti ti-mail"></i> Team Invitation', body,
+    Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">Later</button>
-       <button class="btn btn-primary" onclick="navigateTo('teams'); Modal.close()"><i class="ti ti-users"></i> Go to Teams</button>`
+       <button class="btn btn-primary" onclick="navigateTo('teams'); Modal.close()"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);

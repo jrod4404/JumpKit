@@ -10,15 +10,15 @@ function renderJumps() {
   content.innerHTML = `
     <div class="page-stats-bar">
       <div class="jumps-toolbar">
-        <button class="btn btn-subtle btn-sm" id="btnAddJump"><i class="ti ti-plus"></i> Add Jump</button>
-        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><i class="ti ti-settings"></i> Configure Columns</button>
+        <button class="btn btn-subtle btn-sm" id="btnAddJump"><svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump</button>
+        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
       </div>
       <div class="jump-filter-bar" id="jumpFilterBar">
         <div class="jfb-slider" id="jfbSlider"></div>
         ${JUMP_FILTERS.map(f => `<button class="jfb-tab${f===currentJumpFilter?' active':''}" data-filter="${f}">${FILTER_LABELS[f]}</button>`).join('')}
       </div>
       <div class="jump-search-wrap">
-        <i class="ti ti-search jump-search-icon"></i>
+        <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
         <input class="jump-search-input" id="jumpSearch" type="text" placeholder="Search jumps…" autocomplete="off">
       </div>
     </div>
@@ -45,8 +45,8 @@ function renderJumps() {
     if (e.target.closest('.jump-item')) return;
     e.preventDefault();
     CtxMenu.show(e.clientX, e.clientY, [
-      { icon: '<i class="ti ti-plus"></i>',     label: 'Add Jump',          action: openAddJumpModal },
-      { icon: '<i class="ti ti-settings"></i>',  label: 'Configure Columns', action: openConfigColumnsModal },
+      { icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg>',     label: 'Add Jump',          action: openAddJumpModal },
+      { icon: '<svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg>',  label: 'Configure Columns', action: openConfigColumnsModal },
     ]);
   });
 
@@ -115,7 +115,7 @@ function renderArchivedInline() {
 
   if (filtered.length === 0) {
     area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%">
-      <div class="big-icon"><i class="ti ti-archive"></i></div>
+      <div class="big-icon"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg></div>
       <p>${q ? 'No archived jumps match your search.' : 'Archive is empty.'}</p>
     </div>`;
     area.style.position = 'relative';
@@ -133,10 +133,10 @@ function renderArchivedInline() {
     <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
       <thead>
         <tr style="border-bottom:2px solid var(--border)" id="archiveSortRow">
-          <th data-sort="name" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Name <i class="ti ti-selector" style="font-size:0.7rem;opacity:.5"></i></th>
-          <th data-sort="url" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">URL <i class="ti ti-selector" style="font-size:0.7rem;opacity:.5"></i></th>
-          <th data-sort="lastused" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Last Used <i class="ti ti-selector" style="font-size:0.7rem;opacity:.5"></i></th>
-          <th data-sort="updatedat" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Archived <i class="ti ti-selector" style="font-size:0.7rem;opacity:.5"></i></th>
+          <th data-sort="name" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Name <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
+          <th data-sort="url" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">URL <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
+          <th data-sort="lastused" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Last Used <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
+          <th data-sort="updatedat" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Archived <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
           <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em">Actions</th>
         </tr>
       </thead>
@@ -149,8 +149,8 @@ function renderArchivedInline() {
           <td style="padding:10px 12px;color:var(--text-muted);white-space:nowrap">${fmtDate(j.updatedAt)}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap">
             <div style="display:flex;gap:6px;justify-content:flex-end">
-              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" onclick="confirmUnarchive('${j.id}')"><i class="ti ti-restore"></i> Restore</button>
-              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" onclick="confirmDelete('${j.id}')"><i class="ti ti-trash"></i> Delete</button>
+              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" onclick="confirmUnarchive('${j.id}')"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>
+              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" onclick="confirmDelete('${j.id}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>
             </div>
           </td>
         </tr>`).join('')}
@@ -192,11 +192,11 @@ function renderArchivedInline() {
       e.stopPropagation();
       const j = DB.getJumps(currentUser.id).find(j => j.id === jid);
       CtxMenu.show(e.clientX, e.clientY, [
-        { icon: '<i class="ti ti-clipboard"></i>', label: 'Copy URL', action: () => { if (j) navigator.clipboard.writeText(j.url); } },
-        { icon: '<i class="ti ti-info-circle"></i>', label: 'Details', action: () => openJumpDetails(jid) },
-        { icon: '<i class="ti ti-restore"></i>', label: 'Restore', action: () => confirmUnarchive(jid) },
+        { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { if (j) navigator.clipboard.writeText(j.url); } },
+        { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(jid) },
+        { icon: '<svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg>', label: 'Restore', action: () => confirmUnarchive(jid) },
         'divider',
-        { icon: '<i class="ti ti-trash"></i>', label: 'Delete Permanently', action: () => confirmDelete(jid), danger: true },
+        { icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete Permanently', action: () => confirmDelete(jid), danger: true },
       ]);
     });
     row.addEventListener('mouseenter', () => row.style.background = 'var(--bg-hover)');
@@ -223,10 +223,10 @@ window.doUnarchive = function doUnarchive(id) {
 
 window.confirmUnarchive = function confirmUnarchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<i class="ti ti-restore"></i> Restore Jump',
+  Modal.open('<svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Restore <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong> back to the active Jumps?</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-turq" onclick="doUnarchive('${id}')"><i class="ti ti-restore"></i> Restore</button>`, 'sm');
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" onclick="doUnarchive('${id}')"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>`, 'sm');
 }
 
 function renderColumns() {
@@ -244,10 +244,10 @@ function renderColumns() {
   if (columns.length === 0) {
     area.innerHTML = `
       <div class="no-columns">
-        <div class="big-icon"><i class="ti ti-layout-columns"></i></div>
+        <div class="big-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></div>
         <h3>No columns yet</h3>
         <p>Right-click here or click "Configure Columns" to create your first jump category.</p>
-        <button class="btn btn-subtle" onclick="openConfigColumnsModal()"><i class="ti ti-settings"></i> Configure Columns</button>
+        <button class="btn btn-subtle" onclick="openConfigColumnsModal()"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
       </div>`;
     return;
   }
@@ -256,7 +256,7 @@ function renderColumns() {
   if (currentJumpFilter !== 'active') {
     const filteredIds = new Set(jumps.map(j => j.id));
     if (filteredIds.size === 0) {
-      area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%"><div class="big-icon"><i class="ti ti-mood-empty"></i></div><p>No jumps match this filter.</p></div>`;
+      area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%"><div class="big-icon"><svg class="ti ti-mood-empty"><use href="img/tabler-sprite.svg#tabler-mood-empty"/></svg></div><p>No jumps match this filter.</p></div>`;
       area.style.position = 'relative';
       return;
     }
@@ -368,12 +368,12 @@ function jumpItemHTML(j, colIndex) {
     <div class="jump-info">
       <div class="jump-name">
         ${esc(j.name)}
-        ${isShared ? `<i class="ti ti-users jump-shared-badge" title="Shared with team" style="color:var(--turq);font-size:.8em;margin-left:4px"></i>` : ''}
+        ${isShared ? `<svg class="ti ti-users jump-shared-badge" title="Shared with team" style="color:var(--turq);font-size:.8em;margin-left:4px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}
       </div>
       ${prefs.showDescription && j.description ? `<div class="jump-desc">${esc(j.description)}</div>` : ''}
     </div>
     ${prefs.showHotkey && j.hotkey ? `<span class="jump-hotkey-pill">${esc(j.hotkey)}</span>` : ''}
-    ${j.favorite ? `<span class="jump-fav"><i class="ti ti-star-filled" style="color:${FAVE_COLORS[colIndex % FAVE_COLORS.length]}"></i></span>` : ''}
+    ${j.favorite ? `<span class="jump-fav"><svg class="ti ti-star-filled" style="color:${FAVE_COLORS[colIndex % FAVE_COLORS.length]}"><use href="img/tabler-sprite.svg#tabler-star-filled"/></svg></span>` : ''}
   </div>`;
 }
 
@@ -431,28 +431,28 @@ function openJumpContextMenu(x, y, id) {
   const isShared = !!(jump.isShared || jump.teamId);
 
   const items = [
-    { icon: '<i class="ti ti-clipboard"></i>', label: 'Copy URL', action: () => { navigator.clipboard.writeText(jump.url); } },
-    { icon: '<i class="ti ti-info-circle"></i>', label: 'Details', action: () => openJumpDetails(id) },
+    { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { navigator.clipboard.writeText(jump.url); } },
+    { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(id) },
   ];
 
   if (isShared) {
     const isOwner = jump.userId === currentUser.id && !jump.supabaseId?.startsWith?.('ext');
     if (isOwner) {
       // Owner: full edit + archive/delete
-      items.push({ icon: '<i class="ti ti-pencil"></i>', label: 'Edit', action: () => openEditJumpModal(id) });
-      items.push({ icon: '<i class="ti ti-archive"></i>', label: 'Archive', action: () => confirmArchive(id) });
+      items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
+      items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
       items.push('divider');
-      items.push({ icon: '<i class="ti ti-trash"></i>', label: 'Delete', action: () => confirmDelete(id), danger: true });
+      items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
     } else {
       // Team member: hotkey + favorite only
-      items.push({ icon: '<i class="ti ti-keyboard"></i>', label: 'Set Hotkey', action: () => openHotkeyModal(id) });
-      items.push({ icon: '<i class="ti ti-star"></i>', label: jump.favorite ? 'Remove Favorite' : 'Add Favorite', action: () => { DB.updateJump(currentUser.id, id, { favorite: !jump.favorite }); renderColumns(); } });
+      items.push({ icon: '<svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg>', label: 'Set Hotkey', action: () => openHotkeyModal(id) });
+      items.push({ icon: '<svg class="ti ti-star"><use href="img/tabler-sprite.svg#tabler-star"/></svg>', label: jump.favorite ? 'Remove Favorite' : 'Add Favorite', action: () => { DB.updateJump(currentUser.id, id, { favorite: !jump.favorite }); renderColumns(); } });
     }
   } else {
-    items.push({ icon: '<i class="ti ti-pencil"></i>', label: 'Edit', action: () => openEditJumpModal(id) });
-    items.push({ icon: '<i class="ti ti-archive"></i>', label: 'Archive', action: () => confirmArchive(id) });
+    items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
+    items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
     items.push('divider');
-    items.push({ icon: '<i class="ti ti-trash"></i>', label: 'Delete', action: () => confirmDelete(id), danger: true });
+    items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
   }
 
   CtxMenu.show(x, y, items);
@@ -468,9 +468,9 @@ function openHotkeyModal(id) {
       <input class="form-input" id="sharedHotkey" value="${esc(j.hotkey || '')}"
         placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer"/>
     </div>`;
-  Modal.open('<i class="ti ti-keyboard"></i> Set Hotkey', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="saveSharedHotkey('${id}')"><i class="ti ti-check"></i> Save</button>`, 'sm');
+  Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Set Hotkey', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="saveSharedHotkey('${id}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
   const inp = document.getElementById('sharedHotkey');
   if (inp) {
@@ -521,7 +521,7 @@ function openJumpFormModal(editId) {
       <div class="custom-select" id="jColDrop">
         <div class="custom-select-trigger" id="jColTrigger" tabindex="3">
           <span id="jColLabel" style="${jump?.columnId ? '' : 'color:var(--text-dim)'}">${ jump?.columnId ? (DB.getColumns(currentUser.id).find(c=>c.id===jump.columnId)?.name || 'Select Column') : 'Select Column'}</span>
-          <i class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"></i>
+          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="jColMenu">
           ${DB.getColumns(currentUser.id).filter(c=>c.visible).sort((a,b)=>a.order-b.order).map(c=>`
@@ -571,10 +571,10 @@ function openJumpFormModal(editId) {
 `;
 
   const footer = `
-    <button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-    <button class="btn btn-subtle" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><i class="ti ti-check"></i> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
+    <button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+    <button class="btn btn-subtle" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
-  Modal.open(editId ? '<i class="ti ti-pencil"></i> Edit Jump' : '<i class="ti ti-plus"></i> Add Jump', body, footer);
+  Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump', body, footer);
 
   // Time Saved unit slider
   (function() {
@@ -655,7 +655,7 @@ function saveJump(editId) {
 
   // Show spinner on save button
   const saveBtn = document.getElementById('btnSaveJump');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Saving…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Saving…'; }
 
   const data = {
     name, url,
@@ -700,7 +700,7 @@ function saveJump(editId) {
       renderColumns();
       Toast.success(editId ? 'Jump updated!' : 'Jump added!');
     } catch (err) {
-      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<i class="ti ti-check"></i> ' + (editId ? 'Save Changes' : 'Add Jump'); }
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ' + (editId ? 'Save Changes' : 'Add Jump'); }
       Toast.danger('Failed to save jump: ' + (err.message || 'Unknown error'));
     }
   }, 1000);
@@ -722,28 +722,28 @@ function openJumpDetails(id) {
     <div class="detail-row"><span class="detail-label">Clicks</span>     <span class="detail-value">${j.clickCount || 0}</span></div>
     <div class="detail-row"><span class="detail-label">Last Used</span>  <span class="detail-value">${j.lastUsed ? new Date(j.lastUsed).toLocaleString() : 'Never'}</span></div>
     <div class="detail-row"><span class="detail-label">Created</span>    <span class="detail-value">${new Date(j.createdAt).toLocaleString()}</span></div>`;
-  Modal.open('<i class="ti ti-info-circle"></i> Jump Details', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Close</button>
-     <button class="btn btn-subtle" onclick="Modal.close(); openEditJumpModal('${id}')"><i class="ti ti-pencil"></i> Edit</button>`, 'sm');
+  Modal.open('<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg> Jump Details', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
+     <button class="btn btn-subtle" onclick="Modal.close(); openEditJumpModal('${id}')"><svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit</button>`, 'sm');
 }
 
 // ── Confirm Delete ─────────────────────────────────────────────────
 function confirmDelete(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<i class="ti ti-trash"></i> Delete Jump',
+  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Permanently delete <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-delete" onclick="doDelete('${id}')"><i class="ti ti-trash"></i> Delete</button>`, 'sm');
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" onclick="doDelete('${id}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
 }
 function doDelete(id) { DB.deleteJump(currentUser.id, id); Modal.close(); renderColumns(); }
 
 // ── Confirm Archive ────────────────────────────────────────────────
 function confirmArchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<i class="ti ti-archive"></i> Archive Jump',
+  Modal.open('<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Archive <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? It will be moved to the Archive tab and can be restored any time.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-turq" onclick="doArchive('${id}')"><i class="ti ti-archive"></i> Archive</button>`, 'sm');
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" onclick="doArchive('${id}')"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive</button>`, 'sm');
 }
 function doArchive(id) { DB.updateJump(currentUser.id, id, { isArchived: true }); Modal.close(); renderColumns(); }
 
@@ -792,7 +792,7 @@ function renderColConfigModal(cols) {
       : 'Personal only';
     return `
     <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
-      <span class="col-drag-handle" title="Drag to reorder"><i class="ti ti-grip-vertical"></i></span>
+      <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.svg#tabler-grip-vertical"/></svg></span>
       <div class="col-config-field">
         <span class="col-config-label">Column Name</span>
         <input class="form-input" placeholder="Column name" value="${esc(c.name)}" data-field="name" style="font-size:.85rem;padding:7px 10px"/>
@@ -812,7 +812,7 @@ function renderColConfigModal(cols) {
         <div class="custom-select col-share-drop" data-colidx="${i}" style="font-size:.78rem">
           <div class="custom-select-trigger col-share-trigger" style="height:38px">
             <span class="col-share-label">${esc(teamLabel)}</span>
-            <i class="ti ti-chevron-down" style="font-size:.75rem;color:var(--text-dim)"></i>
+            <svg class="ti ti-chevron-down" style="font-size:.75rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
           </div>
           <div class="custom-select-menu col-share-menu">
             <div class="custom-select-option${!c.teamId ? ' selected' : ''}" data-value="">Personal only</div>
@@ -830,9 +830,9 @@ function renderColConfigModal(cols) {
     </p>
     <div class="col-config-list" id="colConfigList">${rows}</div>`;
 
-  Modal.open('<i class="ti ti-layout-columns"></i> Configure Columns', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-subtle" id="btnSaveColumns" onclick="saveColumns()"><i class="ti ti-check"></i> Save Columns</button>`, 'lg');
+  Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-subtle" id="btnSaveColumns" onclick="saveColumns()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
   initColDragDrop();
   
   // Wire up custom-select dropdowns for team sharing
@@ -922,7 +922,7 @@ function initColDragDrop() {
 async function saveColumns() {
   // Show spinner on save button
   const saveBtn = document.getElementById('btnSaveColumns');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<i class="ti ti-loader-2 spin"></i> Saving…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Saving…'; }
 
   await new Promise(r => setTimeout(r, 1000));
 

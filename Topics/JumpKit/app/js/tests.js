@@ -1223,7 +1223,7 @@ function renderTests() {
   if (window._supabaseUser?.email !== 'jeffroder@gmail.com') {
     pageContent.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px">
-        <i class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"></i>
+        <svg class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
         <h2 style="font-size:1.4rem;font-weight:700;color:var(--text)">403 — Access Restricted</h2>
         <p style="color:var(--text-muted);font-size:0.9rem">This page is only available to administrators.</p>
       </div>`;
@@ -1235,19 +1235,19 @@ function renderTests() {
 
       <!-- Summary bar -->
       <div id="testSummary" style="margin:0 0 10px 0;padding:10px 24px 8px 24px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:flex;align-items:center;gap:32px">
-        <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Passed</div>
-        <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Failed</div>
-        <div id="summaryManual" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><i class="ti ti-alert-triangle" style="font-size:1.4rem;color:var(--text-muted)"></i>0 Manual</div>
+        <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
+        <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
+        <div id="summaryManual" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>0 Manual</div>
         <div style="color:var(--text-muted);font-size:0.8rem;margin-left:auto" id="summaryTime"></div>
       </div>
 
       <!-- Buttons -->
       <div style="margin-bottom:16px;display:flex;gap:8px;align-items:center">
         <button class="btn btn-subtle" id="btnRunTests" style="display:flex;align-items:center;gap:.4rem">
-          <i class="ti ti-player-play"></i> Run All Tests
+          <svg class="ti ti-player-play"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests
         </button>
         <button class="btn btn-subtle" id="btnResetTests" style="display:flex;align-items:center;gap:.4rem">
-          <i class="ti ti-refresh"></i> Reset
+          <svg class="ti ti-refresh"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Reset
         </button>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
@@ -1313,7 +1313,7 @@ function _buildTestRows() {
       <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
       <td style="padding:10px 12px;text-align:center">
         <button onclick="_runSingleTest(${t.id})" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
-          <i class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i><span style="line-height:1">Run</span>
+          <svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>
         </button>
       </td>
       <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
@@ -1351,7 +1351,7 @@ function _openTestDetail(id, state, message) {
     detailsText = manualInstructions; detailsColor = 'var(--text-muted)';
   }
 
-  const modalTitle = `<i class="ti ti-test-pipe"></i> Unit Test ${id} — ${_esc(testDef.title)}`;
+  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> Unit Test ${id} — ${_esc(testDef.title)}`;
   const catColor = _CATEGORY_COLORS[testDef.category] || '#6b7280';
   const catPill = `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${catColor}22;color:${catColor}">${_esc(testDef.category)}</span>`;
   const stored = (window._jkTestResults || {})[id] || {};
@@ -1396,7 +1396,7 @@ function _openTestDetail(id, state, message) {
     </tr>
     <tr>
       <td style="${tdLabel}">Result</td>
-      <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<i class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color}"></i> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
+      <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<svg class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color};width:1.3rem;height:1.3rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">Details</td>
@@ -1413,19 +1413,19 @@ function _openTestDetail(id, state, message) {
   const nextRes = nextId ? (_results[nextId] || null) : null;
 
   const manualBtns = isManualTest ? `
-      <button class="btn btn-subtle" onclick="_markManualResult(${id},'pass')" style="color:#22c55e;border-color:rgba(34,197,94,0.3)"><i class="ti ti-check" style="color:#22c55e"></i> Mark as Pass</button>
-      <button class="btn btn-subtle" onclick="_markManualResult(${id},'fail')" style="color:#ef4444;border-color:rgba(239,68,68,0.3)"><i class="ti ti-x" style="color:#ef4444"></i> Mark as Fail</button>` : '';
+      <button class="btn btn-subtle" onclick="_markManualResult(${id},'pass')" style="color:#22c55e;border-color:rgba(34,197,94,0.3)"><svg class="ti ti-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
+      <button class="btn btn-subtle" onclick="_markManualResult(${id},'fail')" style="color:#ef4444;border-color:rgba(239,68,68,0.3)"><svg class="ti ti-x" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
 
   const footerHTML = `
     <div style="display:flex;gap:8px;align-items:center;width:100%">
       <button class="btn btn-subtle" ${prevId ? '' : 'disabled'} onclick="${prevId ? `_openTestDetail(${prevId},${prevRes ? `'${prevRes.state}'` : 'null'},${prevRes?.message ? JSON.stringify(prevRes.message) : 'null'})` : ''}">
-        <i class="ti ti-chevron-left"></i> Prev
+        <svg class="ti ti-chevron-left"><use href="img/tabler-sprite.svg#tabler-chevron-left"/></svg> Prev
       </button>
       <button class="btn btn-subtle" ${nextId ? '' : 'disabled'} onclick="${nextId ? `_openTestDetail(${nextId},${nextRes ? `'${nextRes.state}'` : 'null'},${nextRes?.message ? JSON.stringify(nextRes.message) : 'null'})` : ''}">
-        Next <i class="ti ti-chevron-right"></i>
+        Next <svg class="ti ti-chevron-right"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
       </button>
       ${manualBtns}
-      <button class="btn btn-subtle" onclick="Modal.close()" style="margin-left:auto"><i class="ti ti-x"></i> Close</button>
+      <button class="btn btn-subtle" onclick="Modal.close()" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
     </div>`;
 
   Modal.open(modalTitle, bodyHTML, footerHTML, 'xl');
@@ -1437,22 +1437,22 @@ function _setRowResult(id, state, message) {
   if (!cell) return;
 
   if (state === 'running') {
-    cell.innerHTML = `<i class="ti ti-loader-2 jk-spin" style="color:var(--text-muted)"></i>`;
+    cell.innerHTML = `<svg class="ti ti-loader-2 jk-spin" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>`;
     cell.style.cursor = '';
     cell.onclick = null;
     if (row) row.style.background = '';
   } else if (state === 'pass') {
-    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3);cursor:pointer"><i class="ti ti-check" style="font-size:0.85rem;line-height:1;color:#22c55e"></i><span style="line-height:1">Pass</span></span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(34,197,94,0.12);color:#22c55e;border:1px solid rgba(34,197,94,0.3);cursor:pointer"><svg class="ti ti-check" style="font-size:0.85rem;line-height:1;color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg><span style="line-height:1">Pass</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(34,197,94,0.04)';
   } else if (state === 'fail') {
-    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);cursor:pointer"><i class="ti ti-x" style="font-size:0.85rem;line-height:1;color:#ef4444"></i><span style="line-height:1">Fail</span></span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3);cursor:pointer"><svg class="ti ti-x" style="font-size:0.85rem;line-height:1;color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg><span style="line-height:1">Fail</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(239,68,68,0.04)';
   } else if (state === 'manual') {
-    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:pointer"><i class="ti ti-alert-triangle" style="font-size:0.85rem;line-height:1;color:#f59e0b"></i><span style="line-height:1">Manual</span></span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:pointer"><svg class="ti ti-alert-triangle" style="font-size:0.85rem;line-height:1;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="line-height:1">Manual</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
     if (row) row.style.background = 'rgba(245,158,11,0.04)';
@@ -1471,16 +1471,16 @@ function _refreshSummary() {
   const sp = document.getElementById('summaryPass');
   const sf = document.getElementById('summaryFail');
   const sm = document.getElementById('summaryManual');
-  if (sp) { sp.innerHTML = `<i class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#22c55e':'var(--text-muted)'}"></i>${passed} Passed`; sp.style.color = passed>0?'#22c55e':'var(--text-muted)'; }
-  if (sf) { sf.innerHTML = `<i class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#ef4444':'var(--text-muted)'}"></i>${failed} Failed`; sf.style.color = failed>0?'#ef4444':'var(--text-muted)'; }
-  if (sm) { sm.innerHTML = `<i class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"></i>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
+  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#22c55e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#22c55e':'var(--text-muted)'; }
+  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#ef4444':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#ef4444':'var(--text-muted)'; }
+  if (sm) { sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
 }
 
 async function _runSingleTest(id) {
   const testDef = JK_TESTS.find(t => t.id === id);
   if (!testDef) return;
   const btn = document.getElementById(`test-run-btn-${id}`);
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 jk-spin" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i>'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<svg class="ti ti-loader-2 jk-spin" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>'; }
   _setRowResult(id, 'running');
   if (!window._jkTestResults) window._jkTestResults = {};
   try {
@@ -1497,7 +1497,7 @@ async function _runSingleTest(id) {
     window._jkTestResults[id] = { state: 'fail', received: msg, message: msg };
     _setRowResult(id, 'fail', msg);
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"></i><span style="line-height:1">Run</span>'; }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>'; }
     _refreshSummary();
   }
 }
@@ -1505,7 +1505,7 @@ async function _runSingleTest(id) {
 async function _runAllTests() {
   const btn = document.getElementById('btnRunTests');
   const progress = document.getElementById('runProgress');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 jk-spin"></i> Running…'; }
+  if (btn) { btn.disabled = true; btn.innerHTML = '<svg class="ti ti-loader-2 jk-spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Running…'; }
   if (progress) { progress.style.display = 'inline'; progress.textContent = ''; }
 
   // Hide summary while running
@@ -1518,7 +1518,7 @@ async function _runAllTests() {
     overlay = document.createElement('div');
     overlay.id = 'testRunOverlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
-    overlay.innerHTML = '<i class="ti ti-test-pipe" style="font-size:2.5rem;color:var(--turq);display:block;text-align:center"></i><div style="font-size:1rem;font-weight:600;color:var(--text);text-align:center;margin-top:12px" id="overlayStatus">Running tests…</div>';
+    overlay.innerHTML = '<svg class="ti ti-test-pipe" style="font-size:2.5rem;color:var(--turq);display:block;text-align:center"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg><div style="font-size:1rem;font-weight:600;color:var(--text);text-align:center;margin-top:12px" id="overlayStatus">Running tests…</div>';
     document.body.appendChild(overlay);
   }
   overlay.style.display = 'flex';
@@ -1579,15 +1579,15 @@ async function _runAllTests() {
     _setRowResult(Number(id), res.state, res.message);
   }
 
-  if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-player-play"></i> Run All Tests'; }
+  if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="ti ti-player-play"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests'; }
   if (progress) { progress.style.display = 'none'; }
 
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<i class="ti ti-check" style="font-size:1.4rem;color:#22c55e"></i>${passed} Passed`;
-    document.getElementById('summaryFail').innerHTML = `<i class="ti ti-x" style="font-size:1.4rem;color:#ef4444"></i>${failed} Failed`;
-    document.getElementById('summaryManual').innerHTML = `<i class="ti ti-alert-triangle" style="font-size:1.4rem;color:#f59e0b"></i>${manual} Manual`;
+    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
+    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
+    document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
   }
 
@@ -1639,11 +1639,11 @@ function _resetTests() {
   const summaryEl = document.getElementById('testSummary');
   if (summaryEl) {
     summaryEl.style.display = 'flex';
-    document.getElementById('summaryPass').innerHTML = '<i class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"></i>0 passed';
+    document.getElementById('summaryPass').innerHTML = '<svg class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 passed';
     document.getElementById('summaryPass').style.color = 'var(--text-muted)';
-    document.getElementById('summaryFail').innerHTML = '<i class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"></i>0 failed';
+    document.getElementById('summaryFail').innerHTML = '<svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 failed';
     document.getElementById('summaryFail').style.color = 'var(--text-muted)';
-    document.getElementById('summaryManual').innerHTML = '<i class="ti ti-alert-triangle" style="font-size:1.1rem;color:var(--text-muted)"></i>0 manual';
+    document.getElementById('summaryManual').innerHTML = '<svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>0 manual';
     document.getElementById('summaryManual').style.color = 'var(--text-muted)';
   }
   const progress = document.getElementById('runProgress');

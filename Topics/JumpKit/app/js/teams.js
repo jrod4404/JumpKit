@@ -20,16 +20,16 @@ async function renderTeams() {
   if (!hasTeamsAccess) {
     content.innerHTML = `
       <div class="placeholder-page">
-        <div class="big-icon"><i class="ti ti-lock" style="color:var(--turq)"></i></div>
+        <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
         <h3 style="margin-bottom:10px;color:var(--text-card-title)">Teams — JumpKit Plan Required</h3>
         <p style="color:var(--text-muted);line-height:1.6">Share columns and jumps with your team. Collaborate in real time — everyone always has the latest links.</p>
-        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><i class="ti ti-bolt"></i> Upgrade to unlock Teams</a>
+        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Teams</a>
       </div>`;
     return;
   }
 
   content.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted)">
-    <i class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
+    <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
     Loading teams…
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
@@ -44,7 +44,7 @@ async function renderTeams() {
 
     if (!supaUser) {
       content.innerHTML = `<div class="no-columns">
-        <div class="big-icon"><i class="ti ti-cloud-off"></i></div>
+        <div class="big-icon"><svg class="ti ti-cloud-off"><use href="img/tabler-sprite.svg#tabler-cloud-off"/></svg></div>
         <h3>Not connected to Supabase</h3>
         <p>Teams require a Supabase connection. Fill in your credentials in <code>supabase/config.js</code> and restart.</p>
       </div>`;
@@ -72,7 +72,7 @@ async function renderTeams() {
     }
   } catch (err) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><i class="ti ti-alert-circle"></i></div>
+      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg></div>
       <h3>Error loading teams</h3>
       <p style="color:var(--text-muted)">${esc(err.message)}</p>
     </div>`;
@@ -108,14 +108,14 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     content.innerHTML = `
       <div class="acct-grid">
         <div class="acct-section">
-          <div class="acct-section-title"><i class="ti ti-building"></i> Create Your Organization</div>
+          <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Your Organization</div>
           <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px">You haven't set up an organization yet. Create one to start managing teams and sharing jumps.</p>
           <div class="form-group">
             <label class="form-label">Organization Name</label>
             <input class="form-input" id="newOrgName" placeholder="e.g. Acme Corp" style="max-width:320px"/>
           </div>
           <div style="margin-top:8px">
-            <button class="btn btn-primary" onclick="createOrganization()"><i class="ti ti-building"></i> Create Organization</button>
+            <button class="btn btn-primary" onclick="createOrganization()"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Organization</button>
           </div>
           <div id="createOrgMsg" style="margin-top:12px;font-size:0.85rem"></div>
         </div>
@@ -158,7 +158,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     }
   } catch (err) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><i class="ti ti-alert-circle"></i></div>
+      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg></div>
       <h3>Error loading organization</h3>
       <p style="color:var(--text-muted)">${esc(err.message)}</p>
     </div>`;
@@ -167,7 +167,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
 
   if (!org) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><i class="ti ti-building"></i></div>
+      <div class="big-icon"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg></div>
       <h3>No organization found</h3>
       <p>Your account is marked as org-owner but no organization was found. Try creating one.</p>
     </div>`;
@@ -194,7 +194,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
 
       <!-- Org row (full width, no selection needed) -->
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-building"></i> Your Organization</div>
+        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Your Organization</div>
         <div class="acct-row" style="flex-wrap:wrap;gap:24px;border-bottom:none">
           <div style="text-align:center">
             <div style="font-size:0.88rem;font-weight:500;color:var(--text-muted)">${esc(org.name)}</div>
@@ -225,10 +225,10 @@ async function renderOrgOwnerView(content, supaUser, profile) {
         <!-- Teams panel -->
         <div class="acct-section">
           <div class="acct-section-title" style="display:flex;align-items:center">
-            <i class="ti ti-users"></i> Your Teams
+            <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Your Teams
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
                     onclick="openAddTeamModal()" id="addTeamBtn">
-              <i class="ti ti-plus"></i> Add Team
+              <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Team
             </button>
           </div>
           <div id="teamsPanel">
@@ -239,10 +239,10 @@ async function renderOrgOwnerView(content, supaUser, profile) {
         <!-- Members panel -->
         <div class="acct-section">
           <div class="acct-section-title" style="display:flex;align-items:center">
-            <i class="ti ti-user-check"></i> Members
+            <svg class="ti ti-user-check"><use href="img/tabler-sprite.svg#tabler-user-check"/></svg> Members
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
                     onclick="openInviteMembersModal()" id="inviteBtn" style="display:none">
-              <i class="ti ti-mail"></i> Invite Members
+              <svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members
             </button>
           </div>
           <div id="membersPanel">
@@ -316,8 +316,8 @@ window.selectOrg = async function(orgId) {
             <span class="acct-row-hint">Created ${created}</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
-            <i class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"></i>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><i class="ti ti-trash"></i></button>
+            <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
           </div>
         </div>`;
       }).join('');
@@ -372,7 +372,7 @@ window.selectTeam = async function(teamId) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending" style="font-size:0.65rem;padding:1px 7px">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><i class="ti ti-send"></i> Invite Again</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
             </div>
           </div>`).join('')}` : '';
 
@@ -393,7 +393,7 @@ window.selectTeam = async function(teamId) {
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
             </div>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><i class="ti ti-user-minus"></i></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>
           </div>`;
       }).join('') + inviteRows;
     }
@@ -422,9 +422,9 @@ window.openAddTeamModal = function() {
       <span class="form-error" id="atTeamPasswordConfirmErr">Passwords do not match.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-users"></i> Add Team', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="saveAddTeam()"><i class="ti ti-check"></i> Save</button>`, 'sm');
+  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Add Team', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="saveAddTeam()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
 };
 
 window.saveAddTeam = async function() {
@@ -478,9 +478,9 @@ window.openInviteMembersModal = function() {
       <span class="form-error" id="orgInviteEmailsErr">At least one valid email required.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-mail"></i> Invite Members', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="sendOrgInvites()"><i class="ti ti-send"></i> Send Invites</button>`, 'sm');
+  Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="sendOrgInvites()"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 };
 
 window.sendOrgInvites = async function() {
@@ -567,7 +567,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
   if (!team) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><i class="ti ti-users"></i></div>
+      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg></div>
       <h3>No team assigned</h3>
       <p>You are a team owner but have not been assigned a team yet. Contact your org owner.</p>
     </div>`;
@@ -597,7 +597,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
   content.innerHTML = `
     <div class="acct-grid">
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-users"></i> Your Team</div>
+        <div class="acct-section-title"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Your Team</div>
         <div class="acct-row"><div class="acct-row-label"><span>Team Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.name)}</span></div>
         <div class="acct-row"><div class="acct-row-label"><span>Organization</span></div>
@@ -608,9 +608,9 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
       <div class="acct-section">
         <div class="acct-section-title">
-          <i class="ti ti-users-group"></i> Members (${memberRows.length})
+          <svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Members (${memberRows.length})
           <button class="btn btn-subtle btn-sm" style="margin-left:auto" onclick="openInviteModal('${team.id}')">
-            <i class="ti ti-user-plus"></i> Invite Members
+            <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members
           </button>
         </div>
         ${memberRows.length === 0
@@ -627,7 +627,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
       ${invites.length > 0 ? `
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-mail"></i> Pending Invites (${invites.length})</div>
+        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invites (${invites.length})</div>
         ${invites.map(inv => `
           <div class="acct-row">
             <div class="acct-row-label">
@@ -636,7 +636,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><i class="ti ti-send"></i> Invite Again</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
             </div>
           </div>`).join('')}
       </div>` : ''}
@@ -687,7 +687,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
   // If no memberships and no pending invites, show empty state
   if (memberRows.length === 0 && pendingInvites.length === 0) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><i class="ti ti-users"></i></div>
+      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg></div>
       <h3>No team yet</h3>
       <p>Ask your team owner to invite you, or use <strong>Join a Team</strong> on the sign-in screen.</p>
     </div>`;
@@ -701,7 +701,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
   if (pendingInvites.length > 0) {
     html += `
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-mail"></i> Pending Invitations</div>
+        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invitations</div>
         ${pendingInvites.map(inv => `
           <div class="acct-row">
             <div class="acct-row-label">
@@ -709,7 +709,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
               <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel || 'team owner')}</span>
             </div>
             <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" onclick="openJoinTeamModal('${inv.teams?.id}','${esc(inv.teams?.name || '')}','${inv.id}')">
-              <i class="ti ti-user-plus"></i> Join Team
+              <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
             </button>
           </div>`).join('')}
       </div>`;
@@ -735,7 +735,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
 
     html += `
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-building"></i> Organization</div>
+        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Organization</div>
         <div class="acct-row"><div class="acct-row-label"><span>Org Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.organizations?.name || '—')}</span></div>
         <div class="acct-row" style="border-bottom:none"><div class="acct-row-label"><span>Team Name</span></div>
@@ -743,7 +743,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
       </div>
 
       <div class="acct-section">
-        <div class="acct-section-title"><i class="ti ti-users-group"></i> Team Members</div>
+        <div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Team Members</div>
         <div class="acct-row"><div class="acct-row-label"><span>Team Owner</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(ownerProfile?.email || '—')}</span></div>
         ${allMembers.map(m => `
@@ -779,9 +779,9 @@ function openCreateTeamModal(orgId) {
       <span class="form-error" id="ctTeamPasswordErr">Team password is required.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-users"></i> Create Team', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="saveNewTeam('${orgId}')"><i class="ti ti-check"></i> Create Team</button>`, 'sm');
+  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create Team', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="saveNewTeam('${orgId}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Create Team</button>`, 'sm');
 }
 
 async function saveNewTeam(orgId) {
@@ -853,9 +853,9 @@ function openInviteModal(teamId) {
       <span class="form-error" id="inviteEmailsErr">At least one valid email required.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-mail"></i> Invite Members', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="sendInvites('${teamId}')"><i class="ti ti-send"></i> Send Invites</button>`, 'sm');
+  Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="sendInvites('${teamId}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 }
 
 async function sendInvites(teamId) {
@@ -939,9 +939,9 @@ function openPromoteUserModal(teamId) {
       <span class="form-error" id="promoteEmailErr">Valid email required.</span>
     </div>`;
 
-  Modal.open('<i class="ti ti-user-up"></i> Promote to Team Owner', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-save" onclick="doPromote('${teamId}')"><i class="ti ti-check"></i> Promote</button>`, 'sm');
+  Modal.open('<svg class="ti ti-user-up"><use href="img/tabler-sprite.svg#tabler-user-up"/></svg> Promote to Team Owner', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="doPromote('${teamId}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Promote</button>`, 'sm');
 }
 
 async function doPromote(teamId) {
@@ -974,10 +974,10 @@ async function doPromote(teamId) {
 // ── Teams CSS ─────────────────────────────────────────────────────
 
 window.removeTeam = function(teamId, teamName) {
-  Modal.open('<i class="ti ti-trash"></i> Remove Team',
+  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team',
     `<p style="color:var(--text-muted);font-size:.95rem">Remove team <strong style="color:var(--text-card-title)">${teamName}</strong> and all its members? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-delete" onclick="doRemoveTeam('${teamId}','${teamName.replace(/'/g,"\'")}')"><i class="ti ti-trash"></i> Remove Team</button>`, 'sm');
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" onclick="doRemoveTeam('${teamId}','${teamName.replace(/'/g,"\'")}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team</button>`, 'sm');
 };
 window.doRemoveTeam = async function(teamId, teamName) {
   Modal.close();
@@ -994,10 +994,10 @@ window.doRemoveTeam = async function(teamId, teamName) {
 };
 
 window.confirmRemoveMember = function(memberId, memberName) {
-  Modal.open('<i class="ti ti-user-minus"></i> Remove Member',
+  Modal.open('<svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove Member',
     `<p style="color:var(--text-muted);font-size:.95rem">Remove <strong style="color:var(--text-card-title)">${memberName}</strong> from this team? They will lose access to shared jumps.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
-     <button class="btn btn-delete" onclick="doRemoveMember('${memberId}','${memberName.replace(/'/g,"\'")}')"><i class="ti ti-user-minus"></i> Remove</button>`, 'sm');
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" onclick="doRemoveMember('${memberId}','${memberName.replace(/'/g,"\'")}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove</button>`, 'sm');
 };
 window.removeMember = window.confirmRemoveMember;
 window.doRemoveMember = async function(memberId, memberName) {
@@ -1012,7 +1012,7 @@ window.doRemoveMember = async function(memberId, memberName) {
 
 // ── Join Team Modal & Flow ─────────────────────────────────────────
 window.openJoinTeamModal = function(teamId, teamName, inviteId) {
-  Modal.open(`<i class="ti ti-user-plus"></i> Join ${teamName}`, `
+  Modal.open(`<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join ${teamName}`, `
     <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">
       Enter the team password to join <strong>${esc(teamName)}</strong>.
     </p>
@@ -1021,9 +1021,9 @@ window.openJoinTeamModal = function(teamId, teamName, inviteId) {
       <input class="form-input" type="password" id="joinTeamPassword" placeholder="Enter team password"/>
       <span class="form-error" id="joinTeamPasswordErr">Incorrect password.</span>
     </div>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><i class="ti ti-x"></i> Cancel</button>
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-primary" onclick="doJoinTeam('${teamId}','${esc(teamName)}','${inviteId}')">
-       <i class="ti ti-user-plus"></i> Join Team
+       <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
      </button>`, 'sm');
 };
 
@@ -1087,9 +1087,9 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
 
     // Show success message
     setTimeout(() => {
-      Modal.open('<i class="ti ti-circle-check" style="color:#22c55e"></i> Joined!',
+      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Joined!',
         `<div style="text-align:center;padding:8px 0">
-          <i class="ti ti-circle-check" style="font-size:2.5rem;color:#22c55e;display:block;margin-bottom:16px"></i>
+          <svg class="ti ti-circle-check" style="font-size:2.5rem;color:#22c55e;display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
           <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">Welcome to ${esc(teamName)}!</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
             You've successfully joined <strong>${esc(teamName)}</strong>.<br>
@@ -1097,7 +1097,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
           </p>
         </div>`,
         `<button class="btn btn-subtle" onclick="Modal.close()">Stay here</button>
-         <button class="btn btn-primary" onclick="navigateTo('jumps'); Modal.close()"><i class="ti ti-run"></i> Go to Jumps</button>`
+         <button class="btn btn-primary" onclick="navigateTo('jumps'); Modal.close()"><svg class="ti ti-run"><use href="img/tabler-sprite.svg#tabler-run"/></svg> Go to Jumps</button>`
       );
     }, 200);
 
