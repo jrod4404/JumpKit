@@ -271,7 +271,7 @@ function renderColumns() {
       colEl.innerHTML = `
         <div class="col-header">
           <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-          <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--turq);vertical-align:-0.1em;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+          <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--turq);vertical-align:-0.1em;margin-right:3px;margin-top:1px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
       area.appendChild(colEl);
@@ -292,7 +292,7 @@ function renderColumns() {
     colEl.innerHTML = `
       <div class="col-header">
         <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-        <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--turq);vertical-align:-0.1em;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+        <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--turq);vertical-align:-0.1em;margin-right:3px;margin-top:1px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
       </div>
       <div class="col-items" id="col-${col.id}">
         ${colJumps.length === 0
