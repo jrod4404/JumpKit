@@ -425,7 +425,7 @@ function renderHome() {
         <p>Go to the <strong>Jumps</strong> page and click the <strong>Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organized Columns</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
         <p>Click the <strong>Configure Columns</strong> button on the Jumps page to create up to 10 custom categories. Arrange them however you work.</p>
       </div>
       <div class="tip-card">
@@ -441,7 +441,7 @@ function renderHome() {
         <p>Toggle the favorite flag on any jump — <svg class="ti ti-link"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your Time Saved</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
         <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong>Statistics</strong> page to see your ROI.</p>
       </div>
     </div>`;

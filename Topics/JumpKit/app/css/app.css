@@ -211,7 +211,9 @@
 .help-card:hover { border-color: var(--hover-accent); box-shadow: 0 8px 32px rgba(26,79,214,0.12), 0 0 40px rgba(0,194,199,0.08); transition: all var(--transition); }
 .tip-icon { display: none; }
 .tip-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 8px; color: var(--text-card-title); display: flex; align-items: center; gap: 10px; }
-.tip-card h3 .tip-icon { display: flex; align-items: center; font-size: 1.5rem; color: var(--text-muted); margin-bottom: 0; -webkit-font-smoothing: antialiased; flex-shrink: 0; }
+.tip-card h3 .tip-icon { display: flex; align-items: center; font-size: 2rem; color: var(--text-muted); margin-bottom: 0; -webkit-font-smoothing: antialiased; flex-shrink: 0; }
+.tip-card h3 .tip-icon svg.ti { width: 2rem; height: 2rem; }
+.tip-card h3 .tip-icon svg[viewBox] { width: 2rem; height: 2rem; }
 .tip-card p { font-size: 0.87rem; color: var(--text-muted); line-height: 1.6; }
 
 /* ── Jumps Page ── */
