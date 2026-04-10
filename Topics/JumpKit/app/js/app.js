@@ -1122,7 +1122,8 @@ function renderStatsDash() {
 function renderJet() {
   const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
   const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
-  const hasAccess = (tier === 'teams_jet') && (status === 'active');
+  const adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
+  const hasAccess = adminEmail === 'jeffroder@gmail.com' || ((tier === 'teams_jet') && (status === 'active'));
 
   if (!hasAccess) {
     document.getElementById('pageContent').innerHTML = `

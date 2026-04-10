@@ -15,7 +15,8 @@ async function renderTeams() {
   // ── Tier gate — Teams requires core or teams_jet ──────────────────
   const tier   = window._supabaseProfile?.subscription_tier   || localStorage.getItem('jk_subscription_tier')   || 'free';
   const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
-  const hasTeamsAccess = (tier === 'core' || tier === 'teams_jet') && (status === 'active');
+  const adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
+  const hasTeamsAccess = adminEmail === 'jeffroder@gmail.com' || ((tier === 'core' || tier === 'teams_jet') && (status === 'active'));
 
   if (!hasTeamsAccess) {
     content.innerHTML = `
