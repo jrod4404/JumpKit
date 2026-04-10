@@ -11,7 +11,7 @@ function renderJumps() {
     <div class="page-stats-bar">
       <div class="jumps-toolbar">
         <button class="btn btn-subtle btn-sm" id="btnAddJump"><svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump</button>
-        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
+        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns</button>
       </div>
       <div class="jump-filter-bar" id="jumpFilterBar">
         <div class="jfb-slider" id="jfbSlider"></div>

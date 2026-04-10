@@ -426,7 +426,7 @@ function renderHome() {
         <p>Go to the <strong>Jumps</strong> page and click the <strong>Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize with Columns</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organized Columns</h3>
         <p>Click the <strong>Configure Columns</strong> button on the Jumps page to create up to 10 custom categories. Arrange them however you work.</p>
       </div>
       <div class="tip-card">
@@ -601,7 +601,7 @@ function renderSettings() {
       </div>
 
       <div class="acct-save-row">
-        <button class="btn btn-save" onclick="saveAccountPrefs()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Preferences</button>
+        <button class="btn btn-subtle" onclick="saveAccountPrefs()"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Save Settings</button>
       </div>
     </div>`;
 

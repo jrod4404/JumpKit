@@ -171,8 +171,9 @@
 /* ── Account Page ── */
 .acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 640px; margin: 0 auto; }
 .acct-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-.acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .acct-section-title i { font-size: 1.1rem; color: var(--text-muted); }
+.acct-section-title svg.ti { width: 1.3rem; height: 1.3rem; color: var(--text-muted); }
 .acct-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); gap: 16px; }
 .acct-row:last-child { border-bottom: none; }
 .acct-row-label { display: flex; flex-direction: column; gap: 2px; }

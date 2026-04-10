@@ -29,7 +29,7 @@ async function renderTeams() {
     return;
   }
 
-  content.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted)">
+  content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
     <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
     Loading teams…
   </div>
