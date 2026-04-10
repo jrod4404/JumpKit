@@ -1118,6 +1118,101 @@ const JK_TESTS = [
     }
   },
 
+  // ── Paywall Gating Tests ──────────────────────────────────────────
+
+  {
+    id: 52, category: 'Paywall',
+    title: 'Jet AI page — free tier user sees paywall, not content',
+    purpose: 'Confirms that a free-tier user hitting the Jet AI page sees the upgrade paywall and not the Jet AI content. Prevents free users from accessing a paid feature.',
+    prerequisites: 'User must be logged in. window._supabaseProfile must be set.',
+    input: 'window._supabaseProfile.subscription_tier, renderJet()',
+    description: 'Temporarily sets tier to free, calls renderJet(), checks for lock icon paywall, then restores tier.',
+    expected: 'pageContent contains upgrade paywall (lock icon + upgrade button) when tier is free',
+    test: () => {
+      const profile = window._supabaseProfile;
+      if (!profile) throw new Error('window._supabaseProfile not set — log in first');
+      const originalTier   = profile.subscription_tier;
+      const originalStatus = profile.subscription_status;
+
+      // Force free tier
+      profile.subscription_tier   = 'free';
+      profile.subscription_status = 'free';
+      renderJet();
+
+      const content = document.getElementById('pageContent').innerHTML;
+      profile.subscription_tier   = originalTier;
+      profile.subscription_status = originalStatus;
+
+      if (!content.includes('ti-lock')) throw new Error('Paywall lock icon not found — free user can see Jet AI without upgrading');
+      if (!content.includes('Upgrade to unlock Jet AI')) throw new Error('Upgrade CTA not found in Jet AI paywall');
+      return true;
+    }
+  },
+
+  {
+    id: 53, category: 'Paywall',
+    title: 'Teams page — free tier user sees paywall, not content',
+    purpose: 'Confirms that a free-tier user hitting the Teams page sees the upgrade paywall. Prevents free users from accessing team sharing features.',
+    prerequisites: 'User must be logged in. window._supabaseProfile must be set.',
+    input: 'window._supabaseProfile.subscription_tier, renderTeams()',
+    description: 'Temporarily sets tier to free, calls renderTeams(), checks for lock icon paywall, then restores tier.',
+    expected: 'pageContent contains upgrade paywall (lock icon + upgrade button) when tier is free',
+    test: async () => {
+      const profile = window._supabaseProfile;
+      if (!profile) throw new Error('window._supabaseProfile not set — log in first');
+      const originalTier   = profile.subscription_tier;
+      const originalStatus = profile.subscription_status;
+
+      // Force free tier
+      profile.subscription_tier   = 'free';
+      profile.subscription_status = 'free';
+      await renderTeams();
+
+      const content = document.getElementById('pageContent').innerHTML;
+      profile.subscription_tier   = originalTier;
+      profile.subscription_status = originalStatus;
+
+      if (!content.includes('ti-lock')) throw new Error('Paywall lock icon not found — free user can see Teams without upgrading');
+      if (!content.includes('Upgrade to unlock Teams')) throw new Error('Upgrade CTA not found in Teams paywall');
+      return true;
+    }
+  },
+
+  {
+    id: 54, category: 'Paywall',
+    title: 'Active paid subscriber — Jet AI and Teams pages load without paywall',
+    purpose: 'Confirms that a user with an active teams_jet subscription can access both Jet AI and Teams pages without being gated. Prevents paying customers from being incorrectly blocked.',
+    prerequisites: 'User must be logged in. window._supabaseProfile must be set.',
+    input: 'window._supabaseProfile.subscription_tier = "teams_jet", subscription_status = "active"',
+    description: 'Temporarily sets tier to teams_jet + status to active, calls renderJet() and renderTeams(), checks that no paywall lock icon appears.',
+    expected: 'Neither Jet AI nor Teams pages show the paywall lock icon for active teams_jet subscribers',
+    test: async () => {
+      const profile = window._supabaseProfile;
+      if (!profile) throw new Error('window._supabaseProfile not set — log in first');
+      const originalTier   = profile.subscription_tier;
+      const originalStatus = profile.subscription_status;
+
+      // Force paid tier
+      profile.subscription_tier   = 'teams_jet';
+      profile.subscription_status = 'active';
+
+      // Check Jet AI
+      renderJet();
+      const jetContent = document.getElementById('pageContent').innerHTML;
+      if (jetContent.includes('Upgrade to unlock Jet AI')) throw new Error('Jet AI paywall shown for active teams_jet subscriber');
+
+      // Check Teams
+      await renderTeams();
+      const teamsContent = document.getElementById('pageContent').innerHTML;
+
+      profile.subscription_tier   = originalTier;
+      profile.subscription_status = originalStatus;
+
+      if (teamsContent.includes('Upgrade to unlock Teams')) throw new Error('Teams paywall shown for active teams_jet subscriber');
+      return true;
+    }
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────

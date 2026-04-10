@@ -11,6 +11,23 @@ async function hashPassword(password) {
 
 async function renderTeams() {
   const content = document.getElementById('pageContent');
+
+  // ── Tier gate — Teams requires core or teams_jet ──────────────────
+  const tier   = window._supabaseProfile?.subscription_tier   || localStorage.getItem('jk_subscription_tier')   || 'free';
+  const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
+  const hasTeamsAccess = (tier === 'core' || tier === 'teams_jet') && (status === 'active');
+
+  if (!hasTeamsAccess) {
+    content.innerHTML = `
+      <div class="placeholder-page">
+        <div class="big-icon"><i class="ti ti-lock" style="color:var(--turq)"></i></div>
+        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Teams — JumpKit Plan Required</h3>
+        <p style="color:var(--text-muted);line-height:1.6">Share columns and jumps with your team. Collaborate in real time — everyone always has the latest links.</p>
+        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><i class="ti ti-bolt"></i> Upgrade to unlock Teams</a>
+      </div>`;
+    return;
+  }
+
   content.innerHTML = `<div style="text-align:center;padding:48px;color:var(--text-muted)">
     <i class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"></i>
     Loading teams…

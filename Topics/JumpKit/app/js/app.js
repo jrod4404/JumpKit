@@ -1120,6 +1120,22 @@ function renderStatsDash() {
 }
 
 function renderJet() {
+  const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+  const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
+  const hasAccess = (tier === 'teams_jet') && (status === 'active');
+
+  if (!hasAccess) {
+    document.getElementById('pageContent').innerHTML = `
+      <div class="placeholder-page">
+        <div class="big-icon"><i class="ti ti-lock" style="color:var(--turq)"></i></div>
+        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — JumpKit + Jet AI Plan</h3>
+        <p style="color:var(--text-muted);line-height:1.6">Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
+        <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
+        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><i class="ti ti-bolt"></i> Upgrade to unlock Jet AI</a>
+      </div>`;
+    return;
+  }
+
   document.getElementById('pageContent').innerHTML = `
     <div class="placeholder-page">
       <div class="big-icon"><i class="ti ti-brain"></i></div>
