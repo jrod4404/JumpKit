@@ -421,28 +421,28 @@ function renderHome() {
   document.getElementById('pageContent').innerHTML = `
     <div class="tips-grid">
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
-        <p>Click the <strong style="color:var(--turq)">Configure Columns</strong> button on the <strong style="color:var(--turq)">Jumps</strong> page to create up to 10 custom categories. Arrange them however you work.</p>
+        <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
+        <p>Click the <strong style="color:var(--hover-accent)">Configure Columns</strong> button on the <strong style="color:var(--hover-accent)">Jumps</strong> page to create up to 10 custom categories. Arrange them however you work.</p>
       </div>
       <div class="tip-card">
         <h3><span class="tip-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="var(--text-card-title)" style="width:1.4rem;height:1.4rem;display:block"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg></span>Add Your First Jump</h3>
-        <p>Go to the <strong style="color:var(--turq)">Jumps</strong> page and click the <strong style="color:var(--turq)">Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
+        <p>Go to the <strong style="color:var(--hover-accent)">Jumps</strong> page and click the <strong style="color:var(--hover-accent)">Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
         <p>Left-click any jump to instantly launch it. Web links open in your browser. Local paths open in your OS. One click, you're there.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
+        <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
         <p>Give each jump a hotkey code when you create or edit it. JumpKit will register it as a global shortcut so you can launch any jump without touching the mouse.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
-        <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--turq);width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--turq);width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
+        <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
+        <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
       </div>
       <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
-        <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong style="color:var(--turq)">Statistics</strong> page to see your ROI.</p>
+        <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
+        <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong style="color:var(--hover-accent)">Statistics</strong> page to see your ROI.</p>
       </div>
     </div>`;
 }
