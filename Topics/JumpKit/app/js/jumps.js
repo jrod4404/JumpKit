@@ -373,7 +373,7 @@ function jumpItemHTML(j, colIndex) {
       ${prefs.showDescription && j.description ? `<div class="jump-desc">${esc(j.description)}</div>` : ''}
     </div>
     ${prefs.showHotkey && j.hotkey ? `<span class="jump-hotkey-pill">${esc(j.hotkey)}</span>` : ''}
-    ${j.favorite ? `<span class="jump-fav"><svg class="ti ti-star-filled" style="color:${FAVE_COLORS[colIndex % FAVE_COLORS.length]}"><use href="img/tabler-sprite.svg#tabler-star-filled"/></svg></span>` : ''}
+
   </div>`;
 }
 
