@@ -271,7 +271,7 @@ function renderColumns() {
       colEl.innerHTML = `
         <div class="col-header">
           <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-          <span class="col-count">${colJumps.length}</span>
+          <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:0.85em;height:0.85em;color:var(--turq);vertical-align:-0.1em;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
       area.appendChild(colEl);
@@ -292,7 +292,7 @@ function renderColumns() {
     colEl.innerHTML = `
       <div class="col-header">
         <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-        <span class="col-count">${colJumps.length}</span>
+        <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:0.85em;height:0.85em;color:var(--turq);vertical-align:-0.1em;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
       </div>
       <div class="col-items" id="col-${col.id}">
         ${colJumps.length === 0
@@ -368,7 +368,7 @@ function jumpItemHTML(j, colIndex) {
     <div class="jump-info">
       <div class="jump-name">
         ${esc(j.name)}
-        ${isShared ? `<svg class="ti ti-users jump-shared-badge" title="Shared with team" style="color:var(--turq);font-size:.8em;margin-left:4px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}
+
       </div>
       ${prefs.showDescription && j.description ? `<div class="jump-desc">${esc(j.description)}</div>` : ''}
     </div>
