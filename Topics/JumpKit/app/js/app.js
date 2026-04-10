@@ -474,7 +474,7 @@ const Toast = window.Toast = (() => {
 
 function renderSettings() {
   const p = DB.getPrefs(currentUser.id);
-  const pageChoices = ['home','jumps','jet','teams','stats','settings','help'].map(pg =>
+  const pageChoices = ['home','jumps','teams','stats','settings','help'].map(pg =>
     `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
   const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
     `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
@@ -601,7 +601,7 @@ function renderSettings() {
       </div>
 
       <div class="acct-save-row">
-        <button class="btn btn-subtle" onclick="saveAccountPrefs()"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Save Settings</button>
+        <button class="btn btn-subtle" onclick="saveAccountPrefs()"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
       </div>
     </div>`;
 
@@ -875,6 +875,10 @@ const STAT_LABELS = { summary:'Summary', daily:'Daily', weekly:'Weekly', monthly
 function renderStats() {
   document.getElementById('pageContent').innerHTML = `
     <div class="stats-wrap">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px">
+        <svg class="ti ti-chart-bar-popular" style="width:1.4rem;height:1.4rem;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg>
+        <span style="font-size:1rem;font-weight:700;color:var(--text-card-title)">Statistics</span>
+      </div>
       <div style="margin-bottom:18px">
         <div class="jump-filter-bar" id="statsBar">
           <div class="jfb-slider" id="statsPill"></div>
@@ -947,7 +951,7 @@ function renderStatsDash() {
   const fmtUSD = v => '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   if (n === 0) {
-    dash.innerHTML = `<div class="stats-empty"><svg class="ti ti-chart-bar-off" style="font-size:2.5rem;display:block;margin-bottom:12px"><use href="img/tabler-sprite.svg#tabler-chart-bar-off"/></svg><p>No click data yet for this period.</p></div>`;
+    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p>No click data yet for this period.</p></div>`;
     return;
   }
 
