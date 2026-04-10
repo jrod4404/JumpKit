@@ -84,6 +84,7 @@ input, select, textarea { font-family: inherit; }
 .btn-turq .ti { color: inherit; }
 .btn-delete .ti { color: inherit; }
 .btn-save .ti { color: inherit; }
+.btn-save svg.ti { width: 1.2rem; height: 1.2rem; color: inherit; }
 .btn .ti { line-height: 1; display: flex; align-items: center; }
 .btn-subtle .ti { font-size: 1.05rem; }
 .jumps-toolbar .btn .ti { font-size: 1.05rem; }
