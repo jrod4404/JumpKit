@@ -538,6 +538,8 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   gap: 24px;
   max-width: 760px;
   align-items: stretch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hero-section-nav { display: none; }
