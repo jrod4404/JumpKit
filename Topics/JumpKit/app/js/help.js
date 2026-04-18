@@ -67,11 +67,11 @@ function renderHelp() {
         <h3><svg class="ti ti-headset"><use href="img/tabler-sprite.svg#tabler-headset"/></svg> Support & About</h3>
         <div class="faq-item">
           <div class="faq-q">Support</div>
-          <div class="faq-a">Email: <a href="mailto:support@jumpkit.ai" style="color:var(--turq)">support@jumpkit.ai</a><br/>Response time: within 1 business day.</div>
+          <div class="faq-a">Email: <a href="mailto:support@jumpkit.ai" style="color:var(--turq)">support@jumpkit.app</a><br/>Response time: within 1 business day.</div>
         </div>
         <div class="faq-item">
           <div class="faq-q">Website</div>
-          <div class="faq-a"><a href="https://jumpkit.ai" target="_blank" style="color:var(--turq)">jumpkit.ai</a></div>
+          <div class="faq-a"><a href="https://jumpkit.app" target="_blank" style="color:var(--turq)">jumpkit.app</a></div>
         </div>
         <div class="faq-item">
           <div class="faq-q">About JumpKit</div>

@@ -122,10 +122,10 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       </p>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px"><tr>
         <td width="50%" style="padding-right:8px">
-          <a href="https://jumpkit.ai/download/mac" style="display:block;padding:14px 0;background:rgba(0,194,199,0.12);border:1px solid rgba(0,194,199,0.25);border-radius:10px;text-align:center;text-decoration:none;color:#00C2C7;font-size:14px;font-weight:600">🍎 Download for macOS</a>
+          <a href="https://jumpkit.app/download/mac" style="display:block;padding:14px 0;background:rgba(0,194,199,0.12);border:1px solid rgba(0,194,199,0.25);border-radius:10px;text-align:center;text-decoration:none;color:#00C2C7;font-size:14px;font-weight:600">🍎 Download for macOS</a>
         </td>
         <td width="50%" style="padding-left:8px">
-          <a href="https://jumpkit.ai/download/win" style="display:block;padding:14px 0;background:rgba(26,79,214,0.12);border:1px solid rgba(26,79,214,0.25);border-radius:10px;text-align:center;text-decoration:none;color:#6a9ff5;font-size:14px;font-weight:600">🪟 Download for Windows</a>
+          <a href="https://jumpkit.app/download/win" style="display:block;padding:14px 0;background:rgba(26,79,214,0.12);border:1px solid rgba(26,79,214,0.25);border-radius:10px;text-align:center;text-decoration:none;color:#6a9ff5;font-size:14px;font-weight:600">🪟 Download for Windows</a>
         </td>
       </tr></table>
       <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:20px 24px;border:1px solid rgba(255,255,255,0.06)">
@@ -139,7 +139,7 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       </div>
     </td></tr>
     <tr><td style="padding:20px 40px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06)">
-      <p style="margin:0;font-size:12px;color:#4A6280"><a href="https://jumpkit.ai" style="color:#00C2C7;text-decoration:none">jumpkit.ai</a> · Stop searching. Start jumping.</p>
+      <p style="margin:0;font-size:12px;color:#4A6280"><a href="https://jumpkit.app" style="color:#00C2C7;text-decoration:none">jumpkit.app</a> · Stop searching. Start jumping.</p>
     </td></tr>
   </table>
 </body></html>`;

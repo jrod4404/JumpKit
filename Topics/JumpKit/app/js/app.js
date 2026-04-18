@@ -1132,7 +1132,7 @@ function renderJet() {
         <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — JumpKit + Jet AI Plan</h3>
         <p style="color:var(--text-muted);line-height:1.6">Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
         <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
-        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Jet AI</a>
+        <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Jet AI</a>
       </div>`;
     return;
   }
@@ -1197,10 +1197,10 @@ window.showPaywall = function() {
         You've used all 250 free launches.<br>Upgrade to keep jumping — no limits, plus team sharing and more.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
-        <button class="btn btn-primary" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700">
+        <button class="btn btn-primary" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.app/#pricing'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700">
           <svg class="ti ti-rocket" style="color:#fff"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to JumpKit — $5/mo
         </button>
-        <button class="btn btn-subtle" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.ai/#pricing'); Modal.close();" style="padding:12px;font-size:0.9rem">
+        <button class="btn btn-subtle" onclick="if (window.electronAPI) window.electronAPI.openUrl('https://jumpkit.app/#pricing'); Modal.close();" style="padding:12px;font-size:0.9rem">
           <svg class="ti ti-brain"><use href="img/tabler-sprite.svg#tabler-brain"/></svg> JumpKit + Jet AI — $25/mo
         </button>
         <button class="btn btn-ghost" onclick="Modal.close();" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">

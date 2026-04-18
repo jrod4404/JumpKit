@@ -26,10 +26,25 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Store email in waitlist table (ignore duplicate)
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if already signed up
+    const { data: existing } = await supabase
+      .from('waitlist')
+      .select('email')
+      .eq('email', normalizedEmail)
+      .maybeSingle();
+
+    if (existing) {
+      return new Response(JSON.stringify({ duplicate: true }), {
+        status: 200, headers: { ...CORS, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Store email in waitlist table
     const { error: dbError } = await supabase
       .from('waitlist')
-      .upsert({ email: email.toLowerCase().trim() }, { onConflict: 'email', ignoreDuplicates: true });
+      .insert({ email: normalizedEmail });
 
     if (dbError) {
       console.error('DB error:', dbError);
@@ -51,7 +66,7 @@ serve(async (req) => {
         subject: "You're on the JumpKit waitlist 🚀",
         html: `
           <div style="font-family: sans-serif; max-width: 520px; margin: 0 auto; padding: 40px 24px; color: #1a1a2e;">
-            <img src="https://jumpkit.ai/logo-light.png" alt="JumpKit" style="height: 36px; margin-bottom: 32px;" />
+            <img src="https://jumpkit.app/logo-light.png" alt="JumpKit" style="height: 36px; width: auto; margin-bottom: 32px;" />
             <h1 style="font-size: 1.6rem; margin: 0 0 12px;">You're on the list. ⚡</h1>
             <p style="font-size: 1rem; color: #444; line-height: 1.6;">
               Thanks for signing up! We'll let you know the moment JumpKit is ready to launch.
@@ -61,7 +76,7 @@ serve(async (req) => {
             </p>
             <p style="margin-top: 32px; font-size: 0.9rem; color: #888;">
               — The JumpKit Team<br/>
-              <a href="https://jumpkit.ai" style="color: #00C2C7;">jumpkit.ai</a>
+              <a href="https://jumpkit.app" style="color: #00C2C7;">jumpkit.app</a>
             </p>
           </div>
         `,

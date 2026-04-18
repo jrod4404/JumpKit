@@ -141,7 +141,7 @@ function buildFeedbackHTML({ name, email, category, message }) {
       </div>
     </td></tr>
     <tr><td style="padding:20px 40px 32px;text-align:center;border-top:1px solid rgba(255,255,255,0.06)">
-      <p style="margin:0;font-size:12px;color:#4A6280"><a href="https://jumpkit.ai" style="color:#00C2C7;text-decoration:none">jumpkit.ai</a> · Stop searching. Start jumping.</p>
+      <p style="margin:0;font-size:12px;color:#4A6280"><a href="https://jumpkit.app" style="color:#00C2C7;text-decoration:none">jumpkit.app</a> · Stop searching. Start jumping.</p>
     </td></tr>
   </table>
 </body></html>`;

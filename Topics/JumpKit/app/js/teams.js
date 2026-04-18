@@ -24,7 +24,7 @@ async function renderTeams() {
         <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
         <h3 style="margin-bottom:10px;color:var(--text-card-title)">Teams — JumpKit Plan Required</h3>
         <p style="color:var(--text-muted);line-height:1.6">Share columns and jumps with your team. Collaborate in real time — everyone always has the latest links.</p>
-        <a href="https://jumpkit.ai/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Teams</a>
+        <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Teams</a>
       </div>`;
     return;
   }
