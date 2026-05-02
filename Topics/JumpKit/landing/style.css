@@ -533,13 +533,17 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 
 /* ─── PRICING ────────────────────────────────────────────────────── */
 .pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
   max-width: 760px;
   align-items: stretch;
   margin-left: auto;
   margin-right: auto;
+}
+.pricing-grid .pricing-card {
+  flex: 0 1 340px;
 }
 
 .hero-section-nav { display: none; }
