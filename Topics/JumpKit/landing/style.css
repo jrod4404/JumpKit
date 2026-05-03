@@ -310,7 +310,7 @@ img { max-width: 100%; }
 .mock-stack { display: flex; flex-direction: column; gap: 17px; width: 100%; max-width: 520px; margin-top: 40px; margin-bottom: 24px; }
 .hero-screenshot-wrap {
   width: 100%;
-  max-width: 560px;
+  max-width: 620px;
   margin-top: 24px;
   filter: drop-shadow(0 20px 48px rgba(0,194,199,0.18)) drop-shadow(0 4px 24px rgba(0,0,0,0.5));
   transform: perspective(1000px) rotateY(-3deg) rotateX(2deg);
