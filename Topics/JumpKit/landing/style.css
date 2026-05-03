@@ -556,10 +556,11 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .hero-section-nav {
     display: flex;
     gap: 8px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     margin-top: 40px;
     white-space: nowrap;
     justify-content: center;
+    max-width: 520px;
   }
   .hero-section-nav a {
     font-size: 0.88rem;
