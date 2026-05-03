@@ -252,7 +252,7 @@ img { max-width: 100%; }
 }
 .hero-inner-wrap {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 100px 24px 15px;
   max-width: 1200px;
   margin: 0 auto;
