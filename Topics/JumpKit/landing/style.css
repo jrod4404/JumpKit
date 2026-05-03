@@ -397,8 +397,9 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   color: var(--text-muted);
   font-size: 0.94rem;
   max-width: 600px;
-  margin-bottom: 32px;
+  margin: 0 auto 32px;
   line-height: 1.65;
+  text-align: center;
 }
 
 /* ─── FEATURES GRID ──────────────────────────────────────────────── */
