@@ -326,6 +326,8 @@ img { max-width: 100%; }
   border-radius: 12px;
   display: block;
 }
+[data-theme="dark"]  .hero-screenshot-light { display: none; }
+[data-theme="light"] .hero-screenshot-dark  { display: none; }
 .dot { width: 12px; height: 12px; border-radius: 50%; }
 .dot.red    { background: #FF5F57; }
 .dot.yellow { background: #FFBD2E; }
