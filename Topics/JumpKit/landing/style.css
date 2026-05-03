@@ -581,13 +581,17 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   #jet .section-inner,
   #statistics .section-inner,
   #features .section-inner,
-  #how .section-inner { text-align: center; }
+  #how .section-inner,
+  #problem .section-inner,
+  #solution .section-inner { text-align: center; }
 
   #pricing .section-inner .section-sub,
   #jet .section-inner .section-sub,
   #statistics .section-inner .section-sub,
   #features .section-inner .section-sub,
-  #how .section-inner .section-sub { margin-left: auto; margin-right: auto; }
+  #how .section-inner .section-sub,
+  #problem .section-inner .section-sub,
+  #solution .section-inner .section-sub { margin-left: auto; margin-right: auto; text-align: center; }
 
   .pricing-grid {
     grid-template-columns: repeat(3, 1fr);
