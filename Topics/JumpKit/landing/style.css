@@ -388,7 +388,7 @@ img { max-width: 100%; }
 .section-label .ti { font-size: 1.3rem; }
 svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .section-title {
-  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
   font-weight: 900;
   letter-spacing: -0.02em;
   margin-bottom: 20px;
