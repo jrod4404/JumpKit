@@ -1195,7 +1195,9 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   /* Testimonials — stack layout on mobile */
   .testimonial-carousel { padding: 32px 16px 0; }
   .testimonial-row { flex-direction: column; }
-  .testimonial-row .testimonial-nav { display: none; }
+  .testimonial-row .testimonial-nav,
+  .testimonial-prev,
+  .testimonial-next { display: none; }
   .testimonial-mobile-nav {
     display: flex;
     justify-content: center;
