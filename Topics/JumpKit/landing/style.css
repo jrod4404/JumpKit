@@ -395,12 +395,15 @@ img { max-width: 100%; }
   background: var(--bg-dark);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
+  position: relative;
 }
 .testimonial-track {
   display: flex;
+  flex-wrap: nowrap;
   gap: 24px;
   width: max-content;
-  animation: scroll-left 28s linear infinite;
+  will-change: transform;
+  animation: scroll-left 32s linear infinite;
 }
 .testimonial-ribbon:hover .testimonial-track {
   animation-play-state: paused;
@@ -414,9 +417,8 @@ img { max-width: 100%; }
   border: 1px solid var(--border);
   border-radius: 14px;
   padding: 22px 28px;
-  min-width: 320px;
-  max-width: 360px;
-  flex-shrink: 0;
+  width: 340px;
+  flex: 0 0 340px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.1);
 }
 .testimonial-placeholder { opacity: 0.4; }
