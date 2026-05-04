@@ -409,6 +409,11 @@ img { max-width: 100%; }
   transition: opacity 0.3s, transform 0.3s;
   z-index: 999;
 }
+#scrollTopBtn .ti {
+  width: 1.6em;
+  height: 1.6em;
+  stroke-width: 3;
+}
 #scrollTopBtn.visible {
   opacity: 1;
   pointer-events: auto;
