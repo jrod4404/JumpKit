@@ -1136,6 +1136,9 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 #jet {
   background: linear-gradient(180deg, var(--section-grad-start), var(--section-grad-end)), var(--bg);
 }
+.testimonial-carousel {
+  background: linear-gradient(180deg, var(--section-grad-start), var(--section-grad-end)), var(--bg-dark);
+}
 
 /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
 @media (max-width: 645px) {
