@@ -486,6 +486,7 @@ img { max-width: 100%; }
   transition: background 0.2s;
 }
 .testimonial-dot.active { background: var(--turq); }
+.testimonial-mobile-nav { display: none; }
 
 /* ─── SECTIONS ───────────────────────────────────────────────────── */
 .section { padding: 96px 24px; }
@@ -1190,6 +1191,18 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .stats-bar-inline .stat-divider { display: none; }
   .mock-sidebar { display: none; }
   .mock-window { max-width: 100%; }
+
+  /* Testimonials — stack layout on mobile */
+  .testimonial-carousel { padding: 32px 16px 0; }
+  .testimonial-row { flex-direction: column; }
+  .testimonial-row .testimonial-nav { display: none; }
+  .testimonial-mobile-nav {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin: 8px 0 16px;
+  }
+  .testimonial-slide { padding: 24px 16px; }
 }
 
 /* ─── CARD TITLE CENTER / BODY LEFT ─────────────────────────── */
