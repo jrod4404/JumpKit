@@ -461,6 +461,9 @@ img { max-width: 100%; }
   color: var(--text-muted);
   flex-shrink: 0;
   transition: border-color 0.2s, color 0.2s;
+}
+.testimonial-prev,
+.testimonial-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
