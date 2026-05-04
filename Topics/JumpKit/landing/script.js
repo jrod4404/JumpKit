@@ -129,12 +129,15 @@ document.addEventListener('click', e => {
 // ─── TESTIMONIAL CAROUSEL ─────────────────────────────────────
 (function() {
   const track = document.getElementById('testimonialTrack');
+  const viewport = track ? track.closest('.testimonial-viewport') : null;
   const dotsContainer = document.getElementById('testimonialDots');
-  if (!track) return;
+  if (!track || !viewport) return;
 
   const slides = track.querySelectorAll('.testimonial-slide');
   let current = 0;
   let autoTimer;
+  let dragStartX = null;
+  let isDragging = false;
 
   // Build dots
   slides.forEach((_, i) => {
@@ -159,6 +162,31 @@ document.addEventListener('click', e => {
   }
 
   window.testimonialMove = function(dir) { goTo(current + dir); };
+
+  // Mouse drag
+  viewport.addEventListener('mousedown', e => { dragStartX = e.clientX; isDragging = true; });
+  viewport.addEventListener('mousemove', e => { if (isDragging) e.preventDefault(); });
+  viewport.addEventListener('mouseup', e => {
+    if (!isDragging) return;
+    const diff = dragStartX - e.clientX;
+    if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+    isDragging = false;
+  });
+  viewport.addEventListener('mouseleave', () => { isDragging = false; });
+
+  // Touch swipe
+  viewport.addEventListener('touchstart', e => { dragStartX = e.touches[0].clientX; }, { passive: true });
+  viewport.addEventListener('touchend', e => {
+    if (dragStartX === null) return;
+    const diff = dragStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) goTo(current + (diff > 0 ? 1 : -1));
+    dragStartX = null;
+  });
+
+  // Cursor style
+  viewport.style.cursor = 'grab';
+  viewport.addEventListener('mousedown', () => viewport.style.cursor = 'grabbing');
+  viewport.addEventListener('mouseup',   () => viewport.style.cursor = 'grab');
 
   resetAuto();
 })();
