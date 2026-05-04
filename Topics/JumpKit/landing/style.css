@@ -469,7 +469,6 @@ img { max-width: 100%; }
   transition: background 0.2s;
 }
 .testimonial-dot.active { background: var(--turq); }
-.testimonial-slide-alt { background: var(--bg-card); }
 
 /* ─── SECTIONS ───────────────────────────────────────────────────── */
 .section { padding: 96px 24px; }
