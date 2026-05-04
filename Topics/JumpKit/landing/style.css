@@ -400,7 +400,7 @@ img { max-width: 100%; }
 }
 .testimonial-header {
   text-align: center;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   width: 100%;
 }
 .testimonial-row {
