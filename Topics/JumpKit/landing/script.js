@@ -190,3 +190,12 @@ document.addEventListener('click', e => {
 
   resetAuto();
 })();
+
+// ─── SCROLL TO TOP BUTTON ─────────────────────────────────────
+(function() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('visible', window.scrollY > 400);
+  });
+})();

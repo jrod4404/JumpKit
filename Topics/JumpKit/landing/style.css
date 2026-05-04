@@ -388,6 +388,33 @@ img { max-width: 100%; }
 }
 .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
+/* ─── SCROLL TO TOP ──────────────────────────────────────────────── */
+#scrollTopBtn {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--turq);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(0,194,199,0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 999;
+}
+#scrollTopBtn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+#scrollTopBtn:hover { transform: translateY(-3px); }
+
 /* ─── TESTIMONIAL RIBBON ─────────────────────────────────────────── */
 .testimonial-carousel {
   position: relative;
