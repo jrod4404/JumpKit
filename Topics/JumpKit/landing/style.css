@@ -389,48 +389,40 @@ img { max-width: 100%; }
 .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
 /* ─── TESTIMONIAL RIBBON ─────────────────────────────────────────── */
-.testimonial-ribbon {
-  overflow: hidden;
-  padding: 40px 0;
+.testimonial-carousel {
+  position: relative;
   background: var(--bg-dark);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
-  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 60px;
+}
+.testimonial-viewport {
+  overflow: hidden;
+  width: 100%;
 }
 .testimonial-track {
   display: flex;
-  flex-wrap: nowrap;
-  gap: 24px;
-  width: max-content;
-  will-change: transform;
-  animation: scroll-left 32s linear infinite;
+  transition: transform 0.5s ease;
 }
-.testimonial-ribbon:hover .testimonial-track {
-  animation-play-state: paused;
+.testimonial-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  padding: 56px 48px;
+  text-align: center;
+  box-sizing: border-box;
 }
-@keyframes scroll-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-.testimonial-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 22px 28px;
-  width: 340px;
-  flex: 0 0 340px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-}
-.testimonial-placeholder { opacity: 0.4; }
 .testimonial-quote {
-  font-size: 0.92rem;
-  line-height: 1.6;
+  font-size: 1.2rem;
+  line-height: 1.7;
   color: var(--text);
-  margin: 0 0 12px;
   font-style: italic;
+  margin: 0 auto 20px;
+  max-width: 720px;
 }
 .testimonial-author {
-  font-size: 0.85rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--turq);
   margin: 0;
@@ -438,8 +430,46 @@ img { max-width: 100%; }
 .testimonial-role {
   font-weight: 400;
   color: var(--text-muted);
-  margin-left: 6px;
+  margin-left: 8px;
 }
+.testimonial-nav {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: border-color 0.2s, color 0.2s;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 2;
+}
+.testimonial-prev { left: 16px; }
+.testimonial-next { right: 16px; }
+.testimonial-nav:hover { border-color: var(--turq); color: var(--turq); }
+.testimonial-dots {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.testimonial-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.testimonial-dot.active { background: var(--turq); }
 
 /* ─── SECTIONS ───────────────────────────────────────────────────── */
 .section { padding: 96px 24px; }

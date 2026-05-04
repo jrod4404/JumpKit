@@ -125,3 +125,40 @@ document.addEventListener('click', e => {
     offcanvas.classList.remove('open');
   }
 });
+
+// ─── TESTIMONIAL CAROUSEL ─────────────────────────────────────
+(function() {
+  const track = document.getElementById('testimonialTrack');
+  const dotsContainer = document.getElementById('testimonialDots');
+  if (!track) return;
+
+  const slides = track.querySelectorAll('.testimonial-slide');
+  let current = 0;
+  let autoTimer;
+
+  // Build dots
+  slides.forEach((_, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'testimonial-dot' + (i === 0 ? ' active' : '');
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function goTo(index) {
+    current = (index + slides.length) % slides.length;
+    track.style.transform = `translateX(-${current * 100}%)`;
+    dotsContainer.querySelectorAll('.testimonial-dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+    resetAuto();
+  }
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current + 1), 5000);
+  }
+
+  window.testimonialMove = function(dir) { goTo(current + dir); };
+
+  resetAuto();
+})();

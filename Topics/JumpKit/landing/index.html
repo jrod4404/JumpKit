@@ -139,44 +139,35 @@
     </div>
   </section>
 
-  <!-- TESTIMONIALS RIBBON -->
-  <div class="testimonial-ribbon">
-    <div class="testimonial-track">
-      <!-- Set 1 -->
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"JumpKit is the tool that makes my clients happy. It's easy and it works."</p>
-        <p class="testimonial-author">Andrew D. <span class="testimonial-role">IT Consultant</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"JumpKit was the tool I was always looking for! It makes work easier."</p>
-        <p class="testimonial-author">Mark P. <span class="testimonial-role">Semiconductor Sales</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"After using JumpKit for 3 months, I can't work without it. Everything I need is right there."</p>
-        <p class="testimonial-author">Jennifer S. <span class="testimonial-role">Automotive Tier 1</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"I love that I can onboard new team members and give them all key info in one step."</p>
-        <p class="testimonial-author">Jared C. <span class="testimonial-role">Software Engineering</span></p>
-      </div>
-      <!-- Set 2 (duplicate for seamless loop) -->
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"JumpKit is the tool that makes my clients happy. It's easy and it works."</p>
-        <p class="testimonial-author">Andrew D. <span class="testimonial-role">IT Consultant</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"JumpKit was the tool I was always looking for! It makes work easier."</p>
-        <p class="testimonial-author">Mark P. <span class="testimonial-role">Semiconductor Sales</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"After using JumpKit for 3 months, I can't work without it. Everything I need is right there."</p>
-        <p class="testimonial-author">Jennifer S. <span class="testimonial-role">Automotive Tier 1</span></p>
-      </div>
-      <div class="testimonial-card">
-        <p class="testimonial-quote">"I love that I can onboard new team members and give them all key info in one step."</p>
-        <p class="testimonial-author">Jared C. <span class="testimonial-role">Software Engineering</span></p>
+  <!-- TESTIMONIALS CAROUSEL -->
+  <div class="testimonial-carousel" id="testimonialCarousel">
+    <button class="testimonial-nav testimonial-prev" onclick="testimonialMove(-1)" aria-label="Previous">
+      <svg class="ti ti-chevron-left"><use href="assets/tabler-sprite.svg#tabler-chevron-left"/></svg>
+    </button>
+    <div class="testimonial-viewport">
+      <div class="testimonial-track" id="testimonialTrack">
+        <div class="testimonial-slide">
+          <p class="testimonial-quote">"JumpKit is the tool that makes my clients happy. It's easy and it works."</p>
+          <p class="testimonial-author">Andrew D. <span class="testimonial-role">IT Consultant</span></p>
+        </div>
+        <div class="testimonial-slide">
+          <p class="testimonial-quote">"JumpKit was the tool I was always looking for! It makes work easier."</p>
+          <p class="testimonial-author">Mark P. <span class="testimonial-role">Semiconductor Sales</span></p>
+        </div>
+        <div class="testimonial-slide">
+          <p class="testimonial-quote">"After using JumpKit for 3 months, I can't work without it. Everything I need is right there."</p>
+          <p class="testimonial-author">Jennifer S. <span class="testimonial-role">Automotive Tier 1</span></p>
+        </div>
+        <div class="testimonial-slide">
+          <p class="testimonial-quote">"I love that I can onboard new team members and give them all key info in one step."</p>
+          <p class="testimonial-author">Jared C. <span class="testimonial-role">Software Engineering</span></p>
+        </div>
       </div>
     </div>
+    <button class="testimonial-nav testimonial-next" onclick="testimonialMove(1)" aria-label="Next">
+      <svg class="ti ti-chevron-right"><use href="assets/tabler-sprite.svg#tabler-chevron-right"/></svg>
+    </button>
+    <div class="testimonial-dots" id="testimonialDots"></div>
   </div>
 
   <!-- FEATURES -->
