@@ -158,7 +158,7 @@ document.addEventListener('click', e => {
 
   function resetAuto() {
     clearInterval(autoTimer);
-    autoTimer = setInterval(() => goTo(current + 1), 5000);
+    autoTimer = setInterval(() => goTo(current + 1), 9000);
   }
 
   window.testimonialMove = function(dir) { goTo(current + dir); };
