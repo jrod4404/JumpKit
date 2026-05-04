@@ -1223,7 +1223,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .stats-bar-inline .stat-divider { display: none; }
   .mock-sidebar { display: none; }
   .mock-window { max-width: 100%; }
-  #scrollTopBtn { bottom: 80px; right: 20px; }
+  #scrollTopBtn { bottom: 160px; right: 20px; }
 
   /* Testimonials — stack layout on mobile */
   .testimonial-carousel { padding: 32px 16px 0; }
