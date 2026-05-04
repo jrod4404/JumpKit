@@ -403,7 +403,7 @@ img { max-width: 100%; }
 }
 .testimonial-track {
   display: flex;
-  transition: transform 0.5s ease;
+  transition: transform 1.2s ease;
 }
 .testimonial-slide {
   flex: 0 0 100%;
