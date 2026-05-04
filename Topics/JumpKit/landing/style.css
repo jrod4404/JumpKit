@@ -391,7 +391,6 @@ img { max-width: 100%; }
 /* ─── TESTIMONIAL RIBBON ─────────────────────────────────────────── */
 .testimonial-carousel {
   position: relative;
-  background: var(--bg-dark);
   border-top: 1px solid var(--border);
   border-bottom: 1px solid var(--border);
   display: flex;
@@ -1137,7 +1136,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   background: linear-gradient(180deg, var(--section-grad-start), var(--section-grad-end)), var(--bg);
 }
 .testimonial-carousel {
-  background: linear-gradient(180deg, var(--section-grad-start), var(--section-grad-end)), var(--bg-dark);
+  background: linear-gradient(180deg, var(--section-grad-start), var(--section-grad-end)), var(--bg);
 }
 
 /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
