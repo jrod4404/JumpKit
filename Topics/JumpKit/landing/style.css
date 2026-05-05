@@ -711,6 +711,106 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .step p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
 .step-arrow { display: none; }
 
+/* ─── HOW IT WORKS ───────────────────────────────────────────────── */
+.how-steps {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  margin-top: 48px;
+}
+.how-step {
+  flex: 1;
+  max-width: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.how-step-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--turq), var(--royal));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(0,194,199,0.3);
+}
+.how-step-circle .ti {
+  width: 2em;
+  height: 2em;
+  color: #fff;
+  stroke: #fff;
+}
+.how-step-num {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  color: var(--turq);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+.how-step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0 0 10px;
+  background: var(--grad-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.how-step-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+.how-step-connector {
+  display: flex;
+  align-items: center;
+  padding-top: 28px;
+  flex-shrink: 0;
+  width: 80px;
+  position: relative;
+}
+.how-connector-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--turq), var(--royal));
+  opacity: 0.4;
+}
+.how-connector-arrow {
+  width: 1.4em;
+  height: 1.4em;
+  color: var(--turq);
+  flex-shrink: 0;
+  margin-left: -2px;
+}
+@media (max-width: 768px) {
+  .how-steps {
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .how-step-connector {
+    flex-direction: column;
+    width: auto;
+    padding: 0;
+    height: 48px;
+  }
+  .how-connector-line {
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--turq), var(--royal));
+  }
+  .how-connector-arrow {
+    transform: rotate(90deg);
+    margin: -2px 0 0;
+  }
+}
+
 /* ─── PRICING ────────────────────────────────────────────────────── */
 .pricing-grid {
   display: flex;
