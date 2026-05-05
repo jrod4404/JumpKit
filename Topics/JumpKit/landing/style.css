@@ -463,7 +463,7 @@ img { max-width: 100%; }
 }
 .testimonial-card-inner {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: none;
   border-radius: 16px;
   padding: 36px 40px;
   max-width: 680px;
