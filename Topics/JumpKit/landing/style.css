@@ -769,17 +769,23 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .how-step-connector {
   display: flex;
   align-items: center;
-  justify-content: center;
   padding-top: 28px;
   flex-shrink: 0;
-  width: 80px;
+  width: 100px;
+}
+.how-connector-line {
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, var(--turq), var(--royal));
+  opacity: 0.5;
 }
 .how-connector-arrow {
-  width: 3.5em;
-  height: 3.5em;
+  width: 2em;
+  height: 2em;
   color: var(--turq);
   stroke-width: 2.5;
-  opacity: 0.85;
+  flex-shrink: 0;
+  margin-left: -4px;
 }
 @media (max-width: 768px) {
   .how-steps {
@@ -788,12 +794,20 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
     gap: 0;
   }
   .how-step-connector {
+    flex-direction: column;
     width: auto;
     padding: 4px 0;
-    height: auto;
+    height: 56px;
+  }
+  .how-connector-line {
+    width: 2px;
+    height: 100%;
+    flex: 1;
+    background: linear-gradient(180deg, var(--turq), var(--royal));
   }
   .how-connector-arrow {
     transform: rotate(90deg);
+    margin: -4px 0 0;
   }
 }
 
