@@ -317,13 +317,11 @@ img { max-width: 100%; }
 }
 .hero-screenshot-wrap {
   width: 100%;
-  transform: perspective(1000px) rotateY(-3deg) rotateX(2deg);
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
   border-radius: 12px;
   box-shadow: 0 20px 48px rgba(0,194,199,0.18), 0 4px 24px rgba(0,0,0,0.5);
+  transition: box-shadow 0.4s ease;
 }
 .hero-screenshot-wrap:hover {
-  transform: perspective(1000px) rotateY(0deg) rotateX(0deg);
   box-shadow: 0 24px 56px rgba(0,194,199,0.28), 0 4px 24px rgba(0,0,0,0.5);
 }
 .hero-screenshot {
