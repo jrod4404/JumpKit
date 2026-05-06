@@ -1343,7 +1343,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .hero-inner-wrap { flex-direction: column; padding-top: 90px; text-align: center; }
   .hero-cta { justify-content: center; }
   .hero-scroll-links { justify-content: center; }
-  .hero-visual { width: 100%; }
+  .hero-visual { width: 100%; padding-top: 0; }
   .stats-bar { gap: 0; }
   .stat { padding: 12px 24px; }
   .stat-divider { display: none; }
