@@ -306,7 +306,7 @@ img { max-width: 100%; }
 .hero-mock-btn { padding: 12px 34px; }
 
 /* ─── APP MOCK ──────────────────────────────────────────────────── */
-.hero-visual { flex: 1; display: flex; justify-content: flex-end; align-items: center; margin-top: -10px; }
+.hero-visual { flex: 1; display: flex; justify-content: flex-end; align-items: flex-start; margin-top: 0; padding-top: 8px; }
 .mock-stack { display: flex; flex-direction: column; gap: 17px; width: 100%; max-width: 520px; margin-top: 40px; margin-bottom: 24px; }
 .hero-screenshots-stack {
   display: flex;
