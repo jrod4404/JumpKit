@@ -1334,6 +1334,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .mock-stack { margin-left: auto; margin-right: auto; margin-top: -16px; }
   .hero-screenshots-stack { max-width: 100%; margin-bottom: 32px; }
   .hero-screenshot-wrap { transform: none; }
+  .hero-visual { padding-top: 26px; }
   .hero-platforms { justify-content: center; }
   .hero-section-nav { justify-content: center; }
 }
