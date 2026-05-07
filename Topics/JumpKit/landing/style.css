@@ -1133,7 +1133,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .footer-social { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 12px; }
 .footer-social-link {
   display: flex; align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 29px; height: 29px; border-radius: 50%;
   background: rgba(255,255,255,0.08);
   border: none;
   color: var(--text-muted);
@@ -1142,7 +1142,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 [data-theme="light"] .footer-social-link {
   background: rgba(0,0,0,0.06);
 }
-.footer-social-link .ti { width: 1.1em; height: 1.1em; }
+.footer-social-link .ti { width: 0.9em; height: 0.9em; }
 .footer-social-link:hover { transform: translateY(-2px); color: #fff; }
 .footer-social-x:hover  { background: #000; }
 [data-theme="light"] .footer-social-x:hover { background: #000; color: #fff; }
