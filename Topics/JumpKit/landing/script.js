@@ -199,3 +199,19 @@ document.addEventListener('click', e => {
     btn.classList.toggle('visible', window.scrollY > 400);
   });
 })();
+
+// ─── LIGHTBOX ─────────────────────────────────────────────────
+function openLightbox(img) {
+  if (!img) return;
+  const lb = document.getElementById('lightbox');
+  const lbImg = document.getElementById('lightboxImg');
+  lbImg.src = img.src.split('?')[0]; // strip cache-bust param
+  lbImg.alt = img.alt;
+  lb.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });

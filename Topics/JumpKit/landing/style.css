@@ -320,6 +320,7 @@ img { max-width: 100%; }
   border-radius: 12px;
   box-shadow: 0 20px 48px rgba(0,194,199,0.18), 0 4px 24px rgba(0,0,0,0.5);
   transition: box-shadow 0.4s ease, transform 0.2s ease;
+  cursor: zoom-in;
 }
 .hero-screenshot-wrap:hover {
   box-shadow: 0 24px 56px rgba(0,194,199,0.28), 0 4px 24px rgba(0,0,0,0.5);
@@ -392,6 +393,32 @@ img { max-width: 100%; }
   background-clip: text;
 }
 .stat-label { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+
+/* ─── LIGHTBOX ───────────────────────────────────────────────────── */
+#lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-out;
+  padding: 24px;
+  box-sizing: border-box;
+}
+#lightbox.open { display: flex; }
+#lightboxImg {
+  max-width: 90vw;
+  max-height: 88vh;
+  border-radius: 12px;
+  box-shadow: 0 0 60px rgba(0,194,199,0.3), 0 8px 40px rgba(0,0,0,0.8);
+  animation: lightbox-in 0.2s ease;
+}
+@keyframes lightbox-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
 
 /* ─── SCROLL TO TOP ──────────────────────────────────────────────── */
 #scrollTopBtn {
