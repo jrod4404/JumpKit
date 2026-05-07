@@ -201,11 +201,14 @@ document.addEventListener('click', e => {
 })();
 
 // ─── LIGHTBOX ─────────────────────────────────────────────────
-function openLightbox(img) {
+function openLightboxThemed(wrap) {
+  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  const selector = theme === 'light' ? '.hero-screenshot-light' : '.hero-screenshot-dark';
+  const img = wrap.querySelector(selector) || wrap.querySelector('img');
   if (!img) return;
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lightboxImg');
-  lbImg.src = img.src.split('?')[0]; // strip cache-bust param
+  lbImg.src = img.src.split('?')[0];
   lbImg.alt = img.alt;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
