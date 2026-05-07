@@ -715,6 +715,9 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .feature-card h3 .ti, .jet-card h3 .ti { font-size: 1rem; display: inline-flex; align-items: center; }
 .feature-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin: 0; word-wrap: break-word; overflow-wrap: break-word; }
 #problem-grid .feature-card p { white-space: nowrap; }
+#problem-grid { grid-template-columns: repeat(4, auto); justify-content: center; }
+@media (max-width: 900px) { #problem-grid { grid-template-columns: repeat(2, auto); } }
+@media (max-width: 480px) { #problem-grid { grid-template-columns: repeat(1, auto); } }
 
 /* ─── JET SECTION ────────────────────────────────────────────────── */
 .jet-grid {
