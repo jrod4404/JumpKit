@@ -297,7 +297,7 @@ img { max-width: 100%; }
   line-height: 1.7;
 }
 .hero-cta { display: flex; gap: 14px; flex-wrap: wrap; margin: 24px 0; }
-.hero-platforms { font-size: 1.05rem; color: var(--text-muted); margin: 12px 0 30px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: flex-start; line-height: 1.4; }
+.hero-platforms { font-size: 1.05rem; color: var(--text-muted); margin: 12px 0 30px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; justify-content: center; line-height: 1.4; }
 .hero-platforms + .hero-visual { margin-top: 6px; }
 .hero-platforms strong { color: var(--text); }
 .hero-platform-pair { display: inline-flex; align-items: center; gap: 4px; }
