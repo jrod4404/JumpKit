@@ -208,7 +208,7 @@ function openLightboxThemed(wrap) {
   if (!img) return;
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lightboxImg');
-  lbImg.src = img.src.split('?')[0];
+  lbImg.src = img.src;
   lbImg.alt = img.alt;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
