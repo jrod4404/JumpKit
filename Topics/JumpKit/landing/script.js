@@ -206,9 +206,13 @@ function openLightboxThemed(wrap) {
   const selector = theme === 'light' ? '.hero-screenshot-light' : '.hero-screenshot-dark';
   const img = wrap.querySelector(selector) || wrap.querySelector('img');
   if (!img) return;
+  // Use absolute src (img.src) which the browser has already resolved
+  const src = img.currentSrc || img.src;
+  if (!src) return;
   const lb = document.getElementById('lightbox');
   const lbImg = document.getElementById('lightboxImg');
-  lbImg.src = img.src;
+  lbImg.src = '';          // force reload
+  lbImg.src = src;
   lbImg.alt = img.alt;
   lb.classList.add('open');
   document.body.style.overflow = 'hidden';
