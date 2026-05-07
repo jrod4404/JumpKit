@@ -1126,14 +1126,25 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .footer .logo { margin-bottom: 8px; }
 .footer-logo-img { height: 42px !important; width: auto; display: block; margin: 0 auto; object-fit: contain; }
 .footer-tagline { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
-.footer-social { display: flex; gap: 16px; justify-content: center; align-items: center; margin-bottom: 12px; }
-.footer-social-link { color: var(--text-muted); display: flex; align-items: center; transition: color 0.2s, transform 0.2s; }
-.footer-social-link .ti { width: 1.4em; height: 1.4em; }
-.footer-social-link:hover { transform: translateY(-2px); }
-.footer-social-x:hover  { color: #000; }
-[data-theme="dark"] .footer-social-x:hover { color: #fff; }
-.footer-social-yt:hover { color: #FF0000; }
-.footer-social-li:hover { color: #0A66C2; }
+.footer-social { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 12px; }
+.footer-social-link {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-muted);
+  transition: background 0.2s, color 0.2s, transform 0.2s, border-color 0.2s;
+}
+[data-theme="light"] .footer-social-link {
+  background: rgba(0,0,0,0.06);
+  border-color: rgba(0,0,0,0.12);
+}
+.footer-social-link .ti { width: 1.15em; height: 1.15em; }
+.footer-social-link:hover { transform: translateY(-2px); color: #fff; border-color: transparent; }
+.footer-social-x:hover  { background: #000; }
+[data-theme="light"] .footer-social-x:hover { background: #000; color: #fff; }
+.footer-social-yt:hover { background: #FF0000; }
+.footer-social-li:hover { background: #0A66C2; }
 .footer-copy { color: var(--text-muted); font-size: 0.8rem; }
 
 /* ─── NAV LOGO BIGGER ─────────────────────────────────────────────── */
