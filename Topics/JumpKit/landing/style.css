@@ -1129,7 +1129,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .footer-social { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 12px; }
 .footer-social-link {
   display: flex; align-items: center; justify-content: center;
-  width: 36px; height: 36px; border-radius: 50%;
+  width: 48px; height: 48px; border-radius: 50%;
   background: rgba(255,255,255,0.08);
   border: 1px solid rgba(255,255,255,0.12);
   color: var(--text-muted);
@@ -1139,7 +1139,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   background: rgba(0,0,0,0.06);
   border-color: rgba(0,0,0,0.12);
 }
-.footer-social-link .ti { width: 1.15em; height: 1.15em; }
+.footer-social-link .ti { width: 1.4em; height: 1.4em; }
 .footer-social-link:hover { transform: translateY(-2px); color: #fff; border-color: transparent; }
 .footer-social-x:hover  { background: #000; }
 [data-theme="light"] .footer-social-x:hover { background: #000; color: #fff; }
