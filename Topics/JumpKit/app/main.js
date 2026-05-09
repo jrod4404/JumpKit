@@ -440,16 +440,16 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
     const colDefs = [
-      { name: 'Col 1',  visible: 1 },
-      { name: 'Col 2',  visible: 1 },
-      { name: 'Col 3',  visible: 1 },
-      { name: 'Col 4',  visible: 1 },
-      { name: 'Col 5',  visible: 1 },
-      { name: 'Col 6',  visible: 1 },
-      { name: 'Col 7',  visible: 1 },
-      { name: 'Col 8',  visible: 0 },
-      { name: 'Col 9',  visible: 0 },
-      { name: 'Col 10', visible: 0 },
+      { name: 'Directories', visible: 1 },
+      { name: 'Links',       visible: 1 },
+      { name: 'Col 3',       visible: 1 },
+      { name: 'Col 4',       visible: 1 },
+      { name: 'Col 5',       visible: 1 },
+      { name: 'Col 6',       visible: 1 },
+      { name: 'Col 7',       visible: 1 },
+      { name: 'Col 8',       visible: 0 },
+      { name: 'Col 9',       visible: 0 },
+      { name: 'Col 10',      visible: 0 },
     ];
 
     const insertCol = db.prepare(`
@@ -473,28 +473,37 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
     const tx = db.transaction(() => {
       for (const col of cols) insertCol.run(col);
 
+      // Links column (cols[1]): Google + Slack
       insertJump.run({
         id: uid(), userId,
-        name: 'Google', url: 'www.google.com',
-        description: 'Link to Google', reason: 'To show an example web jump',
-        columnId: cols[0].id, hotkey: 'Ctrl+Shift+G', favorite: 1,
+        name: 'Google', url: 'https://google.com',
+        description: 'Search the web', reason: '',
+        columnId: cols[1].id, hotkey: '', favorite: 0,
+        createdAt: now, updatedAt: now,
+      });
+      insertJump.run({
+        id: uid(), userId,
+        name: 'Slack', url: 'https://slack.com',
+        description: 'Team chat', reason: '',
+        columnId: cols[1].id, hotkey: '', favorite: 0,
         createdAt: now, updatedAt: now,
       });
 
+      // Directories column (cols[0]): platform-appropriate path
       if (isWin) {
         insertJump.run({
           id: uid(), userId,
           name: 'C Drive', url: 'C:\\',
-          description: 'Link to C drive folder', reason: 'To show an example directory jump',
-          columnId: cols[1].id, hotkey: 'Ctrl+Shift+C', favorite: 1,
+          description: 'Your C drive', reason: '',
+          columnId: cols[0].id, hotkey: '', favorite: 0,
           createdAt: now, updatedAt: now,
         });
       } else {
         insertJump.run({
           id: uid(), userId,
-          name: 'Documents', url: `${process.env.HOME}/Documents`,
-          description: 'Link to Documents folder', reason: 'To show an example directory jump',
-          columnId: cols[1].id, hotkey: 'Ctrl+Shift+D', favorite: 1,
+          name: 'Home Folder', url: '~',
+          description: 'Your home directory', reason: '',
+          columnId: cols[0].id, hotkey: '', favorite: 0,
           createdAt: now, updatedAt: now,
         });
       }
