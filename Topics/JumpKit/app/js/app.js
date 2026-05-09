@@ -318,6 +318,9 @@ const Modal = window.Modal = {
     document.getElementById('modalFooter').style.padding   = footerHTML ? '' : '0';
     this.box.className = 'modal-box' + (size ? ' ' + size : '');
     this.overlay.style.display = 'flex';
+    // Always scroll to top when modal opens
+    const mb = document.getElementById('modalBody');
+    if (mb) mb.scrollTop = 0;
   },
   close() { this.overlay.style.display = 'none'; },
 };
