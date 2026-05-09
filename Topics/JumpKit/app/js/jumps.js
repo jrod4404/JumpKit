@@ -541,7 +541,7 @@ function openJumpFormModal(editId) {
       <label class="form-label">Hotkey</label>
       <div style="display:flex;gap:8px;align-items:center;position:relative">
         <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer;flex:1"/>
-        <button type="button" class="btn btn-secondary" id="btnPickHotkey" style="white-space:nowrap;font-size:0.78rem;padding:6px 10px" title="Show available hotkeys">
+        <button type="button" id="btnPickHotkey" style="white-space:nowrap;font-size:0.93rem;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text);cursor:pointer;transition:border-color var(--transition)" title="Show available hotkeys">
           <svg class="ti ti-keyboard" style="width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Pick
         </button>
         <div id="hotkeyPicker" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.3)"></div>
