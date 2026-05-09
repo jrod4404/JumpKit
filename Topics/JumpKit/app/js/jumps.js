@@ -657,26 +657,21 @@ function openJumpFormModal(editId) {
       const allJumps  = DB.getJumps(currentUser.id);
       const usedKeys  = new Set(allJumps.filter(j => j.hotkey && j.id !== (editId || null)).map(j => j.hotkey));
 
-      // Generate candidates: Ctrl/Cmd+Shift+A–Z
       const mod = window.electronAPI?.platform === 'darwin' ? 'Cmd' : 'Ctrl';
-      const candidates = [];
-      for (let i = 65; i <= 90; i++) {
-        const key = `${mod}+Shift+${String.fromCharCode(i)}`;
-        if (!usedKeys.has(key)) candidates.push(key);
-      }
-      // Also add Ctrl/Cmd+1–9
-      for (let i = 1; i <= 9; i++) {
-        const key = `${mod}+Shift+${i}`;
-        if (!usedKeys.has(key)) candidates.push(key);
-      }
 
-      if (candidates.length === 0) {
-        hotkeyPicker.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;padding:4px">All hotkeys are in use.</div>';
-      } else {
-        hotkeyPicker.innerHTML = candidates.map(k =>
-          `<button type="button" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 10px;margin:3px 2px" onclick="document.getElementById('jHotkey').value='${k}';document.getElementById('hotkeyPicker').style.display='none'">${k}</button>`
-        ).join('');
-      }
+      // Build all combos — green if available, red if used
+      const allCombos = [];
+      for (let i = 65; i <= 90; i++) allCombos.push(`${mod}+Shift+${String.fromCharCode(i)}`);
+      for (let i = 1; i <= 9; i++) allCombos.push(`${mod}+Shift+${i}`);
+
+      hotkeyPicker.innerHTML = allCombos.map(k => {
+        const used = usedKeys.has(k);
+        const bg   = used ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)';
+        const col  = used ? '#ef4444' : '#22c55e';
+        const cur  = used ? 'default' : 'pointer';
+        const onclick = used ? '' : `onclick="document.getElementById('jHotkey').value='${k}';document.getElementById('hotkeyPicker').style.display='none'"`;
+        return `<button type="button" ${onclick} style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid ${col};background:${bg};color:${col};cursor:${cur};opacity:${used ? '0.7' : '1'}">${k}</button>`;
+      }).join('');
       hotkeyPicker.style.display = 'block';
     });
 
