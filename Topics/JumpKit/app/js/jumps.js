@@ -653,9 +653,20 @@ function openJumpFormModal(editId) {
       e.stopPropagation();
       if (hotkeyPicker.style.display !== 'none') { hotkeyPicker.style.display = 'none'; return; }
 
-      // Collect all used hotkeys (excluding this jump if editing)
+      // Collect all used hotkeys (excluding this jump if editing), normalized to lowercase
       const allJumps  = DB.getJumps(currentUser.id);
-      const usedKeys  = new Set(allJumps.filter(j => j.hotkey && j.id !== (editId || null)).map(j => j.hotkey));
+      const usedKeys  = new Set(
+        allJumps
+          .filter(j => j.hotkey && j.id !== (editId || null))
+          .map(j => j.hotkey.toLowerCase().replace(/ctrl/i,'ctrl').replace(/cmd/i,'cmd'))
+      );
+      // Helper: check if a generated combo matches any stored hotkey (normalize mod key)
+      function isUsed(combo) {
+        const norm = combo.toLowerCase();
+        // Also check with swapped mod (Cmd↔Ctrl) for cross-platform stored hotkeys
+        const swapped = norm.replace(/^cmd/, 'ctrl').replace(/^ctrl/, 'cmd');
+        return usedKeys.has(norm) || usedKeys.has(swapped);
+      }
 
       const mod = window.electronAPI?.platform === 'darwin' ? 'Cmd' : 'Ctrl';
 
@@ -665,7 +676,7 @@ function openJumpFormModal(editId) {
       for (let i = 1; i <= 9; i++) allCombos.push(`${mod}+Shift+${i}`);
 
       hotkeyPicker.innerHTML = allCombos.map(k => {
-        const used = usedKeys.has(k);
+        const used = isUsed(k);
         const bg   = used ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)';
         const col  = used ? '#ef4444' : '#22c55e';
         const cur  = used ? 'default' : 'pointer';
