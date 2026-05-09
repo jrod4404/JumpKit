@@ -467,14 +467,14 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
         id: uid(), userId,
         name: 'Google', url: 'https://google.com',
         description: 'Search the web', reason: '',
-        columnId: cols[1].id, hotkey: '', favorite: 0,
+        columnId: cols[1].id, hotkey: '', favorite: 1,
         createdAt: now, updatedAt: now,
       });
       insertJump.run({
         id: uid(), userId,
         name: 'Slack', url: 'https://slack.com',
         description: 'Team chat', reason: '',
-        columnId: cols[1].id, hotkey: '', favorite: 0,
+        columnId: cols[1].id, hotkey: '', favorite: 1,
         createdAt: now, updatedAt: now,
       });
 
@@ -484,7 +484,7 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
           id: uid(), userId,
           name: 'C Drive', url: 'C:\\',
           description: 'Your C drive', reason: '',
-          columnId: cols[0].id, hotkey: '', favorite: 0,
+          columnId: cols[0].id, hotkey: '', favorite: 1,
           createdAt: now, updatedAt: now,
         });
       } else {
@@ -492,7 +492,7 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
           id: uid(), userId,
           name: 'Home Folder', url: '~',
           description: 'Your home directory', reason: '',
-          columnId: cols[0].id, hotkey: '', favorite: 0,
+          columnId: cols[0].id, hotkey: '', favorite: 1,
           createdAt: now, updatedAt: now,
         });
       }
