@@ -566,8 +566,12 @@ ipcMain.handle('open-url', (_e, url) => {
     if (isWeb) {
       shell.openExternal(fullUrl);
     } else {
+      // Expand ~ to actual home directory
+      const resolvedPath = url.startsWith('~')
+        ? url.replace('~', require('os').homedir())
+        : url;
       // Local path — use shell.openPath for cross-platform support
-      shell.openPath(url).then(err => {
+      shell.openPath(resolvedPath).then(err => {
         if (err) console.error('[open-url] openPath error:', err);
       });
     }
