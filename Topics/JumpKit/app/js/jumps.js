@@ -539,7 +539,13 @@ function openJumpFormModal(editId) {
     </div>
     <div class="form-group">
       <label class="form-label">Hotkey</label>
-      <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer"/>
+      <div style="display:flex;gap:8px;align-items:center;position:relative">
+        <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer;flex:1"/>
+        <button type="button" class="btn btn-secondary" id="btnPickHotkey" style="white-space:nowrap;font-size:0.78rem;padding:6px 10px" title="Show available hotkeys">
+          <svg class="ti ti-keyboard" style="width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Pick
+        </button>
+        <div id="hotkeyPicker" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.3)"></div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Favorite</label>
@@ -637,6 +643,45 @@ function openJumpFormModal(editId) {
       const chord = buildChord(e);
       if (chord) hotkeyInput.value = chord;
     });
+  }
+
+  // ── Hotkey picker ───────────────────────────────────────────────
+  const btnPickHotkey = document.getElementById('btnPickHotkey');
+  const hotkeyPicker  = document.getElementById('hotkeyPicker');
+  if (btnPickHotkey && hotkeyPicker) {
+    btnPickHotkey.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (hotkeyPicker.style.display !== 'none') { hotkeyPicker.style.display = 'none'; return; }
+
+      // Collect all used hotkeys (excluding this jump if editing)
+      const allJumps  = DB.getJumps(currentUser.id);
+      const usedKeys  = new Set(allJumps.filter(j => j.hotkey && j.id !== (editId || null)).map(j => j.hotkey));
+
+      // Generate candidates: Ctrl/Cmd+Shift+A–Z
+      const mod = window.electronAPI?.platform === 'darwin' ? 'Cmd' : 'Ctrl';
+      const candidates = [];
+      for (let i = 65; i <= 90; i++) {
+        const key = `${mod}+Shift+${String.fromCharCode(i)}`;
+        if (!usedKeys.has(key)) candidates.push(key);
+      }
+      // Also add Ctrl/Cmd+1–9
+      for (let i = 1; i <= 9; i++) {
+        const key = `${mod}+Shift+${i}`;
+        if (!usedKeys.has(key)) candidates.push(key);
+      }
+
+      if (candidates.length === 0) {
+        hotkeyPicker.innerHTML = '<div style="color:var(--text-muted);font-size:0.82rem;padding:4px">All hotkeys are in use.</div>';
+      } else {
+        hotkeyPicker.innerHTML = candidates.map(k =>
+          `<button type="button" class="btn btn-secondary" style="font-size:0.75rem;padding:4px 10px;margin:3px 2px" onclick="document.getElementById('jHotkey').value='${k}';document.getElementById('hotkeyPicker').style.display='none'">${k}</button>`
+        ).join('');
+      }
+      hotkeyPicker.style.display = 'block';
+    });
+
+    // Close picker when clicking outside
+    document.addEventListener('click', () => { hotkeyPicker.style.display = 'none'; }, { once: false, capture: false });
   }
 }
 
