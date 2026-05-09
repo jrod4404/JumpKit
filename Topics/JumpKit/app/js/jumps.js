@@ -673,7 +673,7 @@ function openJumpFormModal(editId) {
       // Build all combos — green if available, red if used
       const allCombos = [];
       for (let i = 65; i <= 90; i++) allCombos.push(`${mod}+Shift+${String.fromCharCode(i)}`);
-      for (let i = 1; i <= 9; i++) allCombos.push(`${mod}+Shift+${i}`);
+      for (let i = 0; i <= 9; i++) allCombos.push(`${mod}+Shift+${i}`);
 
       hotkeyPicker.innerHTML = allCombos.map(k => {
         const used = isUsed(k);
