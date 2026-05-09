@@ -876,6 +876,10 @@ const JK_TESTS = [
       const col   = cols[0];
       const jumps = DB.getActiveJumps(userId).filter(j => j.columnId === col.id);
 
+      // Cleanup any prior run to prevent duplicate key errors on re-runs
+      await supabaseClient.from('shared_jumps').delete().eq('shared_column_id', col.id).eq('team_id', teamId);
+      await supabaseClient.from('shared_columns').delete().eq('id', col.id).eq('team_id', teamId);
+
       // 1. Insert into shared_columns
       const { data: sharedCol, error: scErr } = await supabaseClient
         .from('shared_columns')
