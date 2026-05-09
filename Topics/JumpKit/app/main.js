@@ -203,6 +203,8 @@ ipcMain.handle('delete-shared-jumps', (_e, ids) => {
 });
 
 // ── IPC: write-test-results ────────────────────────────────────────
+ipcMain.handle('is-packaged', () => app.isPackaged);
+
 ipcMain.handle('write-test-results', (_e, content) => {
   try {
     const fs = require('fs');

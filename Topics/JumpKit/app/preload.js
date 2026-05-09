@@ -26,7 +26,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   installUpdate: () => ipcRenderer.invoke('install-update'),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', cb),
 
-  platform:  process.platform,
-  homeDir:   process.env.HOME || process.env.USERPROFILE || '~',
+  platform:   process.platform,
+  homeDir:    process.env.HOME || process.env.USERPROFILE || '~',
   isElectron: true,
+  isPackaged: () => ipcRenderer.invoke('is-packaged'),
 });
