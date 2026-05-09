@@ -668,7 +668,7 @@ function openJumpFormModal(editId) {
         return usedKeys.has(norm) || usedKeys.has(swapped);
       }
 
-      const mod = window.electronAPI?.platform === 'darwin' ? 'Cmd' : 'Ctrl';
+      const mod = 'Ctrl';
 
       // Build all combos — green if available, red if used
       const allCombos = [];
