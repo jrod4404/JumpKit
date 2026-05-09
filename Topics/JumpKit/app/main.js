@@ -525,6 +525,23 @@ function createWindow() {
 
   win.loadFile(path.join(__dirname, 'index.html'));
 
+  // Disable devtools in production
+  const isDev = !app.isPackaged;
+  if (!isDev) {
+    win.webContents.on('before-input-event', (event, input) => {
+      // Block F12 and Ctrl/Cmd+Shift+I
+      if (
+        input.key === 'F12' ||
+        (input.key === 'I' && input.shift && (input.control || input.meta))
+      ) {
+        event.preventDefault();
+      }
+    });
+    win.webContents.on('devtools-opened', () => {
+      win.webContents.closeDevTools();
+    });
+  }
+
   // Hide menu bar on Windows/Linux
   if (process.platform !== 'darwin') win.setMenuBarVisibility(false);
 
