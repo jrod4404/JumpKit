@@ -8,7 +8,19 @@ let db = null;
 function initDB() {
   try {
     const Database = require('better-sqlite3');
+    const fs = require('fs');
     const dbPath = path.join(app.getPath('userData'), 'jumpkit.db');
+
+    // On first launch, copy the platform-appropriate seed DB
+    if (!fs.existsSync(dbPath)) {
+      const seedFile = process.platform === 'win32' ? 'seed-win.db' : 'seed-mac.db';
+      const seedPath = path.join(__dirname, 'data', seedFile);
+      if (fs.existsSync(seedPath)) {
+        fs.copyFileSync(seedPath, dbPath);
+        console.log('[JumpKit] First launch — seeded DB from', seedFile);
+      }
+    }
+
     db = new Database(dbPath);
 
     // Core tables (create if not exist)
