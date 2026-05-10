@@ -1915,22 +1915,22 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 <li>No permission checks needed in application code</li>
 </ul>
 <h4 id="helper-functions">2.7.2 Helper Functions</h4>
-<h4 id="current_user_role">current_user_role()</h4>
+<h4 id="current_user_role">2.7.2a current_user_role()</h4>
 <pre><code>SELECT COALESCE(
   (SELECT role FROM profiles WHERE id = auth.uid()),
   'anon'
 );</code></pre>
 <p>Returns: <code>'org-owner'</code>, <code>'team-owner'</code>, <code>'team-member'</code>, or <code>'anon'</code></p>
-<h4 id="current_user_org">current_user_org()</h4>
+<h4 id="current_user_org">2.7.2b current_user_org()</h4>
 <pre><code>SELECT org_id FROM profiles WHERE id = auth.uid();</code></pre>
 <p>Returns: UUID of user's organization, or NULL</p>
-<h4 id="is_team_memberp_team_id-uuid">is_team_member(p_team_id UUID)</h4>
+<h4 id="is_team_memberp_team_id-uuid">2.7.2c is_team_member(p_team_id UUID)</h4>
 <pre><code>SELECT EXISTS (
   SELECT 1 FROM team_members
   WHERE team_id = p_team_id AND user_id = auth.uid()
 );</code></pre>
 <p>Returns: TRUE if user is member of team</p>
-<h4 id="is_team_ownerp_team_id-uuid">is_team_owner(p_team_id UUID)</h4>
+<h4 id="is_team_ownerp_team_id-uuid">2.7.2d is_team_owner(p_team_id UUID)</h4>
 <pre><code>SELECT EXISTS (
   SELECT 1 FROM teams
   WHERE id = p_team_id AND owner_id = auth.uid()
