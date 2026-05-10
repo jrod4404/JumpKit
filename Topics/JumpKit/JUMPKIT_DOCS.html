@@ -1,0 +1,2332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JumpKit Developer Documentation</title>
+    <style>
+        /* ============================================================
+           CSS Variables & Theme
+           ============================================================ */
+        :root {
+            --royal: #1A4FD6;
+            --turq: #00C2C7;
+            --hover-accent: #2B9ED8;
+            --bg: #080F1A;
+            --bg-card: #0E1827;
+            --text: #C8D6E8;
+            --text-muted: #7A93B4;
+            --border: rgba(255, 255, 255, 0.09);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --spacing-unit: 1rem;
+        }
+
+        /* ============================================================
+           Global Styles
+           ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+                'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+                sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        a {
+            color: var(--turq);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--hover-accent);
+        }
+
+        /* ============================================================
+           Layout: Sidebar + Content
+           ============================================================ */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: var(--spacing-unit);
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background-color: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background-color: var(--text);
+        }
+
+        .content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--royal) 0%, var(--turq) 100%);
+            padding: 2.5rem var(--spacing-unit);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: #ffffff;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .scroll-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scroll-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb {
+            background-color: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background-color: var(--text);
+        }
+
+        .main-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ============================================================
+           Sidebar: TOC Styling
+           ============================================================ */
+        .toc-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--turq);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toc-list {
+            list-style: none;
+        }
+
+        .toc-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .toc-link {
+            display: block;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-link:hover {
+            color: var(--turq);
+            background-color: rgba(0, 194, 199, 0.1);
+            border-left-color: var(--turq);
+        }
+
+        .toc-link.active {
+            color: var(--turq);
+            background-color: rgba(0, 194, 199, 0.15);
+            border-left-color: var(--turq);
+            font-weight: 600;
+        }
+
+        .toc-sublevel {
+            margin-left: 0.75rem;
+            padding-left: 0.75rem;
+            border-left: 1px solid var(--border);
+            margin-top: 0.25rem;
+        }
+
+        .toc-subitem {
+            margin-bottom: 0.25rem;
+        }
+
+        .toc-sublink {
+            display: block;
+            padding: 0.4rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            border-left: 2px solid transparent;
+        }
+
+        .toc-sublink:hover {
+            color: var(--turq);
+            background-color: rgba(0, 194, 199, 0.08);
+            border-left-color: var(--turq);
+        }
+
+        .toc-sublink.active {
+            color: var(--turq);
+            font-weight: 600;
+            border-left-color: var(--turq);
+        }
+
+        /* ============================================================
+           Content: Headings
+           ============================================================ */
+        h2, h3, h4, h5, h6 {
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            scroll-margin-top: 100px;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            color: var(--turq);
+            border-bottom: 2px solid var(--royal);
+            padding-bottom: 0.75rem;
+        }
+
+        h3 {
+            font-size: 1.4rem;
+            color: var(--royal);
+        }
+
+        h4 {
+            font-size: 1.15rem;
+            color: var(--hover-accent);
+        }
+
+        h5 {
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        h6 {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           Content: Paragraphs & Text
+           ============================================================ */
+        p {
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+
+        strong {
+            color: var(--turq);
+            font-weight: 600;
+        }
+
+        em {
+            color: var(--hover-accent);
+        }
+
+        /* ============================================================
+           Content: Lists
+           ============================================================ */
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+
+        /* Definition-style lists */
+        dt {
+            font-weight: 600;
+            color: var(--turq);
+            margin-top: 0.75rem;
+        }
+
+        dd {
+            margin-left: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        /* ============================================================
+           Content: Code Blocks
+           ============================================================ */
+        pre {
+            background-color: #0a0f18;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        code {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Courier New', monospace;
+            background-color: rgba(0, 194, 199, 0.1);
+            color: var(--turq);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background-color: transparent;
+            color: #a8d8eb;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        /* ============================================================
+           Content: Blockquotes
+           ============================================================ */
+        blockquote {
+            border-left: 4px solid var(--turq);
+            padding-left: 1rem;
+            margin-left: 0;
+            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ============================================================
+           Content: Tables
+           ============================================================ */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        thead {
+            background-color: rgba(26, 79, 214, 0.15);
+            border-bottom: 2px solid var(--royal);
+        }
+
+        th {
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 700;
+            color: var(--royal);
+            border-right: 1px solid var(--border);
+        }
+
+        th:last-child {
+            border-right: none;
+        }
+
+        td {
+            padding: 0.75rem;
+            border-right: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        td:last-child {
+            border-right: none;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: rgba(0, 194, 199, 0.03);
+        }
+
+        tbody tr:hover {
+            background-color: rgba(0, 194, 199, 0.08);
+        }
+
+        /* ============================================================
+           Content: Special Sections
+           ============================================================ */
+        .ascii-diagram {
+            background-color: #0a0f18;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #90ee90;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+        }
+
+        .note, .tip, .warning {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .note {
+            background-color: rgba(0, 194, 199, 0.1);
+            border-left-color: var(--turq);
+            color: var(--text);
+        }
+
+        .tip {
+            background-color: rgba(26, 79, 214, 0.1);
+            border-left-color: var(--royal);
+            color: var(--text);
+        }
+
+        .warning {
+            background-color: rgba(255, 165, 0, 0.1);
+            border-left-color: #ffa500;
+            color: var(--text);
+        }
+
+        .note strong::before {
+            content: '📌 ';
+        }
+
+        .tip strong::before {
+            content: '💡 ';
+        }
+
+        .warning strong::before {
+            content: '⚠️ ';
+        }
+
+        /* ============================================================
+           Responsive
+           ============================================================ */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 240px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+                overflow-x: auto;
+            }
+
+            .scroll-area {
+                padding: 1.5rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .main-content {
+                max-width: 100%;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                padding: 1.5rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .header p {
+                font-size: 0.9rem;
+            }
+
+            .scroll-area {
+                padding: 1rem;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+            }
+
+            h3 {
+                font-size: 1.1rem;
+            }
+
+            pre {
+                padding: 0.75rem;
+                font-size: 0.8rem;
+            }
+
+            table {
+                font-size: 0.85rem;
+            }
+
+            th, td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar with TOC -->
+        <aside class="sidebar">
+            <div class="toc-title">📖 Contents</div>
+            <ul class="toc-list" id="toc">
+                <!-- TOC will be populated by JavaScript -->
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="content">
+            <!-- Header -->
+            <div class="header">
+                <h1>🚀 JumpKit</h1>
+                <p>Developer Documentation</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-10</p>
+            </div>
+
+            <!-- Scrollable Content -->
+            <div class="scroll-area">
+                <div class="main-content" id="mainContent">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Markdown content converted to HTML
+        const mdContent = `
+<blockquote>
+<p>A comprehensive guide to the JumpKit codebase for developers joining the project or building on top of it.</p>
+</blockquote>
+<hr/>
+<h2 id="section-1">1. Product Overview</h2>
+<h3 id="what-is-jumpkit">What is JumpKit?</h3>
+<p>JumpKit is a desktop productivity application for Windows and macOS that solves a simple but powerful problem: <strong>getting to the websites, folders, and file shares you use most, instantly.</strong></p>
+<p>Instead of hunting through bookmarks, file explorers, or network drives, JumpKit puts all your most-used links and paths in one place, organized in custom columns, and launched with a single click—or a global hotkey.</p>
+<h3 id="who-its-for">Who It&#39;s For</h3>
+<ul>
+<li><strong>Individual knowledge workers</strong> who want to save time navigating to frequently used resources</li>
+<li><strong>Small teams</strong> that need to share jump collections with their colleagues</li>
+<li><strong>MSP-managed businesses</strong> in regulated industries (manufacturing, healthcare, legal, finance) that value local-first data (no cloud leakage) and audit trails</li>
+</ul>
+<h3 id="core-value-proposition">Core Value Proposition</h3>
+<ul>
+<li><strong>Save time</strong>: Launch any resource with one click or hotkey</li>
+<li><strong>Measure ROI</strong>: JumpKit tracks every click and calculates time saved and dollars earned back</li>
+<li><strong>Stay organized</strong>: Organize jumps into up to 10 custom columns however you work</li>
+<li><strong>Share safely</strong>: Team members sync shared jumps from a private cloud (Supabase), but hotkeys are always personal and local</li>
+<li><strong>Zero data leakage</strong>: Personal jumps stay on your machine. Only explicitly shared jumps sync to the cloud</li>
+</ul>
+<h3 id="pricing-tiers">Pricing Tiers</h3>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Price</th>
+<th>Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Free</strong></td>
+<td>$0</td>
+<td>Up to 250 jump launches, web links + local folders, hotkey launcher, filters &amp; search, time &amp; ROI dashboard</td>
+</tr>
+<tr>
+<td><strong>JumpKit</strong></td>
+<td>$5/mo or $39/yr</td>
+<td>Everything in Free + unlimited launches + team sharing + optional auto-archive</td>
+</tr>
+<tr>
+<td><strong>JumpKit + Jet AI</strong></td>
+<td>$25/mo or $249/yr</td>
+<td>Everything in JumpKit + locally-run AI + MS Office automation + audit logging</td>
+</tr>
+</tbody>
+</table>
+<h2 id="section-2">2. Architecture Overview</h2>
+<h3 id="electron-app-structure">Electron App Structure</h3>
+<p>JumpKit is built as an Electron application—a Node.js desktop runtime that wraps a Chromium browser. This means:</p>
+<ul>
+<li><strong>Main Process</strong> (<code>main.js</code>): Runs once at startup, creates the app window, manages IPC (inter-process communication), and handles SQLite database access</li>
+<li><strong>Renderer Process</strong> (all JS files in <code>app/</code>): Runs in the browser context, handles all UI rendering, user interactions, and Supabase API calls</li>
+</ul>
+<h3 id="data-architecture">Data Architecture: Local-First + Cloud Sync</h3>
+<pre><code>┌─────────────────────────────────────────┐
+│  JumpKit Desktop App (Electron)         │
+│  ┌───────────────────────────────────┐  │
+│  │ Renderer (HTML/CSS/JS)            │  │
+│  │ - UI rendering                    │  │
+│  │ - Supabase API calls              │  │
+│  │ - In-memory cache (DB._cache)     │  │
+│  └──────────────┬──────────────────┘  │
+│                 │ IPC messages         │
+│  ┌──────────────▼──────────────────┐  │
+│  │ Main Process (Node.js)           │  │
+│  │ - SQLite database (jumpkit.db)   │  │
+│  │ - Global hotkey registration     │  │
+│  │ - Window management              │  │
+│  └──────────────┬──────────────────┘  │
+│                 │ File system          │
+│  ┌──────────────▼──────────────────┐  │
+│  │ SQLite DB (~app-data/)           │  │
+│  │ - jumps, columns, click_log      │  │
+│  │ - user_prefs, sync_state         │  │
+│  └───────────────────────────────────┘  │
+└─────────────────────────────────────────┘
+                 │ HTTPS
+        ┌────────▼─────────┐
+        │ Supabase Cloud   │
+        │ - profiles       │
+        │ - teams          │
+        │ - shared_jumps   │
+        │ - shared_columns │
+        └──────────────────┘</code></pre>
+<h3 id="three-tier-data-model">Three-Tier Data Model</h3>
+<p><strong>1. Personal (SQLite only)</strong></p>
+<ul>
+<li>All jumps created by you without the &quot;shared&quot; flag</li>
+<li>Never leaves your device</li>
+<li>Synced across your devices only via manual backup (if you enable cloud backup)</li>
+</ul>
+<p><strong>2. Shared (SQLite + Supabase)</strong></p>
+<ul>
+<li>Jumps in columns marked &quot;shared with team&quot;</li>
+<li>Synced from the team owner&#39;s machine to Supabase</li>
+<li>Pulled down to all team members&#39; machines on login + every 60 minutes</li>
+<li><strong>Hotkeys are local</strong>: Each user assigns their own hotkey to shared jumps; hotkeys never sync to the cloud</li>
+</ul>
+<p><strong>3. Cached (Supabase)</strong></p>
+<ul>
+<li>Profiles, teams, team memberships, invites</li>
+<li>Read-only in app; written by admin functions in backend</li>
+</ul>
+<h3 id="authentication-flow">Authentication Flow: Supabase Auth</h3>
+<pre><code>User signs in/up with email + password
+           ↓
+Supabase Auth API validates credentials
+           ↓
+Session token issued &amp; stored in browser memory
+           ↓
+localStorage also tracks: role, subscription_tier, subscription_status
+           ↓
+Local SQLite user profile created (if new device)
+           ↓
+App data (columns, jumps, click_log) loaded into in-memory cache
+           ↓
+App ready to render</code></pre>
+<ul>
+<li><strong>No email confirmation</strong>: Currently disabled for faster onboarding (re-enable before public launch)</li>
+<li><strong>Profile auto-creation</strong>: Supabase trigger <code>on_auth_user_created</code> automatically inserts a row into the <code>profiles</code> table on signup</li>
+<li><strong>Roles</strong>: <code>org-owner</code>, <code>team-owner</code>, <code>team-member</code> — stored in profiles table, checked on Teams page</li>
+</ul>
+<h3 id="sync-engine">Sync Engine: Pull-Only, Fire-and-Forget Writes</h3>
+<p><strong>When sync runs:</strong></p>
+<ul>
+<li>On login (in <code>initAuth()</code>)</li>
+<li>Every 60 minutes (interval in <code>sync.js</code>)</li>
+</ul>
+<p><strong>What gets synced:</strong></p>
+<ul>
+<li>Shared columns (names, order, team_id)</li>
+<li>Shared jumps (name, URL, description, team_id)</li>
+<li>Local hotkey assignments are <strong>preserved</strong> (not overwritten)</li>
+</ul>
+<p><strong>How duplicates are prevented:</strong></p>
+<ul>
+<li>Columns are deduplicated by <code>(team_id + name)</code></li>
+<li>Jumps use <code>supabaseId</code> to track the Supabase UUID</li>
+<li>On upsert, if a jump already exists locally, only name/URL/description are updated; hotkey is never touched</li>
+</ul>
+<p><strong>Pattern: Local-First, Fire-and-Forget</strong></p>
+<ul>
+<li>All DB reads are <strong>synchronous</strong> from <code>DB._cache</code> (fast, instant)</li>
+<li>All DB writes <strong>immediately update the cache</strong>, then fire IPC messages to SQLite (async, no await)</li>
+<li>Users never see &quot;saving...&quot; spinners—the cache is the source of truth</li>
+</ul>
+<h2 id="section-3">3. File Structure &amp; Responsibilities</h2>
+<h3 id="mainjs">main.js — Electron Main Process</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Initialize and maintain SQLite database (<code>jumpkit.db</code>)</li>
+<li>Create and manage the app window</li>
+<li>Handle all IPC (Inter-Process Communication) requests from the renderer</li>
+<li>Register global hotkeys and launch jumps when hotkey is pressed</li>
+<li>Manage auto-updates and backups (write to ~/Documents/JumpKit Backups/)</li>
+</ul>
+<p><strong>Key IPC Handlers:</strong></p>
+<ul>
+<li><code>get-jumps</code>, <code>save-jump</code>, <code>delete-jump</code> — Jump CRUD</li>
+<li><code>get-columns</code>, <code>save-columns</code>, <code>save-column</code> — Column management</li>
+<li><code>get-prefs</code>, <code>save-prefs</code> — User preferences</li>
+<li><code>get-click-log</code>, <code>log-click</code> — Click tracking</li>
+<li><code>sync-jumps</code>, <code>upsert-shared-jumps</code>, <code>delete-shared-jumps</code> — Sync from Supabase</li>
+<li><code>open-url</code>, <code>open-path</code> — Launch web links and local folders (cross-platform)</li>
+<li><code>seed-new-user</code> — Create default columns and jumps for new users</li>
+<li><code>save-backup</code>, <code>export-backup</code> — Backup/restore user data as JSON</li>
+</ul>
+<p><strong>SQLite Tables Created:</strong></p>
+<ul>
+<li><code>jumps</code> — All jumps (personal + shared)</li>
+<li><code>columns</code> — Column definitions</li>
+<li><code>click_log</code> — Click history (for stats)</li>
+<li><code>user_prefs</code> — Preferences per user</li>
+<li><code>sync_state</code> — Tracks last sync timestamp</li>
+</ul>
+<h3 id="apphtml">app.html — Main Entry Point (App UI)</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Root HTML structure: sidebar, topbar, main content area</li>
+<li>Modal overlay, toast notifications, context menu shells</li>
+<li>Script loading order (important for init sequence)</li>
+</ul>
+<p><strong>Key Elements:</strong></p>
+<ul>
+<li><code>&lt;aside class=&quot;sidebar&quot;&gt;</code> — Navigation sidebar with collapse toggle</li>
+<li><code>&lt;div class=&quot;topbar&quot;&gt;</code> — Title, theme toggle, user menu</li>
+<li><code>&lt;div class=&quot;page-content&quot;&gt;</code> — Dynamic page content area</li>
+<li>Modal/Toast/CtxMenu elements (populated by JS)</li>
+</ul>
+<p><strong>Script Loading Order (Important):</strong></p>
+<ol>
+<li>CSS (vars.css, app.css)</li>
+<li>Supabase JS SDK</li>
+<li><code>js/db.js</code> — Database wrapper</li>
+<li><code>js/app.js</code> — Core app, Modal/Toast/CtxMenu, theme, auth</li>
+<li><code>js/jumps.js</code> — Jumps page (has <code>?v=timestamp</code> for cache-bust)</li>
+<li><code>js/archive.js</code> — Archive functionality</li>
+<li><code>js/help.js</code>, <code>js/stats.js</code> — Page renderers</li>
+<li><code>js/teams.js</code> — Teams page (also has <code>?v=timestamp</code> for cache-bust)</li>
+<li><code>js/sync.js</code> — Sync engine initialization</li>
+</ol>
+<h3 id="jsappjs">js/app.js — Core App Logic &amp; UI Components</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Initialize Supabase client</li>
+<li>Authenticate user (Supabase session + local SQLite profile)</li>
+<li>Define page router (maps page names to render functions)</li>
+<li>Implement reusable UI components: Modal, Toast, CtxMenu</li>
+<li>Manage theme (dark/light) via CSS variables</li>
+<li>Sidebar collapse/expand state (localStorage + preferences)</li>
+<li>User display (avatar, name, dropdown menu)</li>
+<li>Global hotkey listener (buildChord)</li>
+<li>Auto-archive trigger</li>
+<li>Cloud backup</li>
+<li>Pending invite checker</li>
+</ul>
+<p><strong>Key Functions:</strong></p>
+<ul>
+<li><code>initAuth()</code> — Load Supabase session or localStorage fallback</li>
+<li><code>navigateTo(page)</code> — Route to a page and render it</li>
+<li><code>buildChord(e)</code> — Parse keyboard event into shortcut string (e.g., &quot;Ctrl+Shift+G&quot;)</li>
+<li><code>showPaywall()</code> — Display upgrade modal for free tier limit</li>
+</ul>
+<p><strong>Components:</strong></p>
+<h4 id="modal">Modal</h4>
+<pre><code>Modal.open(title, bodyHTML, footerHTML, size);
+Modal.close();</code></pre>
+<ul>
+<li>Creates a centered overlay with a box</li>
+<li><code>title</code>: HTML (usually icon + text)</li>
+<li><code>bodyHTML</code>: Modal content</li>
+<li><code>footerHTML</code>: Buttons or empty string for no footer</li>
+<li><code>size</code>: Optional CSS class modifier (unused currently, reserved for future)</li>
+</ul>
+<h4 id="toast">Toast</h4>
+<pre><code>Toast.success(message);
+Toast.danger(message);</code></pre>
+<ul>
+<li>Auto-dismissing notification (3 second timer)</li>
+<li>Stacks or replaces previous toast</li>
+<li>Icons via Tabler Icons</li>
+</ul>
+<h4 id="ctxmenu-context-menu">CtxMenu (Context Menu)</h4>
+<pre><code>CtxMenu.show(x, y, items);
+CtxMenu.hide();
+// items = [
+//   { icon: '&lt;i&gt;...&lt;/i&gt;', label: 'Do X', action: () =&gt; {...} },
+//   'divider',
+//   { icon: '...', label: 'Delete', action: () =&gt; {...}, danger: true }
+// ]</code></pre>
+<ul>
+<li>Right-click context menu</li>
+<li>Clamps position to viewport</li>
+<li>Auto-hides on click or escape</li>
+</ul>
+<h4 id="wiredropdown">wireDropdown</h4>
+<pre><code>wireDropdown({
+  dropId: 'myDrop',
+  triggerId: 'myTrigger',
+  menuId: 'myMenu',
+  labelId: 'myLabel',
+  inputId: 'myInput',     // optional
+  onSelect: (option) =&gt; { // optional callback
+    // Called when user selects an option
+  }
+});</code></pre>
+<ul>
+<li>Custom &lt;select&gt; replacement</li>
+<li>Arrow keys navigate without closing, Enter confirms</li>
+<li>Updates label + hidden input on select</li>
+<li>Keyboard accessible</li>
+</ul>
+<h3 id="jsauthjs">js/auth.js — Authentication (index.html)</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Render login, signup, and password reset forms</li>
+<li>Validate email and password</li>
+<li>Call Supabase Auth API</li>
+<li>Create local user profile in SQLite (if first time on device)</li>
+<li>Theme toggle (dark/light)</li>
+</ul>
+<p><strong>Key Functions:</strong></p>
+<ul>
+<li>Sign in with email + password</li>
+<li>Sign up with first name, last name, email, password (2x confirm)</li>
+<li>Password reset (sends link to email)</li>
+<li>Local user creation (fallback, if Supabase not configured)</li>
+</ul>
+<p><strong>Form Validation:</strong></p>
+<ul>
+<li>Email: RFC-like pattern check</li>
+<li>Password: min 8 characters</li>
+<li>Confirm: must match password</li>
+<li>Real-time error display</li>
+</ul>
+<h3 id="jsdbjs">js/db.js — Database Wrapper &amp; Cache</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Maintain in-memory cache (<code>DB._cache</code>)</li>
+<li>Expose synchronous read methods (pull from cache)</li>
+<li>Fire async writes to SQLite via IPC</li>
+<li>Fall back to localStorage if Electron API unavailable (browser dev mode)</li>
+<li>Auto-seed new users with 10 default columns + example jumps</li>
+</ul>
+<p><strong>Key Methods:</strong></p>
+<p><strong>Jumps:</strong></p>
+<pre><code>DB.getJumps(userId)          // → array of all jumps
+DB.getActiveJumps(userId)    // → filter isArchived=0
+DB.getArchivedJumps(userId)  // → filter isArchived=1
+DB.saveJump(userId, jump)    // fire-and-forget to IPC
+DB.deleteJump(userId, jumpId)
+DB.updateJump(userId, jumpId, fields)</code></pre>
+<p><strong>Columns:</strong></p>
+<pre><code>DB.getColumns(userId)        // → array of columns (ordered)
+DB.saveColumns(userId, cols) // replace all columns (bulk)
+DB.saveColumn(userId, col)   // upsert single column</code></pre>
+<p><strong>Preferences:</strong></p>
+<pre><code>DB.getPrefs(userId)          // → preferences object
+DB.savePrefs(userId, prefs)  // upsert preferences</code></pre>
+<p><strong>Click Log:</strong></p>
+<pre><code>DB.getClickLog(userId)       // → array of click events
+DB.logClick(userId, jumpId)  // record a click</code></pre>
+<p><strong>Session:</strong></p>
+<pre><code>DB.getCurrentUser()          // → { id, name, email, ... }
+DB.setSession(userId)
+DB.clearSession()</code></pre>
+<p><strong>Default Preferences Object:</strong></p>
+<pre><code>{
+  startPage:          'home',
+  notifications:      true,
+  cloudBackup:        false,
+  timePerClick:       10,                  // seconds
+  dollarsPerHour:     150,
+  showDescription:    false,
+  showHotkey:         false,
+  autoArchive:        'never',             // 'never', '1m', '6m', '1y'
+  subscriptionStatus: 'free',              // 'free', 'active', 'overdue', 'cancelled'
+  subscriptionTier:   'free',              // 'free', 'core', 'teams_jet'
+  role:               'team-member',       // 'org-owner', 'team-owner', 'team-member'
+  navDefaultCollapsed: false,
+}</code></pre>
+<h3 id="jsjumpsjs">js/jumps.js — Jumps Page &amp; Jump Management</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Render all columns and their jumps</li>
+<li>Handle jump CRUD (create, read, update, delete)</li>
+<li>Filter jumps: active, favorites, recent (30d), most-used (top 10%), archive</li>
+<li>Search jumps by name/URL/description</li>
+<li>Handle drag-to-reorder columns</li>
+<li>Manage hotkey assignment and recording</li>
+<li>Track click events</li>
+<li>Share column with team (if team owner)</li>
+<li>Handle shared jump read-only UI</li>
+</ul>
+<p><strong>Jump Object Structure:</strong></p>
+<pre><code>{
+  id:            'nanoid string',        // local ID
+  userId:        'user-id',
+  name:          'Google',
+  url:           'www.google.com',
+  description:   'Search engine',
+  reason:        'Quick lookups',
+  columnId:      'column-id',
+  hotkey:        'Ctrl+Shift+G',         // optional, user-assigned
+  favorite:      boolean,
+  isArchived:    boolean,
+  isShared:      boolean,                // read-only UI badge if true
+  teamId:        'team-id' || null,
+  clickCount:    123,                    // tracked
+  lastUsed:      timestamp || null,
+  createdAt:     timestamp,
+  updatedAt:     timestamp,
+  timeSaved:     number || null,         // optional: override global timePerClick
+  timeSavedUnit: 'seconds' || null,
+  supabaseId:    'uuid' || null,         // references shared_jumps.id
+}</code></pre>
+<p><strong>Key Functions:</strong></p>
+<p><strong>Jump Rendering:</strong></p>
+<pre><code>renderJumps()                    // main page renderer
+renderColumns()                  // render all visible columns with jumps
+applyJumpFilter()               // filter jumps and re-render
+getFilteredJumps()              // → filtered jump array</code></pre>
+<p><strong>Jump CRUD:</strong></p>
+<pre><code>openAddJumpModal()              // modal to create new jump
+openEditJumpModal(jumpId)       // modal to edit jump
+handleJumpClick(jumpId)         // click a jump (launch + log click)
+deleteJump(jumpId)              // move to archive (soft delete)
+restoreJump(jumpId)             // un-archive
+deleteForever(jumpId)           // hard delete from archive</code></pre>
+<p><strong>Columns:</strong></p>
+<pre><code>openConfigColumnsModal()        // show column reorder/visibility/share UI
+saveColumnOrder(reorderedCols)  // persist drag-to-reorder
+toggleColumnVisibility(colId)   // show/hide column
+shareColumnWithTeam(colId, teamId)  // mark column as shared
+unshareColumn(colId)            // unshare from team</code></pre>
+<p><strong>Hotkeys:</strong></p>
+<pre><code>openHotkeyRecorder(jumpId)      // modal to record Ctrl+Shift+X, etc.
+// Global listener in app.js calls handleJumpClick when hotkey pressed</code></pre>
+<p><strong>Click Tracking:</strong></p>
+<pre><code>handleJumpClick(jumpId) {
+  // 1. Launch the URL or path
+  // 2. Log click to DB
+  // 3. Update clickCount
+  // 4. Set lastUsed timestamp
+  // 5. Check free tier limit
+  // 6. Show toast
+}</code></pre>
+<h3 id="jsteamsjs">js/teams.js — Teams, Organizations &amp; Sharing</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Render three different team views based on role: org-owner, team-owner, team-member</li>
+<li>Team creation and management (org-owner only)</li>
+<li>Team member invites via email (team-owner)</li>
+<li>Join team flow (pending members enter team password)</li>
+<li>Display shared jumps + team member list</li>
+<li>Password hashing (SHA-256 for team passwords)</li>
+</ul>
+<p><strong>Roles:</strong></p>
+<p><strong>org-owner</strong></p>
+<ul>
+<li>Create the organization</li>
+<li>Create teams within the org</li>
+<li>Promote users to team-owner</li>
+<li>See all teams and all members in the org</li>
+<li>Invite members by email (via team-owner)</li>
+</ul>
+<p><strong>team-owner</strong></p>
+<ul>
+<li>Manage their team (invite members, remove members)</li>
+<li>Define shared columns (mark columns as &quot;shared with team&quot;)</li>
+<li>See pending invites and member list</li>
+<li><strong>Cannot</strong> assign hotkeys on shared jumps</li>
+</ul>
+<p><strong>team-member</strong></p>
+<ul>
+<li>View team name and member list (read-only)</li>
+<li>See shared jumps synced from their team</li>
+<li>Assign their own hotkeys (local only, never synced)</li>
+<li><strong>Cannot</strong> edit, delete, move, or invite</li>
+</ul>
+<p><strong>Invite Flow:</strong></p>
+<ol>
+<li>Team-owner enters email addresses</li>
+<li>Invite email sent via Resend (Edge Function <code>send-invite</code>)</li>
+<li>New user downloads app → clicks &quot;Join a Team&quot; → enters org name, team name, team password, personal password</li>
+<li>App verifies team password (SHA-256 hash match) → inserts into <code>team_members</code></li>
+<li>On next sync, shared jumps pull down</li>
+</ol>
+<p><strong>Password Hashing:</strong></p>
+<pre><code>async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b =&gt; b.toString(16).padStart(2, '0'))
+    .join('');
+}</code></pre>
+<h3 id="jssyncjs">js/sync.js — Sync Engine</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Pull shared columns and jumps from Supabase</li>
+<li>Upsert into local SQLite</li>
+<li>Preserve user&#39;s local hotkey assignments</li>
+<li>Remove stale shared jumps no longer on cloud</li>
+<li>Schedule 60-minute interval sync</li>
+</ul>
+<p><strong>When Sync Runs:</strong></p>
+<ul>
+<li>On login (in <code>initAuth()</code> → <code>initApp()</code>)</li>
+<li>Every 60 minutes (setInterval in module init)</li>
+</ul>
+<p><strong>Sync Algorithm:</strong></p>
+<ol>
+<li>Get current user&#39;s Supabase session</li>
+<li>Query <code>team_members</code> to find all teams user is member of</li>
+<li>Fetch <code>shared_columns</code> and <code>shared_jumps</code> for those teams</li>
+<li>Deduplicate columns by (team_id + name)</li>
+<li>For each shared column/jump, check if local row exists by supabaseId or id</li>
+<li><strong>If exists</strong>: Update name/URL, <strong>never overwrite hotkey</strong></li>
+<li><strong>If new</strong>: Insert, pull existing hotkey from DB (or empty string)</li>
+<li>Remove stale columns/jumps no longer in remote</li>
+<li>Update <code>sync_state.lastSync</code> timestamp</li>
+</ol>
+<p><strong>Fire-and-Forget Pattern:</strong></p>
+<pre><code>// In renderer: sync.js pulls from Supabase
+const remoteJumps = await supabaseClient
+  .from('shared_jumps')
+  .select('*')
+  .in('team_id', teamIds);
+
+// Pass to main process to persist
+await window.electronAPI.upsertSharedJumps(remoteJumps);
+
+// Update cache immediately
+DB._cache.jumps = [...newJumps];
+
+// (IPC handler persists to SQLite async, no await)</code></pre>
+<h3 id="jsarchivejs">js/archive.js — Archived Jumps Management</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Render archive page (table view with sorting)</li>
+<li>Search archived jumps</li>
+<li>Restore jumps to active</li>
+<li>Permanently delete archived jumps</li>
+</ul>
+<p><strong>Key Functions:</strong></p>
+<pre><code>renderArchive()                 // main page renderer
+renderArchivedInline()         // called from jumps.js when archive filter selected
+restoreJump(jumpId)            // move back to active
+deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre>
+<p><strong>Archive vs Delete:</strong></p>
+<ul>
+<li><strong>Archive</strong> (soft delete): <code>isArchived = 1</code> — jumps stay in DB, hidden from main view</li>
+<li><strong>Delete</strong> (hard delete): Permanently removed from DB — only from archive page, ask for confirmation first</li>
+</ul>
+<h3 id="jshelpjs-jsstatsjs">js/help.js, js/stats.js — Other Page Renderers</h3>
+<p><strong>help.js</strong></p>
+<ul>
+<li>Render Help page with FAQs, tips, keyboard shortcuts</li>
+</ul>
+<p><strong>stats.js</strong></p>
+<ul>
+<li>Render Statistics page with charts</li>
+<li>Show clicks by day/week/month/year</li>
+<li>Top jumps ranking</li>
+<li>Time saved / dollars earned calculation</li>
+<li>Uses Chart.js for graphs</li>
+</ul>
+<h3 id="jstestsjs">js/tests.js — Unit Tests (45 tests)</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Comprehensive test suite for jump CRUD, columns, hotkeys, filtering</li>
+<li>Runs in-app (admin only) for quick verification</li>
+<li>Writes results to file (for CI/CD)</li>
+</ul>
+<p><strong>Test Categories:</strong></p>
+<ul>
+<li>Jump creation, editing, deletion</li>
+<li>Column operations</li>
+<li>Hotkey parsing and validation</li>
+<li>Click tracking</li>
+<li>Team filtering</li>
+<li>Sync behavior</li>
+<li>Preference persistence</li>
+</ul>
+<p><strong>Run Tests:</strong></p>
+<ul>
+<li>Admin only (check email === jeffroder@gmail.com)</li>
+<li>Tests nav item appears in sidebar</li>
+<li>Click &quot;Tests&quot; → &quot;Run All Tests&quot; button</li>
+<li>Results displayed in modal + written to ~/JumpKit Appdata/test-results.txt</li>
+</ul>
+<h3 id="cssvarcss">css/vars.css — Design Tokens &amp; Theme Variables</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>Define all CSS variables for dark/light theme</li>
+<li>Color palette, spacing, shadows, transitions</li>
+<li>Tabler Icons integration</li>
+</ul>
+<p><strong>Color Palette:</strong></p>
+<ul>
+<li><code>--royal</code>: <code>#1A4FD6</code> (royal blue)</li>
+<li><code>--turq</code>: <code>#00C2C7</code> (turquoise)</li>
+<li><code>--hover-accent</code>: <code>#2B9ED8</code> (hover blue)</li>
+</ul>
+<p><strong>Dark Theme (Default):</strong></p>
+<ul>
+<li><code>--bg</code>: <code>#080F1A</code> (almost black)</li>
+<li><code>--bg-card</code>: <code>#0E1827</code> (card background)</li>
+<li><code>--text</code>: <code>#C8D6E8</code> (light text)</li>
+<li><code>--text-muted</code>: <code>#7A93B4</code> (dimmed text)</li>
+<li><code>--border</code>: <code>rgba(255,255,255,0.09)</code> (subtle borders)</li>
+</ul>
+<p><strong>Light Theme:</strong></p>
+<ul>
+<li><code>--bg</code>: <code>#F0F4FA</code> (off-white)</li>
+<li><code>--bg-card</code>: <code>#FFFFFF</code> (white)</li>
+<li><code>--text</code>: <code>#2C3E52</code> (dark text)</li>
+<li><code>--text-muted</code>: <code>#5A6A7E</code> (dimmed text)</li>
+<li><code>--border</code>: <code>rgba(0,0,0,0.10)</code> (subtle borders)</li>
+</ul>
+<p><strong>Toggling Theme:</strong></p>
+<pre><code>// In app.js
+document.documentElement.dataset.theme = 'dark' || 'light';
+localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
+<h3 id="cssappcss">css/app.css — Component Styles</h3>
+<p><strong>Responsibilities:</strong></p>
+<ul>
+<li>All reusable component styles</li>
+<li>Layout grids and flexboxes</li>
+<li>Animations and transitions</li>
+<li>Responsive design hints (some mobile styles)</li>
+</ul>
+<p><strong>Major Component Classes:</strong></p>
+<ul>
+<li><code>.app-shell</code> — Root container (sidebar + main)</li>
+<li><code>.sidebar</code> — Collapsed state via <code>.collapsed</code></li>
+<li><code>.nav-item</code> — Navigation buttons</li>
+<li><code>.topbar</code> — Header bar</li>
+<li><code>.page-content</code> — Dynamic content area</li>
+<li><code>.modal-*</code> — Modal structure</li>
+<li><code>.toast</code> — Notification styles</li>
+<li><code>.btn-*</code> — All button variants</li>
+<li><code>.form-*</code> — Form element styles</li>
+<li><code>.custom-select</code> — Dropdown component</li>
+<li><code>.toggle</code> — Toggle switch</li>
+<li><code>.jump-item</code> — Jump card in grid</li>
+<li><code>.column</code> — Column container</li>
+<li><code>.stats-*</code> — Statistics page styles</li>
+</ul>
+<h2 id="section-4">4. Database Schema</h2>
+<h3 id="sqlite-local">SQLite (Local)</h3>
+<p><strong>All tables exist in <code>jumpkit.db</code> (stored in app-data/ directory):</strong></p>
+<h4 id="jumps">jumps</h4>
+<pre><code>id TEXT PRIMARY KEY,
+userId TEXT NOT NULL,
+name TEXT NOT NULL,
+url TEXT NOT NULL,
+description TEXT DEFAULT '',
+reason TEXT DEFAULT '',
+columnId TEXT,
+hotkey TEXT DEFAULT '',
+favorite INTEGER DEFAULT 0,
+isArchived INTEGER DEFAULT 0,
+clickCount INTEGER DEFAULT 0,
+lastUsed INTEGER,  -- timestamp
+createdAt INTEGER,
+updatedAt INTEGER,
+isShared INTEGER DEFAULT 0,
+teamId TEXT DEFAULT NULL,
+timeSaved REAL DEFAULT NULL,           -- optional override
+timeSavedUnit TEXT DEFAULT NULL,
+supabaseId TEXT DEFAULT NULL</code></pre>
+<h4 id="columns">columns</h4>
+<pre><code>id TEXT PRIMARY KEY,
+userId TEXT NOT NULL,
+name TEXT NOT NULL,
+visible INTEGER DEFAULT 1,
+\`order\` INTEGER DEFAULT 0,
+createdAt INTEGER,
+isShared INTEGER DEFAULT 0,
+teamId TEXT DEFAULT NULL,
+supabaseId TEXT DEFAULT NULL           -- UUID from shared_columns.id</code></pre>
+<h4 id="sync_state">sync_state</h4>
+<pre><code>key TEXT PRIMARY KEY,
+value TEXT                             -- lastSync timestamp, etc.</code></pre>
+<h4 id="click_log">click_log</h4>
+<pre><code>id INTEGER PRIMARY KEY AUTOINCREMENT,
+userId TEXT NOT NULL,
+jumpId TEXT NOT NULL,
+ts INTEGER NOT NULL                    -- timestamp</code></pre>
+<h4 id="user_prefs">user_prefs</h4>
+<pre><code>userId TEXT PRIMARY KEY,
+startPage TEXT DEFAULT 'home',
+timePerClick REAL DEFAULT 10,
+dollarsPerHour REAL DEFAULT 150,
+showDescription INTEGER DEFAULT 0,
+showHotkey INTEGER DEFAULT 0,
+subscriptionStatus TEXT DEFAULT 'free',
+subscriptionTier TEXT DEFAULT 'free',
+role TEXT DEFAULT 'team-member',
+notifications INTEGER DEFAULT 1,
+cloudBackup INTEGER DEFAULT 0,
+autoArchive TEXT DEFAULT 'never',
+navDefaultCollapsed INTEGER DEFAULT 0</code></pre>
+<h3 id="supabase-cloud">Supabase (Cloud)</h3>
+<p><strong>Tables with RLS enabled:</strong></p>
+<h4 id="profiles">profiles</h4>
+<pre><code>id UUID PRIMARY KEY (auth.users.id),
+email TEXT NOT NULL,
+first_name TEXT DEFAULT '',
+last_name TEXT DEFAULT '',
+role TEXT ('org-owner', 'team-owner', 'team-member'),
+org_id UUID REFERENCES organizations(id),
+subscription_status TEXT ('free', 'active', 'overdue', 'cancelled'),
+subscription_tier TEXT ('free', 'core', 'teams_jet'),
+trial_launches_used INTEGER DEFAULT 0,
+ls_customer_id TEXT,
+created_at TIMESTAMPTZ</code></pre>
+<h4 id="organizations">organizations</h4>
+<pre><code>id UUID PRIMARY KEY,
+name TEXT NOT NULL,
+owner_id UUID REFERENCES auth.users(id),
+created_at TIMESTAMPTZ</code></pre>
+<h4 id="teams">teams</h4>
+<pre><code>id UUID PRIMARY KEY,
+org_id UUID REFERENCES organizations(id),
+name TEXT NOT NULL,
+team_password_hash TEXT NOT NULL,      -- SHA-256 hash
+owner_id UUID REFERENCES profiles(id),
+created_at TIMESTAMPTZ</code></pre>
+<h4 id="team_members">team_members</h4>
+<pre><code>id UUID PRIMARY KEY,
+team_id UUID REFERENCES teams(id),
+user_id UUID REFERENCES profiles(id),
+joined_at TIMESTAMPTZ,
+UNIQUE(team_id, user_id)</code></pre>
+<h4 id="team_invites">team_invites</h4>
+<pre><code>id UUID PRIMARY KEY,
+team_id UUID REFERENCES teams(id),
+email TEXT NOT NULL,
+invited_by UUID REFERENCES profiles(id),
+status TEXT ('pending', 'accepted'),
+invited_at TIMESTAMPTZ</code></pre>
+<h4 id="shared_columns">shared_columns</h4>
+<pre><code>id UUID PRIMARY KEY,
+team_id UUID REFERENCES teams(id),
+name TEXT NOT NULL,
+position INTEGER DEFAULT 0,
+created_by UUID REFERENCES profiles(id),
+created_at TIMESTAMPTZ</code></pre>
+<h4 id="shared_jumps">shared_jumps</h4>
+<pre><code>id UUID PRIMARY KEY,
+shared_column_id UUID REFERENCES shared_columns(id),
+team_id UUID REFERENCES teams(id),
+name TEXT NOT NULL,
+url TEXT NOT NULL,
+description TEXT,
+reason TEXT,
+position INTEGER DEFAULT 0,
+created_by UUID REFERENCES profiles(id),
+created_at TIMESTAMPTZ,
+updated_at TIMESTAMPTZ</code></pre>
+<h3 id="key-relationships">Key Relationships</h3>
+<ul>
+<li><strong>users</strong> (Supabase Auth) ↔ <strong>profiles</strong> (one-to-one, on auth trigger)</li>
+<li><strong>profiles</strong> → <strong>organizations</strong> (many-to-one by org_id)</li>
+<li><strong>organizations</strong> → <strong>teams</strong> (one-to-many)</li>
+<li><strong>teams</strong> ↔ <strong>team_members</strong> (many-to-many, join table)</li>
+<li><strong>teams</strong> → <strong>shared_columns</strong> (one-to-many)</li>
+<li><strong>shared_columns</strong> → <strong>shared_jumps</strong> (one-to-many)</li>
+<li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
+</ul>
+<h2 id="section-5">5. Key Concepts &amp; Data Flows</h2>
+<h3 id="jumps-the-core-resource">5a. Jumps — The Core Resource</h3>
+<p><strong>What is a jump?</strong><br/>
+A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
+<p><strong>Jump Lifecycle:</strong></p>
+<ol>
+<li><strong>Create</strong>: User clicks &quot;Add Jump&quot; → modal → enter name, URL, column, hotkey → save</li>
+<li><strong>Launch</strong>: Click jump → open URL in browser or path in file explorer → log click</li>
+<li><strong>Edit</strong>: Click jump context menu → &quot;Edit&quot; → modify fields → save</li>
+<li><strong>Archive</strong>: Click &quot;Delete&quot; → move to archive (soft delete, reversible)</li>
+<li><strong>Restore</strong>: View archive → restore archived jump</li>
+<li><strong>Delete Forever</strong>: From archive, permanently delete (hard delete, irreversible)</li>
+</ol>
+<p><strong>Click Tracking &amp; ROI:</strong></p>
+<pre><code>// On jump click:
+DB.logClick(userId, jumpId);           // Insert into click_log
+const jump = DB.getJump(jumpId);
+jump.clickCount++;
+jump.lastUsed = Date.now();
+DB.updateJump(userId, jumpId, jump);   // Update in-memory cache + fire IPC
+
+// Stats calculation:
+const totalClicks = allJumps.reduce((sum, j) =&gt; sum + j.clickCount, 0);
+const timePerClick = jump.timeSaved || prefs.timePerClick;  // per-jump override or global default
+const totalSeconds = totalClicks * timePerClick;
+const dollars = (totalSeconds / 3600) * prefs.dollarsPerHour;</code></pre>
+<p><strong>Hotkeys:</strong></p>
+<pre><code>// In global keydown listener (app.js):
+const chord = buildChord(e);  // "Ctrl+Shift+G"
+const match = DB.getActiveJumps(userId).find(j =&gt;
+  j.hotkey?.replace(/\s/g, '').toLowerCase() === chord.replace(/\s/g, '').toLowerCase()
+);
+if (match) {
+  e.preventDefault();
+  handleJumpClick(match.id);
+}
+
+// Hotkey format: "Ctrl+Alt+Shift+X" (space-insensitive)</code></pre>
+<p><strong>Auto-Archive:</strong></p>
+<pre><code>// On app load, if user has autoArchive setting:
+const threshold_ms = days * 24 * 60 * 60 * 1000;
+const toArchive = allJumps.filter(j =&gt;
+  j.lastUsed && (now - j.lastUsed) &gt; threshold_ms
+);
+toArchive.forEach(j =&gt; DB.updateJump(userId, j.id, { isArchived: 1 }));
+addNotification({ message: \`\${toArchive.length} jumps auto-archived\` });</code></pre>
+<h3 id="columns-organization">5b. Columns — Organization</h3>
+<p><strong>What is a column?</strong><br/>
+A column is a category/folder that groups related jumps. Users can have up to 10 columns.</p>
+<p><strong>Column Properties:</strong></p>
+<pre><code>{
+  id: 'nanoid',
+  userId: 'user-id',
+  name: 'Emails',
+  visible: boolean,                    // show/hide column
+  order: 0,                            // 0-9 for ordering
+  createdAt: timestamp,
+  isShared: 0 | 1,                     // 1 if shared with team
+  teamId: 'team-id' || null,
+  supabaseId: 'uuid' || null,          // references shared_columns.id
+}</code></pre>
+<p><strong>Column Ordering:</strong></p>
+<pre><code>// Drag-to-reorder on Jumps page:
+// User drags column header → fires onDragEnd
+// Reorder array locally → saveColumnOrder(reorderedCols)
+// Updates DB immediately, fires IPC
+
+// Visual re-render by order ASC:
+const cols = DB.getColumns(userId).sort((a, b) =&gt; a.order - b.order);</code></pre>
+<p><strong>Column Sharing:</strong></p>
+<pre><code>// Team-owner marks column "Shared with Team"
+// In "Configure Columns" modal:
+shareColumnWithTeam(columnId, teamId);
+  // 1. Mark column isShared=1, teamId=teamId
+  // 2. Call syncColumnToSupabase(column)
+  // 3. Insert into Supabase shared_columns
+  // 4. Move all jumps in column to Supabase shared_jumps
+  // 5. On next sync, other team members pull them down
+
+// Team member receives shared column:
+// 1. sync.js pulls shared_columns + shared_jumps from Supabase
+// 2. Upserts into local SQLite (same column.id from cloud)
+// 3. Jumps marked isShared=1 in UI</code></pre>
+<h3 id="teams-organizations">5c. Teams &amp; Organizations</h3>
+<p><strong>Roles:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th>Can Create Org</th>
+<th>Can Create Teams</th>
+<th>Can Invite Members</th>
+<th>Can Assign Hotkeys to Shared Jumps</th>
+<th>See All Org Data</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>org-owner</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅ (via team-owner)</td>
+<td>N/A</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>team-owner</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>team-member</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅ (local only)</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Invite Flow (step-by-step):</strong></p>
+<p><strong>1. Team-owner opens &quot;Invite Members&quot;</strong></p>
+<ul>
+<li>Enters email addresses (comma-separated)</li>
+<li>System sends email via Resend (Edge Function <code>send-invite</code>)</li>
+<li><code>team_invites</code> row created with status='pending'</li>
+</ul>
+<p><strong>2. Invited user receives email</strong></p>
+<ul>
+<li>Email contains Windows + macOS download links</li>
+<li>Instructions: &quot;Download JumpKit, go to 'Join a Team', enter org name + team name + password&quot;</li>
+</ul>
+<p><strong>3. Invited user joins</strong></p>
+<ul>
+<li>Download JumpKit</li>
+<li>In auth, click &quot;Join a Team&quot; tab</li>
+<li>Enter: org name, team name, team password, personal password</li>
+<li>Click &quot;Join&quot;</li>
+</ul>
+<p><strong>4. Join Logic (in teams.js)</strong></p>
+<pre><code>// User submits join form:
+const orgName = document.getElementById('joinOrgName').value;
+const teamName = document.getElementById('joinTeamName').value;
+const teamPass = document.getElementById('joinTeamPass').value;
+const personalPass = document.getElementById('joinPersonalPass').value;
+
+// 1. Verify team exists (query Supabase)
+const { data: team } = await supabaseClient
+  .from('teams')
+  .select('*')
+  .match({ name: teamName })
+  .single();
+
+// 2. Hash input password, compare with team_password_hash
+const inputHash = await hashPassword(teamPass);
+if (inputHash !== team.team_password_hash) {
+  showError('Incorrect team password');
+  return;
+}
+
+// 3. Create Supabase auth account
+const { data, error } = await supabaseClient.auth.signUp({
+  email: userEmail,
+  password: personalPass,
+  options: { data: { first_name: firstName } }
+});
+
+// 4. Insert into team_members (trigger by invite logic, or manually)
+await supabaseClient.from('team_members').insert({
+  team_id: team.id,
+  user_id: authUser.id,
+});
+
+// 5. Mark invite as accepted
+await supabaseClient.from('team_invites').update({
+  status: 'accepted'
+}).match({ email: userEmail, team_id: team.id });
+
+// 6. Redirect to app
+window.location.href = 'app.html';</code></pre>
+<p><strong>5. On Next Sync</strong></p>
+<ul>
+<li>sync.js fetches <code>team_members</code> for current user</li>
+<li>Finds all teams user is member of</li>
+<li>Pulls <code>shared_columns</code> + <code>shared_jumps</code> for those teams</li>
+<li>Upsets into local SQLite</li>
+</ul>
+<p><strong>Shared Jump Restrictions:</strong></p>
+<ul>
+<li>Team members see jumps with <code>isShared=1</code> and read-only UI badge</li>
+<li>Cannot edit, delete, or move shared jumps</li>
+<li><strong>CAN</strong> assign their own local hotkey (never syncs)</li>
+<li>Team-owner controls content via <code>shared_jumps</code> table in Supabase</li>
+</ul>
+<h3 id="sync-engine">5d. Sync Engine — The Bridge</h3>
+<p><strong>Architecture:</strong></p>
+<pre><code>Supabase (cloud)
+  ↓ [Pull on login + every 60 min]
+Renderer (sync.js)
+  ↓ [Pass to main process]
+Main (main.js IPC handler)
+  ↓ [SQLite upsert]
+SQLite DB
+  ↓ [Update in-memory cache]
+Renderer Cache (DB._cache)
+  ↓ [Render UI]
+User sees shared jumps</code></pre>
+<p><strong>When Sync Runs:</strong></p>
+<ol>
+<li>On login (called from <code>initApp()</code>)</li>
+<li>Every 60 minutes (setInterval in <code>sync.js</code>)</li>
+</ol>
+<p><strong>What Gets Synced:</strong></p>
+<ul>
+<li><strong>Shared columns</strong> from Supabase <code>shared_columns</code> table</li>
+<li><strong>Shared jumps</strong> from Supabase <code>shared_jumps</code> table</li>
+<li><strong>Hotkeys are NOT synced</strong> — each user's hotkey assignment is local</li>
+</ul>
+<p><strong>How Duplicates Are Prevented:</strong></p>
+<pre><code>// Columns: deduplicate by (team_id + name)
+const deduped = Object.values(
+  remoteCols.reduce((acc, rc) =&gt; {
+    const key = rc.team_id + '|' + rc.name;
+    if (!acc[key] || rc.created_at &gt; acc[key].created_at) acc[key] = rc;
+    return acc;
+  }, {})
+);
+
+// Jumps: match by supabaseId (UUID from shared_jumps.id)
+// If local row has supabaseId matching remote.id, it's an update
+// If local row has no supabaseId, it's new</code></pre>
+<p><strong>Hotkey Preservation:</strong></p>
+<pre><code>// Before upsert:
+const hotkeyMap = {};
+existingJumps.forEach(j =&gt; { if (j.hotkey) hotkeyMap[j.id] = j.hotkey; });
+
+// During upsert:
+upsert.run({
+  ...remoteJump,
+  hotkey: hotkeyMap[remoteJump.id] || remoteJump.hotkey || '',  // Preserve local!
+});</code></pre>
+<p><strong>Stale Cleanup:</strong></p>
+<pre><code>// Remove local shared jumps no longer in remote
+const staleLocalJumps = existingJumps.filter(j =&gt;
+  j.isShared && j.teamId && remoteTeamIds.includes(j.teamId) && j.supabaseId && !remoteIds.has(j.supabaseId)
+);
+// Delete them from DB</code></pre>
+<h3 id="authentication">5e. Authentication — Supabase Auth</h3>
+<p><strong>Sign Up Flow:</strong></p>
+<pre><code>User enters email + password (+ name)
+  ↓
+Supabase Auth validates + creates auth.users row
+  ↓
+Trigger: on_auth_user_created → INSERT INTO profiles (auto-create)
+  ↓
+Client stores session token in browser memory
+  ↓
+localStorage tracks: role, subscription_tier, subscription_status
+  ↓
+Local SQLite user profile created (if first device)
+  ↓
+App seeds default columns + example jumps
+  ↓
+Ready to use!</code></pre>
+<p><strong>Sign In Flow:</strong></p>
+<pre><code>User enters email + password
+  ↓
+Supabase Auth validates credentials
+  ↓
+Client stores session token
+  ↓
+App checks: localStorage user exists?
+  ↓
+If not: create local SQLite profile (first device for Supabase user)
+  ↓
+Load all data from SQLite into in-memory cache
+  ↓
+Fetch Supabase profile (role, subscription info)
+  ↓
+Trigger sync to pull shared jumps
+  ↓
+Ready!</code></pre>
+<p><strong>Role System:</strong></p>
+<pre><code>// On login, fetch profile.role:
+const { data: profile } = await supabaseClient
+  .from('profiles')
+  .select('role')
+  .eq('id', authUser.id)
+  .single();
+
+// Used to determine which Team view to show:
+if (profile.role === 'org-owner') renderOrgOwnerView(...);
+else if (profile.role === 'team-owner') renderTeamOwnerView(...);
+else renderTeamMemberView(...);</code></pre>
+<p><strong>Subscription Tracking:</strong></p>
+<pre><code>// From profile:
+{
+  subscription_status: 'free' | 'active' | 'overdue' | 'cancelled',
+  subscription_tier:   'free' | 'core' | 'teams_jet',
+  trial_launches_used: 0,
+  ls_customer_id:      'cus_123...',
+}
+
+// Updated by Lemon Squeezy webhook (ls-webhook edge function)
+// Triggers paywall if: status='overdue' || status='cancelled'
+// OR if free tier and trial_launches_used >= 250</code></pre>
+<h2 id="section-6">6. UI Components</h2>
+<h3 id="modal">Modal</h3>
+<p><strong>Usage:</strong></p>
+<pre><code>Modal.open(
+  '&lt;i class=&quot;ti ti-users&quot;&gt;&lt;/i&gt; Add Team Member',
+  '&lt;div class=&quot;form-group&quot;&gt;&lt;label&gt;Email&lt;/label&gt;&lt;input id=&quot;memberEmail&quot;/&gt;&lt;/div&gt;',
+  '&lt;button class=&quot;btn btn-subtle&quot; onclick=&quot;Modal.close()&quot;&gt;Cancel&lt;/button&gt;&lt;button class=&quot;btn btn-primary&quot; onclick=&quot;inviteMember()&quot;&gt;Send Invite&lt;/button&gt;'
+);
+Modal.close();</code></pre>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong>overlay</strong>: Dark semi-transparent background, clickable to close</li>
+<li><strong>box</strong>: Centered white/dark card</li>
+<li><strong>title</strong>: Icon + text at top</li>
+<li><strong>body</strong>: Dynamic content (HTML string)</li>
+<li><strong>footer</strong>: Buttons (empty string = no footer)</li>
+</ul>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Escape key closes</li>
+<li>Click overlay closes</li>
+<li>Click X button closes</li>
+</ul>
+<h3 id="toast">Toast</h3>
+<p><strong>Usage:</strong></p>
+<pre><code>Toast.success('Jump saved!');
+Toast.danger('Failed to save jump');</code></pre>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Auto-dismisses after 3 seconds</li>
+<li>Replaces previous toast</li>
+<li>Icon + message centered</li>
+<li>Green for success, red for danger</li>
+</ul>
+<h3 id="ctxmenu-context-menu">CtxMenu (Context Menu)</h3>
+<p><strong>Usage:</strong></p>
+<pre><code>CtxMenu.show(e.clientX, e.clientY, [
+  { icon: '&lt;i class=&quot;ti ti-edit&quot;&gt;&lt;/i&gt;', label: 'Edit', action: () =&gt; editJump() },
+  { icon: '&lt;i class=&quot;ti ti-copy&quot;&gt;&lt;/i&gt;', label: 'Duplicate', action: () =&gt; duplicateJump() },
+  'divider',
+  { icon: '&lt;i class=&quot;ti ti-trash&quot;&gt;&lt;/i&gt;', label: 'Delete', action: () =&gt; deleteJump(), danger: true },
+]);
+CtxMenu.hide();</code></pre>
+<p><strong>Properties:</strong></p>
+<ul>
+<li><strong>x, y</strong>: Absolute position</li>
+<li><strong>items</strong>: Array of objects or <code>'divider'</code> string</li>
+<li><strong>item.icon</strong>: HTML for icon</li>
+<li><strong>item.label</strong>: Text</li>
+<li><strong>item.action</strong>: Callback on click</li>
+<li><strong>item.danger</strong>: Red styling if true</li>
+</ul>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Clamps to viewport (doesn&#39;t go off-screen)</li>
+<li>Closes on click</li>
+<li>Closes on escape</li>
+</ul>
+<h3 id="custom-select-wiredropdown">Custom Select (wireDropdown)</h3>
+<p><strong>Usage:</strong></p>
+<pre><code>&lt;div class=&quot;custom-select&quot; id=&quot;myDrop&quot;&gt;
+  &lt;div class=&quot;custom-select-trigger&quot; id=&quot;myTrigger&quot;&gt;
+    &lt;span id=&quot;myLabel&quot;&gt;Select an option&lt;/span&gt;
+    &lt;i class=&quot;ti ti-chevron-down&quot;&gt;&lt;/i&gt;
+  &lt;/div&gt;
+  &lt;div class=&quot;custom-select-menu&quot; id=&quot;myMenu&quot;&gt;
+    &lt;div class=&quot;custom-select-option&quot; data-value=&quot;opt1&quot;&gt;Option 1&lt;/div&gt;
+    &lt;div class=&quot;custom-select-option&quot; data-value=&quot;opt2&quot;&gt;Option 2&lt;/div&gt;
+    &lt;div class=&quot;custom-select-option&quot; data-value=&quot;opt3&quot;&gt;Option 3&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+wireDropdown({
+  dropId: 'myDrop',
+  triggerId: 'myTrigger',
+  menuId: 'myMenu',
+  labelId: 'myLabel',
+  inputId: 'myValue',          // optional hidden input
+  onSelect: (option) =&gt; {       // optional callback
+    console.log('Selected:', option.dataset.value);
+  }
+});
+&lt;/script&gt;</code></pre>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Arrow keys navigate options (highlight, no close)</li>
+<li>Enter / Space confirms selection</li>
+<li>Escape closes</li>
+<li>Click option confirms</li>
+<li>Updates label + hidden input on select</li>
+<li>Calls onSelect callback (if provided)</li>
+</ul>
+<h3 id="custom-select-css-classes">Custom Select (CSS Classes)</h3>
+<pre><code>&lt;div class=&quot;custom-select&quot;&gt;
+  &lt;div class=&quot;custom-select-trigger&quot;&gt;Label&lt;/div&gt;
+  &lt;div class=&quot;custom-select-menu&quot;&gt;
+    &lt;div class=&quot;custom-select-option selected&quot;&gt;Option 1&lt;/div&gt;
+    &lt;div class=&quot;custom-select-option&quot;&gt;Option 2&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+<p><strong>CSS States:</strong></p>
+<ul>
+<li><code>.custom-select.open</code> — menu visible</li>
+<li><code>.custom-select-option.selected</code> — highlighted/chosen</li>
+<li><code>.custom-select-option.kbfocus</code> — keyboard focus (for arrow keys)</li>
+</ul>
+<h3 id="toggle-checkbox">Toggle / Checkbox</h3>
+<pre><code>&lt;label class=&quot;toggle&quot;&gt;
+  &lt;input type=&quot;checkbox&quot; checked /&gt;
+  &lt;span class=&quot;toggle-slider&quot;&gt;&lt;/span&gt;
+&lt;/label&gt;</code></pre>
+<p><strong>Behavior:</strong></p>
+<ul>
+<li>Styled as pill-shaped toggle with animated slider</li>
+<li>Checkbox hidden, slider visible</li>
+<li>Fully keyboard accessible</li>
+</ul>
+<h3 id="buildchord-hotkey-parser">buildChord — Hotkey Parser</h3>
+<pre><code>window.buildChord = function buildChord(e) {
+  const parts = [];
+  if (e.ctrlKey || e.metaKey) parts.push('Ctrl');
+  if (e.altKey)               parts.push('Alt');
+  if (e.shiftKey)             parts.push('Shift');
+  if (['Control','Alt','Shift','Meta'].includes(e.key)) return null;
+  let key = e.key;
+  if (e.code.startsWith('Digit'))      key = e.code.replace('Digit','');
+  else if (e.code.startsWith('Key'))   key = e.code.replace('Key','');
+  else if (/^F\d+$/.test(e.code))      key = e.code;
+  else if (e.key.length === 1)         key = e.key.toUpperCase();
+  parts.push(key);
+  return parts.join('+');  // "Ctrl+Shift+G"
+}
+
+// Returns null if user only pressed modifiers (Ctrl alone)
+// Space-insensitive comparison: "Ctrl+Shift+G" === "ctrl+shift+g"</code></pre>
+<h3 id="sidebar-collapse">Sidebar Collapse</h3>
+<p><strong>localStorage key:</strong> <code>jk_sidebar_collapsed</code><br/>
+<strong>Value:</strong> <code>'0'</code> or <code>'1'</code><br/>
+<strong>Preference key:</strong> <code>user_prefs.navDefaultCollapsed</code></p>
+<pre><code>// On toggle:
+sidebar.classList.toggle('collapsed');
+localStorage.setItem('jk_sidebar_collapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
+
+// On startup, apply saved pref:
+const navPrefs = DB.getPrefs(userId);
+if (navPrefs.navDefaultCollapsed) {
+  sidebar.classList.add('collapsed');
+}</code></pre>
+<p><strong>CSS:</strong> When <code>.collapsed</code> class added:</p>
+<ul>
+<li>Sidebar width shrinks to icon-only</li>
+<li>Nav labels hidden</li>
+<li>Icons remain visible</li>
+<li>Tooltip on hover shows label</li>
+</ul>
+<h2 id="section-7">7. IPC Handlers (main.js ↔ renderer)</h2>
+<p><strong>All IPC handlers are request-response pairs:</strong></p>
+<h3 id="jumps-ipc">Jumps</h3>
+<h4 id="get-jumps">get-jumps</h4>
+<pre><code>// Renderer:
+const jumps = await window.electronAPI.getJumps(userId);
+
+// Main:
+ipcMain.handle('get-jumps', (_e, userId) =&gt; {
+  if (!db) return [];
+  return db.prepare('SELECT * FROM jumps WHERE userId = ?').all(userId);
+});</code></pre>
+<h4 id="save-jump">save-jump</h4>
+<pre><code>// Renderer:
+await window.electronAPI.saveJump(userId, jump);
+
+// Main:
+ipcMain.handle('save-jump', (_e, userId, jump) =&gt; {
+  if (!db) return { ok: false };
+  try {
+    db.prepare(\`INSERT OR REPLACE INTO jumps (...) VALUES (...)\`).run({...jump});
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});</code></pre>
+<h4 id="delete-jump">delete-jump</h4>
+<pre><code>// Renderer:
+await window.electronAPI.deleteJump(userId, jumpId);
+
+// Main:
+ipcMain.handle('delete-jump', (_e, userId, id) =&gt; {
+  if (!db) return { ok: false };
+  db.prepare('DELETE FROM jumps WHERE id = ? AND userId = ?').run(id, userId);
+  return { ok: true };
+});</code></pre>
+<h3 id="columns-ipc">Columns</h3>
+<h4 id="get-columns">get-columns</h4>
+<pre><code>const columns = await window.electronAPI.getColumns(userId);</code></pre>
+<h4 id="save-columns-bulk-replace">save-columns (bulk replace)</h4>
+<pre><code>// Replace all columns for user:
+await window.electronAPI.saveColumns(userId, [
+  { id: '1', name: 'Col 1', visible: 1, order: 0, ... },
+  { id: '2', name: 'Col 2', visible: 1, order: 1, ... },
+]);</code></pre>
+<h4 id="save-column-single-upsert">save-column (single upsert)</h4>
+<pre><code>// Upsert one column:
+await window.electronAPI.saveColumn(userId, {
+  id: 'col-1',
+  name: 'Updated Name',
+  visible: 1,
+  order: 2,
+});</code></pre>
+<h3 id="sync-ipc">Sync</h3>
+<h4 id="sync-jumps">sync-jumps</h4>
+<pre><code>// Renderer (sync.js):
+const result = await window.electronAPI.syncJumps({
+  sharedColumns: [...],
+  sharedJumps: [...],
+});
+// Returns: { ok: true } or { ok: false, reason: '...' }</code></pre>
+<h4 id="upsert-shared-jumps">upsert-shared-jumps</h4>
+<pre><code>// Upsert array of jumps (preserve local hotkeys):
+await window.electronAPI.upsertSharedJumps([jump1, jump2, ...]);</code></pre>
+<h4 id="delete-shared-jumps">delete-shared-jumps</h4>
+<pre><code>// Delete shared jumps by ID:
+await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
+<h3 id="preferences-ipc">Preferences</h3>
+<h4 id="get-prefs">get-prefs</h4>
+<pre><code>const prefs = await window.electronAPI.getPrefs(userId);</code></pre>
+<h4 id="save-prefs">save-prefs</h4>
+<pre><code>await window.electronAPI.savePrefs(userId, {
+  startPage: 'home',
+  timePerClick: 10,
+  showDescription: false,
+  // ... all preference fields
+});</code></pre>
+<h3 id="click-log-ipc">Click Log</h3>
+<h4 id="get-click-log">get-click-log</h4>
+<pre><code>const log = await window.electronAPI.getClickLog(userId);
+// Returns: [{ id, userId, jumpId, ts }, ...]</code></pre>
+<h4 id="log-click">log-click</h4>
+<pre><code>await window.electronAPI.logClick(userId, jumpId, timestamp);</code></pre>
+<h3 id="sync-state-ipc">Sync State</h3>
+<h4 id="get-sync-state">get-sync-state</h4>
+<pre><code>const lastSync = await window.electronAPI.getSyncState('lastSync');
+// Returns: '1704067200000' or null</code></pre>
+<h4 id="update-sync-state">update-sync-state</h4>
+<pre><code>await window.electronAPI.updateSyncState('lastSync', Date.now().toString());</code></pre>
+<h3 id="files-ipc">Files</h3>
+<h4 id="open-url">open-url</h4>
+<pre><code>// Open URL in browser or path in file explorer:
+await window.electronAPI.openUrl('https://google.com');
+await window.electronAPI.openUrl('~/Documents');
+await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
+<p><strong>Main logic:</strong></p>
+<pre><code>ipcMain.handle('open-url', (_e, url) =&gt; {
+  const isWeb = /^(https?:\/\/|www\.)/i.test(url);
+  const fullUrl = isWeb && url.startsWith('www.') ? 'https://' + url : url;
+
+  if (isWeb) {
+    shell.openExternal(fullUrl);
+  } else {
+    shell.openPath(url);  // Cross-platform file explorer
+  }
+});</code></pre>
+<h3 id="backup-ipc">Backup</h3>
+<h4 id="save-backup">save-backup</h4>
+<pre><code>const backup = {
+  version: 1,
+  exportedAt: new Date().toISOString(),
+  userId: currentUser.id,
+  email: currentUser.email,
+  jumps: DB.getJumps(userId),
+  columns: DB.getColumns(userId),
+  prefs: DB.getPrefs(userId),
+};
+const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
+// Returns: { ok: true, path: '~/Documents/JumpKit Backups/jumpkit-backup-2024-01-15T10-30-45.json' }</code></pre>
+<h2 id="section-8">8. Supabase RLS Policies Summary</h2>
+<h3 id="why-rls">Why RLS?</h3>
+<p>Row-Level Security (RLS) restricts database access at the SQL level based on the current authenticated user. This ensures:</p>
+<ul>
+<li>Users can only see/modify their own data</li>
+<li>Team-owners can see their team data</li>
+<li>Org-owners can see all org data</li>
+<li>No permission checks needed in application code</li>
+</ul>
+<h3 id="helper-functions">Helper Functions</h3>
+<h4 id="current_user_role">current_user_role()</h4>
+<pre><code>SELECT COALESCE(
+  (SELECT role FROM profiles WHERE id = auth.uid()),
+  'anon'
+);</code></pre>
+<p>Returns: <code>'org-owner'</code>, <code>'team-owner'</code>, <code>'team-member'</code>, or <code>'anon'</code></p>
+<h4 id="current_user_org">current_user_org()</h4>
+<pre><code>SELECT org_id FROM profiles WHERE id = auth.uid();</code></pre>
+<p>Returns: UUID of user's organization, or NULL</p>
+<h4 id="is_team_memberp_team_id-uuid">is_team_member(p_team_id UUID)</h4>
+<pre><code>SELECT EXISTS (
+  SELECT 1 FROM team_members
+  WHERE team_id = p_team_id AND user_id = auth.uid()
+);</code></pre>
+<p>Returns: TRUE if user is member of team</p>
+<h4 id="is_team_ownerp_team_id-uuid">is_team_owner(p_team_id UUID)</h4>
+<pre><code>SELECT EXISTS (
+  SELECT 1 FROM teams
+  WHERE id = p_team_id AND owner_id = auth.uid()
+);</code></pre>
+<p>Returns: TRUE if user owns team</p>
+<h3 id="policy-summary">Policy Summary</h3>
+<h4 id="profiles-table">profiles</h4>
+<ul>
+<li><strong>SELECT</strong>: Users see own row OR org-owner sees all in org</li>
+<li><strong>INSERT</strong>: Users create own row</li>
+<li><strong>UPDATE</strong>: Users update own row</li>
+</ul>
+<h4 id="organizations-table">organizations</h4>
+<ul>
+<li><strong>SELECT</strong>: Owner sees own org OR member sees their org</li>
+<li><strong>INSERT</strong>: Only org-owners can create</li>
+<li><strong>UPDATE</strong>: Only owner can update</li>
+</ul>
+<h4 id="teams-table">teams</h4>
+<ul>
+<li><strong>SELECT</strong>: Org-owner sees all in org OR team-owner sees own OR member sees own</li>
+<li><strong>INSERT</strong>: Org-owner only</li>
+<li><strong>UPDATE</strong>: Org-owner OR team-owner</li>
+</ul>
+<h4 id="team_members-table">team_members</h4>
+<ul>
+<li><strong>SELECT</strong>: Org-owner sees all OR team-owner sees members OR user sees self</li>
+<li><strong>INSERT</strong>: Team-owner/org-owner OR user self-adding (for join)</li>
+<li><strong>DELETE</strong>: Team-owner or org-owner only</li>
+</ul>
+<h4 id="team_invites-table">team_invites</h4>
+<ul>
+<li><strong>SELECT</strong>: Team-owner/org-owner see all OR user sees invites to their email</li>
+<li><strong>INSERT</strong>: Team-owner/org-owner only</li>
+<li><strong>UPDATE</strong>: Invited user can accept, or team-owner/org-owner</li>
+</ul>
+<h4 id="shared_columns-shared_jumps-tables">shared_columns &amp; shared_jumps</h4>
+<ul>
+<li><strong>SELECT</strong>: Team members see columns/jumps for their teams only</li>
+<li><strong>INSERT</strong>: Team-owner/org-owner create</li>
+<li><strong>UPDATE</strong>: Creator or owner</li>
+<li><strong>DELETE</strong>: Team-owner/org-owner or org-owner</li>
+</ul>
+<h2 id="section-9">9. Build &amp; Development</h2>
+<h3 id="running-locally">Running Locally</h3>
+<p><strong>Prerequisites:</strong></p>
+<ul>
+<li>Node.js 18+ (tested on v24)</li>
+<li>npm</li>
+<li>macOS or Windows</li>
+<li>better-sqlite3 native module (auto-compiles during npm install)</li>
+</ul>
+<p><strong>Steps:</strong></p>
+<pre><code>cd Topics/JumpKit/app
+
+# Install dependencies
+npm install
+
+# Start in dev mode (Electron window opens with dev tools)
+npm start
+
+# OR build for distribution
+npm run build:all</code></pre>
+<h3 id="building-for-distribution">Building for Distribution</h3>
+<p><strong>macOS (Universal DMG):</strong></p>
+<pre><code>npm run build:all
+# Output: dist/JumpKit-1.0.0-universal.dmg
+# Contains both x64 + arm64 (Apple Silicon compatible)</code></pre>
+<p><strong>Windows (NSIS Installer):</strong></p>
+<pre><code>npm run build:all
+# Output: dist/JumpKit Setup 1.0.0.exe</code></pre>
+<h3 id="rebuilding-native-modules">Rebuilding Native Modules</h3>
+<p>If <code>better-sqlite3</code> fails to compile after updating Node or Electron versions:</p>
+<pre><code>npx electron-rebuild --version 40.8.0 -f -w better-sqlite3</code></pre>
+<h3 id="landing-page">Landing Page</h3>
+<p><strong>Location:</strong> <code>Topics/JumpKit/landing/</code><br/>
+<strong>Deploy:</strong> Via Vercel under <code>jeffroder-3196s-projects</code></p>
+<pre><code>cd landing
+
+# Preview locally
+npm run dev
+
+# Deploy to production
+vercel deploy --prod --token [VERCEL_TOKEN]</code></pre>
+<h3 id="database-reset-development">Database Reset (Development)</h3>
+<p>To reset local database and reseed:</p>
+<pre><code># Delete the database file:
+rm ~/Library/Application\\ Support/JumpKit/jumpkit.db  # macOS
+# or
+rm %APPDATA%/JumpKit/jumpkit.db  # Windows
+
+# Restart app — will auto-create schema and seed</code></pre>
+<h3 id="important-notes">Important Notes</h3>
+<p><strong>Cache-bust requirement:</strong></p>
+<ul>
+<li><code>jumps.js</code> and <code>teams.js</code> have <code>?v=timestamp</code> query params in <code>app.html</code></li>
+<li>This forces browsers to re-fetch when files change</li>
+<li>Update the timestamp in HTML when deploying</li>
+</ul>
+<p><strong>Pre-flight checks before build:</strong></p>
+<ul>
+<li>Run tests: go to Settings page → Tests tab (admin only)</li>
+<li>Check all 45 tests pass</li>
+<li>Verify no console errors</li>
+<li>Test on both platforms if distributing</li>
+</ul>
+<h2 id="section-10">10. Known Patterns &amp; Conventions</h2>
+<h3 id="global-functions-window">Global Functions (window.*)</h3>
+<p>All functions that are called from inline HTML <code>onclick</code> attributes <strong>must</strong> be exposed as <code>window.</code> globals:</p>
+<pre><code>// ❌ Not callable from HTML
+function handleClick() { ... }
+
+// ✅ Callable from HTML
+window.handleClick = function() { ... }
+
+// ✅ Also callable from HTML
+window.handleClick = handleClick;</code></pre>
+<p><strong>Examples:</strong></p>
+<pre><code>&lt;button onclick=&quot;window.navigateTo('jumps')&quot;&gt;Jumps&lt;/button&gt;
+&lt;button onclick=&quot;window.handleJumpClick(jumpId)&quot;&gt;Launch&lt;/button&gt;
+&lt;button onclick=&quot;saveAccountPrefs()&quot;&gt;Save&lt;/button&gt;  &lt;!-- exposed as global --&gt;</code></pre>
+<h3 id="database-readwrite-pattern">Database Read/Write Pattern</h3>
+<p><strong>Reads</strong> are synchronous from the in-memory cache:</p>
+<pre><code>const jumps = DB.getJumps(userId);  // Instant, synchronous, from cache
+const prefs = DB.getPrefs(userId);  // Instant</code></pre>
+<p><strong>Writes</strong> immediately update cache, then fire async IPC:</p>
+<pre><code>// This happens instantly (cache updated):
+DB.saveJump(userId, jump);
+
+// IPC message sent async (no await needed):
+window.electronAPI.saveJump(userId, jump);  // fire-and-forget
+
+// No spinner, no delay — user sees result immediately</code></pre>
+<h3 id="id-format-convention">ID Format Convention</h3>
+<p><strong>Local IDs:</strong> nanoid-like strings</p>
+<pre><code>function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  // Example: "if5q8a8u9"
+}</code></pre>
+<p><strong>Supabase IDs:</strong> UUIDs</p>
+<pre><code>// Example: "550e8400-e29b-41d4-a716-446655440000"
+// Stored in columns.supabaseId, jumps.supabaseId</code></pre>
+<p><strong>Tracking shared resources:</strong></p>
+<ul>
+<li>Local row has <code>supabaseId</code> pointing to cloud UUID</li>
+<li>On sync, match by <code>supabaseId</code> to avoid duplicates</li>
+<li>If local row has no <code>supabaseId</code>, it's a personal (never-synced) resource</li>
+</ul>
+<h3 id="darklight-mode">Dark/Light Mode</h3>
+<p><strong>No JS theme switching in components.</strong> Only CSS variables:</p>
+<pre><code>/* vars.css */
+[data-theme="dark"] {
+  --text: #C8D6E8;
+  --bg: #080F1A;
+  /* ... all vars */
+}
+[data-theme="light"] {
+  --text: #2C3E52;
+  --bg: #F0F4FA;
+  /* ... all vars */
+}
+
+/* Components use variables */
+.jump-item {
+  background: var(--bg-card);
+  color: var(--text);
+  border: 1px solid var(--border);
+}</code></pre>
+<p><strong>Theme toggle (in app.js):</strong></p>
+<pre><code>themeBtn.addEventListener('click', () =&gt; {
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;  // Triggers CSS repaint
+  localStorage.setItem('jk_theme', next);
+});</code></pre>
+<h3 id="no-markdown-tables-in-docs">No Markdown Tables in Docs</h3>
+<p>This documentation avoids Markdown <code>|</code> tables. Instead, uses:</p>
+<ul>
+<li>Bullet lists</li>
+<li>Definition lists (<code>term: description</code>)</li>
+<li>Code blocks with comments</li>
+<li>Prose descriptions</li>
+</ul>
+<p>This ensures compatibility with all Markdown renderers and is easier to maintain.</p>
+<h3 id="icons-tabler-icons-via-cdn">Icons: Tabler Icons via CDN</h3>
+<p><strong>All icons use Tabler Icons:</strong></p>
+<pre><code>&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css&quot;/&gt;
+
+&lt;!-- Usage: --&gt;
+&lt;i class=&quot;ti ti-home&quot;&gt;&lt;/i&gt;           &lt;!-- Home icon --&gt;
+&lt;i class=&quot;ti ti-settings&quot;&gt;&lt;/i&gt;       &lt;!-- Settings icon --&gt;
+&lt;i class=&quot;ti ti-users&quot;&gt;&lt;/i&gt;          &lt;!-- Users/Teams icon --&gt;
+&lt;i class=&quot;ti ti-archive&quot;&gt;&lt;/i&gt;        &lt;!-- Archive icon --&gt;
+&lt;i class=&quot;ti ti-circle-check&quot;&gt;&lt;/i&gt;   &lt;!-- Checkmark circle --&gt;
+&lt;i class=&quot;ti ti-alert-circle&quot;&gt;&lt;/i&gt;   &lt;!-- Alert circle --&gt;</code></pre>
+<p><strong>Font size:</strong> Adjust with <code>font-size</code> CSS</p>
+<pre><code>.icon-sm { font-size: 0.9rem; }
+.icon-lg { font-size: 1.5rem; }
+.icon-xl { font-size: 2rem; }</code></pre>
+<h3 id="escape-html-to-prevent-xss">Escape HTML to Prevent XSS</h3>
+<p>Always escape user input before inserting into DOM:</p>
+<pre><code>function esc(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Usage:
+div.innerHTML = \`&lt;p&gt;\${esc(userInput)}&lt;/p&gt;\`;
+
+// NOT:
+div.innerHTML = \`&lt;p&gt;\${userInput}&lt;/p&gt;\`;  // ❌ XSS risk</code></pre>
+<h3 id="localstorage-keys-naming">localStorage Keys Naming</h3>
+<p>Use prefix <code>jk_</code> for all app-specific keys:</p>
+<pre><code>// ✅ Good:
+localStorage.setItem('jk_theme', 'dark');
+localStorage.setItem('jk_sidebar_collapsed', '1');
+localStorage.setItem('jk_notifs_user123', JSON.stringify(notifs));
+
+// ❌ Avoid:
+localStorage.setItem('theme', 'dark');
+localStorage.setItem('notifications', '[]');</code></pre>
+<p>This prevents collisions with other apps on the same domain.</p>
+<h2 id="appendix">Appendix: Common Tasks</h2>
+<h3 id="add-a-new-page">Add a New Page</h3>
+<ol>
+<li><strong>Add to page router (app.js):</strong>
+<pre><code>const pages = {
+  jumps: () =&gt; renderJumps(),
+  mypage: () =&gt; renderMyPage(),  // New!
+  // ...
+};
+
+const pageTitles = {
+  mypage: 'My Page',
+  // ...
+};
+
+const pageIcons = {
+  mypage: 'ti-star',
+  // ...
+};</code></pre>
+</li>
+<li><strong>Add nav item (app.html):</strong>
+<pre><code>&lt;button class=&quot;nav-item&quot; data-page=&quot;mypage&quot;&gt;
+  &lt;i class=&quot;ti ti-star nav-icon&quot;&gt;&lt;/i&gt;
+  &lt;span class=&quot;nav-label&quot;&gt;My Page&lt;/span&gt;
+&lt;/button&gt;</code></pre>
+</li>
+<li><strong>Create renderer function (new file or in app.js):</strong>
+<pre><code>function renderMyPage() {
+  const pc = document.getElementById('pageContent');
+  pc.innerHTML = \`&lt;div&gt;...&lt;/div&gt;\`;
+}</code></pre>
+</li>
+</ol>
+<h3 id="add-a-modal-dialog">Add a Modal Dialog</h3>
+<pre><code>const body = \`
+  &lt;div class=&quot;form-group&quot;&gt;
+    &lt;label class=&quot;form-label&quot;&gt;Email&lt;/label&gt;
+    &lt;input class=&quot;form-input&quot; id=&quot;myEmail&quot; placeholder=&quot;user@example.com&quot;/&gt;
+  &lt;/div&gt;
+  &lt;div id=&quot;myError&quot; class=&quot;form-error&quot;&gt;&lt;/div&gt;
+\`;
+
+const footer = \`
+  &lt;button class=&quot;btn btn-subtle&quot; onclick=&quot;Modal.close()&quot;&gt;Cancel&lt;/button&gt;
+  &lt;button class=&quot;btn btn-primary&quot; onclick=&quot;submitMyForm()&quot;&gt;Submit&lt;/button&gt;
+\`;
+
+Modal.open('&lt;i class=&quot;ti ti-mail&quot;&gt;&lt;/i&gt; Send Email', body, footer);
+
+window.submitMyForm = function() {
+  const email = document.getElementById('myEmail').value;
+  if (!email) {
+    document.getElementById('myError').textContent = 'Email is required';
+    return;
+  }
+  // Do something...
+  Toast.success('Email sent!');
+  Modal.close();
+};</code></pre>
+<h3 id="implement-auto-archive-logic">Implement Auto-Archive Logic</h3>
+<pre><code>window.runAutoArchive = function runAutoArchive() {
+  const prefs = DB.getPrefs(currentUser.id);
+  if (!prefs.autoArchive || prefs.autoArchive === 'never') return;
+
+  const thresholds = { '1m': 30, '6m': 180, '1y': 365 };
+  const days = thresholds[prefs.autoArchive];
+  if (!days) return;
+
+  const thresholdMs = days * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const active = DB.getActiveJumps(currentUser.id);
+
+  const toArchive = active.filter(j =&gt;
+    j.lastUsed && (now - j.lastUsed) &gt; thresholdMs
+  );
+
+  if (toArchive.length === 0) return;
+
+  toArchive.forEach(j =&gt; {
+    DB.updateJump(currentUser.id, j.id, { isArchived: true });
+  });
+
+  const msg = toArchive.length === 1
+    ? \`"\${toArchive[0].name}" was auto-archived\`
+    : \`\${toArchive.length} jumps were auto-archived\`;
+
+  addNotification({
+    type: 'auto-archive',
+    message: msg,
+    ts: now
+  });
+};</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>JumpKit is a thoughtfully architected desktop app that balances:</p>
+<ul>
+<li><strong>Local-first</strong>: Personal data stays on device, fast synchronous reads</li>
+<li><strong>Cloud-enabled</strong>: Teams sync via Supabase, but hotkeys remain personal</li>
+<li><strong>Secure</strong>: RLS policies, role-based access, no data leakage by default</li>
+<li><strong>Productive</strong>: Global hotkeys, click tracking, ROI metrics</li>
+</ul>
+<p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
+<p>Happy building! 🚀</p>
+
+<hr>
+<h2 id="changelog">Changelog</h2>
+
+<h3>2026-05-10</h3>
+<ul>
+<li><strong>Hotkey Picker:</strong> Added "Pick" button next to hotkey input in Add/Edit Jump modal. Shows all <code>Ctrl+Shift+[A-Z, 0-9]</code> combos — green (available) or red (already used). Red combos are unselectable.</li>
+<li><strong>Theme Flash Fix:</strong> Fixed dark mode flash on login. Theme is now set from <code>localStorage</code> via inline <code>&lt;script&gt;</code> in <code>&lt;head&gt;</code> before any CSS loads, preventing flicker.</li>
+<li><strong>Seed Data:</strong> New users now see 3 default columns (Directories, Links, Col 3) with 3 default jumps (Home Folder/C Drive, Google, Slack) — all marked as favorites. Seeding uses <code>seed-new-user</code> IPC and only triggers when no personal columns exist.</li>
+<li><strong>Home Folder Jump:</strong> Fixed <code>~</code> not opening in Finder — <code>shell.openPath</code> doesn't expand <code>~</code>, now expanded to <code>os.homedir()</code> before opening.</li>
+<li><strong>DevTools Disabled in Production:</strong> F12 and Cmd/Ctrl+Shift+I blocked in packaged builds. DevTools forcibly closed if somehow opened. Test 53 added.</li>
+<li><strong>SQLite Fix:</strong> Rebuilt <code>better-sqlite3</code> native module via <code>@electron/rebuild</code> to fix "not valid mach-o file" error.</li>
+<li><strong>Modal Scroll:</strong> Add Jump modal now always scrolls to top when opened.</li>
+<li><strong>Seed DB Files:</strong> <code>data/seed-mac.db</code> and <code>data/seed-win.db</code> added to repo for reference/inspection.</li>
+<li><strong>isPackaged IPC:</strong> Exposed <code>app.isPackaged</code> via IPC for renderer use.</li>
+<li><strong>Test 47 Fix:</strong> Added cleanup step before insert to prevent duplicate key error on re-runs.</li>
+<li><strong>Test 53 Added:</strong> Security test — verifies DevTools are disabled in production builds.</li>
+<li><strong>Vercel DNS Fix:</strong> Updated GoDaddy A record for <code>jumpkit.app</code> to <code>76.76.21.21</code>. SSL cert now valid.</li>
+<li><strong>Landing Page — Hero:</strong> New macOS and Windows screenshots, theme-aware, stacked vertically, lightbox on click.</li>
+<li><strong>Landing Page — Lightbox:</strong> Click hero images for full-size overlay. Theme-aware. Esc or click to close.</li>
+<li><strong>Landing Page — Solution Section:</strong> Demo thumbnail with turquoise play button replaces plain button.</li>
+<li><strong>Landing Page — Footer:</strong> Added X, YouTube, LinkedIn social icons with brand color hover.</li>
+<li><strong>Landing Page — Problem Cards:</strong> Copy sharpened. Responsive 4→2→1 column grid.</li>
+<li><strong>Landing Page — CTA:</strong> Updated to post-launch copy ("Start jumping today", "Get Early Access").</li>
+<li><strong>Landing Page — Nav:</strong> Desktop nav buttons full-width and centered.</li>
+</ul>
+        `;
+
+        // Inject HTML content
+        document.getElementById('mainContent').innerHTML = mdContent;
+
+        // Build TOC and set up active link tracking
+        const headings = document.querySelectorAll('h2, h3');
+        const tocList = document.getElementById('toc');
+
+        let currentH2 = null;
+        let currentH2Item = null;
+
+        headings.forEach((heading, idx) => {
+            if (!heading.id) {
+                heading.id = 'heading-' + idx;
+            }
+
+            if (heading.tagName === 'H2') {
+                const li = document.createElement('li');
+                li.className = 'toc-item';
+                const a = document.createElement('a');
+                a.className = 'toc-link';
+                a.href = '#' + heading.id;
+                a.textContent = heading.textContent.replace(/^\d+\.\s+/, '');
+                li.appendChild(a);
+                tocList.appendChild(li);
+
+                currentH2Item = li;
+                currentH2 = null;
+            } else if (heading.tagName === 'H3' && currentH2Item) {
+                if (!currentH2) {
+                    currentH2 = document.createElement('ul');
+                    currentH2.className = 'toc-sublevel';
+                    currentH2Item.appendChild(currentH2);
+                }
+
+                const li = document.createElement('li');
+                li.className = 'toc-subitem';
+                const a = document.createElement('a');
+                a.className = 'toc-sublink';
+                a.href = '#' + heading.id;
+                a.textContent = heading.textContent;
+                li.appendChild(a);
+                currentH2.appendChild(li);
+            }
+        });
+
+        // Smooth scroll behavior and active link tracking
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Remove active class from all TOC links
+                    document.querySelectorAll('.toc-link, .toc-sublink').forEach(link => {
+                        link.classList.remove('active');
+                    });
+
+                    // Add active class to the corresponding TOC link
+                    const tocLink = document.querySelector(`a[href="#${entry.target.id}"]`);
+                    if (tocLink) {
+                        tocLink.classList.add('active');
+                    }
+                }
+            });
+        }, { rootMargin: '-50% 0px -50% 0px' });
+
+        headings.forEach(heading => observer.observe(heading));
+
+        // Click handlers for TOC links
+        document.querySelectorAll('.toc-link, .toc-sublink').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
