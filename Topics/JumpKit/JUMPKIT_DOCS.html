@@ -537,7 +537,7 @@
         <div class="content">
             <!-- Header -->
             <div class="header">
-                <h1>🚀 JumpKit</h1>
+                <h1><img src="jump-icon.svg" alt="JumpKit" style="width:2rem;height:2rem;vertical-align:-0.35em;margin-right:0.4em"> JumpKit</h1>
                 <p>Developer Documentation</p>
                 <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-10</p>
             </div>
@@ -2254,33 +2254,50 @@ window.submitMyForm = function() {
         const headings = document.querySelectorAll('h2, h3');
         const tocList = document.getElementById('toc');
 
-        let currentH2 = null;
         let currentH2Item = null;
+        let currentSubList = null;
 
         headings.forEach((heading, idx) => {
-            if (!heading.id) {
-                heading.id = 'heading-' + idx;
-            }
+            if (!heading.id) heading.id = 'heading-' + idx;
 
             if (heading.tagName === 'H2') {
                 const li = document.createElement('li');
                 li.className = 'toc-item';
+
+                const row = document.createElement('div');
+                row.className = 'toc-row';
+
+                const arrow = document.createElement('span');
+                arrow.className = 'toc-arrow';
+                arrow.textContent = '▶';
+                arrow.style.cssText = 'font-size:0.6rem;margin-right:6px;cursor:pointer;opacity:0.5;transition:transform 0.2s;display:inline-block';
+
                 const a = document.createElement('a');
                 a.className = 'toc-link';
                 a.href = '#' + heading.id;
                 a.textContent = heading.textContent.replace(/^\d+\.\s+/, '');
-                li.appendChild(a);
+
+                row.appendChild(arrow);
+                row.appendChild(a);
+                li.appendChild(row);
                 tocList.appendChild(li);
 
-                currentH2Item = li;
-                currentH2 = null;
-            } else if (heading.tagName === 'H3' && currentH2Item) {
-                if (!currentH2) {
-                    currentH2 = document.createElement('ul');
-                    currentH2.className = 'toc-sublevel';
-                    currentH2Item.appendChild(currentH2);
-                }
+                const sub = document.createElement('ul');
+                sub.className = 'toc-sublevel';
+                sub.style.display = 'none';
+                li.appendChild(sub);
 
+                arrow.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const open = sub.style.display !== 'none';
+                    sub.style.display = open ? 'none' : 'block';
+                    arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+                });
+
+                currentH2Item = li;
+                currentSubList = sub;
+
+            } else if (heading.tagName === 'H3' && currentSubList) {
                 const li = document.createElement('li');
                 li.className = 'toc-subitem';
                 const a = document.createElement('a');
@@ -2288,7 +2305,7 @@ window.submitMyForm = function() {
                 a.href = '#' + heading.id;
                 a.textContent = heading.textContent;
                 li.appendChild(a);
-                currentH2.appendChild(li);
+                currentSubList.appendChild(li);
             }
         });
 
