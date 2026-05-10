@@ -32,9 +32,8 @@ Instead of hunting through bookmarks, file explorers, or network drives, JumpKit
 
 | Tier | Price | Features |
 |---|---|---|
-| **Free** | $0 | Up to 250 jump launches, web links + local folders, hotkey launcher, filters & search, time & ROI dashboard |
-| **JumpKit** | $5/mo or $39/yr | Everything in Free + unlimited launches + team sharing + optional auto-archive |
-| **JumpKit + Jet AI** | $25/mo or $249/yr | Everything in JumpKit + locally-run AI + MS Office automation + audit logging |
+| **Free** | $0 | 250 jump launches, web links + local folders, hotkey launcher, filters & search, time & ROI dashboard, Windows + Mac |
+| **JumpKit Core** | $15/mo or $149/yr | Everything in Free + unlimited launches + team sharing + team stats & ROI + auto-archive + auto-backup |
 
 ---
 
