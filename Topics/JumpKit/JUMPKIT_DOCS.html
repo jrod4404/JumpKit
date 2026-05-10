@@ -202,16 +202,19 @@
 
         .toc-subitem {
             margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            display: block;
         }
         /* Bullet only on leaf H3 nodes (no children) — added via JS */
-        .toc-subitem.leaf::before {
+        .toc-subitem.leaf > div::before {
             content: '•';
             font-size: 1.2rem;
             opacity: 0.4;
             flex-shrink: 0;
+        }
+        .toc-subitem.leaf > div {
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .toc-sublink {
