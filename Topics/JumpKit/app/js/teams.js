@@ -107,7 +107,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
 
   // Auto-patch profile if org exists but org_id not set on profile
   if (ownedOrg && !profile.org_id) {
-    await supabaseClient.from('profiles').update({ org_id: ownedOrg.id, role: 'org-owner' }).eq('id', supaUser.id);
+    { const { error: _e1 } = await supabaseClient.from('profiles').update({ org_id: ownedOrg.id, role: 'org-owner' }).eq('id', supaUser.id); if (_e1) console.warn('[Teams] profile patch failed:', _e1.message); }
     profile.org_id = ownedOrg.id;
     profile.role = 'org-owner';
     if (window._supabaseProfile) { window._supabaseProfile.org_id = ownedOrg.id; window._supabaseProfile.role = 'org-owner'; }
@@ -144,7 +144,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
           .single();
         if (error) throw error;
         // Update profile org_id
-        await supabaseClient.from('profiles').update({ org_id: org.id }).eq('id', supaUser.id);
+        { const { error: _e2 } = await supabaseClient.from('profiles').update({ org_id: org.id }).eq('id', supaUser.id); if (_e2) console.warn('[Teams] org profile update failed:', _e2.message); }
         if (msg) { msg.style.color='#22c55e'; msg.textContent='Organization created! Reloading…'; }
         setTimeout(() => renderTeams(), 800);
       } catch(e) {
@@ -970,8 +970,8 @@ async function doPromote(teamId) {
     if (!profiles || profiles.length === 0) throw new Error('User not found.');
 
     const userId = profiles[0].id;
-    await supabaseClient.from('profiles').update({ role: 'team-owner' }).eq('id', userId);
-    await supabaseClient.from('teams').update({ owner_id: userId }).eq('id', teamId);
+    { const { error: _e3 } = await supabaseClient.from('profiles').update({ role: 'team-owner' }).eq('id', userId); if (_e3) throw new Error('Transfer failed (profiles): ' + _e3.message); }
+    { const { error: _e4 } = await supabaseClient.from('teams').update({ owner_id: userId }).eq('id', teamId); if (_e4) throw new Error('Transfer failed (teams): ' + _e4.message); }
 
     Modal.close();
     Toast.success(`Promoted ${email} to team owner.`);
@@ -992,8 +992,8 @@ window.removeTeam = function(teamId, teamName) {
 window.doRemoveTeam = async function(teamId, teamName) {
   Modal.close();
   try {
-    const r1 = await supabaseClient.from('team_members').delete().eq('team_id', teamId);
-    const r2 = await supabaseClient.from('teams').delete().eq('id', teamId);
+    const r1 = await supabaseClient.from('team_members').delete().eq('team_id', teamId); if (r1.error) throw new Error('Delete members failed: ' + r1.error.message);
+    const r2 = await supabaseClient.from('teams').delete().eq('id', teamId); if (r2.error) throw new Error('Delete team failed: ' + r2.error.message);
     if (r2.error) throw r2.error;
     Toast.success(`Team "${teamName}" removed`);
     const orgToRefresh = selectedOrgId;
@@ -1013,7 +1013,7 @@ window.removeMember = window.confirmRemoveMember;
 window.doRemoveMember = async function(memberId, memberName) {
   Modal.close();
   try {
-    await supabaseClient.from('team_members').delete().eq('id', memberId);
+    { const { error: _e5 } = await supabaseClient.from('team_members').delete().eq('id', memberId); if (_e5) throw new Error('Remove member failed: ' + _e5.message); }
     Toast.success(`${memberName} removed from team`);
     updateOrgStats(0, -1);
     if (selectedTeamId) selectTeam(selectedTeamId);
@@ -1085,7 +1085,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
 
     // Update profile role to team-member if needed
     if (window._supabaseProfile?.role === 'team-member') {
-      await supabaseClient.from('profiles').update({ role: 'team-member' }).eq('id', window._supabaseUser.id);
+      { const { error: _e6 } = await supabaseClient.from('profiles').update({ role: 'team-member' }).eq('id', window._supabaseUser.id); if (_e6) console.warn('[Teams] leave team profile update failed:', _e6.message); }
     }
 
     Modal.close();
