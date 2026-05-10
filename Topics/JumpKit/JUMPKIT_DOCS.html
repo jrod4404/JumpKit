@@ -606,7 +606,8 @@
 </tr>
 </tbody>
 </table>
-<h2 id="section-2">2. Architecture Overview</h2>
+<h2 id="technical-implementation">Technical Implementation</h2>
+<h3 id="section-2">2. Architecture Overview</h3>
 <h3 id="electron-app-structure">Electron App Structure</h3>
 <p>JumpKit is built as an Electron application—a Node.js desktop runtime that wraps a Chromium browser. This means:</p>
 <ul>
@@ -706,7 +707,7 @@ App ready to render</code></pre>
 <li>All DB writes <strong>immediately update the cache</strong>, then fire IPC messages to SQLite (async, no await)</li>
 <li>Users never see &quot;saving...&quot; spinners—the cache is the source of truth</li>
 </ul>
-<h2 id="section-3">3. File Structure &amp; Responsibilities</h2>
+<h3 id="section-3">3. File Structure &amp; Responsibilities</h3>
 <h3 id="mainjs">main.js — Electron Main Process</h3>
 <p><strong>Responsibilities:</strong></p>
 <ul>
@@ -1170,7 +1171,7 @@ localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
 <li><code>.column</code> — Column container</li>
 <li><code>.stats-*</code> — Statistics page styles</li>
 </ul>
-<h2 id="section-4">4. Database Schema</h2>
+<h3 id="section-4">4. Database Schema</h3>
 <h3 id="sqlite-local">SQLite (Local)</h3>
 <p><strong>All tables exist in <code>jumpkit.db</code> (stored in app-data/ directory):</strong></p>
 <h4 id="jumps">jumps</h4>
@@ -1293,7 +1294,7 @@ updated_at TIMESTAMPTZ</code></pre>
 <li><strong>shared_columns</strong> → <strong>shared_jumps</strong> (one-to-many)</li>
 <li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
 </ul>
-<h2 id="section-5">5. Key Concepts &amp; Data Flows</h2>
+<h3 id="section-5">5. Key Concepts &amp; Data Flows</h3>
 <h3 id="jumps-the-core-resource">5a. Jumps — The Core Resource</h3>
 <p><strong>What is a jump?</strong><br/>
 A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
@@ -1602,7 +1603,7 @@ else renderTeamMemberView(...);</code></pre>
 // Updated by Lemon Squeezy webhook (ls-webhook edge function)
 // Triggers paywall if: status='overdue' || status='cancelled'
 // OR if free tier and trial_launches_used >= 250</code></pre>
-<h2 id="section-6">6. UI Components</h2>
+<h3 id="section-6">6. UI Components</h3>
 <h3 id="modal">Modal</h3>
 <p><strong>Usage:</strong></p>
 <pre><code>Modal.open(
@@ -1758,7 +1759,7 @@ if (navPrefs.navDefaultCollapsed) {
 <li>Icons remain visible</li>
 <li>Tooltip on hover shows label</li>
 </ul>
-<h2 id="section-7">7. IPC Handlers (main.js ↔ renderer)</h2>
+<h3 id="section-7">7. IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
 <h3 id="jumps-ipc">Jumps</h3>
 <h4 id="get-jumps">get-jumps</h4>
@@ -1877,7 +1878,7 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
 };
 const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
 // Returns: { ok: true, path: '~/Documents/JumpKit Backups/jumpkit-backup-2024-01-15T10-30-45.json' }</code></pre>
-<h2 id="section-8">8. Supabase RLS Policies Summary</h2>
+<h3 id="section-8">8. Supabase RLS Policies Summary</h3>
 <h3 id="why-rls">Why RLS?</h3>
 <p>Row-Level Security (RLS) restricts database access at the SQL level based on the current authenticated user. This ensures:</p>
 <ul>
@@ -1946,7 +1947,7 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 <li><strong>UPDATE</strong>: Creator or owner</li>
 <li><strong>DELETE</strong>: Team-owner/org-owner or org-owner</li>
 </ul>
-<h2 id="section-9">9. Build &amp; Development</h2>
+<h3 id="section-9">9. Build &amp; Development</h3>
 <h3 id="running-locally">Running Locally</h3>
 <p><strong>Prerequisites:</strong></p>
 <ul>
@@ -2009,7 +2010,7 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 <li>Verify no console errors</li>
 <li>Test on both platforms if distributing</li>
 </ul>
-<h2 id="section-10">10. Known Patterns &amp; Conventions</h2>
+<h3 id="section-10">10. Known Patterns &amp; Conventions</h3>
 <h3 id="global-functions-window">Global Functions (window.*)</h3>
 <p>All functions that are called from inline HTML <code>onclick</code> attributes <strong>must</strong> be exposed as <code>window.</code> globals:</p>
 <pre><code>// ❌ Not callable from HTML
@@ -2125,6 +2126,40 @@ localStorage.setItem('jk_notifs_user123', JSON.stringify(notifs));
 localStorage.setItem('theme', 'dark');
 localStorage.setItem('notifications', '[]');</code></pre>
 <p>This prevents collisions with other apps on the same domain.</p>
+<h2 id="marketing-strategy">Marketing Strategy</h2>
+<p>This section covers how JumpKit is positioned and marketed to potential customers.</p>
+
+<h3 id="target-audience">Target Audience</h3>
+<ul>
+<li><strong>Individual knowledge workers</strong> — developers, analysts, sales reps, operations staff who navigate many web and file resources daily</li>
+<li><strong>Small to mid-size teams</strong> — teams that want to standardize their navigation stack and share jump collections</li>
+<li><strong>MSP-managed businesses</strong> — IT-managed companies in regulated industries (manufacturing, automotive, healthcare, finance) that value local-first data and audit trails</li>
+</ul>
+
+<h3 id="marketing-channels">Marketing Channels</h3>
+<ul>
+<li><strong>Online forums</strong> — Reddit (r/productivity, r/selfhosted, r/sysadmin), Hacker News, LinkedIn posts</li>
+<li><strong>Email broadcasts</strong> — Targeted outreach to productivity-focused lists</li>
+<li><strong>IT MSP Partners</strong> — Commission-based reseller program; partners earn a recurring commission for every user they sign up</li>
+<li><strong>Landing page (jumpkit.app)</strong> — SEO-optimized, showcases features, demo video, pricing, testimonials</li>
+</ul>
+
+<h3 id="distribution-model">Distribution Model</h3>
+<ul>
+<li>Free tier available immediately — users download and install with no friction</li>
+<li>Paid tier (JumpKit Core) via Lemon Squeezy checkout</li>
+<li>MSP partners earn a recurring commission on all active subscribers they refer</li>
+<li>Goal: reach passive income through partner network + organic growth by end of June 2026</li>
+</ul>
+
+<h3 id="key-messages">Key Messages</h3>
+<ul>
+<li>"Stop searching. Start jumping." — core brand tagline</li>
+<li>Quantifiable ROI — time saved and dollars recovered tracked automatically</li>
+<li>Local-first — no data leakage, works offline, your data stays yours</li>
+<li>Easy to install and use — no IT setup required for individuals</li>
+</ul>
+
 <h2 id="appendix">Appendix: Common Tasks</h2>
 <h3 id="add-a-new-page">Add a New Page</h3>
 <ol>
@@ -2279,7 +2314,7 @@ window.submitMyForm = function() {
                 const arrow = document.createElement('span');
                 arrow.className = 'toc-arrow';
                 arrow.textContent = '▶';
-                arrow.style.cssText = 'font-size:0.55rem;opacity:0.5;transition:transform 0.2s;display:inline-block;flex-shrink:0;line-height:1';
+                arrow.style.cssText = 'font-size:0.85rem;opacity:0.5;transition:transform 0.2s;display:inline-block;flex-shrink:0;line-height:1';
 
                 const a = document.createElement('a');
                 a.className = 'toc-link';
