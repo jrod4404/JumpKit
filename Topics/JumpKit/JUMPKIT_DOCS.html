@@ -99,7 +99,11 @@
 
         .header {
             background: linear-gradient(135deg, var(--royal) 0%, var(--turq) 100%);
-            padding: 1.75rem var(--spacing-unit);
+            height: 150px;
+            padding: 0 var(--spacing-unit);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
@@ -607,7 +611,7 @@
 </tbody>
 </table>
 <h2 id="technical-implementation">2. Technical Implementation</h2>
-<h3 id="section-2">2. Architecture Overview</h3>
+<h3 id="section-2">2.1 Architecture Overview</h3>
 <h3 id="electron-app-structure">Electron App Structure</h3>
 <p>JumpKit is built as an Electron application—a Node.js desktop runtime that wraps a Chromium browser. This means:</p>
 <ul>
@@ -707,7 +711,7 @@ App ready to render</code></pre>
 <li>All DB writes <strong>immediately update the cache</strong>, then fire IPC messages to SQLite (async, no await)</li>
 <li>Users never see &quot;saving...&quot; spinners—the cache is the source of truth</li>
 </ul>
-<h3 id="section-3">3. File Structure &amp; Responsibilities</h3>
+<h3 id="section-3">2.2 File Structure &amp; Responsibilities</h3>
 <h3 id="mainjs">main.js — Electron Main Process</h3>
 <p><strong>Responsibilities:</strong></p>
 <ul>
@@ -785,7 +789,7 @@ App ready to render</code></pre>
 <li><code>showPaywall()</code> — Display upgrade modal for free tier limit</li>
 </ul>
 <p><strong>Components:</strong></p>
-<h4 id="modal">Modal</h4>
+<h4 id="modal">2.5.1 Modal</h4>
 <pre><code>Modal.open(title, bodyHTML, footerHTML, size);
 Modal.close();</code></pre>
 <ul>
@@ -795,7 +799,7 @@ Modal.close();</code></pre>
 <li><code>footerHTML</code>: Buttons or empty string for no footer</li>
 <li><code>size</code>: Optional CSS class modifier (unused currently, reserved for future)</li>
 </ul>
-<h4 id="toast">Toast</h4>
+<h4 id="toast">2.5.2 Toast</h4>
 <pre><code>Toast.success(message);
 Toast.danger(message);</code></pre>
 <ul>
@@ -803,7 +807,7 @@ Toast.danger(message);</code></pre>
 <li>Stacks or replaces previous toast</li>
 <li>Icons via Tabler Icons</li>
 </ul>
-<h4 id="ctxmenu-context-menu">CtxMenu (Context Menu)</h4>
+<h4 id="ctxmenu-context-menu">2.5.3 CtxMenu (Context Menu)</h4>
 <pre><code>CtxMenu.show(x, y, items);
 CtxMenu.hide();
 // items = [
@@ -816,7 +820,7 @@ CtxMenu.hide();
 <li>Clamps position to viewport</li>
 <li>Auto-hides on click or escape</li>
 </ul>
-<h4 id="wiredropdown">wireDropdown</h4>
+<h4 id="wiredropdown">2.5.4 wireDropdown</h4>
 <pre><code>wireDropdown({
   dropId: 'myDrop',
   triggerId: 'myTrigger',
@@ -1171,10 +1175,10 @@ localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
 <li><code>.column</code> — Column container</li>
 <li><code>.stats-*</code> — Statistics page styles</li>
 </ul>
-<h3 id="section-4">4. Database Schema</h3>
+<h3 id="section-4">2.3 Database Schema</h3>
 <h3 id="sqlite-local">SQLite (Local)</h3>
 <p><strong>All tables exist in <code>jumpkit.db</code> (stored in app-data/ directory):</strong></p>
-<h4 id="jumps">jumps</h4>
+<h4 id="jumps">2.3.1 jumps</h4>
 <pre><code>id TEXT PRIMARY KEY,
 userId TEXT NOT NULL,
 name TEXT NOT NULL,
@@ -1194,7 +1198,7 @@ teamId TEXT DEFAULT NULL,
 timeSaved REAL DEFAULT NULL,           -- optional override
 timeSavedUnit TEXT DEFAULT NULL,
 supabaseId TEXT DEFAULT NULL</code></pre>
-<h4 id="columns">columns</h4>
+<h4 id="columns">2.3.2 columns</h4>
 <pre><code>id TEXT PRIMARY KEY,
 userId TEXT NOT NULL,
 name TEXT NOT NULL,
@@ -1204,15 +1208,15 @@ createdAt INTEGER,
 isShared INTEGER DEFAULT 0,
 teamId TEXT DEFAULT NULL,
 supabaseId TEXT DEFAULT NULL           -- UUID from shared_columns.id</code></pre>
-<h4 id="sync_state">sync_state</h4>
+<h4 id="sync_state">2.3.3 sync_state</h4>
 <pre><code>key TEXT PRIMARY KEY,
 value TEXT                             -- lastSync timestamp, etc.</code></pre>
-<h4 id="click_log">click_log</h4>
+<h4 id="click_log">2.3.4 click_log</h4>
 <pre><code>id INTEGER PRIMARY KEY AUTOINCREMENT,
 userId TEXT NOT NULL,
 jumpId TEXT NOT NULL,
 ts INTEGER NOT NULL                    -- timestamp</code></pre>
-<h4 id="user_prefs">user_prefs</h4>
+<h4 id="user_prefs">2.3.5 user_prefs</h4>
 <pre><code>userId TEXT PRIMARY KEY,
 startPage TEXT DEFAULT 'home',
 timePerClick REAL DEFAULT 10,
@@ -1228,7 +1232,7 @@ autoArchive TEXT DEFAULT 'never',
 navDefaultCollapsed INTEGER DEFAULT 0</code></pre>
 <h3 id="supabase-cloud">Supabase (Cloud)</h3>
 <p><strong>Tables with RLS enabled:</strong></p>
-<h4 id="profiles">profiles</h4>
+<h4 id="profiles">2.3.6 profiles</h4>
 <pre><code>id UUID PRIMARY KEY (auth.users.id),
 email TEXT NOT NULL,
 first_name TEXT DEFAULT '',
@@ -1240,39 +1244,39 @@ subscription_tier TEXT ('free', 'core', 'teams_jet'),
 trial_launches_used INTEGER DEFAULT 0,
 ls_customer_id TEXT,
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="organizations">organizations</h4>
+<h4 id="organizations">2.3.7 organizations</h4>
 <pre><code>id UUID PRIMARY KEY,
 name TEXT NOT NULL,
 owner_id UUID REFERENCES auth.users(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="teams">teams</h4>
+<h4 id="teams">2.3.8 teams</h4>
 <pre><code>id UUID PRIMARY KEY,
 org_id UUID REFERENCES organizations(id),
 name TEXT NOT NULL,
 team_password_hash TEXT NOT NULL,      -- SHA-256 hash
 owner_id UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="team_members">team_members</h4>
+<h4 id="team_members">2.3.9 team_members</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 user_id UUID REFERENCES profiles(id),
 joined_at TIMESTAMPTZ,
 UNIQUE(team_id, user_id)</code></pre>
-<h4 id="team_invites">team_invites</h4>
+<h4 id="team_invites">2.3.10 team_invites</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 email TEXT NOT NULL,
 invited_by UUID REFERENCES profiles(id),
 status TEXT ('pending', 'accepted'),
 invited_at TIMESTAMPTZ</code></pre>
-<h4 id="shared_columns">shared_columns</h4>
+<h4 id="shared_columns">2.3.11 shared_columns</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 name TEXT NOT NULL,
 position INTEGER DEFAULT 0,
 created_by UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="shared_jumps">shared_jumps</h4>
+<h4 id="shared_jumps">2.3.12 shared_jumps</h4>
 <pre><code>id UUID PRIMARY KEY,
 shared_column_id UUID REFERENCES shared_columns(id),
 team_id UUID REFERENCES teams(id),
@@ -1294,7 +1298,7 @@ updated_at TIMESTAMPTZ</code></pre>
 <li><strong>shared_columns</strong> → <strong>shared_jumps</strong> (one-to-many)</li>
 <li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
 </ul>
-<h3 id="section-5">5. Key Concepts &amp; Data Flows</h3>
+<h3 id="section-5">2.4 Key Concepts &amp; Data Flows</h3>
 <h3 id="jumps-the-core-resource">5a. Jumps — The Core Resource</h3>
 <p><strong>What is a jump?</strong><br/>
 A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
@@ -1603,7 +1607,7 @@ else renderTeamMemberView(...);</code></pre>
 // Updated by Lemon Squeezy webhook (ls-webhook edge function)
 // Triggers paywall if: status='overdue' || status='cancelled'
 // OR if free tier and trial_launches_used >= 250</code></pre>
-<h3 id="section-6">6. UI Components</h3>
+<h3 id="section-6">2.5 UI Components</h3>
 <h3 id="modal">Modal</h3>
 <p><strong>Usage:</strong></p>
 <pre><code>Modal.open(
@@ -1759,10 +1763,10 @@ if (navPrefs.navDefaultCollapsed) {
 <li>Icons remain visible</li>
 <li>Tooltip on hover shows label</li>
 </ul>
-<h3 id="section-7">7. IPC Handlers (main.js ↔ renderer)</h3>
+<h3 id="section-7">2.6 IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
 <h3 id="jumps-ipc">Jumps</h3>
-<h4 id="get-jumps">get-jumps</h4>
+<h4 id="get-jumps">2.6.1 get-jumps</h4>
 <pre><code>// Renderer:
 const jumps = await window.electronAPI.getJumps(userId);
 
@@ -1771,7 +1775,7 @@ ipcMain.handle('get-jumps', (_e, userId) =&gt; {
   if (!db) return [];
   return db.prepare('SELECT * FROM jumps WHERE userId = ?').all(userId);
 });</code></pre>
-<h4 id="save-jump">save-jump</h4>
+<h4 id="save-jump">2.6.2 save-jump</h4>
 <pre><code>// Renderer:
 await window.electronAPI.saveJump(userId, jump);
 
@@ -1785,7 +1789,7 @@ ipcMain.handle('save-jump', (_e, userId, jump) =&gt; {
     return { ok: false, reason: e.message };
   }
 });</code></pre>
-<h4 id="delete-jump">delete-jump</h4>
+<h4 id="delete-jump">2.6.3 delete-jump</h4>
 <pre><code>// Renderer:
 await window.electronAPI.deleteJump(userId, jumpId);
 
@@ -1796,15 +1800,15 @@ ipcMain.handle('delete-jump', (_e, userId, id) =&gt; {
   return { ok: true };
 });</code></pre>
 <h3 id="columns-ipc">Columns</h3>
-<h4 id="get-columns">get-columns</h4>
+<h4 id="get-columns">2.6.4 get-columns</h4>
 <pre><code>const columns = await window.electronAPI.getColumns(userId);</code></pre>
-<h4 id="save-columns-bulk-replace">save-columns (bulk replace)</h4>
+<h4 id="save-columns-bulk-replace">2.6.5 save-columns (bulk replace)</h4>
 <pre><code>// Replace all columns for user:
 await window.electronAPI.saveColumns(userId, [
   { id: '1', name: 'Col 1', visible: 1, order: 0, ... },
   { id: '2', name: 'Col 2', visible: 1, order: 1, ... },
 ]);</code></pre>
-<h4 id="save-column-single-upsert">save-column (single upsert)</h4>
+<h4 id="save-column-single-upsert">2.6.6 save-column (single upsert)</h4>
 <pre><code>// Upsert one column:
 await window.electronAPI.saveColumn(userId, {
   id: 'col-1',
@@ -1813,14 +1817,14 @@ await window.electronAPI.saveColumn(userId, {
   order: 2,
 });</code></pre>
 <h3 id="sync-ipc">Sync</h3>
-<h4 id="sync-jumps">sync-jumps</h4>
+<h4 id="sync-jumps">2.6.7 sync-jumps</h4>
 <pre><code>// Renderer (sync.js):
 const result = await window.electronAPI.syncJumps({
   sharedColumns: [...],
   sharedJumps: [...],
 });
 // Returns: { ok: true } or { ok: false, reason: '...' }</code></pre>
-<h4 id="upsert-shared-jumps">upsert-shared-jumps</h4>
+<h4 id="upsert-shared-jumps">2.6.8 upsert-shared-jumps</h4>
 <pre><code>// Upsert array of jumps (preserve local hotkeys):
 await window.electronAPI.upsertSharedJumps([jump1, jump2, ...]);</code></pre>
 <h4 id="delete-shared-jumps">delete-shared-jumps</h4>
@@ -1878,7 +1882,7 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
 };
 const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
 // Returns: { ok: true, path: '~/Documents/JumpKit Backups/jumpkit-backup-2024-01-15T10-30-45.json' }</code></pre>
-<h3 id="section-8">8. Supabase RLS Policies Summary</h3>
+<h3 id="section-8">2.7 Supabase RLS Policies Summary</h3>
 <h3 id="why-rls">Why RLS?</h3>
 <p>Row-Level Security (RLS) restricts database access at the SQL level based on the current authenticated user. This ensures:</p>
 <ul>
@@ -1910,31 +1914,31 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 );</code></pre>
 <p>Returns: TRUE if user owns team</p>
 <h3 id="policy-summary">Policy Summary</h3>
-<h4 id="profiles-table">profiles</h4>
+<h4 id="profiles-table">2.3.6 profiles</h4>
 <ul>
 <li><strong>SELECT</strong>: Users see own row OR org-owner sees all in org</li>
 <li><strong>INSERT</strong>: Users create own row</li>
 <li><strong>UPDATE</strong>: Users update own row</li>
 </ul>
-<h4 id="organizations-table">organizations</h4>
+<h4 id="organizations-table">2.3.7 organizations</h4>
 <ul>
 <li><strong>SELECT</strong>: Owner sees own org OR member sees their org</li>
 <li><strong>INSERT</strong>: Only org-owners can create</li>
 <li><strong>UPDATE</strong>: Only owner can update</li>
 </ul>
-<h4 id="teams-table">teams</h4>
+<h4 id="teams-table">2.3.8 teams</h4>
 <ul>
 <li><strong>SELECT</strong>: Org-owner sees all in org OR team-owner sees own OR member sees own</li>
 <li><strong>INSERT</strong>: Org-owner only</li>
 <li><strong>UPDATE</strong>: Org-owner OR team-owner</li>
 </ul>
-<h4 id="team_members-table">team_members</h4>
+<h4 id="team_members-table">2.3.9 team_members</h4>
 <ul>
 <li><strong>SELECT</strong>: Org-owner sees all OR team-owner sees members OR user sees self</li>
 <li><strong>INSERT</strong>: Team-owner/org-owner OR user self-adding (for join)</li>
 <li><strong>DELETE</strong>: Team-owner or org-owner only</li>
 </ul>
-<h4 id="team_invites-table">team_invites</h4>
+<h4 id="team_invites-table">2.3.10 team_invites</h4>
 <ul>
 <li><strong>SELECT</strong>: Team-owner/org-owner see all OR user sees invites to their email</li>
 <li><strong>INSERT</strong>: Team-owner/org-owner only</li>
@@ -1947,7 +1951,7 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 <li><strong>UPDATE</strong>: Creator or owner</li>
 <li><strong>DELETE</strong>: Team-owner/org-owner or org-owner</li>
 </ul>
-<h3 id="section-9">9. Build &amp; Development</h3>
+<h3 id="section-9">2.8 Build &amp; Development</h3>
 <h3 id="running-locally">Running Locally</h3>
 <p><strong>Prerequisites:</strong></p>
 <ul>
@@ -2010,7 +2014,7 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 <li>Verify no console errors</li>
 <li>Test on both platforms if distributing</li>
 </ul>
-<h3 id="section-10">10. Known Patterns &amp; Conventions</h3>
+<h3 id="section-10">2.9 Known Patterns &amp; Conventions</h3>
 <h3 id="global-functions-window">Global Functions (window.*)</h3>
 <p>All functions that are called from inline HTML <code>onclick</code> attributes <strong>must</strong> be exposed as <code>window.</code> globals:</p>
 <pre><code>// ❌ Not callable from HTML
