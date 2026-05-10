@@ -190,36 +190,44 @@
         }
 
         .toc-sublevel {
-            margin-left: 0.75rem;
-            padding-left: 0.75rem;
-            border-left: 1px solid var(--border);
+            margin-left: 1rem;
+            padding-left: 0;
+            border-left: none;
             margin-top: 0.25rem;
         }
 
         .toc-subitem {
             margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toc-subitem::before {
+            content: '•';
+            font-size: 0.6rem;
+            opacity: 0.4;
+            flex-shrink: 0;
         }
 
         .toc-sublink {
             display: block;
-            padding: 0.4rem 0.5rem;
+            padding: 0.3rem 0.25rem;
             border-radius: 3px;
-            font-size: 0.85rem;
+            font-size: 0.82rem;
             color: var(--text-muted);
             transition: all 0.2s ease;
-            border-left: 2px solid transparent;
+            border-left: none;
         }
 
         .toc-sublink:hover {
             color: var(--turq);
             background-color: rgba(0, 194, 199, 0.08);
-            border-left-color: var(--turq);
         }
 
         .toc-sublink.active {
             color: var(--turq);
             font-weight: 600;
-            border-left-color: var(--turq);
         }
 
         /* ============================================================
@@ -537,7 +545,7 @@
         <div class="content">
             <!-- Header -->
             <div class="header">
-                <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem"> JumpKit</h1>
+                <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer Documentation</p>
                 <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-10</p>
             </div>
