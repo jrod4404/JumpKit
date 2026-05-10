@@ -537,7 +537,7 @@
         <div class="content">
             <!-- Header -->
             <div class="header">
-                <h1><img src="jump-icon.svg" alt="JumpKit" style="width:2rem;height:2rem;vertical-align:-0.35em;margin-right:0.4em"> JumpKit</h1>
+                <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem"> JumpKit</h1>
                 <p>Developer Documentation</p>
                 <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-10</p>
             </div>
@@ -2266,16 +2266,18 @@ window.submitMyForm = function() {
 
                 const row = document.createElement('div');
                 row.className = 'toc-row';
+                row.style.cssText = 'display:flex;align-items:center;gap:6px;cursor:pointer';
 
                 const arrow = document.createElement('span');
                 arrow.className = 'toc-arrow';
                 arrow.textContent = '▶';
-                arrow.style.cssText = 'font-size:0.6rem;margin-right:6px;cursor:pointer;opacity:0.5;transition:transform 0.2s;display:inline-block';
+                arrow.style.cssText = 'font-size:0.55rem;opacity:0.5;transition:transform 0.2s;display:inline-block;flex-shrink:0;line-height:1';
 
                 const a = document.createElement('a');
                 a.className = 'toc-link';
                 a.href = '#' + heading.id;
-                a.textContent = heading.textContent.replace(/^\d+\.\s+/, '');
+                // Preserve section number from heading text
+                a.textContent = heading.textContent.trim();
 
                 row.appendChild(arrow);
                 row.appendChild(a);
