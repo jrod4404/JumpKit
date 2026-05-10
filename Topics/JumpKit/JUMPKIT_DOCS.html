@@ -571,16 +571,16 @@
 </blockquote>
 <hr/>
 <h2 id="section-1">1. Product Overview</h2>
-<h3 id="what-is-jumpkit">What is JumpKit?</h3>
+<h4 id="what-is-jumpkit">1.1 What is JumpKit?</h4>
 <p>JumpKit is a desktop productivity application for Windows and macOS that solves a simple but powerful problem: <strong>getting to the websites, folders, and file shares you use most, instantly.</strong></p>
 <p>Instead of hunting through bookmarks, file explorers, or network drives, JumpKit puts all your most-used links and paths in one place, organized in custom columns, and launched with a single click—or a global hotkey.</p>
-<h3 id="who-its-for">Who It&#39;s For</h3>
+<h4 id="who-its-for">1.2 Who It&#39;s For</h4>
 <ul>
 <li><strong>Individual knowledge workers</strong> who want to save time navigating to frequently used resources</li>
 <li><strong>Small teams</strong> that need to share jump collections with their colleagues</li>
 <li><strong>MSP-managed businesses</strong> in regulated industries (manufacturing, healthcare, legal, finance) that value local-first data (no cloud leakage) and audit trails</li>
 </ul>
-<h3 id="core-value-proposition">Core Value Proposition</h3>
+<h4 id="core-value-proposition">1.3 Core Value Proposition</h4>
 <ul>
 <li><strong>Save time</strong>: Launch any resource with one click or hotkey</li>
 <li><strong>Measure ROI</strong>: JumpKit tracks every click and calculates time saved and dollars earned back</li>
@@ -588,7 +588,7 @@
 <li><strong>Share safely</strong>: Team members sync shared jumps from a private cloud (Supabase), but hotkeys are always personal and local</li>
 <li><strong>Zero data leakage</strong>: Personal jumps stay on your machine. Only explicitly shared jumps sync to the cloud</li>
 </ul>
-<h3 id="pricing-tiers">Pricing Tiers</h3>
+<h4 id="pricing-tiers">1.4 Pricing Tiers</h4>
 <table>
 <thead>
 <tr>
@@ -612,13 +612,13 @@
 </table>
 <h2 id="technical-implementation">2. Technical Implementation</h2>
 <h3 id="section-2">2.1 Architecture Overview</h3>
-<h3 id="electron-app-structure">Electron App Structure</h3>
+<h4 id="electron-app-structure">2.1.1 Electron App Structure</h4>
 <p>JumpKit is built as an Electron application—a Node.js desktop runtime that wraps a Chromium browser. This means:</p>
 <ul>
 <li><strong>Main Process</strong> (<code>main.js</code>): Runs once at startup, creates the app window, manages IPC (inter-process communication), and handles SQLite database access</li>
 <li><strong>Renderer Process</strong> (all JS files in <code>app/</code>): Runs in the browser context, handles all UI rendering, user interactions, and Supabase API calls</li>
 </ul>
-<h3 id="data-architecture">Data Architecture: Local-First + Cloud Sync</h3>
+<h4 id="data-architecture">2.1.2 Data Architecture: Local-First + Cloud Sync</h4>
 <pre><code>┌─────────────────────────────────────────┐
 │  JumpKit Desktop App (Electron)         │
 │  ┌───────────────────────────────────┐  │
@@ -649,7 +649,7 @@
         │ - shared_jumps   │
         │ - shared_columns │
         └──────────────────┘</code></pre>
-<h3 id="three-tier-data-model">Three-Tier Data Model</h3>
+<h4 id="three-tier-data-model">2.1.3 Three-Tier Data Model</h4>
 <p><strong>1. Personal (SQLite only)</strong></p>
 <ul>
 <li>All jumps created by you without the &quot;shared&quot; flag</li>
@@ -668,7 +668,7 @@
 <li>Profiles, teams, team memberships, invites</li>
 <li>Read-only in app; written by admin functions in backend</li>
 </ul>
-<h3 id="authentication-flow">Authentication Flow: Supabase Auth</h3>
+<h4 id="authentication-flow">2.1.4 Authentication Flow: Supabase Auth</h4>
 <pre><code>User signs in/up with email + password
            ↓
 Supabase Auth API validates credentials
@@ -687,7 +687,7 @@ App ready to render</code></pre>
 <li><strong>Profile auto-creation</strong>: Supabase trigger <code>on_auth_user_created</code> automatically inserts a row into the <code>profiles</code> table on signup</li>
 <li><strong>Roles</strong>: <code>org-owner</code>, <code>team-owner</code>, <code>team-member</code> — stored in profiles table, checked on Teams page</li>
 </ul>
-<h3 id="sync-engine">Sync Engine: Pull-Only, Fire-and-Forget Writes</h3>
+<h4 id="sync-engine">2.1.5 Sync Engine: Pull-Only, Fire-and-Forget Writes</h4>
 <p><strong>When sync runs:</strong></p>
 <ul>
 <li>On login (in <code>initAuth()</code>)</li>
@@ -712,7 +712,7 @@ App ready to render</code></pre>
 <li>Users never see &quot;saving...&quot; spinners—the cache is the source of truth</li>
 </ul>
 <h3 id="section-3">2.2 File Structure &amp; Responsibilities</h3>
-<h3 id="mainjs">main.js — Electron Main Process</h3>
+<h4 id="mainjs">2.2.1 main.js — Electron Main Process</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Initialize and maintain SQLite database (<code>jumpkit.db</code>)</li>
@@ -740,7 +740,7 @@ App ready to render</code></pre>
 <li><code>user_prefs</code> — Preferences per user</li>
 <li><code>sync_state</code> — Tracks last sync timestamp</li>
 </ul>
-<h3 id="apphtml">app.html — Main Entry Point (App UI)</h3>
+<h4 id="apphtml">2.2.2 app.html — Main Entry Point (App UI)</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Root HTML structure: sidebar, topbar, main content area</li>
@@ -766,7 +766,7 @@ App ready to render</code></pre>
 <li><code>js/teams.js</code> — Teams page (also has <code>?v=timestamp</code> for cache-bust)</li>
 <li><code>js/sync.js</code> — Sync engine initialization</li>
 </ol>
-<h3 id="jsappjs">js/app.js — Core App Logic &amp; UI Components</h3>
+<h4 id="jsappjs">2.2.3 js/app.js — Core App Logic &amp; UI Components</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Initialize Supabase client</li>
@@ -837,7 +837,7 @@ CtxMenu.hide();
 <li>Updates label + hidden input on select</li>
 <li>Keyboard accessible</li>
 </ul>
-<h3 id="jsauthjs">js/auth.js — Authentication (index.html)</h3>
+<h4 id="jsauthjs">2.2.4 js/auth.js — Authentication (index.html)</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Render login, signup, and password reset forms</li>
@@ -860,7 +860,7 @@ CtxMenu.hide();
 <li>Confirm: must match password</li>
 <li>Real-time error display</li>
 </ul>
-<h3 id="jsdbjs">js/db.js — Database Wrapper &amp; Cache</h3>
+<h4 id="jsdbjs">2.2.5 js/db.js — Database Wrapper &amp; Cache</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Maintain in-memory cache (<code>DB._cache</code>)</li>
@@ -906,7 +906,7 @@ DB.clearSession()</code></pre>
   role:               'team-member',       // 'org-owner', 'team-owner', 'team-member'
   navDefaultCollapsed: false,
 }</code></pre>
-<h3 id="jsjumpsjs">js/jumps.js — Jumps Page &amp; Jump Management</h3>
+<h4 id="jsjumpsjs">2.2.6 js/jumps.js — Jumps Page &amp; Jump Management</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Render all columns and their jumps</li>
@@ -972,7 +972,7 @@ unshareColumn(colId)            // unshare from team</code></pre>
   // 5. Check free tier limit
   // 6. Show toast
 }</code></pre>
-<h3 id="jsteamsjs">js/teams.js — Teams, Organizations &amp; Sharing</h3>
+<h4 id="jsteamsjs">2.2.7 js/teams.js — Teams, Organizations &amp; Sharing</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Render three different team views based on role: org-owner, team-owner, team-member</li>
@@ -1022,7 +1022,7 @@ unshareColumn(colId)            // unshare from team</code></pre>
     .map(b =&gt; b.toString(16).padStart(2, '0'))
     .join('');
 }</code></pre>
-<h3 id="jssyncjs">js/sync.js — Sync Engine</h3>
+<h4 id="jssyncjs">2.2.8 js/sync.js — Sync Engine</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Pull shared columns and jumps from Supabase</li>
@@ -1062,7 +1062,7 @@ await window.electronAPI.upsertSharedJumps(remoteJumps);
 DB._cache.jumps = [...newJumps];
 
 // (IPC handler persists to SQLite async, no await)</code></pre>
-<h3 id="jsarchivejs">js/archive.js — Archived Jumps Management</h3>
+<h4 id="jsarchivejs">2.2.9 js/archive.js — Archived Jumps Management</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Render archive page (table view with sorting)</li>
@@ -1080,7 +1080,7 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <li><strong>Archive</strong> (soft delete): <code>isArchived = 1</code> — jumps stay in DB, hidden from main view</li>
 <li><strong>Delete</strong> (hard delete): Permanently removed from DB — only from archive page, ask for confirmation first</li>
 </ul>
-<h3 id="jshelpjs-jsstatsjs">js/help.js, js/stats.js — Other Page Renderers</h3>
+<h4 id="jshelpjs-jsstatsjs">2.2.10 js/help.js, js/stats.js — Other Page Renderers</h4>
 <p><strong>help.js</strong></p>
 <ul>
 <li>Render Help page with FAQs, tips, keyboard shortcuts</li>
@@ -1093,7 +1093,7 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <li>Time saved / dollars earned calculation</li>
 <li>Uses Chart.js for graphs</li>
 </ul>
-<h3 id="jstestsjs">js/tests.js — Unit Tests (45 tests)</h3>
+<h4 id="jstestsjs">2.2.11 js/tests.js — Unit Tests (45 tests)</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Comprehensive test suite for jump CRUD, columns, hotkeys, filtering</li>
@@ -1117,7 +1117,7 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <li>Click &quot;Tests&quot; → &quot;Run All Tests&quot; button</li>
 <li>Results displayed in modal + written to ~/JumpKit Appdata/test-results.txt</li>
 </ul>
-<h3 id="cssvarcss">css/vars.css — Design Tokens &amp; Theme Variables</h3>
+<h4 id="cssvarcss">2.2.12 css/vars.css — Design Tokens &amp; Theme Variables</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Define all CSS variables for dark/light theme</li>
@@ -1150,7 +1150,7 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <pre><code>// In app.js
 document.documentElement.dataset.theme = 'dark' || 'light';
 localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
-<h3 id="cssappcss">css/app.css — Component Styles</h3>
+<h4 id="cssappcss">2.2.13 css/app.css — Component Styles</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>All reusable component styles</li>
@@ -1176,7 +1176,7 @@ localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
 <li><code>.stats-*</code> — Statistics page styles</li>
 </ul>
 <h3 id="section-4">2.3 Database Schema</h3>
-<h3 id="sqlite-local">SQLite (Local)</h3>
+<h4 id="sqlite-local">2.3.1 SQLite (Local)</h4>
 <p><strong>All tables exist in <code>jumpkit.db</code> (stored in app-data/ directory):</strong></p>
 <h4 id="jumps">2.3.1 jumps</h4>
 <pre><code>id TEXT PRIMARY KEY,
@@ -1230,7 +1230,7 @@ notifications INTEGER DEFAULT 1,
 cloudBackup INTEGER DEFAULT 0,
 autoArchive TEXT DEFAULT 'never',
 navDefaultCollapsed INTEGER DEFAULT 0</code></pre>
-<h3 id="supabase-cloud">Supabase (Cloud)</h3>
+<h4 id="supabase-cloud">2.3.2 Supabase (Cloud)</h4>
 <p><strong>Tables with RLS enabled:</strong></p>
 <h4 id="profiles">2.3.6 profiles</h4>
 <pre><code>id UUID PRIMARY KEY (auth.users.id),
@@ -1288,7 +1288,7 @@ position INTEGER DEFAULT 0,
 created_by UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ,
 updated_at TIMESTAMPTZ</code></pre>
-<h3 id="key-relationships">Key Relationships</h3>
+<h4 id="key-relationships">2.3.3 Key Relationships</h4>
 <ul>
 <li><strong>users</strong> (Supabase Auth) ↔ <strong>profiles</strong> (one-to-one, on auth trigger)</li>
 <li><strong>profiles</strong> → <strong>organizations</strong> (many-to-one by org_id)</li>
@@ -1299,7 +1299,7 @@ updated_at TIMESTAMPTZ</code></pre>
 <li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
 </ul>
 <h3 id="section-5">2.4 Key Concepts &amp; Data Flows</h3>
-<h3 id="jumps-the-core-resource">5a. Jumps — The Core Resource</h3>
+<h4 id="jumps-the-core-resource">2.4.1 5a. Jumps — The Core Resource</h4>
 <p><strong>What is a jump?</strong><br/>
 A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
 <p><strong>Jump Lifecycle:</strong></p>
@@ -1344,7 +1344,7 @@ const toArchive = allJumps.filter(j =&gt;
 );
 toArchive.forEach(j =&gt; DB.updateJump(userId, j.id, { isArchived: 1 }));
 addNotification({ message: \`\${toArchive.length} jumps auto-archived\` });</code></pre>
-<h3 id="columns-organization">5b. Columns — Organization</h3>
+<h4 id="columns-organization">2.4.2 5b. Columns — Organization</h4>
 <p><strong>What is a column?</strong><br/>
 A column is a category/folder that groups related jumps. Users can have up to 10 columns.</p>
 <p><strong>Column Properties:</strong></p>
@@ -1381,7 +1381,7 @@ shareColumnWithTeam(columnId, teamId);
 // 1. sync.js pulls shared_columns + shared_jumps from Supabase
 // 2. Upserts into local SQLite (same column.id from cloud)
 // 3. Jumps marked isShared=1 in UI</code></pre>
-<h3 id="teams-organizations">5c. Teams &amp; Organizations</h3>
+<h4 id="teams-organizations">2.4.3 5c. Teams &amp; Organizations</h4>
 <p><strong>Roles:</strong></p>
 <table>
 <thead>
@@ -1495,7 +1495,7 @@ window.location.href = 'app.html';</code></pre>
 <li><strong>CAN</strong> assign their own local hotkey (never syncs)</li>
 <li>Team-owner controls content via <code>shared_jumps</code> table in Supabase</li>
 </ul>
-<h3 id="sync-engine">5d. Sync Engine — The Bridge</h3>
+<h4 id="sync-engine">2.4.4 5d. Sync Engine — The Bridge</h4>
 <p><strong>Architecture:</strong></p>
 <pre><code>Supabase (cloud)
   ↓ [Pull on login + every 60 min]
@@ -1548,7 +1548,7 @@ const staleLocalJumps = existingJumps.filter(j =&gt;
   j.isShared && j.teamId && remoteTeamIds.includes(j.teamId) && j.supabaseId && !remoteIds.has(j.supabaseId)
 );
 // Delete them from DB</code></pre>
-<h3 id="authentication">5e. Authentication — Supabase Auth</h3>
+<h4 id="authentication">2.4.5 5e. Authentication — Supabase Auth</h4>
 <p><strong>Sign Up Flow:</strong></p>
 <pre><code>User enters email + password (+ name)
   ↓
@@ -1608,7 +1608,7 @@ else renderTeamMemberView(...);</code></pre>
 // Triggers paywall if: status='overdue' || status='cancelled'
 // OR if free tier and trial_launches_used >= 250</code></pre>
 <h3 id="section-6">2.5 UI Components</h3>
-<h3 id="modal">Modal</h3>
+<h4 id="modal">2.5.1 Modal</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>Modal.open(
   '&lt;i class=&quot;ti ti-users&quot;&gt;&lt;/i&gt; Add Team Member',
@@ -1630,7 +1630,7 @@ Modal.close();</code></pre>
 <li>Click overlay closes</li>
 <li>Click X button closes</li>
 </ul>
-<h3 id="toast">Toast</h3>
+<h4 id="toast">2.5.2 Toast</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>Toast.success('Jump saved!');
 Toast.danger('Failed to save jump');</code></pre>
@@ -1641,7 +1641,7 @@ Toast.danger('Failed to save jump');</code></pre>
 <li>Icon + message centered</li>
 <li>Green for success, red for danger</li>
 </ul>
-<h3 id="ctxmenu-context-menu">CtxMenu (Context Menu)</h3>
+<h4 id="ctxmenu-context-menu">2.5.3 CtxMenu (Context Menu)</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>CtxMenu.show(e.clientX, e.clientY, [
   { icon: '&lt;i class=&quot;ti ti-edit&quot;&gt;&lt;/i&gt;', label: 'Edit', action: () =&gt; editJump() },
@@ -1665,7 +1665,7 @@ CtxMenu.hide();</code></pre>
 <li>Closes on click</li>
 <li>Closes on escape</li>
 </ul>
-<h3 id="custom-select-wiredropdown">Custom Select (wireDropdown)</h3>
+<h4 id="custom-select-wiredropdown">2.5.4 Custom Select (wireDropdown)</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>&lt;div class=&quot;custom-select&quot; id=&quot;myDrop&quot;&gt;
   &lt;div class=&quot;custom-select-trigger&quot; id=&quot;myTrigger&quot;&gt;
@@ -1700,7 +1700,7 @@ wireDropdown({
 <li>Updates label + hidden input on select</li>
 <li>Calls onSelect callback (if provided)</li>
 </ul>
-<h3 id="custom-select-css-classes">Custom Select (CSS Classes)</h3>
+<h4 id="custom-select-css-classes">2.5.5 Custom Select (CSS Classes)</h4>
 <pre><code>&lt;div class=&quot;custom-select&quot;&gt;
   &lt;div class=&quot;custom-select-trigger&quot;&gt;Label&lt;/div&gt;
   &lt;div class=&quot;custom-select-menu&quot;&gt;
@@ -1714,7 +1714,7 @@ wireDropdown({
 <li><code>.custom-select-option.selected</code> — highlighted/chosen</li>
 <li><code>.custom-select-option.kbfocus</code> — keyboard focus (for arrow keys)</li>
 </ul>
-<h3 id="toggle-checkbox">Toggle / Checkbox</h3>
+<h4 id="toggle-checkbox">2.5.6 Toggle / Checkbox</h4>
 <pre><code>&lt;label class=&quot;toggle&quot;&gt;
   &lt;input type=&quot;checkbox&quot; checked /&gt;
   &lt;span class=&quot;toggle-slider&quot;&gt;&lt;/span&gt;
@@ -1725,7 +1725,7 @@ wireDropdown({
 <li>Checkbox hidden, slider visible</li>
 <li>Fully keyboard accessible</li>
 </ul>
-<h3 id="buildchord-hotkey-parser">buildChord — Hotkey Parser</h3>
+<h4 id="buildchord-hotkey-parser">2.5.7 buildChord — Hotkey Parser</h4>
 <pre><code>window.buildChord = function buildChord(e) {
   const parts = [];
   if (e.ctrlKey || e.metaKey) parts.push('Ctrl');
@@ -1743,7 +1743,7 @@ wireDropdown({
 
 // Returns null if user only pressed modifiers (Ctrl alone)
 // Space-insensitive comparison: "Ctrl+Shift+G" === "ctrl+shift+g"</code></pre>
-<h3 id="sidebar-collapse">Sidebar Collapse</h3>
+<h4 id="sidebar-collapse">2.5.8 Sidebar Collapse</h4>
 <p><strong>localStorage key:</strong> <code>jk_sidebar_collapsed</code><br/>
 <strong>Value:</strong> <code>'0'</code> or <code>'1'</code><br/>
 <strong>Preference key:</strong> <code>user_prefs.navDefaultCollapsed</code></p>
@@ -1765,7 +1765,7 @@ if (navPrefs.navDefaultCollapsed) {
 </ul>
 <h3 id="section-7">2.6 IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
-<h3 id="jumps-ipc">Jumps</h3>
+<h4 id="jumps-ipc">2.6.1 Jumps</h4>
 <h4 id="get-jumps">2.6.1 get-jumps</h4>
 <pre><code>// Renderer:
 const jumps = await window.electronAPI.getJumps(userId);
@@ -1799,7 +1799,7 @@ ipcMain.handle('delete-jump', (_e, userId, id) =&gt; {
   db.prepare('DELETE FROM jumps WHERE id = ? AND userId = ?').run(id, userId);
   return { ok: true };
 });</code></pre>
-<h3 id="columns-ipc">Columns</h3>
+<h4 id="columns-ipc">2.6.2 Columns</h4>
 <h4 id="get-columns">2.6.4 get-columns</h4>
 <pre><code>const columns = await window.electronAPI.getColumns(userId);</code></pre>
 <h4 id="save-columns-bulk-replace">2.6.5 save-columns (bulk replace)</h4>
@@ -1816,7 +1816,7 @@ await window.electronAPI.saveColumn(userId, {
   visible: 1,
   order: 2,
 });</code></pre>
-<h3 id="sync-ipc">Sync</h3>
+<h4 id="sync-ipc">2.6.3 Sync</h4>
 <h4 id="sync-jumps">2.6.7 sync-jumps</h4>
 <pre><code>// Renderer (sync.js):
 const result = await window.electronAPI.syncJumps({
@@ -1830,7 +1830,7 @@ await window.electronAPI.upsertSharedJumps([jump1, jump2, ...]);</code></pre>
 <h4 id="delete-shared-jumps">delete-shared-jumps</h4>
 <pre><code>// Delete shared jumps by ID:
 await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
-<h3 id="preferences-ipc">Preferences</h3>
+<h4 id="preferences-ipc">2.6.4 Preferences</h4>
 <h4 id="get-prefs">get-prefs</h4>
 <pre><code>const prefs = await window.electronAPI.getPrefs(userId);</code></pre>
 <h4 id="save-prefs">save-prefs</h4>
@@ -1840,19 +1840,19 @@ await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
   showDescription: false,
   // ... all preference fields
 });</code></pre>
-<h3 id="click-log-ipc">Click Log</h3>
+<h4 id="click-log-ipc">2.6.5 Click Log</h4>
 <h4 id="get-click-log">get-click-log</h4>
 <pre><code>const log = await window.electronAPI.getClickLog(userId);
 // Returns: [{ id, userId, jumpId, ts }, ...]</code></pre>
 <h4 id="log-click">log-click</h4>
 <pre><code>await window.electronAPI.logClick(userId, jumpId, timestamp);</code></pre>
-<h3 id="sync-state-ipc">Sync State</h3>
+<h4 id="sync-state-ipc">2.6.6 Sync State</h4>
 <h4 id="get-sync-state">get-sync-state</h4>
 <pre><code>const lastSync = await window.electronAPI.getSyncState('lastSync');
 // Returns: '1704067200000' or null</code></pre>
 <h4 id="update-sync-state">update-sync-state</h4>
 <pre><code>await window.electronAPI.updateSyncState('lastSync', Date.now().toString());</code></pre>
-<h3 id="files-ipc">Files</h3>
+<h4 id="files-ipc">2.6.7 Files</h4>
 <h4 id="open-url">open-url</h4>
 <pre><code>// Open URL in browser or path in file explorer:
 await window.electronAPI.openUrl('https://google.com');
@@ -1869,7 +1869,7 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
     shell.openPath(url);  // Cross-platform file explorer
   }
 });</code></pre>
-<h3 id="backup-ipc">Backup</h3>
+<h4 id="backup-ipc">2.6.8 Backup</h4>
 <h4 id="save-backup">save-backup</h4>
 <pre><code>const backup = {
   version: 1,
@@ -1883,7 +1883,7 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
 const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
 // Returns: { ok: true, path: '~/Documents/JumpKit Backups/jumpkit-backup-2024-01-15T10-30-45.json' }</code></pre>
 <h3 id="section-8">2.7 Supabase RLS Policies Summary</h3>
-<h3 id="why-rls">Why RLS?</h3>
+<h4 id="why-rls">2.7.1 Why RLS?</h4>
 <p>Row-Level Security (RLS) restricts database access at the SQL level based on the current authenticated user. This ensures:</p>
 <ul>
 <li>Users can only see/modify their own data</li>
@@ -1891,7 +1891,7 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 <li>Org-owners can see all org data</li>
 <li>No permission checks needed in application code</li>
 </ul>
-<h3 id="helper-functions">Helper Functions</h3>
+<h4 id="helper-functions">2.7.2 Helper Functions</h4>
 <h4 id="current_user_role">current_user_role()</h4>
 <pre><code>SELECT COALESCE(
   (SELECT role FROM profiles WHERE id = auth.uid()),
@@ -1913,7 +1913,7 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
   WHERE id = p_team_id AND owner_id = auth.uid()
 );</code></pre>
 <p>Returns: TRUE if user owns team</p>
-<h3 id="policy-summary">Policy Summary</h3>
+<h4 id="policy-summary">2.7.3 Policy Summary</h4>
 <h4 id="profiles-table">2.3.6 profiles</h4>
 <ul>
 <li><strong>SELECT</strong>: Users see own row OR org-owner sees all in org</li>
@@ -1952,7 +1952,7 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 <li><strong>DELETE</strong>: Team-owner/org-owner or org-owner</li>
 </ul>
 <h3 id="section-9">2.8 Build &amp; Development</h3>
-<h3 id="running-locally">Running Locally</h3>
+<h4 id="running-locally">2.8.1 Running Locally</h4>
 <p><strong>Prerequisites:</strong></p>
 <ul>
 <li>Node.js 18+ (tested on v24)</li>
@@ -1971,7 +1971,7 @@ npm start
 
 # OR build for distribution
 npm run build:all</code></pre>
-<h3 id="building-for-distribution">Building for Distribution</h3>
+<h4 id="building-for-distribution">2.8.2 Building for Distribution</h4>
 <p><strong>macOS (Universal DMG):</strong></p>
 <pre><code>npm run build:all
 # Output: dist/JumpKit-1.0.0-universal.dmg
@@ -1979,10 +1979,10 @@ npm run build:all</code></pre>
 <p><strong>Windows (NSIS Installer):</strong></p>
 <pre><code>npm run build:all
 # Output: dist/JumpKit Setup 1.0.0.exe</code></pre>
-<h3 id="rebuilding-native-modules">Rebuilding Native Modules</h3>
+<h4 id="rebuilding-native-modules">2.8.3 Rebuilding Native Modules</h4>
 <p>If <code>better-sqlite3</code> fails to compile after updating Node or Electron versions:</p>
 <pre><code>npx electron-rebuild --version 40.8.0 -f -w better-sqlite3</code></pre>
-<h3 id="landing-page">Landing Page</h3>
+<h4 id="landing-page">2.8.4 Landing Page</h4>
 <p><strong>Location:</strong> <code>Topics/JumpKit/landing/</code><br/>
 <strong>Deploy:</strong> Via Vercel under <code>jeffroder-3196s-projects</code></p>
 <pre><code>cd landing
@@ -1992,7 +1992,7 @@ npm run dev
 
 # Deploy to production
 vercel deploy --prod --token [VERCEL_TOKEN]</code></pre>
-<h3 id="database-reset-development">Database Reset (Development)</h3>
+<h4 id="database-reset-development">2.8.5 Database Reset (Development)</h4>
 <p>To reset local database and reseed:</p>
 <pre><code># Delete the database file:
 rm ~/Library/Application\\ Support/JumpKit/jumpkit.db  # macOS
@@ -2000,7 +2000,7 @@ rm ~/Library/Application\\ Support/JumpKit/jumpkit.db  # macOS
 rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 
 # Restart app — will auto-create schema and seed</code></pre>
-<h3 id="important-notes">Important Notes</h3>
+<h4 id="important-notes">2.8.6 Important Notes</h4>
 <p><strong>Cache-bust requirement:</strong></p>
 <ul>
 <li><code>jumps.js</code> and <code>teams.js</code> have <code>?v=timestamp</code> query params in <code>app.html</code></li>
@@ -2015,7 +2015,7 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 <li>Test on both platforms if distributing</li>
 </ul>
 <h3 id="section-10">2.9 Known Patterns &amp; Conventions</h3>
-<h3 id="global-functions-window">Global Functions (window.*)</h3>
+<h4 id="global-functions-window">2.9.1 Global Functions (window.*)</h4>
 <p>All functions that are called from inline HTML <code>onclick</code> attributes <strong>must</strong> be exposed as <code>window.</code> globals:</p>
 <pre><code>// ❌ Not callable from HTML
 function handleClick() { ... }
@@ -2029,7 +2029,7 @@ window.handleClick = handleClick;</code></pre>
 <pre><code>&lt;button onclick=&quot;window.navigateTo('jumps')&quot;&gt;Jumps&lt;/button&gt;
 &lt;button onclick=&quot;window.handleJumpClick(jumpId)&quot;&gt;Launch&lt;/button&gt;
 &lt;button onclick=&quot;saveAccountPrefs()&quot;&gt;Save&lt;/button&gt;  &lt;!-- exposed as global --&gt;</code></pre>
-<h3 id="database-readwrite-pattern">Database Read/Write Pattern</h3>
+<h4 id="database-readwrite-pattern">2.9.2 Database Read/Write Pattern</h4>
 <p><strong>Reads</strong> are synchronous from the in-memory cache:</p>
 <pre><code>const jumps = DB.getJumps(userId);  // Instant, synchronous, from cache
 const prefs = DB.getPrefs(userId);  // Instant</code></pre>
@@ -2041,7 +2041,7 @@ DB.saveJump(userId, jump);
 window.electronAPI.saveJump(userId, jump);  // fire-and-forget
 
 // No spinner, no delay — user sees result immediately</code></pre>
-<h3 id="id-format-convention">ID Format Convention</h3>
+<h4 id="id-format-convention">2.9.3 ID Format Convention</h4>
 <p><strong>Local IDs:</strong> nanoid-like strings</p>
 <pre><code>function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -2056,7 +2056,7 @@ window.electronAPI.saveJump(userId, jump);  // fire-and-forget
 <li>On sync, match by <code>supabaseId</code> to avoid duplicates</li>
 <li>If local row has no <code>supabaseId</code>, it's a personal (never-synced) resource</li>
 </ul>
-<h3 id="darklight-mode">Dark/Light Mode</h3>
+<h4 id="darklight-mode">2.9.4 Dark/Light Mode</h4>
 <p><strong>No JS theme switching in components.</strong> Only CSS variables:</p>
 <pre><code>/* vars.css */
 [data-theme="dark"] {
@@ -2082,7 +2082,7 @@ window.electronAPI.saveJump(userId, jump);  // fire-and-forget
   document.documentElement.dataset.theme = next;  // Triggers CSS repaint
   localStorage.setItem('jk_theme', next);
 });</code></pre>
-<h3 id="no-markdown-tables-in-docs">No Markdown Tables in Docs</h3>
+<h4 id="no-markdown-tables-in-docs">2.9.5 No Markdown Tables in Docs</h4>
 <p>This documentation avoids Markdown <code>|</code> tables. Instead, uses:</p>
 <ul>
 <li>Bullet lists</li>
@@ -2091,7 +2091,7 @@ window.electronAPI.saveJump(userId, jump);  // fire-and-forget
 <li>Prose descriptions</li>
 </ul>
 <p>This ensures compatibility with all Markdown renderers and is easier to maintain.</p>
-<h3 id="icons-tabler-icons-via-cdn">Icons: Tabler Icons via CDN</h3>
+<h4 id="icons-tabler-icons-via-cdn">2.9.6 Icons: Tabler Icons via CDN</h4>
 <p><strong>All icons use Tabler Icons:</strong></p>
 <pre><code>&lt;link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css&quot;/&gt;
 
@@ -2106,7 +2106,7 @@ window.electronAPI.saveJump(userId, jump);  // fire-and-forget
 <pre><code>.icon-sm { font-size: 0.9rem; }
 .icon-lg { font-size: 1.5rem; }
 .icon-xl { font-size: 2rem; }</code></pre>
-<h3 id="escape-html-to-prevent-xss">Escape HTML to Prevent XSS</h3>
+<h4 id="escape-html-to-prevent-xss">2.9.7 Escape HTML to Prevent XSS</h4>
 <p>Always escape user input before inserting into DOM:</p>
 <pre><code>function esc(str) {
   const div = document.createElement('div');
@@ -2119,7 +2119,7 @@ div.innerHTML = \`&lt;p&gt;\${esc(userInput)}&lt;/p&gt;\`;
 
 // NOT:
 div.innerHTML = \`&lt;p&gt;\${userInput}&lt;/p&gt;\`;  // ❌ XSS risk</code></pre>
-<h3 id="localstorage-keys-naming">localStorage Keys Naming</h3>
+<h4 id="localstorage-keys-naming">2.9.8 localStorage Keys Naming</h4>
 <p>Use prefix <code>jk_</code> for all app-specific keys:</p>
 <pre><code>// ✅ Good:
 localStorage.setItem('jk_theme', 'dark');
