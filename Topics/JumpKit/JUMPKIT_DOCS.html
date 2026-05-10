@@ -234,6 +234,35 @@
             font-weight: 600;
         }
 
+        .toc-subsublevel {
+            margin-left: 1.2rem;
+            padding-left: 0;
+            border-left: none;
+            margin-top: 0.15rem;
+        }
+        .toc-subsubitem {
+            margin-bottom: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .toc-subsubitem::before {
+            content: '–';
+            font-size: 0.7rem;
+            opacity: 0.35;
+            flex-shrink: 0;
+        }
+        .toc-subsublink {
+            display: block;
+            padding: 0.2rem 0.2rem;
+            border-radius: 3px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .toc-subsublink:hover { color: var(--turq); }
+        .toc-subsublink.active { color: var(--turq); font-weight: 600; }
+
         /* ============================================================
            Content: Headings
            ============================================================ */
@@ -2206,11 +2235,13 @@ localStorage.setItem('notifications', '[]');</code></pre>
         document.getElementById('mainContent').innerHTML = mdContent;
 
         // Build TOC and set up active link tracking
-        const headings = document.querySelectorAll('h2, h3');
+        const headings = document.querySelectorAll('h2, h3, h4');
         const tocList = document.getElementById('toc');
 
         let currentH2Item = null;
         let currentSubList = null;
+        let currentH3Item = null;
+        let currentSubSubList = null;
 
         headings.forEach((heading, idx) => {
             if (!heading.id) heading.id = 'heading-' + idx;
@@ -2257,12 +2288,49 @@ localStorage.setItem('notifications', '[]');</code></pre>
             } else if (heading.tagName === 'H3' && currentSubList) {
                 const li = document.createElement('li');
                 li.className = 'toc-subitem';
+
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:pointer';
+
+                const arrow = document.createElement('span');
+                arrow.textContent = '▶';
+                arrow.style.cssText = 'font-size:0.55rem;opacity:0.4;transition:transform 0.2s;display:inline-block;flex-shrink:0;line-height:1';
+
                 const a = document.createElement('a');
                 a.className = 'toc-sublink';
                 a.href = '#' + heading.id;
                 a.textContent = heading.textContent;
-                li.appendChild(a);
+
+                row.appendChild(arrow);
+                row.appendChild(a);
+                li.appendChild(row);
                 currentSubList.appendChild(li);
+
+                // Sub-sub level (H4s)
+                const subSub = document.createElement('ul');
+                subSub.className = 'toc-subsublevel';
+                subSub.style.display = 'none';
+                li.appendChild(subSub);
+
+                arrow.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const open = subSub.style.display !== 'none';
+                    subSub.style.display = open ? 'none' : 'block';
+                    arrow.style.transform = open ? 'rotate(0deg)' : 'rotate(90deg)';
+                });
+
+                currentH3Item = li;
+                currentSubSubList = subSub;
+
+            } else if (heading.tagName === 'H4' && currentSubSubList) {
+                const li = document.createElement('li');
+                li.className = 'toc-subsubitem';
+                const a = document.createElement('a');
+                a.className = 'toc-subsublink';
+                a.href = '#' + heading.id;
+                a.textContent = heading.textContent;
+                li.appendChild(a);
+                currentSubSubList.appendChild(li);
             }
         });
 
@@ -2271,7 +2339,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     // Remove active class from all TOC links
-                    document.querySelectorAll('.toc-link, .toc-sublink').forEach(link => {
+                    document.querySelectorAll('.toc-link, .toc-sublink, .toc-subsublink').forEach(link => {
                         link.classList.remove('active');
                     });
 
@@ -2287,7 +2355,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
         headings.forEach(heading => observer.observe(heading));
 
         // Click handlers for TOC links
-        document.querySelectorAll('.toc-link, .toc-sublink').forEach(link => {
+        document.querySelectorAll('.toc-link, .toc-sublink, .toc-subsublink').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 const target = document.querySelector(link.getAttribute('href'));
