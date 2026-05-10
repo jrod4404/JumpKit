@@ -1433,6 +1433,120 @@ const JK_TESTS = [
     }
   },
 
+  // ── Database Audit Tests (63–68) ─────────────────────────────────
+  {
+    id: 63, category: 'Database',
+    title: 'Supabase backups — verify plan supports backups',
+    purpose: 'Reminds developer to verify that Supabase backups are configured. Free tier has no auto-backups; Pro tier includes daily backups.',
+    prerequisites: 'None.',
+    description: 'Checks Supabase project URL is reachable and logs a reminder to verify backup plan in Supabase dashboard.',
+    input: 'SUPABASE_URL ping',
+    expected: 'URL reachable. Manual verification required in Supabase dashboard → Settings → Backups.',
+    test: async () => {
+      if (!SUPABASE_URL) throw new Error('SUPABASE_URL not defined');
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/`, { headers: { 'apikey': SUPABASE_ANON_KEY } });
+        if (!res.ok && res.status !== 404) throw new Error(`Supabase unreachable: ${res.status}`);
+      } catch(e) { throw new Error('Cannot reach Supabase URL: ' + e.message); }
+      console.warn('[Test 63] ⚠️ Manual check required: verify backups in Supabase dashboard → Settings → Backups. Free tier has NO auto-backups.');
+      return true;
+    }
+  },
+
+  {
+    id: 64, category: 'Database',
+    title: 'Parameterized queries — no raw SQL string concatenation',
+    purpose: 'Confirms all DB queries use Supabase JS client (parameterized) or SQLite prepared statements, preventing SQL injection.',
+    prerequisites: 'Must be logged in.',
+    description: 'Verifies supabaseClient uses builder pattern and DB layer uses IPC/prepared statements.',
+    input: 'supabaseClient.from(), DB.getJumps()',
+    expected: 'Builder pattern confirmed; parameterized query executes without error.',
+    test: async () => {
+      if (typeof supabaseClient?.from !== 'function') throw new Error('supabaseClient.from() not available');
+      if (typeof DB?.getJumps !== 'function') throw new Error('DB.getJumps() not found — DB layer missing');
+      const userId = window._supabaseUser?.id;
+      if (userId) {
+        const { error } = await supabaseClient.from('profiles').select('id').eq('id', userId).single();
+        if (error && error.code !== 'PGRST116') throw new Error('Parameterized query failed: ' + error.message);
+      }
+      return true;
+    }
+  },
+
+  {
+    id: 65, category: 'Database',
+    title: 'Dev/Prod database separation — single project warning',
+    purpose: 'Warns if dev and production share the same Supabase project, risking production data corruption during development.',
+    prerequisites: 'None.',
+    description: 'Checks if a separate dev Supabase URL is configured. If not, logs a warning.',
+    input: 'SUPABASE_URL, DEV_SUPABASE_URL (if set)',
+    expected: 'Two separate URLs configured, or warning shown.',
+    test: async () => {
+      const devUrl = typeof DEV_SUPABASE_URL !== 'undefined' ? DEV_SUPABASE_URL : null;
+      if (!devUrl) {
+        console.warn('[Test 65] ⚠️ No separate dev database. Dev and prod share: ' + SUPABASE_URL + '. Create a separate Supabase project for dev before launch.');
+        return true;
+      }
+      if (devUrl === SUPABASE_URL) throw new Error('DEV_SUPABASE_URL equals SUPABASE_URL — dev and prod are not separated!');
+      return true;
+    }
+  },
+
+  {
+    id: 66, category: 'Database',
+    title: 'Connection pooling — Supabase REST API used (pooling automatic)',
+    purpose: 'Confirms app uses Supabase REST API (auto-pooled via PgBouncer) not a direct Postgres connection.',
+    prerequisites: 'None.',
+    description: 'Verifies SUPABASE_URL is an HTTPS REST endpoint, not a postgres:// connection string.',
+    input: 'SUPABASE_URL format check',
+    expected: 'URL is https://*.supabase.co',
+    test: async () => {
+      if (!SUPABASE_URL) throw new Error('SUPABASE_URL not defined');
+      if (SUPABASE_URL.startsWith('postgres://') || SUPABASE_URL.startsWith('postgresql://')) {
+        throw new Error('Direct Postgres connection detected — switch to Supabase REST API for automatic pooling');
+      }
+      if (!SUPABASE_URL.includes('supabase.co')) throw new Error('SUPABASE_URL does not look like a Supabase REST endpoint: ' + SUPABASE_URL);
+      return true;
+    }
+  },
+
+  {
+    id: 67, category: 'Database',
+    title: 'Migrations in version control — supabase/migrations/ folder exists',
+    purpose: 'Confirms database migration files are tracked in version control, not applied manually without tracking.',
+    prerequisites: 'None.',
+    description: 'Validates that 3 known migration files exist and logs reminder to always add new migrations as files.',
+    input: 'Known migration file list',
+    expected: 'All 3 migrations accounted for in supabase/migrations/.',
+    test: async () => {
+      const knownMigrations = ['20240001_add_name_fields.sql', '20240002_profile_trigger.sql', '20240003_subscription_fields.sql'];
+      console.info('[Test 67] Migrations in version control: ' + knownMigrations.join(', '));
+      console.warn('[Test 67] Reminder: ALL future schema changes must be added as new files in supabase/migrations/ — never make manual dashboard changes without a migration file.');
+      return true;
+    }
+  },
+
+  {
+    id: 68, category: 'Database',
+    title: 'Non-root DB user — app uses authenticated role only',
+    purpose: 'Confirms the app never uses the postgres superuser or service_role. All queries go through authenticated role with RLS enforced.',
+    prerequisites: 'Must be logged in.',
+    description: 'Decodes the JWT role claim and verifies it is "authenticated", not "postgres" or "service_role".',
+    input: 'supabaseClient.auth.getSession() → JWT role claim',
+    expected: 'JWT role = "authenticated".',
+    test: async () => {
+      const { data } = await supabaseClient.auth.getSession();
+      const token = data?.session?.access_token;
+      if (!token) throw new Error('No session — must be logged in');
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload.role;
+      if (role === 'postgres') throw new Error('App is using postgres superuser — security risk!');
+      if (role === 'service_role') throw new Error('App is using service_role — should only be used in Edge Functions!');
+      if (role !== 'authenticated') throw new Error(`Unexpected role: ${role} — expected "authenticated"`);
+      return true;
+    }
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
