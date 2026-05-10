@@ -1937,37 +1937,37 @@ const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 
 );</code></pre>
 <p>Returns: TRUE if user owns team</p>
 <h4 id="policy-summary">2.7.3 Policy Summary</h4>
-<h4 id="profiles-table">2.3.6 profiles</h4>
+<h4 id="profiles-table">2.7.4 profiles (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Users see own row OR org-owner sees all in org</li>
 <li><strong>INSERT</strong>: Users create own row</li>
 <li><strong>UPDATE</strong>: Users update own row</li>
 </ul>
-<h4 id="organizations-table">2.3.7 organizations</h4>
+<h4 id="organizations-table">2.7.5 organizations (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Owner sees own org OR member sees their org</li>
 <li><strong>INSERT</strong>: Only org-owners can create</li>
 <li><strong>UPDATE</strong>: Only owner can update</li>
 </ul>
-<h4 id="teams-table">2.3.8 teams</h4>
+<h4 id="teams-table">2.7.6 teams (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Org-owner sees all in org OR team-owner sees own OR member sees own</li>
 <li><strong>INSERT</strong>: Org-owner only</li>
 <li><strong>UPDATE</strong>: Org-owner OR team-owner</li>
 </ul>
-<h4 id="team_members-table">2.3.9 team_members</h4>
+<h4 id="team_members-table">2.7.7 team_members (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Org-owner sees all OR team-owner sees members OR user sees self</li>
 <li><strong>INSERT</strong>: Team-owner/org-owner OR user self-adding (for join)</li>
 <li><strong>DELETE</strong>: Team-owner or org-owner only</li>
 </ul>
-<h4 id="team_invites-table">2.3.10 team_invites</h4>
+<h4 id="team_invites-table">2.7.8 team_invites (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Team-owner/org-owner see all OR user sees invites to their email</li>
 <li><strong>INSERT</strong>: Team-owner/org-owner only</li>
 <li><strong>UPDATE</strong>: Invited user can accept, or team-owner/org-owner</li>
 </ul>
-<h4 id="shared_columns-shared_jumps-tables">shared_columns &amp; shared_jumps</h4>
+<h4 id="shared_columns-shared_jumps-tables">2.7.9 shared_columns &amp; shared_jumps (RLS)</h4>
 <ul>
 <li><strong>SELECT</strong>: Team members see columns/jumps for their teams only</li>
 <li><strong>INSERT</strong>: Team-owner/org-owner create</li>
