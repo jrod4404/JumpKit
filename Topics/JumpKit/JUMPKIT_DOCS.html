@@ -206,8 +206,8 @@
             align-items: center;
             gap: 6px;
         }
-
-        .toc-subitem::before {
+        /* Bullet only on leaf H3 nodes (no children) — added via JS */
+        .toc-subitem.leaf::before {
             content: '•';
             font-size: 1.2rem;
             opacity: 0.4;
@@ -223,19 +223,12 @@
             transition: all 0.2s ease;
             border-left: none;
         }
+        .toc-sublink:hover { color: var(--turq); background-color: rgba(0,194,199,0.08); }
+        .toc-sublink.active { color: var(--turq); font-weight: 600; }
 
-        .toc-sublink:hover {
-            color: var(--turq);
-            background-color: rgba(0, 194, 199, 0.08);
-        }
-
-        .toc-sublink.active {
-            color: var(--turq);
-            font-weight: 600;
-        }
-
+        /* Sub-sub level: same indent style as sub-level */
         .toc-subsublevel {
-            margin-left: 1.2rem;
+            margin-left: 1rem;
             padding-left: 0;
             border-left: none;
             margin-top: 0.15rem;
@@ -244,23 +237,24 @@
             margin-bottom: 0.2rem;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
+        /* H4s are always leaves — always show bullet */
         .toc-subsubitem::before {
-            content: '–';
-            font-size: 0.7rem;
+            content: '•';
+            font-size: 1rem;
             opacity: 0.35;
             flex-shrink: 0;
         }
         .toc-subsublink {
             display: block;
-            padding: 0.2rem 0.2rem;
+            padding: 0.3rem 0.25rem;
             border-radius: 3px;
-            font-size: 0.78rem;
+            font-size: 0.80rem;
             color: var(--text-muted);
             transition: all 0.2s ease;
         }
-        .toc-subsublink:hover { color: var(--turq); }
+        .toc-subsublink:hover { color: var(--turq); background-color: rgba(0,194,199,0.08); }
         .toc-subsublink.active { color: var(--turq); font-weight: 600; }
 
         /* ============================================================
@@ -2242,6 +2236,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
         let currentSubList = null;
         let currentH3Item = null;
         let currentSubSubList = null;
+        let currentH3Arrow = null;
 
         headings.forEach((heading, idx) => {
             if (!heading.id) heading.id = 'heading-' + idx;
@@ -2289,28 +2284,31 @@ localStorage.setItem('notifications', '[]');</code></pre>
                 const li = document.createElement('li');
                 li.className = 'toc-subitem';
 
-                const row = document.createElement('div');
-                row.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:pointer';
+                // Sub-sub level (H4s) — built now, populated later
+                const subSub = document.createElement('ul');
+                subSub.className = 'toc-subsublevel';
+                subSub.style.display = 'none';
 
-                const arrow = document.createElement('span');
-                arrow.textContent = '▶';
-                arrow.style.cssText = 'font-size:0.55rem;opacity:0.4;transition:transform 0.2s;display:inline-block;flex-shrink:0;line-height:1';
-
+                // Check if next headings include an H4 before the next H3/H2
+                // We'll do this in a post-pass; for now store references
                 const a = document.createElement('a');
                 a.className = 'toc-sublink';
                 a.href = '#' + heading.id;
                 a.textContent = heading.textContent;
 
+                // Arrow placeholder — will be shown only if H4 children exist
+                const arrow = document.createElement('span');
+                arrow.className = 'toc-arrow-sub';
+                arrow.textContent = '▶';
+                arrow.style.cssText = 'font-size:0.55rem;opacity:0.4;transition:transform 0.2s;display:none;flex-shrink:0;line-height:1';
+
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex;align-items:center;gap:6px';
                 row.appendChild(arrow);
                 row.appendChild(a);
                 li.appendChild(row);
-                currentSubList.appendChild(li);
-
-                // Sub-sub level (H4s)
-                const subSub = document.createElement('ul');
-                subSub.className = 'toc-subsublevel';
-                subSub.style.display = 'none';
                 li.appendChild(subSub);
+                currentSubList.appendChild(li);
 
                 arrow.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -2321,8 +2319,16 @@ localStorage.setItem('notifications', '[]');</code></pre>
 
                 currentH3Item = li;
                 currentSubSubList = subSub;
+                currentH3Arrow = arrow;
 
             } else if (heading.tagName === 'H4' && currentSubSubList) {
+                // Mark parent H3 as having children — show arrow, hide bullet
+                if (currentH3Arrow && currentH3Arrow.style.display === 'none') {
+                    currentH3Arrow.style.display = 'inline-block';
+                    // Remove leaf class if it was set
+                    if (currentH3Item) currentH3Item.classList.remove('leaf');
+                }
+
                 const li = document.createElement('li');
                 li.className = 'toc-subsubitem';
                 const a = document.createElement('a');
@@ -2331,6 +2337,15 @@ localStorage.setItem('notifications', '[]');</code></pre>
                 a.textContent = heading.textContent;
                 li.appendChild(a);
                 currentSubSubList.appendChild(li);
+            }
+        });
+
+        // Mark H3 items with no H4 children as leaves (show bullet via CSS)
+        document.querySelectorAll('.toc-subitem').forEach(item => {
+            const arrow = item.querySelector('.toc-arrow-sub');
+            if (!arrow || arrow.style.display === 'none') {
+                item.classList.add('leaf');
+                if (arrow) arrow.remove();
             }
         });
 
