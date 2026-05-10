@@ -88,13 +88,25 @@ async function syncSharedJumps() {
           supabaseId: rc.id,
         });
       } else {
+        // Place new shared col after the last personal col that has at least one jump
+        const localJumps = DB.getJumps(localUserId);
+        const personalColsWithJumps = existingCols
+          .filter(c => !c.isShared && localJumps.some(j => j.columnId === c.id && !j.isArchived));
+        const lastPersonalOrder = personalColsWithJumps.length > 0
+          ? Math.max(...personalColsWithJumps.map(c => c.order || 0))
+          : 0;
+        // Find next available order slot after last personal col with jumps
+        const usedOrders = new Set(existingCols.map(c => c.order));
+        let newOrder = lastPersonalOrder + 1;
+        while (usedOrders.has(newOrder)) newOrder++;
+
         existingCols.push({
           id: rc.id,
           supabaseId: rc.id,
           userId: localUserId,
           name: rc.name,
           visible: true,
-          order: rc.position,
+          order: newOrder,
           createdAt: new Date(rc.created_at).getTime(),
           isShared: 1,
           teamId: rc.team_id,
@@ -193,7 +205,7 @@ async function syncSharedJumps() {
     // 6. Update sync timestamp in localStorage as well
     localStorage.setItem('jk_last_sync', Date.now().toString());
 
-    console.log(`[JumpKit Sync] Synced ${remoteCols.length} columns, ${remoteJumps.length} jumps`);
+    console.debug(`[JumpKit Sync] Synced ${remoteCols.length} columns, ${remoteJumps.length} jumps`);
   } catch (err) {
     console.warn('[JumpKit Sync] Error:', err.message);
   }
@@ -204,7 +216,7 @@ function startSyncLoop() {
   // Run immediately
   syncSharedJumps().then(() => {
     // Re-render if on jumps page
-    if (typeof activePage !== 'undefined' && activePage === 'jumps' && typeof renderColumns === 'function') {
+    if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) {
       renderColumns();
     }
   });
@@ -213,7 +225,7 @@ function startSyncLoop() {
   if (_syncInterval) clearInterval(_syncInterval);
   _syncInterval = setInterval(() => {
     syncSharedJumps().then(() => {
-      if (typeof activePage !== 'undefined' && activePage === 'jumps' && typeof renderColumns === 'function') {
+      if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) {
         renderColumns();
       }
     });

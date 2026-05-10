@@ -71,7 +71,7 @@ async function renderTeams() {
     if (profErr && profErr.code !== 'PGRST116') throw profErr;
 
     const role = profile?.role || 'team-member';
-    console.log('[Teams] role:', role, 'org_id:', profile?.org_id);
+    console.debug('[Teams] role:', role, 'org_id:', profile?.org_id);
 
     if (role === 'org-owner') {
       await renderOrgOwnerView(content, supaUser, profile);

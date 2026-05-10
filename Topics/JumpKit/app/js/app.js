@@ -839,7 +839,7 @@ window.submitFeedback = async function submitFeedback() {
   try {
     const SUPABASE_URL = 'https://iuexwdjnqfidcwvwbgwr.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0';
-    console.log('[Feedback] Calling edge function…');
+    console.debug('[Feedback] Calling edge function…');
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
       method: 'POST',
       headers: {
@@ -854,7 +854,7 @@ window.submitFeedback = async function submitFeedback() {
       }),
     });
     const data = await res.json().catch(() => ({}));
-    console.log('[Feedback] HTTP status:', res.status, '| response:', JSON.stringify(data));
+    console.debug('[Feedback] HTTP status:', res.status, '| response:', JSON.stringify(data));
     if (!res.ok && !data.ok) throw new Error(data.error || 'Send failed');
   } catch (e) {
     console.warn('Feedback send error:', e);

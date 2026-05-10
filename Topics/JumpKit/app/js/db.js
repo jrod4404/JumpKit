@@ -80,7 +80,7 @@ const DB = (() => {
           // Auto-seed if this user has no personal (non-shared) columns
           const personalCols = this._cache.columns.filter(c => !c.isShared);
           if (personalCols.length === 0) {
-            console.log('[DB.init] No columns found — seeding default data for', userId);
+            console.debug('[DB.init] No columns found — seeding default data for', userId);
             await window.electronAPI.seedNewUser(userId);
             // Reload after seed
             const [jumps2, columns2] = await Promise.all([
