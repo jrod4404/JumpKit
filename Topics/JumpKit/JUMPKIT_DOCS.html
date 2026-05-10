@@ -1201,7 +1201,7 @@ localStorage.setItem('jk_theme', 'dark' || 'light');</code></pre>
 <h3 id="section-4">2.3 Database Schema</h3>
 <h4 id="sqlite-local">2.3.1 SQLite (Local)</h4>
 <p><strong>All tables exist in <code>jumpkit.db</code> (stored in app-data/ directory):</strong></p>
-<h4 id="jumps">2.3.1 jumps</h4>
+<h4 id="jumps">2.3.2 jumps</h4>
 <pre><code>id TEXT PRIMARY KEY,
 userId TEXT NOT NULL,
 name TEXT NOT NULL,
@@ -1221,7 +1221,7 @@ teamId TEXT DEFAULT NULL,
 timeSaved REAL DEFAULT NULL,           -- optional override
 timeSavedUnit TEXT DEFAULT NULL,
 supabaseId TEXT DEFAULT NULL</code></pre>
-<h4 id="columns">2.3.2 columns</h4>
+<h4 id="columns">2.3.3 columns</h4>
 <pre><code>id TEXT PRIMARY KEY,
 userId TEXT NOT NULL,
 name TEXT NOT NULL,
@@ -1231,15 +1231,15 @@ createdAt INTEGER,
 isShared INTEGER DEFAULT 0,
 teamId TEXT DEFAULT NULL,
 supabaseId TEXT DEFAULT NULL           -- UUID from shared_columns.id</code></pre>
-<h4 id="sync_state">2.3.3 sync_state</h4>
+<h4 id="sync_state">2.3.4 sync_state</h4>
 <pre><code>key TEXT PRIMARY KEY,
 value TEXT                             -- lastSync timestamp, etc.</code></pre>
-<h4 id="click_log">2.3.4 click_log</h4>
+<h4 id="click_log">2.3.5 click_log</h4>
 <pre><code>id INTEGER PRIMARY KEY AUTOINCREMENT,
 userId TEXT NOT NULL,
 jumpId TEXT NOT NULL,
 ts INTEGER NOT NULL                    -- timestamp</code></pre>
-<h4 id="user_prefs">2.3.5 user_prefs</h4>
+<h4 id="user_prefs">2.3.6 user_prefs</h4>
 <pre><code>userId TEXT PRIMARY KEY,
 startPage TEXT DEFAULT 'home',
 timePerClick REAL DEFAULT 10,
@@ -1253,9 +1253,9 @@ notifications INTEGER DEFAULT 1,
 cloudBackup INTEGER DEFAULT 0,
 autoArchive TEXT DEFAULT 'never',
 navDefaultCollapsed INTEGER DEFAULT 0</code></pre>
-<h4 id="supabase-cloud">2.3.2 Supabase (Cloud)</h4>
+<h4 id="supabase-cloud">2.3.7 Supabase (Cloud)</h4>
 <p><strong>Tables with RLS enabled:</strong></p>
-<h4 id="profiles">2.3.6 profiles</h4>
+<h4 id="profiles">2.3.8 profiles</h4>
 <pre><code>id UUID PRIMARY KEY (auth.users.id),
 email TEXT NOT NULL,
 first_name TEXT DEFAULT '',
@@ -1267,39 +1267,39 @@ subscription_tier TEXT ('free', 'core', 'teams_jet'),
 trial_launches_used INTEGER DEFAULT 0,
 ls_customer_id TEXT,
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="organizations">2.3.7 organizations</h4>
+<h4 id="organizations">2.3.9 organizations</h4>
 <pre><code>id UUID PRIMARY KEY,
 name TEXT NOT NULL,
 owner_id UUID REFERENCES auth.users(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="teams">2.3.8 teams</h4>
+<h4 id="teams">2.3.10 teams</h4>
 <pre><code>id UUID PRIMARY KEY,
 org_id UUID REFERENCES organizations(id),
 name TEXT NOT NULL,
 team_password_hash TEXT NOT NULL,      -- SHA-256 hash
 owner_id UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="team_members">2.3.9 team_members</h4>
+<h4 id="team_members">2.3.11 team_members</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 user_id UUID REFERENCES profiles(id),
 joined_at TIMESTAMPTZ,
 UNIQUE(team_id, user_id)</code></pre>
-<h4 id="team_invites">2.3.10 team_invites</h4>
+<h4 id="team_invites">2.3.12 team_invites</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 email TEXT NOT NULL,
 invited_by UUID REFERENCES profiles(id),
 status TEXT ('pending', 'accepted'),
 invited_at TIMESTAMPTZ</code></pre>
-<h4 id="shared_columns">2.3.11 shared_columns</h4>
+<h4 id="shared_columns">2.3.13 shared_columns</h4>
 <pre><code>id UUID PRIMARY KEY,
 team_id UUID REFERENCES teams(id),
 name TEXT NOT NULL,
 position INTEGER DEFAULT 0,
 created_by UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
-<h4 id="shared_jumps">2.3.12 shared_jumps</h4>
+<h4 id="shared_jumps">2.3.14 shared_jumps</h4>
 <pre><code>id UUID PRIMARY KEY,
 shared_column_id UUID REFERENCES shared_columns(id),
 team_id UUID REFERENCES teams(id),
@@ -1311,7 +1311,7 @@ position INTEGER DEFAULT 0,
 created_by UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ,
 updated_at TIMESTAMPTZ</code></pre>
-<h4 id="key-relationships">2.3.3 Key Relationships</h4>
+<h4 id="key-relationships">2.3.15 Key Relationships</h4>
 <ul>
 <li><strong>users</strong> (Supabase Auth) ↔ <strong>profiles</strong> (one-to-one, on auth trigger)</li>
 <li><strong>profiles</strong> → <strong>organizations</strong> (many-to-one by org_id)</li>
