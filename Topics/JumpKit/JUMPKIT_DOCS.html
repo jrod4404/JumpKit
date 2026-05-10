@@ -1322,7 +1322,7 @@ updated_at TIMESTAMPTZ</code></pre>
 <li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
 </ul>
 <h3 id="section-5">2.4 Key Concepts &amp; Data Flows</h3>
-<h4 id="jumps-the-core-resource">2.4.1 5a. Jumps — The Core Resource</h4>
+<h4 id="jumps-the-core-resource">2.4.1 Jumps — The Core Resource</h4>
 <p><strong>What is a jump?</strong><br/>
 A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
 <p><strong>Jump Lifecycle:</strong></p>
@@ -1367,7 +1367,7 @@ const toArchive = allJumps.filter(j =&gt;
 );
 toArchive.forEach(j =&gt; DB.updateJump(userId, j.id, { isArchived: 1 }));
 addNotification({ message: \`\${toArchive.length} jumps auto-archived\` });</code></pre>
-<h4 id="columns-organization">2.4.2 5b. Columns — Organization</h4>
+<h4 id="columns-organization">2.4.2 Columns — Organization</h4>
 <p><strong>What is a column?</strong><br/>
 A column is a category/folder that groups related jumps. Users can have up to 10 columns.</p>
 <p><strong>Column Properties:</strong></p>
@@ -1404,7 +1404,7 @@ shareColumnWithTeam(columnId, teamId);
 // 1. sync.js pulls shared_columns + shared_jumps from Supabase
 // 2. Upserts into local SQLite (same column.id from cloud)
 // 3. Jumps marked isShared=1 in UI</code></pre>
-<h4 id="teams-organizations">2.4.3 5c. Teams &amp; Organizations</h4>
+<h4 id="teams-organizations">2.4.3 Teams &amp; Organizations</h4>
 <p><strong>Roles:</strong></p>
 <table>
 <thead>
@@ -1518,7 +1518,7 @@ window.location.href = 'app.html';</code></pre>
 <li><strong>CAN</strong> assign their own local hotkey (never syncs)</li>
 <li>Team-owner controls content via <code>shared_jumps</code> table in Supabase</li>
 </ul>
-<h4 id="sync-engine">2.4.4 5d. Sync Engine — The Bridge</h4>
+<h4 id="sync-engine-bridge">2.4.4 Sync Engine — The Bridge</h4>
 <p><strong>Architecture:</strong></p>
 <pre><code>Supabase (cloud)
   ↓ [Pull on login + every 60 min]
@@ -1571,7 +1571,7 @@ const staleLocalJumps = existingJumps.filter(j =&gt;
   j.isShared && j.teamId && remoteTeamIds.includes(j.teamId) && j.supabaseId && !remoteIds.has(j.supabaseId)
 );
 // Delete them from DB</code></pre>
-<h4 id="authentication">2.4.5 5e. Authentication — Supabase Auth</h4>
+<h4 id="authentication">2.4.5 Authentication — Supabase Auth</h4>
 <p><strong>Sign Up Flow:</strong></p>
 <pre><code>User enters email + password (+ name)
   ↓
