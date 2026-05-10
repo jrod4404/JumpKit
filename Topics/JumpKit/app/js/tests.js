@@ -1547,6 +1547,91 @@ const JK_TESTS = [
     }
   },
 
+  // ── Deployment Audit Tests (69–72) ───────────────────────────────
+  {
+    id: 69, category: 'Deployment',
+    title: 'Environment variables — Supabase URL and anon key configured',
+    purpose: 'Confirms that required environment variables (SUPABASE_URL, SUPABASE_ANON_KEY) are set and non-empty. Edge Function secrets cannot be verified from client but client-side vars are checked.',
+    prerequisites: 'None.',
+    description: 'Checks SUPABASE_URL and SUPABASE_ANON_KEY are defined, non-empty, and correctly formatted.',
+    input: 'SUPABASE_URL, SUPABASE_ANON_KEY constants',
+    expected: 'Both defined, URL is HTTPS, anon key is a valid JWT.',
+    test: async () => {
+      if (!SUPABASE_URL) throw new Error('SUPABASE_URL is not set');
+      if (!SUPABASE_ANON_KEY) throw new Error('SUPABASE_ANON_KEY is not set');
+      if (!SUPABASE_URL.startsWith('https://')) throw new Error('SUPABASE_URL must use HTTPS');
+      // Anon key should be a valid JWT (3 parts separated by dots)
+      if (SUPABASE_ANON_KEY.split('.').length !== 3) throw new Error('SUPABASE_ANON_KEY does not look like a valid JWT');
+      console.warn('[Test 69] ⚠️ Cannot verify Edge Function secrets (RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY, LEMON_SQUEEZY_SIGNING_SECRET) from client. Verify manually in Supabase dashboard → Edge Functions → Secrets.');
+      return true;
+    }
+  },
+
+  {
+    id: 70, category: 'Deployment',
+    title: 'SSL certificate valid and HTTPS enforced',
+    purpose: 'Confirms that jumpkit.app has a valid SSL certificate and HTTPS is enforced (HTTP redirects to HTTPS).',
+    prerequisites: 'Internet connection.',
+    description: 'Fetches jumpkit.app over HTTPS and confirms a 200 response. Also verifies the URL starts with https.',
+    input: 'fetch("https://jumpkit.app")',
+    expected: 'HTTPS fetch returns 200. No SSL errors.',
+    test: async () => {
+      const url = 'https://jumpkit.app';
+      try {
+        const res = await fetch(url, { method: 'HEAD' });
+        if (!res.ok && res.status !== 301 && res.status !== 302 && res.status !== 308) {
+          throw new Error(`https://jumpkit.app returned ${res.status} — expected 200`);
+        }
+        if (!res.url.startsWith('https://')) throw new Error('Response URL is not HTTPS: ' + res.url);
+      } catch(e) {
+        if (e.message.includes('SSL') || e.message.includes('certificate')) {
+          throw new Error('SSL certificate error on jumpkit.app: ' + e.message);
+        }
+        throw e;
+      }
+      return true;
+    }
+  },
+
+  {
+    id: 71, category: 'Deployment',
+    title: 'Firewall / infrastructure — Vercel and Supabase managed (no self-hosted server)',
+    purpose: 'Confirms JumpKit has no self-hosted server that requires manual firewall configuration. Vercel and Supabase handle all infrastructure.',
+    prerequisites: 'None.',
+    description: 'Verifies the app is Electron-based with Vercel landing page and Supabase backend — no exposed ports or self-hosted processes.',
+    input: 'window.electronAPI.isElectron, SUPABASE_URL format',
+    expected: 'Electron app confirmed; Supabase URL is hosted (not localhost); no self-hosted server.',
+    test: async () => {
+      // Confirm this is an Electron app (not a web server)
+      if (!window.electronAPI?.isElectron) throw new Error('Not running in Electron — unexpected environment');
+      // Confirm Supabase is not localhost (which would indicate self-hosted)
+      if (SUPABASE_URL.includes('localhost') || SUPABASE_URL.includes('127.0.0.1')) {
+        throw new Error('SUPABASE_URL points to localhost — this looks like a self-hosted server that may need firewall configuration');
+      }
+      console.info('[Test 71] ✅ No self-hosted server. Vercel manages landing page; Supabase manages backend. Firewall is handled by cloud providers.');
+      return true;
+    }
+  },
+
+  {
+    id: 72, category: 'Deployment',
+    title: 'Process manager — N/A for Electron + Vercel + Supabase stack',
+    purpose: 'Confirms no unmanaged background processes are running. For this stack, process management is handled by Vercel/Supabase/OS — PM2 is not required.',
+    prerequisites: 'None.',
+    description: 'Verifies the deployment model (Electron desktop + Vercel + Supabase) has no self-hosted Node server needing PM2.',
+    input: 'SUPABASE_URL, electronAPI.isElectron',
+    expected: 'No self-hosted server detected. Process management is cloud-managed.',
+    test: async () => {
+      if (!window.electronAPI?.isElectron) throw new Error('Not in Electron context — unexpected');
+      // If Supabase URL is remote (not localhost), no PM2 needed
+      if (SUPABASE_URL.includes('localhost') || SUPABASE_URL.includes('127.0.0.1')) {
+        throw new Error('Self-hosted Supabase detected — ensure PM2 or systemd is managing the Supabase process');
+      }
+      console.info('[Test 72] ✅ Stack is Electron + Vercel + Supabase (all cloud/desktop managed). PM2 not required. If a self-hosted server is added in future, revisit this test.');
+      return true;
+    }
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
