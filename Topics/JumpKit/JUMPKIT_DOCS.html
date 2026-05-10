@@ -1788,8 +1788,8 @@ if (navPrefs.navDefaultCollapsed) {
 </ul>
 <h3 id="section-7">2.6 IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
-<h4 id="jumps-ipc">2.6.1 Jumps</h4>
-<h4 id="get-jumps">2.6.1 get-jumps</h4>
+<h4 id="jumps-ipc">2.6.1 Jumps IPC Group</h4>
+<h4 id="get-jumps">2.6.2 get-jumps</h4>
 <pre><code>// Renderer:
 const jumps = await window.electronAPI.getJumps(userId);
 
@@ -1798,7 +1798,7 @@ ipcMain.handle('get-jumps', (_e, userId) =&gt; {
   if (!db) return [];
   return db.prepare('SELECT * FROM jumps WHERE userId = ?').all(userId);
 });</code></pre>
-<h4 id="save-jump">2.6.2 save-jump</h4>
+<h4 id="save-jump">2.6.3 save-jump</h4>
 <pre><code>// Renderer:
 await window.electronAPI.saveJump(userId, jump);
 
@@ -1812,7 +1812,7 @@ ipcMain.handle('save-jump', (_e, userId, jump) =&gt; {
     return { ok: false, reason: e.message };
   }
 });</code></pre>
-<h4 id="delete-jump">2.6.3 delete-jump</h4>
+<h4 id="delete-jump">2.6.4 delete-jump</h4>
 <pre><code>// Renderer:
 await window.electronAPI.deleteJump(userId, jumpId);
 
@@ -1822,16 +1822,16 @@ ipcMain.handle('delete-jump', (_e, userId, id) =&gt; {
   db.prepare('DELETE FROM jumps WHERE id = ? AND userId = ?').run(id, userId);
   return { ok: true };
 });</code></pre>
-<h4 id="columns-ipc">2.6.2 Columns</h4>
-<h4 id="get-columns">2.6.4 get-columns</h4>
+<h4 id="columns-ipc">2.6.5 Columns IPC Group</h4>
+<h4 id="get-columns">2.6.6 get-columns</h4>
 <pre><code>const columns = await window.electronAPI.getColumns(userId);</code></pre>
-<h4 id="save-columns-bulk-replace">2.6.5 save-columns (bulk replace)</h4>
+<h4 id="save-columns-bulk-replace">2.6.7 save-columns (bulk replace)</h4>
 <pre><code>// Replace all columns for user:
 await window.electronAPI.saveColumns(userId, [
   { id: '1', name: 'Col 1', visible: 1, order: 0, ... },
   { id: '2', name: 'Col 2', visible: 1, order: 1, ... },
 ]);</code></pre>
-<h4 id="save-column-single-upsert">2.6.6 save-column (single upsert)</h4>
+<h4 id="save-column-single-upsert">2.6.8 save-column (single upsert)</h4>
 <pre><code>// Upsert one column:
 await window.electronAPI.saveColumn(userId, {
   id: 'col-1',
@@ -1839,21 +1839,21 @@ await window.electronAPI.saveColumn(userId, {
   visible: 1,
   order: 2,
 });</code></pre>
-<h4 id="sync-ipc">2.6.3 Sync</h4>
-<h4 id="sync-jumps">2.6.7 sync-jumps</h4>
+<h4 id="sync-ipc">2.6.9 Sync IPC Group</h4>
+<h4 id="sync-jumps">2.6.10 sync-jumps</h4>
 <pre><code>// Renderer (sync.js):
 const result = await window.electronAPI.syncJumps({
   sharedColumns: [...],
   sharedJumps: [...],
 });
 // Returns: { ok: true } or { ok: false, reason: '...' }</code></pre>
-<h4 id="upsert-shared-jumps">2.6.8 upsert-shared-jumps</h4>
+<h4 id="upsert-shared-jumps">2.6.11 upsert-shared-jumps</h4>
 <pre><code>// Upsert array of jumps (preserve local hotkeys):
 await window.electronAPI.upsertSharedJumps([jump1, jump2, ...]);</code></pre>
 <h4 id="delete-shared-jumps">delete-shared-jumps</h4>
 <pre><code>// Delete shared jumps by ID:
 await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
-<h4 id="preferences-ipc">2.6.4 Preferences</h4>
+<h4 id="preferences-ipc">2.6.12 Preferences IPC Group</h4>
 <h4 id="get-prefs">get-prefs</h4>
 <pre><code>const prefs = await window.electronAPI.getPrefs(userId);</code></pre>
 <h4 id="save-prefs">save-prefs</h4>
@@ -1863,19 +1863,19 @@ await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
   showDescription: false,
   // ... all preference fields
 });</code></pre>
-<h4 id="click-log-ipc">2.6.5 Click Log</h4>
+<h4 id="click-log-ipc">2.6.13 Click Log IPC Group</h4>
 <h4 id="get-click-log">get-click-log</h4>
 <pre><code>const log = await window.electronAPI.getClickLog(userId);
 // Returns: [{ id, userId, jumpId, ts }, ...]</code></pre>
 <h4 id="log-click">log-click</h4>
 <pre><code>await window.electronAPI.logClick(userId, jumpId, timestamp);</code></pre>
-<h4 id="sync-state-ipc">2.6.6 Sync State</h4>
+<h4 id="sync-state-ipc">2.6.14 Sync State IPC Group</h4>
 <h4 id="get-sync-state">get-sync-state</h4>
 <pre><code>const lastSync = await window.electronAPI.getSyncState('lastSync');
 // Returns: '1704067200000' or null</code></pre>
 <h4 id="update-sync-state">update-sync-state</h4>
 <pre><code>await window.electronAPI.updateSyncState('lastSync', Date.now().toString());</code></pre>
-<h4 id="files-ipc">2.6.7 Files</h4>
+<h4 id="files-ipc">2.6.15 Files IPC Group</h4>
 <h4 id="open-url">open-url</h4>
 <pre><code>// Open URL in browser or path in file explorer:
 await window.electronAPI.openUrl('https://google.com');
@@ -1892,7 +1892,7 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
     shell.openPath(url);  // Cross-platform file explorer
   }
 });</code></pre>
-<h4 id="backup-ipc">2.6.8 Backup</h4>
+<h4 id="backup-ipc">2.6.16 Backup IPC Group</h4>
 <h4 id="save-backup">save-backup</h4>
 <pre><code>const backup = {
   version: 1,
