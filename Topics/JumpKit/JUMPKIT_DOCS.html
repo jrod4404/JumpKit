@@ -1850,33 +1850,33 @@ const result = await window.electronAPI.syncJumps({
 <h4 id="upsert-shared-jumps">2.6.11 upsert-shared-jumps</h4>
 <pre><code>// Upsert array of jumps (preserve local hotkeys):
 await window.electronAPI.upsertSharedJumps([jump1, jump2, ...]);</code></pre>
-<h4 id="delete-shared-jumps">delete-shared-jumps</h4>
+<h4 id="delete-shared-jumps">2.6.12 delete-shared-jumps</h4>
 <pre><code>// Delete shared jumps by ID:
 await window.electronAPI.deleteSharedJumps(['id1', 'id2', ...]);</code></pre>
-<h4 id="preferences-ipc">2.6.12 Preferences IPC Group</h4>
-<h4 id="get-prefs">get-prefs</h4>
+<h4 id="preferences-ipc">2.6.13 Preferences IPC Group</h4>
+<h4 id="get-prefs">2.6.14 get-prefs</h4>
 <pre><code>const prefs = await window.electronAPI.getPrefs(userId);</code></pre>
-<h4 id="save-prefs">save-prefs</h4>
+<h4 id="save-prefs">2.6.15 save-prefs</h4>
 <pre><code>await window.electronAPI.savePrefs(userId, {
   startPage: 'home',
   timePerClick: 10,
   showDescription: false,
   // ... all preference fields
 });</code></pre>
-<h4 id="click-log-ipc">2.6.13 Click Log IPC Group</h4>
-<h4 id="get-click-log">get-click-log</h4>
+<h4 id="click-log-ipc">2.6.16 Click Log IPC Group</h4>
+<h4 id="get-click-log">2.6.17 get-click-log</h4>
 <pre><code>const log = await window.electronAPI.getClickLog(userId);
 // Returns: [{ id, userId, jumpId, ts }, ...]</code></pre>
-<h4 id="log-click">log-click</h4>
+<h4 id="log-click">2.6.18 log-click</h4>
 <pre><code>await window.electronAPI.logClick(userId, jumpId, timestamp);</code></pre>
-<h4 id="sync-state-ipc">2.6.14 Sync State IPC Group</h4>
-<h4 id="get-sync-state">get-sync-state</h4>
+<h4 id="sync-state-ipc">2.6.19 Sync State IPC Group</h4>
+<h4 id="get-sync-state">2.6.20 get-sync-state</h4>
 <pre><code>const lastSync = await window.electronAPI.getSyncState('lastSync');
 // Returns: '1704067200000' or null</code></pre>
-<h4 id="update-sync-state">update-sync-state</h4>
+<h4 id="update-sync-state">2.6.21 update-sync-state</h4>
 <pre><code>await window.electronAPI.updateSyncState('lastSync', Date.now().toString());</code></pre>
-<h4 id="files-ipc">2.6.15 Files IPC Group</h4>
-<h4 id="open-url">open-url</h4>
+<h4 id="files-ipc">2.6.22 Files IPC Group</h4>
+<h4 id="open-url">2.6.23 open-url</h4>
 <pre><code>// Open URL in browser or path in file explorer:
 await window.electronAPI.openUrl('https://google.com');
 await window.electronAPI.openUrl('~/Documents');
@@ -1892,8 +1892,8 @@ await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
     shell.openPath(url);  // Cross-platform file explorer
   }
 });</code></pre>
-<h4 id="backup-ipc">2.6.16 Backup IPC Group</h4>
-<h4 id="save-backup">save-backup</h4>
+<h4 id="backup-ipc">2.6.24 Backup IPC Group</h4>
+<h4 id="save-backup">2.6.25 save-backup</h4>
 <pre><code>const backup = {
   version: 1,
   exportedAt: new Date().toISOString(),
