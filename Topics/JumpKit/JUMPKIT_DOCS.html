@@ -99,7 +99,7 @@
 
         .header {
             background: linear-gradient(135deg, var(--royal) 0%, var(--turq) 100%);
-            padding: 2.5rem var(--spacing-unit);
+            padding: 1.75rem var(--spacing-unit);
             border-bottom: 1px solid var(--border);
             flex-shrink: 0;
         }
@@ -205,7 +205,7 @@
 
         .toc-subitem::before {
             content: '•';
-            font-size: 0.9rem;
+            font-size: 1.2rem;
             opacity: 0.4;
             flex-shrink: 0;
         }
@@ -2160,132 +2160,6 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <li>Easy to install and use — no IT setup required for individuals</li>
 </ul>
 
-<h2 id="marketing-strategy">3. Marketing Strategy</h2>
-<p>This section covers how JumpKit is positioned and marketed to potential customers.</p>
-
-<h3 id="target-audience">Target Audience</h3>
-<ul>
-<li><strong>Individual knowledge workers</strong> — developers, analysts, sales reps, operations staff who navigate many web and file resources daily</li>
-<li><strong>Small to mid-size teams</strong> — teams that want to standardize their navigation stack and share jump collections</li>
-<li><strong>MSP-managed businesses</strong> — IT-managed companies in regulated industries (manufacturing, automotive, healthcare, finance) that value local-first data and audit trails</li>
-</ul>
-
-<h3 id="marketing-channels">Marketing Channels</h3>
-<ul>
-<li><strong>Online forums</strong> — Reddit (r/productivity, r/selfhosted, r/sysadmin), Hacker News, LinkedIn posts</li>
-<li><strong>Email broadcasts</strong> — Targeted outreach to productivity-focused lists</li>
-<li><strong>IT MSP Partners</strong> — Commission-based reseller program; partners earn a recurring commission for every user they sign up</li>
-<li><strong>Landing page (jumpkit.app)</strong> — SEO-optimized, showcases features, demo video, pricing, testimonials</li>
-</ul>
-
-<h3 id="distribution-model">Distribution Model</h3>
-<ul>
-<li>Free tier available immediately — users download and install with no friction</li>
-<li>Paid tier (JumpKit Core) via Lemon Squeezy checkout</li>
-<li>MSP partners earn a recurring commission on all active subscribers they refer</li>
-<li>Goal: reach passive income through partner network + organic growth by end of June 2026</li>
-</ul>
-
-<h3 id="key-messages">Key Messages</h3>
-<ul>
-<li>"Stop searching. Start jumping." — core brand tagline</li>
-<li>Quantifiable ROI — time saved and dollars recovered tracked automatically</li>
-<li>Local-first — no data leakage, works offline, your data stays yours</li>
-<li>Easy to install and use — no IT setup required for individuals</li>
-</ul>
-
-<h3 id="appendix">11. Appendix: Common Tasks</h3>
-<h3 id="add-a-new-page">Add a New Page</h3>
-<ol>
-<li><strong>Add to page router (app.js):</strong>
-<pre><code>const pages = {
-  jumps: () =&gt; renderJumps(),
-  mypage: () =&gt; renderMyPage(),  // New!
-  // ...
-};
-
-const pageTitles = {
-  mypage: 'My Page',
-  // ...
-};
-
-const pageIcons = {
-  mypage: 'ti-star',
-  // ...
-};</code></pre>
-</li>
-<li><strong>Add nav item (app.html):</strong>
-<pre><code>&lt;button class=&quot;nav-item&quot; data-page=&quot;mypage&quot;&gt;
-  &lt;i class=&quot;ti ti-star nav-icon&quot;&gt;&lt;/i&gt;
-  &lt;span class=&quot;nav-label&quot;&gt;My Page&lt;/span&gt;
-&lt;/button&gt;</code></pre>
-</li>
-<li><strong>Create renderer function (new file or in app.js):</strong>
-<pre><code>function renderMyPage() {
-  const pc = document.getElementById('pageContent');
-  pc.innerHTML = \`&lt;div&gt;...&lt;/div&gt;\`;
-}</code></pre>
-</li>
-</ol>
-<h3 id="add-a-modal-dialog">Add a Modal Dialog</h3>
-<pre><code>const body = \`
-  &lt;div class=&quot;form-group&quot;&gt;
-    &lt;label class=&quot;form-label&quot;&gt;Email&lt;/label&gt;
-    &lt;input class=&quot;form-input&quot; id=&quot;myEmail&quot; placeholder=&quot;user@example.com&quot;/&gt;
-  &lt;/div&gt;
-  &lt;div id=&quot;myError&quot; class=&quot;form-error&quot;&gt;&lt;/div&gt;
-\`;
-
-const footer = \`
-  &lt;button class=&quot;btn btn-subtle&quot; onclick=&quot;Modal.close()&quot;&gt;Cancel&lt;/button&gt;
-  &lt;button class=&quot;btn btn-primary&quot; onclick=&quot;submitMyForm()&quot;&gt;Submit&lt;/button&gt;
-\`;
-
-Modal.open('&lt;i class=&quot;ti ti-mail&quot;&gt;&lt;/i&gt; Send Email', body, footer);
-
-window.submitMyForm = function() {
-  const email = document.getElementById('myEmail').value;
-  if (!email) {
-    document.getElementById('myError').textContent = 'Email is required';
-    return;
-  }
-  // Do something...
-  Toast.success('Email sent!');
-  Modal.close();
-};</code></pre>
-<h3 id="implement-auto-archive-logic">Implement Auto-Archive Logic</h3>
-<pre><code>window.runAutoArchive = function runAutoArchive() {
-  const prefs = DB.getPrefs(currentUser.id);
-  if (!prefs.autoArchive || prefs.autoArchive === 'never') return;
-
-  const thresholds = { '1m': 30, '6m': 180, '1y': 365 };
-  const days = thresholds[prefs.autoArchive];
-  if (!days) return;
-
-  const thresholdMs = days * 24 * 60 * 60 * 1000;
-  const now = Date.now();
-  const active = DB.getActiveJumps(currentUser.id);
-
-  const toArchive = active.filter(j =&gt;
-    j.lastUsed && (now - j.lastUsed) &gt; thresholdMs
-  );
-
-  if (toArchive.length === 0) return;
-
-  toArchive.forEach(j =&gt; {
-    DB.updateJump(currentUser.id, j.id, { isArchived: true });
-  });
-
-  const msg = toArchive.length === 1
-    ? \`"\${toArchive[0].name}" was auto-archived\`
-    : \`\${toArchive.length} jumps were auto-archived\`;
-
-  addNotification({
-    type: 'auto-archive',
-    message: msg,
-    ts: now
-  });
-};</code></pre>
 <h2 id="conclusion">4. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
