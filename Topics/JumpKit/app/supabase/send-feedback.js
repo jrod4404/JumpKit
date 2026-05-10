@@ -19,12 +19,32 @@ import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
+// ── Simple in-memory rate limiter (per IP, 5 requests/min) ──────────
+const rateLimitMap = new Map();
+function isRateLimited(ip) {
+  const now = Date.now();
+  const windowMs = 60_000;
+  const maxRequests = 5;
+  const entry = rateLimitMap.get(ip) || { count: 0, start: now };
+  if (now - entry.start > windowMs) { entry.count = 0; entry.start = now; }
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return entry.count > maxRequests;
+}
+
 serve(async (req) => {
+  const ip = req.headers.get('x-forwarded-for') || 'unknown';
+  if (req.method !== 'OPTIONS' && isRateLimited(ip)) {
+    return new Response(JSON.stringify({ error: 'Too many requests' }), {
+      status: 429,
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
+    });
+  }
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response(null, {
       headers: {
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': 'https://jumpkit.app',
         'Access-Control-Allow-Methods': 'POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
       },
@@ -53,7 +73,7 @@ serve(async (req) => {
     if (!RESEND_API_KEY) {
       console.warn('RESEND_API_KEY not set — skipping email send');
       return new Response(JSON.stringify({ ok: true, warning: 'email not sent (no API key)' }), {
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
       });
     }
 
@@ -77,17 +97,17 @@ serve(async (req) => {
       console.error('Resend error:', err);
       return new Response(JSON.stringify({ error: 'Failed to send email', details: err }), {
         status: 500,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
       });
     }
 
     return new Response(JSON.stringify({ ok: true }), {
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
     });
   } catch (err) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
     });
   }
 });
