@@ -432,7 +432,7 @@ ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
       // user_prefs has unique constraint — delete new if exists, then update old
       db.prepare('DELETE FROM user_prefs WHERE userId = ?').run(newId);
       db.prepare('UPDATE user_prefs SET userId = ? WHERE userId = ?').run(newId, oldId);
-      db.prepare('UPDATE sync_state SET userId = ? WHERE userId = ?').run(newId, oldId);
+      // sync_state has no userId column — skip
     })();
     log(`[migrateUserId] ${oldId} → ${newId}`);
     return { ok: true };
