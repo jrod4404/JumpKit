@@ -631,10 +631,15 @@ function renderAccount(initialTab = 'account') {
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
   const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
+  const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 150) : 150;
   const lifetimeSeconds = lifetimeLaunches * timePerClick;
-  const lifetimeHours = Math.floor(lifetimeSeconds / 3600);
-  const lifetimeMins  = Math.floor((lifetimeSeconds % 3600) / 60);
+  const lifetimeHours   = Math.floor(lifetimeSeconds / 3600);
+  const lifetimeMins    = Math.floor((lifetimeSeconds % 3600) / 60);
   const lifetimeTimeStr = lifetimeHours > 0 ? `${lifetimeHours}h ${lifetimeMins}m` : `${lifetimeMins}m`;
+  const lifetimeDollars = (lifetimeSeconds / 3600) * dollarsPerHour;
+  const lifetimeDollarStr = lifetimeDollars >= 1000
+    ? `$${(lifetimeDollars / 1000).toFixed(1)}k`
+    : `$${lifetimeDollars.toFixed(2)}`;
 
   const ACCT_TABS = ['account', 'teams'];
   const ACCT_LABELS = { account: 'My Account', teams: 'My Teams' };
@@ -690,9 +695,13 @@ function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Lifetime Launches</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeLaunches.toLocaleString()}</span>
             </div>
-            <div class="acct-row" style="border-bottom:none">
+            <div class="acct-row">
               <div class="acct-row-label"><span>Lifetime Time Saved</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeTimeStr}</span>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Lifetime $ Saved</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeDollarStr}</span>
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Member Since</span></div>
