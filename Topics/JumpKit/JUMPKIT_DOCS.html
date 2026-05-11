@@ -2353,7 +2353,121 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <li><strong>Test messaging:</strong> "Local-first productivity" — growing trend that resonates with privacy-conscious users and enterprises.</li>
 </ul>
 
-<h2 id="conclusion">4. Conclusion</h2>
+<h2 id="testing">4. Testing</h2>
+
+<h3 id="testing-overview">4.1 Overview</h3>
+<p>JumpKit includes a built-in unit test suite accessible from the <strong>Testing</strong> page in the app. Tests cover core app functionality, security, database integrity, deployment checks, and code quality. Tests are written in vanilla JS and run directly in the Electron renderer process — no external test runner required.</p>
+<p>To run tests: open the app → navigate to <strong>Testing</strong> in the sidebar → click <strong>Run All Tests</strong> or run individual tests by category.</p>
+<p><strong>Current total: 77 tests</strong> across 7 categories.</p>
+
+<h3 id="testing-unit-tests">4.2 Unit Test Summary</h3>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Test #</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Category</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">1–10</td><td style="padding:6px 12px">Core</td><td style="padding:6px 12px">DB init, columns, jumps CRUD, click logging, user prefs</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">11–20</td><td style="padding:6px 12px">Core</td><td style="padding:6px 12px">Hotkey storage, seed data, theme persistence, modal open/close</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">21–30</td><td style="padding:6px 12px">Core</td><td style="padding:6px 12px">Search, favorites, drag-drop ordering, column rename/delete</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">31–40</td><td style="padding:6px 12px">Sync</td><td style="padding:6px 12px">Supabase auth, profile load, subscription tier enforcement</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">41–52</td><td style="padding:6px 12px">Teams</td><td style="padding:6px 12px">Team creation, membership, invite flow, shared jump sync</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">53</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">DevTools disabled in production builds</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">54</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">No secret API keys in frontend JS</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">55</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">All routes check authentication</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">56</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">HTTPS enforced on Supabase URL</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">57</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">CORS not wildcard (config audit)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">58</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">Input sanitized — <code>esc()</code> works correctly</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">59</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">Rate limiting logic blocks at threshold</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">60</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">PBKDF2 used for password hashing (not plain SHA-256)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">61</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">JWT has expiry claim and is not expired</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">62</td><td style="padding:6px 12px">Security</td><td style="padding:6px 12px">Session cleared on logout ⚠️ runs logout</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">63</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Supabase URL reachable; reminder to verify backup plan</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">64</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Parameterized queries — Supabase builder + SQLite prepared statements</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">65</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Dev/prod separation warning — single project detected</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">66</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Connection pooling — REST API (PgBouncer auto-managed)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">67</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Migration files in version control (supabase/migrations/)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">68</td><td style="padding:6px 12px">Database</td><td style="padding:6px 12px">Non-root DB user — JWT role is <code>authenticated</code></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">69</td><td style="padding:6px 12px">Deployment</td><td style="padding:6px 12px">Env vars — SUPABASE_URL and SUPABASE_ANON_KEY configured</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">70</td><td style="padding:6px 12px">Deployment</td><td style="padding:6px 12px">SSL certificate valid — HTTPS fetch returns 200</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">71</td><td style="padding:6px 12px">Deployment</td><td style="padding:6px 12px">Firewall N/A — Vercel + Supabase managed, no self-hosted server</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">72</td><td style="padding:6px 12px">Deployment</td><td style="padding:6px 12px">Process manager N/A — no PM2 needed for this stack</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">73</td><td style="padding:6px 12px">Code Quality</td><td style="padding:6px 12px">No <code>console.log</code> in production (replaced with <code>console.debug</code>)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">74</td><td style="padding:6px 12px">Code Quality</td><td style="padding:6px 12px">Error handling — async Supabase calls check error object</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">75</td><td style="padding:6px 12px">Code Quality</td><td style="padding:6px 12px">Loading/error states — Toast and Modal system functional</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">76</td><td style="padding:6px 12px">Code Quality</td><td style="padding:6px 12px">Pagination — warns if team count exceeds 100</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">77</td><td style="padding:6px 12px">Code Quality</td><td style="padding:6px 12px">npm audit — documents last clean audit date (2026-05-10)</td></tr>
+</tbody>
+</table>
+
+<h3 id="testing-user-accounts">4.3 Test Users &amp; Teams</h3>
+<p>The following accounts and teams are used for manual and automated testing. <strong>Do not use these credentials in production or share publicly.</strong></p>
+
+<h4 id="test-users">Test User Accounts</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Email</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Password</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Role</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>jeffroder@gmail.com</code></td>
+  <td style="padding:6px 12px"><code>KickAss11!!</code></td>
+  <td style="padding:6px 12px">Org Owner / Admin</td>
+  <td style="padding:6px 12px">Primary test account. Paywall bypass (admin email). Has org + teams.</td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>jeff.roder@us.bosch.com</code></td>
+  <td style="padding:6px 12px"><code>KickAss22@@</code></td>
+  <td style="padding:6px 12px">Team Member</td>
+  <td style="padding:6px 12px">Secondary test account. Used to test team member flows and invite acceptance.</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="test-teams">Test Teams</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Team Name</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Password</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Organization</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>JeffTestOrg-Team1</code></td>
+  <td style="padding:6px 12px"><code>JeffTestOrg-Team1!</code></td>
+  <td style="padding:6px 12px">JeffTestOrg</td>
+  <td style="padding:6px 12px">Primary test team. Password hashed with PBKDF2 (migrated 2026-05-11).</td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>JeffTestOrg-Team2</code></td>
+  <td style="padding:6px 12px"><code>JeffTestOrg-Team2@</code></td>
+  <td style="padding:6px 12px">JeffTestOrg</td>
+  <td style="padding:6px 12px">Secondary test team. Use to test multi-team flows.</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="test-notes">Testing Notes</h4>
+<ul>
+<li><strong>Test 62</strong> (session cleared on logout) will sign you out — always run it last.</li>
+<li>Tests 1–52 require being logged in as <code>jeffroder@gmail.com</code> for full coverage.</li>
+<li>After running all tests, re-login with the primary account to restore session.</li>
+<li>Test passwords are hashed with PBKDF2 (100,000 iterations, SHA-256, fixed salt <code>jumpkit-team-salt-v1</code>) before storage in Supabase.</li>
+<li>To reset a team password: log in as org-owner → Teams → click the 🔒 lock icon next to the team.</li>
+</ul>
+
+<h2 id="conclusion">5. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
 <li><strong>Local-first</strong>: Personal data stays on device, fast synchronous reads</li>
@@ -2365,7 +2479,16 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <p>Happy building! 🚀</p>
 
 <hr>
-<h2 id="changelog">5. Changelog</h2>
+<h2 id="changelog">6. Changelog</h2>
+
+<h3>2026-05-11</h3>
+<ul>
+<li><strong>Change Team Password:</strong> Added "Change Password" modal for both org-owners (🔒 button on each team row) and team-owners (button in members section header). Passwords hashed with PBKDF2 before storage.</li>
+<li><strong>Password Hash Migration:</strong> Cleared all plaintext/SHA-256 team password hashes from Supabase. Teams re-hashed with PBKDF2. Migration documented in <code>supabase/migrations/20260510_clear_sha256_passwords.sql</code>.</li>
+<li><strong>Admin Create-Team Bug Fix:</strong> Fixed admin flow that was storing team passwords as plaintext — now correctly hashes with PBKDF2.</li>
+<li><strong>Testing Section Added to Docs:</strong> Added Section 4 (Testing) with overview, full unit test table (77 tests), test user accounts, test teams, and testing notes.</li>
+<li><strong>Button Size Fix:</strong> Matched delete team button icon size to lock button icon size on Teams page (<code>1.05rem</code>).</li>
+</ul>
 
 <h3>2026-05-10</h3>
 <ul>
