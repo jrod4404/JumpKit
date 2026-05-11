@@ -628,6 +628,13 @@ function renderAccount(initialTab = 'account') {
   const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : tier === 'core' ? 'JumpKit' : 'Free';
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
   const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+  const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
+  const lifetimeLaunches = clickLog.length;
+  const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
+  const lifetimeSeconds = lifetimeLaunches * timePerClick;
+  const lifetimeHours = Math.floor(lifetimeSeconds / 3600);
+  const lifetimeMins  = Math.floor((lifetimeSeconds % 3600) / 60);
+  const lifetimeTimeStr = lifetimeHours > 0 ? `${lifetimeHours}h ${lifetimeMins}m` : `${lifetimeMins}m`;
 
   const ACCT_TABS = ['account', 'teams'];
   const ACCT_LABELS = { account: 'My Account', teams: 'My Teams' };
@@ -675,11 +682,18 @@ function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Role</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${role}</span>
             </div>
-            ${tier === 'free' ? `
             <div class="acct-row">
-              <div class="acct-row-label"><span>Launches Used</span></div>
-              <span style="font-size:0.88rem;color:var(--text-muted)">${launchesUsed} / 250</span>
-            </div>` : ''}
+              <div class="acct-row-label"><span>Trial Launches Used</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${tier === 'free' ? `${launchesUsed} / 250` : 'N/A'}</span>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Lifetime Launches</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeLaunches.toLocaleString()}</span>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Lifetime Time Saved</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeTimeStr}</span>
+            </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Member Since</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
