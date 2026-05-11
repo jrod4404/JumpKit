@@ -82,7 +82,7 @@ input, select, textarea { font-family: inherit; }
 .btn-turq { background: rgba(0,194,199,0.05); color: #4dbfc3; border: 1px solid rgba(0,194,199,0.14); }
 .btn-turq:hover { background: rgba(0,194,199,0.1); border-color: rgba(0,194,199,0.25); color: #00c2c7; }
 .btn-turq .ti { color: inherit; }
-.btn-delete .ti { color: inherit; }
+.btn-delete .ti { color: inherit; font-size: 1.05rem; }
 .btn-save .ti { color: inherit; }
 .btn-save svg.ti { width: 1.2rem; height: 1.2rem; color: inherit; }
 .btn .ti { line-height: 1; display: flex; align-items: center; }
