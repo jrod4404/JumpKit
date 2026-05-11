@@ -823,11 +823,11 @@ async function saveNewTeam(orgId) {
     }
     const ownerId = ownerProfiles[0].id;
 
-    // Create team (NOTE: team_password_hash stored as plaintext here for simplicity)
-    // TODO: Jeff — for production, hash the password via an Edge Function before storing
+    // Create team — hash password with PBKDF2 before storing
+    const hashedAdminPassword = await hashPassword(password);
     const { data: team, error } = await supabaseClient
       .from('teams')
-      .insert({ org_id: orgId, name, team_password_hash: password, owner_id: ownerId })
+      .insert({ org_id: orgId, name, team_password_hash: hashedAdminPassword, owner_id: ownerId })
       .select()
       .single();
     if (error) throw error;
