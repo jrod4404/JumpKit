@@ -327,6 +327,7 @@ window.selectOrg = async function(orgId) {
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();openChangeTeamPasswordModal('${t.id}','${esc(t.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
             <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
           </div>
         </div>`;
@@ -621,6 +622,9 @@ async function renderTeamOwnerView(content, supaUser, profile) {
           <svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Members (${memberRows.length})
           <button class="btn btn-subtle btn-sm" style="margin-left:auto" onclick="openInviteModal('${team.id}')">
             <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members
+          </button>
+          <button class="btn btn-subtle btn-sm" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')">
+            <svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Password
           </button>
         </div>
         ${memberRows.length === 0
@@ -1018,6 +1022,54 @@ window.doRemoveMember = async function(memberId, memberName) {
     updateOrgStats(0, -1);
     if (selectedTeamId) selectTeam(selectedTeamId);
   } catch(e) { Toast.danger('Error: ' + e.message); }
+};
+
+// ── Change Team Password ──────────────────────────────────────────
+window.openChangeTeamPasswordModal = function(teamId, teamName) {
+  const body = `
+    <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
+      Set a new password for <strong style="color:var(--text-card-title)">${esc(teamName)}</strong>.
+      Members will need this password to join the team.
+    </p>
+    <div class="form-group">
+      <label class="form-label">New Password *</label>
+      <input class="form-input" type="password" id="ctpNewPassword" placeholder="Enter new password" autocomplete="new-password"/>
+      <span class="form-error" id="ctpNewPasswordErr">Password is required.</span>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Confirm Password *</label>
+      <input class="form-input" type="password" id="ctpConfirmPassword" placeholder="Confirm new password" autocomplete="new-password"/>
+      <span class="form-error" id="ctpConfirmPasswordErr">Passwords do not match.</span>
+    </div>`;
+
+  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Team Password', body,
+    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" onclick="doChangeTeamPassword('${teamId}','${esc(teamName)}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
+};
+
+window.doChangeTeamPassword = async function(teamId, teamName) {
+  const newPw      = document.getElementById('ctpNewPassword')?.value;
+  const confirmPw  = document.getElementById('ctpConfirmPassword')?.value;
+
+  ['ctpNewPasswordErr', 'ctpConfirmPasswordErr'].forEach(id => document.getElementById(id)?.classList.remove('show'));
+
+  let ok = true;
+  if (!newPw)              { document.getElementById('ctpNewPasswordErr')?.classList.add('show'); ok = false; }
+  if (newPw !== confirmPw) { document.getElementById('ctpConfirmPasswordErr')?.classList.add('show'); ok = false; }
+  if (!ok) return;
+
+  try {
+    const hashedPw = await hashPassword(newPw);
+    const { error } = await supabaseClient
+      .from('teams')
+      .update({ team_password_hash: hashedPw })
+      .eq('id', teamId);
+    if (error) throw error;
+    Modal.close();
+    Toast.success(`Password updated for "${esc(teamName)}"`);
+  } catch(e) {
+    Toast.danger('Failed to update password: ' + e.message);
+  }
 };
 
 // ── Join Team Modal & Flow ─────────────────────────────────────────
