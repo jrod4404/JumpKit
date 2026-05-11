@@ -8,14 +8,29 @@ async function initAuth() {
     if (session) {
       _supabaseUser = session.user;
       window._supabaseUser = session.user; // expose globally
+      const supaId = _supabaseUser.id; // Supabase UUID — use as canonical local ID
+
       // Ensure a local DB user exists for this Supabase user
       let localUser = DB.findUserByEmail(_supabaseUser.email);
       if (!localUser) {
-        // First Supabase login on this device — create local profile
-        DB.createUser(_supabaseUser.email.split('@')[0], _supabaseUser.email, '__supabase__');
+        // First Supabase login on this device — create local profile using Supabase UUID
+        DB.createUser(_supabaseUser.email.split('@')[0], _supabaseUser.email, '__supabase__', supaId);
         localUser = DB.findUserByEmail(_supabaseUser.email);
         if (localUser) DB.seedNewUser(localUser.id);
+      } else if (localUser.id !== supaId) {
+        // ID mismatch — migrate SQLite data from old local ID to Supabase UUID
+        console.debug('[Auth] Migrating local user ID', localUser.id, '→', supaId);
+        try {
+          await window.electronAPI.migrateUserId(localUser.id, supaId);
+        } catch(e) {
+          console.warn('[Auth] migrateUserId failed:', e.message);
+        }
+        // Update localStorage user record to use Supabase UUID
+        const users = DB.getUsers().map(u => u.id === localUser.id ? { ...u, id: supaId } : u);
+        DB.saveUsers(users);
+        localUser = DB.findUserByEmail(_supabaseUser.email);
       }
+
       if (localUser) {
         DB.setSession(localUser.id);
         currentUser = localUser;

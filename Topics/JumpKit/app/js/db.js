@@ -112,10 +112,10 @@ const DB = (() => {
     getUsers()           { return lsGet('jk_users', []); },
     saveUsers(users)     { lsSet('jk_users', users); },
     findUserByEmail(email) { return this.getUsers().find(u => u.email.toLowerCase() === email.toLowerCase()); },
-    createUser(name, email, password) {
+    createUser(name, email, password, forceId = null) {
       const users = this.getUsers();
       if (this.findUserByEmail(email)) return null;
-      const user = { id: uid(), name, email, password, createdAt: Date.now() };
+      const user = { id: forceId || uid(), name, email, password, createdAt: Date.now() };
       users.push(user);
       this.saveUsers(users);
       return user;

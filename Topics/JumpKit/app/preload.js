@@ -22,6 +22,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getPrefs:          (userId)          => ipcRenderer.invoke('get-prefs', userId),
   savePrefs:         (userId, prefs)   => ipcRenderer.invoke('save-prefs', userId, prefs),
   seedNewUser:       (userId, platform) => ipcRenderer.invoke('seed-new-user', userId, platform),
+  migrateUserId:     (oldId, newId)     => ipcRenderer.invoke('migrate-user-id', oldId, newId),
 
   installUpdate: () => ipcRenderer.invoke('install-update'),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', cb),

@@ -422,6 +422,26 @@ ipcMain.handle('save-prefs', (_e, userId, prefs) => {
 });
 
 // ── IPC: seed-new-user ─────────────────────────────────────────────
+ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
+  if (!db) return { ok: false };
+  try {
+    db.transaction(() => {
+      db.prepare('UPDATE jumps     SET userId = ? WHERE userId = ?').run(newId, oldId);
+      db.prepare('UPDATE columns   SET userId = ? WHERE userId = ?').run(newId, oldId);
+      db.prepare('UPDATE click_log SET userId = ? WHERE userId = ?').run(newId, oldId);
+      // user_prefs has unique constraint — delete new if exists, then update old
+      db.prepare('DELETE FROM user_prefs WHERE userId = ?').run(newId);
+      db.prepare('UPDATE user_prefs SET userId = ? WHERE userId = ?').run(newId, oldId);
+      db.prepare('UPDATE sync_state SET userId = ? WHERE userId = ?').run(newId, oldId);
+    })();
+    log(`[migrateUserId] ${oldId} → ${newId}`);
+    return { ok: true };
+  } catch(e) {
+    log(`[migrateUserId] Error: ${e.message}`);
+    return { ok: false, error: e.message };
+  }
+});
+
 ipcMain.handle('seed-new-user', (_e, userId, platform) => {
   if (!db) return { ok: false };
   try {
