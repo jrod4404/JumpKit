@@ -78,6 +78,9 @@ const DB = (() => {
           this._cache.prefs    = prefs   || defaultPrefs();
 
           // Auto-seed if this user has no personal (non-shared) columns
+          // Re-fetch columns fresh after any migration to avoid seeding over existing data
+          const freshCols = await window.electronAPI.getColumns(userId);
+          this._cache.columns = freshCols || [];
           const personalCols = this._cache.columns.filter(c => !c.isShared);
           if (personalCols.length === 0) {
             console.debug('[DB.init] No columns found — seeding default data for', userId);

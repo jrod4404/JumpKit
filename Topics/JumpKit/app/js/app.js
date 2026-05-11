@@ -28,6 +28,8 @@ async function initAuth() {
         // Update localStorage user record to use Supabase UUID
         const users = DB.getUsers().map(u => u.id === localUser.id ? { ...u, id: supaId } : u);
         DB.saveUsers(users);
+        // Update the session immediately so DB.init uses the new ID
+        DB.setSession(supaId);
         localUser = DB.findUserByEmail(_supabaseUser.email);
       }
 
