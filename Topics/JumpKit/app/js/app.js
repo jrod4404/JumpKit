@@ -672,6 +672,10 @@ function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Email</span></div>
               <span class="acct-profile-email" style="font-size:0.88rem;color:var(--text-muted)">${email || '—'}</span>
             </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Member Since</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
+            </div>
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.svg#tabler-id-badge"/></svg> Account</div>
@@ -692,7 +696,7 @@ function renderAccount(initialTab = 'account') {
               <span style="font-size:0.88rem;color:var(--text-muted)">${tier === 'free' ? `${launchesUsed} / 250` : 'N/A'}</span>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Lifetime Launches</span></div>
+              <div class="acct-row-label"><span>Lifetime Launches Used</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeLaunches.toLocaleString()}</span>
             </div>
             <div class="acct-row">
@@ -702,10 +706,6 @@ function renderAccount(initialTab = 'account') {
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Lifetime $ Saved</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${lifetimeDollarStr}</span>
-            </div>
-            <div class="acct-row" style="border-bottom:none">
-              <div class="acct-row-label"><span>Member Since</span></div>
-              <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
             </div>
           </div>
           <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
