@@ -18,8 +18,8 @@ async function hashPassword(password) {
   return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
 }
 
-async function renderTeams() {
-  const content = document.getElementById('pageContent');
+async function renderTeams(containerEl) {
+  const content = containerEl || document.getElementById('pageContent');
 
   // ── Tier gate — Teams requires core or teams_jet ──────────────────
   const tier   = window._supabaseProfile?.subscription_tier   || localStorage.getItem('jk_subscription_tier')   || 'free';

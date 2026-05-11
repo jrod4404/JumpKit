@@ -256,14 +256,14 @@ const pages = {
   stats:    () => renderStats(),
   settings: () => renderSettings(),
   help:     () => renderHelp(),
-  account:  () => renderAccount(),
+  account:  () => renderAccount('account'),
   jet:      () => renderJet(),
-  teams:    () => renderTeams(),
+  teams:    () => renderAccount('teams'),
   tests:    () => renderTests(),
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'Teams', tests:'Tests'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'My Account', tests:'Tests'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
@@ -476,7 +476,7 @@ const Toast = window.Toast = (() => {
 
 function renderSettings() {
   const p = DB.getPrefs(currentUser.id);
-  const pageChoices = ['home','jumps','teams','stats','settings','help'].map(pg =>
+  const pageChoices = ['home','jumps','stats','settings','help'].map(pg =>
     `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
   const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
     `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
@@ -613,7 +613,7 @@ function renderSettings() {
   wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
 }
 
-function renderAccount() {
+function renderAccount(initialTab = 'account') {
   const u = currentUser;
   const sbUser = window._supabaseUser || {};
   const sbProfile = window._supabaseProfile || {};
@@ -629,48 +629,98 @@ function renderAccount() {
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
   const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
 
+  const ACCT_TABS = ['account', 'teams'];
+  const ACCT_LABELS = { account: 'My Account', teams: 'My Teams' };
+  let currentAcctTab = ACCT_TABS.includes(initialTab) ? initialTab : 'account';
+
   document.getElementById('pageContent').innerHTML = `
-    <div class="acct-grid">
-      <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Name</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '—'}</span>
-        </div>
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Email</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${email || '—'}</span>
+    <div style="display:flex;flex-direction:column;gap:16px;height:100%">
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div class="jump-filter-bar" id="acctTabBar">
+          <div class="jfb-slider" id="acctTabPill"></div>
+          ${ACCT_TABS.map(t=>`<button class="jfb-tab${t===currentAcctTab?' active':''}" data-at="${t}">${ACCT_LABELS[t]}</button>`).join('')}
         </div>
       </div>
-      <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.svg#tabler-id-badge"/></svg> Account</div>
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Account Type</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${tierLabel}</span>
-        </div>
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Payment Status</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${statusLabel}</span>
-        </div>
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Role</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${role}</span>
-        </div>
-        ${tier === 'free' ? `
-        <div class="acct-row">
-          <div class="acct-row-label"><span>Launches Used</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${launchesUsed} / 250</span>
-        </div>` : ''}
-        <div class="acct-row" style="border-bottom:none">
-          <div class="acct-row-label"><span>Member Since</span></div>
-          <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
-        </div>
-      </div>
-      <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
-        <button class="btn btn-subtle" onclick="openFeedbackModal()"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
-        ${tier === 'free' ? `<a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" target="_blank" class="btn btn-primary"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to JumpKit</a>` : ''}
-      </div>
+      <div id="acctTabContent" style="flex:1;min-height:0;overflow-y:auto"></div>
     </div>`;
+
+  function renderAcctTabContent(tab) {
+    const el = document.getElementById('acctTabContent');
+    if (!el) return;
+    if (tab === 'account') {
+      el.innerHTML = `
+        <div class="acct-grid">
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Name</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '—'}</span>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Email</span></div>
+              <span class="acct-profile-email" style="font-size:0.88rem;color:var(--text-muted)">${email || '—'}</span>
+            </div>
+          </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.svg#tabler-id-badge"/></svg> Account</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Account Type</span></div>
+              <span class="acct-tier-badge" style="font-size:0.88rem;color:var(--text-muted)">${tierLabel}</span>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Payment Status</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${statusLabel}</span>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Role</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${role}</span>
+            </div>
+            ${tier === 'free' ? `
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Launches Used</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${launchesUsed} / 250</span>
+            </div>` : ''}
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Member Since</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
+            </div>
+          </div>
+          <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
+            <button class="btn btn-subtle" onclick="openFeedbackModal()"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
+            ${tier === 'free' ? `<a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" target="_blank" class="btn btn-primary"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to JumpKit</a>` : ''}
+          </div>
+        </div>`;
+    } else {
+      el.innerHTML = `<div style="padding:4px 0 0 0;height:100%"></div>`;
+      renderTeams(el.firstElementChild);
+    }
+  }
+
+  // Wire tab clicks
+  document.getElementById('acctTabBar').addEventListener('click', e => {
+    const btn = e.target.closest('.jfb-tab');
+    if (!btn) return;
+    currentAcctTab = btn.dataset.at;
+    document.querySelectorAll('#acctTabBar .jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.at === currentAcctTab));
+    moveAcctPill();
+    renderAcctTabContent(currentAcctTab);
+  });
+
+  function moveAcctPill() {
+    const bar   = document.getElementById('acctTabBar');
+    const pill  = document.getElementById('acctTabPill');
+    const active = bar && bar.querySelector('.jfb-tab.active');
+    if (!pill || !active || !bar) return;
+    const barRect  = bar.getBoundingClientRect();
+    const tabRect  = active.getBoundingClientRect();
+    pill.style.left  = (tabRect.left - barRect.left) + 'px';
+    pill.style.width = tabRect.width + 'px';
+    pill.style.top   = '0';
+    pill.style.bottom = '0';
+  }
+
+  renderAcctTabContent(currentAcctTab);
+  requestAnimationFrame(moveAcctPill);
 }
 
 
@@ -1376,7 +1426,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
 
     Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">Later</button>
-       <button class="btn btn-primary" onclick="navigateTo('teams'); Modal.close()"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
+       <button class="btn btn-primary" onclick="navigateTo('account'); Modal.close()"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
