@@ -711,11 +711,9 @@ function renderAccount(initialTab = 'account') {
     const pill  = document.getElementById('acctTabPill');
     const active = bar && bar.querySelector('.jfb-tab.active');
     if (!pill || !active || !bar) return;
-    const barRect  = bar.getBoundingClientRect();
-    const tabRect  = active.getBoundingClientRect();
-    pill.style.left  = (tabRect.left - barRect.left) + 'px';
-    pill.style.width = tabRect.width + 'px';
-    pill.style.top   = '0';
+    pill.style.left   = active.offsetLeft + 'px';
+    pill.style.width  = active.offsetWidth + 'px';
+    pill.style.top    = '0';
     pill.style.bottom = '0';
   }
 
