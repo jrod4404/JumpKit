@@ -707,12 +707,14 @@ function renderAccount(initialTab = 'account') {
   });
 
   function moveAcctPill() {
-    const bar   = document.getElementById('acctTabBar');
-    const pill  = document.getElementById('acctTabPill');
+    const bar    = document.getElementById('acctTabBar');
+    const pill   = document.getElementById('acctTabPill');
     const active = bar && bar.querySelector('.jfb-tab.active');
     if (!pill || !active || !bar) return;
+    const tabs   = bar.querySelectorAll('.jfb-tab');
+    const isLast = active === tabs[tabs.length - 1];
     pill.style.left   = active.offsetLeft + 'px';
-    pill.style.width  = active.offsetWidth + 'px';
+    pill.style.width  = isLast ? (bar.offsetWidth - active.offsetLeft) + 'px' : active.offsetWidth + 'px';
     pill.style.top    = '0';
     pill.style.bottom = '0';
   }
