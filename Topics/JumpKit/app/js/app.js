@@ -286,7 +286,7 @@ window.navigateTo = function navigateTo(page) {
   }
   const pageSubs = {
     stats:    'Track your launch history and time saved',
-    account:  'Manage your profile, preferences, and productivity settings',
+    account:  'Manage your profile, account, and team settings',
     settings: 'Configure display, productivity, and app behavior',
     help:     'Tips, features, and frequently asked questions',
     jet:      'AI-powered automation for Microsoft 365 — runs entirely on your machine',
