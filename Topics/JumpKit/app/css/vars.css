@@ -70,7 +70,7 @@ input, select, textarea { font-family: inherit; }
   transition: all var(--transition); cursor: pointer;
 }
 .btn-primary { background: var(--grad); color: #fff; box-shadow: 0 4px 16px rgba(0,194,199,0.25); }
-.btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+.btn-primary:hover { opacity: 0.88; }
 .btn-ghost { background: transparent; color: var(--text); border: 1.5px solid var(--border-input); }
 .btn-ghost:hover { border-color: var(--turq); color: var(--turq); }
 .btn-subtle { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
