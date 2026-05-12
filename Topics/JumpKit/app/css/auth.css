@@ -43,11 +43,13 @@
   font-size: 1.4rem;
   font-weight: 800;
   margin-bottom: 4px;
+  text-align: center;
 }
 .auth-sub {
   font-size: 0.88rem;
   color: var(--text-muted);
   margin-bottom: 28px;
+  text-align: center;
 }
 .auth-divider {
   text-align: center;
