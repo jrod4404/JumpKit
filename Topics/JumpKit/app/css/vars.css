@@ -135,3 +135,14 @@ svg.ti.nav-icon { width: 1.25rem; height: 1.25rem; }
 .toggle input:checked + .toggle-slider::before { transform: translateX(20px); }
 .toggle-label { font-size: 0.85rem; color: var(--text-dim); }
 
+
+/* ── Password reveal toggle ─────────────────────────────────────── */
+.pw-wrap { position: relative; display: flex; align-items: center; }
+.pw-wrap .form-input { width: 100%; padding-right: 38px; }
+.pw-eye {
+  position: absolute; right: 10px; cursor: pointer;
+  color: var(--text-muted); display: flex; align-items: center;
+  background: none; border: none; padding: 0;
+}
+.pw-eye:hover { color: var(--text-card-title); }
+.pw-eye svg { width: 1.1rem; height: 1.1rem; }
