@@ -16,7 +16,7 @@
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  height: 740px;
+  height: 720px;
 }
 /* Fixed header: logo + tagline + tabs */
 .auth-header { flex-shrink: 0; }
