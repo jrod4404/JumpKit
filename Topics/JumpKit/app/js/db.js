@@ -82,7 +82,10 @@ const DB = (() => {
           const freshCols = await window.electronAPI.getColumns(userId);
           this._cache.columns = freshCols || [];
           const personalCols = this._cache.columns.filter(c => !c.isShared);
-          if (personalCols.length === 0) {
+          const seedKey = `jk_seeded_${userId}`;
+          const alreadySeeded = localStorage.getItem(seedKey);
+          if (personalCols.length === 0 && !alreadySeeded) {
+            localStorage.setItem(seedKey, '1');
             console.debug('[DB.init] No columns found — seeding default data for', userId);
             await window.electronAPI.seedNewUser(userId);
             // Reload after seed
