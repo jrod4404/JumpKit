@@ -745,7 +745,28 @@ function saveJump(editId) {
           }
         }
       } else {
-        DB.createJump(currentUser.id, data);
+        const newJump = DB.createJump(currentUser.id, data);
+        // If added to a shared column, push to Supabase shared_jumps
+        if (newJump) {
+          const col = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
+          if (col?.isShared && col?.teamId && col?.supabaseId) {
+            const supabaseId = crypto.randomUUID();
+            DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: col.teamId });
+            supabaseClient.from('shared_jumps').insert({
+              id: supabaseId,
+              shared_column_id: col.supabaseId,
+              team_id: col.teamId,
+              name: data.name,
+              url: data.url,
+              description: data.description || '',
+              reason: data.reason || '',
+              position: 0,
+              created_by: window._supabaseUser?.id || currentUser.id,
+            }).then(({ error }) => {
+              if (error) console.warn('[saveJump] shared_jumps insert:', error.message);
+            });
+          }
+        }
       }
       Modal.close();
       renderColumns();
