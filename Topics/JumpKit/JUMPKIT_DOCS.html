@@ -577,7 +577,7 @@
                 <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer and Marketing Documentation</p>
                 <p style="font-size:0.85rem;opacity:0.85;margin-top:6px;max-width:600px;line-height:1.5">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-10</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-12</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -2683,6 +2683,21 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <hr>
 <h2 id="changelog">7. Changelog</h2>
+
+<h3>2026-05-12</h3>
+<ul>
+<li><strong>Auth Page:</strong> Fixed card height to 720px — consistent size across all tabs, no scrollbar. Centered auth title and subtitle. Increased tagline font size. Reduced spacing below Create Account button.</li>
+<li><strong>Password Reveal:</strong> Added eye icon toggle to all password input fields — auth page (sign in, sign up) and all modals (join team, create team, change password).</li>
+<li><strong>Teams Paywall Removed:</strong> Teams page now fully available on free tier. Paywall only triggers at 250 jump launches. Teams drives natural upgrade conversion.</li>
+<li><strong>send-invite Edge Function:</strong> Deployed to Supabase for the first time — was missing from <code>functions/</code> folder. Invite emails now fully functional end-to-end.</li>
+<li><strong>Team Onboarding Flow Fixes:</strong> "Go to Teams" button now opens My Teams tab. Join Team modal header text fixed. White icon colors on buttons. "Team Joined!" modal polished.</li>
+<li><strong>Seed Duplication Fix:</strong> Added in-memory + localStorage seed lock per userId — prevents duplicate columns from being created on repeated logins.</li>
+<li><strong>Shared Jump Sync (5 scenarios):</strong> New jump added to shared column → inserted to Supabase. Edited jump in shared column → updated in Supabase. Jump moved INTO shared column → inserted. Jump moved OUT of shared column → deleted from Supabase. Jump deleted from shared column → deleted from Supabase.</li>
+<li><strong>Share Column Fix:</strong> Fixed <code>currentUser.id</code> mismatch in <code>syncColumnToSupabase</code> — now uses <code>session.user.id</code> directly to fetch jumps for sharing.</li>
+<li><strong>Account Page:</strong> Card width increased 25% (640→800px). Tab bar aligned to match.</li>
+<li><strong>Docs:</strong> Added Section 5.2 — Supabase Edge Functions (all 4 functions, secrets, deploy commands). Added test users/teams table entries for <code>support@jumpkit.ai</code> and <code>E2E-Test-Team</code>. Landing page deployment notes (Section 5.1) added.</li>
+<li><strong>Vercel Deploy:</strong> Switched to CLI-based deploy (<code>vercel --prod</code>) after git webhook proved unreliable. Root Directory must be blank in Vercel settings.</li>
+</ul>
 
 <h3>2026-05-11</h3>
 <ul>
