@@ -69,9 +69,8 @@ if (window.electronAPI?.onUpdateReady) {
 }
 
 async function initApp() {
-  // Wire password toggles after each navigation
-  document.addEventListener('click', () => requestAnimationFrame(() => wirePasswordToggles()));
-  requestAnimationFrame(() => wirePasswordToggles());
+  // Wire password toggles on boot
+  requestAnimationFrame(() => { wirePasswordToggles(); patchModalForPwToggles(); });
   // Clean up old localStorage app data keys (post-SQLite migration)
   try {
     const oldPrefixes = ['jk_jumps_', 'jk_cols_', 'jk_clicks_', 'jk_prefs_', 'jk_click_log_'];
@@ -320,6 +319,7 @@ window.navigateTo = function navigateTo(page) {
   pc.innerHTML = '';
   pc.classList.remove('jumps-page');
   if (pages[page]) pages[page]();
+  requestAnimationFrame(() => wirePasswordToggles());
 }
 
 document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
@@ -1306,11 +1306,12 @@ function wirePasswordToggles(root = document) {
     wrap.appendChild(btn);
   });
 }
-// Wire on page load and after any Modal open
-const _origModalOpen = Modal?.open?.bind(Modal);
-if (_origModalOpen) {
+// Modal password toggle wiring — patched after Modal is initialized
+function patchModalForPwToggles() {
+  if (typeof Modal === 'undefined' || !Modal?.open) return;
+  const _origOpen = Modal.open.bind(Modal);
   Modal.open = function(...args) {
-    const result = _origModalOpen(...args);
+    const result = _origOpen(...args);
     requestAnimationFrame(() => wirePasswordToggles(document.getElementById('modalBody') || document));
     return result;
   };
