@@ -16,13 +16,14 @@
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
+  height: 780px;
 }
 /* Fixed header: logo + tagline + tabs */
 .auth-header { flex-shrink: 0; }
-/* Content area — no scroll, expands to fit */
+/* Content area — no scroll */
 .auth-view-content {
   flex: 1;
-  overflow-y: visible;
+  overflow-y: hidden;
   padding-right: 0;
 }
 .auth-logo-img { max-height: 72px; max-width: 360px; width: auto; object-fit: contain; display: block; margin: 0 auto; }
