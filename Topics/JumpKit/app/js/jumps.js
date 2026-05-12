@@ -728,6 +728,16 @@ function saveJump(editId) {
   setTimeout(() => {
     try {
       if (editId) {
+        // Before updating — check if jump is moving OUT of a shared column
+        const jumpBeforeEdit = DB.getJumps(currentUser.id).find(j => j.id === editId);
+        const prevCol = DB.getColumns(currentUser.id).find(c => c.id === jumpBeforeEdit?.columnId);
+        const movingOutOfShared = prevCol?.isShared && data.columnId && data.columnId !== jumpBeforeEdit?.columnId;
+        if (movingOutOfShared && jumpBeforeEdit?.supabaseId) {
+          // Remove from Supabase shared_jumps
+          supabaseClient.from('shared_jumps').delete().eq('id', jumpBeforeEdit.supabaseId)
+            .then(({ error }) => { if (error) console.warn('shared_jumps remove (moved out):', error.message); });
+          data.supabaseId = null; data.isShared = 0; data.teamId = null;
+        }
         DB.updateJump(currentUser.id, editId, data);
         const updatedJump = DB.getJumps(currentUser.id).find(j => j.id === editId);
         const col = DB.getColumns(currentUser.id).find(c => c.id === updatedJump?.columnId);
@@ -817,7 +827,17 @@ function confirmDelete(id) {
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-delete" onclick="doDelete('${id}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
 }
-function doDelete(id) { DB.deleteJump(currentUser.id, id); Modal.close(); renderColumns(); }
+function doDelete(id) {
+  // If deleting a shared jump, remove from Supabase first
+  const jump = DB.getJumps(currentUser.id).find(j => j.id === id);
+  if (jump?.isShared && jump?.supabaseId) {
+    supabaseClient.from('shared_jumps').delete().eq('id', jump.supabaseId)
+      .then(({ error }) => { if (error) console.warn('shared_jumps delete:', error.message); });
+  }
+  DB.deleteJump(currentUser.id, id);
+  Modal.close();
+  renderColumns();
+}
 
 // ── Confirm Archive ────────────────────────────────────────────────
 function confirmArchive(id) {
