@@ -710,7 +710,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
               <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel || 'team owner')}</span>
             </div>
             <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" onclick="openJoinTeamModal('${inv.teams?.id}','${esc(inv.teams?.name || '')}','${inv.id}')">
-              <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
+              <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
             </button>
           </div>`).join('')}
       </div>`;

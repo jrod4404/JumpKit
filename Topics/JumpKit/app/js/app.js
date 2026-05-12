@@ -1465,7 +1465,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
 
     Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">Later</button>
-       <button class="btn btn-primary" onclick="navigateTo('account'); Modal.close()"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
+       <button class="btn btn-primary" onclick="navigateTo('teams'); Modal.close()"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
