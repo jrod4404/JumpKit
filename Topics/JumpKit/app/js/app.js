@@ -664,7 +664,7 @@ function renderAccount(initialTab = 'account') {
 
   document.getElementById('pageContent').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:16px;height:100%">
-      <div style="max-width:640px;margin:0 auto;width:100%;flex-shrink:0">
+      <div style="max-width:800px;margin:0 auto;width:100%;flex-shrink:0">
         <div class="jump-filter-bar" id="acctTabBar">
           <div class="jfb-slider" id="acctTabPill"></div>
           ${ACCT_TABS.map(t=>`<button class="jfb-tab${t===currentAcctTab?' active':''}" data-at="${t}">${ACCT_LABELS[t]}</button>`).join('')}
