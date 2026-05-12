@@ -1052,7 +1052,8 @@ async function syncColumnToSupabase(col) {
     // Use a stable UUID for Supabase — generate once and store locally
     if (!col.supabaseId) {
       col.supabaseId = crypto.randomUUID();
-      DB.saveColumns(currentUser.id, DB.getColumns(currentUser.id).map(c => c.id === col.id ? { ...c, supabaseId: col.supabaseId } : c));
+      const _sessionId = session?.user?.id || currentUser.id;
+      DB.saveColumns(_sessionId, DB.getColumns(_sessionId).map(c => c.id === col.id ? { ...c, supabaseId: col.supabaseId } : c));
     }
 
     // Upsert shared_column — use unique constraint (team_id, created_by, name) to prevent dupes
@@ -1069,8 +1070,9 @@ async function syncColumnToSupabase(col) {
       .single();
     if (scErr) { console.warn('shared_column upsert:', scErr.message); return; }
 
-    // Upsert all jumps in this column
-    const jumps = DB.getActiveJumps(currentUser.id).filter(j => j.columnId === col.id);
+    // Upsert all jumps in this column — use session UUID directly to avoid stale currentUser
+    const localUserId = session.user.id;
+    const jumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id);
     for (const j of jumps) {
       // Generate a stable UUID for Supabase if not already set
       if (!j.supabaseId) {
