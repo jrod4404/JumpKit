@@ -1136,9 +1136,8 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
 
     // Show success message
     setTimeout(() => {
-      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Joined!',
+      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e;width:1.5em;height:1.5em;vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Team Joined!',
         `<div style="text-align:center;padding:8px 0">
-          <svg class="ti ti-circle-check" style="font-size:2.5rem;color:#22c55e;display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
           <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">Welcome to ${esc(teamName)}!</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
             You've successfully joined <strong>${esc(teamName)}</strong>.<br>
@@ -1146,7 +1145,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
           </p>
         </div>`,
         `<button class="btn btn-subtle" onclick="Modal.close()">Stay here</button>
-         <button class="btn btn-primary" onclick="navigateTo('jumps'); Modal.close()"><svg class="ti ti-run"><use href="img/tabler-sprite.svg#tabler-run"/></svg> Go to Jumps</button>`
+         <button class="btn btn-primary" onclick="navigateTo('jumps'); Modal.close()"><svg class="ti ti-run" style="color:white"><use href="img/tabler-sprite.svg#tabler-run"/></svg> Go to Jumps</button>`
       );
     }, 200);
 
