@@ -1456,7 +1456,6 @@ window.checkPendingInvites = async function checkPendingInvites() {
     const teamNames = invites.map(inv => inv.teams?.name || 'a team').join(', ');
     const body = `
       <div style="text-align:center;padding:8px 0">
-        <svg class="ti ti-users" style="font-size:2.5rem;color:var(--turq);display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
         <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">You have a team invitation!</h3>
         <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6;margin-bottom:0">
           You've been invited to join <strong>${esc(teamNames)}</strong>.<br>
@@ -1466,7 +1465,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
 
     Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">Later</button>
-       <button class="btn btn-primary" onclick="navigateTo('account'); Modal.close()"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
+       <button class="btn btn-primary" onclick="navigateTo('account'); Modal.close()"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
