@@ -6,6 +6,9 @@
 const DB = (() => {
   function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
+  // ── Seed lock — prevents duplicate seeding in same session ───────
+  const _seededThisSession = new Set();
+
   // ── Helpers ──────────────────────────────────────────────────────
   function lsGet(key, def) {
     try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : def; } catch(_) { return def; }
@@ -83,8 +86,9 @@ const DB = (() => {
           this._cache.columns = freshCols || [];
           const personalCols = this._cache.columns.filter(c => !c.isShared);
           const seedKey = `jk_seeded_${userId}`;
-          const alreadySeeded = localStorage.getItem(seedKey);
+          const alreadySeeded = localStorage.getItem(seedKey) || _seededThisSession.has(userId);
           if (personalCols.length === 0 && !alreadySeeded) {
+            _seededThisSession.add(userId);
             localStorage.setItem(seedKey, '1');
             console.debug('[DB.init] No columns found — seeding default data for', userId);
             await window.electronAPI.seedNewUser(userId);
