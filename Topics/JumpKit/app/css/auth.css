@@ -16,15 +16,14 @@
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  height: 620px;
 }
 /* Fixed header: logo + tagline + tabs */
 .auth-header { flex-shrink: 0; }
-/* Scrollable content area per view */
+/* Content area — no scroll, expands to fit */
 .auth-view-content {
   flex: 1;
-  overflow-y: auto;
-  padding-right: 2px; /* prevent scrollbar overlap */
+  overflow-y: visible;
+  padding-right: 0;
 }
 .auth-logo-img { max-height: 72px; max-width: 360px; width: auto; object-fit: contain; display: block; margin: 0 auto; }
 .auth-logo {
@@ -93,17 +92,7 @@
   border-radius: 8px; padding: 6px 10px; font-size: 1rem; cursor: pointer;
 }
 
-/* ── Fix 1: Dark scrollbar for auth view content ── */
-.auth-view-content {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.auth-view-content::-webkit-scrollbar { width: 6px; }
-.auth-view-content::-webkit-scrollbar-track { background: transparent; }
-.auth-view-content::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
-}
+/* scrollbar styles removed — card now auto-sizes to content */
 
 /* ── Fix 3: Button spinner ── */
 @keyframes auth-spin { to { transform: rotate(360deg); } }
