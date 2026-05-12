@@ -2581,6 +2581,89 @@ vercel --prod</code></pre>
 </tbody>
 </table>
 
+<h3 id="deployment-edge-functions">5.2 Supabase Edge Functions</h3>
+
+<p>JumpKit uses Supabase Edge Functions (Deno runtime) for server-side operations. All functions are deployed to the Supabase project <code>iuexwdjnqfidcwvwbgwr</code>.</p>
+
+<h4>Deployed Functions</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Function</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Trigger</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Purpose</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Required Secrets</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-invite</code></td>
+  <td style="padding:6px 12px">App → <code>supabaseClient.functions.invoke()</code></td>
+  <td style="padding:6px 12px">Sends branded team invite email via Resend when an org-owner invites a member</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-feedback</code></td>
+  <td style="padding:6px 12px">App → <code>supabaseClient.functions.invoke()</code></td>
+  <td style="padding:6px 12px">Sends user feedback emails to support@jumpkit.ai via Resend</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>ls-webhook</code></td>
+  <td style="padding:6px 12px">Lemon Squeezy webhook POST</td>
+  <td style="padding:6px 12px">Receives payment events from Lemon Squeezy and updates <code>profiles</code> subscription tier/status in Supabase</td>
+  <td style="padding:6px 12px"><code>LEMON_SQUEEZY_SIGNING_SECRET</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>waitlist-signup</code></td>
+  <td style="padding:6px 12px">Landing page waitlist form POST</td>
+  <td style="padding:6px 12px">Saves waitlist signups to Supabase and sends confirmation email via Resend</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+</tbody>
+</table>
+
+<h4>How to Deploy / Redeploy</h4>
+<pre style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.85rem;overflow-x:auto"><code># Deploy a single function
+cd Topics/JumpKit/app
+npx supabase functions deploy &lt;function-name&gt; --project-ref iuexwdjnqfidcwvwbgwr
+
+# Deploy all functions
+npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
+
+<h4>Function Source Files</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Function</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Source Path</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-invite</code></td><td style="padding:6px 12px"><code>supabase/functions/send-invite/index.ts</code></td><td style="padding:6px 12px">Deployed 2026-05-12. Rate limit: 10 req/min per IP. CORS locked to jumpkit.app.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-feedback</code></td><td style="padding:6px 12px"><code>supabase/send-feedback.js</code></td><td style="padding:6px 12px">⚠️ Not yet in functions/ folder — deploy manually. Rate limit: 5 req/min per IP.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>ls-webhook</code></td><td style="padding:6px 12px"><code>supabase/functions/ls-webhook/index.ts</code></td><td style="padding:6px 12px">Lemon Squeezy webhook. Verifies HMAC signature before processing.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>waitlist-signup</code></td><td style="padding:6px 12px"><code>supabase/functions/waitlist-signup/index.ts</code></td><td style="padding:6px 12px">Landing page waitlist. CORS locked to jumpkit.app.</td></tr>
+</tbody>
+</table>
+
+<h4>Secrets (set in Supabase dashboard → Edge Functions → Secrets)</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Secret</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Used By</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Status</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>RESEND_API_KEY</code></td><td style="padding:6px 12px">send-invite, send-feedback, waitlist-signup</td><td style="padding:6px 12px">✅ Set</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td style="padding:6px 12px">ls-webhook, send-invite, waitlist-signup</td><td style="padding:6px 12px">✅ Set (auto-injected by Supabase — manually set copy marked deprecated)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>LEMON_SQUEEZY_SIGNING_SECRET</code></td><td style="padding:6px 12px">ls-webhook</td><td style="padding:6px 12px">✅ Set (verified 2026-05-11)</td></tr>
+</tbody>
+</table>
+
 <h2 id="conclusion">6. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
