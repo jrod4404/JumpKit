@@ -2515,7 +2515,67 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <li>To reset a team password: log in as org-owner → Teams → click the 🔒 lock icon next to the team.</li>
 </ul>
 
-<h2 id="conclusion">5. Conclusion</h2>
+<h2 id="deployment">5. Deployment</h2>
+
+<h3 id="deployment-landing">5.1 Landing Page</h3>
+
+<h4 id="deployment-landing-overview">Overview</h4>
+<p>The JumpKit landing page is hosted on <strong>Vercel</strong> and served at <a href="https://jumpkit.app" target="_blank">https://jumpkit.app</a>. The landing page source lives in a subdirectory of the main GitHub repo.</p>
+
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Item</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Value</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">GitHub Repo</td><td style="padding:6px 12px"><code>jrod4404/JumpKit</code> — <a href="https://github.com/jrod4404/JumpKit" target="_blank">github.com/jrod4404/JumpKit</a></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">Landing Page Path</td><td style="padding:6px 12px"><code>Topics/JumpKit/landing/</code></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">Production Branch</td><td style="padding:6px 12px"><code>main</code></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">Vercel Project</td><td style="padding:6px 12px"><code>jumpkit-landing</code> — <a href="https://vercel.com/jeffroder-3196s-projects/jumpkit-landing" target="_blank">vercel.com/jeffroder-3196s-projects/jumpkit-landing</a></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">Vercel Root Directory</td><td style="padding:6px 12px"><strong>Must be blank/empty</strong> in Vercel settings (not <code>Topics/JumpKit/landing</code>)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">DNS</td><td style="padding:6px 12px">GoDaddy A record → <code>76.76.21.21</code> (Vercel IP)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px">SSL</td><td style="padding:6px 12px">Valid, CN=jumpkit.app, expires Oct 20 2026. HSTS enforced (2 years).</td></tr>
+</tbody>
+</table>
+
+<h4 id="deployment-landing-deploy">How to Deploy</h4>
+<p>⚠️ <strong>Git auto-deploy via Vercel webhook is unreliable</strong> — the GitHub → Vercel integration has disconnected multiple times. Do not rely on it.</p>
+<p><strong>Standard deploy process (use this every time):</strong></p>
+<ol>
+  <li>Make changes to landing page files in <code>Topics/JumpKit/landing/</code></li>
+  <li>Commit and push to git: <code>git add . && git commit -m "..." && git push origin main</code></li>
+  <li>Deploy via Vercel CLI: run from the landing folder or let Max do it</li>
+</ol>
+<pre style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:14px;font-size:0.85rem;overflow-x:auto"><code>cd Topics/JumpKit/landing
+vercel --prod</code></pre>
+
+<h4 id="deployment-landing-troubleshooting">Troubleshooting</h4>
+<ul>
+  <li><strong>Auto-deploy not triggering:</strong> The Vercel Root Directory setting is the usual culprit. It must be <strong>blank</strong> in Vercel → Settings → General. If it's set to <code>Topics/JumpKit/landing</code>, the CLI deploy will fail with a "path does not exist" error because Vercel doubles up the path.</li>
+  <li><strong>Vercel CLI auth error:</strong> Run <code>vercel login</code> then retry. If permission denied, run: <code>sudo chown -R jeffroder ~/Library/Application\ Support/com.vercel.cli/ ~/Library/Caches/com.vercel.cli/</code></li>
+  <li><strong>Git push not deploying:</strong> Vercel webhook may have disconnected. Go to Vercel → Settings → Git → Disconnect → Reconnect <code>jrod4404/JumpKit</code>. Then set Root Directory to blank. Use CLI deploy as fallback.</li>
+  <li><strong>Old version showing on site:</strong> Hard refresh with <code>Cmd+Shift+R</code>. If still old, run <code>vercel --prod</code> from the landing folder.</li>
+</ul>
+
+<h4 id="deployment-landing-files">Key Files</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">File</th>
+  <th style="text-align:left;padding:8px 12px;color:#50CACC">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>index.html</code></td><td style="padding:6px 12px">Main landing page</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>style.css</code></td><td style="padding:6px 12px">All landing page styles</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>script.js</code></td><td style="padding:6px 12px">Landing page interactivity (carousel, lightbox, etc.)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>assets/</code></td><td style="padding:6px 12px">Hero images, testimonial photos</td></tr>
+</tbody>
+</table>
+
+<h2 id="conclusion">6. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
 <li><strong>Local-first</strong>: Personal data stays on device, fast synchronous reads</li>
@@ -2527,7 +2587,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <p>Happy building! 🚀</p>
 
 <hr>
-<h2 id="changelog">6. Changelog</h2>
+<h2 id="changelog">7. Changelog</h2>
 
 <h3>2026-05-11</h3>
 <ul>
