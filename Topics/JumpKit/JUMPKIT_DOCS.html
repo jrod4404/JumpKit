@@ -2358,7 +2358,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <h3 id="testing-overview">4.1 Overview</h3>
 <p>JumpKit includes a built-in unit test suite accessible from the <strong>Testing</strong> page in the app. Tests cover core app functionality, security, database integrity, deployment checks, and code quality. Tests are written in vanilla JS and run directly in the Electron renderer process — no external test runner required.</p>
 <p>To run tests: open the app → navigate to <strong>Testing</strong> in the sidebar → click <strong>Run All Tests</strong> or run individual tests by category.</p>
-<p><strong>Current total: 77 tests</strong> across 7 categories.</p>
+<p><strong>Current total: 82 tests</strong> across 8 categories.</p>
 
 <h3 id="testing-unit-tests">4.2 Unit Test Summary</h3>
 <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px">
@@ -2448,6 +2448,11 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">75</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">Loading and error states — Toast system functional</td><td style="padding:5px 10px;color:var(--text-muted)">Toast.success and Toast.danger callable; Modal.open/close callable</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">76</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">Pagination — list queries have reasonable limits</td><td style="padding:5px 10px;color:var(--text-muted)">Query executes; count returned. Warning logged if team count &gt; 100.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">77</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">npm audit — zero critical/high vulnerabilities</td><td style="padding:5px 10px;color:var(--text-muted)">0 vulnerabilities. Reminder to re-run before each release.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">78</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Add jump to shared column → appears in Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Test jump created, verified in Supabase, cleaned up. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">79</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Edit jump in shared column → Supabase shared_jumps updated</td><td style="padding:5px 10px;color:var(--text-muted)">Updated name reflected in Supabase. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">80</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Delete jump from shared column → removed from Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump no longer exists in Supabase after deletion. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">81</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Move jump OUT of shared column → removed from Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump gone from Supabase after moving to personal column. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">82</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Move jump INTO shared column → inserted into Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump appears in Supabase after moving from personal to shared column. Self-cleaning.</td></tr>
 </tbody>
 </table>
 
