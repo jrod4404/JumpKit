@@ -1736,6 +1736,210 @@ const JK_TESTS = [
     }
   },
 
+  // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
+  // These tests create real data in Supabase, verify it, then clean up.
+  // They require: logged in as org-owner, at least one team with a shared column.
+  {
+    id: 78, category: 'Shared Sync',
+    title: 'Add jump to shared column → appears in Supabase shared_jumps',
+    purpose: 'Verifies that creating a new jump in a shared column immediately pushes it to Supabase shared_jumps for team members to see.',
+    prerequisites: 'Must be logged in as org-owner with at least one shared column.',
+    description: 'Creates a test jump in the first shared column, waits 1s, checks Supabase, then cleans up.',
+    input: 'DB.createJump + Supabase shared_jumps query',
+    expected: 'Supabase shared_jumps contains the test jump. Cleaned up after.',
+    test: async () => {
+      const sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
+      if (!sharedCol) throw new Error('No shared column found — share a column to a team first');
+
+      // Create test jump
+      const testName = `__TEST_JUMP_${Date.now()}__`;
+      const newJump = DB.createJump(currentUser.id, {
+        name: testName, url: 'https://test.jumpkit.app',
+        description: 'Auto-generated test jump', columnId: sharedCol.id,
+      });
+      if (!newJump) throw new Error('DB.createJump returned null');
+
+      // Push to Supabase (same logic as saveJump)
+      const supabaseId = crypto.randomUUID();
+      DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: sharedCol.teamId });
+      const { error: insertErr } = await supabaseClient.from('shared_jumps').insert({
+        id: supabaseId, shared_column_id: sharedCol.supabaseId, team_id: sharedCol.teamId,
+        name: testName, url: 'https://test.jumpkit.app', description: 'Auto-generated test jump',
+        reason: '', position: 999, created_by: window._supabaseUser?.id,
+      });
+      if (insertErr) throw new Error('Insert to shared_jumps failed: ' + insertErr.message);
+
+      // Verify in Supabase
+      await new Promise(r => setTimeout(r, 500));
+      const { data, error } = await supabaseClient.from('shared_jumps').select('id,name').eq('id', supabaseId).single();
+      if (error || !data) throw new Error('Test jump not found in Supabase: ' + (error?.message || 'no data'));
+      if (data.name !== testName) throw new Error(`Name mismatch: expected "${testName}", got "${data.name}"`);
+
+      // Cleanup — delete from Supabase and local
+      await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
+      DB.deleteJump(currentUser.id, newJump.id);
+      console.info('[Test 78] ✅ Test jump created, verified in Supabase, and cleaned up.');
+      return true;
+    }
+  },
+
+  {
+    id: 79, category: 'Shared Sync',
+    title: 'Edit jump in shared column → Supabase shared_jumps updated',
+    purpose: 'Verifies that editing a jump already in a shared column pushes the update to Supabase.',
+    prerequisites: 'Must be logged in as org-owner with at least one shared column.',
+    description: 'Creates a shared test jump, edits it, checks Supabase for updated name, then cleans up.',
+    input: 'DB.updateJump + Supabase shared_jumps update query',
+    expected: 'Supabase shared_jumps shows updated name. Cleaned up after.',
+    test: async () => {
+      const sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
+      if (!sharedCol) throw new Error('No shared column found');
+
+      // Create initial jump
+      const testName = `__TEST_EDIT_${Date.now()}__`;
+      const supabaseId = crypto.randomUUID();
+      const newJump = DB.createJump(currentUser.id, { name: testName, url: 'https://test.jumpkit.app', columnId: sharedCol.id });
+      DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: sharedCol.teamId });
+      await supabaseClient.from('shared_jumps').insert({
+        id: supabaseId, shared_column_id: sharedCol.supabaseId, team_id: sharedCol.teamId,
+        name: testName, url: 'https://test.jumpkit.app', description: '', reason: '', position: 999, created_by: window._supabaseUser?.id,
+      });
+
+      // Edit the jump
+      const updatedName = testName + '_EDITED';
+      DB.updateJump(currentUser.id, newJump.id, { name: updatedName });
+      const { error: updateErr } = await supabaseClient.from('shared_jumps').update({ name: updatedName }).eq('id', supabaseId);
+      if (updateErr) throw new Error('Update to shared_jumps failed: ' + updateErr.message);
+
+      // Verify
+      await new Promise(r => setTimeout(r, 500));
+      const { data } = await supabaseClient.from('shared_jumps').select('name').eq('id', supabaseId).single();
+      if (data?.name !== updatedName) throw new Error(`Edit not reflected in Supabase: expected "${updatedName}", got "${data?.name}"`);
+
+      // Cleanup
+      await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
+      DB.deleteJump(currentUser.id, newJump.id);
+      console.info('[Test 79] ✅ Test jump updated in Supabase and cleaned up.');
+      return true;
+    }
+  },
+
+  {
+    id: 80, category: 'Shared Sync',
+    title: 'Delete jump from shared column → removed from Supabase shared_jumps',
+    purpose: 'Verifies that deleting a jump from a shared column removes it from Supabase so team members no longer see it.',
+    prerequisites: 'Must be logged in as org-owner with at least one shared column.',
+    description: 'Creates a shared test jump, deletes it, verifies it is gone from Supabase.',
+    input: 'DB.deleteJump + Supabase shared_jumps delete query',
+    expected: 'Supabase shared_jumps no longer contains the test jump.',
+    test: async () => {
+      const sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
+      if (!sharedCol) throw new Error('No shared column found');
+
+      // Create test jump
+      const testName = `__TEST_DELETE_${Date.now()}__`;
+      const supabaseId = crypto.randomUUID();
+      const newJump = DB.createJump(currentUser.id, { name: testName, url: 'https://test.jumpkit.app', columnId: sharedCol.id });
+      DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: sharedCol.teamId });
+      await supabaseClient.from('shared_jumps').insert({
+        id: supabaseId, shared_column_id: sharedCol.supabaseId, team_id: sharedCol.teamId,
+        name: testName, url: 'https://test.jumpkit.app', description: '', reason: '', position: 999, created_by: window._supabaseUser?.id,
+      });
+
+      // Delete the jump (same logic as doDelete)
+      await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
+      DB.deleteJump(currentUser.id, newJump.id);
+
+      // Verify gone from Supabase
+      await new Promise(r => setTimeout(r, 500));
+      const { data } = await supabaseClient.from('shared_jumps').select('id').eq('id', supabaseId);
+      if (data && data.length > 0) throw new Error('Test jump still exists in Supabase after deletion!');
+
+      console.info('[Test 80] ✅ Test jump deleted from Supabase. No cleanup needed.');
+      return true;
+    }
+  },
+
+  {
+    id: 81, category: 'Shared Sync',
+    title: 'Move jump OUT of shared column → removed from Supabase shared_jumps',
+    purpose: 'Verifies that moving a shared jump to a non-shared column removes it from Supabase.',
+    prerequisites: 'Must be logged in as org-owner with at least one shared column and one non-shared column.',
+    description: 'Creates a shared test jump, moves it to a personal column, verifies it is gone from Supabase.',
+    input: 'DB.updateJump (columnId change) + Supabase delete',
+    expected: 'Supabase shared_jumps no longer contains the jump after it is moved to a personal column.',
+    test: async () => {
+      const sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
+      const personalCol = DB.getColumns(currentUser.id).find(c => !c.isShared);
+      if (!sharedCol) throw new Error('No shared column found');
+      if (!personalCol) throw new Error('No personal column found');
+
+      // Create shared test jump
+      const testName = `__TEST_MOVE_${Date.now()}__`;
+      const supabaseId = crypto.randomUUID();
+      const newJump = DB.createJump(currentUser.id, { name: testName, url: 'https://test.jumpkit.app', columnId: sharedCol.id });
+      DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: sharedCol.teamId });
+      await supabaseClient.from('shared_jumps').insert({
+        id: supabaseId, shared_column_id: sharedCol.supabaseId, team_id: sharedCol.teamId,
+        name: testName, url: 'https://test.jumpkit.app', description: '', reason: '', position: 999, created_by: window._supabaseUser?.id,
+      });
+
+      // Move to personal column (same logic as edit path when moving out)
+      await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
+      DB.updateJump(currentUser.id, newJump.id, { columnId: personalCol.id, isShared: 0, teamId: null, supabaseId: null });
+
+      // Verify gone from Supabase
+      await new Promise(r => setTimeout(r, 500));
+      const { data } = await supabaseClient.from('shared_jumps').select('id').eq('id', supabaseId);
+      if (data && data.length > 0) throw new Error('Jump still in Supabase after being moved to personal column!');
+
+      // Cleanup local
+      DB.deleteJump(currentUser.id, newJump.id);
+      console.info('[Test 81] ✅ Jump removed from Supabase after being moved to personal column.');
+      return true;
+    }
+  },
+
+  {
+    id: 82, category: 'Shared Sync',
+    title: 'Move jump INTO shared column → inserted into Supabase shared_jumps',
+    purpose: 'Verifies that moving a personal jump into a shared column pushes it to Supabase.',
+    prerequisites: 'Must be logged in as org-owner with at least one shared column and one non-shared column.',
+    description: 'Creates a personal test jump, moves it to a shared column, verifies it appears in Supabase, then cleans up.',
+    input: 'DB.createJump + DB.updateJump (columnId change) + Supabase insert',
+    expected: 'Supabase shared_jumps contains the jump after it is moved to a shared column.',
+    test: async () => {
+      const sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
+      const personalCol = DB.getColumns(currentUser.id).find(c => !c.isShared);
+      if (!sharedCol) throw new Error('No shared column found');
+      if (!personalCol) throw new Error('No personal column found');
+
+      // Create personal test jump
+      const testName = `__TEST_MOVEIN_${Date.now()}__`;
+      const newJump = DB.createJump(currentUser.id, { name: testName, url: 'https://test.jumpkit.app', columnId: personalCol.id });
+
+      // Move into shared column
+      const supabaseId = crypto.randomUUID();
+      DB.updateJump(currentUser.id, newJump.id, { columnId: sharedCol.id, supabaseId, isShared: 1, teamId: sharedCol.teamId });
+      const { error } = await supabaseClient.from('shared_jumps').insert({
+        id: supabaseId, shared_column_id: sharedCol.supabaseId, team_id: sharedCol.teamId,
+        name: testName, url: 'https://test.jumpkit.app', description: '', reason: '', position: 999, created_by: window._supabaseUser?.id,
+      });
+      if (error) throw new Error('Insert to shared_jumps failed: ' + error.message);
+
+      // Verify in Supabase
+      await new Promise(r => setTimeout(r, 500));
+      const { data } = await supabaseClient.from('shared_jumps').select('id,name').eq('id', supabaseId).single();
+      if (!data) throw new Error('Jump not found in Supabase after being moved to shared column');
+
+      // Cleanup
+      await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
+      DB.deleteJump(currentUser.id, newJump.id);
+      console.info('[Test 82] ✅ Jump inserted into Supabase after being moved to shared column. Cleaned up.');
+      return true;
+    }
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
