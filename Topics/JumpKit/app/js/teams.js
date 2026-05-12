@@ -21,22 +21,9 @@ async function hashPassword(password) {
 async function renderTeams(containerEl) {
   const content = containerEl || document.getElementById('pageContent');
 
-  // ── Tier gate — Teams requires core or teams_jet ──────────────────
-  const tier   = window._supabaseProfile?.subscription_tier   || localStorage.getItem('jk_subscription_tier')   || 'free';
-  const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
-  const adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
-  const hasTeamsAccess = adminEmail === 'jeffroder@gmail.com' || ((tier === 'core' || tier === 'teams_jet') && (status === 'active'));
-
-  if (!hasTeamsAccess) {
-    content.innerHTML = `
-      <div class="placeholder-page">
-        <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
-        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Teams — JumpKit Plan Required</h3>
-        <p style="color:var(--text-muted);line-height:1.6">Share columns and jumps with your team. Collaborate in real time — everyone always has the latest links.</p>
-        <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Teams</a>
-      </div>`;
-    return;
-  }
+  // ── Teams is available on all tiers (free included) ──────────────
+  // Paywall is only triggered at 250 jump launches (free tier limit)
+  // Teams access is unrestricted — it drives upgrade naturally
 
   content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
     <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
