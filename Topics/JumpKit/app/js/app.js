@@ -1312,7 +1312,7 @@ function patchModalForPwToggles() {
   const _origOpen = Modal.open.bind(Modal);
   Modal.open = function(...args) {
     const result = _origOpen(...args);
-    requestAnimationFrame(() => wirePasswordToggles(document.getElementById('modalBody') || document));
+    setTimeout(() => wirePasswordToggles(document.getElementById('modalBody') || document), 50);
     return result;
   };
 }

@@ -1061,7 +1061,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
 
 // ── Join Team Modal & Flow ─────────────────────────────────────────
 window.openJoinTeamModal = function(teamId, teamName, inviteId) {
-  Modal.open(`<svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team`, `
+  Modal.open(`<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team`, `
     <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">
       Enter the team password to join <strong>${esc(teamName)}</strong>.
     </p>
