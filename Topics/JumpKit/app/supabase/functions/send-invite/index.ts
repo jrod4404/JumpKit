@@ -201,18 +201,24 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       <p style="margin:0 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px"><tr>
         <td style="padding:0 6px">
-          <a href="https://x.com/jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
-            <img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="vertical-align:middle;margin-top:9px" alt="X" />
+          <a href="https://x.com/jumpkitapp" style="text-decoration:none">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
+              <img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="display:block;margin-top:2px" alt="X" />
+            </td></tr></table>
           </a>
         </td>
         <td style="padding:0 6px">
-          <a href="https://youtube.com/@jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
-            <img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="vertical-align:middle;margin-top:7px" alt="YouTube" />
+          <a href="https://youtube.com/@jumpkitapp" style="text-decoration:none">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
+              <img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="display:block;margin-top:2px" alt="YouTube" />
+            </td></tr></table>
           </a>
         </td>
         <td style="padding:0 6px">
-          <a href="https://linkedin.com/company/jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
-            <img src="https://jumpkit.app/email-icons/icon-social-li.png" width="18" height="18" style="vertical-align:middle;margin-top:7px" alt="LinkedIn" />
+          <a href="https://linkedin.com/company/jumpkitapp" style="text-decoration:none">
+            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
+              <img src="https://jumpkit.app/email-icons/icon-social-li.png" width="18" height="18" style="display:block;margin-top:2px" alt="LinkedIn" />
+            </td></tr></table>
           </a>
         </td>
       </tr></table>
