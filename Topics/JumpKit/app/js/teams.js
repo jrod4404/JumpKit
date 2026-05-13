@@ -391,7 +391,7 @@ window.selectTeam = async function(teamId) {
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
             </div>
-            <button class="btn btn-delete" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>
+            <button class="btn btn-delete tooltip-left" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>
           </div>`;
       }).join('') + inviteRows;
     }

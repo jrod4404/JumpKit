@@ -546,3 +546,10 @@ strong, b { color: inherit; }
   box-shadow: var(--shadow);
 }
 [data-tooltip]:hover::after { opacity: 1; }
+
+/* ── Tooltip pinned to right edge (prevents right-side clip) ── */
+[data-tooltip].tooltip-left::after {
+  left: auto;
+  right: 0;
+  transform: none;
+}
