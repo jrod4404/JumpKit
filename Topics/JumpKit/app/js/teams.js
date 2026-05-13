@@ -314,8 +314,8 @@ window.selectOrg = async function(orgId) {
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();openChangeTeamPasswordModal('${t.id}','${esc(t.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <button class="btn btn-subtle" title="Change team password" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();openChangeTeamPasswordModal('${t.id}','${esc(t.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+            <button class="btn btn-delete" title="Delete team" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
           </div>
         </div>`;
       }).join('');
@@ -391,7 +391,7 @@ window.selectTeam = async function(teamId) {
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
             </div>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>
+            <button class="btn btn-delete" title="Remove member from team" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>
           </div>`;
       }).join('') + inviteRows;
     }
