@@ -539,11 +539,26 @@ window.resendInvite = async function(inviteId, email, teamId) {
       .eq('id', inviteId);
     if (error) throw error;
 
-    // Re-send invite email (non-fatal)
+    // Re-send invite email (non-fatal) — fetch team/org/password first
     try {
       const invitedBy = _orgOwnerSupaUser?.id;
+      const { data: team } = await supabaseClient
+        .from('teams')
+        .select('name, org_id, team_password_plain')
+        .eq('id', teamId)
+        .single();
+      let orgName = '';
+      if (team?.org_id) {
+        const { data: org } = await supabaseClient.from('organizations').select('name').eq('id', team.org_id).single();
+        orgName = org?.name || '';
+      }
       await supabaseClient.functions.invoke('send-invite', {
-        body: { email, teamId, invitedBy },
+        body: {
+          email, teamId, invitedBy,
+          teamName: team?.name || '',
+          orgName,
+          teamPassword: team?.team_password_plain || '',
+        },
       });
     } catch (_) { /* email sending optional */ }
 
