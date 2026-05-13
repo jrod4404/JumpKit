@@ -577,7 +577,7 @@
                 <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer and Marketing Documentation</p>
                 <p style="font-size:0.85rem;opacity:0.85;margin-top:6px;max-width:600px;line-height:1.5">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-12</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-13</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -1276,7 +1276,8 @@ created_at TIMESTAMPTZ</code></pre>
 <pre><code>id UUID PRIMARY KEY,
 org_id UUID REFERENCES organizations(id),
 name TEXT NOT NULL,
-team_password_hash TEXT NOT NULL,      -- SHA-256 hash
+team_password_hash TEXT NOT NULL,      -- PBKDF2 hash (100k iterations, SHA-256, salt: jumpkit-team-salt-v1)
+team_password_plain TEXT,              -- Plaintext password stored for use in invite emails (added 2026-05-13)
 owner_id UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
 <h4 id="team_members">2.3.11 team_members</h4>
@@ -2688,6 +2689,15 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <hr>
 <h2 id="changelog">7. Changelog</h2>
+
+<h3>2026-05-13</h3>
+<ul>
+<li><strong>Invite Email — Full Polish:</strong> Redesigned invite email with dark gradient header, hosted PNG icons (mac, windows, jumpkit, clock, refresh, social circles), benefits card, proper footer. Icons generated as transparent PNGs hosted at <code>jumpkit.app/email-icons/</code>.</li>
+<li><strong>Invite Email — Inviter Name:</strong> Now shows first + last name from <code>profiles</code> table instead of email address.</li>
+<li><strong>Invite Email — Team Password Fix:</strong> Added <code>team_password_plain</code> column to <code>teams</code> table in Supabase. Plaintext password is now stored alongside the PBKDF2 hash and automatically included in invite emails. <strong>Note:</strong> This column intentionally stores plaintext because the team password is designed to be shared with all members.</li>
+<li><strong>Invite Email — resendInvite fix:</strong> "Invite Again" button was calling the Edge Function without team name, org name, or password. Now fetches all required data before sending.</li>
+<li><strong>Team Tooltips:</strong> Added CSS <code>data-tooltip</code> tooltips to Change Password, Delete Team, and Remove Member buttons. <code>tooltip-left</code> class pins tooltip to right edge to prevent clipping.</li>
+</ul>
 
 <h3>2026-05-12</h3>
 <ul>
