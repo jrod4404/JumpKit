@@ -200,16 +200,20 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:36px;display:block;margin:0 auto 10px;opacity:0.8" /></a>
       <p style="margin:0 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px"><tr>
-        <td style="padding:0 8px">
-          <a href="https://x.com/jumpkitapp" style="font-size:12px;color:#4A6280;text-decoration:none">X / Twitter</a>
+        <td style="padding:0 6px">
+          <a href="https://x.com/jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
+            <img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="vertical-align:middle;margin-top:9px" alt="X" />
+          </a>
         </td>
-        <td style="padding:0 8px;color:#2e3d52">·</td>
-        <td style="padding:0 8px">
-          <a href="https://youtube.com/@jumpkitapp" style="font-size:12px;color:#4A6280;text-decoration:none">YouTube</a>
+        <td style="padding:0 6px">
+          <a href="https://youtube.com/@jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
+            <img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="vertical-align:middle;margin-top:7px" alt="YouTube" />
+          </a>
         </td>
-        <td style="padding:0 8px;color:#2e3d52">·</td>
-        <td style="padding:0 8px">
-          <a href="https://linkedin.com/company/jumpkitapp" style="font-size:12px;color:#4A6280;text-decoration:none">LinkedIn</a>
+        <td style="padding:0 6px">
+          <a href="https://linkedin.com/company/jumpkitapp" style="display:inline-block;width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%;text-align:center;line-height:32px;text-decoration:none">
+            <img src="https://jumpkit.app/email-icons/icon-social-li.png" width="18" height="18" style="vertical-align:middle;margin-top:7px" alt="LinkedIn" />
+          </a>
         </td>
       </tr></table>
       <p style="margin:0;font-size:11px;color:#2e3d52">© 2026 JumpKit. All rights reserved.</p>
