@@ -446,7 +446,7 @@ window.saveAddTeam = async function() {
     const ownerId = _orgOwnerSupaUser?.id;
     const { data: team, error } = await supabaseClient
       .from('teams')
-      .insert({ org_id: selectedOrgId, name, team_password_hash: hashedPassword, owner_id: ownerId })
+      .insert({ org_id: selectedOrgId, name, team_password_hash: hashedPassword, team_password_plain: password, owner_id: ownerId })
       .select()
       .single();
     if (error) throw error;
@@ -818,7 +818,7 @@ async function saveNewTeam(orgId) {
     const hashedAdminPassword = await hashPassword(password);
     const { data: team, error } = await supabaseClient
       .from('teams')
-      .insert({ org_id: orgId, name, team_password_hash: hashedAdminPassword, owner_id: ownerId })
+      .insert({ org_id: orgId, name, team_password_hash: hashedAdminPassword, team_password_plain: password, owner_id: ownerId })
       .select()
       .single();
     if (error) throw error;
@@ -843,27 +843,25 @@ async function saveNewTeam(orgId) {
 }
 
 // ── Invite Members Modal ──────────────────────────────────────────
-function openInviteModal(teamId) {
+async function openInviteModal(teamId) {
+  // Fetch plaintext password for this team
+  const { data: teamData } = await supabaseClient
+    .from('teams')
+    .select('team_password_plain')
+    .eq('id', teamId)
+    .single();
+  const plainPw = teamData?.team_password_plain || '';
+
   const body = `
     <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
-      Enter email addresses to invite (one per line). An invitation email will be sent with instructions.
+      Enter email addresses to invite (one per line). An invitation email will be sent with instructions to join.
     </p>
     <div class="form-group">
       <label class="form-label">Email Addresses *</label>
       <textarea class="form-textarea" id="inviteEmails" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
       <span class="form-error" id="inviteEmailsErr">At least one valid email required.</span>
     </div>
-    <div class="form-group" style="margin-top:12px">
-      <label class="form-label">Team Password *</label>
-      <p style="color:var(--text-muted);font-size:.8rem;margin:0 0 6px">This will be included in the invite email so members can join.</p>
-      <div style="position:relative">
-        <input type="password" class="form-input" id="inviteTeamPassword" placeholder="Enter team password" />
-        <button type="button" class="pw-toggle-btn" data-target="inviteTeamPassword" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0">
-          <svg class="ti ti-eye"><use href="img/tabler-sprite.svg#tabler-eye"/></svg>
-        </button>
-      </div>
-      <span class="form-error" id="invitePasswordErr">Team password is required.</span>
-    </div>`;
+    <input type="hidden" id="inviteTeamPassword" value="${esc(plainPw)}" />`;
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
@@ -876,12 +874,11 @@ async function sendInvites(teamId) {
   const teamPassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
 
   document.getElementById('inviteEmailsErr')?.classList.remove('show');
-  document.getElementById('invitePasswordErr')?.classList.remove('show');
 
-  let valid = true;
-  if (emails.length === 0) { document.getElementById('inviteEmailsErr').classList.add('show'); valid = false; }
-  if (!teamPassword) { document.getElementById('invitePasswordErr').classList.add('show'); valid = false; }
-  if (!valid) return;
+  if (emails.length === 0) {
+    document.getElementById('inviteEmailsErr').classList.add('show');
+    return;
+  }
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1064,7 +1061,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
     const hashedPw = await hashPassword(newPw);
     const { error } = await supabaseClient
       .from('teams')
-      .update({ team_password_hash: hashedPw })
+      .update({ team_password_hash: hashedPw, team_password_plain: newPw })
       .eq('id', teamId);
     if (error) throw error;
     Modal.close();
