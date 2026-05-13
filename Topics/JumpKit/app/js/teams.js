@@ -852,6 +852,17 @@ function openInviteModal(teamId) {
       <label class="form-label">Email Addresses *</label>
       <textarea class="form-textarea" id="inviteEmails" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
       <span class="form-error" id="inviteEmailsErr">At least one valid email required.</span>
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label class="form-label">Team Password *</label>
+      <p style="color:var(--text-muted);font-size:.8rem;margin:0 0 6px">This will be included in the invite email so members can join.</p>
+      <div style="position:relative">
+        <input type="password" class="form-input" id="inviteTeamPassword" placeholder="Enter team password" />
+        <button type="button" class="pw-toggle-btn" data-target="inviteTeamPassword" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);padding:0">
+          <svg class="ti ti-eye"><use href="img/tabler-sprite.svg#tabler-eye"/></svg>
+        </button>
+      </div>
+      <span class="form-error" id="invitePasswordErr">Team password is required.</span>
     </div>`;
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
@@ -862,11 +873,15 @@ function openInviteModal(teamId) {
 async function sendInvites(teamId) {
   const raw = document.getElementById('inviteEmails').value.trim();
   const emails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  const teamPassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
 
-  if (emails.length === 0) {
-    document.getElementById('inviteEmailsErr').classList.add('show');
-    return;
-  }
+  document.getElementById('inviteEmailsErr')?.classList.remove('show');
+  document.getElementById('invitePasswordErr')?.classList.remove('show');
+
+  let valid = true;
+  if (emails.length === 0) { document.getElementById('inviteEmailsErr').classList.add('show'); valid = false; }
+  if (!teamPassword) { document.getElementById('invitePasswordErr').classList.add('show'); valid = false; }
+  if (!valid) return;
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -904,7 +919,7 @@ async function sendInvites(teamId) {
               invitedBy: invitedBy,
               orgName: team?.organizations?.name || '',
               teamName: team?.name || '',
-              teamPassword: team?.team_password_hash || '',
+              teamPassword: teamPassword,
             },
           });
         } catch (_) { /* email sending optional */ }
