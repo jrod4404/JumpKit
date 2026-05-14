@@ -171,7 +171,7 @@
 }
 
 /* ── Account Page ── */
-.acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 800px; margin: 0 auto; }
+.acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 960px; margin: 0 auto; }
 .acct-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .acct-section-title i { font-size: 1.1rem; color: var(--text-muted); }
