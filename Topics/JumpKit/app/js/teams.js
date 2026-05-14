@@ -289,14 +289,23 @@ window.selectOrg = async function(orgId) {
       .order('name');
     if (error) throw error;
 
-    // Fetch member counts for all teams
+    // Fetch member counts and pending invite counts for all teams
     let memberCounts = {};
+    let inviteCounts = {};
     if (teams.length) {
+      const teamIds = teams.map(t => t.id);
       const { data: counts = [] } = await supabaseClient
         .from('team_members')
         .select('team_id')
-        .in('team_id', teams.map(t => t.id));
+        .in('team_id', teamIds);
       counts.forEach(c => { memberCounts[c.team_id] = (memberCounts[c.team_id] || 0) + 1; });
+
+      const { data: invites = [] } = await supabaseClient
+        .from('team_invites')
+        .select('team_id')
+        .in('team_id', teamIds)
+        .eq('status', 'pending');
+      invites.forEach(i => { inviteCounts[i.team_id] = (inviteCounts[i.team_id] || 0) + 1; });
     }
 
     if (teams.length === 0) {
@@ -304,12 +313,14 @@ window.selectOrg = async function(orgId) {
     } else {
       teamsPanel.innerHTML = teams.map(t => {
         const mCount = memberCounts[t.id] || 0;
+        const iCount = inviteCounts[t.id] || 0;
         const created = t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '—';
+        const inviteHint = iCount > 0 ? ` · <span style="color:#e6a817">${iCount} pending invite${iCount !== 1 ? 's' : ''}</span>` : '';
         return `
         <div class="acct-row teams-selectable-row" id="teamRow_${t.id}" onclick="selectTeam('${t.id}')">
           <div class="acct-row-label">
             <span>${esc(t.name)}</span>
-            <span class="acct-row-hint">${mCount} team member${mCount !== 1 ? 's' : ''}</span>
+            <span class="acct-row-hint">${mCount} member${mCount !== 1 ? 's' : ''}${inviteHint}</span>
             <span class="acct-row-hint">Created ${created}</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
