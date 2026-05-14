@@ -2677,7 +2677,73 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </tbody>
 </table>
 
-<h2 id="conclusion">6. Conclusion</h2>
+<h2 id="paid-services">6. Paid Services &amp; Subscriptions</h2>
+<p>The following table tracks all recurring paid services used by JumpKit.</p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+  <thead>
+    <tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:8px 12px;text-align:left">Service</th>
+      <th style="padding:8px 12px;text-align:left">Provider</th>
+      <th style="padding:8px 12px;text-align:left">Purpose</th>
+      <th style="padding:8px 12px;text-align:left">Cost</th>
+      <th style="padding:8px 12px;text-align:left">Billing</th>
+      <th style="padding:8px 12px;text-align:left">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Supabase Pro</td>
+      <td style="padding:8px 12px">Supabase</td>
+      <td style="padding:8px 12px">Backend DB, Auth, Edge Functions, auto-backups</td>
+      <td style="padding:8px 12px"><strong>$25/month</strong></td>
+      <td style="padding:8px 12px">Monthly</td>
+      <td style="padding:8px 12px">Upgraded 2026-05-14. Removes auth email rate limits. Enables auto-backups. Project: <code>iuexwdjnqfidcwvwbgwr</code></td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">jumpkit.app domain</td>
+      <td style="padding:8px 12px">GoDaddy</td>
+      <td style="padding:8px 12px">Primary domain — landing page + email</td>
+      <td style="padding:8px 12px"><strong>TBD/year</strong></td>
+      <td style="padding:8px 12px">Annual</td>
+      <td style="padding:8px 12px">A record → <code>76.76.21.21</code> (Vercel). DNS managed in GoDaddy.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">jumpkit.ai domain</td>
+      <td style="padding:8px 12px">TBD</td>
+      <td style="padding:8px 12px">Email sending domain — verified in Resend</td>
+      <td style="padding:8px 12px"><strong>TBD/year</strong></td>
+      <td style="padding:8px 12px">Annual</td>
+      <td style="padding:8px 12px">Used for <code>noreply@jumpkit.ai</code>. Verified in Resend. Used for all transactional emails.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Vercel</td>
+      <td style="padding:8px 12px">Vercel</td>
+      <td style="padding:8px 12px">Landing page hosting + CDN</td>
+      <td style="padding:8px 12px"><strong>Free (Hobby)</strong></td>
+      <td style="padding:8px 12px">N/A</td>
+      <td style="padding:8px 12px">Project: <code>jumpkit-landing</code>. Deploy via <code>vercel --prod</code> from landing folder.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Resend</td>
+      <td style="padding:8px 12px">Resend</td>
+      <td style="padding:8px 12px">Transactional email delivery</td>
+      <td style="padding:8px 12px"><strong>Free tier</strong></td>
+      <td style="padding:8px 12px">N/A</td>
+      <td style="padding:8px 12px">Used via Supabase SMTP + Edge Functions. Domain <code>jumpkit.ai</code> verified.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">GitHub</td>
+      <td style="padding:8px 12px">GitHub</td>
+      <td style="padding:8px 12px">Source control</td>
+      <td style="padding:8px 12px"><strong>Free</strong></td>
+      <td style="padding:8px 12px">N/A</td>
+      <td style="padding:8px 12px">Repo: <code>jrod4404/JumpKit</code> (private)</td>
+    </tr>
+  </tbody>
+</table>
+<p style="color:var(--text-muted);font-size:0.85rem">💡 <strong>Monthly burn rate:</strong> ~$25/month (Supabase Pro only, as of 2026-05-14). Domain costs TBD at renewal.</p>
+
+<h2 id="conclusion">7. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
 <li><strong>Local-first</strong>: Personal data stays on device, fast synchronous reads</li>
@@ -2689,7 +2755,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <p>Happy building! 🚀</p>
 
 <hr>
-<h2 id="changelog">7. Changelog</h2>
+<h2 id="changelog">8. Changelog</h2>
 
 <h3>2026-05-14</h3>
 <ul>
