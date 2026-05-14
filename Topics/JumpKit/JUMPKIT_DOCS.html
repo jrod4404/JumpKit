@@ -2757,7 +2757,23 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <hr>
 <h2 id="changelog">8. Changelog</h2>
 
-<h3>2026-05-14</h3>
+<h3>2026-05-14 (afternoon)</h3>
+<ul>
+<li><strong>Teams UX — Cancel Invitation:</strong> Added cancel button on pending invite rows. Confirmation modal shows invitee email + team name. Uses <code>btn-delete</code> style. RLS DELETE policy: <code>invited_by = auth.uid()</code>. Cancel now only refreshes members panel (not full page).</li>
+<li><strong>Teams UX — Auto-add owner to team_members:</strong> On team creation, owner automatically inserted into <code>team_members</code>. Existing teams backfilled via SQL. Remove button hidden for team owner.</li>
+<li><strong>Teams UX — Member sorting + role pills:</strong> Members sorted org-owner → team-owner → member. Distinct pill colors: org-owner blue (<code>rgba(26,79,214,0.18)</code>), team-owner gold, member grey.</li>
+<li><strong>Teams UX — Pending invite count on team rows:</strong> Each team row shows "X members · Y pending invites". Always visible, muted style.</li>
+<li><strong>Invite Validation (full):</strong> Both <code>sendInvites</code> and <code>sendOrgInvites</code> now validate: invalid emails, duplicates, &gt;25 limit, self-invite, already-member, already-pending. <code>maxlength=2000</code> on textarea. Spinner on Send Invites button while sending.</li>
+<li><strong>Seed re-run bug fixed:</strong> <code>seed-new-user</code> in <code>main.js</code> now checks for existing personal columns before seeding. Duplicate columns and orphaned jumps from legacy userIds cleaned. Only Jeff's Supabase UUID retained.</li>
+<li><strong>Button consistency:</strong> Add Jump and Save Columns buttons changed to <code>btn-save</code> style.</li>
+<li><strong>Auth card height:</strong> Increased from 720px to 792px (+10%) for validation error space.</li>
+<li><strong>Signup success modal:</strong> Replaced inline alert with branded overlay modal. "Go to Sign In" button activates sign in tab via <code>showView('viewLogin')</code>.</li>
+<li><strong>Paid Services docs:</strong> Added Section 6 with table of all paid/free services.</li>
+<li><strong>Delete Team fix:</strong> <code>doRemoveTeam</code> now deletes <code>team_invites</code> before deleting the team.</li>
+<li><strong>RLS Recursion Fix (major):</strong> Resolved infinite recursion across <code>teams</code>, <code>team_members</code>, <code>team_invites</code>, <code>profiles</code>, <code>organizations</code>. Solution: 4 <code>SECURITY DEFINER</code> functions: <code>get_my_role_safe()</code>, <code>get_my_org_safe()</code>, <code>is_team_or_org_owner()</code>, <code>is_org_member_safe()</code>. All policies rewritten to use these instead of direct cross-table joins.</li>
+</ul>
+
+<h3>2026-05-14 (morning)</h3>
 <ul>
 <li><strong>Secure Team Join (3-factor):</strong> Join now requires (1) correct org/team name, (2) correct PBKDF2 password, (3) user's email must have a pending invite in <code>team_invites</code>. Blocks uninvited users at the API level even if UI is bypassed.</li>
 <li><strong>Email Confirmation:</strong> Supabase email confirmation enabled. New signups must verify email before signing in. Custom SMTP via Resend (<code>noreply@jumpkit.ai</code>). Confirmation redirects to <code>jumpkit.app/confirmed</code> (new branded page). <code>emailRedirectTo</code> passed on signup. Auth error message handles "email not confirmed" case gracefully.</li>
