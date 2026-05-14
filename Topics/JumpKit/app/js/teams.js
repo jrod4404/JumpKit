@@ -487,15 +487,53 @@ window.openInviteMembersModal = function() {
 };
 
 window.sendOrgInvites = async function() {
-  const raw    = document.getElementById('orgInviteEmails')?.value.trim() || '';
-  const emails = raw.split(/[\n,;]+/)
-    .map(e => e.trim())
-    .filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  const raw = document.getElementById('orgInviteEmails')?.value.trim() || '';
+  const allEmails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean);
+  const errEl = document.getElementById('orgInviteEmailsErr');
+  errEl?.classList.remove('show');
 
-  if (emails.length === 0) {
-    document.getElementById('orgInviteEmailsErr')?.classList.add('show');
-    return;
+  // Validation
+  if (allEmails.length === 0) {
+    if (errEl) { errEl.textContent = 'Please enter at least one email address.'; errEl.classList.add('show'); } return;
   }
+  const invalidEmails = allEmails.filter(e => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  if (invalidEmails.length > 0) {
+    if (errEl) { errEl.textContent = `Invalid address${invalidEmails.length > 1 ? 'es' : ''}: ${invalidEmails.join(', ')}`; errEl.classList.add('show'); } return;
+  }
+  const lowerEmails = allEmails.map(e => e.toLowerCase().trim());
+  const uniqueEmails = [...new Set(lowerEmails)];
+  if (uniqueEmails.length < lowerEmails.length) {
+    const dups = lowerEmails.filter((e, i) => lowerEmails.indexOf(e) !== i);
+    if (errEl) { errEl.textContent = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`; errEl.classList.add('show'); } return;
+  }
+  if (uniqueEmails.length > 25) {
+    if (errEl) { errEl.textContent = `Maximum 25 email addresses per invite. You entered ${uniqueEmails.length}.`; errEl.classList.add('show'); } return;
+  }
+
+  // Check self-invite, existing members, pending invites
+  try {
+    const { data: { session: chkSession } } = await supabaseClient.auth.getSession();
+    const currentUserEmail = chkSession?.user?.email?.toLowerCase();
+    if (currentUserEmail && uniqueEmails.includes(currentUserEmail)) {
+      if (errEl) { errEl.textContent = 'You cannot invite yourself.'; errEl.classList.add('show'); } return;
+    }
+    const { data: memberProfiles = [] } = await supabaseClient.from('team_members').select('profiles(email)').eq('team_id', selectedTeamId);
+    const memberEmails = memberProfiles.map(m => m.profiles?.email?.toLowerCase()).filter(Boolean);
+    const alreadyMembers = uniqueEmails.filter(e => memberEmails.includes(e));
+    if (alreadyMembers.length > 0) {
+      if (errEl) { errEl.textContent = `Already a member: ${alreadyMembers.join(', ')}`; errEl.classList.add('show'); } return;
+    }
+    const { data: pendingInvites = [] } = await supabaseClient.from('team_invites').select('email').eq('team_id', selectedTeamId).eq('status', 'pending');
+    const pendingEmails = pendingInvites.map(i => i.email?.toLowerCase()).filter(Boolean);
+    const alreadyInvited = uniqueEmails.filter(e => pendingEmails.includes(e));
+    if (alreadyInvited.length > 0) {
+      if (errEl) { errEl.textContent = `Already has a pending invitation: ${alreadyInvited.join(', ')}`; errEl.classList.add('show'); } return;
+    }
+  } catch (checkErr) {
+    console.warn('[sendOrgInvites] pre-check failed:', checkErr.message);
+  }
+
+  const emails = uniqueEmails;
 
   try {
     const invitedBy = _orgOwnerSupaUser?.id;
@@ -936,12 +974,9 @@ async function sendInvites(teamId) {
   }
   const lowerEmails = allEmails.map(e => e.toLowerCase().trim());
   const uniqueEmails = [...new Set(lowerEmails)];
-  console.log('[sendInvites] lowerEmails:', lowerEmails, 'unique:', uniqueEmails);
   if (uniqueEmails.length < lowerEmails.length) {
     const dups = lowerEmails.filter((e, i) => lowerEmails.indexOf(e) !== i);
-    const dupMsg = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`;
-    console.log('[sendInvites] dup error:', dupMsg);
-    if (errEl) { errEl.textContent = dupMsg; errEl.classList.add('show'); }
+    if (errEl) { errEl.textContent = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`; errEl.classList.add('show'); }
     return;
   }
   if (uniqueEmails.length > 25) {
