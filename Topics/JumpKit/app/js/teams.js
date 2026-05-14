@@ -1148,6 +1148,26 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
       return;
     }
 
+    // Verify this user's email has a pending invite for this team
+    const userEmail = window._supabaseUser?.email;
+    const { data: invite, error: inviteErr } = await supabaseClient
+      .from('team_invites')
+      .select('id')
+      .eq('team_id', teamId)
+      .eq('email', userEmail)
+      .eq('status', 'pending')
+      .maybeSingle();
+    if (inviteErr) throw inviteErr;
+    if (!invite) {
+      if (errEl) {
+        errEl.textContent = 'Your email has not been invited to this team.';
+        errEl.classList.add('show');
+      } else {
+        Toast.danger('Your email has not been invited to this team.');
+      }
+      return;
+    }
+
     // Add user to team_members
     const { error: joinErr } = await supabaseClient
       .from('team_members')
@@ -1159,11 +1179,11 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
       });
     if (joinErr && !joinErr.message.includes('duplicate')) throw joinErr;
 
-    // Update invite status to accepted
+    // Mark invite as accepted
     await supabaseClient
       .from('team_invites')
       .update({ status: 'accepted' })
-      .eq('id', inviteId);
+      .eq('id', invite.id);
 
     // Update profile role to team-member if needed
     if (window._supabaseProfile?.role === 'team-member') {
