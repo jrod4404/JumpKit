@@ -523,12 +523,21 @@ window.sendOrgInvites = async function() {
       }
     }
 
-    Modal.close();
-    if (failed === 0) {
-      Toast.success(`Invited ${sent} member${sent !== 1 ? 's' : ''}!`);
-    } else {
-      Toast.success(`Sent ${sent} invite${sent !== 1 ? 's' : ''} (${failed} failed).`);
-    }
+    // Build summary
+    const dupCount = validEmails.length - emails.length;
+    const invalidCount = allEmails.filter(e => e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
+    const summaryLines = [];
+    if (sent > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-circle-check" style="color:#22c55e;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>${sent} invitation${sent !== 1 ? 's' : ''} sent successfully</li>`);
+    if (failed > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-alert-circle" style="color:var(--danger);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>${failed} invitation${failed !== 1 ? 's' : ''} failed to send</li>`);
+    if (dupCount > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-copy-off" style="color:var(--text-dim);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-copy-off"/></svg>${dupCount} duplicate${dupCount !== 1 ? 's' : ''} removed</li>`);
+    if (invalidCount > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-mail-off" style="color:var(--text-dim);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg>${invalidCount} invalid address${invalidCount !== 1 ? 'es' : ''} skipped</li>`);
+
+    Modal.open(
+      '<svg class="ti ti-mail" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invitation Summary',
+      `<ul style="list-style:none;margin:0;padding:0;font-size:0.92rem;line-height:2">${summaryLines.join('')}</ul>`,
+      `<button class="btn btn-save" onclick="Modal.close()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`,
+      'sm'
+    );
     selectTeam(selectedTeamId); // refresh members panel
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
@@ -902,7 +911,7 @@ async function openInviteModal(teamId) {
 
   const body = `
     <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
-      Enter email addresses to invite (one per line). An invitation email will be sent with instructions to join.
+      Enter email addresses to invite (one per line). An invitation will be sent to each unique and valid address.
     </p>
     <div class="form-group">
       <label class="form-label">Email Addresses *</label>
