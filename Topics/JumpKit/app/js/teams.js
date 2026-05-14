@@ -483,7 +483,7 @@ window.openInviteMembersModal = function() {
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="sendOrgInvites()"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+     <button class="btn btn-save" id="sendOrgInvitesBtn" onclick="sendOrgInvites()"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 };
 
 window.sendOrgInvites = async function() {
@@ -534,6 +534,10 @@ window.sendOrgInvites = async function() {
   }
 
   const emails = uniqueEmails;
+
+  // Show spinner on button
+  const sendOrgBtn = document.getElementById('sendOrgInvitesBtn');
+  if (sendOrgBtn) { sendOrgBtn.disabled = true; sendOrgBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
 
   try {
     const invitedBy = _orgOwnerSupaUser?.id;
@@ -951,7 +955,7 @@ async function openInviteModal(teamId) {
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="sendInvites('${teamId}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+     <button class="btn btn-save" id="sendInvitesBtn" onclick="sendInvites('${teamId}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 }
 
 async function sendInvites(teamId) {
@@ -1023,6 +1027,10 @@ async function sendInvites(teamId) {
   } catch (checkErr) {
     console.warn('[sendInvites] pre-check failed:', checkErr.message);
   }
+
+  // Show spinner on button
+  const sendBtn = document.getElementById('sendInvitesBtn');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
