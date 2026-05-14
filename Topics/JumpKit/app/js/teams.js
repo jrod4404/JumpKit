@@ -350,6 +350,10 @@ window.selectTeam = async function(teamId) {
       .eq('team_id', teamId);
     if (error) throw error;
 
+    // Fetch team name for use in cancel modal
+    const { data: teamInfo } = await supabaseClient.from('teams').select('name').eq('id', teamId).single();
+    const teamName = teamInfo?.name || '';
+
     // Also fetch pending invites
     const { data: invites = [] } = await supabaseClient
       .from('team_invites')
@@ -371,7 +375,7 @@ window.selectTeam = async function(teamId) {
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending" style="font-size:0.65rem;padding:1px 7px">Pending</span>
               <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(teamName)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}` : '';
 
@@ -569,15 +573,14 @@ window.resendInvite = async function(inviteId, email, teamId) {
   }
 };
 
-window.cancelInvite = async function(inviteId, email) {
+window.cancelInvite = async function(inviteId, email, teamName) {
   Modal.open(
     '<svg class="ti ti-mail-off" style="color:var(--danger)"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation',
     `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6">
-      Are you sure you want to cancel the invitation for <strong style="color:var(--text)">${esc(email)}</strong>?<br/>
-      They will no longer be able to join this team using this invite.
+      Are you sure you want to cancel the invitation for <strong style="color:var(--text)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text)">${esc(teamName)}</strong> using this invite.
     </p>`,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
-     <button class="btn btn-danger" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
+     <button class="btn btn-subtle" style="color:#e05555;border-color:rgba(224,85,85,0.3)" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off" style="color:#e05555"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
     'sm'
   );
 };
@@ -682,7 +685,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending">Pending</span>
               <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}
       </div>` : ''}
