@@ -918,14 +918,27 @@ async function openInviteModal(teamId) {
 
 async function sendInvites(teamId) {
   const raw = document.getElementById('inviteEmails').value.trim();
-  const emails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  const allEmails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean);
+  const validEmails = allEmails.filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  const emails = [...new Set(validEmails.map(e => e.toLowerCase()))]; // deduplicate
   const teamPassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
 
-  document.getElementById('inviteEmailsErr')?.classList.remove('show');
+  const errEl = document.getElementById('inviteEmailsErr');
+  errEl?.classList.remove('show');
 
   if (emails.length === 0) {
-    document.getElementById('inviteEmailsErr').classList.add('show');
+    if (errEl) errEl.textContent = 'Please enter at least one valid email address.';
+    errEl?.classList.add('show');
     return;
+  }
+
+  const invalidCount = allEmails.filter(e => e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
+  const dupCount = validEmails.length - emails.length;
+  if (invalidCount > 0 || dupCount > 0) {
+    const parts = [];
+    if (invalidCount > 0) parts.push(`${invalidCount} invalid email${invalidCount > 1 ? 's' : ''} skipped`);
+    if (dupCount > 0) parts.push(`${dupCount} duplicate${dupCount > 1 ? 's' : ''} removed`);
+    Toast.success(`Note: ${parts.join(', ')}.`);
   }
 
   try {
