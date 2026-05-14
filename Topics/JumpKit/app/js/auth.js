@@ -162,10 +162,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       document.body.appendChild(overlay);
       document.getElementById('signupSuccessOk').addEventListener('click', () => {
         overlay.remove();
-        showView('login');
+        showView('viewLogin');
       });
       overlay.addEventListener('click', (e) => {
-        if (e.target === overlay) { overlay.remove(); showView('login'); }
+        if (e.target === overlay) { overlay.remove(); showView('viewLogin'); }
       });
       return;
     }
