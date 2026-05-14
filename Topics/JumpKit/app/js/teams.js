@@ -934,12 +934,15 @@ async function sendInvites(teamId) {
     if (errEl) errEl.textContent = `Invalid address${invalidEmails.length > 1 ? 'es' : ''}: ${invalidEmails.join(', ')}`;
     errEl?.classList.add('show'); return;
   }
-  const lowerEmails = allEmails.map(e => e.toLowerCase());
+  const lowerEmails = allEmails.map(e => e.toLowerCase().trim());
   const uniqueEmails = [...new Set(lowerEmails)];
+  console.log('[sendInvites] lowerEmails:', lowerEmails, 'unique:', uniqueEmails);
   if (uniqueEmails.length < lowerEmails.length) {
     const dups = lowerEmails.filter((e, i) => lowerEmails.indexOf(e) !== i);
-    if (errEl) errEl.textContent = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`;
-    errEl?.classList.add('show'); return;
+    const dupMsg = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`;
+    console.log('[sendInvites] dup error:', dupMsg);
+    if (errEl) { errEl.textContent = dupMsg; errEl.classList.add('show'); }
+    return;
   }
   if (uniqueEmails.length > 25) {
     if (errEl) errEl.textContent = `Maximum 25 email addresses per invite. You entered ${uniqueEmails.length}.`;
