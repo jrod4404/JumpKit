@@ -124,7 +124,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     const { data, error } = await supabaseClient.auth.signUp({
       email,
       password: pass,
-      options: { data: { first_name: firstName, last_name: lastName } }
+      options: {
+        data: { first_name: firstName, last_name: lastName },
+        emailRedirectTo: 'https://jumpkit.app/confirmed'
+      }
     });
     if (error) throw error;
 
