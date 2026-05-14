@@ -523,19 +523,12 @@ window.sendOrgInvites = async function() {
       }
     }
 
-    // Build summary
-    const summaryLines = [];
-    if (sent > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-circle-check" style="color:#22c55e;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>${sent} invitation${sent !== 1 ? 's' : ''} sent successfully</li>`);
-    if (failed > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-alert-circle" style="color:var(--danger);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>${failed} invitation${failed !== 1 ? 's' : ''} failed to send</li>`);
-    if (dupCount > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-copy-off" style="color:var(--text-dim);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-copy-off"/></svg>${dupCount} duplicate${dupCount !== 1 ? 's' : ''} removed</li>`);
-    if (invalidCount > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-mail-off" style="color:var(--text-dim);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg>${invalidCount} invalid address${invalidCount !== 1 ? 'es' : ''} skipped</li>`);
-
-    Modal.open(
-      '<svg class="ti ti-mail" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invitation Summary',
-      `<ul style="list-style:none;margin:0;padding:0;font-size:0.92rem;line-height:2">${summaryLines.join('')}</ul>`,
-      `<button class="btn btn-save" onclick="Modal.close()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`,
-      'sm'
-    );
+    Modal.close();
+    if (failed === 0) {
+      Toast.success(`${sent} invitation${sent !== 1 ? 's' : ''} sent!`);
+    } else {
+      Toast.success(`${sent} sent, ${failed} failed.`);
+    }
     selectTeam(selectedTeamId); // refresh members panel
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
@@ -914,7 +907,7 @@ async function openInviteModal(teamId) {
     <div class="form-group">
       <label class="form-label">Email Addresses *</label>
       <textarea class="form-textarea" id="inviteEmails" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
-      <span class="form-error" id="inviteEmailsErr">At least one valid email required.</span>
+      <span class="form-error" id="inviteEmailsErr"></span>
     </div>
     <input type="hidden" id="inviteTeamPassword" value="${esc(plainPw)}" />`;
 
@@ -926,21 +919,33 @@ async function openInviteModal(teamId) {
 async function sendInvites(teamId) {
   const raw = document.getElementById('inviteEmails').value.trim();
   const allEmails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean);
-  const validEmails = allEmails.filter(e => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
-  const emails = [...new Set(validEmails.map(e => e.toLowerCase()))]; // deduplicate
   const teamPassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
 
   const errEl = document.getElementById('inviteEmailsErr');
   errEl?.classList.remove('show');
 
-  if (emails.length === 0) {
-    if (errEl) errEl.textContent = 'Please enter at least one valid email address.';
-    errEl?.classList.add('show');
-    return;
+  // Validation
+  if (allEmails.length === 0) {
+    if (errEl) errEl.textContent = 'Please enter at least one email address.';
+    errEl?.classList.add('show'); return;
   }
-
-  const invalidCount = allEmails.filter(e => e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
-  const dupCount = validEmails.length - emails.length;
+  const invalidEmails = allEmails.filter(e => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+  if (invalidEmails.length > 0) {
+    if (errEl) errEl.textContent = `Invalid address${invalidEmails.length > 1 ? 'es' : ''}: ${invalidEmails.join(', ')}`;
+    errEl?.classList.add('show'); return;
+  }
+  const lowerEmails = allEmails.map(e => e.toLowerCase());
+  const uniqueEmails = [...new Set(lowerEmails)];
+  if (uniqueEmails.length < lowerEmails.length) {
+    const dups = lowerEmails.filter((e, i) => lowerEmails.indexOf(e) !== i);
+    if (errEl) errEl.textContent = `Duplicate address${dups.length > 1 ? 'es' : ''} found: ${[...new Set(dups)].join(', ')}`;
+    errEl?.classList.add('show'); return;
+  }
+  if (uniqueEmails.length > 25) {
+    if (errEl) errEl.textContent = `Maximum 25 email addresses per invite. You entered ${uniqueEmails.length}.`;
+    errEl?.classList.add('show'); return;
+  }
+  const emails = uniqueEmails;
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
