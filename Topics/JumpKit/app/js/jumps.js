@@ -578,7 +578,7 @@ function openJumpFormModal(editId) {
 
   const footer = `
     <button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-    <button class="btn btn-subtle" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
+    <button class="btn btn-save" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
   Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump', body, footer);
 
@@ -934,7 +934,7 @@ function renderColConfigModal(cols) {
 
   Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-subtle" id="btnSaveColumns" onclick="saveColumns()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
+     <button class="btn btn-save" id="btnSaveColumns" onclick="saveColumns()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
   initColDragDrop();
   
   // Wire up custom-select dropdowns for team sharing
