@@ -577,7 +577,7 @@
                 <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer and Marketing Documentation</p>
                 <p style="font-size:0.85rem;opacity:0.85;margin-top:6px;max-width:600px;line-height:1.5">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-13</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-14</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -1278,6 +1278,7 @@ org_id UUID REFERENCES organizations(id),
 name TEXT NOT NULL,
 team_password_hash TEXT NOT NULL,      -- PBKDF2 hash (100k iterations, SHA-256, salt: jumpkit-team-salt-v1)
 team_password_plain TEXT,              -- Plaintext password stored for use in invite emails (added 2026-05-13)
+                                       -- Security note: intentional — team password is a shared secret by design
 owner_id UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
 <h4 id="team_members">2.3.11 team_members</h4>
@@ -2689,6 +2690,29 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <hr>
 <h2 id="changelog">7. Changelog</h2>
+
+<h3>2026-05-14</h3>
+<ul>
+<li><strong>Secure Team Join (3-factor):</strong> Join now requires (1) correct org/team name, (2) correct PBKDF2 password, (3) user's email must have a pending invite in <code>team_invites</code>. Blocks uninvited users at the API level even if UI is bypassed.</li>
+<li><strong>Email Confirmation:</strong> Supabase email confirmation enabled. New signups must verify email before signing in. Custom SMTP via Resend (<code>noreply@jumpkit.ai</code>). Confirmation redirects to <code>jumpkit.app/confirmed</code> (new branded page). <code>emailRedirectTo</code> passed on signup. Auth error message handles "email not confirmed" case gracefully.</li>
+<li><strong>Supabase Pro upgrade:</strong> Upgraded from free to Pro tier — removes auth email rate limits, enables auto-backups.</li>
+<li><strong>Supabase SMTP:</strong> Configured custom SMTP via Resend (host: smtp.resend.com, port: 587, user: resend, from: noreply@jumpkit.ai). All Supabase auth emails (confirm, reset) now route through Resend.</li>
+<li><strong>Cancel Invitation:</strong> Added cancel button on pending invite rows. Confirmation modal shows invitee email + team name. Uses <code>btn-delete</code> style. RLS DELETE policy added: <code>invited_by = auth.uid()</code>.</li>
+<li><strong>Invite Validation:</strong> Full inline validation on both <code>sendInvites</code> and <code>sendOrgInvites</code>: invalid emails, duplicates, >25 limit, self-invite, already-member, already-pending invite. <code>maxlength=2000</code> on textarea.</li>
+<li><strong>Invite UX:</strong> After sending, only members panel refreshes (not full page). Spinner on Send Invites button while sending. Cancel invite also only refreshes members panel.</li>
+<li><strong>Teams card width:</strong> Increased from 800px to 960px. Tab toggle max-width aligned to match.</li>
+<li><strong>Confirmed page:</strong> New <code>jumpkit.app/confirmed</code> page — branded dark card, logo + tagline, checkmark icon, "Open the JumpKit desktop app" copy, subtle back link. Vercel rewrite rule added for <code>/confirmed</code> → <code>confirmed.html</code>.</li>
+<li><strong>RLS Recursion Fix (major):</strong> Resolved infinite recursion in Supabase RLS policies across <code>teams</code>, <code>team_members</code>, <code>team_invites</code>, <code>profiles</code>, <code>organizations</code>. Root cause: circular policy dependencies. Solution: <code>SECURITY DEFINER</code> functions bypass RLS for ownership checks:
+  <ul>
+    <li><code>get_my_role_safe()</code> — returns current user's role from profiles</li>
+    <li><code>get_my_org_safe()</code> — returns current user's org_id from profiles</li>
+    <li><code>is_team_or_org_owner(p_team_id)</code> — checks team/org ownership without triggering RLS</li>
+    <li><code>is_org_member_safe(p_org_id)</code> — checks org membership without direct teams join</li>
+  </ul>
+  All policies rewritten to use these functions instead of direct cross-table joins.
+</li>
+<li><strong>Delete Team:</strong> <code>doRemoveTeam</code> now also deletes <code>team_invites</code> before deleting the team (cascade cleanup). Teams page and members panel both confirmed working after delete.</li>
+</ul>
 
 <h3>2026-05-13</h3>
 <ul>
