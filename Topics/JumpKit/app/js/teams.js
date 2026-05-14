@@ -1147,15 +1147,27 @@ window.removeTeam = function(teamId, teamName) {
 window.doRemoveTeam = async function(teamId, teamName) {
   Modal.close();
   try {
-    const r1 = await supabaseClient.from('team_members').delete().eq('team_id', teamId); if (r1.error) throw new Error('Delete members failed: ' + r1.error.message);
-    const r2 = await supabaseClient.from('teams').delete().eq('id', teamId); if (r2.error) throw new Error('Delete team failed: ' + r2.error.message);
-    if (r2.error) throw r2.error;
+    console.log('[doRemoveTeam] step 1 — deleting team_members for team:', teamId);
+    const r1 = await supabaseClient.from('team_members').delete().eq('team_id', teamId);
+    console.log('[doRemoveTeam] step 1 result:', JSON.stringify(r1));
+    if (r1.error) throw new Error('Delete members failed: ' + r1.error.message);
+
+    console.log('[doRemoveTeam] step 2 — deleting team_invites for team:', teamId);
+    const r1b = await supabaseClient.from('team_invites').delete().eq('team_id', teamId);
+    console.log('[doRemoveTeam] step 2 result:', JSON.stringify(r1b));
+    if (r1b.error) console.warn('[doRemoveTeam] invite delete warning:', r1b.error.message);
+
+    console.log('[doRemoveTeam] step 3 — deleting team:', teamId);
+    const r2 = await supabaseClient.from('teams').delete().eq('id', teamId);
+    console.log('[doRemoveTeam] step 3 result:', JSON.stringify(r2));
+    if (r2.error) throw new Error('Delete team failed: ' + r2.error.message);
+
     Toast.success(`Team "${teamName}" removed`);
     const orgToRefresh = selectedOrgId;
     selectedTeamId = null;
     if (orgToRefresh) setTimeout(() => selectOrg(orgToRefresh), 300);
     updateOrgStats(-1, 0);
-  } catch(e) { Toast.danger('Error: ' + e.message); console.error('[doRemoveTeam]', e); }
+  } catch(e) { Toast.danger('Error: ' + e.message); console.error('[doRemoveTeam] CAUGHT:', e); }
 };
 
 window.confirmRemoveMember = function(memberId, memberName) {
