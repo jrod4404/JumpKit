@@ -524,8 +524,6 @@ window.sendOrgInvites = async function() {
     }
 
     // Build summary
-    const dupCount = validEmails.length - emails.length;
-    const invalidCount = allEmails.filter(e => e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
     const summaryLines = [];
     if (sent > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-circle-check" style="color:#22c55e;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>${sent} invitation${sent !== 1 ? 's' : ''} sent successfully</li>`);
     if (failed > 0) summaryLines.push(`<li style="color:var(--text-muted)"><svg class="ti ti-alert-circle" style="color:var(--danger);vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>${failed} invitation${failed !== 1 ? 's' : ''} failed to send</li>`);
@@ -943,12 +941,6 @@ async function sendInvites(teamId) {
 
   const invalidCount = allEmails.filter(e => e && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)).length;
   const dupCount = validEmails.length - emails.length;
-  if (invalidCount > 0 || dupCount > 0) {
-    const parts = [];
-    if (invalidCount > 0) parts.push(`${invalidCount} invalid email${invalidCount > 1 ? 's' : ''} skipped`);
-    if (dupCount > 0) parts.push(`${dupCount} duplicate${dupCount > 1 ? 's' : ''} removed`);
-    Toast.success(`Note: ${parts.join(', ')}.`);
-  }
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
