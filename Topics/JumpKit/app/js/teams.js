@@ -636,7 +636,7 @@ window.confirmCancelInvite = async function(inviteId) {
     if (error) throw error;
     Modal.close();
     Toast.success('Invitation cancelled.');
-    await renderTeams();
+    if (selectedTeamId) selectTeam(selectedTeamId);
   } catch (e) {
     Toast.danger('Failed to cancel invitation: ' + e.message);
   }
