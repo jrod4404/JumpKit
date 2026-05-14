@@ -947,6 +947,45 @@ async function sendInvites(teamId) {
   }
   const emails = uniqueEmails;
 
+  // Check self-invite, existing members, and pending invites
+  try {
+    const { data: { session: chkSession } } = await supabaseClient.auth.getSession();
+    const currentUserEmail = chkSession?.user?.email?.toLowerCase();
+
+    // #3 — self-invite
+    if (currentUserEmail && emails.includes(currentUserEmail)) {
+      if (errEl) errEl.textContent = 'You cannot invite yourself.';
+      errEl?.classList.add('show'); return;
+    }
+
+    // #1 — already a member (look up by email via profiles)
+    const { data: memberProfiles = [] } = await supabaseClient
+      .from('team_members')
+      .select('profiles(email)')
+      .eq('team_id', teamId);
+    const memberEmails = memberProfiles.map(m => m.profiles?.email?.toLowerCase()).filter(Boolean);
+    const alreadyMembers = emails.filter(e => memberEmails.includes(e));
+    if (alreadyMembers.length > 0) {
+      if (errEl) errEl.textContent = `Already a member: ${alreadyMembers.join(', ')}`;
+      errEl?.classList.add('show'); return;
+    }
+
+    // #2 — already has pending invite
+    const { data: pendingInvites = [] } = await supabaseClient
+      .from('team_invites')
+      .select('email')
+      .eq('team_id', teamId)
+      .eq('status', 'pending');
+    const pendingEmails = pendingInvites.map(i => i.email?.toLowerCase()).filter(Boolean);
+    const alreadyInvited = emails.filter(e => pendingEmails.includes(e));
+    if (alreadyInvited.length > 0) {
+      if (errEl) errEl.textContent = `Already has a pending invitation: ${alreadyInvited.join(', ')}`;
+      errEl?.classList.add('show'); return;
+    }
+  } catch (checkErr) {
+    console.warn('[sendInvites] pre-check failed:', checkErr.message);
+  }
+
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     const invitedBy = session?.user?.id;
