@@ -571,14 +571,16 @@ window.resendInvite = async function(inviteId, email, teamId) {
 
 window.cancelInvite = async function(inviteId) {
   try {
-    const { error } = await supabaseClient
+    const { error, count } = await supabaseClient
       .from('team_invites')
       .delete()
       .eq('id', inviteId);
     if (error) throw error;
+    console.log('[cancelInvite] deleted count:', count);
     Toast.success('Invitation cancelled.');
-    renderTeams();
+    await renderTeams();
   } catch (e) {
+    console.error('[cancelInvite] error:', e);
     Toast.danger('Failed to cancel invitation: ' + e.message);
   }
 };
