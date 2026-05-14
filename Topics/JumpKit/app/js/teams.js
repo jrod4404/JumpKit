@@ -580,7 +580,7 @@ window.cancelInvite = async function(inviteId, email, teamName) {
       Are you sure you want to cancel the invitation for <strong style="color:var(--text)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text)">${esc(teamName)}</strong> using this invite.
     </p>`,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
-     <button class="btn btn-subtle btn-cancel-invite" style="color:#ffffff;background:rgba(180,60,60,0.18);border-color:rgba(180,60,60,0.25)" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off" style="color:#ffffff"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
+     <button class="btn btn-delete" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
     'sm'
   );
 };
