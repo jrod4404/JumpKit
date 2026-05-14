@@ -577,7 +577,7 @@ window.cancelInvite = async function(inviteId, email, teamName) {
   Modal.open(
     '<svg class="ti ti-mail-off" style="color:var(--danger)"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation',
     `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6">
-      Are you sure you want to cancel the invitation for <strong style="color:var(--text)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text)">${esc(teamName)}</strong> using this invite.
+      Are you sure you want to cancel the invitation for <strong style="color:var(--text-muted)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text-muted)">${esc(teamName)}</strong> using this invite.
     </p>`,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
      <button class="btn btn-delete" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
