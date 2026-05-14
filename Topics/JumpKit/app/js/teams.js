@@ -1078,7 +1078,7 @@ async function sendInvites(teamId) {
     } else {
       Toast.success(`Sent ${sent} invite${sent !== 1 ? 's' : ''} (${failed} failed)`);
     }
-    renderTeams();
+    selectTeam(selectedTeamId); // refresh only the members panel
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
   }
