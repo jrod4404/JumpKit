@@ -88,7 +88,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (error) throw error;
     window.location.href = 'app.html';
   } catch (err) {
-    showAlert('loginAlert', err.message || 'Invalid email or password.', 'error');
+    const msg = err.message || '';
+    if (msg.toLowerCase().includes('email not confirmed')) {
+      showAlert('loginAlert', 'Please check your email and click the confirmation link before signing in.', 'error');
+    } else {
+      showAlert('loginAlert', msg || 'Invalid email or password.', 'error');
+    }
     btn.classList.remove('btn-loading'); btn.disabled = false;
   }
 });
@@ -129,6 +134,13 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     if (localUser) {
       DB.setSession(localUser.id);
       DB.seedNewUser(localUser.id);
+    }
+
+    // If email confirmation is enabled, Supabase won't auto-log in — show check-email message
+    if (!data?.session) {
+      showAlert('signupAlert', '✅ Account created! Check your email and click the confirmation link to activate your account.', 'success');
+      btn.classList.remove('btn-loading'); btn.disabled = false;
+      return;
     }
 
     window.location.href = 'app.html';
