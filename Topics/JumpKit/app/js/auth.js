@@ -139,10 +139,34 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       DB.seedNewUser(localUser.id);
     }
 
-    // If email confirmation is enabled, Supabase won't auto-log in — show check-email message
+    // If email confirmation is enabled, Supabase won't auto-log in — show success modal
     if (!data?.session) {
-      showAlert('signupAlert', '✅ Account created! Check your email and click the confirmation link to activate your account.', 'success');
       btn.classList.remove('btn-loading'); btn.disabled = false;
+      // Show modal overlay
+      const overlay = document.createElement('div');
+      overlay.id = 'signupSuccessOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:9999';
+      overlay.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px 36px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.4)">
+          <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 12px">Account Created!</h2>
+          <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0 0 28px">
+            Check your email at <strong style="color:var(--text)">${email}</strong> and click the confirmation link to activate your account.
+          </p>
+          <button id="signupSuccessOk" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:700;font-size:0.95rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;width:100%">
+            Go to Sign In
+          </button>
+        </div>`;
+      document.body.appendChild(overlay);
+      document.getElementById('signupSuccessOk').addEventListener('click', () => {
+        overlay.remove();
+        showView('login');
+      });
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) { overlay.remove(); showView('login'); }
+      });
       return;
     }
 
