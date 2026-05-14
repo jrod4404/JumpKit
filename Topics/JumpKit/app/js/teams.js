@@ -374,8 +374,8 @@ window.selectTeam = async function(teamId) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending" style="font-size:0.65rem;padding:1px 7px">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(teamName)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(teamName)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}` : '';
 
@@ -684,8 +684,8 @@ async function renderTeamOwnerView(content, supaUser, profile) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px;color:var(--danger)" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}
       </div>` : ''}
