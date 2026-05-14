@@ -391,9 +391,9 @@ window.selectTeam = async function(teamId) {
         const role = m.profiles?.role || 'team-member';
         const roleLabel = role === 'org-owner' ? 'Org Owner' : role === 'team-owner' ? 'Team Owner' : 'Member';
         const pillStyle = role === 'org-owner'
-          ? 'background:rgba(250,204,21,0.12);color:#fbbf24;border:1px solid rgba(250,204,21,0.25)'   // gold
-          : role === 'team-owner'
           ? 'background:rgba(99,179,237,0.12);color:#7aa8f7;border:1px solid rgba(99,179,237,0.25)'   // blue
+          : role === 'team-owner'
+          ? 'background:rgba(250,204,21,0.12);color:#fbbf24;border:1px solid rgba(250,204,21,0.25)'   // gold
           : 'background:rgba(160,174,192,0.10);color:#8a9bb0;border:1px solid rgba(160,174,192,0.2)'; // grey
         return `
           <div class="acct-row">
