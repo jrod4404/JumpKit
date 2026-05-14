@@ -315,8 +315,7 @@ window.selectOrg = async function(orgId) {
         const mCount = memberCounts[t.id] || 0;
         const iCount = inviteCounts[t.id] || 0;
         const created = t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '—';
-        const inviteColor = iCount > 0 ? '#e6a817' : 'var(--text-dim)';
-        const inviteHint = ` · <span style="color:${inviteColor}">${iCount} pending invite${iCount !== 1 ? 's' : ''}</span>`;
+        const inviteHint = ` · ${iCount} pending invite${iCount !== 1 ? 's' : ''}`;
         return `
         <div class="acct-row teams-selectable-row" id="teamRow_${t.id}" onclick="selectTeam('${t.id}')">
           <div class="acct-row-label">
