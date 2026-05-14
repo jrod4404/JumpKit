@@ -445,6 +445,13 @@ ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
 ipcMain.handle('seed-new-user', (_e, userId, platform) => {
   if (!db) return { ok: false };
   try {
+    // Guard: never seed if personal columns already exist for this user
+    const existingCols = db.prepare('SELECT COUNT(*) as cnt FROM columns WHERE userId = ? AND isShared = 0').get(userId);
+    if (existingCols && existingCols.cnt > 0) {
+      log(`[seedNewUser] Skipping — user ${userId} already has ${existingCols.cnt} columns`);
+      return { ok: true, skipped: true };
+    }
+
     const now = Date.now();
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
 
