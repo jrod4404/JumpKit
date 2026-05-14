@@ -476,7 +476,7 @@ window.openInviteMembersModal = function() {
     </p>
     <div class="form-group">
       <label class="form-label">Email Addresses *</label>
-      <textarea class="form-textarea" id="orgInviteEmails"
+      <textarea class="form-textarea" id="orgInviteEmails" maxlength="2000"
         placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
       <span class="form-error" id="orgInviteEmailsErr">At least one valid email required.</span>
     </div>`;
@@ -944,7 +944,7 @@ async function openInviteModal(teamId) {
     </p>
     <div class="form-group">
       <label class="form-label">Email Addresses *</label>
-      <textarea class="form-textarea" id="inviteEmails" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
+      <textarea class="form-textarea" id="inviteEmails" maxlength="2000" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
       <span class="form-error" id="inviteEmailsErr"></span>
     </div>
     <input type="hidden" id="inviteTeamPassword" value="${esc(plainPw)}" />`;
