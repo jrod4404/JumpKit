@@ -380,19 +380,27 @@ window.selectTeam = async function(teamId) {
             </div>
           </div>`).join('')}` : '';
 
+      // Sort: org-owner first, then team-owner, then members
+      const roleOrder = { 'org-owner': 0, 'team-owner': 1, 'team-member': 2 };
+      members.sort((a, b) => (roleOrder[a.profiles?.role] ?? 2) - (roleOrder[b.profiles?.role] ?? 2));
+
       membersPanel.innerHTML = members.map(m => {
         const name = [m.profiles?.first_name, m.profiles?.last_name].filter(Boolean).join(' ');
         const email = m.profiles?.email || m.user_id;
         const joined = m.joined_at ? new Date(m.joined_at).toLocaleDateString() : '—';
         const role = m.profiles?.role || 'team-member';
-        const roleBadgeClass = role === 'org-owner' ? 'teams-badge teams-badge-owner' : role === 'team-owner' ? 'teams-badge teams-badge-owner' : 'teams-badge';
         const roleLabel = role === 'org-owner' ? 'Org Owner' : role === 'team-owner' ? 'Team Owner' : 'Member';
+        const pillStyle = role === 'org-owner'
+          ? 'background:rgba(250,204,21,0.12);color:#fbbf24;border:1px solid rgba(250,204,21,0.25)'   // gold
+          : role === 'team-owner'
+          ? 'background:rgba(99,179,237,0.12);color:#7aa8f7;border:1px solid rgba(99,179,237,0.25)'   // blue
+          : 'background:rgba(160,174,192,0.10);color:#8a9bb0;border:1px solid rgba(160,174,192,0.2)'; // grey
         return `
           <div class="acct-row">
             <div class="acct-row-label">
               <span style="display:flex;align-items:center;gap:6px">
                 <span style="color:var(--text-muted)">${name ? esc(name) : esc(email)}</span>
-                <span class="teams-badge teams-badge-owner" style="padding:1px 7px;font-size:0.65rem;color:#7aa8f7">${roleLabel}</span>
+                <span style="padding:1px 7px;font-size:0.65rem;border-radius:4px;${pillStyle}">${roleLabel}</span>
               </span>
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
