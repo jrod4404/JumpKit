@@ -573,7 +573,7 @@ window.cancelInvite = async function(inviteId) {
   try {
     const { error } = await supabaseClient
       .from('team_invites')
-      .update({ status: 'cancelled' })
+      .delete()
       .eq('id', inviteId);
     if (error) throw error;
     Toast.success('Invitation cancelled.');
