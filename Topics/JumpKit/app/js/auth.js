@@ -29,6 +29,13 @@ function showView(id) {
   document.querySelectorAll('.auth-tab').forEach(tab => {
     tab.classList.toggle('active', tab.dataset.view === id);
   });
+  // Reset forgot form on entry
+  if (id === 'viewForgot') {
+    const emailEl = document.getElementById('forgotEmail');
+    const alertEl = document.getElementById('forgotAlert');
+    if (emailEl) emailEl.value = '';
+    if (alertEl) { alertEl.className = 'auth-alert'; alertEl.textContent = ''; }
+  }
 }
 
 // Tab click
