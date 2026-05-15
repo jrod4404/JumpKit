@@ -185,7 +185,9 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   if (!isValidEmail(email)) { showError('forgotEmail', 'forgotEmailErr'); return; }
 
   try {
-    await supabaseClient.auth.resetPasswordForEmail(email);
+    await supabaseClient.auth.resetPasswordForEmail(email, {
+      redirectTo: 'https://jumpkit.app/reset-password'
+    });
   } catch (_) {
     // Silently swallow — don't reveal if email exists
   }
