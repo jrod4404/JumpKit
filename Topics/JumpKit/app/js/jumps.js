@@ -540,7 +540,7 @@ function openJumpFormModal(editId) {
     <div class="form-group">
       <label class="form-label">Hotkey</label>
       <div style="display:flex;gap:8px;align-items:center;position:relative">
-        <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer;flex:1"/>
+        <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Tab or click here, then press combo…" autocomplete="off" style="cursor:pointer;flex:1"/>
         <button type="button" id="btnPickHotkey" style="white-space:nowrap;font-size:0.93rem;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text);cursor:pointer;transition:border-color var(--transition)" title="Show available hotkeys">
           <svg class="ti ti-keyboard" style="width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Pick
         </button>
@@ -623,16 +623,17 @@ function openJumpFormModal(editId) {
   // Hotkey recorder — captures combo on keydown, clears on Backspace/Delete
   const hotkeyInput = document.getElementById('jHotkey');
   if (hotkeyInput) {
-    hotkeyInput.addEventListener('click', () => {
+    function activateHotkeyRecorder() {
       hotkeyInput.dataset.recording = '1';
       hotkeyInput.style.borderColor = 'var(--hover-accent)';
       hotkeyInput.placeholder = 'Press your key combo…';
-      hotkeyInput.focus();
-    });
+    }
+    hotkeyInput.addEventListener('click', activateHotkeyRecorder);
+    hotkeyInput.addEventListener('focus', activateHotkeyRecorder);
     hotkeyInput.addEventListener('blur', () => {
       delete hotkeyInput.dataset.recording;
       hotkeyInput.style.borderColor = '';
-      hotkeyInput.placeholder = 'Click here then press combo…';
+      hotkeyInput.placeholder = 'Tab or click here, then press combo…';
     });
     hotkeyInput.addEventListener('keydown', e => {
       if (!hotkeyInput.dataset.recording) return;
