@@ -68,9 +68,7 @@ function renderOnboardingStep(step, firstName) {
     content.innerHTML = `
       <div style="text-align:center">
         <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
-            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-          </svg>
+          <img src="img/logo-dark-mode.png" style="width:32px;height:32px;object-fit:contain" alt="JumpKit" />
         </div>
         <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">Welcome to JumpKit! 🎉</h2>
         <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
@@ -109,11 +107,8 @@ function renderOnboardingStep(step, firstName) {
             <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 1 of 2</p>
           </div>
         </div>
-        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 6px">
-          Columns are the categories you use to organize your jumps. Name them to match how you work — e.g. <em>Projects</em>, <em>Tools</em>, <em>Clients</em>.
-        </p>
-        <p style="color:var(--text-muted);font-size:0.82rem;line-height:1.5;margin:0 0 16px;opacity:0.75">
-          Use the <strong style="color:var(--text)">Visible</strong> checkbox to show or hide each column in your jumps view.
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 16px">
+          Columns are the categories you use to organize your jumps. Name them to match how you work — e.g. <em>Projects</em>, <em>Tools</em>, <em>Clients</em>. Use the <strong style="color:var(--text)">Visible</strong> checkbox to show or hide each column in your jumps view.
         </p>
         <div id="obColRows" style="max-height:260px;overflow-y:auto;padding-right:4px">${rows}</div>
         <div style="display:flex;gap:10px;margin-top:20px">
@@ -121,7 +116,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obNext2" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:4px"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:4px;color:#fff"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -153,9 +148,7 @@ function renderOnboardingStep(step, firstName) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:40px;height:40px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px">
-              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
-            </svg>
+            <img src="img/logo-dark-mode.png" style="width:20px;height:20px;object-fit:contain" alt="JumpKit" />
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Add Your First Jump</h2>
@@ -194,7 +187,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinish" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            <svg class="ti ti-check" style="vertical-align:middle;margin-right:4px"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish Setup
+            <svg class="ti ti-check" style="vertical-align:middle;margin-right:4px;color:#fff"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish Setup
           </button>
         </div>
       </div>`;
