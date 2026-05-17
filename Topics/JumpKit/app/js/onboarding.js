@@ -252,7 +252,7 @@ function renderOnboardingStep(step, firstName) {
 
       // Show spinner
       btn.disabled = true;
-      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="width:20px;height:20px;vertical-align:middle;animation:ob-spin 0.7s linear infinite"><circle cx="12" cy="12" r="9" stroke-opacity="0.3"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>`;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="width:20px;height:20px;vertical-align:middle;animation:ob-spin 1.4s linear infinite"><circle cx="12" cy="12" r="9" stroke-opacity="0.3"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>`;
 
       // Inject spin animation once
       if (!document.getElementById('ob-spin-style')) {

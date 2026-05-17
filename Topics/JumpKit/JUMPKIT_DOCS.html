@@ -577,7 +577,7 @@
                 <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer and Marketing Documentation</p>
                 <p style="font-size:0.85rem;opacity:0.85;margin-top:6px;max-width:600px;line-height:1.5">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-15</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-17</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -2763,7 +2763,55 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <p>Happy building! 🚀</p>
 
 <hr>
-<h2 id="changelog">8. Changelog</h2>
+<h2 id="onboarding">9. User Onboarding</h2>
+
+<h3>Overview</h3>
+<p>New users are guided through a 3-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
+
+<h3>Trigger Logic</h3>
+<ul>
+<li>Checked in <code>initApp()</code> in <code>app.js</code> after the Supabase profile is fetched</li>
+<li>If <code>!data.onboarding_completed</code> → calls <code>checkAndShowOnboarding()</code> after 600ms delay</li>
+<li><code>checkAndShowOnboarding()</code> re-verifies the flag via Supabase before showing (safety check)</li>
+<li>Completion sets <code>profiles.onboarding_completed = true</code> via <code>markOnboardingComplete()</code></li>
+</ul>
+
+<h3>Step Flow</h3>
+<ol>
+<li><strong>Welcome to JumpKit</strong> — Greeting screen with JumpKit jumping man icon (turquoise SVG), welcome message, "Let's Go" button. No step label shown.</li>
+<li><strong>Configure Your Columns (Step 1 of 2)</strong> — Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
+<li><strong>Add Your First Jump (Step 2 of 2)</strong> — Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
+<li><strong>Setup Complete</strong> — Success screen with checkmark icon and "Go to Your Jumps Page" button that calls <code>navigateTo('jumps')</code> and closes the overlay.</li>
+</ol>
+
+<h3>Progress Indicator</h3>
+<p>A gradient progress bar at the top of the modal fills as the user advances: 33% → 67% → 100% (completion screen).</p>
+
+<h3>Key Implementation Details</h3>
+<ul>
+<li>File: <code>app/js/onboarding.js</code> — fully self-contained</li>
+<li>Loaded via <code>&lt;script src="js/onboarding.js"&gt;</code> in <code>app.html</code></li>
+<li>Column dropdown uses <code>position:fixed</code> with <code>min-width:0</code> override to escape modal <code>overflow:hidden</code></li>
+<li>Spinner: CSS <code>@keyframes ob-spin</code> injected once into <code>&lt;head&gt;</code> at runtime (1.4s rotation)</li>
+<li>No localStorage used — all state tracked server-side via Supabase <code>profiles</code> table</li>
+<li>Styling uses existing CSS variables (<code>var(--bg-card)</code>, <code>var(--text)</code>, etc.) so it works in both light and dark mode</li>
+</ul>
+
+<h2 id="changelog">10. Changelog</h2>
+
+<h3>2026-05-17</h3>
+<ul>
+<li><strong>Email templates — Welcome to JumpKit:</strong> New <code>send-welcome</code> Supabase Edge Function deployed. Fires on first sign-in only (guarded by <code>profiles.welcome_email_sent boolean</code> column). Uses <code>await fetch()</code> before redirect to prevent page-unload killing the request. Branded dark card, 3-step getting started section, macOS/Windows download buttons removed (user already has the app).</li>
+<li><strong>Email templates — Welcome to JumpKit Core:</strong> New <code>send-welcome-core</code> Edge Function. Triggered from <code>ls-webhook</code> on <code>subscription_created</code> event for paid tier. Branded dark card with turquoise "What's included" feature list.</li>
+<li><strong>Email templates — Subscription Cancelled:</strong> New <code>send-cancellation</code> Edge Function. Triggered from <code>ls-webhook</code> on <code>subscription_cancelled</code> / <code>subscription_expired</code>. Shows what user still has (free tier) vs what they lost. Reactivate Core CTA button.</li>
+<li><strong>Email icon — icon-jumpkit-white.png:</strong> Generated white version of JumpKit icon via Pillow. Deployed to <code>https://jumpkit.app/email-icons/icon-jumpkit-white.png</code>. Used in CTA buttons for welcome, core, and cancellation emails.</li>
+<li><strong>Email header consistency:</strong> All email templates (invite, confirm, reset, welcome, core, cancellation) now use matching header: <code>display:block;margin:0 auto 12px</code> on logo, <code>font-size:14px;color:#C8D6E8;opacity:0.9</code> on tagline.</li>
+<li><strong>Supabase confirm + reset email templates updated:</strong> Both re-pasted into Supabase Auth dashboard with corrected logo styles.</li>
+<li><strong>profiles table — new columns:</strong> <code>welcome_email_sent boolean DEFAULT false</code>, <code>onboarding_completed boolean DEFAULT false</code>. Added via Supabase SQL Editor.</li>
+<li><strong>3-step onboarding modal:</strong> Shown to new users on first app load after email confirmation. Tracked server-side via <code>profiles.onboarding_completed</code>. See Section 9 for full details.</li>
+<li><strong>Git: node_modules removed from tracking:</strong> Added <code>.gitignore</code> with <code>node_modules/</code>. Ran <code>git rm -r --cached</code> to untrack. Repo now pushes cleanly without large Electron binary errors.</li>
+<li><strong>Backups:</strong> <code>app_backup_2026-05-17</code> (morning), <code>app_backup_2026-05-17b</code> (afternoon).</li>
+</ul>
 
 <h3>2026-05-15</h3>
 <ul>
