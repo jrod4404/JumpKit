@@ -3,3 +3,9 @@ node_modules/
 .DS_Store
 dist/
 out/
+*.dmg
+*.exe
+*.zip
+*.AppImage
+*.deb
+*.rpm
