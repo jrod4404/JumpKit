@@ -75,7 +75,7 @@ function renderOnboardingStep(step, firstName) {
           Let's get you set up in under a minute. We'll walk you through two quick steps so JumpKit is ready to use right away.
         </p>
         <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
-          Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:4px;color:#fff"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
         </button>
       </div>`;
     document.getElementById('obNext1').addEventListener('click', () => renderOnboardingStep(2, firstName));
@@ -116,7 +116,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obNext2" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:4px;color:#fff"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -204,12 +204,16 @@ function renderOnboardingStep(step, firstName) {
       obMenu.style.zIndex   = '99999';
 
       function positionObMenu() {
-        const rect = obTrigger.getBoundingClientRect();
-        const selectRect = obSelect.getBoundingClientRect();
-        obMenu.style.left  = selectRect.left + 'px';
-        obMenu.style.top   = (rect.bottom + 4) + 'px';
-        obMenu.style.width = selectRect.width + 'px';
-        obMenu.style.maxWidth = selectRect.width + 'px';
+        const trigRect  = obTrigger.getBoundingClientRect();
+        const cardEl    = document.getElementById('onboardingCard');
+        const cardRect  = cardEl ? cardEl.getBoundingClientRect() : trigRect;
+        // Clamp left/width inside card bounds
+        const left  = trigRect.left;
+        const width = Math.min(trigRect.width, cardRect.right - left - 2);
+        obMenu.style.left     = left + 'px';
+        obMenu.style.top      = (trigRect.bottom + 4) + 'px';
+        obMenu.style.width    = width + 'px';
+        obMenu.style.maxWidth = width + 'px';
       }
 
       obTrigger.addEventListener('click', (e) => {
