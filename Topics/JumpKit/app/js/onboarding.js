@@ -250,7 +250,7 @@ function renderOnboardingStep(step, firstName) {
       if (!url)  { errEl.textContent = 'Please enter a URL or path.'; errEl.style.display = 'block'; return; }
 
       // Save the jump
-      DB.addJump(currentUser.id, { name, url, columnId: colId, favorite: false, hotkey: '', notes: '' });
+      DB.createJump(currentUser.id, { name, url, columnId: colId, favorite: false, hotkey: '', notes: '' });
 
       // Mark onboarding complete server-side
       await markOnboardingComplete();
