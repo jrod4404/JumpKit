@@ -68,7 +68,7 @@ function renderOnboardingStep(step, firstName) {
     content.innerHTML = `
       <div style="text-align:center">
         <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
-          <img src="img/logo-sm.png" style="width:32px;height:32px;object-fit:contain" alt="JumpKit" />
+          <img src="../assets/jump-icon.png" style="width:32px;height:32px;object-fit:contain" alt="JumpKit" />
         </div>
         <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">Welcome to JumpKit! 🎉</h2>
         <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
@@ -148,7 +148,7 @@ function renderOnboardingStep(step, firstName) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:40px;height:40px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <img src="img/logo-sm.png" style="width:20px;height:20px;object-fit:contain" alt="JumpKit" />
+            <img src="../assets/jump-icon.png" style="width:20px;height:20px;object-fit:contain" alt="JumpKit" />
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Add Your First Jump</h2>
