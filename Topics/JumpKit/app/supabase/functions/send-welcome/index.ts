@@ -37,16 +37,16 @@ serve(async (req) => {
   if (isRateLimited(ip)) return new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429, headers });
 
   try {
-    const { email, firstName } = await req.json();
+    const { email, firstName, userId } = await req.json();
     if (!email) return new Response(JSON.stringify({ error: 'email required' }), { status: 400, headers });
 
     // Check + set welcome_email_sent flag via service role (bypasses RLS)
-    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    if (userId && SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
       const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
       const { data: profile } = await supabase
         .from('profiles')
         .select('welcome_email_sent')
-        .eq('email', email)
+        .eq('id', userId)
         .single();
 
       if (profile?.welcome_email_sent) {
@@ -58,7 +58,7 @@ serve(async (req) => {
       await supabase
         .from('profiles')
         .update({ welcome_email_sent: true })
-        .eq('email', email);
+        .eq('id', userId);
     }
 
     if (!RESEND_API_KEY) {

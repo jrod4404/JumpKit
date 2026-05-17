@@ -95,11 +95,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     if (error) throw error;
 
     // Send welcome email — Edge Function handles the "only once" check server-side
+    const userId = data?.user?.id || '';
     const firstName = data?.user?.user_metadata?.first_name || '';
     fetch('https://iuexwdjnqfidcwvwbgwr.supabase.co/functions/v1/send-welcome', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0' },
-      body: JSON.stringify({ email, firstName })
+      body: JSON.stringify({ email, firstName, userId })
     }).catch(() => {});
 
     window.location.href = 'app.html';
