@@ -103,6 +103,11 @@ async function initApp() {
         if (data.subscription_status === 'overdue' || data.subscription_status === 'cancelled') {
           setTimeout(() => showPaywall(), 1200);
         }
+
+        // Show onboarding for first-time users
+        if (!data.onboarding_completed) {
+          setTimeout(() => checkAndShowOnboarding(), 600);
+        }
       }
     } catch (_) {}
   }
