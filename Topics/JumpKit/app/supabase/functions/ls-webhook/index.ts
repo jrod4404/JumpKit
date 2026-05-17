@@ -72,6 +72,38 @@ serve(async (req) => {
       return new Response('DB error', { status: 500 });
     }
 
+    // Look up first name for personalized emails
+    let firstName = 'there';
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('first_name')
+        .eq('email', customerEmail)
+        .single();
+      if (profile?.first_name) firstName = profile.first_name;
+    } catch (_) {}
+
+    const SUPABASE_URL_VAL = Deno.env.get('SUPABASE_URL') || '';
+    const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || '';
+    const emailHeaders = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${ANON_KEY}` };
+
+    // Send transactional email based on event
+    if (eventName === 'subscription_created' && subStatus === 'active' && tier !== 'free') {
+      // Welcome to Core
+      fetch(`${SUPABASE_URL_VAL}/functions/v1/send-welcome-core`, {
+        method: 'POST',
+        headers: emailHeaders,
+        body: JSON.stringify({ email: customerEmail, firstName }),
+      }).catch(e => console.error('send-welcome-core error:', e));
+    } else if (eventName === 'subscription_cancelled' || eventName === 'subscription_expired') {
+      // Cancellation notice
+      fetch(`${SUPABASE_URL_VAL}/functions/v1/send-cancellation`, {
+        method: 'POST',
+        headers: emailHeaders,
+        body: JSON.stringify({ email: customerEmail, firstName }),
+      }).catch(e => console.error('send-cancellation error:', e));
+    }
+
     return new Response('OK', { status: 200 });
   } catch (err) {
     console.error('Webhook error:', err);
