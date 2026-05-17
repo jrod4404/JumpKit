@@ -68,7 +68,7 @@ function renderOnboardingStep(step, firstName) {
     content.innerHTML = `
       <div style="text-align:center">
         <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
-          <img src="img/logo-dark-mode.png" style="width:32px;height:32px;object-fit:contain" alt="JumpKit" />
+          <img src="img/logo-sm.png" style="width:32px;height:32px;object-fit:contain" alt="JumpKit" />
         </div>
         <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">Welcome to JumpKit! 🎉</h2>
         <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
@@ -148,7 +148,7 @@ function renderOnboardingStep(step, firstName) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:40px;height:40px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <img src="img/logo-dark-mode.png" style="width:20px;height:20px;object-fit:contain" alt="JumpKit" />
+            <img src="img/logo-sm.png" style="width:20px;height:20px;object-fit:contain" alt="JumpKit" />
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Add Your First Jump</h2>
@@ -194,26 +194,42 @@ function renderOnboardingStep(step, firstName) {
 
     document.getElementById('obBack3').addEventListener('click', () => renderOnboardingStep(2, firstName));
 
-    // Wire custom column select
+    // Wire custom column select — use fixed positioning so menu escapes modal overflow
     const obTrigger = document.getElementById('obColTrigger');
     const obMenu    = document.getElementById('obColMenu');
     const obSelect  = document.getElementById('obColSelect');
     if (obTrigger && obMenu) {
+      // Override menu to fixed position so it overlays the modal
+      obMenu.style.position = 'fixed';
+      obMenu.style.zIndex   = '99999';
+
+      function positionObMenu() {
+        const rect = obTrigger.getBoundingClientRect();
+        obMenu.style.left  = rect.left + 'px';
+        obMenu.style.top   = (rect.bottom + 4) + 'px';
+        obMenu.style.width = rect.width + 'px';
+      }
+
       obTrigger.addEventListener('click', (e) => {
         e.stopPropagation();
-        obMenu.classList.toggle('open');
-        obSelect.classList.toggle('open');
+        const isOpen = obMenu.classList.contains('open');
+        obMenu.classList.toggle('open', !isOpen);
+        obSelect.classList.toggle('open', !isOpen);
+        if (!isOpen) positionObMenu();
       });
+
       obMenu.querySelectorAll('.custom-select-option').forEach(opt => {
-        opt.addEventListener('click', () => {
+        opt.addEventListener('click', (e) => {
+          e.stopPropagation();
           document.getElementById('obJumpCol').value = opt.dataset.value;
           document.getElementById('obColLabel').textContent = opt.textContent;
           obMenu.classList.remove('open');
           obSelect.classList.remove('open');
         });
       });
+
       document.addEventListener('click', function closeObDrop(e) {
-        if (!obSelect.contains(e.target)) {
+        if (!obSelect.contains(e.target) && !obMenu.contains(e.target)) {
           obMenu.classList.remove('open');
           obSelect.classList.remove('open');
           document.removeEventListener('click', closeObDrop);
