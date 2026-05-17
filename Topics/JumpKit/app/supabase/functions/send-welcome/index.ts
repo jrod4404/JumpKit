@@ -139,19 +139,7 @@ function buildWelcomeHTML({ firstName }: { firstName: string }): string {
         </table>
       </div>
 
-      <!-- Download buttons -->
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px"><tr>
-        <td width="50%" style="padding-right:8px">
-          <a href="https://jumpkit.app" style="display:block;padding:12px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:13px;font-weight:600">
-            <img src="https://jumpkit.app/email-icons/icon-apple.png" width="18" height="18" style="vertical-align:middle;margin-right:6px" alt="" /> macOS
-          </a>
-        </td>
-        <td width="50%" style="padding-left:8px">
-          <a href="https://jumpkit.app" style="display:block;padding:12px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:13px;font-weight:600">
-            <img src="https://jumpkit.app/email-icons/icon-windows.png" width="18" height="18" style="vertical-align:middle;margin-right:6px" alt="" /> Windows
-          </a>
-        </td>
-      </tr></table>
+
     </td></tr>
 
     <!-- FOOTER -->
