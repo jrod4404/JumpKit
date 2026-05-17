@@ -111,7 +111,7 @@ function buildWelcomeHTML({ firstName }: { firstName: string }): string {
     <tr><td style="padding:36px 40px">
       <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">Welcome to JumpKit, ${esc(firstName)}! 🎉</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
-        Your account is confirmed and ready to go. JumpKit keeps your most-used links, folders, and web addresses one click away — so you spend less time searching and more time getting things done.
+        Your account is ready to go. JumpKit keeps your most-used links, folders, and web addresses one click away — so you spend less time searching and more time getting things done.
       </p>
 
       <!-- CTA Button -->
