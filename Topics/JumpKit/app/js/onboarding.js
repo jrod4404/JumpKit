@@ -187,7 +187,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinish" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            <svg class="ti ti-check" style="vertical-align:middle;margin-right:4px;color:#fff"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish Setup
+            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish Setup
           </button>
         </div>
       </div>`;
@@ -205,9 +205,11 @@ function renderOnboardingStep(step, firstName) {
 
       function positionObMenu() {
         const rect = obTrigger.getBoundingClientRect();
-        obMenu.style.left  = rect.left + 'px';
+        const selectRect = obSelect.getBoundingClientRect();
+        obMenu.style.left  = selectRect.left + 'px';
         obMenu.style.top   = (rect.bottom + 4) + 'px';
-        obMenu.style.width = rect.width + 'px';
+        obMenu.style.width = selectRect.width + 'px';
+        obMenu.style.maxWidth = selectRect.width + 'px';
       }
 
       obTrigger.addEventListener('click', (e) => {
