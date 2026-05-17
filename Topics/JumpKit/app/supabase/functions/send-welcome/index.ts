@@ -7,8 +7,11 @@
 // ============================================================
 
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 const CORS_ORIGIN = 'https://jumpkit.app';
 
 const rateLimitMap = new Map();
@@ -36,6 +39,27 @@ serve(async (req) => {
   try {
     const { email, firstName } = await req.json();
     if (!email) return new Response(JSON.stringify({ error: 'email required' }), { status: 400, headers });
+
+    // Check + set welcome_email_sent flag via service role (bypasses RLS)
+    if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('welcome_email_sent')
+        .eq('email', email)
+        .single();
+
+      if (profile?.welcome_email_sent) {
+        // Already sent — skip silently
+        return new Response(JSON.stringify({ ok: true, skipped: true }), { headers });
+      }
+
+      // Mark as sent before sending (prevent race conditions)
+      await supabase
+        .from('profiles')
+        .update({ welcome_email_sent: true })
+        .eq('email', email);
+    }
 
     if (!RESEND_API_KEY) {
       console.warn('RESEND_API_KEY not set — skipping email send');
