@@ -244,10 +244,23 @@ function renderOnboardingStep(step, firstName) {
       const url     = document.getElementById('obJumpUrl').value.trim();
       const colId   = document.getElementById('obJumpCol').value;
       const errEl   = document.getElementById('obJumpErr');
+      const btn     = document.getElementById('obFinish');
       errEl.style.display = 'none';
 
       if (!name) { errEl.textContent = 'Please enter a name.'; errEl.style.display = 'block'; return; }
       if (!url)  { errEl.textContent = 'Please enter a URL or path.'; errEl.style.display = 'block'; return; }
+
+      // Show spinner
+      btn.disabled = true;
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" style="width:20px;height:20px;vertical-align:middle;animation:ob-spin 0.7s linear infinite"><circle cx="12" cy="12" r="9" stroke-opacity="0.3"/><path d="M12 3a9 9 0 0 1 9 9"/></svg>`;
+
+      // Inject spin animation once
+      if (!document.getElementById('ob-spin-style')) {
+        const s = document.createElement('style');
+        s.id = 'ob-spin-style';
+        s.textContent = '@keyframes ob-spin { to { transform: rotate(360deg); } }';
+        document.head.appendChild(s);
+      }
 
       // Save the jump
       DB.createJump(currentUser.id, { name, url, columnId: colId, favorite: false, hotkey: '', notes: '' });
@@ -255,12 +268,38 @@ function renderOnboardingStep(step, firstName) {
       // Mark onboarding complete server-side
       await markOnboardingComplete();
 
-      // Close overlay, refresh jumps view
-      const overlay = document.getElementById('onboardingOverlay');
-      if (overlay) overlay.remove();
-      if (typeof renderColumns === 'function') renderColumns();
+      // Show complete step
+      renderOnboardingComplete();
     });
   }
+}
+
+function renderOnboardingComplete() {
+  setOnboardingProgress(3); // fill bar to 100%
+  const content = document.getElementById('onboardingContent');
+  if (!content) return;
+  content.innerHTML = `
+    <div style="text-align:center">
+      <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+      <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">You're all set! 🎉</h2>
+      <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
+        Your columns are configured and your first jump is saved. Time to start jumping!
+      </p>
+      <button id="obGoToJumps" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
+        Go to Your Jumps Page <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+      </button>
+    </div>`;
+
+  document.getElementById('obGoToJumps').addEventListener('click', () => {
+    const overlay = document.getElementById('onboardingOverlay');
+    if (overlay) overlay.remove();
+    if (typeof navigateTo === 'function') { navigateTo('jumps'); }
+    else if (typeof renderColumns === 'function') { renderColumns(); }
+  });
 }
 
 function escHtml(s) {
