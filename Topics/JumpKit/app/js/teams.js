@@ -467,6 +467,20 @@ window.saveAddTeam = async function() {
   if (!ok) return;
 
   try {
+    // Free tier: max 1 team
+    const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+    if (tier === 'free') {
+      const { data: existingTeams } = await supabaseClient
+        .from('teams')
+        .select('id')
+        .eq('org_id', selectedOrgId);
+      if (existingTeams && existingTeams.length >= 1) {
+        Toast.danger('Free tier is limited to 1 team. Upgrade to Core for unlimited teams.');
+        Modal.close();
+        return;
+      }
+    }
+
     const hashedPassword = await hashPassword(password);
     const ownerId = _orgOwnerSupaUser?.id;
     const { data: team, error } = await supabaseClient

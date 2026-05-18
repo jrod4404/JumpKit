@@ -771,6 +771,17 @@ function saveJump(editId) {
         if (newJump) {
           const col = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
           if (col?.isShared && col?.teamId && col?.supabaseId) {
+            // Free tier: check 10 shared jump limit before inserting
+            const _tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+            if (_tier === 'free') {
+              const sharedJumps = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === col.teamId && j.isShared);
+              if (sharedJumps.length > 10) {
+                Toast.warning('Free tier allows up to 10 shared jumps per team. Upgrade to Core for unlimited.');
+                renderColumns();
+                Modal.close();
+                return;
+              }
+            }
             const supabaseId = crypto.randomUUID();
             DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: col.teamId });
             supabaseClient.from('shared_jumps').insert({
@@ -1124,7 +1135,14 @@ async function syncColumnToSupabase(col) {
 
     // Upsert all jumps in this column — use session UUID directly to avoid stale currentUser
     const localUserId = session.user.id;
-    const jumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id);
+    let jumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id);
+
+    // Free tier: max 10 shared jumps per team across all shared columns
+    const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+    if (tier === 'free' && jumps.length > 10) {
+      Toast.warning(`Free tier allows up to 10 shared jumps per team. Only the first 10 will be shared. Upgrade to Core for unlimited.`);
+      jumps = jumps.slice(0, 10);
+    }
     for (const j of jumps) {
       // Generate a stable UUID for Supabase if not already set
       if (!j.supabaseId) {
