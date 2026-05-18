@@ -776,9 +776,12 @@ function saveJump(editId) {
             if (_tier === 'free') {
               const sharedJumps = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === col.teamId && j.isShared);
               if (sharedJumps.length > 10) {
-                Toast.warning('Free tier allows up to 10 shared jumps per team. Upgrade to Core for unlimited.');
-                renderColumns();
                 Modal.close();
+                showUpgradeModal(
+                  'Shared Jump Limit Reached',
+                  'The free tier allows up to <strong>10 shared jumps per team</strong>. Upgrade to JumpKit Core for unlimited shared jumps, unlimited teams, and unlimited launches.'
+                );
+                renderColumns();
                 return;
               }
             }
@@ -1140,7 +1143,10 @@ async function syncColumnToSupabase(col) {
     // Free tier: max 10 shared jumps per team across all shared columns
     const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
     if (tier === 'free' && jumps.length > 10) {
-      Toast.warning(`Free tier allows up to 10 shared jumps per team. Only the first 10 will be shared. Upgrade to Core for unlimited.`);
+      showUpgradeModal(
+        'Shared Jump Limit Reached',
+        'The free tier allows up to <strong>10 shared jumps per team</strong>. Only the first 10 will be synced. Upgrade to JumpKit Core for unlimited shared jumps.'
+      );
       jumps = jumps.slice(0, 10);
     }
     for (const j of jumps) {

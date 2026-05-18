@@ -1323,6 +1323,20 @@ function patchModalForPwToggles() {
 }
 
 // ── Paywall ───────────────────────────────────────────────────────
+const LS_CHECKOUT_URL = 'https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb';
+
+window.showUpgradeModal = function(title, message) {
+  const body = `<p style="color:var(--text-muted);font-size:0.95rem;line-height:1.7">${message}</p>`;
+  const footer = `
+    <button class="btn btn-subtle" onclick="Modal.close()">
+      <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
+    </button>
+    <button class="btn btn-primary" onclick="if(window.electronAPI) window.electronAPI.openUrl('${LS_CHECKOUT_URL}'); Modal.close();" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
+      <svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Core
+    </button>`;
+  Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
+};
+
 window.showPaywall = function() {
   const body = `
     <div style="text-align:center;padding:16px 0">

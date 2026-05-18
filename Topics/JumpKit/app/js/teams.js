@@ -475,8 +475,11 @@ window.saveAddTeam = async function() {
         .select('id')
         .eq('org_id', selectedOrgId);
       if (existingTeams && existingTeams.length >= 1) {
-        Toast.danger('Free tier is limited to 1 team. Upgrade to Core for unlimited teams.');
         Modal.close();
+        showUpgradeModal(
+          'Team Limit Reached',
+          'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Core for unlimited teams, unlimited shared jumps, and unlimited launches.'
+        );
         return;
       }
     }
