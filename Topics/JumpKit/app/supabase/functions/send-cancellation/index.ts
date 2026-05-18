@@ -94,9 +94,6 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
             <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved personal jumps
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Global hotkey to open JumpKit
-          </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
             <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Free tier features
           </td></tr>
         </table>
@@ -107,13 +104,7 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">No longer included:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Team creation and management
-          </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Shared team jumps
-          </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Priority support
+            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Unlimited Jump launches
           </td></tr>
         </table>
       </div>
