@@ -1340,7 +1340,6 @@ window.showUpgradeModal = function(title, message) {
 window.showPaywall = function() {
   const body = `
     <div style="text-align:center;padding:16px 0">
-      <svg class="ti ti-lock" style="font-size:3rem;color:var(--turq);display:block;margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px">Your free trial has ended</h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;line-height:1.6">
         You've used all 250 free launches.<br>Upgrade to Core for unlimited launches, unlimited teams, and unlimited shared jumps.
@@ -1355,7 +1354,7 @@ window.showPaywall = function() {
       </div>
     </div>
   `;
-  Modal.open('<svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade JumpKit', body, '', { closeable: false });
+  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Jump Launches Reached', body, '', { closeable: false });
 };
 
 // ── Notifications ────────────────────────────────────────────────
