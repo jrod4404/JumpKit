@@ -24,7 +24,27 @@ async function syncSharedJumps() {
     if (memErr) throw memErr;
 
     const teamIds = memberships.map(m => m.team_id);
-    if (teamIds.length === 0) return;
+
+    // If no team memberships, clean up any stale shared columns/jumps and return
+    if (teamIds.length === 0) {
+      const localUser = DB.getCurrentUser();
+      if (localUser) {
+        const existingCols = DB.getColumns(localUser.id);
+        const staleCols = existingCols.filter(c => c.isShared && c.teamId);
+        if (staleCols.length > 0) {
+          const cleanCols = existingCols.map(c => c.isShared && c.teamId
+            ? { ...c, isShared: 0, teamId: null, supabaseId: null }
+            : c
+          );
+          DB.saveColumns(localUser.id, cleanCols);
+          // Remove shared jumps
+          const allJumps = DB.getJumps(localUser.id);
+          allJumps.filter(j => j.isShared).forEach(j => DB.updateJump(localUser.id, j.id, { isShared: 0, teamId: null }));
+          if (typeof renderColumns === 'function') renderColumns();
+        }
+      }
+      return;
+    }
 
     // 2. For each team: fetch shared_columns + shared_jumps
     const { data: remoteCols = [], error: colErr } = await supabaseClient
@@ -63,8 +83,11 @@ async function syncSharedJumps() {
     );
     const remoteColIds = new Set(remoteColsDeduped.map(c => c.id));
 
-    // Remove stale local shared columns no longer in remote
-    const staleLocalCols = existingCols.filter(c => c.isShared && c.teamId && teamIds.includes(c.teamId) && c.supabaseId && !remoteColIds.has(c.supabaseId));
+    // Remove stale local shared columns — either no longer in remote OR team user is no longer a member of
+    const staleLocalCols = existingCols.filter(c => c.isShared && c.teamId && (
+      !teamIds.includes(c.teamId) ||  // not a member of this team anymore
+      (c.supabaseId && !remoteColIds.has(c.supabaseId))  // column no longer exists in Supabase
+    ));
     for (const stale of staleLocalCols) {
       const idx = existingCols.indexOf(stale);
       if (idx > -1) existingCols.splice(idx, 1);
