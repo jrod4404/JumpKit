@@ -1354,7 +1354,7 @@ window.showPaywall = function() {
       </div>
     </div>
   `;
-  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Jump Launches Reached', body, '', { closeable: false });
+  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Jump Launch Limit Reached', body, '', { closeable: false });
 };
 
 // ── Notifications ────────────────────────────────────────────────
