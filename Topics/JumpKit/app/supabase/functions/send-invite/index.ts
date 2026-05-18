@@ -156,12 +156,12 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:20px"><tr>
         <td width="50%" style="padding-right:8px">
           <a href="https://jumpkit.app" style="display:block;padding:14px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:14px;font-weight:600">
-            <img src="https://jumpkit.app/email-icons/icon-apple.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="" /> Download for macOS
+            <img src="https://jumpkit.app/email-icons/icon-apple.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="Apple" /> Download for macOS
           </a>
         </td>
         <td width="50%" style="padding-left:8px">
           <a href="https://jumpkit.app" style="display:block;padding:14px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:14px;font-weight:600">
-            <img src="https://jumpkit.app/email-icons/icon-windows.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="" /> Download for Windows
+            <img src="https://jumpkit.app/email-icons/icon-windows.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="Windows" /> Download for Windows
           </a>
         </td>
       </tr></table>
@@ -182,13 +182,13 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
         <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#C8D6E8">Then enjoy instant access to:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-jumpkit.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="" /> Shared team jumps — your whole team's most-used links, one click away
+            <img src="https://jumpkit.app/email-icons/icon-jumpkit.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="→" /> Shared team jumps — your whole team's most-used links, one click away
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-clock.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="" /> Save hours a week — stop hunting for the same links every day
+            <img src="https://jumpkit.app/email-icons/icon-clock.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="⏱" /> Save hours a week — stop hunting for the same links every day
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-refresh.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="" /> Always in sync — when your team updates a link, you get it instantly
+            <img src="https://jumpkit.app/email-icons/icon-refresh.png" width="16" height="16" style="vertical-align:middle;margin-right:8px" alt="↻" /> Always in sync — when your team updates a link, you get it instantly
           </td></tr>
         </table>
       </div>

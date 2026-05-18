@@ -118,7 +118,7 @@ function buildWelcomeHTML({ firstName }: { firstName: string }): string {
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 32px">
         <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
           <a href="https://jumpkit.app" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Open JumpKit
+            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="→" />Open JumpKit
           </a>
         </td></tr>
       </table>

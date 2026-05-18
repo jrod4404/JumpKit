@@ -91,13 +91,13 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">What you still have access to:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="" /> All your saved personal jumps
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved personal jumps
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="" /> Global hotkey to open JumpKit
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Global hotkey to open JumpKit
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="" /> Free tier features
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Free tier features
           </td></tr>
         </table>
       </div>
@@ -122,7 +122,7 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto">
         <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
           <a href="https://jumpkit.app" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Reactivate Core
+            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="→" />Reactivate Core
           </a>
         </td></tr>
       </table>
