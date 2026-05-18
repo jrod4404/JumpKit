@@ -21,10 +21,6 @@ async function hashPassword(password) {
 async function renderTeams(containerEl) {
   const content = containerEl || document.getElementById('pageContent');
 
-  // ── Teams is available on all tiers (free included) ──────────────
-  // Paywall is only triggered at 250 jump launches (free tier limit)
-  // Teams access is unrestricted — it drives upgrade naturally
-
   content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
     <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
     Loading teams…
@@ -32,7 +28,6 @@ async function renderTeams(containerEl) {
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
 
   try {
-    // Get current Supabase user
     let supaUser = null;
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -48,25 +43,7 @@ async function renderTeams(containerEl) {
       return;
     }
 
-    // Fetch profile
-    const { data: profile, error: profErr } = await supabaseClient
-      .from('profiles')
-      .select('*')
-      .eq('id', supaUser.id)
-      .single();
-
-    if (profErr && profErr.code !== 'PGRST116') throw profErr;
-
-    const role = profile?.role || 'team-member';
-    console.debug('[Teams] role:', role, 'org_id:', profile?.org_id);
-
-    if (role === 'org-owner') {
-      await renderOrgOwnerView(content, supaUser, profile);
-    } else if (role === 'team-owner') {
-      await renderTeamOwnerView(content, supaUser, profile);
-    } else {
-      await renderTeamMemberView(content, supaUser, profile);
-    }
+    await renderUnifiedTeamsView(content, supaUser);
   } catch (err) {
     content.innerHTML = `<div class="no-columns">
       <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg></div>
@@ -75,6 +52,165 @@ async function renderTeams(containerEl) {
     </div>`;
   }
 }
+
+// ── Unified Teams View (replaces org-owner / team-owner / team-member views) ─
+async function renderUnifiedTeamsView(content, supaUser) {
+  // Auto-create org silently if user doesn't have one
+  let { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', supaUser.id).single();
+  if (!profile) throw new Error('Profile not found.');
+
+  let orgId = profile.org_id;
+  if (!orgId) {
+    // Check if user already owns an org (safety check)
+    const { data: existingOrg } = await supabaseClient.from('organizations').select('id').eq('owner_id', supaUser.id).maybeSingle();
+    if (existingOrg) {
+      orgId = existingOrg.id;
+    } else {
+      // Create org silently using email prefix as name
+      const orgName = supaUser.email.split('@')[0];
+      const { data: newOrg, error: orgErr } = await supabaseClient.from('organizations').insert({ name: orgName, owner_id: supaUser.id }).select().single();
+      if (orgErr) throw orgErr;
+      orgId = newOrg.id;
+    }
+    // Update profile with org_id and org-owner role
+    await supabaseClient.from('profiles').update({ org_id: orgId, role: 'org-owner' }).eq('id', supaUser.id);
+    profile = { ...profile, org_id: orgId, role: 'org-owner' };
+    if (window._supabaseProfile) { window._supabaseProfile.org_id = orgId; window._supabaseProfile.role = 'org-owner'; }
+  }
+
+  _orgOwnerSupaUser = supaUser;
+  selectedOrgId = orgId;
+
+  // Fetch teams this user owns
+  const { data: ownedTeams = [] } = await supabaseClient.from('teams').select('*').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name');
+
+  // Fetch teams this user is a member of (but doesn't own)
+  const { data: memberRows = [] } = await supabaseClient.from('team_members').select('team_id').eq('user_id', supaUser.id);
+  const memberTeamIds = memberRows.map(r => r.team_id).filter(id => !ownedTeams.find(t => t.id === id));
+  let memberTeams = [];
+  for (const tid of memberTeamIds) {
+    const { data: t } = await supabaseClient.from('teams').select('*').eq('id', tid).single();
+    if (t) memberTeams.push(t);
+  }
+
+  // Fetch pending invites for this user
+  const { data: rawInvites = [] } = await supabaseClient.from('team_invites').select('*').eq('email', supaUser.email).eq('status', 'pending');
+  const pendingInvites = [];
+  for (const inv of rawInvites) {
+    const { data: t } = await supabaseClient.from('teams').select('id, name, team_password_hash, owner_id').eq('id', inv.team_id).single();
+    let ownerLabel = 'team owner';
+    if (t?.owner_id) {
+      const { data: op } = await supabaseClient.from('profiles').select('first_name, last_name, email').eq('id', t.owner_id).single();
+      ownerLabel = (op?.first_name && op?.last_name) ? `${op.first_name} ${op.last_name}` : (op?.email || 'team owner');
+    }
+    pendingInvites.push({ ...inv, teams: t, ownerLabel });
+  }
+
+  let html = `<div class="acct-grid">`;
+
+  // ── My Teams (owned) ──
+  html += `
+    <div class="acct-section">
+      <div class="acct-section-title" style="display:flex;align-items:center">
+        <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
+        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px" onclick="openAddTeamModal()">
+          <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> New Team
+        </button>
+      </div>`;
+
+  if (ownedTeams.length === 0) {
+    html += `<div style="padding:16px 0;color:var(--text-muted);font-size:0.88rem;text-align:center">No teams yet. Click <strong>New Team</strong> to get started.</div>`;
+  } else {
+    for (const team of ownedTeams) {
+      // Fetch members for this team
+      const { data: members = [] } = await supabaseClient.from('team_members').select('id, user_id, profiles(email, first_name, last_name)').eq('team_id', team.id);
+      const { data: pendingTeamInvites = [] } = await supabaseClient.from('team_invites').select('id, email, invited_at').eq('team_id', team.id).eq('status', 'pending');
+
+      const teamOwnerId = team.owner_id;
+      const memberPills = members.map(m => {
+        const isOwner = m.user_id === teamOwnerId;
+        const label = m.profiles?.first_name ? `${m.profiles.first_name} ${m.profiles.last_name || ''}`.trim() : (m.profiles?.email || m.user_id);
+        const pill = isOwner
+          ? `<span class="teams-badge teams-badge-owner">Team Owner</span>`
+          : `<span class="teams-badge">Member</span>`;
+        const removeBtn = isOwner ? '' : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
+        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span></div><div style="display:flex;align-items:center;gap:6px">${pill}${removeBtn}</div></div>`;
+      }).join('');
+
+      const invitePills = pendingTeamInvites.map(inv => `
+        <div class="acct-row">
+          <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="teams-badge teams-badge-pending">Pending</span>
+            <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg></button>
+          </div>
+        </div>`).join('');
+
+      html += `
+        <div style="background:var(--bg-input);border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border)">
+          <div style="display:flex;align-items:center;margin-bottom:10px">
+            <span style="font-weight:700;color:var(--text);font-size:0.95rem">${esc(team.name)}</span>
+            <span class="teams-badge teams-badge-owner" style="margin-left:10px">Team Owner</span>
+            <div style="margin-left:auto;display:flex;gap:6px">
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            </div>
+          </div>
+          ${memberPills}
+          ${invitePills}
+        </div>`;
+    }
+  }
+  html += `</div>`; // end My Teams section
+
+  // ── Teams I've Joined ──
+  if (memberTeams.length > 0) {
+    html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
+    for (const team of memberTeams) {
+      const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', team.owner_id).single();
+      const ownerLabel = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : (ownerProf?.email || '—');
+      html += `
+        <div class="acct-row">
+          <div class="acct-row-label">
+            <span>${esc(team.name)}</span>
+            <span class="acct-row-hint">Owner: ${esc(ownerLabel)}</span>
+          </div>
+          <span class="teams-badge">Member</span>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+
+  // ── Pending Invitations ──
+  if (pendingInvites.length > 0) {
+    html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invitations (${pendingInvites.length})</div>`;
+    for (const inv of pendingInvites) {
+      html += `
+        <div class="acct-row">
+          <div class="acct-row-label">
+            <span>${esc(inv.teams?.name || 'Team')}</span>
+            <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel)}</span>
+          </div>
+          <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" onclick="openJoinTeamModal('${inv.teams?.id}','${esc(inv.teams?.name || '')}','${inv.id}')">
+            <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
+          </button>
+        </div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `</div>`; // end acct-grid
+  content.innerHTML = html;
+  addTeamsStyles();
+}
+
+// Helper: open invite modal wired to unified view
+window.openInviteModalForTeam = function(teamId) {
+  selectedTeamId = teamId;
+  openInviteModal(teamId);
+};
 
 // ── Org-Owner View ────────────────────────────────────────────────
 // Module-level selection state for the three-panel layout
@@ -503,9 +639,7 @@ window.saveAddTeam = async function() {
 
     Modal.close();
     Toast.success(`Team "${esc(name)}" created!`);
-    selectOrg(selectedOrgId); // refresh teams panel
-    // Increment org teams count in header
-    updateOrgStats(1, 0);
+    renderTeams();
   } catch (err) {
     Toast.danger('Failed to create team: ' + err.message);
   }
@@ -616,7 +750,7 @@ window.sendOrgInvites = async function() {
     } else {
       Toast.success(`${sent} sent, ${failed} failed.`);
     }
-    selectTeam(selectedTeamId); // refresh members panel
+    renderTeams();
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
   }
@@ -681,7 +815,7 @@ window.confirmCancelInvite = async function(inviteId) {
     if (error) throw error;
     Modal.close();
     Toast.success('Invitation cancelled.');
-    if (selectedTeamId) selectTeam(selectedTeamId);
+    renderTeams();
   } catch (e) {
     Toast.danger('Failed to cancel invitation: ' + e.message);
   }
@@ -1139,7 +1273,7 @@ async function sendInvites(teamId) {
     } else {
       Toast.success(`Sent ${sent} invite${sent !== 1 ? 's' : ''} (${failed} failed)`);
     }
-    selectTeam(selectedTeamId); // refresh only the members panel
+    renderTeams();
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
   }
@@ -1207,10 +1341,8 @@ window.doRemoveTeam = async function(teamId, teamName) {
     const r2 = await supabaseClient.from('teams').delete().eq('id', teamId);
     if (r2.error) throw new Error('Delete team failed: ' + r2.error.message);
     Toast.success(`Team "${teamName}" removed`);
-    const orgToRefresh = selectedOrgId;
     selectedTeamId = null;
-    if (orgToRefresh) setTimeout(() => selectOrg(orgToRefresh), 300);
-    updateOrgStats(-1, 0);
+    setTimeout(() => renderTeams(), 300);
   } catch(e) { Toast.danger('Error: ' + e.message); console.error('[doRemoveTeam]', e); }
 };
 
@@ -1226,8 +1358,7 @@ window.doRemoveMember = async function(memberId, memberName) {
   try {
     { const { error: _e5 } = await supabaseClient.from('team_members').delete().eq('id', memberId); if (_e5) throw new Error('Remove member failed: ' + _e5.message); }
     Toast.success(`${memberName} removed from team`);
-    updateOrgStats(0, -1);
-    if (selectedTeamId) selectTeam(selectedTeamId);
+    renderTeams();
   } catch(e) { Toast.danger('Error: ' + e.message); }
 };
 
