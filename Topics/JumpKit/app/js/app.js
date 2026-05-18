@@ -720,10 +720,7 @@ function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Payment Status</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${statusLabel}</span>
             </div>
-            <div class="acct-row">
-              <div class="acct-row-label"><span>Role</span></div>
-              <span style="font-size:0.88rem;color:var(--text-muted)">${role}</span>
-            </div>
+
             <div class="acct-row">
               <div class="acct-row-label"><span>Trial Launches Used</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${tier === 'free' ? `${launchesUsed} / 250` : 'N/A'}</span>
