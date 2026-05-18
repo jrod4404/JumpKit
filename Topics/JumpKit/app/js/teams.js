@@ -666,9 +666,10 @@ window.saveAddTeam = async function() {
   if (password && password !== passwordConfirm) { document.getElementById('atTeamPasswordConfirmErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
-  // Spinner on save button
+  // Spinner on save button — show for at least 1.5s
   const saveBtn = document.querySelector('[onclick="saveAddTeam()"]');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
+  const _atSpinStart = Date.now();
 
   try {
     // Free tier: max 1 team
@@ -705,10 +706,15 @@ window.saveAddTeam = async function() {
       joined_at: new Date().toISOString(),
     });
 
-    Modal.close();
-    Toast.success(`Team "${esc(name)}" created!`);
-    renderTeams();
+    const _atElapsed = Date.now() - _atSpinStart;
+    const _atDelay = Math.max(0, 1500 - _atElapsed);
+    setTimeout(() => {
+      Modal.close();
+      Toast.success(`Team "${esc(name)}" created!`);
+      renderTeams();
+    }, _atDelay);
   } catch (err) {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save'; }
     Toast.danger('Failed to create team: ' + err.message);
   }
 };
@@ -1531,9 +1537,10 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
   if (newPw !== confirmPw) { document.getElementById('ctpConfirmPasswordErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
-  // Spinner on save button
+  // Spinner on save button — show for at least 1.5s
   const ctpSaveBtn = document.querySelector(`[onclick="doChangeTeamPassword('${teamId}','${teamName.replace(/'/g,"\\'")}')"]`);
   if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
+  const _ctpSpinStart = Date.now();
 
   try {
     const hashedPw = await hashPassword(newPw);
@@ -1542,9 +1549,14 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
       .update({ team_password_hash: hashedPw, team_password_plain: newPw })
       .eq('id', teamId);
     if (error) throw error;
-    Modal.close();
-    Toast.success(`Password updated for "${esc(teamName)}"`);
+    const _ctpElapsed = Date.now() - _ctpSpinStart;
+    const _ctpDelay = Math.max(0, 1500 - _ctpElapsed);
+    setTimeout(() => {
+      Modal.close();
+      Toast.success(`Password updated for "${esc(teamName)}"`);
+    }, _ctpDelay);
   } catch(e) {
+    if (ctpSaveBtn) { ctpSaveBtn.disabled = false; ctpSaveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password'; }
     Toast.danger('Failed to update password: ' + e.message);
   }
 };
