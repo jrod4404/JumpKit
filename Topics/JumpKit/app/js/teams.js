@@ -1427,7 +1427,14 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
         <input class="form-input" type="password" id="ctpNewPassword" placeholder="Enter new password" autocomplete="new-password" style="padding-right:38px"/>
         <button type="button" class="pw-eye" tabindex="-1" id="ctpNewPasswordEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
-      <span class="form-error" id="ctpNewPasswordErr">Password is required.</span>
+      <ul style="list-style:none;padding:6px 0 0 4px;margin:0" id="ctpPwRules">
+        <li id="ctpRule-len"     style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>At least 8 characters</li>
+        <li id="ctpRule-upper"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One uppercase letter</li>
+        <li id="ctpRule-lower"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One lowercase letter</li>
+        <li id="ctpRule-num"     style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One number</li>
+        <li id="ctpRule-special" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One special character (!@#$%^&amp;*)</li>
+      </ul>
+      <span class="form-error" id="ctpNewPasswordErr">Password does not meet requirements.</span>
     </div>
     <div class="form-group">
       <label class="form-label">Confirm Password *</label>
@@ -1455,6 +1462,29 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
         eye.innerHTML = show ? eyeClosed : eyeOpen;
       });
     });
+
+    // Live password rule checklist
+    const ctpRules = {
+      'ctpRule-len':     p => p.length >= 8,
+      'ctpRule-upper':   p => /[A-Z]/.test(p),
+      'ctpRule-lower':   p => /[a-z]/.test(p),
+      'ctpRule-num':     p => /[0-9]/.test(p),
+      'ctpRule-special': p => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
+    };
+    const ctpInput = document.getElementById('ctpNewPassword');
+    if (ctpInput) {
+      ctpInput.addEventListener('input', function() {
+        const p = this.value;
+        for (const [id, fn] of Object.entries(ctpRules)) {
+          const li = document.getElementById(id);
+          if (!li) continue;
+          const icon = li.querySelector('.ctp-rule-icon');
+          const ok = fn(p);
+          li.style.color = ok ? '#50CACC' : '#4A6280';
+          if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+        }
+      });
+    }
   }, 100);
 };
 
@@ -1464,8 +1494,13 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
 
   ['ctpNewPasswordErr', 'ctpConfirmPasswordErr'].forEach(id => document.getElementById(id)?.classList.remove('show'));
 
+  const ctpPwValid = newPw && newPw.length >= 8 && /[A-Z]/.test(newPw) && /[a-z]/.test(newPw) && /[0-9]/.test(newPw) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(newPw);
   let ok = true;
-  if (!newPw)              { document.getElementById('ctpNewPasswordErr')?.classList.add('show'); ok = false; }
+  if (!newPw || !ctpPwValid) {
+    const errEl = document.getElementById('ctpNewPasswordErr');
+    if (errEl) { errEl.textContent = 'Password does not meet requirements (8+ chars, uppercase, lowercase, number, special char).'; errEl.classList.add('show'); }
+    ok = false;
+  }
   if (newPw !== confirmPw) { document.getElementById('ctpConfirmPasswordErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
