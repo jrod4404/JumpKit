@@ -577,7 +577,7 @@
                 <h1 style="display:flex;align-items:center;gap:0.5rem"><img src="jump-icon.svg" alt="JumpKit" style="width:3rem;height:3rem;filter:brightness(0) invert(1)"> JumpKit</h1>
                 <p>Developer and Marketing Documentation</p>
                 <p style="font-size:0.85rem;opacity:0.85;margin-top:6px;max-width:600px;line-height:1.5">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-17</p>
+                <p style="font-size:0.75rem;opacity:0.6;margin-top:4px">Last updated: 2026-05-18</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -2798,6 +2798,30 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </ul>
 
 <h2 id="changelog">10. Changelog</h2>
+
+<h3>2026-05-18</h3>
+<ul>
+<li><strong>Edge Functions deployed:</strong> <code>send-welcome-core</code> and <code>send-cancellation</code> deployed to Supabase. <code>ls-webhook</code> redeployed (v4) with email triggers for <code>subscription_created</code> and <code>subscription_cancelled</code> events.</li>
+<li><strong>Email alt text:</strong> All email templates (<code>send-welcome</code>, <code>send-welcome-core</code>, <code>send-cancellation</code>, <code>send-invite</code>, Supabase confirm + reset) updated with descriptive alt text on all icon images for Gmail image-blocking fallback.</li>
+<li><strong>Cancellation email cleanup:</strong> Removed "Global hotkey" bullet from "What you still have" section. Simplified "No longer included" to single bullet: "Unlimited Jump launches".</li>
+<li><strong>Teams — unified view (major refactor):</strong> Removed org/role branching from <code>renderTeams()</code>. All users now see one unified view: My Teams (owned) + Teams I've Joined + Pending Invitations. Org is auto-created silently on first teams page visit. No org creation screen shown to users.</li>
+<li><strong>Free tier limits:</strong>
+  <ul>
+    <li>Max 1 team on free tier — checked before showing Add Team modal (shows upgrade modal immediately)</li>
+    <li>Max 10 shared jumps per team — checked before <code>createJump()</code> so jump is never saved if limit hit</li>
+    <li>Received shared columns capped at 10 visible jumps — "+X more" nudge + "Unlock" button shown at bottom of column</li>
+  </ul>
+</li>
+<li><strong>Upgrade modal (<code>showUpgradeModal()</code>):</strong> New shared helper in <code>app.js</code>. Used by team limit, shared jump limit. Shows "Not Now" + "Unlock JumpKit Core!" button (jumping man icon, gradient, links to Lemon Squeezy via <code>electronAPI.openUrl</code>).</li>
+<li><strong>Paywall modal updates:</strong> Replaced old "Upgrade to JumpKit — $5/mo" and "Jet AI — $25/mo" buttons with single "Unlock JumpKit Core!" button. Title changed to "Jump Launch Limit Reached". Lock icon in header. Body icon removed.</li>
+<li><strong>Account page "Unlock JumpKit Core!" button:</strong> Changed from <code>&lt;a href&gt;</code> (broken in Electron) to <code>&lt;button onclick="electronAPI.openUrl(...)"&gt;</code>. Role row hidden.</li>
+<li><strong>Team password modals:</strong> Eye toggles added to Add Team and Change Team Password modals. 5-rule live checklist (8 chars, uppercase, lowercase, number, special) + "Passwords match" rule added to both. Save buttons show 1.5s minimum spinner.</li>
+<li><strong>Sync fix:</strong> <code>sync.js</code> now properly removes stale shared columns/jumps when user is removed from a team (previously bailed early when <code>teamIds.length === 0</code>). Also prunes columns from teams user is no longer a member of.</li>
+<li><strong>Invite modal:</strong> Removed localStorage gate — invite notification modal now shows on every login while pending invites exist.</li>
+<li><strong>Teams UI polish:</strong> Inner team cards use flat <code>border-top</code> inside <code>acct-section</code> (no inner border-radius fighting parent overflow). Team member pills, invite buttons, delete/password buttons all in team card header row.</li>
+<li><strong>window._ownedTeamIds:</strong> Populated on app load — array of team IDs owned by current user. Used to distinguish received vs owned shared columns for free tier rendering cap.</li>
+<li><strong>Backups:</strong> <code>app_backup_2026-05-18</code>, <code>app_backup_2026-05-18b</code>, <code>app_backup_2026-05-18c</code>.</li>
+</ul>
 
 <h3>2026-05-17</h3>
 <ul>
