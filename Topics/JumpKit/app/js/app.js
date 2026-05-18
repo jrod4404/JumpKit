@@ -108,6 +108,14 @@ async function initApp() {
         if (!data.onboarding_completed) {
           setTimeout(() => checkAndShowOnboarding(), 600);
         }
+
+        // Cache team IDs owned by current user (used to detect received vs owned shared columns)
+        if (_supabaseUser) {
+          supabaseClient.from('teams').select('id').eq('owner_id', _supabaseUser.id)
+            .then(({ data: ownedTeams }) => {
+              window._ownedTeamIds = (ownedTeams || []).map(t => t.id);
+            }).catch(() => { window._ownedTeamIds = []; });
+        }
       }
     } catch (_) {}
   }
