@@ -572,18 +572,40 @@ window.openAddTeamModal = function() {
     </div>
     <div class="form-group">
       <label class="form-label">Team Password *</label>
-      <input class="form-input" type="password" id="atTeamPassword" placeholder="Members will need this to join"/>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="atTeamPassword" placeholder="Members will need this to join" style="padding-right:38px"/>
+        <button type="button" class="pw-eye" tabindex="-1" id="atTeamPasswordEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <span class="form-error" id="atTeamPasswordErr">Team password is required.</span>
     </div>
     <div class="form-group">
       <label class="form-label">Confirm Password *</label>
-      <input class="form-input" type="password" id="atTeamPasswordConfirm" placeholder="Re-enter password"/>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="atTeamPasswordConfirm" placeholder="Re-enter password" style="padding-right:38px"/>
+        <button type="button" class="pw-eye" tabindex="-1" id="atTeamPasswordConfirmEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <span class="form-error" id="atTeamPasswordConfirmErr">Passwords do not match.</span>
     </div>`;
 
   Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Add Team', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" onclick="saveAddTeam()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
+
+  // Wire eye toggles
+  setTimeout(() => {
+    const eyeOpen   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const eyeClosed = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    [['atTeamPasswordEye','atTeamPassword'],['atTeamPasswordConfirmEye','atTeamPasswordConfirm']].forEach(([eyeId, inputId]) => {
+      const eye = document.getElementById(eyeId);
+      const inp = document.getElementById(inputId);
+      if (!eye || !inp) return;
+      eye.addEventListener('click', () => {
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        eye.innerHTML = show ? eyeClosed : eyeOpen;
+      });
+    });
+  }, 100);
 };
 
 window.saveAddTeam = async function() {
@@ -1371,18 +1393,39 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
     </p>
     <div class="form-group">
       <label class="form-label">New Password *</label>
-      <input class="form-input" type="password" id="ctpNewPassword" placeholder="Enter new password" autocomplete="new-password"/>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="ctpNewPassword" placeholder="Enter new password" autocomplete="new-password" style="padding-right:38px"/>
+        <button type="button" class="pw-eye" tabindex="-1" id="ctpNewPasswordEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <span class="form-error" id="ctpNewPasswordErr">Password is required.</span>
     </div>
     <div class="form-group">
       <label class="form-label">Confirm Password *</label>
-      <input class="form-input" type="password" id="ctpConfirmPassword" placeholder="Confirm new password" autocomplete="new-password"/>
+      <div class="pw-wrap">
+        <input class="form-input" type="password" id="ctpConfirmPassword" placeholder="Confirm new password" autocomplete="new-password" style="padding-right:38px"/>
+        <button type="button" class="pw-eye" tabindex="-1" id="ctpConfirmPasswordEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
       <span class="form-error" id="ctpConfirmPasswordErr">Passwords do not match.</span>
     </div>`;
 
   Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Team Password', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" onclick="doChangeTeamPassword('${teamId}','${esc(teamName)}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
+
+  setTimeout(() => {
+    const eyeOpen   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    const eyeClosed = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+    [['ctpNewPasswordEye','ctpNewPassword'],['ctpConfirmPasswordEye','ctpConfirmPassword']].forEach(([eyeId, inputId]) => {
+      const eye = document.getElementById(eyeId);
+      const inp = document.getElementById(inputId);
+      if (!eye || !inp) return;
+      eye.addEventListener('click', () => {
+        const show = inp.type === 'password';
+        inp.type = show ? 'text' : 'password';
+        eye.innerHTML = show ? eyeClosed : eyeOpen;
+      });
+    });
+  }, 100);
 };
 
 window.doChangeTeamPassword = async function(teamId, teamName) {
