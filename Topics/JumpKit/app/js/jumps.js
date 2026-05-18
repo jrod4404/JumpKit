@@ -766,25 +766,28 @@ function saveJump(editId) {
           }
         }
       } else {
+        // Free tier: check 10 shared jump limit BEFORE creating the jump
+        const _colCheck = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
+        if (_colCheck?.isShared && _colCheck?.teamId) {
+          const _tierCheck = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+          if (_tierCheck === 'free') {
+            const _sharedCount = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === _colCheck.teamId && j.isShared).length;
+            if (_sharedCount >= 10) {
+              Modal.close();
+              showUpgradeModal(
+                'Shared Jump Limit Reached',
+                'The free tier allows up to <strong>10 shared jumps per team</strong>. Upgrade to JumpKit Core for unlimited shared jumps, unlimited teams, and unlimited launches.'
+              );
+              return;
+            }
+          }
+        }
+
         const newJump = DB.createJump(currentUser.id, data);
         // If added to a shared column, push to Supabase shared_jumps
         if (newJump) {
           const col = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
           if (col?.isShared && col?.teamId && col?.supabaseId) {
-            // Free tier: check 10 shared jump limit before inserting
-            const _tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
-            if (_tier === 'free') {
-              const sharedJumps = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === col.teamId && j.isShared);
-              if (sharedJumps.length > 10) {
-                Modal.close();
-                showUpgradeModal(
-                  'Shared Jump Limit Reached',
-                  'The free tier allows up to <strong>10 shared jumps per team</strong>. Upgrade to JumpKit Core for unlimited shared jumps, unlimited teams, and unlimited launches.'
-                );
-                renderColumns();
-                return;
-              }
-            }
             const supabaseId = crypto.randomUUID();
             DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: col.teamId });
             supabaseClient.from('shared_jumps').insert({
