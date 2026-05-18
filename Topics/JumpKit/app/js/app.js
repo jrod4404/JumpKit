@@ -1489,10 +1489,6 @@ window.checkPendingInvites = async function checkPendingInvites() {
     if (!window._supabaseUser) return;
     const email = window._supabaseUser.email;
     
-    // Check if we already showed this invite dialog (stored in localStorage)
-    const shownKey = `jk_invite_shown_${window._supabaseUser.id}`;
-    if (localStorage.getItem(shownKey)) return;
-
     // Check for pending invites for this email (flat query to avoid stack depth limit)
     const { data: rawInvites = [] } = await supabaseClient
       .from('team_invites')
@@ -1506,9 +1502,6 @@ window.checkPendingInvites = async function checkPendingInvites() {
     }
 
     if (invites.length === 0) return;
-
-    // Mark as shown so it won't show again
-    localStorage.setItem(shownKey, '1');
 
     const teamNames = invites.map(inv => inv.teams?.name || 'a team').join(', ');
     const body = `
