@@ -582,6 +582,7 @@ window.openAddTeamModal = function() {
         <li id="atRule-lower" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One lowercase letter</li>
         <li id="atRule-num"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One number</li>
         <li id="atRule-special" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One special character (!@#$%^&amp;*)</li>
+        <li id="atRule-match"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>Passwords match</li>
       </ul>
       <span class="form-error" id="atTeamPasswordErr">Password does not meet requirements.</span>
     </div>
@@ -621,20 +622,31 @@ window.openAddTeamModal = function() {
       'atRule-num':     p => /[0-9]/.test(p),
       'atRule-special': p => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
     };
-    const pwInput = document.getElementById('atTeamPassword');
-    if (pwInput) {
-      pwInput.addEventListener('input', function() {
-        const p = this.value;
-        for (const [id, fn] of Object.entries(atPwRules)) {
-          const li = document.getElementById(id);
-          if (!li) continue;
-          const icon = li.querySelector('.at-rule-icon');
-          const ok = fn(p);
-          li.style.color = ok ? '#50CACC' : '#4A6280';
-          if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
-        }
-      });
+    const pwInput  = document.getElementById('atTeamPassword');
+    const cfmInput = document.getElementById('atTeamPasswordConfirm');
+
+    function updateAtRules() {
+      const p = pwInput?.value || '';
+      const c = cfmInput?.value || '';
+      for (const [id, fn] of Object.entries(atPwRules)) {
+        const li = document.getElementById(id);
+        if (!li) continue;
+        const icon = li.querySelector('.at-rule-icon');
+        const ok = fn(p);
+        li.style.color = ok ? '#50CACC' : '#4A6280';
+        if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+      }
+      // match rule
+      const matchLi = document.getElementById('atRule-match');
+      if (matchLi) {
+        const icon = matchLi.querySelector('.at-rule-icon');
+        const ok = p.length > 0 && p === c;
+        matchLi.style.color = ok ? '#50CACC' : '#4A6280';
+        if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+      }
     }
+    if (pwInput)  pwInput.addEventListener('input', updateAtRules);
+    if (cfmInput) cfmInput.addEventListener('input', updateAtRules);
   }, 100);
 };
 
@@ -653,6 +665,10 @@ window.saveAddTeam = async function() {
   if (!password || !pwValid) { document.getElementById('atTeamPasswordErr')?.classList.add('show'); ok = false; }
   if (password && password !== passwordConfirm) { document.getElementById('atTeamPasswordConfirmErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
+
+  // Spinner on save button
+  const saveBtn = document.querySelector('[onclick="saveAddTeam()"]');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
 
   try {
     // Free tier: max 1 team
@@ -1433,6 +1449,7 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
         <li id="ctpRule-lower"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One lowercase letter</li>
         <li id="ctpRule-num"     style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One number</li>
         <li id="ctpRule-special" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One special character (!@#$%^&amp;*)</li>
+        <li id="ctpRule-match"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="ctp-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>Passwords match</li>
       </ul>
       <span class="form-error" id="ctpNewPasswordErr">Password does not meet requirements.</span>
     </div>
@@ -1471,20 +1488,30 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
       'ctpRule-num':     p => /[0-9]/.test(p),
       'ctpRule-special': p => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
     };
-    const ctpInput = document.getElementById('ctpNewPassword');
-    if (ctpInput) {
-      ctpInput.addEventListener('input', function() {
-        const p = this.value;
-        for (const [id, fn] of Object.entries(ctpRules)) {
-          const li = document.getElementById(id);
-          if (!li) continue;
-          const icon = li.querySelector('.ctp-rule-icon');
-          const ok = fn(p);
-          li.style.color = ok ? '#50CACC' : '#4A6280';
-          if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
-        }
-      });
+    const ctpInput  = document.getElementById('ctpNewPassword');
+    const ctpCfmInput = document.getElementById('ctpConfirmPassword');
+
+    function updateCtpRules() {
+      const p = ctpInput?.value || '';
+      const c = ctpCfmInput?.value || '';
+      for (const [id, fn] of Object.entries(ctpRules)) {
+        const li = document.getElementById(id);
+        if (!li) continue;
+        const icon = li.querySelector('.ctp-rule-icon');
+        const ok = fn(p);
+        li.style.color = ok ? '#50CACC' : '#4A6280';
+        if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+      }
+      const matchLi = document.getElementById('ctpRule-match');
+      if (matchLi) {
+        const icon = matchLi.querySelector('.ctp-rule-icon');
+        const ok = p.length > 0 && p === c;
+        matchLi.style.color = ok ? '#50CACC' : '#4A6280';
+        if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+      }
     }
+    if (ctpInput)    ctpInput.addEventListener('input', updateCtpRules);
+    if (ctpCfmInput) ctpCfmInput.addEventListener('input', updateCtpRules);
   }, 100);
 };
 
@@ -1503,6 +1530,10 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
   }
   if (newPw !== confirmPw) { document.getElementById('ctpConfirmPasswordErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
+
+  // Spinner on save button
+  const ctpSaveBtn = document.querySelector(`[onclick="doChangeTeamPassword('${teamId}','${teamName.replace(/'/g,"\\'")}')"]`);
+  if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
 
   try {
     const hashedPw = await hashPassword(newPw);
