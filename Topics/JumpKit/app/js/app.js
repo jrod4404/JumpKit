@@ -1332,7 +1332,7 @@ window.showUpgradeModal = function(title, message) {
       <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
     </button>
     <button class="btn btn-primary" onclick="if(window.electronAPI) window.electronAPI.openUrl('${LS_CHECKOUT_URL}'); Modal.close();" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-      <svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Core
+      <svg class="ti ti-rocket" style="color:#fff"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Core
     </button>`;
   Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
 };
