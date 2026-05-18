@@ -576,7 +576,14 @@ window.openAddTeamModal = function() {
         <input class="form-input" type="password" id="atTeamPassword" placeholder="Members will need this to join" style="padding-right:38px"/>
         <button type="button" class="pw-eye" tabindex="-1" id="atTeamPasswordEye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
-      <span class="form-error" id="atTeamPasswordErr">Team password is required.</span>
+      <ul style="list-style:none;padding:6px 0 0 4px;margin:0" id="atPwRules">
+        <li id="atRule-len"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>At least 8 characters</li>
+        <li id="atRule-upper" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One uppercase letter</li>
+        <li id="atRule-lower" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One lowercase letter</li>
+        <li id="atRule-num"   style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One number</li>
+        <li id="atRule-special" style="font-size:0.78rem;color:#4A6280;margin-bottom:3px;display:flex;align-items:center;gap:5px"><span class="at-rule-icon" style="color:#f87171;font-weight:700;font-size:0.7rem">✕</span>One special character (!@#$%^&amp;*)</li>
+      </ul>
+      <span class="form-error" id="atTeamPasswordErr">Password does not meet requirements.</span>
     </div>
     <div class="form-group">
       <label class="form-label">Confirm Password *</label>
@@ -591,7 +598,7 @@ window.openAddTeamModal = function() {
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" onclick="saveAddTeam()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
-  // Wire eye toggles
+  // Wire eye toggles + live password rules
   setTimeout(() => {
     const eyeOpen   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     const eyeClosed = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
@@ -605,6 +612,29 @@ window.openAddTeamModal = function() {
         eye.innerHTML = show ? eyeClosed : eyeOpen;
       });
     });
+
+    // Live password rule checklist
+    const atPwRules = {
+      'atRule-len':     p => p.length >= 8,
+      'atRule-upper':   p => /[A-Z]/.test(p),
+      'atRule-lower':   p => /[a-z]/.test(p),
+      'atRule-num':     p => /[0-9]/.test(p),
+      'atRule-special': p => /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(p),
+    };
+    const pwInput = document.getElementById('atTeamPassword');
+    if (pwInput) {
+      pwInput.addEventListener('input', function() {
+        const p = this.value;
+        for (const [id, fn] of Object.entries(atPwRules)) {
+          const li = document.getElementById(id);
+          if (!li) continue;
+          const icon = li.querySelector('.at-rule-icon');
+          const ok = fn(p);
+          li.style.color = ok ? '#50CACC' : '#4A6280';
+          if (icon) { icon.textContent = ok ? '✓' : '✕'; icon.style.color = ok ? '#50CACC' : '#f87171'; }
+        }
+      });
+    }
   }, 100);
 };
 
@@ -617,11 +647,11 @@ window.saveAddTeam = async function() {
     document.getElementById(id)?.classList.remove('show');
   });
 
+  const pwValid = password.length >= 8 && /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
   let ok = true;
-  if (!name)     { document.getElementById('atTeamNameErr')?.classList.add('show');     ok = false; }
-  if (!password)  { document.getElementById('atTeamPasswordErr')?.classList.add('show');  ok = false; }
+  if (!name)     { document.getElementById('atTeamNameErr')?.classList.add('show'); ok = false; }
+  if (!password || !pwValid) { document.getElementById('atTeamPasswordErr')?.classList.add('show'); ok = false; }
   if (password && password !== passwordConfirm) { document.getElementById('atTeamPasswordConfirmErr')?.classList.add('show'); ok = false; }
-  if (!password) { document.getElementById('atTeamPasswordErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
   try {
