@@ -148,7 +148,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         </div>`).join('');
 
       html += `
-        <div style="background:var(--bg-input);border-radius:10px;padding:14px 16px;margin-bottom:12px;border:1px solid var(--border)">
+        <div style="padding:14px 20px;border-top:1px solid var(--border)">
           <div style="display:flex;align-items:center;margin-bottom:10px">
             <span style="font-weight:700;color:var(--text);font-size:0.95rem">${esc(team.name)}</span>
             <span class="teams-badge teams-badge-owner" style="margin-left:10px">Team Owner</span>
