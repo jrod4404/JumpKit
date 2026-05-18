@@ -562,8 +562,21 @@ window.selectTeam = async function(teamId) {
 };
 
 // ── Org-Owner: Add Team Modal ─────────────────────────────────────
-window.openAddTeamModal = function() {
+window.openAddTeamModal = async function() {
   if (!selectedOrgId) return;
+
+  // Free tier: check team limit before showing the modal
+  const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+  if (tier === 'free') {
+    const { data: existingTeams } = await supabaseClient.from('teams').select('id').eq('org_id', selectedOrgId);
+    if (existingTeams && existingTeams.length >= 1) {
+      showUpgradeModal(
+        'Team Limit Reached',
+        'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Core for unlimited teams, unlimited shared jumps, and unlimited launches.'
+      );
+      return;
+    }
+  }
   const body = `
     <div class="form-group">
       <label class="form-label">Team Name *</label>
@@ -672,23 +685,6 @@ window.saveAddTeam = async function() {
   const _atSpinStart = Date.now();
 
   try {
-    // Free tier: max 1 team
-    const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
-    if (tier === 'free') {
-      const { data: existingTeams } = await supabaseClient
-        .from('teams')
-        .select('id')
-        .eq('org_id', selectedOrgId);
-      if (existingTeams && existingTeams.length >= 1) {
-        Modal.close();
-        showUpgradeModal(
-          'Team Limit Reached',
-          'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Core for unlimited teams, unlimited shared jumps, and unlimited launches.'
-        );
-        return;
-      }
-    }
-
     const hashedPassword = await hashPassword(password);
     const ownerId = _orgOwnerSupaUser?.id;
     const { data: team, error } = await supabaseClient
