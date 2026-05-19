@@ -83,7 +83,7 @@ async function initApp() {
   if (_supabaseUser) {
     try {
       const { data } = await supabaseClient.from('profiles')
-        .select('first_name,last_name,role,subscription_status,subscription_tier,trial_launches_used,ls_customer_id')
+        .select('first_name,last_name,role,subscription_status,subscription_tier,trial_launches_used,ls_customer_id,last_known_tier')
         .eq('id', _supabaseUser.id).single();
       if (data) {
         window._supabaseProfile = data;
@@ -116,6 +116,15 @@ async function initApp() {
               window._ownedTeamIds = (ownedTeams || []).map(t => t.id);
             }).catch(() => { window._ownedTeamIds = []; });
         }
+
+        // Check for Core → free downgrade
+        const currentTier = data.subscription_tier || 'free';
+        const lastKnownTier = data.last_known_tier || currentTier;
+        if (lastKnownTier === 'core' && currentTier === 'free') {
+          setTimeout(() => checkAndHandleDowngrade(), 1500);
+        }
+        // Update last_known_tier to current
+        supabaseClient.from('profiles').update({ last_known_tier: currentTier }).eq('id', _supabaseUser.id).then(() => {});
       }
     } catch (_) {}
   }
@@ -1519,6 +1528,90 @@ window.checkPendingInvites = async function checkPendingInvites() {
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
+  }
+};
+
+// ── Downgrade Handler ─────────────────────────────────────────────
+window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
+  try {
+    if (!window._supabaseUser || !currentUser) return;
+    const userId = _supabaseUser.id;
+    const localUserId = currentUser.id;
+
+    // 1. Get all teams owned by user, sorted by created_at ascending
+    const { data: ownedTeams = [] } = await supabaseClient
+      .from('teams')
+      .select('id, name, created_at')
+      .eq('owner_id', userId)
+      .order('created_at', { ascending: true });
+
+    const pruneLines = [];
+
+    // 2. Keep earliest team, unshare all others
+    if (ownedTeams.length > 1) {
+      const keepTeam = ownedTeams[0];
+      const pruneTeams = ownedTeams.slice(1);
+      for (const t of pruneTeams) {
+        // Remove shared columns for this team from Supabase
+        await supabaseClient.from('shared_columns').delete().eq('team_id', t.id);
+        // Remove shared jumps for this team from Supabase
+        await supabaseClient.from('shared_jumps').delete().eq('team_id', t.id);
+      }
+      // Update local columns — unshare any belonging to pruned teams
+      const pruneTeamIds = new Set(pruneTeams.map(t => t.id));
+      const allCols = DB.getColumns(localUserId);
+      const updatedCols = allCols.map(c =>
+        c.isShared && pruneTeamIds.has(c.teamId)
+          ? { ...c, isShared: 0, teamId: null, supabaseId: null }
+          : c
+      );
+      DB.saveColumns(localUserId, updatedCols);
+      // Unshare local jumps for pruned teams
+      const allJumps = DB.getJumps(localUserId);
+      allJumps.filter(j => j.isShared && pruneTeamIds.has(j.teamId))
+        .forEach(j => DB.updateJump(localUserId, j.id, { isShared: 0, teamId: null }));
+
+      const prunedNames = pruneTeams.map(t => `<strong>${esc(t.name)}</strong>`).join(', ');
+      pruneLines.push(`Sharing was removed from ${prunedNames}. Only your earliest team <strong>${esc(keepTeam.name)}</strong> remains shared.`);
+    }
+
+    // 3. Check shared columns on the kept team for >10 visible jumps (hidden by UI cap — note only)
+    if (ownedTeams.length >= 1) {
+      const keepTeam = ownedTeams[0];
+      const allCols = DB.getColumns(localUserId);
+      const sharedCols = allCols.filter(c => c.isShared && c.teamId === keepTeam.id);
+      for (const col of sharedCols) {
+        const colJumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id && j.isShared);
+        if (colJumps.length > 10) {
+          pruneLines.push(`<strong>${esc(col.name)}</strong> has ${colJumps.length} shared jumps — only the first 10 are visible to team members until you reactivate Core.`);
+        }
+      }
+    }
+
+    // 4. Show downgrade modal
+    const changesList = pruneLines.length > 0
+      ? `<ul style="text-align:left;margin:12px 0 0;padding-left:18px;font-size:0.85rem;color:var(--text-muted);line-height:1.8">${pruneLines.map(l => `<li>${l}</li>`).join('')}</ul>`
+      : `<p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px">No immediate changes were required on your account.</p>`;
+
+    const body = `
+      <div style="text-align:center;padding:8px 0 4px">
+        <div style="font-size:2rem;margin-bottom:10px">⚠️</div>
+        <h3 style="font-size:1.05rem;font-weight:700;margin-bottom:8px">Your JumpKit Core subscription has ended</h3>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin-bottom:0">Your account has been moved to the free tier. The following changes were made:</p>
+        ${changesList}
+        <p style="font-size:0.8rem;color:var(--text-muted);margin-top:14px">Reactivate Core to restore unlimited launches, teams, and shared jumps.</p>
+      </div>`;
+
+    Modal.open('⚠️ Subscription Ended', body,
+      `<button class="btn btn-subtle" onclick="Modal.close()">OK</button>
+       <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" onclick="window.electronAPI?.openUrl('${LS_CHECKOUT_URL}'); Modal.close()">
+         Reactivate Core
+       </button>`
+    );
+
+    if (typeof renderColumns === 'function') renderColumns();
+  } catch(e) {
+    console.warn('[checkAndHandleDowngrade]', e.message);
   }
 };
 
