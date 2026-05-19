@@ -114,6 +114,8 @@ async function initApp() {
           supabaseClient.from('teams').select('id').eq('owner_id', _supabaseUser.id)
             .then(({ data: ownedTeams }) => {
               window._ownedTeamIds = (ownedTeams || []).map(t => t.id);
+              // Re-render columns now that profile + tier + owned teams are all loaded
+              if (typeof renderColumns === 'function') renderColumns();
             }).catch(() => { window._ownedTeamIds = []; });
         }
 
@@ -1539,11 +1541,16 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     const localUserId = currentUser.id;
 
     // 1. Get all teams owned by user, sorted by created_at ascending
-    const { data: ownedTeams = [] } = await supabaseClient
+    const { data: ownedTeams = [], error: teamsErr } = await supabaseClient
       .from('teams')
       .select('id, name, created_at')
       .eq('owner_id', userId)
       .order('created_at', { ascending: true });
+
+    console.log('[downgrade] ownedTeams:', ownedTeams, 'err:', teamsErr);
+    console.log('[downgrade] currentUser.id:', localUserId);
+    const allColsDebug = DB.getColumns(localUserId);
+    console.log('[downgrade] local cols:', allColsDebug.map(c => ({ name: c.name, isShared: c.isShared, teamId: c.teamId })));
 
     const pruneLines = [];
 
@@ -1580,6 +1587,9 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       const keepTeam = ownedTeams[0];
       const allCols = DB.getColumns(localUserId);
       const sharedCols = allCols.filter(c => c.isShared && c.teamId === keepTeam.id);
+      console.log('[downgrade] keepTeam.id:', keepTeam.id, 'sharedCols:', sharedCols.map(c => ({ name: c.name, teamId: c.teamId, isShared: c.isShared })));
+      const allShared = allCols.filter(c => c.isShared);
+      console.log('[downgrade] all isShared cols:', allShared.map(c => ({ name: c.name, teamId: c.teamId })));
       for (const col of sharedCols) {
         const colJumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id && j.isShared);
         if (colJumps.length > 10) {
