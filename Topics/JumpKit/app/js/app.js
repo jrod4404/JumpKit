@@ -1582,7 +1582,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
     if (ownedTeams.length > 0 && !pruneLines.some(l => l.includes('first created team'))) {
       const keepTeam = ownedTeams[0];
-      pruneLines.push(`Free tier keeps only your first created team <strong>${esc(keepTeam.name || 'your team')}</strong>. All other teams are saved but inactive. Reactivate them — and create new teams — after you upgrade to Core.`);
+      pruneLines.push(`Free tier keeps only your earliest created team <strong>${esc(keepTeam.name || 'your team')}</strong>. All your other teams are saved but no longer activated. Reactivate them and create new teams after you upgrade to Core.`);
     }
 
     // 3. Check all remaining shared columns for >10 visible jumps (members capped at 10)
