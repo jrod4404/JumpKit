@@ -266,7 +266,7 @@ function updateUserDisplay() {
   document.getElementById('userAvatar').textContent = initials;
 }
 
-window.renderSidebarCTA = function renderSidebarCTA() {
+function renderSidebarCTA() {
   const container = document.querySelector('.sidebar-bottom');
   if (!container) return;
   const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
@@ -1683,5 +1683,5 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 };
 
 // ── Boot ───────────────────────────────────────────────────────────
-renderSidebarCTA();
 initAuth();
+renderSidebarCTA();

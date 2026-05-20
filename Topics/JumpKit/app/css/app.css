@@ -61,7 +61,22 @@
 .jump-man-icon { display: block; width: 24px; height: 24px; flex-shrink: 0; margin-right: -2px; }
 .nav-item:hover .nav-icon { color: var(--hover-accent); }
 .nav-item.active .nav-icon { color: var(--hover-accent); }
-.sidebar-bottom { padding: 10px 0; flex-shrink: 0; display: flex; align-items: center; }
+.sidebar-bottom { padding: 10px 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
+.sidebar-cta {
+  margin: 0 18px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  border: none; border-radius: 12px;
+  background: linear-gradient(135deg,#50CACC,#1A4FD6);
+  color: #fff; font-weight: 600; font-size: 0.88rem;
+  padding: 10px 14px;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(16,24,40,0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.sidebar-cta svg { width: 1rem; height: 1rem; fill: white; }
+.sidebar-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(16,24,40,0.4); }
+.sidebar.collapsed .sidebar-cta { display: none; }
+.sidebar-bottom .sidebar-toggle-btn { align-self: center; }
 
 /* ── Main ── */
 .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -172,6 +187,22 @@
 
 /* ── Account Page ── */
 .acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 960px; margin: 0 auto; }
+.acct-upgrade-banner {
+  background: linear-gradient(135deg, rgba(80,202,204,0.15), rgba(26,79,214,0.18));
+  border: 1px solid rgba(80,202,204,0.25);
+  border-radius: var(--radius-lg);
+  padding: 22px 26px;
+  display: flex; gap: 20px; align-items: center;
+}
+.acct-upgrade-banner h3 { margin: 0 0 6px; font-size: 1.1rem; color: var(--text); }
+.acct-upgrade-banner p { margin: 0 0 10px; color: var(--text-muted); font-size: 0.92rem; }
+.acct-upgrade-banner ul { margin: 0; padding-left: 18px; color: var(--text-muted); font-size: 0.88rem; line-height: 1.6; }
+.acct-upgrade-banner ul li { margin: 2px 0; }
+.acct-upgrade-cta { margin-left: auto; }
+@media (max-width: 720px) {
+  .acct-upgrade-banner { flex-direction: column; align-items: flex-start; }
+  .acct-upgrade-cta { width: 100%; }
+}
 .acct-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 .acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .acct-section-title i { font-size: 1.1rem; color: var(--text-muted); }
