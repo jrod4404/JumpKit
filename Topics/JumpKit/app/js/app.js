@@ -1605,9 +1605,11 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       : `<p style="font-size:0.9rem;color:var(--text-muted);margin:12px 0 0">No immediate changes were required on your account.</p>`;
 
     const body = `
-      <div style="padding:6px 0;font-size:0.9rem;line-height:1.6;color:var(--text-muted);text-align:left">
-        <p style="margin:0 0 10px;color:var(--text);display:flex;align-items:center;gap:8px"><span style="font-size:1.2rem">⚠️</span><strong>Your JumpKit Core subscription has ended.</strong></p>
-        <p style="margin:0 0 6px">Your account has been moved to the free tier.${hasChanges ? ' The following changes were made:' : ''}</p>
+      <div style="padding:10px 0 6px;font-size:0.9rem;line-height:1.6;color:var(--text-muted);text-align:left">
+        <div style="text-align:center;margin:0 auto 14px;color:var(--text)">
+          <span style="display:inline-flex;align-items:center;gap:8px;font-weight:600"><span style="font-size:1.3rem">⚠️</span>Your JumpKit Core subscription has ended.</span>
+        </div>
+        <p style="margin:12px 0 6px">Your account has been moved to the free tier.${hasChanges ? ' The following changes were made:' : ''}</p>
         ${changesList}
         <p style="margin:16px 0 0">Reactivate Core to restore unlimited launches, teams, and shared jumps.</p>
       </div>`;
@@ -1620,7 +1622,8 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
     Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">OK</button>
-       ${upgradeBtn.replace('Unlock JumpKit Core!', 'Reactivate JumpKit Core')}`
+       ${upgradeBtn.replace('Unlock JumpKit Core!', 'Reactivate JumpKit Core')}`,
+      'xl'
     );
 
     if (typeof renderColumns === 'function') renderColumns();
