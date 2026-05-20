@@ -1623,7 +1623,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
       `<button class="btn btn-subtle" onclick="Modal.close()">OK</button>
        ${upgradeBtn.replace('Unlock JumpKit Core!', 'Reactivate JumpKit Core')}`,
-      'xl'
+      'lg'
     );
 
     if (typeof renderColumns === 'function') renderColumns();
