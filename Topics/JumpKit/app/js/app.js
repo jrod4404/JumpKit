@@ -1580,9 +1580,9 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       pruneLines.push(`Sharing was removed from ${prunedNames}. Only your earliest team <strong>${esc(keepTeam.name)}</strong> remains shared.`);
     }
 
-    if (ownedTeams.length > 0 && !pruneLines.some(l => l.includes('earliest team'))) {
+    if (ownedTeams.length > 0 && !pruneLines.some(l => l.includes('first created team'))) {
       const keepTeam = ownedTeams[0];
-      pruneLines.push(`Free tier keeps only your earliest shared team <strong>${esc(keepTeam.name || 'your team')}</strong>. Create new teams after you reactivate Core.`);
+      pruneLines.push(`Free tier keeps only your first created team <strong>${esc(keepTeam.name || 'your team')}</strong>. All other teams are saved but inactive. Reactivate them — and create new teams — after you upgrade to Core.`);
     }
 
     // 3. Check all remaining shared columns for >10 visible jumps (members capped at 10)
@@ -1597,11 +1597,12 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
           sharedWarning = true;
         }
       }
-      if (!sharedWarning) {
+      if (!sharedWarning && sharedColsRemaining.length > 0) {
         const col = sharedColsRemaining[0];
         const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
         pruneLines.push(`Shared column <strong>${esc(col.name)}</strong> (${esc(teamName)}) now caps team members at 10 visible jumps until you reactivate Core.`);
       }
+      pruneLines.push('Free tier is limited to <strong>250 lifetime launches</strong> — you have exhausted this allowance.');
     }
 
     // 4. Show downgrade modal
