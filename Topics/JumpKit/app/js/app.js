@@ -119,6 +119,8 @@ async function initApp() {
             }).catch(() => { window._ownedTeamIds = []; });
         }
 
+                renderSidebarCTA();
+
         // Check for Core → free downgrade
         const currentTier = data.subscription_tier || 'free';
         const lastKnownTier = data.last_known_tier || currentTier;
@@ -1682,4 +1684,3 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
 // ── Boot ───────────────────────────────────────────────────────────
 initAuth();
-renderSidebarCTA();
