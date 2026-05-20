@@ -1580,15 +1580,27 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       pruneLines.push(`Sharing was removed from ${prunedNames}. Only your earliest team <strong>${esc(keepTeam.name)}</strong> remains shared.`);
     }
 
+    if (ownedTeams.length > 0 && !pruneLines.some(l => l.includes('earliest team'))) {
+      const keepTeam = ownedTeams[0];
+      pruneLines.push(`Free tier keeps only your earliest shared team <strong>${esc(keepTeam.name || 'your team')}</strong>. Create new teams after you reactivate Core.`);
+    }
+
     // 3. Check all remaining shared columns for >10 visible jumps (members capped at 10)
     const sharedColsRemaining = allCols.filter(c => c.isShared && c.teamId);
     if (sharedColsRemaining.length > 0) {
+      let sharedWarning = false;
       for (const col of sharedColsRemaining) {
-        const colJumps = allJumps.filter(j => j.columnId === col.id && j.isShared);
+        const colJumps = allJumps.filter(j => j.columnId === col.id);
         if (colJumps.length > 10) {
           const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
           pruneLines.push(`<strong>${esc(col.name)}</strong> (${esc(teamName)}) has ${colJumps.length} shared jumps — only the first 10 are visible to team members until you reactivate Core.`);
+          sharedWarning = true;
         }
+      }
+      if (!sharedWarning) {
+        const col = sharedColsRemaining[0];
+        const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
+        pruneLines.push(`Shared column <strong>${esc(col.name)}</strong> (${esc(teamName)}) now caps team members at 10 visible jumps until you reactivate Core.`);
       }
     }
 
