@@ -1602,12 +1602,12 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
         pruneLines.push(`Within your <strong>${esc(teamName)}</strong> team, the shared column <strong>${esc(col.name)}</strong> now caps members at 10 visible jumps until you reactivate Core.`);
       }
-      pruneLines.push(`Free tier is limited to <strong>250 lifetime launches</strong>. You have <strong>${launchesRemaining}</strong> launches remaining.`);
     }
 
     // 4. Show downgrade modal
     const launchesUsed = window._supabaseProfile?.trial_launches_used || 0;
     const launchesRemaining = Math.max(250 - launchesUsed, 0);
+    pruneLines.push(`Free tier is limited to <strong>250 lifetime launches</strong>. You have <strong>${launchesRemaining}</strong> launches remaining.`);
     const hasChanges = pruneLines.length > 0;
     const changesList = hasChanges
       ? `<ul style="text-align:left;margin:12px 0;padding-left:20px;font-size:0.9rem;color:var(--text-muted);line-height:1.85">${pruneLines.map(l => `<li style="margin:6px 0">${l}</li>`).join('')}</ul>`
