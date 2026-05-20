@@ -2762,6 +2762,65 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
 <p>Happy building! 🚀</p>
 
+<h2 id="tier-matrix">8. Tier Limits &amp; Sharing Matrix</h2>
+<p>The table below captures all enforced combinations between JumpKit Core and Free tiers. Use it as the single source of truth when updating paywall logic, onboarding copy, or support docs.</p>
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+  <thead>
+    <tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:8px 12px;text-align:left">Team Owner Tier</th>
+      <th style="padding:8px 12px;text-align:left">Team Member Tier</th>
+      <th style="padding:8px 12px;text-align:left">Owner: Max Teams Shared</th>
+      <th style="padding:8px 12px;text-align:left">Member: Max Teams Joinable</th>
+      <th style="padding:8px 12px;text-align:left">Owner: Max Shared Jumps</th>
+      <th style="padding:8px 12px;text-align:left">Owner: Visible Shared Jumps</th>
+      <th style="padding:8px 12px;text-align:left">Member: Visible Shared Jumps</th>
+      <th style="padding:8px 12px;text-align:left">Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Free</td>
+      <td style="padding:8px 12px">Free</td>
+      <td style="padding:8px 12px">1 (earliest team only)</td>
+      <td style="padding:8px 12px">1</td>
+      <td style="padding:8px 12px">10 (hard stop in save flow)</td>
+      <td style="padding:8px 12px">10 (owner is free)</td>
+      <td style="padding:8px 12px">10 ("+X more / Unlock" block)</td>
+      <td style="padding:8px 12px;color:var(--text-muted)">Downgrade flow unshares newer teams automatically.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Core</td>
+      <td style="padding:8px 12px">Free</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">1</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">10</td>
+      <td style="padding:8px 12px;color:var(--text-muted)">Free viewers are always capped at 10 visible shared jumps.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Free</td>
+      <td style="padding:8px 12px">Core</td>
+      <td style="padding:8px 12px">1</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">10</td>
+      <td style="padding:8px 12px">10</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px;color:var(--text-muted)">Core viewers always see full columns even if owner is capped.</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px">Core</td>
+      <td style="padding:8px 12px">Core</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px">Unlimited</td>
+      <td style="padding:8px 12px;color:var(--text-muted)">No caps anywhere.</td>
+    </tr>
+  </tbody>
+</table>
+
 <hr>
 <h2 id="onboarding">9. User Onboarding</h2>
 
