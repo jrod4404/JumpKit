@@ -1593,14 +1593,14 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         const colJumps = allJumps.filter(j => j.columnId === col.id);
         if (colJumps.length > 10) {
           const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
-          pruneLines.push(`<strong>${esc(col.name)}</strong> (${esc(teamName)}) has ${colJumps.length} shared jumps — only the first 10 are visible to team members until you reactivate Core.`);
+          pruneLines.push(`Within your <strong>${esc(teamName)}</strong> team, the shared column <strong>${esc(col.name)}</strong> now caps members at 10 visible jumps until you reactivate Core.`);
           sharedWarning = true;
         }
       }
       if (!sharedWarning && sharedColsRemaining.length > 0) {
         const col = sharedColsRemaining[0];
         const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
-        pruneLines.push(`Shared column <strong>${esc(col.name)}</strong> (${esc(teamName)}) now caps team members at 10 visible jumps until you reactivate Core.`);
+        pruneLines.push(`Within your <strong>${esc(teamName)}</strong> team, the shared column <strong>${esc(col.name)}</strong> now caps members at 10 visible jumps until you reactivate Core.`);
       }
       pruneLines.push('Free tier is limited to <strong>250 lifetime launches</strong> — you have exhausted this allowance.');
     }
@@ -1618,7 +1618,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         </div>
         <p style="margin:12px 0">Your account has been moved to the free tier.${hasChanges ? ' The following changes were made:' : ''}</p>
         ${changesList}
-        <p style="margin:12px 0">Reactivate Core to restore unlimited launches, teams, and shared jumps.</p>
+        <p style="margin:12px 0">Reactivate Core to restore unlimited teams, unlimited shared jumps, and unlimited launches.</p>
       </div>`;
 
     const upgradeBtn = `
