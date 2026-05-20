@@ -2810,7 +2810,11 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   </tbody>
 </table>
 
-<h2 id="conclusion">8. Conclusion</h2>
+<h2 id="onboarding">8. User Onboarding</h2>
+<p>New users are guided through a 3-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
+...
+
+<h2 id="conclusion">9. Conclusion</h2>
 <p>JumpKit is a thoughtfully architected desktop app that balances:</p>
 <ul>
 <li><strong>Local-first</strong>: Personal data stays on device, fast synchronous reads</li>
@@ -2820,8 +2824,6 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </ul>
 <p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
 <p>Happy building! 🚀</p>
-
-<h2 id="onboarding">9. User Onboarding</h2>
 <p>The table below captures all enforced combinations between JumpKit Core and Free tiers. Use it as the single source of truth when updating paywall logic, onboarding copy, or support docs.</p>
 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
   <thead>
