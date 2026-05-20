@@ -119,6 +119,8 @@ async function initApp() {
             }).catch(() => { window._ownedTeamIds = []; });
         }
 
+        renderSidebarCTA();
+
         // Check for Core → free downgrade
         const currentTier = data.subscription_tier || 'free';
         const lastKnownTier = data.last_known_tier || currentTier;
@@ -262,6 +264,27 @@ function updateUserDisplay() {
     : (nameParts[0]?.[0] || '?').toUpperCase();
   document.getElementById('userName').textContent = displayName || currentUser?.email || '';
   document.getElementById('userAvatar').textContent = initials;
+}
+
+window.renderSidebarCTA = function renderSidebarCTA() {
+  const container = document.querySelector('.sidebar-bottom');
+  if (!container) return;
+  const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+  let cta = container.querySelector('.sidebar-cta');
+  if (tier === 'free') {
+    if (!cta) {
+      cta = document.createElement('button');
+      cta.className = 'sidebar-cta';
+      cta.innerHTML = `<svg viewBox="0 0 105.74 122.88"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31-0.83-1.07-1.31-1.7-1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19-0.86-0.88-1.44-1.54-1.29L22.26,22.99z"/></svg>
+        Reactivate JumpKit Core`;
+      cta.addEventListener('click', () => window.electronAPI?.openUrl(LS_CHECKOUT_URL));
+      const toggleBtn = container.querySelector('.sidebar-toggle-btn');
+      if (toggleBtn) container.insertBefore(cta, toggleBtn);
+      else container.appendChild(cta);
+    }
+  } else if (cta) {
+    cta.remove();
+  }
 }
 
 // ── User Dropdown ──────────────────────────────────────────────────
@@ -706,6 +729,24 @@ function renderAccount(initialTab = 'account') {
     if (tab === 'account') {
       el.innerHTML = `
         <div class="acct-grid">
+          ${tier === 'free' ? `
+          <div class="acct-upgrade-banner">
+            <div>
+              <h3>Unlock JumpKit Core</h3>
+              <p>Unlimited teams, shared jumps, launches — plus full automation support.</p>
+              <ul>
+                <li>Share every column with your team</li>
+                <li>Remove the 250 launch cap</li>
+                <li>Priority support + future Jet AI access</li>
+              </ul>
+            </div>
+            <div class="acct-upgrade-cta">
+              <button class="btn btn-primary" style="width:100%;background:linear-gradient(135deg,#50CACC,#1A4FD6)" onclick="window.electronAPI?.openUrl('${LS_CHECKOUT_URL}')">
+                <svg viewBox="0 0 105.74 122.88" style="width:1.1rem;height:1.1rem;fill:white;flex-shrink:0;vertical-align:middle;margin-right:6px"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83-1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31-0.83-1.07-1.31-1.7-1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31-0.83-1.07-1.31-1.7-1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83-1.07-1.31-1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19-0.86-0.88-1.44-1.54-1.29L22.26,22.99L22.26,22.99 z"/></svg>
+                Reactivate JumpKit Core
+              </button>
+            </div>
+          </div>` : ''}
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
             <div class="acct-row">
@@ -1642,4 +1683,5 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 };
 
 // ── Boot ───────────────────────────────────────────────────────────
+renderSidebarCTA();
 initAuth();
