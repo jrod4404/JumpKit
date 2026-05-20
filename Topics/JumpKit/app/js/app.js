@@ -1539,6 +1539,8 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     if (!window._supabaseUser || !currentUser) return;
     const userId = _supabaseUser.id;
     const localUserId = currentUser.id;
+    let allCols = DB.getColumns(localUserId);
+    let allJumps = DB.getActiveJumps(localUserId);
 
     // 1. Get all teams owned by user, sorted by created_at ascending
     const { data: ownedTeams = [], error: teamsErr } = await supabaseClient
@@ -1546,11 +1548,6 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       .select('id, name, created_at')
       .eq('owner_id', userId)
       .order('created_at', { ascending: true });
-
-    console.log('[downgrade] ownedTeams:', ownedTeams, 'err:', teamsErr);
-    console.log('[downgrade] currentUser.id:', localUserId);
-    const allColsDebug = DB.getColumns(localUserId);
-    console.log('[downgrade] local cols:', allColsDebug.map(c => ({ name: c.name, isShared: c.isShared, teamId: c.teamId })));
 
     const pruneLines = [];
 
@@ -1566,34 +1563,31 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       }
       // Update local columns — unshare any belonging to pruned teams
       const pruneTeamIds = new Set(pruneTeams.map(t => t.id));
-      const allCols = DB.getColumns(localUserId);
       const updatedCols = allCols.map(c =>
         c.isShared && pruneTeamIds.has(c.teamId)
           ? { ...c, isShared: 0, teamId: null, supabaseId: null }
           : c
       );
       DB.saveColumns(localUserId, updatedCols);
+      allCols = updatedCols;
       // Unshare local jumps for pruned teams
-      const allJumps = DB.getJumps(localUserId);
-      allJumps.filter(j => j.isShared && pruneTeamIds.has(j.teamId))
+      const jumpsBefore = DB.getJumps(localUserId);
+      jumpsBefore.filter(j => j.isShared && pruneTeamIds.has(j.teamId))
         .forEach(j => DB.updateJump(localUserId, j.id, { isShared: 0, teamId: null }));
+      allJumps = DB.getActiveJumps(localUserId);
 
       const prunedNames = pruneTeams.map(t => `<strong>${esc(t.name)}</strong>`).join(', ');
       pruneLines.push(`Sharing was removed from ${prunedNames}. Only your earliest team <strong>${esc(keepTeam.name)}</strong> remains shared.`);
     }
 
-    // 3. Check shared columns on the kept team for >10 visible jumps (hidden by UI cap — note only)
-    if (ownedTeams.length >= 1) {
-      const keepTeam = ownedTeams[0];
-      const allCols = DB.getColumns(localUserId);
-      const sharedCols = allCols.filter(c => c.isShared && c.teamId === keepTeam.id);
-      console.log('[downgrade] keepTeam.id:', keepTeam.id, 'sharedCols:', sharedCols.map(c => ({ name: c.name, teamId: c.teamId, isShared: c.isShared })));
-      const allShared = allCols.filter(c => c.isShared);
-      console.log('[downgrade] all isShared cols:', allShared.map(c => ({ name: c.name, teamId: c.teamId })));
-      for (const col of sharedCols) {
-        const colJumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id && j.isShared);
+    // 3. Check all remaining shared columns for >10 visible jumps (members capped at 10)
+    const sharedColsRemaining = allCols.filter(c => c.isShared && c.teamId);
+    if (sharedColsRemaining.length > 0) {
+      for (const col of sharedColsRemaining) {
+        const colJumps = allJumps.filter(j => j.columnId === col.id && j.isShared);
         if (colJumps.length > 10) {
-          pruneLines.push(`<strong>${esc(col.name)}</strong> has ${colJumps.length} shared jumps — only the first 10 are visible to team members until you reactivate Core.`);
+          const teamName = ownedTeams.find(t => t.id === col.teamId)?.name || 'your team';
+          pruneLines.push(`<strong>${esc(col.name)}</strong> (${esc(teamName)}) has ${colJumps.length} shared jumps — only the first 10 are visible to team members until you reactivate Core.`);
         }
       }
     }
