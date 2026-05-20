@@ -1610,7 +1610,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     const launchesUsed = window._supabaseProfile?.trial_launches_used || 0;
     const launchesRemaining = Math.max(250 - launchesUsed, 0);
     const changesList = hasChanges
-      ? `<ul style="text-align:left;margin:12px 0;padding-left:18px;font-size:0.9rem;color:var(--text-muted);line-height:1.7">${pruneLines.map(l => `<li>${l}</li>`).join('')}</ul>`
+      ? `<ul style="text-align:left;margin:12px 0;padding-left:20px;font-size:0.9rem;color:var(--text-muted);line-height:1.85">${pruneLines.map(l => `<li style="margin:6px 0">${l}</li>`).join('')}</ul>`
       : `<p style="font-size:0.9rem;color:var(--text-muted);margin:12px 0">No immediate changes were required on your account.</p>`;
 
     const body = `
