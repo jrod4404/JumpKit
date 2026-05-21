@@ -54,6 +54,22 @@ async function renderTeams(containerEl) {
 }
 
 // ── Unified Teams View (replaces org-owner / team-owner / team-member views) ─
+// ── Team collapse/expand ─────────────────────────────────────────
+function _getTeamCollapsedState() {
+  try { return JSON.parse(localStorage.getItem('jk_teams_collapsed') || '{}'); } catch { return {}; }
+}
+function _getTeamCollapsed(teamId) {
+  return !!_getTeamCollapsedState()[teamId];
+}
+window.toggleTeam = function(teamId) {
+  const entry = document.getElementById('teamEntry_' + teamId);
+  if (!entry) return;
+  const nowCollapsed = entry.classList.toggle('acct-team-collapsed');
+  const state = _getTeamCollapsedState();
+  state[teamId] = nowCollapsed;
+  localStorage.setItem('jk_teams_collapsed', JSON.stringify(state));
+};
+
 async function renderUnifiedTeamsView(content, supaUser) {
   // Auto-create org silently if user doesn't have one
   let { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', supaUser.id).single();
@@ -177,11 +193,16 @@ async function renderUnifiedTeamsView(content, supaUser) {
       if (createdDate) statsParts.push(`created ${createdDate}`);
       const statsText = statsParts.join(' · ');
 
+      const isCollapsed = _getTeamCollapsed(team.id);
+
       html += `
-        <div class="acct-team-entry">
+        <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <span class="acct-team-name">${esc(team.name)}</span>
+              <div class="acct-team-name-row">
+                <button class="acct-team-chevron" data-tooltip="Collapse / expand" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+                <span class="acct-team-name">${esc(team.name)}</span>
+              </div>
               ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
             </div>
             <div class="acct-team-actions">
@@ -190,8 +211,10 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
           </div>
-          ${memberPills}
-          ${sortedInvites.length > 0 ? invitePills : ''}
+          <div class="acct-team-members">
+            ${memberPills}
+            ${sortedInvites.length > 0 ? invitePills : ''}
+          </div>
         </div>`;
     }
   }

@@ -240,6 +240,15 @@
 .acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; align-items: flex-start; }
 .acct-team-entry:first-of-type { border-top: none; }
 .acct-team-name-block { display: flex; flex-direction: column; gap: 2px; }
+.acct-team-name-row { display: flex; align-items: center; gap: 6px; }
+.acct-team-chevron {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: var(--text-dim); display: flex; align-items: center; flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.acct-team-chevron:hover { color: var(--text-muted); }
+.acct-team-entry.acct-team-collapsed .acct-team-chevron { transform: rotate(-90deg); }
+.acct-team-entry.acct-team-collapsed .acct-team-members { display: none; }
 .acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; }
 .acct-team-stats { font-size: 0.72rem; color: var(--text-dim); font-weight: 400; }
 /* Name + email on same line */
