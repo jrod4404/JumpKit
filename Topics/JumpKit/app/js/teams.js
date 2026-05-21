@@ -1754,20 +1754,20 @@ function addTeamsStyles() {
   style.textContent = `
     .teams-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 3px 10px; border-radius: 20px;
-      font-size: .72rem; font-weight: 500;
-      background: rgba(0,194,199,0.14); color: var(--text-muted);
-      border: 1px solid rgba(0,194,199,0.29);
+      padding: 4px 10px; border-radius: 10px;
+      font-size: 0.75rem; font-weight: 500;
+      background: rgba(0,194,199,0.15); color: var(--text-muted);
+      border: 1px solid rgba(0,194,199,0.32);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.14); color: var(--text-muted);
-      border-color: rgba(26,79,214,0.34);
+      background: rgba(26,79,214,0.15); color: var(--text-muted);
+      border-color: rgba(26,79,214,0.37);
       margin-right: 40px;
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.14); color: var(--text-muted);
-      border-color: rgba(250,173,20,0.29);
+      background: rgba(250,173,20,0.15); color: var(--text-muted);
+      border-color: rgba(250,173,20,0.32);
     }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
