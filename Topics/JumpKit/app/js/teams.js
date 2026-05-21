@@ -154,26 +154,32 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
-        const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
-        // Grid: [label] [pill col2] [empty col3] [delete col4]
-        return `<div class="acct-row acct-member-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div>${pill}<span></span>${actionBtn || '<span></span>'}</div>`;
+        // Name + email on same line; pill stacked below
+        const nameEmail = `<div class="acct-name-email"><span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
+        return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}${pill}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
       }).join('');
 
       const invitePills = sortedInvites.map(inv => `
         <div class="acct-row acct-member-row">
-          <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
-          <span class="teams-badge teams-badge-pending">Pending</span>
-          <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
-          <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+          <div class="acct-row-label">
+            <div class="acct-name-email"><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
+            <span class="teams-badge teams-badge-pending">Pending</span>
+          </div>
+          <div class="acct-member-actions">
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+          </div>
         </div>`).join('');
 
       html += `
         <div class="acct-team-entry">
           <div class="acct-team-header">
             <span class="acct-team-name">${esc(team.name)}</span>
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <div class="acct-team-actions">
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            </div>
           </div>
           ${memberPills}
           ${sortedInvites.length > 0 ? invitePills : ''}
@@ -222,26 +228,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   content.innerHTML = html;
   addTeamsStyles();
 
-  // ── Align pill column under Invite button ──
-  // Each row is a separate CSS grid, so auto column widths are computed
-  // independently. We measure the header button widths after render and
-  // apply them as min-width to pills and empty placeholder spans.
-  requestAnimationFrame(() => {
-    const headerBtns = content.querySelectorAll('.acct-team-header > button');
-    if (headerBtns.length < 3) return;
-    const [inviteW, lockW] = [...headerBtns].map(b => b.offsetWidth);
-    // Col 2: pills must be at least as wide as the Invite button
-    content.querySelectorAll('.acct-member-row .teams-badge').forEach(b => {
-      b.style.minWidth = inviteW + 'px';
-    });
-    // Col 3: empty placeholder spans must be as wide as the Lock button
-    content.querySelectorAll('.acct-member-row').forEach(row => {
-      const col3 = row.children[2];
-      if (col3 && col3.tagName === 'SPAN' && !col3.classList.length) {
-        col3.style.minWidth = lockW + 'px';
-      }
-    });
-  });
+
 }
 
 // Helper: open invite modal wired to unified view
@@ -1754,16 +1741,15 @@ function addTeamsStyles() {
   style.textContent = `
     .teams-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 4px 10px; border-radius: 10px;
-      font-size: 0.75rem; font-weight: 500;
+      padding: 2px 9px; border-radius: 6px;
+      font-size: 0.70rem; font-weight: 500;
       background: rgba(0,194,199,0.15); color: var(--text-muted);
       border: 1px solid rgba(0,194,199,0.32);
-      white-space: nowrap;
+      white-space: nowrap; margin-top: 5px;
     }
     .teams-badge-owner {
       background: rgba(26,79,214,0.15); color: var(--text-muted);
       border-color: rgba(26,79,214,0.37);
-      margin-right: 40px;
     }
     .teams-badge-pending {
       background: rgba(250,173,20,0.15); color: var(--text-muted);
