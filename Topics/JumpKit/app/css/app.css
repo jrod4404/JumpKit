@@ -235,7 +235,10 @@
 .acct-team-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
 .acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Fixed-width pill column so Owner / Member / Pending always align */
-.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; gap: 0; }
+.acct-team-entry .acct-member-row {
+  justify-content: flex-start; /* override space-between so flex:1 on label works */
+  padding-left: 0; padding-right: 0; gap: 0;
+}
 .acct-team-entry .acct-member-row .acct-row-label { flex: 1; min-width: 0; }
 .acct-team-entry .acct-member-row .teams-badge {
   width: 76px; flex-shrink: 0;
