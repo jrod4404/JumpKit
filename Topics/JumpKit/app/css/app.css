@@ -63,7 +63,7 @@
 .nav-item.active .nav-icon { color: var(--hover-accent); }
 .sidebar-bottom { padding: 10px 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
 .sidebar-bottom .sidebar-toggle-btn { align-self: center; }
-.sidebar-cta { margin: 0 18px; }
+.sidebar-cta { margin: 0 18px; font-size: 0.72rem; padding: 6px 8px; white-space: nowrap; overflow: hidden; }
 .sidebar.collapsed .sidebar-cta { display: none; }
 
 .jump-cta-icon { width: 16px; height: 16px; fill: currentColor; }
@@ -79,6 +79,7 @@
 }
 .unlock-btn span { white-space: nowrap; font-weight: 600; }
 .unlock-btn:hover { box-shadow: 0 14px 32px rgba(16,24,40,0.4); }
+.sidebar-cta.unlock-btn { padding: 7.9px 18px; }
 
 /* ── Main ── */
 .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
@@ -188,7 +189,7 @@
 }
 
 /* ── Account Page ── */
-.acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 960px; margin: 0 auto; }
+.acct-grid { display: flex; flex-direction: column; gap: 20px; max-width: 960px; margin: 0 auto; padding: 4px 0 24px; }
 .acct-upgrade-banner {
   background: linear-gradient(135deg, rgba(80,202,204,0.15), rgba(26,79,214,0.18));
   border: 1px solid rgba(80,202,204,0.25);
@@ -206,6 +207,8 @@
   .acct-upgrade-cta { width: 100%; }
 }
 .acct-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+/* Allow dropdowns inside sections to overflow the card boundary */
+.acct-section:has(.custom-select) { overflow: visible; }
 .acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .acct-section-title i { font-size: 1.1rem; color: var(--text-muted); }
 .acct-section-title svg.ti { width: 1.3rem; height: 1.3rem; color: var(--text-muted); }
@@ -219,6 +222,16 @@
 .acct-number { width: 72px; text-align: center; padding: 6px 8px; }
 .acct-unit { font-size: 0.8rem; color: var(--text-dim); }
 .acct-save-row { display: flex; justify-content: flex-end; }
+
+/* ── Teams tab entries ── */
+.acct-teams-wrap { padding: 0; height: 100%; }
+.acct-team-entry { padding: 14px 20px; border-top: 1px solid var(--border); }
+.acct-team-entry:first-of-type { border-top: none; }
+.acct-team-header { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
+.acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; flex-shrink: 0; }
+.acct-team-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+.acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.acct-empty-state { padding: 20px; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
 
 .feedback-wrap { display: flex; justify-content: center; padding-top: 12px; }
 .feedback-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 520px; }

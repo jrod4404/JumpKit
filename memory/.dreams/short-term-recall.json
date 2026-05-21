@@ -1,0 +1,425 @@
+{
+  "version": 1,
+  "updatedAt": "2026-05-21T11:22:34.882Z",
+  "entries": {
+    "memory:memory/2026-03-01.md:73:82": {
+      "key": "memory:memory/2026-03-01.md:73:82",
+      "path": "memory/2026-03-01.md",
+      "startLine": 73,
+      "endLine": 82,
+      "source": "memory",
+      "snippet": "## JumpKit App — Tech Notes - Auth: localStorage-based (signup/login/forgot password) - DB: localStorage abstraction in db.js (easy swap to SQLite in Electron) - Styling: Tabler Icons throughout (grayscale), turquoise+royal blue accent, light/dark mode - Color palette: --royal #1A4FD6, --turq #00C2C7, --hover-accent #2B9ED8 - Text softened: dark --text #C8D6E8, light --text #2C3E52 - Pages: Home, Jumps (columns + context menus), Archive, Stats (placeholder), Help, Settings (placeholder), Account (placeholder) - User dropdown in topbar (Settings, My Account, Logout) - Drag-and-drop column reordering in configure columns modal",
+      "recallCount": 4,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.6376597702503202,
+      "maxScore": 0.4372597575187683,
+      "firstRecalledAt": "2026-05-20T20:49:52.957Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "401b0ff2f490",
+        "cd71ff1b4e59",
+        "84f72e652e71",
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "localstorage-based",
+        "signup/login/forgot",
+        "db.js",
+        "light/dark",
+        "hover-accent",
+        "drag-and-drop",
+        "jumpkit",
+        "app"
+      ]
+    },
+    "memory:memory/2026-05-11.md:57:87": {
+      "key": "memory:memory/2026-05-11.md:57:87",
+      "path": "memory/2026-05-11.md",
+      "startLine": 57,
+      "endLine": 87,
+      "source": "memory",
+      "snippet": "- [x] Account + Teams page UI cleanup — DONE: merged into Account page with slider toggle (2026-05-11) - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy or download ### 🔵 Low Priority / Post-launch - [ ] Dev/prod database separation — create separate Supabase project for dev - [ ] Supabase backups — verify/upgrade plan - [ ] Rebuild Windows installer with latest code before distribution - [ ] Swap send-feedback from/to once jumpkit.ai verified in Resend - [ ] Update send-invite from address once jumpkit.ai verified - [ ] Pagination on list queries (teams, members) ## Latest Git Commits (as of 2026-05-10) - `b0dc4d9` — Code quality: fix unchecked awaits in teams.js; add tests 73-77",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.35562654733657834,
+      "maxScore": 0.35562654733657834,
+      "firstRecalledAt": "2026-05-20T20:49:52.957Z",
+      "lastRecalledAt": "2026-05-20T20:49:52.957Z",
+      "queryHashes": [
+        "401b0ff2f490"
+      ],
+      "recallDays": [
+        "2026-05-20"
+      ],
+      "conceptTags": [
+        "backup",
+        "backups",
+        "post-launch",
+        "dev/prod",
+        "verify/upgrade",
+        "send-feedback",
+        "from/to",
+        "jumpkit.ai"
+      ]
+    },
+    "memory:memory/2026-05-03.md:1:34": {
+      "key": "memory:memory/2026-05-03.md:1:34",
+      "path": "memory/2026-05-03.md",
+      "startLine": 1,
+      "endLine": 34,
+      "source": "memory",
+      "snippet": "# 2026-05-03 — Session Notes ## Infrastructure - Supabase free tier had paused the JumpKit project over the weekend — Jeff resumed it manually, back online by ~7:55 AM - jumpkit.app DNS is correct (all 3 Vercel A records in GoDaddy), landing page renders via HTTP - Vercel still showing \"invalid configuration\" for SSL cert as of morning — Jeff hit Refresh, pending resolution - No vercel.json in landing repo (confirmed) ## JumpKit Landing Page — Major Updates Today ### Hero Section - Replaced both mock window HTML elements with real app screenshot - Dark mode: `assets/Jumpkit-hero.png` - Light mode: `assets/Jumpkit-hero-light.png` - CSS uses `[data-theme]` attribute to swap images automatic",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7626245349645614,
+      "maxScore": 0.41001847982406614,
+      "firstRecalledAt": "2026-05-20T20:49:52.957Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "401b0ff2f490",
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "jumpkit.app",
+        "vercel.json",
+        "assets/jumpkit-hero.png",
+        "assets/jumpkit-hero-light.png",
+        "data-theme",
+        "infrastructure",
+        "supabase",
+        "free"
+      ]
+    },
+    "memory:memory/2026-05-03.md:27:60": {
+      "key": "memory:memory/2026-05-03.md:27:60",
+      "path": "memory/2026-05-03.md",
+      "startLine": 27,
+      "endLine": 60,
+      "source": "memory",
+      "snippet": "### Solution Section (new) - Added after Problem section - Title: \"Jumpkit\" - Subtitle: \"One app to store, launch, and share your navigation data without anyone ever changing it.\" - Contains Supademo \"Try the Interactive Demo\" button (ID: cmopzrg0m0510xa0jfqglvrfv) - Removed standalone \"Live Demo\" section ### Nav Updates - Desktop hero-section-nav: 7 links in 2 rows (flex-wrap, max-width 520px) - Home, The Problem, The Solution, Features, Dashboard, How It Works, Pricing - Mobile offcanvas: same links with icons ### Style Tweaks - Section title size reduced: `clamp(1.6rem, 3vw, 2.4rem)` - `section-sub` now globally centered with `margin: 0 auto` and `text-align: center` - Light mode text",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7111361235380173,
+      "maxScore": 0.3591873347759247,
+      "firstRecalledAt": "2026-05-20T20:49:52.957Z",
+      "lastRecalledAt": "2026-05-20T21:28:25.062Z",
+      "queryHashes": [
+        "401b0ff2f490",
+        "cd71ff1b4e59"
+      ],
+      "recallDays": [
+        "2026-05-20"
+      ],
+      "conceptTags": [
+        "hero-section-nav",
+        "flex-wrap",
+        "max-width",
+        "1.6rem",
+        "2.4rem",
+        "section-sub",
+        "text-align",
+        "solution"
+      ]
+    },
+    "memory:memory/2026-05-17.md:47:61": {
+      "key": "memory:memory/2026-05-17.md:47:61",
+      "path": "memory/2026-05-17.md",
+      "startLine": 47,
+      "endLine": 61,
+      "source": "memory",
+      "snippet": "- [ ] Welcome to JumpKit Core — test with a real paid subscription event - [ ] Cancellation email — test - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer - [ ] Pagination on list queries ## Key Identifiers - New Edge Functions: `send-welcome` (deployed ✅), `send-welcome-core` (not yet deployed), `send-cancellation` (not yet deployed) - Onboarding file: `Topics/JumpKit/app/js/onboarding.js` - Git corruption: object `be1cf517c9cde53a9290fbe61a8472f56a4e8eb3` - Backups: `a",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3516550153493881,
+      "maxScore": 0.3516550153493881,
+      "firstRecalledAt": "2026-05-20T20:49:52.957Z",
+      "lastRecalledAt": "2026-05-20T20:49:52.957Z",
+      "queryHashes": [
+        "401b0ff2f490"
+      ],
+      "recallDays": [
+        "2026-05-20"
+      ],
+      "conceptTags": [
+        "backup",
+        "backups",
+        "4.1",
+        "4.2",
+        "send-feedback.js",
+        "dev/prod",
+        "send-welcome",
+        "send-welcome-core"
+      ]
+    },
+    "memory:memory/2026-04-07.md:1:30": {
+      "key": "memory:memory/2026-04-07.md:1:30",
+      "path": "memory/2026-04-07.md",
+      "startLine": 1,
+      "endLine": 30,
+      "source": "memory",
+      "snippet": "# 2026-04-07 — Session Notes ## 📋 JumpKit To-Do List (as of Apr 10) 1. **Audit tests 46–51** — verify team sharing writes to Supabase + local SQLite are in sync 2. **Live invite email test** — trigger a real team invite, verify end-to-end delivery via Resend 3. **Account + Teams page UI cleanup** — review layout/design, evaluate merging into one page 4. **Supademo** — Jeff records demo, Max swaps into landing page in place of static screenshots 5. **Connect \"Get JumpKit Now\" landing page buttons to Lemon Squeezy** — free tier card button still links to `#` (download placeholder), needs to be wired to actual download or LS flow 6. **Security + vibe coding audit + backup** — check for secur",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7783125400543212,
+      "maxScore": 0.39642322957515713,
+      "firstRecalledAt": "2026-05-20T21:28:25.062Z",
+      "lastRecalledAt": "2026-05-21T11:22:31.234Z",
+      "queryHashes": [
+        "cd71ff1b4e59",
+        "84f72e652e71"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "backup",
+        "to-do",
+        "end-to-end",
+        "layout/design",
+        "jumpkit",
+        "list",
+        "apr",
+        "audit"
+      ]
+    },
+    "memory:memory/2026-05-03.md:55:65": {
+      "key": "memory:memory/2026-05-03.md:55:65",
+      "path": "memory/2026-05-03.md",
+      "startLine": 55,
+      "endLine": 65,
+      "source": "memory",
+      "snippet": "- [ ] Verify Vercel SSL cert resolved for jumpkit.app (was pending) - [ ] Audit tests 46–51 — team sharing Supabase + SQLite sync - [ ] Live invite email test end-to-end via Resend - [ ] Account + Teams page UI cleanup (consider merging) - [ ] Wire \"Get JumpKit Free Tier\" button → actual download or Lemon Squeezy - [ ] Security + vibe coding audit + backup - [ ] Once jumpkit.ai verified in Resend → swap from/to addresses in send-feedback edge function - [ ] Add Windows screenshot of JumpKit to hero section - [x] Add industry icons and cards to hero section - [x] Add two more cards to Features section",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7307067483663559,
+      "maxScore": 0.36752284765243526,
+      "firstRecalledAt": "2026-05-20T21:28:25.062Z",
+      "lastRecalledAt": "2026-05-21T11:22:31.234Z",
+      "queryHashes": [
+        "cd71ff1b4e59",
+        "84f72e652e71"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "backup",
+        "jumpkit.app",
+        "end-to-end",
+        "jumpkit.ai",
+        "from/to",
+        "send-feedback",
+        "verify",
+        "vercel"
+      ]
+    },
+    "memory:memory/2026-03-29.md:1:28": {
+      "key": "memory:memory/2026-03-29.md:1:28",
+      "path": "memory/2026-03-29.md",
+      "startLine": 1,
+      "endLine": 28,
+      "source": "memory",
+      "snippet": "# 2026-03-29 — JumpKit Session Notes ## Session summary Long JumpKit dev session. Context grew to ~900k tokens — compacted to save costs. Haiku set as default model for new sessions. ## Features completed today ### Column config modal - Replaced native `<select>` with custom-select component for \"Share With\" dropdown - Grid updated to `28px 1fr 70px 240px`; labels (\"Column Name\", \"Visible\", \"Share With\") added above each control - Share dropdown height fixed to 30.4px matching inputs; drag handle padding tuned to 7px - Close handler scoped to modalBox element only (not document) to avoid interfering with other modals ### Add Jump modal - Column dropdown placeholder \"Select Column\" in mut",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.1602339565753936,
+      "maxScore": 0.4062155097723007,
+      "firstRecalledAt": "2026-05-20T21:28:25.062Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "cd71ff1b4e59",
+        "84f72e652e71",
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "custom-select",
+        "30.4px",
+        "jumpkit",
+        "summary",
+        "dev",
+        "context",
+        "grew",
+        "900k"
+      ]
+    },
+    "memory:memory/2026-05-15.md:26:54": {
+      "key": "memory:memory/2026-05-15.md:26:54",
+      "path": "memory/2026-05-15.md",
+      "startLine": 26,
+      "endLine": 54,
+      "source": "memory",
+      "snippet": "- `Topics/JumpKit/app/css/auth.css` — auth card height 792px - `Topics/JumpKit/app/main.js` — seed guard: checks existing columns before seeding - `Topics/JumpKit/JUMPKIT_DOCS.html` — Section 6 added, both 2026-05-14 AM and PM changelogs - `memory/2026-05-14.md` — full end-of-day notes ### Completed 2026-05-15 - ✅ Hotkey input activates on tab + click - ✅ Forgot password browser-only reset flow — `jumpkit.app/reset-password` - ✅ Reset password live validation checklist (5 rules) - ✅ Branded reset email template in Supabase - ✅ `icon-check-white.png` + `icon-reset-white.png` generated + deployed - ✅ Confirm + reset Supabase email templates updated (margin, white icons) - ✅ `confirmed.html` f",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7704911202192306,
+      "maxScore": 0.41357643008232114,
+      "firstRecalledAt": "2026-05-20T21:28:25.062Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "cd71ff1b4e59",
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-20",
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "topics/jumpkit/app/css/auth.css",
+        "topics/jumpkit/app/main.js",
+        "topics/jumpkit/jumpkit-docs.html",
+        "memory/2026-05-14.md",
+        "end-of-day",
+        "browser-only",
+        "jumpkit.app/reset-password",
+        "icon-check-white.png"
+      ]
+    },
+    "memory:memory/2026-03-17.md:57:103": {
+      "key": "memory:memory/2026-03-17.md:57:103",
+      "path": "memory/2026-03-17.md",
+      "startLine": 57,
+      "endLine": 103,
+      "source": "memory",
+      "snippet": "- Webhook URL: https://iuexwdjnqfidcwvwbgwr.supabase.co/functions/v1/ls-webhook - Signing secret set in Supabase secrets as LEMON_SQUEEZY_SIGNING_SECRET - Edge function deployed: ls-webhook ### App changes - Auth: Sign In + Sign Up only (Join a Team removed from public UI) - Free tier: 250 launch limit, paywall modal shown on limit hit - Subscription status checked on every login - Paywall CTAs point to https://jumpkit.app/#pricing ### Supabase CLI - Installed via brew, token stored: sbp_a4fe90fcaa750a1106c803356153603039cb283f (ForSetupConfigs) - Project linked at: Topics/JumpKit/app/ ### Backup - app_backup_2026-03-25 created --- ## TODO List (updated 2026-03-28) **Done:** 1. ✅ Popula",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.5532527478899848,
+      "maxScore": 0.5532527478899848,
+      "firstRecalledAt": "2026-05-21T11:22:31.234Z",
+      "lastRecalledAt": "2026-05-21T11:22:31.234Z",
+      "queryHashes": [
+        "84f72e652e71"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "backup",
+        "lemon-squeezy-signing-secret",
+        "ls-webhook",
+        "jumpkit.app",
+        "topics/jumpkit/app",
+        "app-backup-2026-03-25",
+        "webhook",
+        "url"
+      ]
+    },
+    "memory:memory/2026-05-11.md:82:119": {
+      "key": "memory:memory/2026-05-11.md:82:119",
+      "path": "memory/2026-05-11.md",
+      "startLine": 82,
+      "endLine": 119,
+      "source": "memory",
+      "snippet": "- GitHub: `https://github.com/jrod4404/JumpKit.git` - Supabase URL: `https://iuexwdjnqfidcwvwbgwr.supabase.co` - Lemon Squeezy checkout: `https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb` - Admin email: `jeffroder@gmail.com` - App SQLite DB: `/Users/jeffroder/Library/Application Support/jumpkit/jumpkit.db` --- ## 2026-05-11 Afternoon Updates ### Account + Teams merge complete - Slider toggle (My Account | My Teams) added to Account page - Teams nav item removed from sidebar - navigateTo('teams') now opens Account with My Teams tab active - Button updates: \"Unlock JumpKit Core!\" with JumpKit icon, no hover shift ### Account page new fields - Trial Launche",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.36329970359802244,
+      "maxScore": 0.36329970359802244,
+      "firstRecalledAt": "2026-05-21T11:22:31.234Z",
+      "lastRecalledAt": "2026-05-21T11:22:31.234Z",
+      "queryHashes": [
+        "84f72e652e71"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "github.com/jrod4404/jumpkit.git",
+        "iuexwdjnqfidcwvwbgwr.supabase.co",
+        "gmail.com",
+        "support/jumpkit/jumpkit.db",
+        "github",
+        "https",
+        "github.com",
+        "jrod4404"
+      ]
+    },
+    "memory:memory/2026-03-05.md:40:67": {
+      "key": "memory:memory/2026-03-05.md:40:67",
+      "path": "memory/2026-03-05.md",
+      "startLine": 40,
+      "endLine": 67,
+      "source": "memory",
+      "snippet": "## JumpKit Current State - App entry: `Topics/JumpKit/app/index.html` → `app.html` - All data in localStorage (file-based DB attempt was reverted — broke the app) - Click logging: `DB.logClick()` called in `incrementClick()`, stored as `jk_clicks_${userId}` - Jump click handler: shows `alert()` placeholder + toast + increments count - Toast: success (green ✓) and danger (red !) — centered top, 3s auto-dismiss, defined in app.js as IIFE - Stats charts use bundled Chart.js (`js/chart.min.js`, 205KB) --- ## Session Continued (Thu Mar 5, afternoon/evening) ### JumpKit UI Polish #### Jumping Man Icon - Downloaded `jump-icon.svg` + `jump-icon.png` from Jeff's Downloads folder - Copied to `app/",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.421243953704834,
+      "maxScore": 0.421243953704834,
+      "firstRecalledAt": "2026-05-21T11:22:34.882Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "topics/jumpkit/app/index.html",
+        "app.html",
+        "file-based",
+        "db.logclick",
+        "jk-clicks",
+        "auto-dismiss",
+        "app.js",
+        "chart.js"
+      ]
+    },
+    "memory:memory/2026-05-20.md:1:19": {
+      "key": "memory:memory/2026-05-20.md:1:19",
+      "path": "memory/2026-05-20.md",
+      "startLine": 1,
+      "endLine": 19,
+      "source": "memory",
+      "snippet": "# Memory — 2026-05-20 ## JumpKit UI Session ### Completed Today - ✅ Save Settings button → changed from `btn-subtle` to `btn-save` (green tint, matches Add Jump modal) - ✅ Sidebar CTA height reduced 15% (`padding: 9.3px → 7.9px`) - ✅ Gradient unified: `--grad` updated to `linear-gradient(135deg, #50CACC, #1A4FD6)` in vars.css — affects all `btn-primary` buttons + user avatar - ✅ Auth submit buttons (login, signup, join) also get same gradient override in auth.css - ✅ Sign In button: `ti-login` icon added; Create Account: `ti-user-plus` icon added - ✅ Icons: `inline-flex`, `align-items:center`, `gap:6px`, `white-space:nowrap`, `flex-shrink:0`; sized `1.32rem` - ✅ Sign In click → icon swaps",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4113155514001846,
+      "maxScore": 0.4113155514001846,
+      "firstRecalledAt": "2026-05-21T11:22:34.882Z",
+      "lastRecalledAt": "2026-05-21T11:22:34.882Z",
+      "queryHashes": [
+        "0287dc4dc6d9"
+      ],
+      "recallDays": [
+        "2026-05-21"
+      ],
+      "conceptTags": [
+        "btn-subtle",
+        "btn-save",
+        "9.3px",
+        "7.9px",
+        "linear-gradient",
+        "vars.css",
+        "btn-primary",
+        "auth.css"
+      ]
+    }
+  }
+}

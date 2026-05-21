@@ -1,0 +1,68 @@
+{
+  "name": "jumpkit",
+  "version": "1.0.0",
+  "description": "JumpKit — Your instant jump launcher",
+  "main": "main.js",
+  "author": "Jeff",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win"
+  },
+  "build": {
+    "appId": "com.jumpkit.app",
+    "productName": "JumpKit",
+    "copyright": "Copyright © 2026 Jeff",
+    "files": [
+      "**/*",
+      "!node_modules/.bin",
+      "!**/*.map",
+      "!server.js",
+      "!data/db.json"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "hardenedRuntime": false
+    },
+    "dmg": {
+      "title": "JumpKit",
+      "background": null,
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "icon": "assets/icon_gradient_512.png",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    }
+  },
+  "devDependencies": {
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.8.0",
+    "express": "^4.22.1"
+  }
+}

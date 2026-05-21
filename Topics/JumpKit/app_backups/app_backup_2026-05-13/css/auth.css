@@ -1,0 +1,124 @@
+.auth-body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+.auth-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px 32px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  height: 720px;
+}
+/* Fixed header: logo + tagline + tabs */
+.auth-header { flex-shrink: 0; }
+/* Content area — no scroll */
+.auth-view-content {
+  flex: 1;
+  overflow-y: hidden;
+  padding-right: 0;
+}
+.auth-logo-img { max-height: 72px; max-width: 360px; width: auto; object-fit: contain; display: block; margin: 0 auto; }
+.auth-logo {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+.auth-tagline {
+  text-align: center;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+}
+.auth-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+  text-align: center;
+}
+.auth-sub {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 28px;
+  text-align: center;
+}
+.auth-divider {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.82rem;
+  margin: 20px 0;
+  position: relative;
+}
+.auth-divider::before, .auth-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: var(--border);
+}
+.auth-divider::before { left: 0; }
+.auth-divider::after  { right: 0; }
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+.auth-footer a {
+  color: var(--turq);
+  font-weight: 600;
+  cursor: pointer;
+}
+.auth-footer a:hover { text-decoration: underline; }
+.auth-alert {
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 0.88rem;
+  margin-bottom: 16px;
+  display: none;
+}
+.auth-alert.error   { background: rgba(229,62,62,0.1); color: #e53e3e; border: 1px solid rgba(229,62,62,0.3); display: block; }
+.auth-alert.success { background: rgba(0,194,199,0.1); color: var(--turq); border: 1px solid rgba(0,194,199,0.3); display: block; }
+.auth-theme-btn {
+  position: fixed; top: 16px; right: 16px;
+  background: var(--bg-card); border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 6px 10px; font-size: 1rem; cursor: pointer;
+}
+
+/* scrollbar styles removed — card now auto-sizes to content */
+
+/* ── Fix 3: Button spinner ── */
+@keyframes auth-spin { to { transform: rotate(360deg); } }
+.btn-spinner {
+  display: none;
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: auth-spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+.btn-loading .btn-spinner { display: block; }
+.btn-loading { display: flex !important; align-items: center; justify-content: center; gap: 8px; pointer-events: none; opacity: 0.85; }
+/* Prevent layout shift on auth submit buttons */
+#loginForm [type=submit],
+#signupForm [type=submit],
+#joinForm [type=submit] {
+  min-height: 42px;
+  box-sizing: border-box;
+  display: flex !important;
+  width: 100%;
+  transform: none !important;
+  transition: opacity 0.2s !important;
+}

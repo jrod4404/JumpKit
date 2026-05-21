@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JumpKit — Sign In</title>
+  <link rel="icon" type="image/png" href="img/logo-sm.png"/>
+  <link rel="stylesheet" href="css/vars.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ── Auth Tabs ── */
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      background: var(--bg-input);
+      border-radius: var(--radius);
+      padding: 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .auth-tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 10px;
+      border-radius: 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .auth-tab .ti { font-size: 1.2rem; }
+    .auth-tab.active {
+      background: var(--bg-card);
+      color: var(--turq);
+      box-shadow: none;
+    }
+    .auth-tab:hover:not(.active) {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body class="auth-body">
+  <button class="auth-theme-btn" id="themeBtn">☀️</button>
+
+  <!-- SHARED LOGO / TABS WRAPPER -->
+  <div class="auth-card" id="authCard">
+    <div class="auth-header">
+    <div class="auth-logo"><img id="authLogoMain" src="img/logo.png" alt="JumpKit" class="auth-logo-img"/></div>
+    <p class="auth-tagline">Stop searching. Start jumping.</p>
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-view="viewLogin">
+        <i class="ti ti-login"></i> Sign In
+      </button>
+      <button class="auth-tab" data-view="viewSignup">
+        <i class="ti ti-user-plus"></i> Sign Up
+      </button>
+    </div>
+    </div><!-- /auth-header -->
+    <div class="auth-view-content">
+
+    <!-- SIGN IN -->
+    <div id="viewLogin">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to your account</p>
+      <div class="auth-alert" id="loginAlert"></div>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="loginEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••"/>
+          <span class="form-error" id="loginPassErr">Password is required.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn" style="margin-top:4px"><span class="btn-spinner"></span><span class="btn-label">Sign In</span></button>
+      </form>
+      <div class="auth-footer">
+        <a onclick="showView('viewForgot')" style="cursor:pointer">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="viewSignup" style="display:none">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-sub">Get started for free</p>
+      <div class="auth-alert" id="signupAlert"></div>
+      <form id="signupForm" novalidate>
+        <div class="form-group" style="display:flex;gap:10px;">
+          <div style="flex:1">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" id="signupFirstName" placeholder="Jeff"/>
+            <span class="form-error" id="signupFirstNameErr">First name is required.</span>
+          </div>
+          <div style="flex:1">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" id="signupLastName" placeholder="Smith"/>
+            <span class="form-error" id="signupLastNameErr">Last name is required.</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="signupEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="signupPassword" placeholder="Min 8 characters"/>
+          <span class="form-error" id="signupPassErr">Password must be at least 8 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-input" id="signupConfirm" placeholder="Re-enter password"/>
+          <span class="form-error" id="signupConfirmErr">Passwords do not match.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="signupBtn" style="margin-top:4px"><span class="btn-spinner"></span><span class="btn-label">Create Account</span></button>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="viewForgot" style="display:none">
+      <h2 class="auth-title">Reset password</h2>
+      <p class="auth-sub">Enter your email and we'll send a reset link.</p>
+      <div class="auth-alert" id="forgotAlert"></div>
+      <form id="forgotForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="forgotEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="forgotEmailErr">Please enter a valid email.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Send Reset Link</button>
+      </form>
+      <div class="auth-footer"><a onclick="showView('viewLogin')" style="cursor:pointer">← Back to sign in</a></div>
+        </div><!-- /auth-view-content -->
+  </div><!-- /authCard -->
+
+  <script src="supabase/config.js"></script>
+  <script src="supabase/client.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

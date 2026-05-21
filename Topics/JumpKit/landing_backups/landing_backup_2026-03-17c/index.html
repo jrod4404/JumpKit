@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit — Stop Searching. Start Jumping.</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.31.0/dist/tabler-icons.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><img id="navLogo" src="logo-dark.png" alt="JumpKit" class="nav-logo-img" /></div>
+      <div class="nav-right">
+        <div class="nav-theme-toggle">
+          <i class="ti ti-sun"></i>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <i class="ti ti-moon"></i>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><i class="ti ti-x"></i></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="#" class="offcanvas-link"><i class="ti ti-home"></i> Home</a>
+      <a href="#how" class="offcanvas-link"><i class="ti ti-list-check"></i> How It Works</a>
+      <a href="#features" class="offcanvas-link"><i class="ti ti-sparkles"></i> Features</a>
+      <a href="#statistics" class="offcanvas-link"><i class="ti ti-chart-bar"></i> Dashboard</a>
+      <a href="#jet" class="offcanvas-link"><i class="ti ti-brain"></i> Jet AI</a>
+      <a href="#pricing" class="offcanvas-link offcanvas-divider"><i class="ti ti-tag"></i> Pricing</a>
+      <div class="theme-switch-row">
+        <i class="ti ti-sun"></i>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <i class="ti ti-moon"></i>
+      </div>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+  <div class="hero-inner-wrap">
+    <div class="hero-inner">
+      <h1 class="hero-title">Stop Searching. Start Jumping.</h1>
+      <p class="hero-sub">Jump to any link, folder, or file in one click.</p>
+      <p class="hero-desc">JumpKit displays your navigation links in one place — web links, local directories, shared resources — organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. No more bookmarks. Just jump. Save time, save money, and track the savings automatically. Available for single users and shareable among teams.</p>
+      <div class="hero-platforms">Available for <span class="hero-platform-pair"><i class="ti ti-brand-windows hero-platform-icon"></i><strong>Windows</strong></span> &amp; <span class="hero-platform-pair"><i class="ti ti-brand-apple hero-platform-icon"></i><strong>macOS</strong></span></div>
+      <nav class="hero-section-nav">
+        <a href="#">Home</a>
+        <a href="#how">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#statistics">Dashboard</a>
+        <a href="#jet">Jet AI</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="hero-visual">
+      <div class="mock-stack">
+        <div class="mock-window mock-window-win">
+          <div class="mock-titlebar win-titlebar">
+            <span class="mock-title win-title">JumpKit · Windows</span>
+            <div class="win-controls">
+              <div class="win-btn win-minimize"><span></span></div>
+              <div class="win-btn win-maximize"><span></span></div>
+              <div class="win-btn win-close">✕</div>
+            </div>
+          </div>
+          <div class="mock-body win-layout">
+            <div class="mock-col">
+              <div class="mock-col-header">Pinned</div>
+              <div class="mock-item active">SharePoint Hub</div>
+              <div class="mock-item">Finance \ Forecast</div>
+              <div class="mock-item">OneDrive</div>
+            </div>
+            <div class="mock-col">
+              <div class="mock-col-header">Shortcuts</div>
+              <div class="mock-item">Edge DevTools</div>
+              <div class="mock-item">PowerShell Scripts</div>
+              <div class="mock-item">Azure Portal</div>
+            </div>
+          </div>
+        </div>
+        <div class="mock-window mock-window-mac">
+          <div class="mock-titlebar">
+            <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+            <span class="mock-title">JumpKit · macOS</span>
+          </div>
+          <div class="mock-body">
+            <div class="mock-sidebar">
+              <div class="mock-nav-item active">Jumps</div>
+              <div class="mock-nav-item">Archive</div>
+              <div class="mock-nav-item">Statistics</div>
+            </div>
+            <div class="mock-content">
+              <div class="mock-col">
+                <div class="mock-col-header">Work</div>
+                <div class="mock-item active">Salesforce</div>
+                <div class="mock-item">Jira Board</div>
+                <div class="mock-item">Confluence</div>
+              </div>
+              <div class="mock-col">
+                <div class="mock-col-header">DevOps</div>
+                <div class="mock-item">GitHub</div>
+                <div class="mock-item">Jenkins</div>
+                <div class="mock-item">AWS Console</div>
+              </div>
+              <div class="mock-col">
+                <div class="mock-col-header">Local</div>
+                <div class="mock-item">\\server\shared</div>
+                <div class="mock-item">~/Projects</div>
+                <div class="mock-item">C:\\Reports</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /hero-inner-wrap -->
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="section-inner">
+      <div class="section-label"><i class="ti ti-list-check"></i> How It Works</div>
+      <h2 class="section-title">Up and running in minutes</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-header"><h3><span class="step-num">01</span> Add Your Jumps</h3></div>
+          <p>Download and install. Paste in web URLs, local folder paths, or file locations. Organize them into categories that match how you work.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-header"><h3><span class="step-num">02</span> Assign Hotkeys</h3></div>
+          <p>Set a global hotkey to open JumpKit instantly from anywhere on your desktop.</p>
+        </div>
+        <div class="step-arrow">→</div>
+        <div class="step">
+          <div class="step-header"><h3><span class="step-num">03</span> Jump</h3></div>
+          <p>Click once. You're there. Watch the time savings add up in your personal dashboard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-inner">
+      <div class="section-label"><i class="ti ti-sparkles"></i> Features</div>
+      <h2 class="section-title">Everything at your fingertips</h2>
+      <p class="section-sub">Built for single users, teams, and enterprises who are tired of wasting time navigating, and want their data local.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3><svg class="jump-icon-inline" viewBox="0 0 105.74 122.88" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path fill="#00C2C7" style="flex-shrink:0" d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92z M75.85,119.82c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21z M59.12,9.04c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04z"/></svg> Instant Jump Launcher</h3>
+          <p>Store web links, local directories, and file paths in organized columns. Click once to jump — no drilling through folders or bookmarks.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-columns"></i> Column Layouts &amp; Filters</h3>
+          <p>Organize jumps into drag-ready columns, mark favorites, and filter views (Active, Favorites, Recent, Archive) so you always see the right jumps at the right time.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-keyboard"></i> Hotkey Access</h3>
+          <p>Trigger JumpKit from anywhere on your desktop with a global hotkey. Your entire workspace, one keystroke away.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-users-group"></i> Team &amp; Group Jumps</h3>
+          <p>Share jump sets across your team. Set default jumps for groups so everyone starts from the same page — literally.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-report-analytics"></i> Time &amp; Money Saved</h3>
+          <p>Track clicks per jump, clicks per day, view data in a fully automated dashboard, and see your real ROI. Show your team exactly how many hours JumpKit gives back every month.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-lock"></i> 100% Local Storage</h3>
+          <p>All your data lives on your machine. No cloud required, no data leaves your network. Optional cloud backup available when you want it.</p>
+        </div>
+        <div class="feature-card">
+          <h3><i class="ti ti-cloud-upload"></i> Optional Cloud Backup</h3>
+          <p>Want a safety net? Enable optional cloud backup to keep your jumps synced and recoverable — on your terms.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+    <section class="section section-dark" id="statistics">
+    <div class="section-inner stats-section-inner">
+      <div class="section-label"><i class="ti ti-chart-bar"></i> Dashboard</div>
+      <h2 class="section-title">Automatic Statistics</h2>
+      <p class="section-sub">JumpKit counts every click and shows you exactly how much time and money you're saving. All data stays local in an automatic dashboard.</p>
+      <div class="stats-bar-inline">
+        <div class="stat"><span class="stat-num">~10s</span><span class="stat-label">saved per jump</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">1-click</span><span class="stat-label">to any resource</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">local — your data stays yours</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-label">links, folders &amp; files</span></div>
+      </div>
+      <div class="stats-charts-row">
+      <div class="stats-chart-demo">
+        <div class="chart-title">174 jumps this week</div>
+        <div class="chart-bars">
+          <div class="chart-bar-group"><div class="chart-val">28</div><div class="chart-bar" style="height: 115px"></div><div class="chart-label">Mon</div></div>
+          <div class="chart-bar-group"><div class="chart-val">35</div><div class="chart-bar" style="height: 144px"></div><div class="chart-label">Tue</div></div>
+          <div class="chart-bar-group"><div class="chart-val">39</div><div class="chart-bar" style="height: 160px"></div><div class="chart-label">Wed</div></div>
+          <div class="chart-bar-group"><div class="chart-val">31</div><div class="chart-bar" style="height: 127px"></div><div class="chart-label">Thu</div></div>
+          <div class="chart-bar-group"><div class="chart-val">22</div><div class="chart-bar" style="height: 90px"></div><div class="chart-label">Fri</div></div>
+          <div class="chart-bar-group"><div class="chart-val">12</div><div class="chart-bar" style="height: 49px"></div><div class="chart-label">Sat</div></div>
+          <div class="chart-bar-group"><div class="chart-val">7</div><div class="chart-bar" style="height: 29px"></div><div class="chart-label">Sun</div></div>
+        </div>
+      </div>
+      <div class="stats-chart-demo roi-chart">
+        <div class="chart-title">Weekly ROI • 29.0 min saved • $72 recovered</div>
+        <div class="roi-lines">
+          <div class="roi-row">
+            <div class="roi-day">Mon</div>
+            <div class="roi-track"><div class="roi-fill" style="width:72%"></div></div>
+            <div class="roi-label">4.7m · $12</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Tue</div>
+            <div class="roi-track"><div class="roi-fill" style="width:90%"></div></div>
+            <div class="roi-label">5.8m · $15</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Wed</div>
+            <div class="roi-track"><div class="roi-fill" style="width:100%"></div></div>
+            <div class="roi-label">6.5m · $16</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Thu</div>
+            <div class="roi-track"><div class="roi-fill" style="width:79%"></div></div>
+            <div class="roi-label">5.2m · $13</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Fri</div>
+            <div class="roi-track"><div class="roi-fill" style="width:56%"></div></div>
+            <div class="roi-label">3.7m · $9</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Sat</div>
+            <div class="roi-track"><div class="roi-fill" style="width:31%"></div></div>
+            <div class="roi-label">2.0m · $5</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Sun</div>
+            <div class="roi-track"><div class="roi-fill" style="width:18%"></div></div>
+            <div class="roi-label">1.2m · $3</div>
+          </div>
+        </div>
+      </div>
+      </div><!-- /stats-charts-row -->
+    </div>
+  </section>
+
+  <!-- JET AI — COMING SOON -->
+  <section class="section section-dark" id="jet">
+    <div class="section-inner">
+      <div class="section-label"><i class="ti ti-rocket"></i> Coming Soon</div>
+      <h2 class="section-title">Meet <span class="accent">Jet</span> — Your Local AI Agent</h2>
+      <p class="section-sub">Enterprise AI without the data risk. Jet runs entirely on your machine locally — no API queries, no data leaks, nothing ever leaves your network.</p>
+      <div class="jet-grid">
+        <div class="jet-card">
+          <h3><i class="ti ti-robot"></i> Agentic AI, Locally Run</h3>
+          <p>Jet is packaged with a local AI model that operates Outlook, Excel, Word, PowerPoint, and OneNote — all without sending a single byte to the cloud.</p>
+        </div>
+        <div class="jet-card">
+          <h3><i class="ti ti-shield-lock"></i> Zero Data Leakage</h3>
+          <p>The #1 concern holding enterprises back from AI adoption. Jet solves it completely — your data never leaves the building.</p>
+        </div>
+        <div class="jet-card">
+          <h3><i class="ti ti-device-desktop-analytics"></i> Office Automation</h3>
+          <p>Jet pilots Outlook, Excel, Word, PowerPoint, and OneNote locally so repetitive email, reporting, and deck work finishes itself.</p>
+        </div>
+        <div class="jet-card">
+          <h3><i class="ti ti-clipboard-check"></i> Logging for Audits</h3>
+          <p>Export every action Jet takes with timestamped context, so compliance teams can review or prove activity in seconds.</p>
+        </div>
+        <div class="jet-card">
+          <h3><i class="ti ti-building"></i> Industries</h3>
+          <p>Perfect for: Automotive · Finance · Healthcare · Legal · Any regulated industry.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="section-inner">
+      <div class="section-label"><i class="ti ti-tag"></i> Pricing</div>
+      <h2 class="section-title">Simple, per-user pricing</h2>
+      <p class="section-sub">Deployed through trusted IT partners. No surprise fees.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Demo</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:50px">
+            <li>✅ Web links &amp; local paths</li>
+            <li>✅ Hotkey launcher</li>
+            <li>✅ Filters and search</li>
+            <li>✅ Time &amp; ROI dashboard</li>
+            <li>✅ Local storage — 100% private</li>
+          </ul>
+          <div class="plan-price-main">
+            <div class="price-line"><strong>$0</strong> / month</div>
+            <div class="price-line">Free forever</div>
+          </div>
+          <a href="#cta" class="btn btn-primary">Get JumpKit Now</a>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Core</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:50px">
+            <li>✅ Everything in Demo</li>
+            <li>✅ Unlimited jumps</li>
+            <li>✅ Team &amp; group jumps</li>
+            <li>✅ Optional cloud backup</li>
+            <li>✅ Optional auto-archive</li>
+          </ul>
+          <div class="plan-price-main">
+            <div class="price-line"><strong>$4</strong> / month</div>
+            <div class="price-line">or $39 / year</div>
+          </div>
+          <a href="#cta" class="btn btn-primary">Get JumpKit Now</a>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit + Jet AI</div>
+          <div class="plan-price" style="text-align:center">Coming Soon</div>
+          <ul class="plan-features">
+            <li>✅ Everything in Core</li>
+            <li>✅ Jet local AI agent</li>
+            <li>✅ Office automation (local)</li>
+            <li>✅ Zero cloud data exposure</li>
+            <li>✅ Immutable audit trail</li>
+            <li>✅ Compliance-ready logging</li>
+          </ul>
+          <a href="#cta" class="btn btn-primary">Get JumpKit Now</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA -->
+  <section class="section cta-section" id="cta">
+    <div class="section-inner cta-inner">
+      <h2 class="section-title">Ready to stop searching?</h2>
+      <a href="#pricing" class="btn btn-primary btn-lg">Get JumpKit Now</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -111,7 +111,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   // ── My Teams (owned) ──
   html += `
     <div class="acct-section">
-      <div class="acct-section-title" style="display:flex;align-items:center">
+      <div class="acct-section-title">
         <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
         <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px" onclick="openAddTeamModal()">
           <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> New Team
@@ -119,7 +119,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
 
   if (ownedTeams.length === 0) {
-    html += `<div style="padding:16px 0;color:var(--text-muted);font-size:0.88rem;text-align:center">No teams yet. Click <strong>New Team</strong> to get started.</div>`;
+    html += `<div class="acct-empty-state">No teams yet. Click <strong>New Team</strong> to get started.</div>`;
   } else {
     for (const team of ownedTeams) {
       // Fetch members for this team
@@ -134,13 +134,13 @@ async function renderUnifiedTeamsView(content, supaUser) {
           ? `<span class="teams-badge teams-badge-owner">Team Owner</span>`
           : `<span class="teams-badge">Member</span>`;
         const removeBtn = isOwner ? '' : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
-        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span></div><div style="display:flex;align-items:center;gap:6px">${pill}${removeBtn}</div></div>`;
+        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span></div><div class="acct-member-actions">${pill}${removeBtn}</div></div>`;
       }).join('');
 
       const invitePills = pendingTeamInvites.map(inv => `
         <div class="acct-row">
           <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
-          <div style="display:flex;align-items:center;gap:6px">
+          <div class="acct-member-actions">
             <span class="teams-badge teams-badge-pending">Pending</span>
             <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
             <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg></button>
@@ -148,11 +148,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
         </div>`).join('');
 
       html += `
-        <div style="padding:14px 20px;border-top:1px solid var(--border)">
-          <div style="display:flex;align-items:center;margin-bottom:10px">
-            <span style="font-weight:700;color:var(--text);font-size:0.95rem">${esc(team.name)}</span>
-            <span class="teams-badge teams-badge-owner" style="margin-left:10px">Team Owner</span>
-            <div style="margin-left:auto;display:flex;gap:6px">
+        <div class="acct-team-entry">
+          <div class="acct-team-header">
+            <span class="acct-team-name">${esc(team.name)}</span>
+            <span class="teams-badge teams-badge-owner">Team Owner</span>
+            <div class="acct-team-actions">
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
               <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
