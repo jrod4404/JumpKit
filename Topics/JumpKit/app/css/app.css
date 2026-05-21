@@ -236,11 +236,10 @@
   gap: 6px;
   width: 100%;
 }
+.acct-team-header { margin-bottom: 6px; }
 .acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; }
 .acct-team-entry:first-of-type { border-top: none; }
-.acct-team-header { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
-.acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; flex-shrink: 0; }
-.acct-team-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
+.acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; }
 .acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Member row label fills col 1 */
 .acct-team-entry .acct-member-row .acct-row-label { min-width: 0; }
