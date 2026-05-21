@@ -154,16 +154,15 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
-        // Name + email on same line; pill stacked below
-        const nameEmail = `<div class="acct-name-email"><span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
-        return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}${pill}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
+        // Pill left of name + email on same row
+        const nameEmail = `<div class="acct-name-email">${pill}<span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
+        return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
       }).join('');
 
       const invitePills = sortedInvites.map(inv => `
         <div class="acct-row acct-member-row">
           <div class="acct-row-label">
-            <div class="acct-name-email"><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
-            <span class="teams-badge teams-badge-pending">Pending</span>
+            <div class="acct-name-email"><span class="teams-badge teams-badge-pending">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           </div>
           <div class="acct-member-actions">
             <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
@@ -1745,7 +1744,7 @@ function addTeamsStyles() {
       font-size: 0.70rem; font-weight: 500;
       background: rgba(0,194,199,0.15); color: #00a8ad;
       border: 1px solid rgba(0,194,199,0.32);
-      white-space: nowrap; margin-top: 5px;
+      white-space: nowrap;
     }
     .teams-badge-owner {
       background: rgba(26,79,214,0.15); color: #4060b8;
