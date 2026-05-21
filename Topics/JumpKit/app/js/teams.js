@@ -113,7 +113,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     <div class="acct-section">
       <div class="acct-section-title">
         <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
-        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
+        <button class="btn btn-subtle tooltip-below" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
           <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team
         </button>
       </div>`;

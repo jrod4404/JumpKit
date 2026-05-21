@@ -227,6 +227,8 @@
 /* ── Teams tab entries ── */
 .acct-teams-wrap { padding: 0; height: 100%; }
 .acct-team-entry { padding: 14px 20px; border-top: 1px solid var(--border); }
+/* Remove double horizontal padding on rows nested inside team entries */
+.acct-team-entry .acct-row { padding-left: 0; padding-right: 0; }
 .acct-team-entry:first-of-type { border-top: none; }
 .acct-team-header { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
 .acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; flex-shrink: 0; }
@@ -599,5 +601,10 @@ strong, b { color: inherit; }
   left: auto;
   right: 0;
   transform: none;
+}
+/* ── Tooltip below button (use when button is near scroll-container top) ── */
+[data-tooltip].tooltip-below::after {
+  bottom: auto;
+  top: calc(100% + 6px);
 }
 
