@@ -618,6 +618,7 @@ strong, b { color: inherit; }
   box-shadow: var(--shadow);
 }
 [data-tooltip]:hover::after { opacity: 1; }
+.hide-tooltips [data-tooltip]::after { opacity: 0 !important; transition: none !important; }
 
 /* ── Tooltip pinned to right edge (prevents right-side clip) ── */
 [data-tooltip].tooltip-left::after {

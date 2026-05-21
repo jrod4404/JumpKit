@@ -337,6 +337,8 @@ const pageIcons = {
 let activePage = 'home';
 
 window.navigateTo = function navigateTo(page) {
+  // Kill any lingering tooltip before DOM swap
+  document.documentElement.classList.add('hide-tooltips');
   activePage = page;
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.page === page);
@@ -365,7 +367,10 @@ window.navigateTo = function navigateTo(page) {
   pc.innerHTML = '';
   pc.classList.remove('jumps-page');
   if (pages[page]) pages[page]();
-  requestAnimationFrame(() => wirePasswordToggles());
+  requestAnimationFrame(() => {
+    wirePasswordToggles();
+    document.documentElement.classList.remove('hide-tooltips');
+  });
 }
 
 document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
