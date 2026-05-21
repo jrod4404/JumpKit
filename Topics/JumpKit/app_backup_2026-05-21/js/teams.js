@@ -54,6 +54,24 @@ async function renderTeams(containerEl) {
 }
 
 // ── Unified Teams View (replaces org-owner / team-owner / team-member views) ─
+// ── Team collapse/expand ─────────────────────────────────────────
+function _getTeamCollapsedState() {
+  try { return JSON.parse(localStorage.getItem('jk_teams_collapsed') || '{}'); } catch { return {}; }
+}
+function _getTeamCollapsed(teamId) {
+  const state = _getTeamCollapsedState();
+  // Default is collapsed; only expanded if explicitly set to false
+  return state[teamId] === false ? false : true;
+}
+window.toggleTeam = function(teamId) {
+  const entry = document.getElementById('teamEntry_' + teamId);
+  if (!entry) return;
+  const nowCollapsed = entry.classList.toggle('acct-team-collapsed');
+  const state = _getTeamCollapsedState();
+  state[teamId] = nowCollapsed;
+  localStorage.setItem('jk_teams_collapsed', JSON.stringify(state));
+};
+
 async function renderUnifiedTeamsView(content, supaUser) {
   // Auto-create org silently if user doesn't have one
   let { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', supaUser.id).single();
@@ -149,34 +167,56 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const email = m.profiles?.email || '';
         const label = name || email || m.user_id;
         const pill = isOwner
-          ? `<span class="teams-badge teams-badge-owner">Owner</span>`
-          : `<span class="teams-badge">Member</span>`;
+          ? `<span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span>`
+          : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span>`;
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
-        const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
-        // Grid: [label] [pill col2] [empty col3] [delete col4]
-        return `<div class="acct-row acct-member-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div>${pill}<span></span>${actionBtn || '<span></span>'}</div>`;
+        // Pill left of name + email on same row
+        const nameEmail = `<div class="acct-name-email">${pill}<span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
+        return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
       }).join('');
 
       const invitePills = sortedInvites.map(inv => `
         <div class="acct-row acct-member-row">
-          <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
-          <span class="teams-badge teams-badge-pending">Pending</span>
-          <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
-          <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+          <div class="acct-row-label">
+            <div class="acct-name-email"><span class="teams-badge teams-badge-pending" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#a07010">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
+          </div>
+          <div class="acct-member-actions">
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+          </div>
         </div>`).join('');
 
+      const createdDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      const statsParts = [];
+      if (regularMembers.length > 0) statsParts.push(`${regularMembers.length} member${regularMembers.length !== 1 ? 's' : ''}`);
+      if (sortedInvites.length > 0) statsParts.push(`${sortedInvites.length} pending`);
+      if (createdDate) statsParts.push(`created ${createdDate}`);
+      const statsText = statsParts.join(' · ');
+
+      const isCollapsed = _getTeamCollapsed(team.id);
+
       html += `
-        <div class="acct-team-entry">
+        <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
-            <span class="acct-team-name">${esc(team.name)}</span>
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <div class="acct-team-name-block">
+              <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <div class="acct-team-name-text">
+                <span class="acct-team-name">${esc(team.name)}</span>
+                ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
+              </div>
+            </div>
+            <div class="acct-team-actions">
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            </div>
           </div>
-          ${memberPills}
-          ${sortedInvites.length > 0 ? invitePills : ''}
+          <div class="acct-team-members">
+            ${memberPills}
+            ${sortedInvites.length > 0 ? invitePills : ''}
+          </div>
         </div>`;
     }
   }
@@ -222,26 +262,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   content.innerHTML = html;
   addTeamsStyles();
 
-  // ── Align pill column under Invite button ──
-  // Each row is a separate CSS grid, so auto column widths are computed
-  // independently. We measure the header button widths after render and
-  // apply them as min-width to pills and empty placeholder spans.
-  requestAnimationFrame(() => {
-    const headerBtns = content.querySelectorAll('.acct-team-header > button');
-    if (headerBtns.length < 3) return;
-    const [inviteW, lockW] = [...headerBtns].map(b => b.offsetWidth);
-    // Col 2: pills must be at least as wide as the Invite button
-    content.querySelectorAll('.acct-member-row .teams-badge').forEach(b => {
-      b.style.minWidth = inviteW + 'px';
-    });
-    // Col 3: empty placeholder spans must be as wide as the Lock button
-    content.querySelectorAll('.acct-member-row').forEach(row => {
-      const col3 = row.children[2];
-      if (col3 && col3.tagName === 'SPAN' && !col3.classList.length) {
-        col3.style.minWidth = lockW + 'px';
-      }
-    });
-  });
+
 }
 
 // Helper: open invite modal wired to unified view
@@ -1748,27 +1769,29 @@ function updateOrgStats(teamDelta, memberDelta) {
 }
 
 function addTeamsStyles() {
-  if (document.getElementById('teamsStyles')) return;
+  const existing = document.getElementById('teamsStyles');
+  if (existing) existing.remove(); // always recreate so latest CSS applies
   const style = document.createElement('style');
   style.id = 'teamsStyles';
   style.textContent = `
     .teams-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 4px 10px; border-radius: 10px;
-      font-size: 0.75rem; font-weight: 500;
-      background: rgba(0,194,199,0.15); color: var(--text-muted);
-      border: 1px solid rgba(0,194,199,0.32);
+      padding: 1px 7px; border-radius: 10px;
+      font-size: 0.69rem; font-weight: 600; min-width: 70px;
+      background: rgba(26,79,214,0.15); color: #4060b8;
+      border: 1px solid rgba(26,79,214,0.37);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.15); color: var(--text-muted);
-      border-color: rgba(26,79,214,0.37);
-      margin-right: 40px;
+      background: rgba(0,194,199,0.15); color: #00a8ad;
+      border-color: rgba(0,194,199,0.32);
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.15); color: var(--text-muted);
+      background: rgba(250,173,20,0.15); color: #a07010;
       border-color: rgba(250,173,20,0.32);
     }
+    /* Pills only as wide as their text, not full label width */
+    .acct-row-label .teams-badge { align-self: flex-start; }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
       min-height: 52px;

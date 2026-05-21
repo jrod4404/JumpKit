@@ -227,19 +227,33 @@
 /* ── Teams tab entries ── */
 .acct-teams-wrap { padding: 0; height: 100%; }
 .acct-team-entry { padding: 14px 20px; border-top: 1px solid var(--border); }
-/* 4-column grid shared by header and all member rows for perfect column alignment */
+/* 2-column grid: [label or team name] [action buttons group] */
 .acct-team-header,
 .acct-team-entry .acct-member-row {
   display: grid;
-  grid-template-columns: 1fr auto auto auto;
+  grid-template-columns: 1fr auto;
   align-items: center;
   gap: 6px;
   width: 100%;
 }
 .acct-team-header { margin-bottom: 6px; }
-.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; }
+.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; align-items: flex-start; }
 .acct-team-entry:first-of-type { border-top: none; }
+.acct-team-name-block { display: flex; flex-direction: row; align-items: flex-start; gap: 6px; }
+.acct-team-name-text { display: flex; flex-direction: column; gap: 2px; }
+.acct-team-chevron {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: var(--text-dim); display: flex; align-items: center; flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.acct-team-chevron:hover { color: var(--text-muted); }
+.acct-team-entry.acct-team-collapsed .acct-team-chevron { transform: rotate(-90deg); }
+.acct-team-entry.acct-team-collapsed .acct-team-members { display: none; }
 .acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; }
+.acct-team-stats { font-size: 0.72rem; color: var(--text-dim); font-weight: 400; }
+/* Name + email on same line */
+.acct-name-email { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.acct-member-name { font-size: 0.88rem; font-weight: 500; color: var(--text-muted); }
 .acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 /* Member row label fills col 1 */
 .acct-team-entry .acct-member-row .acct-row-label { min-width: 0; }
