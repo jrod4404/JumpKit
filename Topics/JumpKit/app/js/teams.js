@@ -152,8 +152,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
           ? `<span class="teams-badge teams-badge-owner">Owner</span>`
           : `<span class="teams-badge">Member</span>`;
         const actionBtn = isOwner
-          ? `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
-          : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
+          ? ''
+          : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg></button>`;
         const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
         return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div><div class="acct-member-actions">${pill}${actionBtn}</div></div>`;
       }).join('');
