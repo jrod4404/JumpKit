@@ -232,9 +232,10 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const ownerEmail = ownerProf?.email || '';
       const ownerLabel = ownerName || ownerEmail || '—';
       // Fetch total member count for stats
-      const { count: memberCount = 1 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
+      const { count: memberCount = 0 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
+      const totalJoinedUsers = memberCount + 1; // +1 for owner (not in team_members table)
       const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
-      const joinedStatsParts = [`${memberCount} user${memberCount !== 1 ? 's' : ''}`];
+      const joinedStatsParts = [`${totalJoinedUsers} user${totalJoinedUsers !== 1 ? 's' : ''}`];
       if (joinedCreatedDate) joinedStatsParts.push(`created ${joinedCreatedDate}`);
       const joinedStats = joinedStatsParts.join(' · ');
       const isCollapsed = _getTeamCollapsed(team.id);
