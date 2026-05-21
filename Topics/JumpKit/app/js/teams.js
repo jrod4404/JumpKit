@@ -59,7 +59,9 @@ function _getTeamCollapsedState() {
   try { return JSON.parse(localStorage.getItem('jk_teams_collapsed') || '{}'); } catch { return {}; }
 }
 function _getTeamCollapsed(teamId) {
-  return !!_getTeamCollapsedState()[teamId];
+  const state = _getTeamCollapsedState();
+  // Default is collapsed; only expanded if explicitly set to false
+  return state[teamId] === false ? false : true;
 }
 window.toggleTeam = function(teamId) {
   const entry = document.getElementById('teamEntry_' + teamId);
@@ -200,7 +202,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
           <div class="acct-team-header">
             <div class="acct-team-name-block">
               <div class="acct-team-name-row">
-                <button class="acct-team-chevron" data-tooltip="Collapse / expand" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+                <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
                 <span class="acct-team-name">${esc(team.name)}</span>
               </div>
               ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
