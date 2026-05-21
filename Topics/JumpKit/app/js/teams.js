@@ -1753,20 +1753,21 @@ function addTeamsStyles() {
   style.id = 'teamsStyles';
   style.textContent = `
     .teams-badge {
-      display: inline-flex; align-items: center;
+      display: inline-flex; align-items: center; justify-content: center;
       padding: 3px 10px; border-radius: 20px;
       font-size: .72rem; font-weight: 500;
-      background: rgba(0,194,199,0.13); color: var(--text-muted);
-      border: 1px solid rgba(0,194,199,0.26);
+      background: rgba(0,194,199,0.14); color: var(--text-muted);
+      border: 1px solid rgba(0,194,199,0.29);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.13); color: var(--text-muted);
-      border-color: rgba(26,79,214,0.31);
+      background: rgba(26,79,214,0.14); color: var(--text-muted);
+      border-color: rgba(26,79,214,0.34);
+      margin-right: 40px;
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.13); color: var(--text-muted);
-      border-color: rgba(250,173,20,0.26);
+      background: rgba(250,173,20,0.14); color: var(--text-muted);
+      border-color: rgba(250,173,20,0.29);
     }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
