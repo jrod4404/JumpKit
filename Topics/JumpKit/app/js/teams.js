@@ -1741,18 +1741,18 @@ function addTeamsStyles() {
   style.textContent = `
     .teams-badge {
       display: inline-flex; align-items: center; justify-content: center;
-      padding: 2px 9px; border-radius: 6px;
+      padding: 2px 9px; border-radius: 10px;
       font-size: 0.70rem; font-weight: 500;
-      background: rgba(0,194,199,0.15); color: var(--text-muted);
+      background: rgba(0,194,199,0.15); color: #00a8ad;
       border: 1px solid rgba(0,194,199,0.32);
       white-space: nowrap; margin-top: 5px;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.15); color: var(--text-muted);
+      background: rgba(26,79,214,0.15); color: #4060b8;
       border-color: rgba(26,79,214,0.37);
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.15); color: var(--text-muted);
+      background: rgba(250,173,20,0.15); color: #a07010;
       border-color: rgba(250,173,20,0.32);
     }
     /* Pills only as wide as their text, not full label width */
