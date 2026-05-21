@@ -1755,6 +1755,8 @@ function addTeamsStyles() {
       background: rgba(250,173,20,0.15); color: var(--text-muted);
       border-color: rgba(250,173,20,0.32);
     }
+    /* Pills only as wide as their text, not full label width */
+    .acct-row-label .teams-badge { align-self: flex-start; }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
       min-height: 52px;
