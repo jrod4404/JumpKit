@@ -29,7 +29,7 @@ _Last updated: 2026-05-20_
 
 ## 🔴 High Priority
 
-- [ ] **Teams page UI cleanup** — tighten the unified My Account / My Teams layout; review spacing, headers, and action buttons now that both live together
+- [x] **Teams page UI cleanup** — tighten the unified My Account / My Teams layout; review spacing, headers, and action buttons now that both live together
 
 - [ ] **Paywall edge-case polish**
   - [ ] In-app downgrade notice — modal exists, needs copy QA
