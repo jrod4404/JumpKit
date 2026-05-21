@@ -149,11 +149,13 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const email = m.profiles?.email || '';
         const label = name || email || m.user_id;
         const pill = isOwner
-          ? `<span class="teams-badge teams-badge-owner">Team Owner</span>`
+          ? `<span class="teams-badge teams-badge-owner">Owner</span>`
           : `<span class="teams-badge">Member</span>`;
-        const removeBtn = isOwner ? '' : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
+        const actionBtn = isOwner
+          ? `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
+          : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
         const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
-        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div><div class="acct-member-actions">${pill}${removeBtn}</div></div>`;
+        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div><div class="acct-member-actions">${pill}${actionBtn}</div></div>`;
       }).join('');
 
       const invitePills = sortedInvites.map(inv => `
@@ -170,11 +172,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry">
           <div class="acct-team-header">
             <span class="acct-team-name">${esc(team.name)}</span>
-            <span class="teams-badge teams-badge-owner">Team Owner</span>
             <div class="acct-team-actions">
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
           </div>
           ${memberPills}
