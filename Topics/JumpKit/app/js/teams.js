@@ -228,14 +228,38 @@ async function renderUnifiedTeamsView(content, supaUser) {
     html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
     for (const team of memberTeams) {
       const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', team.owner_id).single();
-      const ownerLabel = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : (ownerProf?.email || '—');
+      const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
+      const ownerEmail = ownerProf?.email || '';
+      const ownerLabel = ownerName || ownerEmail || '—';
+      // Fetch total member count for stats
+      const { count: memberCount = 1 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
+      const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      const joinedStatsParts = [`${memberCount} user${memberCount !== 1 ? 's' : ''}`];
+      if (joinedCreatedDate) joinedStatsParts.push(`created ${joinedCreatedDate}`);
+      const joinedStats = joinedStatsParts.join(' · ');
+      const isCollapsed = _getTeamCollapsed(team.id);
+      // Current user's own row
+      const meName  = (window._supabaseProfile?.first_name ? `${window._supabaseProfile.first_name} ${window._supabaseProfile.last_name || ''}`.trim() : '') || supaUser.email;
+      const meEmail = supaUser.email;
       html += `
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>${esc(team.name)}</span>
-            <span class="acct-row-hint">Owner: ${esc(ownerLabel)}</span>
+        <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
+          <div class="acct-team-header">
+            <div class="acct-team-name-block">
+              <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <div class="acct-team-name-text">
+                <span class="acct-team-name">${esc(team.name)}</span>
+                <span class="acct-team-stats">${joinedStats}</span>
+              </div>
+            </div>
           </div>
-          <span class="teams-badge">Member</span>
+          <div class="acct-team-members">
+            <div class="acct-row acct-member-row">
+              <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span><span class="acct-member-name">${esc(ownerLabel)}</span>${ownerName && ownerEmail ? `<span class="acct-row-hint">${esc(ownerEmail)}</span>` : ''}</div></div>
+            </div>
+            <div class="acct-row acct-member-row">
+              <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
+            </div>
+          </div>
         </div>`;
     }
     html += `</div>`;
