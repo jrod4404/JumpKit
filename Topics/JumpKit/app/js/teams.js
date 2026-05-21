@@ -1734,14 +1734,15 @@ function updateOrgStats(teamDelta, memberDelta) {
 }
 
 function addTeamsStyles() {
-  if (document.getElementById('teamsStyles')) return;
+  const existing = document.getElementById('teamsStyles');
+  if (existing) existing.remove(); // always recreate so latest CSS applies
   const style = document.createElement('style');
   style.id = 'teamsStyles';
   style.textContent = `
     .teams-badge {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 2px 9px; border-radius: 10px;
-      font-size: 0.55rem; font-weight: 600; min-width: 62px;
+      font-size: 0.55rem; font-weight: 600; min-width: 70px;
       background: rgba(0,194,199,0.15); color: #00a8ad;
       border: 1px solid rgba(0,194,199,0.32);
       white-space: nowrap;
