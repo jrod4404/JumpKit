@@ -113,7 +113,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     <div class="acct-section">
       <div class="acct-section-title">
         <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
-        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px" onclick="openAddTeamModal()">
+        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
           <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> New Team
         </button>
       </div>`;
@@ -127,17 +127,36 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const { data: pendingTeamInvites = [] } = await supabaseClient.from('team_invites').select('id, email, invited_at').eq('team_id', team.id).eq('status', 'pending');
 
       const teamOwnerId = team.owner_id;
-      const memberPills = members.map(m => {
+
+      // Sort: owner first, then joined members A→Z, then pending A→Z
+      const ownerMembers  = members.filter(m => m.user_id === teamOwnerId);
+      const regularMembers = members
+        .filter(m => m.user_id !== teamOwnerId)
+        .sort((a, b) => {
+          const nameA = (a.profiles?.first_name || a.profiles?.email || '').toLowerCase();
+          const nameB = (b.profiles?.first_name || b.profiles?.email || '').toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+      const sortedMembers = [...ownerMembers, ...regularMembers];
+
+      const sortedInvites = [...pendingTeamInvites].sort((a, b) =>
+        (a.email || '').toLowerCase().localeCompare((b.email || '').toLowerCase())
+      );
+
+      const memberPills = sortedMembers.map(m => {
         const isOwner = m.user_id === teamOwnerId;
-        const label = m.profiles?.first_name ? `${m.profiles.first_name} ${m.profiles.last_name || ''}`.trim() : (m.profiles?.email || m.user_id);
+        const name  = m.profiles?.first_name ? `${m.profiles.first_name} ${m.profiles.last_name || ''}`.trim() : '';
+        const email = m.profiles?.email || '';
+        const label = name || email || m.user_id;
         const pill = isOwner
           ? `<span class="teams-badge teams-badge-owner">Team Owner</span>`
           : `<span class="teams-badge">Member</span>`;
         const removeBtn = isOwner ? '' : `<button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`;
-        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span></div><div class="acct-member-actions">${pill}${removeBtn}</div></div>`;
+        const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
+        return `<div class="acct-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div><div class="acct-member-actions">${pill}${removeBtn}</div></div>`;
       }).join('');
 
-      const invitePills = pendingTeamInvites.map(inv => `
+      const invitePills = sortedInvites.map(inv => `
         <div class="acct-row">
           <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           <div class="acct-member-actions">
@@ -159,7 +178,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
             </div>
           </div>
           ${memberPills}
-          ${invitePills}
+          ${sortedInvites.length > 0 ? invitePills : ''}
         </div>`;
     }
   }
