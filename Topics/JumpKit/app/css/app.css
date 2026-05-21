@@ -207,8 +207,9 @@
   .acct-upgrade-cta { width: 100%; }
 }
 .acct-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-/* Allow dropdowns inside sections to overflow the card boundary */
+/* Allow dropdowns and header tooltips to overflow the card boundary */
 .acct-section:has(.custom-select) { overflow: visible; }
+.acct-section:has(.acct-section-title [data-tooltip]) { overflow: visible; }
 .acct-section-title { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); padding: 14px 20px 10px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .acct-section-title i { font-size: 1.1rem; color: var(--text-muted); }
 .acct-section-title svg.ti { width: 1.3rem; height: 1.3rem; color: var(--text-muted); }

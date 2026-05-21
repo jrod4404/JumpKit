@@ -113,8 +113,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
     <div class="acct-section">
       <div class="acct-section-title">
         <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
-        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
-          <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> New Team
+        <button class="btn btn-subtle" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
+          <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team
         </button>
       </div>`;
 
@@ -163,8 +163,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
           <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           <div class="acct-member-actions">
             <span class="teams-badge teams-badge-pending">Pending</span>
-            <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg></button>
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg></button>
           </div>
         </div>`).join('');
 
