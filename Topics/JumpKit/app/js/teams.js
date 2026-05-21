@@ -149,8 +149,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const email = m.profiles?.email || '';
         const label = name || email || m.user_id;
         const pill = isOwner
-          ? `<span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Owner</span>`
-          : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Member</span>`;
+          ? `<span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span>`
+          : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span>`;
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
@@ -170,10 +170,20 @@ async function renderUnifiedTeamsView(content, supaUser) {
           </div>
         </div>`).join('');
 
+      const createdDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
+      const statsParts = [];
+      if (regularMembers.length > 0) statsParts.push(`${regularMembers.length} member${regularMembers.length !== 1 ? 's' : ''}`);
+      if (sortedInvites.length > 0) statsParts.push(`${sortedInvites.length} pending`);
+      if (createdDate) statsParts.push(`created ${createdDate}`);
+      const statsText = statsParts.join(' · ');
+
       html += `
         <div class="acct-team-entry">
           <div class="acct-team-header">
-            <span class="acct-team-name">${esc(team.name)}</span>
+            <div class="acct-team-name-block">
+              <span class="acct-team-name">${esc(team.name)}</span>
+              ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
+            </div>
             <div class="acct-team-actions">
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
@@ -1743,13 +1753,13 @@ function addTeamsStyles() {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 1px 7px; border-radius: 10px;
       font-size: 0.69rem; font-weight: 600; min-width: 70px;
-      background: rgba(0,194,199,0.15); color: #00a8ad;
-      border: 1px solid rgba(0,194,199,0.32);
+      background: rgba(26,79,214,0.15); color: #4060b8;
+      border: 1px solid rgba(26,79,214,0.37);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.15); color: #4060b8;
-      border-color: rgba(26,79,214,0.37);
+      background: rgba(0,194,199,0.15); color: #00a8ad;
+      border-color: rgba(0,194,199,0.32);
     }
     .teams-badge-pending {
       background: rgba(250,173,20,0.15); color: #a07010;
