@@ -239,8 +239,8 @@
 .acct-team-header { margin-bottom: 6px; }
 .acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; align-items: flex-start; }
 .acct-team-entry:first-of-type { border-top: none; }
-.acct-team-name-block { display: flex; flex-direction: column; gap: 2px; }
-.acct-team-name-row { display: flex; align-items: center; gap: 6px; }
+.acct-team-name-block { display: flex; flex-direction: row; align-items: flex-start; gap: 6px; }
+.acct-team-name-text { display: flex; flex-direction: column; gap: 2px; }
 .acct-team-chevron {
   background: none; border: none; cursor: pointer; padding: 2px;
   color: var(--text-dim); display: flex; align-items: center; flex-shrink: 0;

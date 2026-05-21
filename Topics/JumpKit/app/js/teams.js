@@ -201,11 +201,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <div class="acct-team-name-row">
-                <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
+                ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
               </div>
-              ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
             </div>
             <div class="acct-team-actions">
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite</button>
