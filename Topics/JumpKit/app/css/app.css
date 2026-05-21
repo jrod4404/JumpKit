@@ -234,6 +234,7 @@
 .acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; flex-shrink: 0; }
 .acct-team-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
 .acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.acct-row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .acct-empty-state { padding: 20px; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
 
 .feedback-wrap { display: flex; justify-content: center; padding-top: 12px; }
