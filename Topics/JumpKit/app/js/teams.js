@@ -190,7 +190,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
 
       const createdDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
       const statsParts = [];
-      if (regularMembers.length > 0) statsParts.push(`${regularMembers.length} member${regularMembers.length !== 1 ? 's' : ''}`);
+      const totalUsers = regularMembers.length + 1; // joined members + owner
+      statsParts.push(`${totalUsers} user${totalUsers !== 1 ? 's' : ''}`);
       if (sortedInvites.length > 0) statsParts.push(`${sortedInvites.length} pending`);
       if (createdDate) statsParts.push(`created ${createdDate}`);
       const statsText = statsParts.join(' · ');
@@ -208,7 +209,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               </div>
             </div>
             <div class="acct-team-actions">
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
               <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
