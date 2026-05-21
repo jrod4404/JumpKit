@@ -149,8 +149,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const email = m.profiles?.email || '';
         const label = name || email || m.user_id;
         const pill = isOwner
-          ? `<span class="teams-badge teams-badge-owner">Owner</span>`
-          : `<span class="teams-badge">Member</span>`;
+          ? `<span class="teams-badge teams-badge-owner" style="font-size:0.55rem;min-width:70px">Owner</span>`
+          : `<span class="teams-badge" style="font-size:0.55rem;min-width:70px">Member</span>`;
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
@@ -162,7 +162,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const invitePills = sortedInvites.map(inv => `
         <div class="acct-row acct-member-row">
           <div class="acct-row-label">
-            <div class="acct-name-email"><span class="teams-badge teams-badge-pending">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
+            <div class="acct-name-email"><span class="teams-badge teams-badge-pending" style="font-size:0.55rem;min-width:70px">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           </div>
           <div class="acct-member-actions">
             <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
