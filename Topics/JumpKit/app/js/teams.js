@@ -155,12 +155,13 @@ async function renderUnifiedTeamsView(content, supaUser) {
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
         const emailHint = email ? `<span class="acct-row-hint">${esc(email)}</span>` : '';
-        return `<div class="acct-row"><div class="acct-row-left"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div>${pill}</div>${actionBtn}</div>`;
+        return `<div class="acct-row acct-member-row"><div class="acct-row-label"><span>${esc(label)}</span>${emailHint}</div>${pill}${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : '<div></div>'}</div>`;
       }).join('');
 
       const invitePills = sortedInvites.map(inv => `
-        <div class="acct-row">
-          <div class="acct-row-left"><div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div><span class="teams-badge teams-badge-pending">Pending</span></div>
+        <div class="acct-row acct-member-row">
+          <div class="acct-row-label"><span>${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
+          <span class="teams-badge teams-badge-pending">Pending</span>
           <div class="acct-member-actions">
             <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
             <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
