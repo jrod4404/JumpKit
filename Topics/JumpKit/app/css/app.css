@@ -234,6 +234,7 @@
   grid-template-columns: 1fr auto auto auto;
   align-items: center;
   gap: 6px;
+  width: 100%;
 }
 .acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; }
 .acct-team-entry:first-of-type { border-top: none; }

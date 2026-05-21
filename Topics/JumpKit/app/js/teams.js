@@ -1735,17 +1735,17 @@ function addTeamsStyles() {
       display: inline-flex; align-items: center;
       padding: 3px 10px; border-radius: 20px;
       font-size: .72rem; font-weight: 500;
-      background: rgba(0,194,199,0.07); color: var(--text-dim);
-      border: 1px solid rgba(0,194,199,0.14);
+      background: rgba(0,194,199,0.10); color: var(--text-muted);
+      border: 1px solid rgba(0,194,199,0.20);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.07); color: var(--text-dim);
-      border-color: rgba(26,79,214,0.18);
+      background: rgba(26,79,214,0.10); color: var(--text-muted);
+      border-color: rgba(26,79,214,0.24);
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.07); color: var(--text-dim);
-      border-color: rgba(250,173,20,0.15);
+      background: rgba(250,173,20,0.10); color: var(--text-muted);
+      border-color: rgba(250,173,20,0.20);
     }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
