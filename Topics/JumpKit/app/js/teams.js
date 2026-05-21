@@ -221,6 +221,27 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `</div>`; // end acct-grid
   content.innerHTML = html;
   addTeamsStyles();
+
+  // ── Align pill column under Invite button ──
+  // Each row is a separate CSS grid, so auto column widths are computed
+  // independently. We measure the header button widths after render and
+  // apply them as min-width to pills and empty placeholder spans.
+  requestAnimationFrame(() => {
+    const headerBtns = content.querySelectorAll('.acct-team-header > button');
+    if (headerBtns.length < 3) return;
+    const [inviteW, lockW] = [...headerBtns].map(b => b.offsetWidth);
+    // Col 2: pills must be at least as wide as the Invite button
+    content.querySelectorAll('.acct-member-row .teams-badge').forEach(b => {
+      b.style.minWidth = inviteW + 'px';
+    });
+    // Col 3: empty placeholder spans must be as wide as the Lock button
+    content.querySelectorAll('.acct-member-row').forEach(row => {
+      const col3 = row.children[2];
+      if (col3 && col3.tagName === 'SPAN' && !col3.classList.length) {
+        col3.style.minWidth = lockW + 'px';
+      }
+    });
+  });
 }
 
 // Helper: open invite modal wired to unified view
@@ -1735,17 +1756,17 @@ function addTeamsStyles() {
       display: inline-flex; align-items: center;
       padding: 3px 10px; border-radius: 20px;
       font-size: .72rem; font-weight: 500;
-      background: rgba(0,194,199,0.12); color: var(--text-muted);
-      border: 1px solid rgba(0,194,199,0.24);
+      background: rgba(0,194,199,0.13); color: var(--text-muted);
+      border: 1px solid rgba(0,194,199,0.26);
       white-space: nowrap;
     }
     .teams-badge-owner {
-      background: rgba(26,79,214,0.12); color: var(--text-muted);
-      border-color: rgba(26,79,214,0.28);
+      background: rgba(26,79,214,0.13); color: var(--text-muted);
+      border-color: rgba(26,79,214,0.31);
     }
     .teams-badge-pending {
-      background: rgba(250,173,20,0.12); color: var(--text-muted);
-      border-color: rgba(250,173,20,0.24);
+      background: rgba(250,173,20,0.13); color: var(--text-muted);
+      border-color: rgba(250,173,20,0.26);
     }
     #teamsPanel .acct-row,
     #membersPanel .acct-row {
