@@ -227,26 +227,22 @@
 /* ── Teams tab entries ── */
 .acct-teams-wrap { padding: 0; height: 100%; }
 .acct-team-entry { padding: 14px 20px; border-top: 1px solid var(--border); }
-/* Remove double horizontal padding on rows nested inside team entries */
-.acct-team-entry .acct-row { padding-left: 0; padding-right: 0; }
+/* 4-column grid shared by header and all member rows for perfect column alignment */
+.acct-team-header,
+.acct-team-entry .acct-member-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 6px;
+}
+.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; }
 .acct-team-entry:first-of-type { border-top: none; }
 .acct-team-header { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; flex-wrap: wrap; }
 .acct-team-name { font-weight: 700; color: var(--text); font-size: 0.95rem; flex-shrink: 0; }
 .acct-team-actions { margin-left: auto; display: flex; gap: 6px; flex-shrink: 0; }
 .acct-member-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-/* Align pill column under Invite button: same min-width on both action blocks */
-.acct-team-entry .acct-team-actions,
-.acct-team-entry .acct-member-row .acct-member-actions {
-  min-width: 164px;
-}
-.acct-team-entry .acct-member-row {
-  justify-content: flex-start;
-  padding-left: 0; padding-right: 0; gap: 0;
-}
-.acct-team-entry .acct-member-row .acct-row-label { flex: 1; min-width: 0; }
-.acct-team-entry .acct-member-row .acct-member-actions {
-  margin-left: auto; justify-content: flex-start; flex-shrink: 0;
-}
+/* Member row label fills col 1 */
+.acct-team-entry .acct-member-row .acct-row-label { min-width: 0; }
 .acct-empty-state { padding: 20px; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
 
 .feedback-wrap { display: flex; justify-content: center; padding-top: 12px; }
