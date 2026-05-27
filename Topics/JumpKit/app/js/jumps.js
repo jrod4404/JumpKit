@@ -149,8 +149,8 @@ function renderArchivedInline() {
           <td style="padding:10px 12px;color:var(--text-muted);white-space:nowrap">${fmtDate(j.updatedAt)}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap">
             <div style="display:flex;gap:6px;justify-content:flex-end">
-              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" onclick="confirmUnarchive('${j.id}')"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>
-              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" onclick="confirmDelete('${j.id}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>
+              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-unarchive" data-id="${esc(j.id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>
+              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-delete" data-id="${esc(j.id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>
             </div>
           </td>
         </tr>`).join('')}
@@ -225,8 +225,8 @@ window.confirmUnarchive = function confirmUnarchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
   Modal.open('<svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Restore <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong> back to the active Jumps?</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-turq" onclick="doUnarchive('${id}')"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" data-jaction="do-unarchive" data-id="${esc(id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>`, 'sm');
 }
 
 function renderColumns() {
@@ -248,7 +248,7 @@ function renderColumns() {
         <div class="big-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></div>
         <h3>No columns yet</h3>
         <p>Right-click here or click "Configure Columns" to create your first jump category.</p>
-        <button class="btn btn-subtle" onclick="openConfigColumnsModal()"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
+        <button class="btn btn-subtle" data-jaction="open-config-columns"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
       </div>`;
     return;
   }
@@ -307,7 +307,7 @@ function renderColumns() {
     const upgradeNudge = hiddenCount > 0 ? `
       <div style="margin:4px 6px 6px;padding:7px 10px;background:rgba(80,202,204,0.06);border:1px solid rgba(80,202,204,0.18);border-radius:7px;display:flex;flex-direction:column;align-items:center;gap:6px">
         <span style="font-size:0.72rem;color:var(--text-muted)">+${hiddenCount} more</span>
-        <button class="btn btn-primary" style="font-size:0.72rem;padding:4.6px 10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)" onclick="showUpgradeModal('Shared Jump Limit','Upgrade to JumpKit Core to see all shared jumps — unlimited teams, unlimited shared jumps, and unlimited launches.')">
+        <button class="btn btn-primary" style="font-size:0.72rem;padding:4.6px 10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="show-upgrade-modal" data-title="Shared Jump Limit" data-msg="Upgrade to JumpKit Core to see all shared jumps — unlimited teams, unlimited shared jumps, and unlimited launches.">
           <svg viewBox="0 0 105.74 122.88" style="width:0.8rem;height:0.8rem;fill:white;flex-shrink:0;vertical-align:middle;margin-right:4px"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg> Unlock
         </button>
       </div>` : '';
@@ -495,8 +495,8 @@ function openHotkeyModal(id) {
         placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer"/>
     </div>`;
   Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Set Hotkey', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="saveSharedHotkey('${id}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="save-shared-hotkey" data-id="${esc(id)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
   const inp = document.getElementById('sharedHotkey');
   if (inp) {
@@ -603,8 +603,8 @@ function openJumpFormModal(editId) {
 `;
 
   const footer = `
-    <button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-    <button class="btn btn-save" id="btnSaveJump" onclick="saveJump('${editId || ''}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
+    <button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+    <button class="btn btn-save" id="btnSaveJump" data-jaction="save-jump" data-id="${esc(editId || '')}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
   Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump', body, footer);
 
@@ -707,8 +707,8 @@ function openJumpFormModal(editId) {
         const bg   = used ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)';
         const col  = used ? '#ef4444' : '#22c55e';
         const cur  = used ? 'default' : 'pointer';
-        const onclick = used ? '' : `onclick="document.getElementById('jHotkey').value='${k}';document.getElementById('hotkeyPicker').style.display='none'"`;
-        return `<button type="button" ${onclick} style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid ${col};background:${bg};color:${col};cursor:${cur};opacity:${used ? '0.7' : '1'}">${k}</button>`;
+        const jaction = used ? '' : `data-jaction="pick-hotkey" data-key="${k}"`;
+        return `<button type="button" ${jaction} style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid ${col};background:${bg};color:${col};cursor:${cur};opacity:${used ? '0.7' : '1'}">${k}</button>`;
       }).join('');
       hotkeyPicker.style.display = 'block';
     });
@@ -859,8 +859,8 @@ function openJumpDetails(id) {
     <div class="detail-row"><span class="detail-label">Last Used</span>  <span class="detail-value">${j.lastUsed ? new Date(j.lastUsed).toLocaleString() : 'Never'}</span></div>
     <div class="detail-row"><span class="detail-label">Created</span>    <span class="detail-value">${new Date(j.createdAt).toLocaleString()}</span></div>`;
   Modal.open('<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg> Jump Details', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
-     <button class="btn btn-subtle" onclick="Modal.close(); openEditJumpModal('${id}')"><svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
+     <button class="btn btn-subtle" data-jaction="close-edit-jump" data-id="${esc(id)}"><svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit</button>`, 'sm');
 }
 
 // ── Confirm Delete ─────────────────────────────────────────────────
@@ -868,8 +868,8 @@ function confirmDelete(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
   Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Permanently delete <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" onclick="doDelete('${id}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="do-delete" data-id="${esc(id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
 }
 function doDelete(id) {
   // If deleting a shared jump, remove from Supabase first
@@ -888,8 +888,8 @@ function confirmArchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
   Modal.open('<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Archive <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? It will be moved to the Archive tab and can be restored any time.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-turq" onclick="doArchive('${id}')"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" data-jaction="do-archive" data-id="${esc(id)}"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive</button>`, 'sm');
 }
 function doArchive(id) { DB.updateJump(currentUser.id, id, { isArchived: true }); Modal.close(); renderColumns(); }
 
@@ -978,8 +978,8 @@ function renderColConfigModal(cols) {
     <div class="col-config-list" id="colConfigList">${rows}</div>`;
 
   Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="btnSaveColumns" onclick="saveColumns()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="btnSaveColumns" data-jaction="save-columns"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
   initColDragDrop();
 }
 
@@ -1140,3 +1140,36 @@ async function unshareColumnFromSupabase(col) {
     console.warn('unshareColumnFromSupabase error:', err.message);
   }
 }
+
+// ── Event delegation — replaces inline onclick handlers ───────────
+// Listens at document level; keyed on data-jaction to avoid conflicts
+// with other files' delegated listeners.
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-jaction]');
+  if (!btn) return;
+  const action = btn.dataset.jaction;
+  const id     = btn.dataset.id || '';
+
+  switch (action) {
+    case 'modal-close':         Modal.close(); break;
+    case 'confirm-unarchive':   confirmUnarchive(id); break;
+    case 'confirm-delete':      confirmDelete(id); break;
+    case 'do-unarchive':        doUnarchive(id); break;
+    case 'do-delete':           doDelete(id); break;
+    case 'do-archive':          doArchive(id); break;
+    case 'open-config-columns': openConfigColumnsModal(); break;
+    case 'save-jump':           saveJump(id); break;
+    case 'save-shared-hotkey':  saveSharedHotkey(id); break;
+    case 'save-columns':        saveColumns(); break;
+    case 'close-edit-jump':     Modal.close(); openEditJumpModal(id); break;
+    case 'show-upgrade-modal':  showUpgradeModal(btn.dataset.title, btn.dataset.msg); break;
+    case 'pick-hotkey': {
+      e.stopPropagation(); // prevent hotkeyPicker close-on-click listener from firing
+      const inp = document.getElementById('jHotkey');
+      const picker = document.getElementById('hotkeyPicker');
+      if (inp) inp.value = btn.dataset.key;
+      if (picker) picker.style.display = 'none';
+      break;
+    }
+  }
+});
