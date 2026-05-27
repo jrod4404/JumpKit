@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, globalShortcut } = require('electron');
+const log = (...a) => console.log('[JumpKit]', ...a);
 const { spawn } = require('child_process');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -105,7 +106,7 @@ ipcMain.handle('sync-jumps', async (_e, payload) => {
     const { sharedColumns = [], sharedJumps = [] } = payload;
     const upsertCol = db.prepare(`
       INSERT INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId)
-      VALUES (@id, @userId, @name, @visible, @order, @createdAt, 1, @teamId)
+      VALUES (@id, @userId, @name, @visible, @order, @createdAt, 1, @teamId, @supabaseId)
       ON CONFLICT(id) DO UPDATE SET
         name=excluded.name, visible=excluded.visible,
         \`order\`=excluded.\`order\`, isShared=1, teamId=excluded.teamId
