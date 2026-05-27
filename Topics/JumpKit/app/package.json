@@ -35,7 +35,7 @@
       "darkModeSupport": true,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist",
-      "hardenedRuntime": false
+      "hardenedRuntime": true
     },
     "dmg": {
       "title": "JumpKit",

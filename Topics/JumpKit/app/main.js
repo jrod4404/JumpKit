@@ -578,6 +578,18 @@ function createWindow() {
   if (process.platform !== 'darwin') win.setMenuBarVisibility(false);
 
   win.on('closed', () => { win = null; });
+
+  // Prevent new BrowserWindows from being opened (e.g. via window.open or target=_blank)
+  // Redirect to system browser instead — keeps preload out of uncontrolled windows
+  win.webContents.setWindowOpenHandler(({ url }) => {
+    shell.openExternal(url);
+    return { action: 'deny' };
+  });
+
+  // Prevent renderer from navigating the main window to external URLs
+  win.webContents.on('will-navigate', (e, url) => {
+    if (!url.startsWith('file://')) e.preventDefault();
+  });
 }
 
 // Spawn a detached OS process and unref so it outlives the Electron main process
