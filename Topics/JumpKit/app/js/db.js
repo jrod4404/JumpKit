@@ -41,12 +41,9 @@ const DB = (() => {
     const columns  = lsGet(`jk_cols_${userId}`,   []);
     const clickLog = lsGet(`jk_clicks_${userId}`, []);
     const rawPrefs = lsGet(`jk_prefs_${userId}`,  null);
-    // Merge with subscription keys that used to live in plain localStorage
-    const prefs = Object.assign(defaultPrefs(), rawPrefs || {}, {
-      subscriptionStatus: localStorage.getItem('jk_subscription_status') || (rawPrefs?.subscriptionStatus || 'free'),
-      subscriptionTier:   localStorage.getItem('jk_subscription_tier')   || (rawPrefs?.subscriptionTier   || 'free'),
-      role:               localStorage.getItem('jk_role')                 || (rawPrefs?.role               || 'team-member'),
-    });
+    // subscription/role are intentionally not read from localStorage — always
+    // use window._supabaseProfile (in-memory) to prevent paywall tampering.
+    const prefs = Object.assign(defaultPrefs(), rawPrefs || {});
     return { jumps, columns, clickLog, prefs };
   }
 
@@ -85,13 +82,30 @@ const DB = (() => {
           const freshCols = await window.electronAPI.getColumns(userId);
           this._cache.columns = freshCols || [];
           const personalCols = this._cache.columns.filter(c => !c.isShared);
-          const seedKey = `jk_seeded_${userId}`;
-          const alreadySeeded = localStorage.getItem(seedKey) || _seededThisSession.has(userId);
+
+          // Check seeded_at from Supabase profiles instead of localStorage.
+          // This prevents re-seeding across devices and after localStorage clears.
+          let alreadySeeded = _seededThisSession.has(userId);
+          if (!alreadySeeded && window.supabaseClient && window._supabaseUser) {
+            try {
+              const { data: seedCheck } = await window.supabaseClient
+                .from('profiles').select('seeded_at').eq('id', userId).single();
+              alreadySeeded = !!seedCheck?.seeded_at;
+            } catch (_) { /* offline or Supabase unavailable — fall through, columns check is the primary guard */ }
+          }
+
           if (personalCols.length === 0 && !alreadySeeded) {
             _seededThisSession.add(userId);
-            localStorage.setItem(seedKey, '1');
             console.debug('[DB.init] No columns found — seeding default data for', userId);
             await window.electronAPI.seedNewUser(userId);
+            // Mark seeded in Supabase (fire-and-forget)
+            if (window.supabaseClient && window._supabaseUser) {
+              window.supabaseClient.from('profiles')
+                .update({ seeded_at: new Date().toISOString() })
+                .eq('id', userId)
+                .then(() => {})
+                .catch(() => {});
+            }
             // Reload after seed
             const [jumps2, columns2] = await Promise.all([
               window.electronAPI.getJumps(userId),
@@ -130,11 +144,14 @@ const DB = (() => {
       this.saveUsers(users);
       return user;
     },
-    getCurrentUserId()   { return localStorage.getItem('jk_current_user'); },
-    setCurrentUserId(id) { localStorage.setItem('jk_current_user', id); },
-    clearCurrentUser()   { localStorage.removeItem('jk_current_user'); },
-    setSession(id)       { this.setCurrentUserId(id); },
-    clearSession()       { this.clearCurrentUser(); },
+    // NOTE: jk_current_user localStorage key has been removed.
+    // The canonical user ID always comes from window._supabaseUser (in-memory Supabase session).
+    // Supabase handles its own session persistence via persistSession:true in client.js.
+    getCurrentUserId()   { return window._supabaseUser?.id || null; },
+    setCurrentUserId(_)  { /* no-op: Supabase session owns this */ },
+    clearCurrentUser()   { /* no-op: supabaseClient.auth.signOut() owns this */ },
+    setSession(_)        { /* no-op: Supabase session owns this */ },
+    clearSession()       { /* no-op: supabaseClient.auth.signOut() owns this */ },
     getCurrentUser() {
       const id = this.getCurrentUserId();
       return id ? this.getUsers().find(u => u.id === id) || null : null;
@@ -270,12 +287,10 @@ const DB = (() => {
         return Object.assign(defaultPrefs(), this._cache.prefs);
       }
       // Fallback: read from localStorage (shouldn't normally happen after init)
+      // NOTE: subscription/role are intentionally excluded — must come from
+      // window._supabaseProfile only to prevent client-side paywall tampering.
       const rawPrefs = lsGet(`jk_prefs_${userId}`, null);
-      return Object.assign(defaultPrefs(), rawPrefs || {}, {
-        subscriptionStatus: localStorage.getItem('jk_subscription_status') || 'free',
-        subscriptionTier:   localStorage.getItem('jk_subscription_tier')   || 'free',
-        role:               localStorage.getItem('jk_role')                 || 'team-member',
-      });
+      return Object.assign(defaultPrefs(), rawPrefs || {});
     },
 
     savePrefs(userId, prefs) {

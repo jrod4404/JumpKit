@@ -1,4 +1,4 @@
-// ── Guard (Supabase session + localStorage fallback) ───────────────
+// ── Guard (Supabase session) ───────────────────────────────────────
 let _supabaseUser = null;
 let currentUser = null;
 
@@ -38,20 +38,14 @@ async function initAuth() {
         currentUser = localUser;
       }
     } else {
-      // No Supabase session — fallback to localStorage
-      currentUser = DB.getCurrentUser();
-      if (!currentUser) {
-        window.location.href = 'index.html';
-        return;
-      }
-    }
-  } catch (_) {
-    // Offline / Supabase not configured — localStorage only
-    currentUser = DB.getCurrentUser();
-    if (!currentUser) {
+      // No Supabase session — redirect to login
       window.location.href = 'index.html';
       return;
     }
+  } catch (_) {
+    // Supabase unavailable — redirect to login (no local session fallback)
+    window.location.href = 'index.html';
+    return;
   }
   // Load all app data into DB cache from SQLite
   await DB.init(currentUser.id);
@@ -73,10 +67,17 @@ async function initApp() {
   requestAnimationFrame(() => { wirePasswordToggles(); patchModalForPwToggles(); });
   // Clean up old localStorage app data keys (post-SQLite migration)
   try {
-    const oldPrefixes = ['jk_jumps_', 'jk_cols_', 'jk_clicks_', 'jk_prefs_', 'jk_click_log_'];
+    // Sweep prefixed keys from old localStorage-only era
+    const oldPrefixes = ['jk_jumps_', 'jk_cols_', 'jk_clicks_', 'jk_prefs_', 'jk_click_log_', 'jk_seeded_'];
     Object.keys(localStorage)
       .filter(k => oldPrefixes.some(prefix => k.startsWith(prefix)))
       .forEach(k => localStorage.removeItem(k));
+    // Remove legacy scalar keys — no longer written; stale values must not persist.
+    // subscription/role: removed to prevent paywall tampering.
+    // jk_current_user: Supabase session owns identity now.
+    // jk_last_sync: was never read — dead code removed.
+    // jk_teams_collapsed: renamed to jk_teams_expanded (new unambiguous format)
+    ['jk_role', 'jk_subscription_status', 'jk_subscription_tier', 'jk_current_user', 'jk_last_sync', 'jk_teams_collapsed'].forEach(k => localStorage.removeItem(k));
   } catch(_) {}
 
   // Fetch Supabase profile for name display
@@ -87,9 +88,9 @@ async function initApp() {
         .eq('id', _supabaseUser.id).single();
       if (data) {
         window._supabaseProfile = data;
-        localStorage.setItem('jk_role', data.role || 'team-member');
-        localStorage.setItem('jk_subscription_status', data.subscription_status || 'free');
-        localStorage.setItem('jk_subscription_tier', data.subscription_tier || 'free');
+        // NOTE: role/subscription_status/subscription_tier are intentionally NOT written
+        // to localStorage — always read from window._supabaseProfile (in-memory, resets
+        // on reload from Supabase) to prevent client-side tampering of paywall gates.
         // Persist subscription/role data to user_prefs (SQLite) and update cache
         if (currentUser) {
           DB.savePrefs(currentUser.id, {
@@ -101,6 +102,15 @@ async function initApp() {
         }
         // If overdue — show paywall immediately after load
         if (data.subscription_status === 'overdue' || data.subscription_status === 'cancelled') {
+          // Notify once per day max
+          const lastLicenseNotifTs = parseInt(localStorage.getItem('jk_license_notif_ts') || '0');
+          if (Date.now() - lastLicenseNotifTs > 24 * 60 * 60 * 1000) {
+            const msg = data.subscription_status === 'cancelled'
+              ? 'Your JumpKit subscription has been cancelled. Renew to keep Core features.'
+              : 'Your JumpKit subscription payment is overdue. Update billing to avoid interruption.';
+            addNotification({ type: 'license-expiring', message: msg, ts: Date.now() });
+            localStorage.setItem('jk_license_notif_ts', Date.now().toString());
+          }
           setTimeout(() => showPaywall(), 1200);
         }
 
@@ -149,6 +159,19 @@ async function initApp() {
   }
   runAutoArchive();
   await runCloudBackup();
+  // Check backup reminder: notify if no backup in 7+ days and auto-backup is off
+  (function checkBackupReminder() {
+    try {
+      const prefs = currentUser ? DB.getPrefs(currentUser.id) : {};
+      if (prefs.cloudBackup) return; // auto-backup is on, no reminder needed
+      const lastBackupNotifTs = parseInt(localStorage.getItem('jk_backup_reminder_ts') || '0');
+      const sevenDays = 7 * 24 * 60 * 60 * 1000;
+      if (Date.now() - lastBackupNotifTs > sevenDays) {
+        addNotification({ type: 'backup-reminder', message: 'No backup in 7+ days. Consider exporting a manual backup from Settings.', ts: Date.now() });
+        localStorage.setItem('jk_backup_reminder_ts', Date.now().toString());
+      }
+    } catch (_) {}
+  })();
   setTimeout(() => checkPendingInvites(), 500); // defer until Modal is defined
 
   // Show Tests nav item only for admin
@@ -165,6 +188,22 @@ async function initApp() {
       (window._supabaseProfile?.trial_launches_used || 0) >= 250) {
     setTimeout(() => showPaywall(), 1000);
   }
+  // Trial ending warning notifications
+  (function checkTrialEndingNotif() {
+    try {
+      const profile = window._supabaseProfile;
+      if (!profile || profile.subscription_tier !== 'free') return;
+      const used = profile.trial_launches_used || 0;
+      const lastMilestone = localStorage.getItem('jk_trial_notif_milestone') || '';
+      if (used >= 230 && lastMilestone !== '230') {
+        addNotification({ type: 'trial-ending', message: `You've used ${used}/250 trial launches. Upgrade to JumpKit Core to keep unlimited access.`, ts: Date.now() });
+        localStorage.setItem('jk_trial_notif_milestone', '230');
+      } else if (used >= 200 && lastMilestone !== '200' && lastMilestone !== '230') {
+        addNotification({ type: 'trial-ending', message: `You've used ${used}/250 trial launches. Consider upgrading before you hit the limit.`, ts: Date.now() });
+        localStorage.setItem('jk_trial_notif_milestone', '200');
+      }
+    } catch (_) {}
+  })();
 
 // ── Theme ──────────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('jk_theme') || 'dark';
@@ -269,7 +308,7 @@ function updateUserDisplay() {
 function renderSidebarCTA() {
   const container = document.querySelector('.sidebar-bottom');
   if (!container) return;
-  const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+  const tier = window._supabaseProfile?.subscription_tier || 'free';
   let cta = container.querySelector('.sidebar-cta');
   if (tier === 'free') {
     if (!cta) {
@@ -319,7 +358,7 @@ const pages = {
   jumps:    () => renderJumps(),
   archive:  () => renderArchive(),
   stats:    () => renderStats(),
-  settings: () => renderSettings(),
+  settings: () => renderAccount('settings'),
   help:     () => renderHelp(),
   account:  () => renderAccount('account'),
   jet:      () => renderJet(),
@@ -328,11 +367,11 @@ const pages = {
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'My Account', tests:'Tests'
+  stats:'Statistics', settings:'My Account', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'My Account', tests:'Tests'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', jet:'ti-brain', feedback:'ti-message-circle', teams:'ti-users', tests:'ti-test-pipe'
+  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', jet:'ti-brain', feedback:'ti-message-circle', teams:'ti-user-circle', tests:'ti-test-pipe'
 };
 let activePage = 'home';
 
@@ -397,6 +436,32 @@ const Modal = window.Modal = {
 };
 document.getElementById('modalClose').addEventListener('click', () => Modal.close());
 // Overlay click intentionally does NOT close the modal — use Save or Close buttons.
+
+// ── Modal Queue ───────────────────────────────────────────────────
+// Ensures modals are shown one at a time. If a modal is already open
+// when Modal.open() is called, the new call is queued and shown
+// automatically after the current modal closes.
+(function patchModalQueue() {
+  const _queue = [];
+  let _open = false;
+  const _origOpen  = Modal.open.bind(Modal);
+  const _origClose = Modal.close.bind(Modal);
+
+  Modal.open = function(...args) {
+    if (_open) { _queue.push(args); return; }
+    _open = true;
+    _origOpen(...args);
+  };
+
+  Modal.close = function() {
+    _origClose();
+    _open = false;
+    if (_queue.length > 0) {
+      const next = _queue.shift();
+      setTimeout(() => { _open = true; _origOpen(...next); }, 120);
+    }
+  };
+})();
 
 // ── Context Menu ───────────────────────────────────────────────────
 const CtxMenu = window.CtxMenu = {
@@ -545,144 +610,9 @@ const Toast = window.Toast = (() => {
   };
 })();
 
-function renderSettings() {
-  const p = DB.getPrefs(currentUser.id);
-  const pageChoices = ['home','jumps','stats','settings','help'].map(pg =>
-    `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
-  const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
-    `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
-
-  document.getElementById('pageContent').innerHTML = `
-    <div class="acct-grid">
-
-      <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-adjustments-horizontal"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg> Preferences</div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Starting Page</span>
-            <span class="acct-row-hint">Page shown when app opens</span>
-          </div>
-          <div class="custom-select acct-select" id="startPageDrop">
-            <div class="custom-select-trigger" id="startPageTrigger">
-              <span id="startPageLabel">${pageTitles[p.startPage]||p.startPage}</span>
-              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-            </div>
-            <div class="custom-select-menu" id="startPageMenu">${pageChoices}</div>
-          </div>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Nav Menu on Startup</span>
-            <span class="acct-row-hint">Sidebar state when app opens</span>
-          </div>
-          <div class="custom-select acct-select" id="navStateDrop">
-            <div class="custom-select-trigger" id="navStateTrigger">
-              <span id="navStateLabel">${p.navDefaultCollapsed ? 'Collapsed' : 'Expanded'}</span>
-              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-            </div>
-            <div class="custom-select-menu" id="navStateMenu">
-              <div class="custom-select-option${!p.navDefaultCollapsed ? ' selected' : ''}" data-value="expanded">Expanded</div>
-              <div class="custom-select-option${p.navDefaultCollapsed ? ' selected' : ''}" data-value="collapsed">Collapsed</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Notifications</span>
-            <span class="acct-row-hint">In-app notification alerts</span>
-          </div>
-          <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Auto Cloud Backup</span>
-            <span class="acct-row-hint">Sync jumps to the cloud</span>
-          </div>
-          <label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>
-        </div>
-        <div class="acct-row" style="border-bottom:none">
-          <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
-          <button class="btn btn-subtle" onclick="forceBackup()">
-            <svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export
-          </button>
-        </div>
-      </div>
-
-      <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Time Saved per Click</span>
-            <span class="acct-row-hint">Seconds saved per jump launch</span>
-          </div>
-          <div class="acct-number-wrap">
-            <input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/>
-            <span class="acct-unit">sec</span>
-          </div>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Dollars per Hour</span>
-            <span class="acct-row-hint">Used to calculate ROI</span>
-          </div>
-          <div class="acct-number-wrap">
-            <span class="acct-unit">$</span>
-            <input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/>
-            <span class="acct-unit">/hr</span>
-          </div>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Show Jump Description</span>
-            <span class="acct-row-hint">Display description under jump name</span>
-          </div>
-          <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
-        </div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Show Hotkey</span>
-            <span class="acct-row-hint">Display hotkey pill on jump cards</span>
-          </div>
-          <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
-        </div>
-      </div>
-
-      <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
-
-        <div class="acct-row">
-          <div class="acct-row-label">
-            <span>Auto-Archive Jumps</span>
-            <span class="acct-row-hint">Archive unused jumps after</span>
-          </div>
-          <div class="custom-select acct-select" id="autoArchiveDrop">
-            <div class="custom-select-trigger" id="autoArchiveTrigger">
-              <span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span>
-              <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-            </div>
-            <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="acct-save-row">
-        <button class="btn btn-save" onclick="saveAccountPrefs()"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
-      </div>
-    </div>`;
-
-  // Wire dropdowns
-  wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
-  wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
-  wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
-}
+// renderSettings() merged into renderAccount() as the 'settings' tab.
+// Route and direct links still work: navigateTo('settings') -> renderAccount('settings').
+function renderSettings() { renderAccount('settings'); }
 
 function renderAccount(initialTab = 'account') {
   const u = currentUser;
@@ -692,9 +622,9 @@ function renderAccount(initialTab = 'account') {
   const lastName  = sbProfile.last_name  || '';
   const fullName  = [firstName, lastName].filter(Boolean).join(' ') || (u ? esc(u.name) : '');
   const email     = sbUser.email || (u ? esc(u.email) : '');
-  const tier      = sbProfile.subscription_tier   || localStorage.getItem('jk_subscription_tier')   || 'free';
-  const status    = sbProfile.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
-  const role      = sbProfile.role || localStorage.getItem('jk_role') || 'team-member';
+  const tier      = sbProfile.subscription_tier   || 'free';
+  const status    = sbProfile.subscription_status || 'free';
+  const role      = sbProfile.role || 'team-member';
   const launchesUsed = sbProfile.trial_launches_used || 0;
   const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : tier === 'core' ? 'JumpKit' : 'Free';
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
@@ -712,8 +642,8 @@ function renderAccount(initialTab = 'account') {
     ? `$${(lifetimeDollars / 1000).toFixed(1)}k`
     : `$${lifetimeDollars.toFixed(2)}`;
 
-  const ACCT_TABS = ['account', 'teams'];
-  const ACCT_LABELS = { account: 'My Account', teams: 'My Teams' };
+  const ACCT_TABS = ['account', 'teams', 'settings'];
+  const ACCT_LABELS = { account: 'My Account', teams: 'My Teams', settings: 'Settings' };
   let currentAcctTab = ACCT_TABS.includes(initialTab) ? initialTab : 'account';
 
   document.getElementById('pageContent').innerHTML = `
@@ -795,9 +725,85 @@ function renderAccount(initialTab = 'account') {
             <button class="btn btn-subtle" onclick="openFeedbackModal()"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
           </div>
         </div>`;
-    } else {
+    } else if (tab === 'teams') {
       el.innerHTML = `<div class="acct-teams-wrap"></div>`;
       renderTeams(el.firstElementChild);
+    } else if (tab === 'settings') {
+      const p = DB.getPrefs(currentUser.id);
+      const pageChoices = ['home','jumps','stats','settings','help'].map(pg =>
+        `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
+      const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
+        `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
+      el.innerHTML = `
+        <div class="acct-grid">
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-adjustments-horizontal"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg> Preferences</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Starting Page</span><span class="acct-row-hint">Page shown when app opens</span></div>
+              <div class="custom-select acct-select" id="startPageDrop">
+                <div class="custom-select-trigger" id="startPageTrigger"><span id="startPageLabel">${pageTitles[p.startPage]||p.startPage}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-menu" id="startPageMenu">${pageChoices}</div>
+              </div>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Nav Menu on Startup</span><span class="acct-row-hint">Sidebar state when app opens</span></div>
+              <div class="custom-select acct-select" id="navStateDrop">
+                <div class="custom-select-trigger" id="navStateTrigger"><span id="navStateLabel">${p.navDefaultCollapsed ? 'Collapsed' : 'Expanded'}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-menu" id="navStateMenu">
+                  <div class="custom-select-option${!p.navDefaultCollapsed ? ' selected' : ''}" data-value="expanded">Expanded</div>
+                  <div class="custom-select-option${p.navDefaultCollapsed ? ' selected' : ''}" data-value="collapsed">Collapsed</div>
+                </div>
+              </div>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">In-app notification alerts</span></div>
+              <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Auto Cloud Backup</span><span class="acct-row-hint">Sync jumps to the cloud</span></div>
+              <label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
+              <button class="btn btn-subtle" onclick="forceBackup()"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
+            </div>
+          </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">Seconds saved per jump launch</span></div>
+              <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Used to calculate ROI</span></div>
+              <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Display description under jump name</span></div>
+              <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill on jump cards</span></div>
+              <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Archive unused jumps after</span></div>
+              <div class="custom-select acct-select" id="autoArchiveDrop">
+                <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
+              </div>
+            </div>
+          </div>
+          <div class="acct-save-row">
+            <button class="btn btn-save" onclick="saveAccountPrefs()"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
+          </div>
+        </div>`;
+      wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
+      wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
+      wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
     }
   }
 
@@ -1278,8 +1284,8 @@ function renderStatsDash() {
 }
 
 function renderJet() {
-  const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
-  const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
+  const tier = window._supabaseProfile?.subscription_tier || 'free';
+  const status = window._supabaseProfile?.subscription_status || 'free';
   const adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
   const hasAccess = adminEmail === 'jeffroder@gmail.com' || ((tier === 'teams_jet') && (status === 'active'));
 
@@ -1512,6 +1518,7 @@ window.forceBackup = async function forceBackup() {
         `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
       );
     } else {
+      addNotification({ type: 'backup-failed', message: `Backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
       Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Backup Failed',
         `<p style="color:var(--text-muted);font-size:0.9rem">${esc(result?.reason || 'Unknown error')}</p>`,
         `<button class="btn btn-subtle" onclick="Modal.close()">Close</button>`
@@ -1540,6 +1547,8 @@ window.runCloudBackup = async function runCloudBackup() {
     const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
     if (result?.ok) {
       addNotification({ type: 'backup', message: `Backup saved to: ${result.path}`, ts: Date.now() });
+    } else {
+      addNotification({ type: 'backup-failed', message: `Auto-backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
     }
   }
 };
@@ -1562,6 +1571,16 @@ window.checkPendingInvites = async function checkPendingInvites() {
     }
 
     if (invites.length === 0) return;
+
+    // Notify once per invite (deduplicated by invite ID)
+    const notifiedInviteIds = JSON.parse(localStorage.getItem('jk_notified_invite_ids') || '[]');
+    const newInvites = invites.filter(inv => !notifiedInviteIds.includes(inv.id));
+    if (newInvites.length > 0) {
+      const newTeamNames = newInvites.map(inv => inv.teams?.name || 'a team').join(', ');
+      addNotification({ type: 'invite-received', message: `You've been invited to join: ${newTeamNames}`, ts: Date.now() });
+      const updatedIds = [...notifiedInviteIds, ...newInvites.map(inv => inv.id)].slice(-50);
+      localStorage.setItem('jk_notified_invite_ids', JSON.stringify(updatedIds));
+    }
 
     const teamNames = invites.map(inv => inv.teams?.name || 'a team').join(', ');
     const body = `

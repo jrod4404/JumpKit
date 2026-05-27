@@ -1794,6 +1794,47 @@ if (navPrefs.navDefaultCollapsed) {
 <li>Icons remain visible</li>
 <li>Tooltip on hover shows label</li>
 </ul>
+<h4 id="notifications-system">2.5.9 Notification System</h4>
+<p>The notification system provides a persistent, per-user, in-app bell notification feed stored in localStorage. Notifications survive page navigation and are cleared manually by the user.</p>
+<p><strong>Storage key:</strong> <code>jk_notifs_&lt;userId&gt;</code> (localStorage, max 50 entries)</p>
+<p><strong>Core API (window.* globals in js/app.js):</strong></p>
+<ul>
+<li><code>addNotification({ type, message, ts })</code> — prepend a new notification; caps at 50</li>
+<li><code>getNotifications()</code> — returns array of notification objects</li>
+<li><code>saveNotifications(notifs)</code> — persist array to localStorage</li>
+<li><code>markAllNotificationsRead()</code> — mark all <code>read: true</code></li>
+<li><code>clearAllNotifications()</code> — wipe all notifications</li>
+<li><code>updateNotifBadge()</code> — refresh the bell badge count in the nav</li>
+</ul>
+<p><strong>Notification object shape:</strong></p>
+<pre><code>{ type: string, message: string, ts: number, read?: boolean }</code></pre>
+<p><strong>Notification Types &amp; Triggers:</strong></p>
+<ul>
+<li><strong>auto-archive</strong> — One or more jumps were auto-archived after exceeding the configured inactivity threshold (days). Fires during startup's <code>runAutoArchive()</code> call.</li>
+<li><strong>backup</strong> — A manual or automatic backup completed successfully. Fires in <code>forceBackup()</code> and <code>runCloudBackup()</code>.</li>
+<li><strong>backup-failed</strong> — A manual or automatic backup failed. Fires in <code>forceBackup()</code> (on failed result) and <code>runCloudBackup()</code> (on failed result). Message includes the error reason.</li>
+<li><strong>backup-reminder</strong> — Auto-backup is off and no backup reminder has fired in 7+ days. Fires once per week at startup. Throttled via <code>jk_backup_reminder_ts</code> localStorage key.</li>
+<li><strong>invite-received</strong> — A pending team invite was detected for the user's email. Fires in <code>checkPendingInvites()</code> at startup. Deduplicated by invite ID via <code>jk_notified_invite_ids</code> localStorage key — only fires once per invite.</li>
+<li><strong>team-joined</strong> — The user successfully joined a team via the join flow in <code>js/teams.js</code>. Fires immediately after membership insert + invite acceptance.</li>
+<li><strong>team-deleted</strong> — A shared column was removed because the team was deleted or the owner unshared it. Fired during sync cleanup in <code>js/sync.js (_cleanStaleSharedColumns, processStale)</code>. Also fires when the user chooses to keep or remove stale columns after a team loss.</li>
+<li><strong>member-removed</strong> — A team owner removed a member from their team. Fires in <code>doRemoveMember()</code> in <code>js/teams.js</code>. Message includes the removed member's name.</li>
+<li><strong>shared-jump-added</strong> — New shared jumps were pulled from Supabase during sync that didn't exist locally before. Only fires when the user already had prior shared jumps (skips first-ever sync to avoid noise). Fires in <code>js/sync.js syncSharedJumps()</code>. Throttled by the existing shared jump ID set at time of sync.</li>
+<li><strong>shared-column-updated</strong> — A shared column was renamed by its owner and the new name was pulled during sync. Fires in <code>js/sync.js syncSharedJumps()</code> when <code>existing.name !== rc.name</code>.</li>
+<li><strong>sync-failed</strong> — The sync engine threw an unhandled error. Throttled to at most one notification per hour via <code>jk_sync_fail_notif_ts</code> localStorage key. Fires in the <code>catch</code> block of <code>syncSharedJumps()</code>.</li>
+<li><strong>license-expiring</strong> — The user's subscription is <code>overdue</code> or <code>cancelled</code>. Throttled to once per 24 hours via <code>jk_license_notif_ts</code> localStorage key. Fires during Supabase profile load at startup.</li>
+<li><strong>trial-ending</strong> — The user's trial launch count crosses the 200 or 230 milestone (out of 250 total). Only fires once per milestone, tracked in <code>jk_trial_notif_milestone</code> localStorage key.</li>
+</ul>
+<p><strong>User preference:</strong> Notifications can be toggled on/off per user in Settings (<code>user_prefs.notifications</code>, SQLite). When off, the bell icon is hidden and no badge is shown. Note: <code>addNotification()</code> itself does not check this flag — the preference only controls UI visibility.</p>
+<p><strong>localStorage keys used by the notification system:</strong></p>
+<ul>
+<li><code>jk_notifs_&lt;userId&gt;</code> — the notification feed array</li>
+<li><code>jk_notified_invite_ids</code> — array of invite IDs already notified (dedup)</li>
+<li><code>jk_backup_reminder_ts</code> — timestamp of last backup reminder notification</li>
+<li><code>jk_sync_fail_notif_ts</code> — timestamp of last sync-failed notification</li>
+<li><code>jk_license_notif_ts</code> — timestamp of last license-expiring notification</li>
+<li><code>jk_trial_notif_milestone</code> — last trial milestone notified ('200' or '230')</li>
+</ul>
+
 <h3 id="section-7">2.6 IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
 <h4 id="jumps-ipc">2.6.1 Jumps IPC Group</h4>
@@ -2753,9 +2794,33 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
       <td style="padding:8px 12px">N/A</td>
       <td style="padding:8px 12px">Repo: <code>jrod4404/JumpKit</code> (private)</td>
     </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">GitHub Releases</td>
+      <td style="padding:8px 12px">GitHub</td>
+      <td style="padding:8px 12px">App binary distribution + auto-update feed for electron-updater</td>
+      <td style="padding:8px 12px"><strong>Free</strong></td>
+      <td style="padding:8px 12px">N/A</td>
+      <td style="padding:8px 12px">electron-updater checks <code>jrod4404/JumpKit</code> releases for new versions. Each release must include: <code>.dmg</code>, <code>.exe</code>, <code>latest.yml</code>, <code>.blockmap</code> files. Tag must match <code>package.json</code> version (e.g. <code>v1.0.1</code>). Auto-download + install-on-quit configured in <code>main.js</code>. Update banner shown in app when download completes. <strong>Status: code complete, pending first release publish.</strong></td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Proton Mail Plus</td>
+      <td style="padding:8px 12px">Proton</td>
+      <td style="padding:8px 12px">Business email hosting for <code>jeff@jumpkit.ai</code> — professional inbox for JumpKit comms, customer replies, and domain email</td>
+      <td style="padding:8px 12px"><strong>$3.99/month</strong> (billed annually ~$48/yr)</td>
+      <td style="padding:8px 12px">Annual</td>
+      <td style="padding:8px 12px">Proton Mail Plus plan. End-to-end encrypted. Custom domain: <code>jumpkit.ai</code> (verified, 1 of 1 domain slots used on Plus plan). MX records set in the <code>jumpkit.ai</code> registrar pointing to Proton. Use <code>jeff@jumpkit.ai</code> for customer-facing replies, support, and all JumpKit business correspondence. Note: Plus plan supports only 1 custom domain — upgrade to Proton Unlimited (~$8/mo) if a second domain (e.g. <code>jumpkit.app</code>) is ever needed. Login at <a href="https://mail.proton.me" target="_blank">mail.proton.me</a>.</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px">Apple Developer Program</td>
+      <td style="padding:8px 12px">Apple</td>
+      <td style="padding:8px 12px">macOS code signing + notarization + auto-update support</td>
+      <td style="padding:8px 12px"><strong>$99/year</strong></td>
+      <td style="padding:8px 12px">Annual</td>
+      <td style="padding:8px 12px"><strong>Not yet enrolled ⚠️</strong> — required before shipping to real Mac users. Without it: (1) users see “unidentified developer” warning on install, (2) auto-update via electron-updater silently fails on macOS (Gatekeeper blocks the downloaded update). Setup steps once enrolled: generate Developer ID Application cert → add <code>certificateSubjectName</code> to electron-builder config → enable notarization (<code>afterSign</code> hook) → build → publish release to GitHub. Enroll at <a href="https://developer.apple.com" target="_blank">developer.apple.com</a>.</td>
+    </tr>
   </tbody>
 </table>
-<p style="color:var(--text-muted);font-size:0.85rem">💡 <strong>Monthly burn rate:</strong> ~$25/month (Supabase Pro only, as of 2026-05-14). Domain costs TBD at renewal.</p>
+<p style="color:var(--text-muted);font-size:0.85rem">💡 <strong>Monthly burn rate:</strong> ~$29/month (Supabase Pro $25 + Proton Mail Plus ~$4, as of 2026-05-25). Domain costs TBD at renewal. Apple Developer Program: $99/yr (not yet enrolled).</p>
 
 <h2 id="tier-matrix">7. Tier Limits &amp; Sharing Matrix</h2>
 <p>The table below captures all enforced combinations between JumpKit Core and Free tiers. Use it as the single source of truth when updating paywall logic, onboarding copy, or support docs.</p>
@@ -2861,6 +2926,78 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
 <p>Happy building! 🚀</p>
 <h2 id="changelog">10. Changelog</h2>
+
+<h3>2026-05-25</h3>
+<ul>
+  <li>Docs: Added Proton Mail Plus subscription to Section 6 (Paid Services &amp; Subscriptions)</li>
+  <li>Docs: Updated monthly burn rate to ~$29/month</li>
+</ul>
+<h3>2026-05-23 (notifications)</h3>
+<ul>
+<li>Added 11 new in-app notification triggers: <code>backup-failed</code>, <code>backup-reminder</code>, <code>invite-received</code>, <code>team-joined</code>, <code>member-removed</code>, <code>shared-jump-added</code>, <code>shared-column-updated</code>, <code>sync-failed</code>, <code>license-expiring</code>, <code>trial-ending</code>.</li>
+<li>All new triggers include appropriate throttling/deduplication via localStorage keys to prevent notification spam on every app launch.</li>
+<li>Added section 2.5.9 Notification System to JUMPKIT_DOCS.html documenting all types, triggers, API, and localStorage keys.</li>
+</ul>
+<h3>2026-05-23</h3>
+<ul>
+<li><strong>Edge Function: send-team-deleted deployed:</strong> First-time deployment to Supabase dashboard. Fixed null-vs-undefined bug in data destructuring (<code>|| []</code> fallback). Sends branded email to all team members and pending invitees when a team is deleted, including owner name, team name, and list of removed shared columns.</li>
+<li><strong>Delete team — all edge cases now handled:</strong>
+  <ul>
+    <li>Email notifications to members + pending invitees via <code>send-team-deleted</code> edge function.</li>
+    <li>Owner local SQLite cleanup: shared columns converted to personal (data preserved).</li>
+    <li>localStorage <code>jk_teams_expanded</code> purged for deleted team.</li>
+    <li>In-app modal shown to members on next sync with paid-user &ldquo;Keep as My Jumps&rdquo; restore option.</li>
+  </ul>
+</li>
+<li><strong>Column unshared by owner — same treatment as team deleted:</strong> <code>sync.js</code> now distinguishes two stale-column cases with separate modal wording:
+  <ul>
+    <li><em>staleByTeamGone</em>: &ldquo;Team Deleted&rdquo; modal — team no longer in user&rsquo;s memberships.</li>
+    <li><em>staleByUnshared</em>: &ldquo;Shared Column Removed&rdquo; modal — still a member but column removed from <code>shared_columns</code> by owner.</li>
+    <li>Both modals include owner name, team name, affected column names + jump counts, and the paid-user restore option.</li>
+    <li>Free-tier footer: &ldquo;OK, Understood&rdquo; + gradient &ldquo;Unlock JumpKit Core&rdquo; button.</li>
+    <li>Paid-tier footer: &ldquo;Remove Columns&rdquo; + &ldquo;Keep as My Jumps&rdquo; buttons.</li>
+  </ul>
+</li>
+<li><strong>Configure Columns modal refactor:</strong> Removed &ldquo;Share with team&rdquo; dropdown. Replaced with read-only sharing status badge per column:
+  <ul>
+    <li><em>Personal</em> — gray label, column not shared.</li>
+    <li><em>[Team Name]</em> — teal pill with users icon; owner&rsquo;s column shared outbound.</li>
+    <li><em>&darr; From [Team Name]</em> — gray badge; column received as a team member.</li>
+  </ul>
+  Help text updated: &ldquo;To share columns, go to Account &rarr; My Teams.&rdquo; <code>saveColumns()</code> now only updates name/visible/order — all sharing state preserved. Local rename supported for all column types including received columns.
+</li>
+<li><strong>Teams page — Manage Sharing:</strong> New &ldquo;Manage Sharing&rdquo; button (share icon) on each owned team card. Opens a modal showing all columns with toggles pre-set to current share state. Columns shared with another team shown disabled. Save applies all changes at once; warns if unsharing affects team members.</li>
+<li><strong>Teams page — shared columns list:</strong> Each team card (both My Teams and Teams I&rsquo;ve Joined) now shows shared column pills below the member list. Fetched from <code>shared_columns</code> table. Theme-aware background (dark: #1E2D3D, light: #DDE3EA). Owner view includes &times; button to unshare directly from the pill.</li>
+<li><strong>Sidebar nav updates:</strong> Added Teams (after Statistics) and Settings (after Teams) nav items. Both route to the My Account page on the appropriate tab. Both use the My Account icon in the topbar (not the gear icon).</li>
+<li><strong>Modal queue:</strong> Patched <code>Modal.open</code> and <code>Modal.close</code> with a global queue. If a modal is already open when a second tries to show, the second is queued and auto-displays after the first is dismissed. Prevents invite modal and stale-column modal from colliding on login.</li>
+<li><strong>Backup:</strong> <code>app_backup_2026-05-23</code>.</li>
+</ul>
+
+<h3>2026-05-21</h3>
+<ul>
+<li><strong>localStorage security audit &amp; cleanup:</strong> Full audit of all localStorage keys. Removed all security-sensitive data from localStorage:
+  <ul>
+    <li><strong>jk_subscription_status, jk_subscription_tier, jk_role (removed):</strong> Were written on login and used to gate paid features. Risk: any user could open DevTools and change these values to bypass paywalls or elevate role. Now read exclusively from <code>window._supabaseProfile</code> (in-memory, resets from Supabase on every load). Tamper-proof.</li>
+    <li><strong>jk_current_user (removed):</strong> Was a redundant local copy of the Supabase user ID. Supabase session (<code>persistSession: true</code>) already owns identity. <code>DB.setSession()</code> and <code>DB.clearSession()</code> are now no-ops. Offline fallback path simplified to redirect-to-login.</li>
+    <li><strong>jk_seeded_&lt;userId&gt; (migrated to Supabase):</strong> One-time flag preventing re-seeding of default data. Moved to <code>profiles.seeded_at</code> (TIMESTAMPTZ). Migration <code>20260521_add_seeded_at.sql</code> applied. Seed check in <code>DB.init()</code> now does a lightweight Supabase fetch for <code>seeded_at</code> before seeding, and writes <code>seeded_at = NOW()</code> after seeding (fire-and-forget).</li>
+    <li><strong>jk_last_sync (deleted):</strong> Was written after every sync but never read anywhere in the codebase. Dead code removed from <code>sync.js</code>.</li>
+  </ul>
+</li>
+<li><strong>Boot-time legacy key purge:</strong> <code>initApp()</code> now actively removes all retired keys on every boot: <code>jk_role</code>, <code>jk_subscription_status</code>, <code>jk_subscription_tier</code>, <code>jk_current_user</code>, <code>jk_last_sync</code>, <code>jk_teams_collapsed</code>, plus all <code>jk_seeded_*</code> prefixed keys. Ensures stale/tampered values from old installs are purged.</li>
+<li><strong>Dev mode cache fix:</strong> Added <code>session.clearCache()</code> before <code>loadFile()</code> in dev mode (<code>main.js</code>). Prevents Electron's Chromium cache from serving stale JS files during development when static <code>?v=</code> cache-busters don't change.</li>
+<li><strong>Teams page UI polish &amp; default collapsed:</strong>
+  <ul>
+    <li><strong>Default collapsed:</strong> All teams (owned + joined) now render collapsed by default on page load. Previously teams defaulted to expanded, cluttering the page when a user had multiple teams.</li>
+    <li><strong>Chevron animation:</strong> Chevron button rotates -90° (<code>transition: transform 0.2s ease</code>) when collapsed, pointing right. Points down when expanded. Clicking the chevron toggles the team body inline.</li>
+    <li><strong>Team card layout:</strong> Each team entry (<code>.acct-team-entry</code>) has a header row with team name + stats on the left and action buttons (Invite, Change Password, Delete) on the right. Member list (<code>.acct-team-members</code>) sits below the header and is hidden via <code>display:none</code> when collapsed.</li>
+    <li><strong>Team stats line:</strong> Shown below team name in small muted text — member count, pending invite count, and creation date joined with · separator.</li>
+    <li><strong>Section grouping:</strong> Owned teams shown under &ldquo;My Teams&rdquo; section (<code>.acct-section</code> card with border-radius + overflow hidden). Joined teams shown under &ldquo;Teams I&rsquo;ve Joined&rdquo; with owner name/email displayed.</li>
+    <li><strong>Persistence:</strong> Renamed localStorage key from <code>jk_teams_collapsed</code> to <code>jk_teams_expanded</code>. New semantics: only explicitly-expanded teams stored as <code>true</code>. Empty object = all collapsed. Old key purged on boot. User expand preference persists across navigation within a session.</li>
+  </ul>
+</li>
+<li><strong>Remaining localStorage (intentional):</strong> Only UI state remains: <code>jk_theme</code> (dark/light), <code>jk_sidebar_collapsed</code>, <code>jk_teams_expanded</code>, <code>jk_notifs_&lt;userId&gt;</code> (local device notifications — backup/auto-archive events).</li>
+<li><strong>Backup:</strong> <code>app_backup_2026-05-21</code>.</li>
+</ul>
 
 <h3>2026-05-18</h3>
 <ul>

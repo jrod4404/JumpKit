@@ -550,10 +550,18 @@ function createWindow() {
     },
   });
 
-  win.loadFile(path.join(__dirname, 'index.html'));
+  // In dev mode, clear the renderer cache so source file changes are always picked up.
+  // Static ?v= cache-busters in script tags don't update automatically during development.
+  const isDev = !app.isPackaged;
+  if (isDev) {
+    win.webContents.session.clearCache().then(() => {
+      win.loadFile(path.join(__dirname, 'index.html'));
+    });
+  } else {
+    win.loadFile(path.join(__dirname, 'index.html'));
+  }
 
   // Disable devtools in production
-  const isDev = !app.isPackaged;
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {
       // Block F12 and Ctrl/Cmd+Shift+I

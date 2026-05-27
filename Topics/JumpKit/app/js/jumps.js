@@ -795,7 +795,7 @@ function saveJump(editId) {
         // Free tier: check 10 shared jump limit BEFORE creating the jump
         const _colCheck = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
         if (_colCheck?.isShared && _colCheck?.teamId) {
-          const _tierCheck = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+          const _tierCheck = window._supabaseProfile?.subscription_tier || 'free';
           if (_tierCheck === 'free') {
             const _sharedCount = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === _colCheck.teamId && j.isShared).length;
             if (_sharedCount >= 10) {
@@ -894,32 +894,36 @@ function confirmArchive(id) {
 function doArchive(id) { DB.updateJump(currentUser.id, id, { isArchived: true }); Modal.close(); renderColumns(); }
 
 // ── Configure Columns Modal ────────────────────────────────────────
+// Team name cache for Configure Columns status labels
+let _colConfigTeamNames = {}; // { teamId: teamName }
+let _colConfigOwnedTeamIds = new Set(); // teamIds owned by current user
+
 async function openConfigColumnsModal() {
-  await fetchOwnedTeams();
   let cols = DB.getColumns(currentUser.id);
   while (cols.length < 10) {
     cols.push({ id: 'new_' + cols.length, userId: currentUser.id, name: '', visible: false, order: cols.length + 1, _new: true });
   }
   cols.sort((a, b) => a.order - b.order);
+
+  // Fetch team names + ownership for all teamIds present in columns
+  _colConfigTeamNames = {};
+  _colConfigOwnedTeamIds = new Set();
+  const teamIds = [...new Set(cols.filter(c => c.teamId).map(c => c.teamId))];
+  if (teamIds.length > 0) {
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) {
+        const { data: teams = [] } = await supabaseClient
+          .from('teams').select('id, name, owner_id').in('id', teamIds);
+        teams.forEach(t => {
+          _colConfigTeamNames[t.id] = t.name;
+          if (t.owner_id === session.user.id) _colConfigOwnedTeamIds.add(t.id);
+        });
+      }
+    } catch (_) {}
+  }
+
   renderColConfigModal(cols);
-}
-
-// Cached teams for column sharing dropdown (fetched once when modal opens)
-let _colConfigTeams = [];
-
-async function fetchOwnedTeams() {
-  _colConfigTeams = [];
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) return;
-    const role = await getUserRole(session.user.id);
-    if (role !== 'team-owner' && role !== 'org-owner') return;
-    const { data: teams = [] } = await supabaseClient
-      .from('teams')
-      .select('id, name')
-      .eq('owner_id', session.user.id);
-    _colConfigTeams = teams;
-  } catch (_) {}
 }
 
 async function getUserRole(userId) {
@@ -930,12 +934,20 @@ async function getUserRole(userId) {
 }
 
 function renderColConfigModal(cols) {
-  const showTeamShare = _colConfigTeams.length > 0;
-
   const rows = cols.map((c, i) => {
-    const teamLabel = c.teamId
-      ? (_colConfigTeams.find(t => t.id === c.teamId)?.name || 'Personal only')
-      : 'Personal only';
+    // Build sharing status label (read-only)
+    let statusHTML = '';
+    if (c.name && !c._new) {
+      if (!c.teamId || !c.isShared) {
+        statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
+      } else if (_colConfigOwnedTeamIds.has(c.teamId)) {
+        const teamName = _colConfigTeamNames[c.teamId] || 'Team';
+        statusHTML = `<span class="col-status-badge col-status-shared-out"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
+      } else {
+        const teamName = _colConfigTeamNames[c.teamId] || 'Team';
+        statusHTML = `<span class="col-status-badge col-status-shared-from"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+      }
+    }
     return `
     <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
       <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.svg#tabler-grip-vertical"/></svg></span>
@@ -952,27 +964,16 @@ function renderColConfigModal(cols) {
           </label>
         </div>
       </div>
-      ${showTeamShare ? `
-      <div class="col-config-field">
-        <span class="col-config-label">Share With</span>
-        <div class="custom-select col-share-drop" data-colidx="${i}" style="font-size:.78rem">
-          <div class="custom-select-trigger col-share-trigger" style="height:38px">
-            <span class="col-share-label">${esc(teamLabel)}</span>
-            <svg class="ti ti-chevron-down" style="font-size:.75rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-          </div>
-          <div class="custom-select-menu col-share-menu">
-            <div class="custom-select-option${!c.teamId ? ' selected' : ''}" data-value="">Personal only</div>
-            ${_colConfigTeams.map(t => `<div class="custom-select-option${c.teamId === t.id ? ' selected' : ''}" data-value="${t.id}">${esc(t.name)}</div>`).join('')}
-          </div>
-        </div>
-        <input type="hidden" class="col-teamid-input" data-field="teamId" value="${esc(c.teamId || '')}" />
-      </div>` : ''}
+      <div class="col-config-field col-status-field">
+        <span class="col-config-label">Sharing</span>
+        ${statusHTML}
+      </div>
     </div>`;
   }).join('');
 
   const body = `
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px">
-      Define up to 10 columns. Drag to reorder. Named + visible columns appear on the Jumps page left to right.
+      Define up to 10 columns. Drag to reorder. To share columns with a team, go to <strong>Account → My Teams</strong>.
     </p>
     <div class="col-config-list" id="colConfigList">${rows}</div>`;
 
@@ -980,60 +981,6 @@ function renderColConfigModal(cols) {
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" id="btnSaveColumns" onclick="saveColumns()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
   initColDragDrop();
-  
-  // Wire up custom-select dropdowns for team sharing
-  if (showTeamShare) {
-    setTimeout(() => {
-      document.querySelectorAll('.col-share-drop').forEach(drop => {
-        const trigger = drop.querySelector('.col-share-trigger');
-        const menu = drop.querySelector('.col-share-menu');
-        const label = drop.querySelector('.col-share-label');
-        const hiddenInput = drop.parentElement.querySelector('.col-teamid-input');
-        
-        if (trigger && menu) {
-          trigger.addEventListener('click', e => {
-            e.stopPropagation();
-            const isOpen = menu.classList.contains('open');
-            // Close all other dropdowns
-            document.querySelectorAll('.col-share-menu.open').forEach(m => {
-              if (m !== menu) m.classList.remove('open');
-            });
-            if (isOpen) {
-              menu.classList.remove('open');
-            } else {
-              menu.classList.add('open');
-            }
-          });
-          
-          menu.querySelectorAll('.custom-select-option').forEach(opt => {
-            opt.addEventListener('click', () => {
-              const value = opt.dataset.value || '';
-              const text = opt.textContent;
-              // Update label
-              label.textContent = text;
-              // Update hidden input
-              if (hiddenInput) hiddenInput.value = value;
-              // Update selected state
-              menu.querySelectorAll('.custom-select-option').forEach(o => o.classList.remove('selected'));
-              opt.classList.add('selected');
-              // Close menu
-              menu.classList.remove('open');
-            });
-          });
-        }
-      });
-      // Close col-share dropdowns on outside click — scoped to modal, removed when modal closes
-      const _colConfigModal = document.getElementById('modalBox');
-      const _colShareCloseHandler = e => {
-        if (!e.target.closest('.col-share-drop')) {
-          document.querySelectorAll('.col-share-menu.open').forEach(m => m.classList.remove('open'));
-        }
-      };
-      if (_colConfigModal) {
-        _colConfigModal.addEventListener('mousedown', _colShareCloseHandler);
-      }
-    }, 0);
-  }
 }
 
 function initColDragDrop() {
@@ -1066,7 +1013,6 @@ function initColDragDrop() {
 }
 
 async function saveColumns() {
-  // Show spinner on save button
   const saveBtn = document.getElementById('btnSaveColumns');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Saving…'; }
 
@@ -1075,61 +1021,37 @@ async function saveColumns() {
   const items    = document.querySelectorAll('.col-config-item');
   const existing = DB.getColumns(currentUser.id);
   const updated  = [];
-  const toShare  = [];  // columns being assigned to a team
-  const toUnshare = []; // columns being removed from a team
 
   items.forEach((item, i) => {
-    const name     = item.querySelector('[data-field="name"]').value.trim();
-    const visible  = item.querySelector('[data-field="visible"]').checked && name.length > 0;
-    const order    = i + 1;
-    const teamIdInput = item.querySelector('.col-teamid-input');
-    const teamId   = teamIdInput ? (teamIdInput.value || null) : null;
-    const isShared = !!teamId;
-    const colId = item.dataset.colid;
+    const name    = item.querySelector('[data-field="name"]').value.trim();
+    const visible = item.querySelector('[data-field="visible"]').checked && name.length > 0;
+    const order   = i + 1;
+    const colId   = item.dataset.colid;
     const existingCol = colId ? existing.find(c => c.id === colId) : existing[i];
 
     if (name) {
-      let col;
       if (existingCol && !existingCol._new) {
-        // Detect team sharing change
-        const wasShared = !!existingCol.teamId;
-        if (isShared) toShare.push({ ...existingCol, name, visible, order, isShared: 1, teamId });
-        else if (wasShared && !isShared) toUnshare.push(existingCol);
-        col = { ...existingCol, name, visible, order, isShared: isShared ? 1 : 0, teamId: teamId || null };
+        // Preserve all sharing state — only update name, visible, order
+        updated.push({ ...existingCol, name, visible, order });
       } else {
-        col = { id: 'col_' + Date.now() + '_' + i, userId: currentUser.id, name, visible, order, createdAt: Date.now(), isShared: isShared ? 1 : 0, teamId: teamId || null };
-        if (isShared) toShare.push(col);
+        updated.push({ id: 'col_' + Date.now() + '_' + i, userId: currentUser.id, name, visible, order, createdAt: Date.now(), isShared: 0, teamId: null });
       }
-      updated.push(col);
     } else if (existingCol && !existingCol._new) {
-      if (existingCol.teamId) toUnshare.push(existingCol);
-      updated.push({ ...existingCol, visible: false, order, isShared: 0, teamId: null });
+      // Empty name row — hide but preserve sharing state
+      updated.push({ ...existingCol, visible: false, order });
     }
   });
 
   DB.saveColumns(currentUser.id, updated.filter(c => c.name));
 
-  // Sync to Supabase for newly shared columns
-  for (const col of toShare) {
-    await syncColumnToSupabase(col);
-  }
-  // Remove from Supabase for unshared columns
-  for (const col of toUnshare) {
-    await unshareColumnFromSupabase(col);
-  }
-  // Sync position updates for already-shared columns that were reordered
+  // Sync name changes for owner's shared columns to Supabase
   for (const col of updated) {
-    if (col.isShared && col.teamId && col.supabaseId) {
+    if (col.isShared && col.teamId && col.supabaseId && _colConfigOwnedTeamIds.has(col.teamId)) {
       const was = existing.find(c => c.id === col.id);
-      if (was && was.order !== col.order) {
+      if (was && was.name !== col.name) {
         try {
-          await supabaseClient
-            .from('shared_columns')
-            .update({ position: col.order })
-            .eq('id', col.supabaseId);
-        } catch (err) {
-          console.warn('Failed to sync column reorder:', err.message);
-        }
+          await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', col.supabaseId);
+        } catch (err) { console.warn('Failed to sync column rename:', err.message); }
       }
     }
   }
@@ -1170,7 +1092,7 @@ async function syncColumnToSupabase(col) {
     let jumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id);
 
     // Free tier: max 10 shared jumps per team across all shared columns
-    const tier = window._supabaseProfile?.subscription_tier || localStorage.getItem('jk_subscription_tier') || 'free';
+    const tier = window._supabaseProfile?.subscription_tier || 'free';
     if (tier === 'free' && jumps.length > 10) {
       showUpgradeModal(
         'Shared Jump Limit Reached',

@@ -496,14 +496,21 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-config-item {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 14px;
-  display: grid; grid-template-columns: 28px 1fr 70px 240px; gap: 10px; align-items: start;
+  display: grid; grid-template-columns: 28px 1fr 70px 1fr; gap: 10px; align-items: start;
   cursor: grab; transition: background var(--transition), border-color var(--transition);
 }
 .col-config-field { display: flex; flex-direction: column; gap: 4px; }
 .col-config-label { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
-.col-share-drop { width: 100%; }
-.col-share-drop .custom-select-trigger,
-.col-share-trigger { height: 30.4px !important; min-height: 0 !important; padding: 3px 10px !important; box-sizing: border-box; }
+.col-status-field { justify-content: flex-start; }
+.col-status-badge {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 0.76rem; font-weight: 500; white-space: nowrap;
+  border: 1px solid var(--border-input);
+}
+.col-status-personal { color: var(--text-dim); background: transparent; }
+.col-status-shared-out { color: var(--turq); background: rgba(0,194,199,0.08); border-color: rgba(0,194,199,0.25); }
+.col-status-shared-from { color: var(--text-muted); background: var(--bg-card); }
 .col-config-item:active { cursor: grabbing; }
 .col-config-item.drag-over { border-color: var(--hover-accent); background: var(--bg-hover); }
 .col-drag-handle { font-size: 1.2rem; color: var(--text-dim); text-align: center; cursor: grab; user-select: none; align-self: center; padding-top: 7px; }

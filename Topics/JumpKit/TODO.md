@@ -29,7 +29,7 @@ _Last updated: 2026-05-20_
 
 ## 🔴 High Priority
 
-- [x] **Teams page UI cleanup** — tighten the unified My Account / My Teams layout; review spacing, headers, and action buttons now that both live together
+- [x] **Teams page UI cleanup** — fully complete: pill layout, collapsible teams, stats line, column alignment, button sizing, color polish
 
 - [ ] **Paywall edge-case polish**
   - [ ] In-app downgrade notice — modal exists, needs copy QA
@@ -52,6 +52,7 @@ _Last updated: 2026-05-20_
 
 ## 🔵 Low Priority / Post-launch
 
+- [ ] **Apple Developer Account ($99/yr)** — required for macOS code signing + notarization + auto-update via GitHub Releases. Without it: auto-update silently fails on Mac, users see "unidentified developer" warning on first install. Steps once enrolled: generate Developer ID Application cert → add signing config to electron-builder → build → notarize → publish release to GitHub.
 - [ ] **Dev vs. prod Supabase separation** — duplicate project/config, add environment switching
 - [ ] **Rebuild Windows installer** — bundle latest app code for distribution
 - [ ] **Pagination on large lists** — teams, members, invites; keep UI responsive at scale

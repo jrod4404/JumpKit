@@ -58,15 +58,15 @@ const JK_TESTS = [
   },
   {
     id: 4, category: 'Auth',
-    title: 'Subscription status cached',
-    purpose: 'Ensures subscription status was written to localStorage on login. This cache is used to gate features without a Supabase round-trip on every action.',
-    prerequisites: 'Must be logged in. Subscription status must have been fetched and cached during initApp.',
-    input: 'localStorage.getItem("jk_subscription_status")',
-    description: 'jk_subscription_status is in localStorage',
-    expected: 'localStorage.getItem("jk_subscription_status") is not null',
+    title: 'Subscription status in memory',
+    purpose: 'Ensures subscription_status is present on the in-memory Supabase profile object after login. This is the sole source of truth for feature gating — localStorage is intentionally not used to prevent client-side tampering.',
+    prerequisites: 'Must be logged in. Supabase profile must have been fetched during initApp (Test 3 must pass).',
+    input: 'window._supabaseProfile?.subscription_status',
+    description: 'window._supabaseProfile.subscription_status is set',
+    expected: 'window._supabaseProfile.subscription_status is not null/undefined',
     test: async () => {
-      const val = localStorage.getItem('jk_subscription_status');
-      if (val == null) throw new Error('jk_subscription_status not found in localStorage');
+      const val = window._supabaseProfile?.subscription_status;
+      if (val == null) throw new Error('window._supabaseProfile.subscription_status is not set — Supabase profile may not have loaded');
       return true;
     }
   },
@@ -556,7 +556,7 @@ const JK_TESTS = [
     description: 'If status is free, trial_launches_used should be <= 250',
     expected: 'Free tier users have trial_launches_used <= 250',
     test: async () => {
-      const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
+      const status = window._supabaseProfile?.subscription_status || 'free';
       if (status !== 'free') return true; // paid — skip
       const used = window._supabaseProfile?.trial_launches_used || 0;
       if (used > 250) throw new Error(`Free user has ${used} launches used — exceeds 250 limit`);
@@ -587,7 +587,7 @@ const JK_TESTS = [
     description: 'If status is active, modal overlay should not be visible on page load',
     expected: 'No paywall modal visible immediately after checking on active subscription',
     test: async () => {
-      const status = window._supabaseProfile?.subscription_status || localStorage.getItem('jk_subscription_status') || 'free';
+      const status = window._supabaseProfile?.subscription_status || 'free';
       if (status !== 'active') return true; // skip for non-active
       const overlay = document.getElementById('modalOverlay');
       if (overlay && overlay.style.display !== 'none' && overlay.style.display !== '') {
@@ -632,15 +632,15 @@ const JK_TESTS = [
   },
   {
     id: 36, category: 'Teams',
-    title: 'Role stored in localStorage',
-    purpose: 'Confirms the user\'s role was cached locally after login. Role is used for UI gating (org-owner vs team-member views) — missing it causes incorrect page rendering.',
-    prerequisites: 'Must be logged in. Role must have been set during initApp.',
-    input: 'localStorage.getItem("jk_role")',
-    description: 'jk_role is present in localStorage',
-    expected: 'localStorage.getItem("jk_role") is not null',
+    title: 'Role present in memory',
+    purpose: 'Confirms the user\'s role is present on the in-memory Supabase profile object. Role gates org-owner vs team-member views — localStorage is intentionally not used to prevent client-side tampering.',
+    prerequisites: 'Must be logged in. Supabase profile must have been fetched during initApp (Test 3 must pass).',
+    input: 'window._supabaseProfile?.role',
+    description: 'window._supabaseProfile.role is set',
+    expected: 'window._supabaseProfile.role is not null/undefined',
     test: async () => {
-      const role = localStorage.getItem('jk_role');
-      if (role == null) throw new Error('jk_role not found in localStorage');
+      const role = window._supabaseProfile?.role;
+      if (role == null) throw new Error('window._supabaseProfile.role is not set — Supabase profile may not have loaded');
       return true;
     }
   },

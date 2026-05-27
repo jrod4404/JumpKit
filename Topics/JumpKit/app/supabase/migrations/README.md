@@ -21,3 +21,9 @@ All database schema changes must be tracked here as numbered SQL migration files
 | 20240001_add_name_fields.sql | Add first_name/last_name to profiles |
 | 20240002_profile_trigger.sql | Auto-create profile on user signup |
 | 20240003_subscription_fields.sql | Add subscription tier/status fields |
+| 20260521_add_seeded_at.sql | Add seeded_at to profiles (replaces jk_seeded localStorage flag) |
+
+## Edge Functions Added
+| Function | Description |
+|---|---|
+| send-team-deleted | Notifies all team members + pending invitees via email when a team is deleted. Called by doRemoveTeam() before Supabase deletes. |

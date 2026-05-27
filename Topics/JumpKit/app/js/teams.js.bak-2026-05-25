@@ -125,7 +125,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   const { data: rawInvites = [] } = await supabaseClient.from('team_invites').select('*').eq('email', supaUser.email).eq('status', 'pending');
   const pendingInvites = [];
   for (const inv of rawInvites) {
-    const { data: t } = await supabaseClient.from('teams').select('id, name, owner_id').eq('id', inv.team_id).single();
+    const { data: t } = await supabaseClient.from('teams').select('id, name, team_password_hash, owner_id').eq('id', inv.team_id).single();
     let ownerLabel = 'team owner';
     if (t?.owner_id) {
       const { data: op } = await supabaseClient.from('profiles').select('first_name, last_name, email').eq('id', t.owner_id).single();
@@ -803,7 +803,7 @@ window.saveAddTeam = async function() {
     const ownerId = _orgOwnerSupaUser?.id;
     const { data: team, error } = await supabaseClient
       .from('teams')
-      .insert({ org_id: selectedOrgId, name, team_password_hash: hashedPassword, owner_id: ownerId })
+      .insert({ org_id: selectedOrgId, name, team_password_hash: hashedPassword, team_password_plain: password, owner_id: ownerId })
       .select()
       .single();
     if (error) throw error;
@@ -941,64 +941,20 @@ window.sendOrgInvites = async function() {
 };
 
 window.resendInvite = async function(inviteId, email, teamId) {
-  // Prompt owner to enter team password before resending
-  Modal.open(
-    '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend Invite',
-    `<p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
-      Re-sending invite to <strong>${esc(email)}</strong>.<br>Enter the team password to verify and include it in the email.
-    </p>
-    <div class="form-group">
-      <label class="form-label">Team Password *</label>
-      <div style="position:relative">
-        <input class="form-input" type="password" id="resendTeamPassword" placeholder="Enter team password" autocomplete="off" />
-        <button type="button" class="pw-eye" tabindex="-1" onclick="(function(){const i=document.getElementById('resendTeamPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-      <span class="form-error" id="resendTeamPasswordErr">Incorrect team password.</span>
-    </div>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="resendConfirmBtn" onclick="doResendInvite('${esc(inviteId)}','${esc(email)}','${esc(teamId)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend</button>`,
-    'sm'
-  );
-  setTimeout(() => document.getElementById('resendTeamPassword')?.focus(), 100);
-};
-
-window.doResendInvite = async function(inviteId, email, teamId) {
-  const candidatePassword = document.getElementById('resendTeamPassword')?.value.trim() || '';
-  const pwErrEl = document.getElementById('resendTeamPasswordErr');
-  pwErrEl?.classList.remove('show');
-
-  if (!candidatePassword) {
-    if (pwErrEl) { pwErrEl.textContent = 'Please enter the team password.'; pwErrEl.classList.add('show'); }
-    return;
-  }
-
-  const resendBtn = document.getElementById('resendConfirmBtn');
-  if (resendBtn) { resendBtn.disabled = true; resendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
-
   try {
-    // Verify password server-side first
-    const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
-      body: { teamId, candidatePassword },
-    });
-    if (verifyErr || !verifyData?.valid) {
-      if (pwErrEl) { pwErrEl.textContent = 'Incorrect team password.'; pwErrEl.classList.add('show'); }
-      if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend'; }
-      return;
-    }
-
-    // Reset invite to pending
+    // Update the existing invite's timestamp and reset to pending
     const { error } = await supabaseClient
       .from('team_invites')
       .update({ status: 'pending', invited_at: new Date().toISOString() })
       .eq('id', inviteId);
     if (error) throw error;
 
-    // Re-send email (non-fatal)
+    // Re-send invite email (non-fatal) — fetch team/org/password first
     try {
       const invitedBy = _orgOwnerSupaUser?.id;
       const { data: team } = await supabaseClient
         .from('teams')
-        .select('name, org_id')
+        .select('name, org_id, team_password_plain')
         .eq('id', teamId)
         .single();
       let orgName = '';
@@ -1007,15 +963,18 @@ window.doResendInvite = async function(inviteId, email, teamId) {
         orgName = org?.name || '';
       }
       await supabaseClient.functions.invoke('send-invite', {
-        body: { email, teamId, invitedBy, teamName: team?.name || '', orgName, teamPassword: candidatePassword },
+        body: {
+          email, teamId, invitedBy,
+          teamName: team?.name || '',
+          orgName,
+          teamPassword: team?.team_password_plain || '',
+        },
       });
     } catch (_) { /* email sending optional */ }
 
-    Modal.close();
     Toast.success(`Invite resent to ${email}!`);
   } catch (e) {
     Toast.danger('Failed to resend invite: ' + e.message);
-    if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend'; }
   }
 };
 
@@ -1152,7 +1111,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
   // Fetch team details for each invite separately
   const pendingInvites = [];
   for (const inv of rawInvites) {
-    const { data: t } = await supabaseClient.from('teams').select('id, name, owner_id').eq('id', inv.team_id).single();
+    const { data: t } = await supabaseClient.from('teams').select('id, name, team_password_hash, owner_id').eq('id', inv.team_id).single();
     let ownerEmail = null;
     if (t?.owner_id) {
       const { data: op } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', t.owner_id).single();
@@ -1312,7 +1271,7 @@ async function saveNewTeam(orgId) {
     const hashedAdminPassword = await hashPassword(password);
     const { data: team, error } = await supabaseClient
       .from('teams')
-      .insert({ org_id: orgId, name, team_password_hash: hashedAdminPassword, owner_id: ownerId })
+      .insert({ org_id: orgId, name, team_password_hash: hashedAdminPassword, team_password_plain: password, owner_id: ownerId })
       .select()
       .single();
     if (error) throw error;
@@ -1346,6 +1305,14 @@ async function saveNewTeam(orgId) {
 
 // ── Invite Members Modal ──────────────────────────────────────────
 async function openInviteModal(teamId) {
+  // Fetch plaintext password for this team
+  const { data: teamData } = await supabaseClient
+    .from('teams')
+    .select('team_password_plain')
+    .eq('id', teamId)
+    .single();
+  const plainPw = teamData?.team_password_plain || '';
+
   const body = `
     <p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
       Enter email addresses to invite (one per line). An invitation will be sent to each unique and valid address.
@@ -1355,14 +1322,7 @@ async function openInviteModal(teamId) {
       <textarea class="form-textarea" id="inviteEmails" maxlength="2000" placeholder="alice@example.com&#10;bob@example.com" style="min-height:120px"></textarea>
       <span class="form-error" id="inviteEmailsErr"></span>
     </div>
-    <div class="form-group" style="margin-top:12px">
-      <label class="form-label">Team Password * <span style="color:var(--text-muted);font-weight:400;font-size:.8rem">(verified server-side &amp; included in invite email)</span></label>
-      <div style="position:relative">
-        <input class="form-input" type="password" id="inviteTeamPassword" placeholder="Enter team password" autocomplete="off" />
-        <button type="button" class="pw-eye" tabindex="-1" onclick="(function(){const i=document.getElementById('inviteTeamPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-      </div>
-      <span class="form-error" id="inviteTeamPasswordErr">Incorrect team password.</span>
-    </div>`;
+    <input type="hidden" id="inviteTeamPassword" value="${esc(plainPw)}" />`;
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
@@ -1372,18 +1332,10 @@ async function openInviteModal(teamId) {
 async function sendInvites(teamId) {
   const raw = document.getElementById('inviteEmails').value.trim();
   const allEmails = raw.split(/[\n,;]+/).map(e => e.trim()).filter(Boolean);
-  const candidatePassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
+  const teamPassword = document.getElementById('inviteTeamPassword')?.value.trim() || '';
 
   const errEl = document.getElementById('inviteEmailsErr');
-  const pwErrEl = document.getElementById('inviteTeamPasswordErr');
   errEl?.classList.remove('show');
-  pwErrEl?.classList.remove('show');
-
-  // Require team password entry
-  if (!candidatePassword) {
-    if (pwErrEl) { pwErrEl.textContent = 'Please enter the team password.'; pwErrEl.classList.add('show'); }
-    return;
-  }
 
   // Validation
   if (allEmails.length === 0) {
@@ -1447,20 +1399,6 @@ async function sendInvites(teamId) {
     console.warn('[sendInvites] pre-check failed:', checkErr.message);
   }
 
-  // Verify team password server-side before sending any invites
-  try {
-    const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
-      body: { teamId, candidatePassword },
-    });
-    if (verifyErr || !verifyData?.valid) {
-      if (pwErrEl) { pwErrEl.textContent = 'Incorrect team password.'; pwErrEl.classList.add('show'); }
-      return;
-    }
-  } catch (_) {
-    if (pwErrEl) { pwErrEl.textContent = 'Could not verify password. Please try again.'; pwErrEl.classList.add('show'); }
-    return;
-  }
-
   // Show spinner on button
   const sendBtn = document.getElementById('sendInvitesBtn');
   if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
@@ -1501,7 +1439,7 @@ async function sendInvites(teamId) {
               invitedBy: invitedBy,
               orgName: team?.organizations?.name || '',
               teamName: team?.name || '',
-              teamPassword: candidatePassword,
+              teamPassword: teamPassword,
             },
           });
         } catch (_) { /* email sending optional */ }
@@ -1770,7 +1708,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
     const hashedPw = await hashPassword(newPw);
     const { error } = await supabaseClient
       .from('teams')
-      .update({ team_password_hash: hashedPw })
+      .update({ team_password_hash: hashedPw, team_password_plain: newPw })
       .eq('id', teamId);
     if (error) throw error;
     const _ctpElapsed = Date.now() - _ctpSpinStart;
@@ -1826,11 +1764,23 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
   if (!pw) { if (errEl) errEl.classList.add('show'); return; }
 
   try {
-    // Verify password server-side — hash never leaves the server
-    const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
-      body: { teamId, candidatePassword: pw },
-    });
-    if (verifyErr || !verifyData?.valid) {
+    // Fetch the team's password hash
+    const { data: team, error } = await supabaseClient
+      .from('teams')
+      .select('team_password_hash')
+      .eq('id', teamId)
+      .single();
+    if (error) throw error;
+
+    // Compare passwords — use SHA-256 hash comparison
+    // Hash the input and compare to stored hash
+    const inputHash = await hashPassword(pw);
+    
+    // Support both plain text (legacy) and hashed passwords
+    const storedHash = team.team_password_hash;
+    const match = storedHash === pw || storedHash === inputHash;
+    
+    if (!match) {
       if (errEl) errEl.classList.add('show');
       return;
     }
