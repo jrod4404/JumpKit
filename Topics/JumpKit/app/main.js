@@ -587,9 +587,9 @@ function fireAndForget(cmd, args) {
 }
 
 // Open URLs / local paths from renderer
-ipcMain.handle('open-url', (_e, url) => {
+const RISKY_EXTENSIONS = /\.(app|exe|sh|bat|cmd|command|pkg|dmg|scpt)$/i;
+ipcMain.handle('open-url', async (_e, url, isShared) => {
   if (!url) return;
-  console.log('[open-url] received:', url);
 
   const isWeb = /^(https?:\/\/|www\.)/i.test(url);
   const fullUrl = isWeb && url.startsWith('www.') ? 'https://' + url : url;
@@ -602,14 +602,25 @@ ipcMain.handle('open-url', (_e, url) => {
       const resolvedPath = url.startsWith('~')
         ? url.replace('~', require('os').homedir())
         : url;
-      // Local path — use shell.openPath for cross-platform support
-      shell.openPath(resolvedPath).then(err => {
-        if (err) console.error('[open-url] openPath error:', err);
-      });
+
+      // Shared team jumps pointing to local paths require user confirmation
+      if (isShared) {
+        const { dialog } = require('electron');
+        const { response } = await dialog.showMessageBox({
+          type: 'warning',
+          buttons: ['Cancel', 'Open'],
+          defaultId: 0,
+          cancelId: 0,
+          title: 'Shared Team Jump — Local Path',
+          message: 'Open this shared jump?',
+          detail: `This jump was shared by your team and points to a local path: ${url}. As a security precaution, is this the file you actually want to open?`,
+        });
+        if (response !== 1) return; // 0 = Cancel
+      }
+
+      shell.openPath(resolvedPath);
     }
-  } catch (err) {
-    console.error('[open-url] error:', err);
-  }
+  } catch (_) {}
 });
 
 // ── Auto-updater ──────────────────────────────────────────────────

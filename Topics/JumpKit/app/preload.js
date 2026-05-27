@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  openUrl:           (url)             => ipcRenderer.invoke('open-url', url),
+  openUrl:           (url, isShared)   => ipcRenderer.invoke('open-url', url, isShared),
   syncJumps:         (payload)         => ipcRenderer.invoke('sync-jumps', payload),
   getSyncState:      (key)             => ipcRenderer.invoke('get-sync-state', key),
   upsertSharedJumps: (jumps)           => ipcRenderer.invoke('upsert-shared-jumps', jumps),

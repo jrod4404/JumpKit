@@ -445,7 +445,7 @@ function handleJumpClick(id) {
   refreshStatsBar();
   Toast.success(`Launched <strong>${esc(jump.name)}</strong>`);
   if (window.electronAPI?.isElectron) {
-    window.electronAPI.openUrl(jump.url);
+    window.electronAPI.openUrl(jump.url, !!(jump.isShared || jump.teamId));
   } else {
     window.open(jump.url, '_blank', 'noopener');
   }
