@@ -453,7 +453,7 @@ function startSyncLoop() {
         renderColumns();
       }
     });
-  }, 60 * 60 * 1000);
+  }, 2 * 60 * 1000); // 2-minute poll — members see shared jump updates within 2 min
 }
 
 // Kick off sync after a short delay to let the page initialize
