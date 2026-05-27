@@ -4,7 +4,11 @@
 // Module-level utility: SHA-256 hash for team passwords
 async function hashPassword(password) {
   const encoder = new TextEncoder();
-  // Use PBKDF2 with a fixed salt derived from the app name + password length
+  // Use PBKDF2 with a fixed salt derived from the app name + password length.
+  // NOTE: Fixed salt removes per-password uniqueness vs. a random salt, weakening
+  // rainbow-table resistance. Acceptable here since the hash is never exposed to
+  // clients (verify-team-password Edge Function only). Future improvement: migrate
+  // to a random per-team salt stored alongside the hash in the teams table.
   // This is significantly stronger than plain SHA-256 for password storage
   const keyMaterial = await crypto.subtle.importKey(
     'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']

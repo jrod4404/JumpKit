@@ -558,7 +558,8 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'index.html'));
   }
 
-  // Disable devtools in production
+  // Discourage accidental DevTools access — not a true security control;
+  // determined users can still open DevTools via menu or attach a remote debugger.
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {
       // Block F12 and Ctrl/Cmd+Shift+I
