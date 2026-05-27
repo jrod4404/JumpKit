@@ -2925,7 +2925,123 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </ul>
 <p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
 <p>Happy building! 🚀</p>
-<h2 id="changelog">10. Changelog</h2>
+<h2 id="security">10. Security Architecture</h2>
+<p>This section documents JumpKit's security model, known issues addressed, and remaining hardening work. Updated 2026-05-27.</p>
+
+<h3 id="security-model">10.1 Security Model Overview</h3>
+<p>JumpKit is an Electron + Supabase app. The threat surface spans three layers:</p>
+<ul>
+<li><strong>Renderer process</strong> — runs HTML/JS, handles user input, renders shared content from Supabase</li>
+<li><strong>Main process</strong> — Electron Node.js process, accesses SQLite, opens local files via <code>shell.openPath</code></li>
+<li><strong>Supabase backend</strong> — Postgres with RLS, Edge Functions for auth-sensitive operations</li>
+</ul>
+<p>Key design principles:</p>
+<ul>
+<li>Sensitive operations (password verification, invite sending) run in Edge Functions — never in the renderer</li>
+<li>Team password hashes never leave the server; only <code>{ valid: true/false }</code> is returned to the client</li>
+<li>RLS policies enforce org-owner / team-owner / team-member access at the DB layer</li>
+<li>Electron <code>contextIsolation: true</code>, <code>nodeIntegration: false</code> — renderer cannot access Node APIs directly</li>
+</ul>
+
+<h3 id="security-fixes">10.2 Security Fixes Applied (2026-05-27)</h3>
+<p>All issues below were identified in a full codebase audit (see <code>CODE_REVIEW.md</code>) and resolved.</p>
+
+<h4>🔴 Critical — Resolved</h4>
+<table>
+<thead><tr><th>#</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td><strong>Team passwords stored in plaintext</strong> — <code>team_password_plain</code> column stored cleartext alongside hash; readable by any team member via RLS SELECT</td>
+  <td>Column dropped (migration <code>20260525_drop_team_password_plain.sql</code>). Team owner now enters password at invite time; verified server-side via <code>verify-team-password</code> Edge Function; plaintext included in email only at that moment — never persisted</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><strong>Password hash returned to renderer</strong> — <code>select('*')</code> on <code>teams</code> table sent <code>team_password_hash</code> to the renderer JS context; visible in DevTools</td>
+  <td>All 4 <code>select('*')</code> calls on <code>teams</code> replaced with explicit column lists (<code>id, name, owner_id, org_id, created_at</code>). Hash never leaves the server.</td>
+</tr>
+</tbody>
+</table>
+
+<h4>🟠 High — Resolved</h4>
+<table>
+<thead><tr><th>#</th><th>Issue</th><th>Fix</th></tr></thead>
+<tbody>
+<tr>
+  <td>3</td>
+  <td><strong>SQL column/value mismatch in <code>sync-jumps</code></strong> — INSERT had 9 columns, 8 values; missing <code>@supabaseId</code></td>
+  <td>Added <code>@supabaseId</code> to VALUES list in <code>main.js</code></td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><strong><code>log()</code> undefined in <code>main.js</code></strong> — <code>migrateUserId</code> and <code>seedNewUser</code> called undefined <code>log()</code>; threw ReferenceError after successful SQLite writes, corrupting IPC response</td>
+  <td>Removed all <code>log()</code> calls; no logging needed on success paths</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><strong>CSP effectively disabled</strong> — single <code>default-src</code> with <code>unsafe-inline</code>, <code>unsafe-eval</code>, <code>data:</code>, <code>blob:</code>, <code>file:</code></td>
+  <td>Split into proper directives; removed <code>unsafe-eval</code>; <code>unsafe-inline</code> retained in <code>script-src</code> only until event delegation refactor (#11) is complete; inline theme bootstrap and pw-toggle scripts moved to external files</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><strong>No <code>requestSingleInstanceLock()</code></strong> — two app instances could open same SQLite file concurrently, risking DB corruption during <code>initDB()</code> migrations</td>
+  <td>Added single-instance lock at startup; second launch focuses existing window</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><strong><code>shell.openPath</code> runs any renderer-supplied path</strong> — shared team jumps could point to <code>.app</code>, <code>.sh</code>, <code>.pkg</code> etc. and execute silently on member machines</td>
+  <td>Personal jumps: open immediately (user owns their own machine). Shared team jumps pointing to local paths: native confirmation dialog required before opening. <code>isShared</code> flag passed from renderer through preload to main process.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><strong><code>hardenedRuntime: false</code></strong> — blocked Apple notarization; Gatekeeper warned users on macOS 13+</td>
+  <td>Set <code>hardenedRuntime: true</code> in <code>package.json</code>; existing entitlements already cover <code>better-sqlite3</code></td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><strong>No <code>setWindowOpenHandler</code> / <code>will-navigate</code> lockdown</strong> — <code>window.open()</code> could create new BrowserWindow with full preload access; XSS in user content could exploit this</td>
+  <td>Added <code>setWindowOpenHandler</code> (redirects to system browser, denies new window) and <code>will-navigate</code> guard (blocks non-<code>file://</code> navigation) in <code>createWindow()</code></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="security-edge-functions">10.3 Security-Sensitive Edge Functions</h3>
+<table>
+<thead><tr><th>Function</th><th>Purpose</th><th>Auth</th></tr></thead>
+<tbody>
+<tr><td><code>verify-team-password</code></td><td>Accepts candidate password + teamId; computes PBKDF2 hash server-side; compares to stored hash; returns <code>{ valid: bool }</code> only — hash never exposed</td><td>Rate-limited 20 req/min per IP</td></tr>
+<tr><td><code>send-invite</code></td><td>Sends branded invite email via Resend; includes team password entered by owner (verified before call)</td><td>Rate-limited 10 req/min per IP; CORS locked to <code>jumpkit.app</code></td></tr>
+<tr><td><code>send-welcome</code></td><td>Sends one-time welcome email on first login; server-side dedup prevents repeat sends</td><td>Service role; called from renderer after sign-in</td></tr>
+</tbody>
+</table>
+
+<h3 id="security-rls">10.4 RLS Hardening Notes</h3>
+<ul>
+<li><code>shared_jumps</code> INSERT/UPDATE/DELETE: team owner or org owner only — members cannot write shared content</li>
+<li><code>teams</code> SELECT: returns all columns including <code>team_password_hash</code> — mitigated by never requesting it from the renderer (explicit column selects). No column-level security in Supabase; defense is at the query layer.</li>
+<li><code>team_invites</code> SELECT: any team member can read pending invites for their team — by design (used to prevent duplicate invites)</li>
+</ul>
+
+<h3 id="security-remaining">10.5 Remaining Security Work (🟡 Medium / 🟢 Low)</h3>
+<table>
+<thead><tr><th>#</th><th>Severity</th><th>Issue</th><th>Status</th></tr></thead>
+<tbody>
+<tr><td>10</td><td>🟡</td><td><code>tests.js</code> (130 KB) ships and parses for every user; exposes test fixtures</td><td>To do</td></tr>
+<tr><td>11</td><td>🟡</td><td>80+ inline <code>onclick</code> handlers in generated HTML — blocks full CSP <code>script-src</code> lockdown; requires event delegation refactor. Completing this allows removing <code>unsafe-inline</code> from <code>script-src</code>.</td><td>To do</td></tr>
+<tr><td>12</td><td>🟡</td><td><code>chart.min.js</code> (200 KB) loaded on every page including auth</td><td>To do</td></tr>
+<tr><td>13</td><td>🟡</td><td><code>auth.js</code> hardcodes anon key JWT literal instead of referencing <code>SUPABASE_ANON_KEY</code></td><td>To do</td></tr>
+<tr><td>14</td><td>🟡</td><td>Admin nav check uses <code>email === 'jeffroder@gmail.com'</code> hardcode instead of <code>role</code> field</td><td>To do</td></tr>
+<tr><td>15</td><td>🟡</td><td><code>isShared</code> mixed as <code>1</code>/<code>0</code> vs <code>true</code>/<code>false</code> in sync/cache layer</td><td>To do</td></tr>
+<tr><td>16</td><td>🟡</td><td>Stale data cleanup uses two different ID schemes (<code>supabaseId</code> vs <code>id</code>) — can leave ghost rows</td><td>To do</td></tr>
+<tr><td>17</td><td>🟡</td><td>Dead code in <code>main.js</code>: unused <code>globalShortcut</code> import, unused <code>tray</code> variable</td><td>To do</td></tr>
+<tr><td>18</td><td>🟡</td><td>Auto-seed triple-guard race: localStorage + in-memory Set + SQLite can disagree across reinstalls</td><td>To do</td></tr>
+<tr><td>19</td><td>🟡</td><td><code>getColumns</code> IPC returns sorted; cache replacement doesn't sort — inconsistent order</td><td>To do</td></tr>
+<tr><td>20</td><td>🟢</td><td>DevTools keyboard block is cosmetic — rename comment to reflect it's a deterrent only</td><td>To do</td></tr>
+<tr><td>21</td><td>🟢</td><td>PBKDF2 fixed salt weakens rainbow-table resistance — note in code; low priority</td><td>To do</td></tr>
+</tbody>
+</table>
+
+<h2 id="changelog">11. Changelog</h2>
 
 <h3>2026-05-25</h3>
 <ul>
