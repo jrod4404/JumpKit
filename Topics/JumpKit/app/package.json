@@ -14,6 +14,7 @@
     "appId": "com.jumpkit.app",
     "productName": "JumpKit",
     "copyright": "Copyright © 2026 Jeff",
+    "afterPack": "./fuse.js",
     "files": [
       "**/*",
       "!node_modules/.bin",
