@@ -110,14 +110,14 @@ async function renderUnifiedTeamsView(content, supaUser) {
   selectedOrgId = orgId;
 
   // Fetch teams this user owns
-  const { data: ownedTeams = [] } = await supabaseClient.from('teams').select('*').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name');
+  const { data: ownedTeams = [] } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name');
 
   // Fetch teams this user is a member of (but doesn't own)
   const { data: memberRows = [] } = await supabaseClient.from('team_members').select('team_id').eq('user_id', supaUser.id);
   const memberTeamIds = memberRows.map(r => r.team_id).filter(id => !ownedTeams.find(t => t.id === id));
   let memberTeams = [];
   for (const tid of memberTeamIds) {
-    const { data: t } = await supabaseClient.from('teams').select('*').eq('id', tid).single();
+    const { data: t } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('id', tid).single();
     if (t) memberTeams.push(t);
   }
 
@@ -534,7 +534,7 @@ window.selectOrg = async function(orgId) {
   try {
     const { data: teams = [], error } = await supabaseClient
       .from('teams')
-      .select('*')
+      .select('id, name, owner_id, org_id, created_at')
       .eq('org_id', orgId)
       .order('name');
     if (error) throw error;
@@ -1051,7 +1051,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
   // Find team this user owns
   const { data: teams = [] } = await supabaseClient
     .from('teams')
-    .select('*')
+    .select('id, name, owner_id, org_id, created_at')
     .eq('owner_id', supaUser.id);
 
   const team = teams[0] || null;
@@ -1356,7 +1356,7 @@ async function openInviteModal(teamId) {
       <span class="form-error" id="inviteEmailsErr"></span>
     </div>
     <div class="form-group" style="margin-top:12px">
-      <label class="form-label">Team Password * <span style="color:var(--text-muted);font-weight:400;font-size:.8rem">(verified server-side &amp; included in invite email)</span></label>
+      <label class="form-label">Team Password *</label>
       <div style="position:relative">
         <input class="form-input" type="password" id="inviteTeamPassword" placeholder="Enter team password" autocomplete="off" />
         <button type="button" class="pw-eye" tabindex="-1" onclick="(function(){const i=document.getElementById('inviteTeamPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
@@ -1364,7 +1364,7 @@ async function openInviteModal(teamId) {
       <span class="form-error" id="inviteTeamPasswordErr">Incorrect team password.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
+  Modal.open('<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members', body,
     `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" id="sendInvitesBtn" onclick="sendInvites('${teamId}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 }
