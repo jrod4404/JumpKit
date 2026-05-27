@@ -1,5 +1,4 @@
 const { app, BrowserWindow, ipcMain, shell, globalShortcut } = require('electron');
-const log = (...a) => console.log('[JumpKit]', ...a);
 const { spawn } = require('child_process');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -435,10 +434,8 @@ ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
       db.prepare('UPDATE user_prefs SET userId = ? WHERE userId = ?').run(newId, oldId);
       // sync_state has no userId column — skip
     })();
-    log(`[migrateUserId] ${oldId} → ${newId}`);
     return { ok: true };
   } catch(e) {
-    log(`[migrateUserId] Error: ${e.message}`);
     return { ok: false, error: e.message };
   }
 });
@@ -449,7 +446,6 @@ ipcMain.handle('seed-new-user', (_e, userId, platform) => {
     // Guard: never seed if personal columns already exist for this user
     const existingCols = db.prepare('SELECT COUNT(*) as cnt FROM columns WHERE userId = ? AND isShared = 0').get(userId);
     if (existingCols && existingCols.cnt > 0) {
-      log(`[seedNewUser] Skipping — user ${userId} already has ${existingCols.cnt} columns`);
       return { ok: true, skipped: true };
     }
 
