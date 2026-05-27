@@ -137,6 +137,7 @@ async function syncSharedJumps() {
     if (memErr) throw memErr;
 
     const teamIds = memberships.map(m => m.team_id);
+    console.debug('[sync] memberships found:', teamIds.length, 'teamIds:', teamIds);
 
     // If no team memberships, offer recovery for any stale shared columns then return
     if (teamIds.length === 0) {
@@ -165,14 +166,17 @@ async function syncSharedJumps() {
       .in('team_id', teamIds)
       .order('position');
     if (jumpErr) throw jumpErr;
+    console.debug('[sync] remoteCols:', remoteCols.length, remoteCols.map(c => c.name));
+    console.debug('[sync] remoteJumps:', remoteJumps.length, remoteJumps.map(j => j.name));
 
     // 3. Upsert into local DB — preserve local hotkey if already set
     const localUser = DB.getCurrentUser();
-    if (!localUser) return;
+    if (!localUser) { console.debug('[sync] no localUser — aborting'); return; }
     const localUserId = localUser.id;
 
     const existingCols = DB.getColumns(localUserId);
     const existingJumps = DB.getJumps(localUserId);
+    console.debug('[sync] existingCols:', existingCols.length, '| existingJumps:', existingJumps.length);
 
     // Build lookup for existing hotkeys
     const hotkeyMap = {};
@@ -316,6 +320,8 @@ async function syncSharedJumps() {
       // Find the local column id that maps to this supabase column
       const localCol = existingCols.find(c => c.supabaseId === rj.shared_column_id || c.id === rj.shared_column_id);
       const columnId = localCol ? localCol.id : rj.shared_column_id;
+      if (!localCol) console.debug('[sync] WARNING: no localCol found for jump', rj.name, 'shared_column_id:', rj.shared_column_id);
+      console.debug('[sync] jump', rj.name, '| existing:', !!existing, '| columnId:', columnId, '| localCol.id:', localCol?.id, '| localCol.supabaseId:', localCol?.supabaseId);
 
       if (existing) {
         DB.updateJump(localUserId, existing.id, {
@@ -437,11 +443,15 @@ async function syncSharedJumps() {
 
 // ── Auto-sync on load + every 60 min ──────────────────────────────
 function startSyncLoop() {
+  console.debug('[sync] startSyncLoop fired');
   // Run immediately
   syncSharedJumps().then(() => {
+    console.debug('[sync] initial sync complete — re-rendering if on jumps page');
     // Re-render if on jumps page
     if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) {
       renderColumns();
+    } else {
+      console.debug('[sync] renderColumns not available or columnsArea not in DOM');
     }
   });
 
