@@ -768,17 +768,21 @@ function saveJump(editId) {
         DB.updateJump(currentUser.id, editId, data);
         const updatedJump = DB.getJumps(currentUser.id).find(j => j.id === editId);
         const col = DB.getColumns(currentUser.id).find(c => c.id === updatedJump?.columnId);
+        console.debug('[saveJump-edit] col:', col?.name, '| isShared:', col?.isShared, '| teamId:', col?.teamId, '| supabaseId:', col?.supabaseId, '| updatedJump.supabaseId:', updatedJump?.supabaseId);
         if (col?.isShared && col?.teamId && col?.supabaseId) {
           if (updatedJump?.supabaseId) {
             // Already in Supabase — update it
+            console.debug('[saveJump-edit] updating existing shared_jump:', updatedJump.supabaseId);
             supabaseClient.from('shared_jumps').update({
               name: data.name, url: data.url,
               description: data.description || '', reason: data.reason || '',
             }).eq('id', updatedJump.supabaseId).then(({ error }) => {
               if (error) console.warn('shared_jumps update:', error.message);
+              else console.debug('[saveJump-edit] update ok');
             });
           } else {
             // Moved into a shared column — insert it
+            console.debug('[saveJump-edit] inserting new shared_jump for:', data.name);
             const supabaseId = crypto.randomUUID();
             DB.updateJump(currentUser.id, editId, { supabaseId, isShared: 1, teamId: col.teamId });
             supabaseClient.from('shared_jumps').insert({
@@ -787,9 +791,12 @@ function saveJump(editId) {
               description: data.description || '', reason: data.reason || '',
               position: 0, created_by: window._supabaseUser?.id || currentUser.id,
             }).then(({ error }) => {
-              if (error) console.warn('shared_jumps insert (edit):', error.message);
+              if (error) console.warn('[saveJump-edit] shared_jumps insert error:', error.message);
+              else console.debug('[saveJump-edit] insert ok');
             });
           }
+        } else {
+          console.debug('[saveJump-edit] condition failed — not pushing to Supabase');
         }
       } else {
         // Free tier: check 10 shared jump limit BEFORE creating the jump
@@ -813,6 +820,7 @@ function saveJump(editId) {
         // If added to a shared column, push to Supabase shared_jumps
         if (newJump) {
           const col = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
+          console.debug('[saveJump-create] col:', col?.name, '| isShared:', col?.isShared, '| teamId:', col?.teamId, '| supabaseId:', col?.supabaseId);
           if (col?.isShared && col?.teamId && col?.supabaseId) {
             const supabaseId = crypto.randomUUID();
             DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: col.teamId });
@@ -827,8 +835,11 @@ function saveJump(editId) {
               position: 0,
               created_by: window._supabaseUser?.id || currentUser.id,
             }).then(({ error }) => {
-              if (error) console.warn('[saveJump] shared_jumps insert:', error.message);
+              if (error) console.warn('[saveJump] shared_jumps insert error:', error.message);
+              else console.debug('[saveJump-create] insert ok');
             });
+          } else {
+            console.debug('[saveJump-create] condition failed — not pushing to Supabase');
           }
         }
       }
