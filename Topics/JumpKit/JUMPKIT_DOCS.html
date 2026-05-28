@@ -3086,8 +3086,8 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <tr><td>17</td><td>✅</td><td>Dead code in <code>main.js</code>: unused <code>globalShortcut</code> import, unused <code>tray</code> variable</td><td>✅ Done 2026-05-28 — Removed <code>globalShortcut</code> from import, <code>let tray</code> declaration, and <code>globalShortcut.unregisterAll()</code> no-op call</td></tr>
 <tr><td>18</td><td>✅</td><td>Auto-seed triple-guard race: concurrent <code>DB.init()</code> calls can race past seed guards and double-seed</td><td>✅ Done 2026-05-28 — Added Promise-based in-flight lock (<code>_initInFlight</code> Map). Concurrent <code>init()</code> calls for the same userId now share one Promise; actual init logic moved to <code>_doInit()</code>. Race condition closed at the async boundary.</td></tr>
 <tr><td>19</td><td>✅</td><td><code>getColumns</code> IPC returns sorted; cache replacement doesn't sort — inconsistent order</td><td>✅ Done 2026-05-28 — <code>DB.getColumns()</code> now sorts by <code>order ASC</code> before returning, matching SQLite IPC path exactly</td></tr>
-<tr><td>20</td><td>🟢</td><td>DevTools keyboard block is cosmetic — rename comment to reflect it's a deterrent only</td><td>To do</td></tr>
-<tr><td>21</td><td>🟢</td><td>PBKDF2 fixed salt weakens rainbow-table resistance — note in code; low priority</td><td>To do</td></tr>
+<tr><td>20</td><td>✅</td><td>DevTools keyboard block is cosmetic — rename comment to reflect it's a deterrent only</td><td>✅ Already done — <code>main.js</code> comment reads: <em>"Discourage accidental DevTools access — not a true security control; determined users can still open DevTools via menu or attach a remote debugger."</em></td></tr>
+<tr><td>21</td><td>✅</td><td>PBKDF2 fixed salt weakens rainbow-table resistance — note in code; low priority</td><td>✅ Already done — <code>teams.js</code> lines 7–11 document the tradeoff: fixed salt noted, acceptable given hash is never exposed to clients, future improvement path (random per-team salt) noted inline.</td></tr>
 </tbody>
 </table>
 
