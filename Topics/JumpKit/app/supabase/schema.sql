@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   first_name  TEXT DEFAULT '',
   last_name   TEXT DEFAULT '',
   role        TEXT NOT NULL DEFAULT 'team-member'
-                CHECK (role IN ('org-owner','team-owner','team-member')),
+                CHECK (role IN ('org-owner','team-owner','team-member','admin')),
   org_id      UUID REFERENCES organizations(id) ON DELETE SET NULL,
   seeded_at   TIMESTAMPTZ DEFAULT NULL,  -- set once when default data is seeded for new user
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()

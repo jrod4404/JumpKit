@@ -716,29 +716,79 @@ App ready to render</code></pre>
 <li><strong>Profile auto-creation</strong>: Supabase trigger <code>on_auth_user_created</code> automatically inserts a row into the <code>profiles</code> table on signup</li>
 <li><strong>Roles</strong>: <code>org-owner</code>, <code>team-owner</code>, <code>team-member</code> — stored in profiles table, checked on Teams page</li>
 </ul>
-<h4 id="sync-engine">2.1.5 Sync Engine: Pull-Only, Fire-and-Forget Writes</h4>
-<p><strong>When sync runs:</strong></p>
+<h4 id="sync-engine">2.1.5 Sync Engine: Local SQLite ↔ Supabase</h4>
+
+<p><strong>Overview:</strong> JumpKit uses a <em>local-first</em> architecture. All data lives in SQLite on the user's machine. Supabase is only used for <em>shared</em> data (columns + jumps that the team owner explicitly shares). Personal jumps never leave the device.</p>
+
+<h5>When sync runs</h5>
 <ul>
-<li>On login (in <code>initAuth()</code>)</li>
-<li>Every 60 minutes (interval in <code>sync.js</code>)</li>
+<li>2 seconds after app launch (deferred to let the page initialize)</li>
+<li>Every 2 minutes on an interval (members see shared jump updates within ~2 min)</li>
+<li>Immediately after joining a team or changing column sharing settings</li>
 </ul>
-<p><strong>What gets synced:</strong></p>
+
+<h5>ID Scheme — Two Namespaces, Never Mixed</h5>
+<p>This is critical to understand to avoid ghost/duplicate rows:</p>
 <ul>
-<li>Shared columns (names, order, team_id)</li>
-<li>Shared jumps (name, URL, description, team_id)</li>
-<li>Local hotkey assignments are <strong>preserved</strong> (not overwritten)</li>
+<li><strong>Local ID</strong> — e.g. <code>col_1717000000_0</code> or <code>jump_abc123</code> — generated locally when the item is created. Used internally within SQLite and the in-memory cache.</li>
+<li><strong>Supabase ID</strong> (<code>supabaseId</code>) — a UUID (e.g. <code>6c07...3873</code>) generated when the item is first synced to Supabase. Stored in the local <code>supabaseId</code> field after first sync.</li>
+<li><strong>Rule:</strong> These two namespaces must never be used interchangeably. All sync matching operations use <code>supabaseId</code> only. Local IDs are never used as a proxy for Supabase UUIDs.</li>
 </ul>
-<p><strong>How duplicates are prevented:</strong></p>
+
+<h5>Column Sync Flow (Owner → Supabase → Members)</h5>
+<ol>
+<li><strong>Owner shares a column</strong> via Teams → Manage Sharing → toggle ON → Save</li>
+<li><code>syncColumnToSupabase(col, teamId)</code> in <code>jumps.js</code>:
+  <ul>
+    <li>Generates a UUID for the <code>shared_columns</code> row if not already set</li>
+    <li>Upserts the row: <code>{ id, team_id, name, position, created_by }</code></li>
+    <li>For each jump in the column: generates a per-(jump, team) UUID, upserts to <code>shared_jumps</code></li>
+    <li>Stores the supabase UUID in <code>col.sharedTeams[i].supabaseId</code> and <code>jump.supabaseIdMap[teamId]</code></li>
+  </ul>
+</li>
+<li><strong>Members sync</strong> via <code>syncSharedJumps()</code> in <code>sync.js</code>:
+  <ul>
+    <li>Fetches all <code>shared_columns</code> and <code>shared_jumps</code> rows for all team memberships</li>
+    <li>Deduplicates remote columns by <code>(team_id + name)</code> (keeps latest by <code>created_at</code>)</li>
+    <li>Matches remote rows to local by <code>supabaseId</code> → updates in place</li>
+    <li>No local match → creates a new local record, placed after the last personal column that has jumps</li>
+    <li>Hotkeys are <strong>never overwritten</strong> — each member's hotkey assignments are local and personal</li>
+  </ul>
+</li>
+</ol>
+
+<h5>One-to-Many Column Sharing</h5>
 <ul>
-<li>Columns are deduplicated by <code>(team_id + name)</code></li>
-<li>Jumps use <code>supabaseId</code> to track the Supabase UUID</li>
-<li>On upsert, if a jump already exists locally, only name/URL/description are updated; hotkey is never touched</li>
+<li>A column can be shared with <strong>multiple teams simultaneously</strong></li>
+<li>Each share is a separate <code>shared_columns</code> row in Supabase (one per team)</li>
+<li>Locally tracked in <code>col.sharedTeams: [{ teamId, supabaseId }, ...]</code></li>
+<li>Each jump in the column has a <code>supabaseIdMap: { [teamId]: supabaseJumpId }</code> to track separate Supabase rows per team</li>
+<li>Unsharing from one team does not affect the other teams</li>
 </ul>
-<p><strong>Pattern: Local-First, Fire-and-Forget</strong></p>
+
+<h5>Stale Data Detection</h5>
+<p>On every sync, <code>syncSharedJumps()</code> checks for stale local columns:</p>
 <ul>
-<li>All DB reads are <strong>synchronous</strong> from <code>DB._cache</code> (fast, instant)</li>
-<li>All DB writes <strong>immediately update the cache</strong>, then fire IPC messages to SQLite (async, no await)</li>
-<li>Users never see &quot;saving...&quot; spinners—the cache is the source of truth</li>
+<li><strong>Team gone</strong> — user is no longer a member of the team that shared this column (team deleted, or user removed). Prompt shown: keep as personal jumps or delete.</li>
+<li><strong>Column unshared</strong> — still a team member, but the column was removed from <code>shared_columns</code> by the owner. Same prompt.</li>
+<li><strong>Stale shared jumps</strong> — a shared jump's <code>supabaseId</code> is no longer in the remote set → deleted locally. Only jumps with a confirmed <code>supabaseId</code> are eligible for deletion; owner-local jumps (no supabaseId set yet) are never deleted by sync.</li>
+</ul>
+
+<h5>Pattern: Local-First, Fire-and-Forget Writes</h5>
+<ul>
+<li>All DB reads are <strong>synchronous</strong> from <code>DB._cache</code> (fast, instant, no spinner)</li>
+<li>All DB writes <strong>immediately update the cache</strong>, then fire async IPC to SQLite</li>
+<li><code>DB.getColumns(userId)</code> always returns columns sorted by <code>order ASC</code> — matches SQLite sort</li>
+<li>Users never wait for writes to complete — the cache is the source of truth</li>
+</ul>
+
+<h5>Key Files</h5>
+<ul>
+<li><code>js/sync.js</code> — <code>syncSharedJumps()</code>: member-side sync loop, stale detection, column/jump upsert</li>
+<li><code>js/jumps.js</code> — <code>syncColumnToSupabase(col, teamId)</code>: owner-side push; <code>unshareColumnFromSupabase(col, teamId)</code>: owner-side remove</li>
+<li><code>js/db.js</code> — In-memory cache wrapper; <code>getColumns()</code> sorts by order; <code>saveColumns()</code> / <code>updateJump()</code> write-through to SQLite via IPC</li>
+<li><code>main.js</code> — SQLite IPC handlers: <code>upsertSharedJumps</code>, <code>deleteSharedJumps</code>, <code>getColumns</code> (ORDER BY order ASC)</li>
+<li><code>supabase/config.js</code> — Single source of truth for <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code></li>
 </ul>
 <h3 id="section-3">2.2 File Structure &amp; Responsibilities</h3>
 <h4 id="mainjs">2.2.1 main.js — Electron Main Process</h4>
@@ -2943,7 +2993,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <li>Electron <code>contextIsolation: true</code>, <code>nodeIntegration: false</code> — renderer cannot access Node APIs directly</li>
 </ul>
 
-<h3 id="security-fixes">10.2 Security Fixes Applied (2026-05-27)</h3>
+<h3 id="security-fixes">10.2 Security Fixes Applied (2026-05-27 &amp; 2026-05-28)</h3>
 <p>All issues below were identified in a full codebase audit (see <code>CODE_REVIEW.md</code>) and resolved.</p>
 
 <h4>🔴 Critical — Resolved</h4>
@@ -2980,7 +3030,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <tr>
   <td>5</td>
   <td><strong>CSP effectively disabled</strong> — single <code>default-src</code> with <code>unsafe-inline</code>, <code>unsafe-eval</code>, <code>data:</code>, <code>blob:</code>, <code>file:</code></td>
-  <td>Split into proper directives; removed <code>unsafe-eval</code>; <code>unsafe-inline</code> retained in <code>script-src</code> only until event delegation refactor (#11) is complete; inline theme bootstrap and pw-toggle scripts moved to external files</td>
+  <td>Split into proper directives; removed <code>unsafe-eval</code>; <code>unsafe-inline</code> fully removed from <code>script-src</code> after event delegation refactor (#11) completed on 2026-05-28; inline theme bootstrap and pw-toggle scripts moved to external files</td>
 </tr>
 <tr>
   <td>6</td>
@@ -3026,22 +3076,31 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <table>
 <thead><tr><th>#</th><th>Severity</th><th>Issue</th><th>Status</th></tr></thead>
 <tbody>
-<tr><td>10</td><td>🟡</td><td><code>tests.js</code> (130 KB) ships and parses for every user; exposes test fixtures</td><td>To do</td></tr>
-<tr><td>11</td><td>🟡</td><td>80+ inline <code>onclick</code> handlers in generated HTML — blocks full CSP <code>script-src</code> lockdown; requires event delegation refactor. Completing this allows removing <code>unsafe-inline</code> from <code>script-src</code>.</td><td>To do</td></tr>
-<tr><td>12</td><td>🟡</td><td><code>chart.min.js</code> (200 KB) loaded on every page including auth</td><td>To do</td></tr>
-<tr><td>13</td><td>🟡</td><td><code>auth.js</code> hardcodes anon key JWT literal instead of referencing <code>SUPABASE_ANON_KEY</code></td><td>To do</td></tr>
-<tr><td>14</td><td>🟡</td><td>Admin nav check uses <code>email === 'jeffroder@gmail.com'</code> hardcode instead of <code>role</code> field</td><td>To do</td></tr>
-<tr><td>15</td><td>🟡</td><td><code>isShared</code> mixed as <code>1</code>/<code>0</code> vs <code>true</code>/<code>false</code> in sync/cache layer</td><td>To do</td></tr>
-<tr><td>16</td><td>🟡</td><td>Stale data cleanup uses two different ID schemes (<code>supabaseId</code> vs <code>id</code>) — can leave ghost rows</td><td>To do</td></tr>
-<tr><td>17</td><td>🟡</td><td>Dead code in <code>main.js</code>: unused <code>globalShortcut</code> import, unused <code>tray</code> variable</td><td>To do</td></tr>
-<tr><td>18</td><td>🟡</td><td>Auto-seed triple-guard race: localStorage + in-memory Set + SQLite can disagree across reinstalls</td><td>To do</td></tr>
-<tr><td>19</td><td>🟡</td><td><code>getColumns</code> IPC returns sorted; cache replacement doesn't sort — inconsistent order</td><td>To do</td></tr>
+<tr><td>10</td><td>✅</td><td><code>tests.js</code> (130 KB) ships and parses for every user; exposes test fixtures</td><td>✅ Done 2026-05-28 — Removed from <code>app.html</code>; lazy-loaded via <code>loadScript()</code> only when admin navigates to Tests page</td></tr>
+<tr><td>11</td><td>✅</td><td>80+ inline <code>onclick</code> handlers in generated HTML — blocks full CSP <code>script-src</code> lockdown.</td><td>✅ Done 2026-05-28 — All inline handlers replaced with <code>data-jaction</code> attributes + document-level delegation listeners in <code>jumps.js</code>, <code>archive.js</code>, <code>sync.js</code>, <code>app.js</code>, <code>teams.js</code>, <code>auth.js</code>. <code>'unsafe-inline'</code> removed from <code>script-src</code> in CSP.</td></tr>
+<tr><td>12</td><td>✅</td><td><code>chart.min.js</code> (200 KB) loaded on every page including auth</td><td>✅ Done 2026-05-28 — Removed from <code>app.html</code>; lazy-loaded via <code>loadScript()</code> in <code>renderStats()</code> only when Stats page is visited</td></tr>
+<tr><td>13</td><td>✅</td><td><code>auth.js</code> hardcodes anon key JWT literal instead of referencing <code>SUPABASE_ANON_KEY</code></td><td>✅ Done 2026-05-28 — Removed hardcoded literals from <code>auth.js</code> and <code>app.js</code>; both now use <code>window.SUPABASE_ANON_KEY</code> / <code>window.SUPABASE_URL</code> from <code>supabase/config.js</code> (single source of truth)</td></tr>
+<tr><td>14</td><td>✅</td><td>Admin nav check uses <code>email === 'jeffroder@gmail.com'</code> hardcode instead of <code>role</code> field</td><td>✅ Done 2026-05-28 — All hardcoded email checks replaced with <code>role === 'admin'</code>. Supabase <code>profiles_role_check</code> constraint updated to include <code>'admin'</code>. <code>schema.sql</code> updated to match.</td></tr>
+<tr><td>15</td><td>✅</td><td><code>isShared</code> mixed as <code>1</code>/<code>0</code> vs <code>true</code>/<code>false</code> in sync/cache layer</td><td>✅ Done 2026-05-28 — 15 occurrences across <code>sync.js</code>, <code>teams.js</code>, <code>jumps.js</code> normalized to <code>true</code>/<code>false</code>. <code>db.js</code> already correct.</td></tr>
+<tr><td>16</td><td>✅</td><td>Stale data cleanup uses two different ID schemes (<code>supabaseId</code> vs <code>id</code>) — can leave ghost rows</td><td>✅ Done 2026-05-28 — Column + jump matching in <code>sync.js</code> now uses <code>supabaseId</code>-only. Local IDs never used as proxy for Supabase UUIDs. Stale jump deletion gated on <code>j.supabaseId</code> presence.</td></tr>
+<tr><td>17</td><td>✅</td><td>Dead code in <code>main.js</code>: unused <code>globalShortcut</code> import, unused <code>tray</code> variable</td><td>✅ Done 2026-05-28 — Removed <code>globalShortcut</code> from import, <code>let tray</code> declaration, and <code>globalShortcut.unregisterAll()</code> no-op call</td></tr>
+<tr><td>18</td><td>✅</td><td>Auto-seed triple-guard race: concurrent <code>DB.init()</code> calls can race past seed guards and double-seed</td><td>✅ Done 2026-05-28 — Added Promise-based in-flight lock (<code>_initInFlight</code> Map). Concurrent <code>init()</code> calls for the same userId now share one Promise; actual init logic moved to <code>_doInit()</code>. Race condition closed at the async boundary.</td></tr>
+<tr><td>19</td><td>✅</td><td><code>getColumns</code> IPC returns sorted; cache replacement doesn't sort — inconsistent order</td><td>✅ Done 2026-05-28 — <code>DB.getColumns()</code> now sorts by <code>order ASC</code> before returning, matching SQLite IPC path exactly</td></tr>
 <tr><td>20</td><td>🟢</td><td>DevTools keyboard block is cosmetic — rename comment to reflect it's a deterrent only</td><td>To do</td></tr>
 <tr><td>21</td><td>🟢</td><td>PBKDF2 fixed salt weakens rainbow-table resistance — note in code; low priority</td><td>To do</td></tr>
 </tbody>
 </table>
 
 <h2 id="changelog">11. Changelog</h2>
+
+<h3>2026-05-28</h3>
+<ul>
+  <li><strong>Security audit items #10, #12–#15, #17, #19 completed:</strong> lazy-load <code>tests.js</code> + <code>chart.min.js</code>; hardcoded anon key removed; admin email replaced with <code>role === 'admin'</code>; Supabase constraint updated to allow <code>'admin'</code> role; <code>isShared</code> normalized to boolean throughout; dead code removed from <code>main.js</code>; <code>getColumns()</code> always sorted by order.</li>
+  <li><strong>Security audit item #16 (ghost rows):</strong> Sync matching now uses <code>supabaseId</code>-only — local IDs never used as proxy for Supabase UUIDs. Stale jump deletion also gated on <code>supabaseId</code> presence.</li>
+  <li><strong>One-to-many column sharing:</strong> Columns can now be shared with multiple teams simultaneously. New local data model: <code>col.sharedTeams: [{ teamId, supabaseId }]</code> and <code>jump.supabaseIdMap: { [teamId]: supabaseId }</code>. Old single-team format preserved for backward compat.</li>
+  <li><strong>Feedback modal UX:</strong> Green centered checkmark on success; Your Name pre-filled from Supabase profile; Submit button uses <code>btn-save</code> (green).</li>
+  <li><strong>Docs:</strong> Section 2.1.5 (Sync Engine) fully rewritten with ID scheme explanation, column sync flow, one-to-many sharing, stale detection, and key files reference.</li>
+</ul>
 
 <h3>2026-05-25</h3>
 <ul>

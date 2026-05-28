@@ -98,7 +98,7 @@
         <button type="submit" class="btn btn-primary btn-full" id="loginBtn" style="margin-top:4px"><span class="btn-spinner"></span><span class="btn-label" style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><svg class="ti ti-login" style="width:1.32rem;height:1.32rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-login"/></svg>Sign In</span></button>
       </form>
       <div class="auth-footer">
-        <a onclick="showView('viewForgot')" style="cursor:pointer">Forgot password?</a>
+        <a data-jaction="show-view" data-view="viewForgot" style="cursor:pointer">Forgot password?</a>
       </div>
     </div>
 
@@ -152,7 +152,7 @@
         </div>
         <button type="submit" class="btn btn-primary btn-full">Send Reset Link</button>
       </form>
-      <div class="auth-footer"><a onclick="showView('viewLogin')" style="cursor:pointer">← Back to sign in</a></div>
+      <div class="auth-footer"><a data-jaction="show-view" data-view="viewLogin" style="cursor:pointer">← Back to sign in</a></div>
         </div><!-- /auth-view-content -->
   </div><!-- /authCard -->
 

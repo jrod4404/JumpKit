@@ -101,9 +101,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const userId = data?.user?.id || '';
     const firstName = data?.user?.user_metadata?.first_name || '';
     try {
-      await fetch('https://iuexwdjnqfidcwvwbgwr.supabase.co/functions/v1/send-welcome', {
+      await fetch(`${window.SUPABASE_URL}/functions/v1/send-welcome`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}` },
         body: JSON.stringify({ email, firstName, userId })
       });
     } catch (_) {}
@@ -244,4 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
   wirePwToggles();
   // Re-wire when tabs switch (new fields may appear)
   document.querySelectorAll('.auth-tab').forEach(tab => tab.addEventListener('click', () => requestAnimationFrame(wirePwToggles)));
+});
+
+
+// ── Event delegation — auth view links ─────────────────────────────
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-jaction="show-view"]');
+  if (!el) return;
+  showView(el.dataset.view);
 });

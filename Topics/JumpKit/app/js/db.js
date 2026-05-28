@@ -9,6 +9,12 @@ const DB = (() => {
   // ── Seed lock — prevents duplicate seeding in same session ───────
   const _seededThisSession = new Set();
 
+  // ── Init in-flight lock — deduplicates concurrent DB.init() calls ─
+  // If two callers invoke init() for the same userId simultaneously,
+  // the second waits on the first's Promise instead of running a parallel
+  // init that can race past the seed guard and double-seed.
+  const _initInFlight = new Map(); // userId → Promise
+
   // ── Helpers ──────────────────────────────────────────────────────
   function lsGet(key, def) {
     try { const r = localStorage.getItem(key); return r ? JSON.parse(r) : def; } catch(_) { return def; }
@@ -54,6 +60,18 @@ const DB = (() => {
 
     // ── Init (called once after auth, before renderApp) ────────────
     async init(userId) {
+      // Deduplicate concurrent calls for the same userId
+      if (_initInFlight.has(userId)) {
+        console.debug('[DB.init] Already in-flight for', userId, '— waiting on existing promise');
+        return _initInFlight.get(userId);
+      }
+      const initPromise = this._doInit(userId);
+      _initInFlight.set(userId, initPromise);
+      initPromise.finally(() => _initInFlight.delete(userId));
+      return initPromise;
+    },
+
+    async _doInit(userId) {
       this._userId = userId;
       if (window.electronAPI) {
         try {
@@ -159,7 +177,9 @@ const DB = (() => {
 
     // ── Columns ───────────────────────────────────────────────────
     getColumns(userId) {
-      return this._cache.columns.filter(c => c.userId === userId);
+      return this._cache.columns
+        .filter(c => c.userId === userId)
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
     },
 
     saveColumns(userId, cols) {

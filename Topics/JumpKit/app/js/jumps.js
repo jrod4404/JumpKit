@@ -780,7 +780,7 @@ function saveJump(editId) {
           } else {
             // Moved into a shared column — insert it
             const supabaseId = crypto.randomUUID();
-            DB.updateJump(currentUser.id, editId, { supabaseId, isShared: 1, teamId: col.teamId });
+            DB.updateJump(currentUser.id, editId, { supabaseId, isShared: true, teamId: col.teamId });
             supabaseClient.from('shared_jumps').insert({
               id: supabaseId, shared_column_id: col.supabaseId, team_id: col.teamId,
               name: data.name, url: data.url,
@@ -815,7 +815,7 @@ function saveJump(editId) {
           const col = DB.getColumns(currentUser.id).find(c => c.id === data.columnId);
           if (col?.isShared && col?.teamId && col?.supabaseId) {
             const supabaseId = crypto.randomUUID();
-            DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: 1, teamId: col.teamId });
+            DB.updateJump(currentUser.id, newJump.id, { supabaseId, isShared: true, teamId: col.teamId });
             supabaseClient.from('shared_jumps').insert({
               id: supabaseId,
               shared_column_id: col.supabaseId,
@@ -908,7 +908,10 @@ async function openConfigColumnsModal() {
   // Fetch team names + ownership for all teamIds present in columns
   _colConfigTeamNames = {};
   _colConfigOwnedTeamIds = new Set();
-  const teamIds = [...new Set(cols.filter(c => c.teamId).map(c => c.teamId))];
+  const teamIds = [...new Set([
+    ...cols.filter(c => c.teamId).map(c => c.teamId),
+    ...cols.flatMap(c => (c.sharedTeams || []).map(st => st.teamId)),
+  ])];
   if (teamIds.length > 0) {
     try {
       const { data: { session } } = await supabaseClient.auth.getSession();
@@ -938,14 +941,24 @@ function renderColConfigModal(cols) {
     // Build sharing status label (read-only)
     let statusHTML = '';
     if (c.name && !c._new) {
-      if (!c.teamId || !c.isShared) {
+      // Collect all team entries from both old (teamId) and new (sharedTeams) format
+      const allEntries = [];
+      if (c.sharedTeams && c.sharedTeams.length > 0) {
+        c.sharedTeams.forEach(st => allEntries.push(st.teamId));
+      } else if (c.teamId && c.isShared) {
+        allEntries.push(c.teamId);
+      }
+      if (!c.isShared || allEntries.length === 0) {
         statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
-      } else if (_colConfigOwnedTeamIds.has(c.teamId)) {
-        const teamName = _colConfigTeamNames[c.teamId] || 'Team';
-        statusHTML = `<span class="col-status-badge col-status-shared-out"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
       } else {
-        const teamName = _colConfigTeamNames[c.teamId] || 'Team';
-        statusHTML = `<span class="col-status-badge col-status-shared-from"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+        statusHTML = allEntries.map(tid => {
+          const teamName = _colConfigTeamNames[tid] || 'Team';
+          if (_colConfigOwnedTeamIds.has(tid)) {
+            return `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
+          } else {
+            return `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+          }
+        }).join('');
       }
     }
     return `
@@ -1034,7 +1047,7 @@ async function saveColumns() {
         // Preserve all sharing state — only update name, visible, order
         updated.push({ ...existingCol, name, visible, order });
       } else {
-        updated.push({ id: 'col_' + Date.now() + '_' + i, userId: currentUser.id, name, visible, order, createdAt: Date.now(), isShared: 0, teamId: null });
+        updated.push({ id: 'col_' + Date.now() + '_' + i, userId: currentUser.id, name, visible, order, createdAt: Date.now(), isShared: false, teamId: null });
       }
     } else if (existingCol && !existingCol._new) {
       // Empty name row — hide but preserve sharing state
@@ -1046,13 +1059,22 @@ async function saveColumns() {
 
   // Sync name changes for owner's shared columns to Supabase
   for (const col of updated) {
-    if (col.isShared && col.teamId && col.supabaseId && _colConfigOwnedTeamIds.has(col.teamId)) {
-      const was = existing.find(c => c.id === col.id);
-      if (was && was.name !== col.name) {
+    const was = existing.find(c => c.id === col.id);
+    if (!was || was.name === col.name) continue;
+    // New format: sharedTeams array
+    const sharedTeams = col.sharedTeams || [];
+    for (const st of sharedTeams) {
+      if (st.supabaseId && _colConfigOwnedTeamIds.has(st.teamId)) {
         try {
-          await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', col.supabaseId);
-        } catch (err) { console.warn('Failed to sync column rename:', err.message); }
+          await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', st.supabaseId);
+        } catch (err) { console.warn('Failed to sync column rename (sharedTeams):', err.message); }
       }
+    }
+    // Old format: single teamId
+    if (col.isShared && col.teamId && col.supabaseId && _colConfigOwnedTeamIds.has(col.teamId)) {
+      try {
+        await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', col.supabaseId);
+      } catch (err) { console.warn('Failed to sync column rename:', err.message); }
     }
   }
 
@@ -1061,37 +1083,58 @@ async function saveColumns() {
   Toast.success('Columns saved!');
 }
 
-async function syncColumnToSupabase(col) {
+// syncColumnToSupabase(col, teamId)
+// teamId is required for multi-team support. Falls back to col.teamId for old-format columns.
+async function syncColumnToSupabase(col, teamId) {
+  const resolvedTeamId = teamId || col.teamId;
+  if (!resolvedTeamId) { console.warn('syncColumnToSupabase: no teamId'); return; }
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
+    const localUserId = session.user.id;
 
-    // Use a stable UUID for Supabase — generate once and store locally
-    if (!col.supabaseId) {
-      col.supabaseId = crypto.randomUUID();
-      const _sessionId = session?.user?.id || currentUser.id;
-      DB.saveColumns(_sessionId, DB.getColumns(_sessionId).map(c => c.id === col.id ? { ...c, supabaseId: col.supabaseId } : c));
+    // ── Resolve supabase column ID for this (col, team) pair ──
+    // New format: look up from sharedTeams array
+    // Old format: use col.supabaseId directly
+    let colSupabaseId;
+    const sharedTeams = Array.isArray(col.sharedTeams) ? col.sharedTeams : [];
+    const stEntry = sharedTeams.find(st => st.teamId === resolvedTeamId);
+
+    if (stEntry) {
+      // Already in sharedTeams — use or generate supabase ID
+      if (!stEntry.supabaseId) stEntry.supabaseId = crypto.randomUUID();
+      colSupabaseId = stEntry.supabaseId;
+      // Persist updated sharedTeams
+      const updatedSharedTeams = sharedTeams.map(st => st.teamId === resolvedTeamId ? stEntry : st);
+      DB.saveColumns(localUserId, DB.getColumns(localUserId).map(c =>
+        c.id === col.id ? { ...c, sharedTeams: updatedSharedTeams } : c
+      ));
+    } else if (col.teamId === resolvedTeamId && col.supabaseId) {
+      // Old single-team format — use existing supabaseId
+      colSupabaseId = col.supabaseId;
+    } else {
+      // Fallback: generate new ID
+      colSupabaseId = crypto.randomUUID();
     }
 
-    // Upsert shared_column — use unique constraint (team_id, created_by, name) to prevent dupes
+    // Upsert shared_column row for this (col, team)
     const { data: sc, error: scErr } = await supabaseClient
       .from('shared_columns')
       .upsert({
-        id: col.supabaseId,
-        team_id: col.teamId,
+        id: colSupabaseId,
+        team_id: resolvedTeamId,
         name: col.name,
         position: col.order,
-        created_by: session.user.id,
-      }, { onConflict: 'team_id,created_by,name', ignoreDuplicates: false })
+        created_by: localUserId,
+      }, { onConflict: 'id', ignoreDuplicates: false })
       .select()
       .single();
     if (scErr) { console.warn('shared_column upsert:', scErr.message); return; }
 
-    // Upsert all jumps in this column — use session UUID directly to avoid stale currentUser
-    const localUserId = session.user.id;
+    // Upsert all jumps in this column for this team
     let jumps = DB.getActiveJumps(localUserId).filter(j => j.columnId === col.id);
 
-    // Free tier: max 10 shared jumps per team across all shared columns
+    // Free tier: max 10 shared jumps per team
     const tier = window._supabaseProfile?.subscription_tier || 'free';
     if (tier === 'free' && jumps.length > 10) {
       showUpgradeModal(
@@ -1101,40 +1144,65 @@ async function syncColumnToSupabase(col) {
       jumps = jumps.slice(0, 10);
     }
     for (const j of jumps) {
-      // Generate a stable UUID for Supabase if not already set
-      if (!j.supabaseId) {
-        j.supabaseId = crypto.randomUUID();
-        DB.updateJump(currentUser.id, j.id, { supabaseId: j.supabaseId });
+      // Get or generate a per-(jump, team) supabase ID
+      const supabaseIdMap = (j.supabaseIdMap && typeof j.supabaseIdMap === 'object') ? { ...j.supabaseIdMap } : {};
+      if (!supabaseIdMap[resolvedTeamId]) {
+        // Migrate old single-team format if applicable
+        if (j.teamId === resolvedTeamId && j.supabaseId) {
+          supabaseIdMap[resolvedTeamId] = j.supabaseId;
+        } else {
+          supabaseIdMap[resolvedTeamId] = crypto.randomUUID();
+        }
+        DB.updateJump(localUserId, j.id, { supabaseIdMap, isShared: true });
       }
+      const jumpSupabaseId = supabaseIdMap[resolvedTeamId];
+
       await supabaseClient.from('shared_jumps').upsert({
-        id: j.supabaseId,
+        id: jumpSupabaseId,
         shared_column_id: sc.id,
-        team_id: col.teamId,
+        team_id: resolvedTeamId,
         name: j.name,
         url: j.url,
         description: j.description || '',
         reason: j.reason || '',
         position: 0,
-        created_by: session.user.id,
+        created_by: localUserId,
       }, { onConflict: 'id' });
-
-      // Mark local jump as shared
-      DB.updateJump(currentUser.id, j.id, { isShared: 1, teamId: col.teamId });
     }
   } catch (err) {
     console.warn('syncColumnToSupabase error:', err.message);
   }
 }
 
-async function unshareColumnFromSupabase(col) {
+// unshareColumnFromSupabase(col, teamId)
+// teamId is required for multi-team support. Falls back to col.teamId for old-format columns.
+async function unshareColumnFromSupabase(col, teamId) {
+  const resolvedTeamId = teamId || col.teamId;
   try {
-    // Delete shared_jumps for this column then the column itself
-    // (cascade should handle it, but let's be explicit)
-    await supabaseClient.from('shared_columns').delete().eq('id', col.supabaseId || col.id);
-    // Mark local jumps as not shared
-    const jumps = DB.getActiveJumps(currentUser.id).filter(j => j.columnId === col.id);
-    for (const j of jumps) {
-      DB.updateJump(currentUser.id, j.id, { isShared: 0, teamId: null });
+    // Resolve the supabase column ID for this (col, team) pair
+    const sharedTeams = Array.isArray(col.sharedTeams) ? col.sharedTeams : [];
+    const stEntry = sharedTeams.find(st => st.teamId === resolvedTeamId);
+    const colSupabaseId = stEntry?.supabaseId || (col.teamId === resolvedTeamId ? col.supabaseId : null);
+
+    if (colSupabaseId) {
+      await supabaseClient.from('shared_columns').delete().eq('id', colSupabaseId);
+    }
+
+    // Clear per-team supabase jump IDs and update isShared status
+    const localUser = DB.getCurrentUser();
+    if (localUser) {
+      const jumps = DB.getActiveJumps(localUser.id).filter(j => j.columnId === col.id);
+      for (const j of jumps) {
+        const supabaseIdMap = { ...(j.supabaseIdMap || {}) };
+        delete supabaseIdMap[resolvedTeamId];
+        // Determine if still shared with any other team
+        const remainingTeams = Object.keys(supabaseIdMap);
+        DB.updateJump(localUser.id, j.id, {
+          supabaseIdMap,
+          isShared: remainingTeams.length > 0 ? 1 : 0,
+          // Keep teamId/supabaseId if still used by old format or other path
+        });
+      }
     }
   } catch (err) {
     console.warn('unshareColumnFromSupabase error:', err.message);

@@ -145,7 +145,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     <div class="acct-section">
       <div class="acct-section-title">
         <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
-        <button class="btn btn-subtle tooltip-below" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" onclick="openAddTeamModal()">
+        <button class="btn btn-subtle tooltip-below" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" data-jaction="open-add-team-modal">
           <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team
         </button>
       </div>`;
@@ -186,7 +186,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
           : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span>`;
         const actionBtn = isOwner
           ? ''
-          : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" onclick="confirmRemoveMember('${m.id}','${esc(label)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
+          : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(label)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
         // Pill left of name + email on same row
         const nameEmail = `<div class="acct-name-email">${pill}<span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
         return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
@@ -198,8 +198,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
             <div class="acct-name-email"><span class="teams-badge teams-badge-pending" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#a07010">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           </div>
           <div class="acct-member-actions">
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" onclick="resendInvite('${inv.id}','${esc(inv.email)}','${team.id}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" onclick="cancelInvite('${inv.id}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(team.id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
           </div>
         </div>`).join('');
 
@@ -217,17 +217,17 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
                 ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
               </div>
             </div>
             <div class="acct-team-actions">
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" onclick="openInviteModalForTeam('${team.id}')"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" onclick="openShareColumnModal('${team.id}','${esc(team.name)}')"><svg class="ti ti-share"><use href="img/tabler-sprite.svg#tabler-share"/></svg> Manage Sharing</button>
-              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" onclick="removeTeam('${team.id}','${esc(team.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" data-jaction="t-invite-for-team" data-id="${esc(team.id)}"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" data-jaction="t-share-col-modal" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-share"><use href="img/tabler-sprite.svg#tabler-share"/></svg> Manage Sharing</button>
+              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" data-jaction="t-remove-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
           </div>
           <div class="acct-team-members">
@@ -237,7 +237,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
                 ${teamSharedCols.length > 0
-                  ? teamSharedCols.map(c => `<span class="acct-team-col-chip">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" onclick="confirmUnshareColumnFromTeam('${team.id}','${esc(team.name)}','${c.id}','${esc(c.name)}')">×</button></span>`).join('')
+                  ? teamSharedCols.map(c => `<span class="acct-team-col-chip">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`).join('')
                   : '<span class="acct-row-hint" style="font-size:0.8rem">None yet — click <strong>Share Col</strong> above to add one</span>'}
               </div>
             </div>
@@ -271,7 +271,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <button class="acct-team-chevron" onclick="toggleTeam('${team.id}')"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
                 <span class="acct-team-stats">${joinedStats}</span>
@@ -309,7 +309,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
             <span>${esc(inv.teams?.name || 'Team')}</span>
             <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel)}</span>
           </div>
-          <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" onclick="openJoinTeamModal('${inv.teams?.id}','${esc(inv.teams?.name || '')}','${inv.id}')">
+          <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" data-jaction="t-join-team-modal" data-team-id="${esc(inv.teams?.id)}" data-team-name="${esc(inv.teams?.name || '')}" data-invite-id="${esc(inv.id)}">
             <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
           </button>
         </div>`;
@@ -366,7 +366,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
             <input class="form-input" id="newOrgName" placeholder="e.g. Acme Corp" style="max-width:320px"/>
           </div>
           <div style="margin-top:8px">
-            <button class="btn btn-primary" onclick="createOrganization()"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Organization</button>
+            <button class="btn btn-primary" data-jaction="t-create-org"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Organization</button>
           </div>
           <div id="createOrgMsg" style="margin-top:12px;font-size:0.85rem"></div>
         </div>
@@ -478,7 +478,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
           <div class="acct-section-title" style="display:flex;align-items:center">
             <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Your Teams
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
-                    onclick="openAddTeamModal()" id="addTeamBtn">
+                    data-jaction="open-add-team-modal" id="addTeamBtn">
               <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Team
             </button>
           </div>
@@ -492,7 +492,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
           <div class="acct-section-title" style="display:flex;align-items:center">
             <svg class="ti ti-user-check"><use href="img/tabler-sprite.svg#tabler-user-check"/></svg> Members
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
-                    onclick="openInviteMembersModal()" id="inviteBtn" style="display:none">
+                    data-jaction="t-open-invite-members" id="inviteBtn" style="display:none">
               <svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members
             </button>
           </div>
@@ -571,7 +571,7 @@ window.selectOrg = async function(orgId) {
         const created = t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '—';
         const inviteHint = ` · ${iCount} pending invite${iCount !== 1 ? 's' : ''}`;
         return `
-        <div class="acct-row teams-selectable-row" id="teamRow_${t.id}" onclick="selectTeam('${t.id}')">
+        <div class="acct-row teams-selectable-row" id="teamRow_${t.id}" data-jaction="t-select-team" data-id="${esc(t.id)}">
           <div class="acct-row-label">
             <span>${esc(t.name)}</span>
             <span class="acct-row-hint">${mCount} member${mCount !== 1 ? 's' : ''}${inviteHint}</span>
@@ -579,8 +579,8 @@ window.selectOrg = async function(orgId) {
           </div>
           <div style="display:flex;gap:6px;align-items:center">
             <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
-            <button class="btn btn-subtle" data-tooltip="Change team password" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();openChangeTeamPasswordModal('${t.id}','${esc(t.name)}')"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-            <button class="btn btn-delete" data-tooltip="Delete team" style="font-size:0.75rem;padding:3px 8px" onclick="event.stopPropagation();removeTeam('${t.id}','${esc(t.name)}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <button class="btn btn-subtle" data-tooltip="Change team password" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-change-pw" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
+            <button class="btn btn-delete" data-tooltip="Delete team" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-remove-team" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
           </div>
         </div>`;
       }).join('');
@@ -640,8 +640,8 @@ window.selectTeam = async function(teamId) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending" style="font-size:0.65rem;padding:1px 7px">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(teamName)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(teamName)}"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}` : '';
 
@@ -670,7 +670,7 @@ window.selectTeam = async function(teamId) {
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
             </div>
-            ${m.user_id === teamOwnerId ? '' : `<button class="btn btn-delete tooltip-left" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" onclick="confirmRemoveMember('${m.id}','${esc(name || email)}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`}
+            ${m.user_id === teamOwnerId ? '' : `<button class="btn btn-delete tooltip-left" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(name || email)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`}
           </div>`;
       }).join('') + inviteRows;
     }
@@ -727,8 +727,8 @@ window.openAddTeamModal = async function() {
     </div>`;
 
   Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Add Team', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="saveAddTeam()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-add-team"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
   // Wire eye toggles + live password rules
   setTimeout(() => {
@@ -798,7 +798,7 @@ window.saveAddTeam = async function() {
   if (!ok) return;
 
   // Spinner on save button — show for at least 1.5s
-  const saveBtn = document.querySelector('[onclick="saveAddTeam()"]');
+  const saveBtn = document.querySelector('[data-jaction="t-save-add-team"]');
   if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
   const _atSpinStart = Date.now();
 
@@ -849,8 +849,8 @@ window.openInviteMembersModal = function() {
     </div>`;
 
   Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="sendOrgInvitesBtn" onclick="sendOrgInvites()"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="sendOrgInvitesBtn" data-jaction="t-send-org-invites"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 };
 
 window.sendOrgInvites = async function() {
@@ -955,12 +955,12 @@ window.resendInvite = async function(inviteId, email, teamId) {
       <label class="form-label">Team Password *</label>
       <div style="position:relative">
         <input class="form-input" type="password" id="resendTeamPassword" placeholder="Enter team password" autocomplete="off" />
-        <button type="button" class="pw-eye" tabindex="-1" onclick="(function(){const i=document.getElementById('resendTeamPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button type="button" class="pw-eye" tabindex="-1" data-jaction="t-pw-toggle" data-target="resendTeamPassword" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <span class="form-error" id="resendTeamPasswordErr">Incorrect team password.</span>
     </div>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="resendConfirmBtn" onclick="doResendInvite('${esc(inviteId)}','${esc(email)}','${esc(teamId)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="resendConfirmBtn" data-jaction="t-do-resend-invite" data-invite-id="${esc(inviteId)}" data-email="${esc(email)}" data-team-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend</button>`,
     'sm'
   );
   setTimeout(() => document.getElementById('resendTeamPassword')?.focus(), 100);
@@ -1029,8 +1029,8 @@ window.cancelInvite = async function(inviteId, email, teamName) {
     `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6">
       Are you sure you want to cancel the invitation for <strong style="color:var(--text-muted)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text-muted)">${esc(teamName)}</strong> using this invite.
     </p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
-     <button class="btn btn-delete" onclick="confirmCancelInvite('${esc(inviteId)}')"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
+     <button class="btn btn-delete" data-jaction="t-confirm-cancel-invite" data-id="${esc(inviteId)}"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
     'sm'
   );
 };
@@ -1104,10 +1104,10 @@ async function renderTeamOwnerView(content, supaUser, profile) {
       <div class="acct-section">
         <div class="acct-section-title">
           <svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Members (${memberRows.length})
-          <button class="btn btn-subtle btn-sm" style="margin-left:auto" onclick="openInviteModal('${team.id}')">
+          <button class="btn btn-subtle btn-sm" style="margin-left:auto" data-jaction="t-open-invite-modal" data-id="${esc(team.id)}">
             <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members
           </button>
-          <button class="btn btn-subtle btn-sm" onclick="openChangeTeamPasswordModal('${team.id}','${esc(team.name)}')">
+          <button class="btn btn-subtle btn-sm" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}">
             <svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Password
           </button>
         </div>
@@ -1134,8 +1134,8 @@ async function renderTeamOwnerView(content, supaUser, profile) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" onclick="resendInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(inv.team_id)}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" onclick="cancelInvite('${esc(inv.id)}','${esc(inv.email)}','${esc(team.name)}')"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}
       </div>` : ''}
@@ -1207,7 +1207,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
               <span>${esc(inv.teams?.name || 'Team')}</span>
               <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel || 'team owner')}</span>
             </div>
-            <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" onclick="openJoinTeamModal('${inv.teams?.id}','${esc(inv.teams?.name || '')}','${inv.id}')">
+            <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" data-jaction="t-join-team-modal" data-team-id="${esc(inv.teams?.id)}" data-team-name="${esc(inv.teams?.name || '')}" data-invite-id="${esc(inv.id)}">
               <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
             </button>
           </div>`).join('')}
@@ -1279,8 +1279,8 @@ function openCreateTeamModal(orgId) {
     </div>`;
 
   Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create Team', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="saveNewTeam('${orgId}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Create Team</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-new-team" data-org-id="${esc(orgId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Create Team</button>`, 'sm');
 }
 
 async function saveNewTeam(orgId) {
@@ -1363,14 +1363,14 @@ async function openInviteModal(teamId) {
       <label class="form-label">Team Password *</label>
       <div style="position:relative">
         <input class="form-input" type="password" id="inviteTeamPassword" placeholder="Enter team password" autocomplete="off" />
-        <button type="button" class="pw-eye" tabindex="-1" onclick="(function(){const i=document.getElementById('inviteTeamPassword');i.type=i.type==='password'?'text':'password';})()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        <button type="button" class="pw-eye" tabindex="-1" data-jaction="t-pw-toggle" data-target="inviteTeamPassword" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:0;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
       </div>
       <span class="form-error" id="inviteTeamPasswordErr">Incorrect team password.</span>
     </div>`;
 
   Modal.open('<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="sendInvitesBtn" onclick="sendInvites('${teamId}')"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="sendInvitesBtn" data-jaction="t-send-invites" data-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 }
 
 async function sendInvites(teamId) {
@@ -1542,8 +1542,8 @@ function openPromoteUserModal(teamId) {
     </div>`;
 
   Modal.open('<svg class="ti ti-user-up"><use href="img/tabler-sprite.svg#tabler-user-up"/></svg> Promote to Team Owner', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="doPromote('${teamId}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Promote</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-do-promote" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Promote</button>`, 'sm');
 }
 
 async function doPromote(teamId) {
@@ -1578,8 +1578,8 @@ async function doPromote(teamId) {
 window.removeTeam = function(teamId, teamName) {
   Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team',
     `<p style="color:var(--text-muted);font-size:.95rem">Remove team <strong style="color:var(--text-card-title)">${teamName}</strong> and all its members? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" onclick="doRemoveTeam('${teamId}','${teamName.replace(/'/g,"\'")}')"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-remove-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team</button>`, 'sm');
 };
 window.doRemoveTeam = async function(teamId, teamName) {
   Modal.close();
@@ -1607,20 +1607,31 @@ window.doRemoveTeam = async function(teamId, teamName) {
     // Convert to personal rather than delete — owner keeps their data.
     if (currentUser) {
       const localCols = DB.getColumns(currentUser.id);
-      const ownedTeamColIds = new Set(
-        localCols.filter(c => c.isShared && c.teamId === teamId).map(c => c.id)
+      // Find columns that were shared with this team (both old and new format)
+      const affectedColIds = new Set(
+        localCols.filter(c => {
+          if (!c.isShared) return false;
+          if (c.teamId === teamId) return true; // old format
+          return Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.teamId === teamId); // new format
+        }).map(c => c.id)
       );
-      if (ownedTeamColIds.size > 0) {
-        const updatedCols = localCols.map(c =>
-          ownedTeamColIds.has(c.id)
-            ? { ...c, isShared: 0, teamId: null, supabaseId: null }
-            : c
-        );
+      if (affectedColIds.size > 0) {
+        const updatedCols = localCols.map(c => {
+          if (!affectedColIds.has(c.id)) return c;
+          // Remove this team from sharedTeams
+          const sharedTeams = Array.isArray(c.sharedTeams)
+            ? c.sharedTeams.filter(st => st.teamId !== teamId)
+            : [];
+          const isStillShared = sharedTeams.length > 0 || (c.teamId && c.teamId !== teamId && c.isShared);
+          return { ...c, sharedTeams, isShared: isStillShared ? 1 : 0, teamId: isStillShared ? c.teamId : null, supabaseId: isStillShared ? c.supabaseId : null };
+        });
         DB.saveColumns(currentUser.id, updatedCols);
-        // Convert shared jumps in those columns to personal
-        DB.getJumps(currentUser.id)
-          .filter(j => j.isShared && ownedTeamColIds.has(j.columnId))
-          .forEach(j => DB.updateJump(currentUser.id, j.id, { isShared: 0, teamId: null }));
+        // Convert jumps to personal only if the column is no longer shared with anyone
+        updatedCols.filter(c => affectedColIds.has(c.id) && !c.isShared).forEach(c => {
+          DB.getJumps(currentUser.id)
+            .filter(j => j.isShared && j.columnId === c.id)
+            .forEach(j => DB.updateJump(currentUser.id, j.id, { isShared: false, teamId: null }));
+        });
       }
     }
 
@@ -1649,8 +1660,8 @@ window.doRemoveTeam = async function(teamId, teamName) {
 window.confirmRemoveMember = function(memberId, memberName) {
   Modal.open('<svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove Member',
     `<p style="color:var(--text-muted);font-size:.95rem">Remove <strong style="color:var(--text-card-title)">${memberName}</strong> from this team? They will lose access to shared jumps.</p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" onclick="doRemoveMember('${memberId}','${memberName.replace(/'/g,"\'")}')"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-remove-member" data-id="${esc(memberId)}" data-name="${esc(memberName)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove</button>`, 'sm');
 };
 window.removeMember = window.confirmRemoveMember;
 window.doRemoveMember = async function(memberId, memberName) {
@@ -1697,8 +1708,8 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
     </div>`;
 
   Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Team Password', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="doChangeTeamPassword('${teamId}','${esc(teamName)}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-do-change-pw" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
 
   setTimeout(() => {
     const eyeOpen   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
@@ -1766,7 +1777,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
   if (!ok) return;
 
   // Spinner on save button — show for at least 1.5s
-  const ctpSaveBtn = document.querySelector(`[onclick="doChangeTeamPassword('${teamId}','${teamName.replace(/'/g,"\\'")}')"]`);
+  const ctpSaveBtn = document.querySelector('[data-jaction="t-do-change-pw"]');
   if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
   const _ctpSpinStart = Date.now();
 
@@ -1803,8 +1814,8 @@ window.openJoinTeamModal = function(teamId, teamName, inviteId) {
       </div>
       <span class="form-error" id="joinTeamPasswordErr">Incorrect password.</span>
     </div>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-primary" onclick="doJoinTeam('${teamId}','${esc(teamName)}','${inviteId}')">
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-primary" data-jaction="t-do-join-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}" data-invite="${esc(inviteId)}">
        <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
      </button>`, 'sm');
   // Wire eye toggle after modal renders
@@ -1902,8 +1913,8 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
             Visit your <strong>Jumps</strong> page — your team's shared jumps will appear there automatically.
           </p>
         </div>`,
-        `<button class="btn btn-subtle" onclick="Modal.close()">Stay here</button>
-         <button class="btn btn-primary" onclick="navigateTo('jumps'); Modal.close()"><svg viewBox="0 0 105.74 122.88" style="width:1.4rem;height:1.4rem;fill:white;flex-shrink:0;vertical-align:middle"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg> Go to Jumps</button>`
+        `<button class="btn btn-subtle" data-jaction="modal-close">Stay here</button>
+         <button class="btn btn-primary" data-jaction="nav-teams-close" data-nav="jumps"><svg viewBox="0 0 105.74 122.88" style="width:1.4rem;height:1.4rem;fill:white;flex-shrink:0;vertical-align:middle"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg> Go to Jumps</button>`
       );
     }, 200);
 
@@ -2042,7 +2053,7 @@ window.openShareColumnModal = async function(teamId, teamName) {
     Modal.open(
       '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns',
       `<p style="color:var(--text-muted);font-size:.9rem">No columns yet. Add columns first via <strong>Configure Columns</strong> on the Jumps page.</p>`,
-      `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`,
       'sm'
     );
     return;
@@ -2051,25 +2062,22 @@ window.openShareColumnModal = async function(teamId, teamName) {
   _shareColModalOriginal = {};
 
   const rows = allCols.map(col => {
-    const sharedWithThis  = !!(col.isShared && col.teamId === teamId);
-    const sharedWithOther = !!(col.isShared && col.teamId && col.teamId !== teamId);
+    // Check both new (sharedTeams) and old (teamId) format
+    const sharedTeams = Array.isArray(col.sharedTeams) ? col.sharedTeams : [];
+    const sharedWithThis = sharedTeams.some(st => st.teamId === teamId) ||
+                           !!(col.isShared && col.teamId === teamId && sharedTeams.length === 0);
     _shareColModalOriginal[col.id] = sharedWithThis;
 
     const toggleId = `shareToggle_${col.id}`;
-    const disabledAttr = sharedWithOther ? 'disabled' : '';
-    const hint = sharedWithOther
-      ? `<span style="font-size:.75rem;color:var(--text-dim)">Shared with another team</span>`
-      : '';
 
     return `
-    <div class="acct-row" style="min-height:44px;padding:10px 16px;opacity:${sharedWithOther ? '0.5' : '1'}">
+    <div class="acct-row" style="min-height:44px;padding:10px 16px">
       <div class="acct-row-label">
         <span style="font-size:.88rem;font-weight:500;color:var(--text-muted)">${esc(col.name)}</span>
-        ${hint}
       </div>
       <div class="toggle-wrap" style="justify-content:flex-end">
         <label class="toggle">
-          <input type="checkbox" id="${toggleId}" data-colid="${col.id}" ${sharedWithThis ? 'checked' : ''} ${disabledAttr}/>
+          <input type="checkbox" id="${toggleId}" data-colid="${col.id}" ${sharedWithThis ? 'checked' : ''}/>
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -2080,8 +2088,8 @@ window.openShareColumnModal = async function(teamId, teamName) {
     '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns — ' + esc(teamName),
     `<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px">Toggle which columns are shared with this team.</p>
      <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">${rows}</div>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" onclick="saveShareColumnModal('${teamId}')"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-share-col" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`,
     'sm'
   );
 };
@@ -2122,6 +2130,7 @@ window.saveShareColumnModal = async function(teamId) {
       const memberWord = memberCount === 1 ? 'member' : 'members';
       // Store pending for after confirm
       window._pendingShareSave = { teamId, toShare, toUnshare };
+      Modal.close();
       Modal.open(
         '<svg class="ti ti-alert-triangle"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Unshare Column?',
         `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6;margin:0">
@@ -2129,8 +2138,8 @@ window.saveShareColumnModal = async function(teamId) {
            <strong style="color:var(--text-card-title)">${memberCount} ${memberWord}</strong>.
            They will be notified in the app on their next sync.
          </p>`,
-        `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-         <button class="btn btn-delete" onclick="_confirmShareSave()">
+        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+         <button class="btn btn-delete" data-jaction="t-confirm-share-save">
            <svg class="ti ti-share-off"><use href="img/tabler-sprite.svg#tabler-share-off"/></svg> Yes, Save Changes
          </button>`,
         { closeable: true }
@@ -2157,19 +2166,33 @@ async function _applyShareColumnSave(teamId, toShare, toUnshare) {
   const cols = DB.getColumns(localUser.id);
 
   for (const colId of toShare) {
-    const col = cols.find(c => c.id === colId);
+    let col = DB.getColumns(localUser.id).find(c => c.id === colId);
     if (!col) continue;
-    const updatedCol = { ...col, isShared: 1, teamId };
+    // Build updated sharedTeams: migrate old format if needed, then add new entry
+    let sharedTeams = Array.isArray(col.sharedTeams) ? [...col.sharedTeams] : [];
+    if (sharedTeams.length === 0 && col.teamId && col.isShared) {
+      // Migrate old single-team format into sharedTeams
+      sharedTeams = [{ teamId: col.teamId, supabaseId: col.supabaseId || null }];
+    }
+    if (!sharedTeams.some(st => st.teamId === teamId)) {
+      sharedTeams.push({ teamId, supabaseId: null }); // supabaseId assigned in syncColumnToSupabase
+    }
+    const updatedCol = { ...col, sharedTeams, isShared: true, teamId: null, supabaseId: null };
     DB.saveColumns(localUser.id, DB.getColumns(localUser.id).map(c => c.id === colId ? updatedCol : c));
-    await syncColumnToSupabase(updatedCol);
+    await syncColumnToSupabase(updatedCol, teamId);
   }
 
   for (const colId of toUnshare) {
     const col = DB.getColumns(localUser.id).find(c => c.id === colId);
     if (!col) continue;
-    await unshareColumnFromSupabase(col);
+    await unshareColumnFromSupabase(col, teamId);
+    // Remove this team from sharedTeams
+    let sharedTeams = Array.isArray(col.sharedTeams) ? col.sharedTeams.filter(st => st.teamId !== teamId) : [];
+    // Also handle old single-team format
+    if (col.teamId === teamId && sharedTeams.length === 0) sharedTeams = [];
+    const isStillShared = sharedTeams.length > 0;
     DB.saveColumns(localUser.id, DB.getColumns(localUser.id).map(c =>
-      c.id === colId ? { ...c, isShared: 0, teamId: null, supabaseId: null } : c
+      c.id === colId ? { ...c, sharedTeams, isShared: isStillShared ? 1 : 0, teamId: null, supabaseId: null } : c
     ));
   }
 
@@ -2204,8 +2227,8 @@ window.confirmUnshareColumnFromTeam = async function(teamId, teamName, colSupaba
        <strong style="color:var(--text-card-title)">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</strong>.
        They will be notified in the app on their next sync.
      </p>`,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" onclick="_executeUnshareColumnFromTeam('${teamId}','${colSupabaseId}','${esc(colName)}')">
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-execute-unshare-col" data-team-id="${esc(teamId)}" data-col-id="${esc(colSupabaseId)}" data-col-name="${esc(colName)}">
        <svg class="ti ti-share-off"><use href="img/tabler-sprite.svg#tabler-share-off"/></svg> Yes, Unshare
      </button>`,
     { closeable: true }
@@ -2228,7 +2251,7 @@ async function _doUnshareColumnFromTeam(teamId, colSupabaseId, colName) {
     await unshareColumnFromSupabase(col);
     // Convert to personal locally
     DB.saveColumns(localUser.id, cols.map(c =>
-      c.id === col.id ? { ...c, isShared: 0, teamId: null, supabaseId: null } : c
+      c.id === col.id ? { ...c, isShared: false, teamId: null, supabaseId: null } : c
     ));
   } else {
     // No local copy (e.g. member's column) — just delete from Supabase
@@ -2241,3 +2264,58 @@ async function _doUnshareColumnFromTeam(teamId, colSupabaseId, colName) {
   if (typeof renderColumns === 'function') renderColumns();
   renderTeams();
 }
+
+// ── Event delegation — teams actions ─────────────────────────────
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-jaction]');
+  if (!btn) return;
+  const action = btn.dataset.jaction;
+  const id     = btn.dataset.id || '';
+  const name   = btn.dataset.name || '';
+
+  // Handle stopPropagation for buttons inside clickable rows
+  if (btn.dataset.stopProp) e.stopPropagation();
+
+  switch (action) {
+    case 'open-add-team-modal':   openAddTeamModal(); break;
+    case 't-create-org':          createOrganization(); break;
+    case 't-open-invite-members': openInviteMembersModal(); break;
+    case 't-select-team':         selectTeam(id); break;
+    case 't-toggle-team':         toggleTeam(id); break;
+    case 't-invite-for-team':     openInviteModalForTeam(id); break;
+    case 't-open-invite-modal':   openInviteModal(id); break;
+    case 't-change-pw':           openChangeTeamPasswordModal(id, name); break;
+    case 't-share-col-modal':     openShareColumnModal(id, name); break;
+    case 't-remove-team':         removeTeam(id, name); break;
+    case 't-confirm-remove-member': confirmRemoveMember(id, btn.dataset.label || ''); break;
+    case 't-save-add-team':       saveAddTeam(); break;
+    case 't-send-org-invites':    sendOrgInvites(); break;
+    case 't-save-new-team':       saveNewTeam(btn.dataset.orgId || ''); break;
+    case 't-send-invites':        sendInvites(id); break;
+    case 't-do-promote':          doPromote(id); break;
+    case 't-do-remove-team':      doRemoveTeam(id, name); break;
+    case 't-do-remove-member':    doRemoveMember(id, btn.dataset.name || ''); break;
+    case 't-do-change-pw':        doChangeTeamPassword(id, name); break;
+    case 't-do-join-team':        doJoinTeam(id, name, btn.dataset.invite || ''); break;
+    case 't-join-team-modal':     openJoinTeamModal(btn.dataset.teamId, btn.dataset.teamName, btn.dataset.inviteId); break;
+    case 't-save-share-col':      saveShareColumnModal(id); break;
+    case 't-confirm-share-save':  _confirmShareSave(); break;
+    case 't-confirm-unshare-col': confirmUnshareColumnFromTeam(btn.dataset.teamId, btn.dataset.teamName, btn.dataset.colId, btn.dataset.colName); break;
+    case 't-execute-unshare-col': _executeUnshareColumnFromTeam(btn.dataset.teamId, btn.dataset.colId, btn.dataset.colName); break;
+    case 't-resend-invite':       resendInvite(id, btn.dataset.email || '', btn.dataset.team || ''); break;
+    case 't-cancel-invite':       cancelInvite(id, btn.dataset.email || '', btn.dataset.teamname || ''); break;
+    case 't-confirm-cancel-invite': confirmCancelInvite(id); break;
+    case 't-do-resend-invite':    doResendInvite(btn.dataset.inviteId, btn.dataset.email, btn.dataset.teamId); break;
+    case 't-pw-toggle': {
+      const inp = document.getElementById(btn.dataset.target);
+      if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+      break;
+    }
+    case 'nav-teams-close': {
+      const nav = btn.dataset.nav || 'teams';
+      navigateTo(nav);
+      Modal.close();
+      break;
+    }
+  }
+});

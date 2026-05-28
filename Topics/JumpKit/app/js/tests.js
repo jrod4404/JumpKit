@@ -1947,7 +1947,7 @@ function renderTests() {
   const pageContent = document.getElementById('pageContent');
 
   // Access control
-  if (window._supabaseUser?.email !== 'jeffroder@gmail.com') {
+  if (window._supabaseProfile?.role !== 'admin') {
     pageContent.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px">
         <svg class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>

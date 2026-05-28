@@ -65,22 +65,43 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
            </div>`}`;
 
     const footer = canKeep
-      ? `<button class="btn btn-subtle" onclick="window._staleColsResolve(false);Modal.close()">
+      ? `<button class="btn btn-subtle" data-jaction="stale-remove">
            <svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Columns
          </button>
-         <button class="btn btn-primary" onclick="window._staleColsResolve(true);Modal.close()">
+         <button class="btn btn-primary" data-jaction="stale-keep">
            <svg class="ti ti-copy"><use href="img/tabler-sprite.svg#tabler-copy"/></svg> Keep as My Jumps
          </button>`
-      : `<button class="btn btn-subtle" onclick="window._staleColsResolve(false);Modal.close()">
+      : `<button class="btn btn-subtle" data-jaction="stale-remove">
            OK, Understood
          </button>
-         <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" onclick="window._staleColsResolve(false);Modal.close();if(window.electronAPI)window.electronAPI.openUrl('${LS_CHECKOUT_URL}')">
+         <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="stale-upgrade" data-url="${LS_CHECKOUT_URL}">
            <svg class="ti ti-lock" style="width:1rem;height:1rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Core
          </button>`;
 
     Modal.open(title, body, footer, { closeable: false });
   });
 }
+
+// ── Event delegation — sync stale-column modal ─────────────────────
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-jaction]');
+  if (!btn) return;
+  switch (btn.dataset.jaction) {
+    case 'stale-keep':
+      if (window._staleColsResolve) window._staleColsResolve(true);
+      Modal.close();
+      break;
+    case 'stale-remove':
+      if (window._staleColsResolve) window._staleColsResolve(false);
+      Modal.close();
+      break;
+    case 'stale-upgrade':
+      if (window._staleColsResolve) window._staleColsResolve(false);
+      Modal.close();
+      if (window.electronAPI) window.electronAPI.openUrl(btn.dataset.url);
+      break;
+  }
+});
 
 // ── Apply stale column cleanup after user's modal choice ──────────
 async function _cleanStaleSharedColumns(staleCols, localUserId, reason = 'team-deleted', ctx = {}) {
@@ -92,11 +113,11 @@ async function _cleanStaleSharedColumns(staleCols, localUserId, reason = 'team-d
   if (keepStale) {
     // Convert shared columns + jumps to personal
     const updatedCols = DB.getColumns(localUserId).map(c =>
-      staleColIds.has(c.id) ? { ...c, isShared: 0, teamId: null, supabaseId: null } : c
+      staleColIds.has(c.id) ? { ...c, isShared: false, teamId: null, supabaseId: null } : c
     );
     DB.saveColumns(localUserId, updatedCols);
     allJumps.filter(j => j.isShared && staleColIds.has(j.columnId))
-      .forEach(j => DB.updateJump(localUserId, j.id, { isShared: 0, teamId: null }));
+      .forEach(j => DB.updateJump(localUserId, j.id, { isShared: false, teamId: null }));
     const names = staleCols.map(c => c.name).join(', ');
     window.addNotification?.({ type: 'team-deleted',
       message: `Kept ${staleCols.length} shared column${staleCols.length > 1 ? 's' : ''} as personal jumps: ${names}`,
@@ -143,7 +164,8 @@ async function syncSharedJumps() {
       const localUser = DB.getCurrentUser();
       if (localUser) {
         const existingCols = DB.getColumns(localUser.id);
-        const staleCols = existingCols.filter(c => c.isShared && c.teamId);
+        // Only old-format columns (teamId set, no sharedTeams) are stale in this context
+        const staleCols = existingCols.filter(c => c.isShared && c.teamId && !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0));
         if (staleCols.length > 0) {
           await _cleanStaleSharedColumns(staleCols, localUser.id);
         }
@@ -188,16 +210,17 @@ async function syncSharedJumps() {
     );
     const remoteColIds = new Set(remoteColsDeduped.map(c => c.id));
 
-    // Detect stale local shared columns — split by reason for correct modal wording
+    // Detect stale local shared columns — split by reason for correct modal wording.
+    // Stale detection only applies to old single-team format (c.teamId set, sharedTeams empty).
+    // New multi-team format (sharedTeams) is owner-managed and doesn't go stale via sync.
+    const _isOldFormat = c => c.isShared && c.teamId && !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0);
     // Case 1: team no longer in membership (team deleted or removed from team)
     const staleByTeamGone = existingCols.filter(c =>
-      c.isShared && c.teamId && !teamIds.includes(c.teamId)
+      _isOldFormat(c) && !teamIds.includes(c.teamId)
     );
     // Case 2: still a member of the team but column was removed from shared_columns (owner unshared)
     const staleByUnshared = existingCols.filter(c =>
-      c.isShared && c.teamId &&
-      teamIds.includes(c.teamId) &&
-      c.supabaseId && !remoteColIds.has(c.supabaseId)
+      _isOldFormat(c) && teamIds.includes(c.teamId) && c.supabaseId && !remoteColIds.has(c.supabaseId)
     );
 
     // Fetch team name + owner name for modal context
@@ -227,14 +250,14 @@ async function syncSharedJumps() {
       for (let i = existingCols.length - 1; i >= 0; i--) {
         if (staleColIds.has(existingCols[i].id)) {
           if (keepStale) {
-            existingCols[i] = { ...existingCols[i], isShared: 0, teamId: null, supabaseId: null };
+            existingCols[i] = { ...existingCols[i], isShared: false, teamId: null, supabaseId: null };
           } else {
             existingCols.splice(i, 1);
           }
         }
       }
       staleJumps.forEach(j => {
-        if (keepStale) DB.updateJump(localUserId, j.id, { isShared: 0, teamId: null });
+        if (keepStale) DB.updateJump(localUserId, j.id, { isShared: false, teamId: null });
         else           DB.deleteJump(localUserId, j.id);
       });
 
@@ -260,23 +283,37 @@ async function syncSharedJumps() {
     const _renamedCols = []; // track column renames for notifications
     for (const rc of remoteColsDeduped) {
       colMap[rc.id] = rc;
+      // Match by supabaseId only (primary key in Supabase namespace).
+      // Never match by local id — local IDs and Supabase UUIDs are different namespaces
+      // and mixing them causes ghost/duplicate rows.
+      // Fall back to name+team match only for first-sync where supabaseId not yet stored locally.
       const existing = existingCols.find(c =>
         (c.supabaseId && c.supabaseId === rc.id) ||
-        c.id === rc.id ||
-        (c.isShared && c.teamId === rc.team_id && c.name === rc.name)
+        (Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.supabaseId && st.supabaseId === rc.id)) ||
+        (!c.supabaseId && c.isShared && c.teamId === rc.team_id && c.name === rc.name) ||
+        (Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.teamId === rc.team_id) && c.name === rc.name && !c.supabaseId)
       );
       if (existing) {
         // Track column renames
         if (existing.name && existing.name !== rc.name) {
           _renamedCols.push({ oldName: existing.name, newName: rc.name });
         }
-        // Update name only — preserve local order so user's column layout is respected
-        Object.assign(existing, {
-          name: rc.name,
-          isShared: 1,
-          teamId: rc.team_id,
-          supabaseId: rc.id,
-        });
+        if (Array.isArray(existing.sharedTeams) && existing.sharedTeams.length > 0) {
+          // New multi-team format: update the sharedTeams entry, don't overwrite teamId
+          const stIdx = existing.sharedTeams.findIndex(st => st.teamId === rc.team_id);
+          if (stIdx >= 0) existing.sharedTeams[stIdx].supabaseId = rc.id;
+          else existing.sharedTeams.push({ teamId: rc.team_id, supabaseId: rc.id });
+          existing.name = rc.name;
+          existing.isShared = 1;
+        } else {
+          // Old single-team format: regular update
+          Object.assign(existing, {
+            name: rc.name,
+            isShared: true,
+            teamId: rc.team_id,
+            supabaseId: rc.id,
+          });
+        }
       } else {
         // Place new shared col after the last personal col that has at least one jump
         const localJumps = DB.getJumps(localUserId);
@@ -298,7 +335,7 @@ async function syncSharedJumps() {
           visible: true,
           order: newOrder,
           createdAt: new Date(rc.created_at).getTime(),
-          isShared: 1,
+          isShared: true,
           teamId: rc.team_id,
         });
       }
@@ -307,11 +344,15 @@ async function syncSharedJumps() {
 
     // Upsert shared jumps using DB.updateJump / DB.createJump
     const remoteJumpIds = new Set(remoteJumps.map(j => j.id));
-    const existingSharedJumpIds = new Set(existingJumps.filter(j => j.isShared).map(j => j.supabaseId || j.id));
+    // Only include jumps that have a real supabaseId — local IDs are a different namespace
+    // and must never be used as a proxy for Supabase UUIDs.
+    const existingSharedJumpIds = new Set(
+      existingJumps.filter(j => j.isShared && j.supabaseId).map(j => j.supabaseId)
+    );
     const _newJumpsByTeam = {}; // teamId → [jumpName, ...]
     for (const rj of remoteJumps) {
-      // Match by supabaseId or id
-      const existing = existingJumps.find(j => j.supabaseId === rj.id || j.id === rj.id);
+      // Match by supabaseId only — never by local id to avoid ghost rows
+      const existing = existingJumps.find(j => j.supabaseId && j.supabaseId === rj.id);
       const preservedHotkey = existing?.hotkey || hotkeyMap[rj.id] || '';
       // Find the local column id that maps to this supabase column
       const localCol = existingCols.find(c => c.supabaseId === rj.shared_column_id || c.id === rj.shared_column_id);
@@ -324,7 +365,7 @@ async function syncSharedJumps() {
           reason: rj.reason || '',
           columnId,
           hotkey: preservedHotkey,
-          isShared: 1,
+          isShared: true,
           teamId: rj.team_id,
           supabaseId: rj.id,
           updatedAt: new Date(rj.updated_at).getTime(),
@@ -344,7 +385,7 @@ async function syncSharedJumps() {
           lastUsed: null,
           createdAt: new Date(rj.created_at).getTime(),
           updatedAt: new Date(rj.updated_at).getTime(),
-          isShared: 1,
+          isShared: true,
           teamId: rj.team_id,
           supabaseId: rj.id,
         });
@@ -380,7 +421,9 @@ async function syncSharedJumps() {
     // 4. Delete local shared jumps that no longer exist in Supabase
     const allJumps = DB.getJumps(localUserId);
     for (const j of allJumps) {
-      if (j.isShared && j.teamId && teamIds.includes(j.teamId) && !remoteJumpIds.has(j.supabaseId || j.id)) {
+      // Only delete if jump has a supabaseId (confirmed synced) and is no longer in remote
+      // Jumps without supabaseId are owner-local and should not be deleted by sync
+      if (j.isShared && j.supabaseId && j.teamId && teamIds.includes(j.teamId) && !remoteJumpIds.has(j.supabaseId)) {
         DB.deleteJump(localUserId, j.id);
       }
     }
@@ -407,7 +450,7 @@ async function syncSharedJumps() {
 
       // Delete local shared jumps that are no longer in Supabase
       const staleIds = existingJumps
-        .filter(j => j.isShared && j.teamId && teamIds.includes(j.teamId) && !remoteJumpIds.has(j.id))
+        .filter(j => j.isShared && j.supabaseId && j.teamId && teamIds.includes(j.teamId) && !remoteJumpIds.has(j.supabaseId))
         .map(j => j.id);
       if (window.electronAPI.deleteSharedJumps && staleIds.length > 0) {
         await window.electronAPI.deleteSharedJumps(staleIds);

@@ -175,8 +175,7 @@ async function initApp() {
   setTimeout(() => checkPendingInvites(), 500); // defer until Modal is defined
 
   // Show Tests nav item only for admin
-  const _adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
-  if (_adminEmail === 'jeffroder@gmail.com') {
+  if (window._supabaseProfile?.role === 'admin') {
     const testNavBtn = document.querySelector('[data-page="tests"]');
     if (testNavBtn) testNavBtn.style.display = '';
     const adminLabel = document.getElementById('adminNavLabel');
@@ -220,8 +219,8 @@ notifBtn.addEventListener('click', () => {
           <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px">${new Date(n.ts).toLocaleString()}</div>
         </div>`).join('');
   Modal.open('<svg class="ti ti-bell"><use href="img/tabler-sprite.svg#tabler-bell"/></svg> Notifications', listHTML,
-    `<button class="btn btn-subtle" onclick="markAllNotificationsRead(); Modal.close()"><svg class="ti ti-checks"><use href="img/tabler-sprite.svg#tabler-checks"/></svg> Mark all read</button>
-     <button class="btn btn-subtle" onclick="clearAllNotifications(); notifBtn.click()" style="color:var(--text-muted)"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Clear</button>`
+    `<button class="btn btn-subtle" data-jaction="notif-mark-read"><svg class="ti ti-checks"><use href="img/tabler-sprite.svg#tabler-checks"/></svg> Mark all read</button>
+     <button class="btn btn-subtle" data-jaction="notif-clear" style="color:var(--text-muted)"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Clear</button>`
   );
   markAllNotificationsRead();
 });
@@ -363,7 +362,7 @@ const pages = {
   account:  () => renderAccount('account'),
   jet:      () => renderJet(),
   teams:    () => renderAccount('teams'),
-  tests:    () => renderTests(),
+  tests:    async () => { await loadScript('js/tests.js'); renderTests(); },
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
@@ -722,7 +721,7 @@ function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
-            <button class="btn btn-subtle" onclick="openFeedbackModal()"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
+            <button class="btn btn-subtle" data-jaction="open-feedback-modal"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
           </div>
         </div>`;
     } else if (tab === 'teams') {
@@ -765,7 +764,7 @@ function renderAccount(initialTab = 'account') {
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
-              <button class="btn btn-subtle" onclick="forceBackup()"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
+              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
             </div>
           </div>
           <div class="acct-section">
@@ -798,7 +797,7 @@ function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-save-row">
-            <button class="btn btn-save" onclick="saveAccountPrefs()"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
+            <button class="btn btn-save" data-jaction="save-account-prefs"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
           </div>
         </div>`;
       wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
@@ -944,7 +943,7 @@ window.openFeedbackModal = function openFeedbackModal() {
   const body = `
     <div class="form-group">
       <label class="form-label">Your Name</label>
-      <input class="form-input" id="fbName" value="${esc(currentUser.name)}" readonly tabindex="-1"/>
+      <input class="form-input" id="fbName" value="${esc(([((window._supabaseProfile||{}).first_name)||'', ((window._supabaseProfile||{}).last_name)||''].filter(Boolean).join(' ')) || currentUser.name)}" readonly tabindex="-1"/>
     </div>
     <div class="form-group">
       <label class="form-label">Email</label>
@@ -972,8 +971,8 @@ window.openFeedbackModal = function openFeedbackModal() {
     </div>`;
 
   Modal.open('<svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Feedback', body,
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-subtle" onclick="submitFeedback()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Submit</button>`);
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="submit-feedback"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Submit</button>`);
 
   wireDropdown({
     dropId: 'fbCatDrop', triggerId: 'fbCatTrigger', menuId: 'fbCatMenu',
@@ -998,14 +997,12 @@ window.submitFeedback = async function submitFeedback() {
     `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending…</button>`;
 
   try {
-    const SUPABASE_URL = 'https://iuexwdjnqfidcwvwbgwr.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml1ZXh3ZGpucWZpZGN3dndiZ3dyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTA1MTksImV4cCI6MjA4OTY4NjUxOX0.N-m3Kxb4EKITOHmJ3tJuQuvZ1LVnWzStFtarCxxvmO0';
     console.debug('[Feedback] Calling edge function…');
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${window.SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({
         name: currentUser?.name || '',
@@ -1024,18 +1021,35 @@ window.submitFeedback = async function submitFeedback() {
 
   document.getElementById('modalBody').innerHTML = `
     <div style="text-align:center;padding:32px 0">
-      <svg class="ti ti-circle-check" style="font-size:3rem;color:var(--hover-accent);display:block;margin-bottom:16px;-webkit-font-smoothing:antialiased"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
+      <svg class="ti ti-circle-check" style="font-size:3rem;color:#22c55e;display:block;margin:0 auto 16px;-webkit-font-smoothing:antialiased"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
       <p style="color:var(--text-card-title);font-size:1rem;font-weight:600;margin-bottom:8px">Thanks for your feedback!</p>
       <p style="color:var(--text-muted);font-size:0.88rem">We'll review it and be in touch if needed.</p>
     </div>`;
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
 }
 let currentStatView = 'summary';
 const STAT_VIEWS  = ['summary','daily','weekly','monthly','yearly'];
 const STAT_LABELS = { summary:'Summary', daily:'Daily', weekly:'Weekly', monthly:'Monthly', yearly:'Yearly' };
 
-function renderStats() {
+// ── Lazy script loader ───────────────────────────────────────────
+const _loadedScripts = new Set();
+function loadScript(src) {
+  if (_loadedScripts.has(src) || document.querySelector(`script[src^="${src}"]`)) {
+    _loadedScripts.add(src);
+    return Promise.resolve();
+  }
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => { _loadedScripts.add(src); resolve(); };
+    s.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+async function renderStats() {
+  await loadScript('js/chart.min.js');
   document.getElementById('pageContent').innerHTML = `
     <div class="stats-wrap">
 
@@ -1286,8 +1300,7 @@ function renderStatsDash() {
 function renderJet() {
   const tier = window._supabaseProfile?.subscription_tier || 'free';
   const status = window._supabaseProfile?.subscription_status || 'free';
-  const adminEmail = window._supabaseUser?.email || window._supabaseProfile?.email || '';
-  const hasAccess = adminEmail === 'jeffroder@gmail.com' || ((tier === 'teams_jet') && (status === 'active'));
+  const hasAccess = window._supabaseProfile?.role === 'admin' || ((tier === 'teams_jet') && (status === 'active'));
 
   if (!hasAccess) {
     document.getElementById('pageContent').innerHTML = `
@@ -1393,16 +1406,16 @@ function buildUnlockButton(label = 'Unlock JumpKit Core', opts = {}) {
   const width = opts.width || 'auto';
   const extraClass = opts.extraClass || '';
   const style = width && width !== 'auto' ? `width:${width};` : '';
-  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${style}" onclick="window.electronAPI?.openUrl('${LS_CHECKOUT_URL}')"><svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>${label}</span></button>`;
+  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${style}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>${label}</span></button>`;
 }
 
 window.showUpgradeModal = function(title, message) {
   const body = `<p style="color:var(--text-muted);font-size:0.95rem;line-height:1.7">${message}</p>`;
   const footer = `
-    <button class="btn btn-subtle" onclick="Modal.close()">
+    <button class="btn btn-subtle" data-jaction="modal-close">
       <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
     </button>
-    <button class="btn btn-primary" onclick="if(window.electronAPI) window.electronAPI.openUrl('${LS_CHECKOUT_URL}'); Modal.close();" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
+    <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
       <svg viewBox="0 0 105.74 122.88" style="width:1.2rem;height:1.2rem;fill:white;flex-shrink:0;vertical-align:middle"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg> Unlock JumpKit Core!
     </button>`;
   Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
@@ -1416,10 +1429,10 @@ window.showPaywall = function() {
         You've used all 250 free launches.<br>Upgrade to Core for unlimited launches, unlimited teams, and unlimited shared jumps.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
-        <button class="btn btn-primary" onclick="if(window.electronAPI) window.electronAPI.openUrl('${LS_CHECKOUT_URL}'); Modal.close();" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
+        <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
           <svg viewBox="0 0 105.74 122.88" style="width:1.2rem;height:1.2rem;fill:white;flex-shrink:0;vertical-align:middle"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg> Unlock JumpKit Core!
         </button>
-        <button class="btn btn-ghost" onclick="Modal.close();" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
+        <button class="btn btn-ghost" data-jaction="modal-close" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
           Maybe later
         </button>
       </div>
@@ -1515,13 +1528,13 @@ window.forceBackup = async function forceBackup() {
           <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">Your data has been exported successfully.</p>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.82rem;font-family:monospace;color:var(--text);word-break:break-all;text-align:left">${esc(result.path)}</div>
         </div>`,
-        `<button class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
+        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
       );
     } else {
       addNotification({ type: 'backup-failed', message: `Backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
       Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Backup Failed',
         `<p style="color:var(--text-muted);font-size:0.9rem">${esc(result?.reason || 'Unknown error')}</p>`,
-        `<button class="btn btn-subtle" onclick="Modal.close()">Close</button>`
+        `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
       );
     }
   } else {
@@ -1593,8 +1606,8 @@ window.checkPendingInvites = async function checkPendingInvites() {
       </div>`;
 
     Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
-      `<button class="btn btn-subtle" onclick="Modal.close()">Later</button>
-       <button class="btn btn-primary" onclick="navigateTo('teams'); Modal.close()"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
+      `<button class="btn btn-subtle" data-jaction="modal-close">Later</button>
+       <button class="btn btn-primary" data-jaction="nav-teams-close"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
@@ -1692,13 +1705,13 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       </div>`;
 
     const upgradeBtn = `
-      <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" onclick="window.electronAPI?.openUrl('${LS_CHECKOUT_URL}'); Modal.close()">
+      <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}">
         <svg viewBox="0 0 105.74 122.88" style="width:1.1rem;height:1.1rem;fill:white;flex-shrink:0;vertical-align:middle;margin-right:6px"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19-0.86-0.88-1.44-1.54-1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg>
         Unlock JumpKit Core!
       </button>`;
 
     Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
-      `<button class="btn btn-subtle" onclick="Modal.close()">OK</button>
+      `<button class="btn btn-subtle" data-jaction="modal-close">OK</button>
        ${upgradeBtn.replace('Unlock JumpKit Core!', 'Reactivate JumpKit Core')}`,
       'lg'
     );
@@ -1711,3 +1724,25 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
 // ── Boot ───────────────────────────────────────────────────────────
 initAuth();
+
+// ── Event delegation — app-level actions ───────────────────────────
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-jaction]');
+  if (!btn) return;
+  switch (btn.dataset.jaction) {
+    case 'notif-mark-read':    markAllNotificationsRead(); Modal.close(); break;
+    case 'notif-clear':        clearAllNotifications(); document.getElementById('notifBtn')?.click(); break;
+    case 'open-feedback-modal': openFeedbackModal(); break;
+    case 'force-backup':       forceBackup(); break;
+    case 'save-account-prefs': saveAccountPrefs(); break;
+    case 'submit-feedback':    submitFeedback(); break;
+    case 'nav-teams-close':    navigateTo('teams'); Modal.close(); break;
+    case 'open-url':
+      if (window.electronAPI) window.electronAPI.openUrl(btn.dataset.url);
+      break;
+    case 'open-url-close':
+      if (window.electronAPI) window.electronAPI.openUrl(btn.dataset.url);
+      Modal.close();
+      break;
+  }
+});
