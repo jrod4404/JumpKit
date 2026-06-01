@@ -183,7 +183,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const label = name || email || m.user_id;
         const pill = isOwner
           ? `<span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span>`
-          : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span>`;
+          : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span>`;
         const actionBtn = isOwner
           ? ''
           : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(label)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
@@ -283,7 +283,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span><span class="acct-member-name">${esc(ownerLabel)}</span>${ownerName && ownerEmail ? `<span class="acct-row-hint">${esc(ownerEmail)}</span>` : ''}</div></div>
             </div>
             <div class="acct-row acct-member-row">
-              <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#4060b8">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
+              <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
             </div>
             <div class="acct-team-cols-section">
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
@@ -1970,8 +1970,8 @@ function addTeamsStyles() {
       display: inline-flex; align-items: center; justify-content: center;
       padding: 1px 7px; border-radius: 10px;
       font-size: 0.69rem; font-weight: 600; min-width: 70px;
-      background: rgba(26,79,214,0.15); color: #4060b8;
-      border: 1px solid rgba(26,79,214,0.37);
+      background: rgba(34,197,94,0.13); color: #178a3a;
+      border: 1px solid rgba(34,197,94,0.35);
       white-space: nowrap;
     }
     .teams-badge-owner {
