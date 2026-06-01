@@ -540,5 +540,144 @@ function startSyncLoop() {
   }, 2 * 60 * 1000); // 2-minute poll — members see shared jump updates within 2 min
 }
 
+// ── rebuildOwnerSharedTeams ───────────────────────────────────────
+// Runs once at login. For each team the user owns, fetches Supabase
+// shared_columns and matches them back to local columns whose sharedTeams
+// array is empty (lost due to the pre-fix SQLite persistence bug).
+// Matching priority: 1) col.supabaseId (old format), 2) exact name,
+// 3) order/position, 4) sole-remaining pair per team.
+// After matching, local name wins — Supabase is updated if names differ.
+async function rebuildOwnerSharedTeams() {
+  try {
+    const res = await supabaseClient.auth.getSession();
+    const userId = res?.data?.session?.user?.id;
+    if (!userId) return;
+
+    const localUser = DB.getCurrentUser();
+    if (!localUser) return;
+
+    // 1. Get teams owned by this user
+    const { data: ownedTeams = [] } = await supabaseClient
+      .from('teams').select('id').eq('owner_id', userId);
+    if (!ownedTeams.length) return;
+    const ownedTeamIds = ownedTeams.map(t => t.id);
+
+    // 2. Fetch all shared_columns for owned teams
+    const { data: remoteRows = [] } = await supabaseClient
+      .from('shared_columns').select('id, name, team_id, position')
+      .in('team_id', ownedTeamIds);
+    if (!remoteRows.length) return;
+
+    // 3. Find local columns that need rebuilding:
+    //    isShared=1 but sharedTeams is empty/missing
+    const cols = DB.getColumns(localUser.id);
+    const needsRebuild = cols.filter(c =>
+      c.isShared && !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0)
+    );
+    if (!needsRebuild.length) return;
+
+    // Work per owned team
+    let anyChanged = false;
+    for (const teamId of ownedTeamIds) {
+      const teamRemote = remoteRows.filter(r => r.team_id === teamId);
+      if (!teamRemote.length) continue;
+
+      // Local cols that still need a sharedTeams entry for this team
+      const unmatched = needsRebuild.filter(c =>
+        !(Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.teamId === teamId))
+      );
+      if (!unmatched.length) continue;
+
+      const usedRemote = new Set();
+
+      // Pass 1: match by old-format col.supabaseId === remote.id
+      for (const col of unmatched) {
+        if (col.supabaseId) {
+          const remote = teamRemote.find(r => r.id === col.supabaseId && !usedRemote.has(r.id));
+          if (remote) {
+            _applyMatch(col, remote, teamId);
+            usedRemote.add(remote.id);
+            anyChanged = true;
+          }
+        }
+      }
+
+      // Pass 2: match by exact name
+      for (const col of unmatched) {
+        if (Array.isArray(col.sharedTeams) && col.sharedTeams.some(st => st.teamId === teamId)) continue; // already matched
+        const remote = teamRemote.find(r => r.name === col.name && !usedRemote.has(r.id));
+        if (remote) {
+          _applyMatch(col, remote, teamId);
+          usedRemote.add(remote.id);
+          anyChanged = true;
+        }
+      }
+
+      // Pass 3: match by order/position
+      for (const col of unmatched) {
+        if (Array.isArray(col.sharedTeams) && col.sharedTeams.some(st => st.teamId === teamId)) continue;
+        const remote = teamRemote.find(r => r.position === col.order && !usedRemote.has(r.id));
+        if (remote) {
+          _applyMatch(col, remote, teamId);
+          usedRemote.add(remote.id);
+          anyChanged = true;
+        }
+      }
+
+      // Pass 4: sole remaining pair — if exactly 1 unmatched local and 1 unmatched remote, pair them
+      const stillUnmatched = unmatched.filter(c =>
+        !(Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.teamId === teamId))
+      );
+      const stillUnmatchedRemote = teamRemote.filter(r => !usedRemote.has(r.id));
+      if (stillUnmatched.length === 1 && stillUnmatchedRemote.length === 1) {
+        _applyMatch(stillUnmatched[0], stillUnmatchedRemote[0], teamId);
+        usedRemote.add(stillUnmatchedRemote[0].id);
+        anyChanged = true;
+      }
+    }
+
+    if (!anyChanged) return;
+
+    // Persist the rebuilt sharedTeams
+    DB.saveColumns(localUser.id, DB.getColumns(localUser.id));
+
+    // Update Supabase names where local name differs (local wins — it's the rename source of truth)
+    const updatedCols = DB.getColumns(localUser.id);
+    for (const col of updatedCols) {
+      if (!Array.isArray(col.sharedTeams) || !col.sharedTeams.length) continue;
+      for (const st of col.sharedTeams) {
+        if (!st.supabaseId) continue;
+        const remote = remoteRows.find(r => r.id === st.supabaseId);
+        if (remote && remote.name !== col.name) {
+          try {
+            await supabaseClient.from('shared_columns')
+              .update({ name: col.name }).eq('id', st.supabaseId);
+            console.log(`[rebuildOwnerSharedTeams] Updated Supabase name: "${remote.name}" → "${col.name}"`);
+          } catch (e) { console.warn('[rebuildOwnerSharedTeams] name update failed:', e.message); }
+        }
+      }
+    }
+
+    console.log('[rebuildOwnerSharedTeams] sharedTeams rebuilt and Supabase names synced.');
+    if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) renderColumns();
+  } catch (err) {
+    console.warn('[rebuildOwnerSharedTeams] error:', err.message);
+  }
+}
+
+// Helper: assign a remote shared_columns row to a local column for a given team
+function _applyMatch(col, remote, teamId) {
+  if (!Array.isArray(col.sharedTeams)) col.sharedTeams = [];
+  const existing = col.sharedTeams.findIndex(st => st.teamId === teamId);
+  if (existing >= 0) {
+    col.sharedTeams[existing].supabaseId = remote.id;
+  } else {
+    col.sharedTeams.push({ teamId, supabaseId: remote.id });
+  }
+  col.isShared = 1;
+}
+
 // Kick off sync after a short delay to let the page initialize
 setTimeout(startSyncLoop, 2000);
+// Run owner sharedTeams rebuild shortly after sync settles
+setTimeout(() => rebuildOwnerSharedTeams().catch(e => console.warn('[rebuildOwnerSharedTeams]', e)), 4000);
