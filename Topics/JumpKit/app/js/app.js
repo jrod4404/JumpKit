@@ -823,7 +823,7 @@ function renderAccount(initialTab = 'account') {
   const acctTabSubs = {
     account:  'View your account details',
     teams:    'Manage your teams and shared columns',
-    settings: 'Manage settings to personalize JumpKit behavior',
+    settings: 'Change settings to personalize app behavior',
   };
   function setAcctSubtitle(tab) {
     const el = document.getElementById('topbarSubtitle');
