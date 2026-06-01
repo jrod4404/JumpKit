@@ -69,7 +69,7 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
            <svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Columns
          </button>
          <button class="btn btn-primary" data-jaction="stale-keep">
-           <svg class="ti ti-copy"><use href="img/tabler-sprite.svg#tabler-copy"/></svg> Keep as My Jumps
+           <svg class="ti ti-download" style="color:white"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Keep as My Jumps
          </button>`
       : `<button class="btn btn-subtle" data-jaction="stale-remove">
            OK, Understood
@@ -200,15 +200,57 @@ async function syncSharedJumps() {
     const hotkeyMap = {};
     existingJumps.forEach(j => { if (j.hotkey) hotkeyMap[j.id] = j.hotkey; });
 
+    // Fetch teams owned by this user — we never sync our own shared columns back in
+    // (owner-format columns already exist locally and are the source of truth)
+    const { data: ownedTeams = [] } = await supabaseClient
+      .from('teams').select('id').eq('owner_id', userId);
+    const ownedTeamIds = new Set(ownedTeams.map(t => t.id));
+
     // Dedupe remote cols — keep only latest per (team_id + name)
+    // Also exclude columns from teams we own — those are owner-managed locally
     const remoteColsDeduped = Object.values(
       remoteCols.reduce((acc, rc) => {
+        if (ownedTeamIds.has(rc.team_id)) return acc; // skip own shared cols
         const key = rc.team_id + '|' + rc.name;
         if (!acc[key] || rc.created_at > acc[key].created_at) acc[key] = rc;
         return acc;
       }, {})
     );
     const remoteColIds = new Set(remoteColsDeduped.map(c => c.id));
+
+    // ONE-TIME CLEANUP: remove old-format duplicate columns that shadow owner-format ones.
+    // These are created by the bug where sync imported owner's own shared cols as member copies.
+    // An old-format col (isShared + teamId, no sharedTeams) is a duplicate if there is also
+    // an owner-format col (sharedTeams[]) with the same name sharing the same team.
+    const ownerFormatCols = existingCols.filter(c => Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0);
+    const duplicateOldFormatIds = new Set();
+    for (const ownerCol of ownerFormatCols) {
+      const ownerTeamIds = ownerCol.sharedTeams.map(st => st.teamId);
+      existingCols.forEach(c => {
+        if (
+          c.id !== ownerCol.id &&
+          !Array.isArray(c.sharedTeams) &&
+          c.isShared &&
+          c.teamId &&
+          ownerTeamIds.includes(c.teamId) &&
+          c.name === ownerCol.name
+        ) {
+          duplicateOldFormatIds.add(c.id);
+        }
+      });
+    }
+    if (duplicateOldFormatIds.size > 0) {
+      console.log(`[syncSharedJumps] Removing ${duplicateOldFormatIds.size} duplicate old-format shadow column(s)`);
+      // Remove duplicate columns and their jumps from local DB
+      const cleanedCols = existingCols.filter(c => !duplicateOldFormatIds.has(c.id));
+      const cleanedJumps = DB.getJumps(localUserId).filter(j => !duplicateOldFormatIds.has(j.columnId));
+      DB.saveColumns(localUserId, cleanedCols);
+      cleanedJumps.forEach(j => {}); // jumps are keyed by id, delete the orphaned ones
+      DB.getJumps(localUserId).filter(j => duplicateOldFormatIds.has(j.columnId))
+        .forEach(j => DB.deleteJump(localUserId, j.id));
+      // Refresh existingCols so the rest of the sync uses the cleaned list
+      existingCols.splice(0, existingCols.length, ...DB.getColumns(localUserId));
+    }
 
     // Detect stale local shared columns — split by reason for correct modal wording.
     // Stale detection only applies to old single-team format (c.teamId set, sharedTeams empty).
