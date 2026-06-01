@@ -393,7 +393,7 @@ window.navigateTo = function navigateTo(page) {
   }
   const pageSubs = {
     stats:    'Track your launch history and time saved',
-    account:  'Manage your teams and shared columns',
+    account:  'Manage your teams and shared jumps',
     settings: 'Configure display, productivity, and app behavior',
     help:     'Tips, features, and frequently asked questions',
     jet:      'AI-powered automation for Microsoft 365 — runs entirely on your machine',
