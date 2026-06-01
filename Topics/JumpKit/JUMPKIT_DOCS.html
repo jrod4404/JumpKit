@@ -628,14 +628,14 @@
 </thead>
 <tbody>
 <tr>
-<td><strong>Free</strong></td>
+<td><strong>JumpKit Free</strong></td>
 <td>$0</td>
-<td>250 jump launches, web links + local folders, hotkey launcher, filters &amp; search, time &amp; ROI dashboard, Windows + Mac</td>
+<td>Up to 250 lifetime launches; web links + local folders; hotkey launcher; filters &amp; search; time &amp; ROI dashboard; Windows + Mac; own 1 team; join 1 team as a member; up to 10 shared jumps visible per shared column</td>
 </tr>
 <tr>
 <td><strong>JumpKit Core</strong></td>
 <td>$15/mo or $149/yr</td>
-<td>Everything in Free + unlimited launches + team sharing + team stats &amp; ROI + auto-archive + auto-backup</td>
+<td>Everything in Free + unlimited launches; own unlimited teams; join unlimited teams as a member; unlimited shared jumps; full team collaboration &amp; sharing; auto-archive; auto-backup</td>
 </tr>
 </tbody>
 </table>
@@ -1687,7 +1687,20 @@ else renderTeamMemberView(...);</code></pre>
 
 // Updated by Lemon Squeezy webhook (ls-webhook edge function)
 // Triggers paywall if: status='overdue' || status='cancelled'
-// OR if free tier and trial_launches_used >= 250</code></pre>
+// OR if free tier and trial_launches_used >= 250
+
+// Free tier enforcement rules (enforced client-side at action time):
+// - Max 1 team OWNED  (openAddTeamModal — blocks if ownedTeams.length >= 1)
+// - Max 1 team JOINED (openJoinTeamModal — blocks if team_members rows >= 1)
+// - Max 10 shared jumps VISIBLE per shared column (member view, enforced in sync)
+// - Max 250 lifetime launches (trial_launches_used; paywall fires on launch attempt)
+//
+// Downgrade behavior (Core → free):
+// - Earliest created team is KEPT (shared_columns + shared_jumps preserved in Supabase)
+// - All other owned teams: shared_columns + shared_jumps DELETED from Supabase
+// - teams + team_members rows LEFT DORMANT — not deleted
+// - Rationale: gives owner chance to reupgrade and restore team structure
+// - Planned cleanup: dormant teams older than 6 months may be purged in a future job</code></pre>
 <h3 id="section-6">2.5 UI Components</h3>
 <h4 id="modal">2.5.1 Modal</h4>
 <p><strong>Usage:</strong></p>
@@ -2457,7 +2470,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <h3 id="testing-overview">4.1 Overview</h3>
 <p>JumpKit includes a built-in unit test suite accessible from the <strong>Testing</strong> page in the app. Tests cover core app functionality, security, database integrity, deployment checks, and code quality. Tests are written in vanilla JS and run directly in the Electron renderer process — no external test runner required.</p>
 <p>To run tests: open the app → navigate to <strong>Testing</strong> in the sidebar → click <strong>Run All Tests</strong> or run individual tests by category.</p>
-<p><strong>Current total: 82 tests</strong> across 8 categories.</p>
+<p><strong>Current total: 93 tests</strong> across 9 categories.</p>
 
 <h3 id="testing-unit-tests">4.2 Unit Test Summary</h3>
 <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px">
@@ -2552,6 +2565,17 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">80</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Delete jump from shared column → removed from Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump no longer exists in Supabase after deletion. Self-cleaning.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">81</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Move jump OUT of shared column → removed from Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump gone from Supabase after moving to personal column. Self-cleaning.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">82</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Move jump INTO shared column → inserted into Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump appears in Supabase after moving from personal to shared column. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">83</td><td style="padding:5px 10px">Jumps</td><td style="padding:5px 10px">DB.updateJump persists field changes</td><td style="padding:5px 10px;color:var(--text-muted)">Read-back name, url, and description match updated values exactly. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">84</td><td style="padding:5px 10px">Columns</td><td style="padding:5px 10px">Column create / delete lifecycle</td><td style="padding:5px 10px;color:var(--text-muted)">Column present after createColumn; absent after saveColumns (remove). Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">85</td><td style="padding:5px 10px">Jumps</td><td style="padding:5px 10px">Jump favorite toggle persists</td><td style="padding:5px 10px;color:var(--text-muted)">favorite=true after first updateJump; false after second. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">86</td><td style="padding:5px 10px">Jumps</td><td style="padding:5px 10px">DB.incrementClick increments clickCount</td><td style="padding:5px 10px;color:var(--text-muted)">clickCount equals 2 after two incrementClick calls. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">87</td><td style="padding:5px 10px">Columns</td><td style="padding:5px 10px">Column drag-reorder persists order values</td><td style="padding:5px 10px;color:var(--text-muted)">At least one column order value changes after saveColumns; originals restored.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">88</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Shared column rename updates Supabase shared_columns.name</td><td style="padding:5px 10px;color:var(--text-muted)">Supabase name matches new local name; original name restored. Regression guard.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">89</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">syncSharedJumps runs without error</td><td style="padding:5px 10px;color:var(--text-muted)">syncSharedJumps() resolves without throwing regardless of team membership state.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">90</td><td style="padding:5px 10px">Teams</td><td style="padding:5px 10px">Team join rejects wrong password</td><td style="padding:5px 10px;color:var(--text-muted)">verify-team-password returns valid=false for intentionally wrong password.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">91</td><td style="padding:5px 10px">Settings</td><td style="padding:5px 10px">Theme pref persists via DB.savePrefs / getPrefs</td><td style="padding:5px 10px;color:var(--text-muted)">getPrefs returns theme="dark" after savePrefs; original theme restored.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">92</td><td style="padding:5px 10px">Stats</td><td style="padding:5px 10px">DB.logClick records entry in click log</td><td style="padding:5px 10px;color:var(--text-muted)">getClickLog contains at least one entry with matching jumpId after logClick. Self-cleaning.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">93</td><td style="padding:5px 10px">Subscription</td><td style="padding:5px 10px">Lemon Squeezy webhook upgrades subscription_status ⚠️ manual</td><td style="padding:5px 10px;color:var(--text-muted)">POST test webhook → Supabase profiles.subscription_status = "active". Full curl steps in test.</td></tr>
 </tbody>
 </table>
 
@@ -3079,7 +3103,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <tr><td>10</td><td>✅</td><td><code>tests.js</code> (130 KB) ships and parses for every user; exposes test fixtures</td><td>✅ Done 2026-05-28 — Removed from <code>app.html</code>; lazy-loaded via <code>loadScript()</code> only when admin navigates to Tests page</td></tr>
 <tr><td>11</td><td>✅</td><td>80+ inline <code>onclick</code> handlers in generated HTML — blocks full CSP <code>script-src</code> lockdown.</td><td>✅ Done 2026-05-28 — All inline handlers replaced with <code>data-jaction</code> attributes + document-level delegation listeners in <code>jumps.js</code>, <code>archive.js</code>, <code>sync.js</code>, <code>app.js</code>, <code>teams.js</code>, <code>auth.js</code>. <code>'unsafe-inline'</code> removed from <code>script-src</code> in CSP.</td></tr>
 <tr><td>12</td><td>✅</td><td><code>chart.min.js</code> (200 KB) loaded on every page including auth</td><td>✅ Done 2026-05-28 — Removed from <code>app.html</code>; lazy-loaded via <code>loadScript()</code> in <code>renderStats()</code> only when Stats page is visited</td></tr>
-<tr><td>13</td><td>✅</td><td><code>auth.js</code> hardcodes anon key JWT literal instead of referencing <code>SUPABASE_ANON_KEY</code></td><td>✅ Done 2026-05-28 — Removed hardcoded literals from <code>auth.js</code> and <code>app.js</code>; both now use <code>window.SUPABASE_ANON_KEY</code> / <code>window.SUPABASE_URL</code> from <code>supabase/config.js</code> (single source of truth)</td></tr>
+<tr><td>13</td><td>✅</td><td><code>auth.js</code> hardcodes anon key JWT literal instead of referencing <code>SUPABASE_ANON_KEY</code></td><td>✅ Done 2026-05-28 — Removed hardcoded literals from <code>auth.js</code> and <code>app.js</code>; both now reference <code>SUPABASE_ANON_KEY</code> / <code>SUPABASE_URL</code> from <code>supabase/config.js</code> (single source of truth). <em>Note: 2026-05-30 fix — references were incorrectly using <code>window.</code> prefix; <code>const</code> at top-level script scope does not attach to <code>window</code>, causing <code>undefined</code> JWT on all edge function calls. Removed <code>window.</code> prefix in <code>app.js</code> and <code>auth.js</code>.</em></td></tr>
 <tr><td>14</td><td>✅</td><td>Admin nav check uses <code>email === 'jeffroder@gmail.com'</code> hardcode instead of <code>role</code> field</td><td>✅ Done 2026-05-28 — All hardcoded email checks replaced with <code>role === 'admin'</code>. Supabase <code>profiles_role_check</code> constraint updated to include <code>'admin'</code>. <code>schema.sql</code> updated to match.</td></tr>
 <tr><td>15</td><td>✅</td><td><code>isShared</code> mixed as <code>1</code>/<code>0</code> vs <code>true</code>/<code>false</code> in sync/cache layer</td><td>✅ Done 2026-05-28 — 15 occurrences across <code>sync.js</code>, <code>teams.js</code>, <code>jumps.js</code> normalized to <code>true</code>/<code>false</code>. <code>db.js</code> already correct.</td></tr>
 <tr><td>16</td><td>✅</td><td>Stale data cleanup uses two different ID schemes (<code>supabaseId</code> vs <code>id</code>) — can leave ghost rows</td><td>✅ Done 2026-05-28 — Column + jump matching in <code>sync.js</code> now uses <code>supabaseId</code>-only. Local IDs never used as proxy for Supabase UUIDs. Stale jump deletion gated on <code>j.supabaseId</code> presence.</td></tr>
@@ -3092,6 +3116,27 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </table>
 
 <h2 id="changelog">11. Changelog</h2>
+
+<h3>2026-05-31</h3>
+<ul>
+  <li><strong>Free tier paywall rules enforced:</strong> Free users limited to owning 1 team (<code>openAddTeamModal</code> blocks if already own 1) and joining 1 team as a member (<code>openJoinTeamModal</code> blocks if already a member of 1 team). Both show upgrade modal on violation.</li>
+  <li><strong>Subscription Ended modal fixes:</strong> 250-launches bullet now appears first; team name lookup falls back to direct Supabase query for members who don't own the team (fixes "your team" placeholder).</li>
+  <li><strong>Account Type labels:</strong> Free tier now displays as "JumpKit Free"; paid tier displays as "JumpKit Core".</li>
+  <li><strong>Features button:</strong> Added inline "Features" button next to Account Type on My Account tab — opens a tier-specific feature list modal with upgrade CTA for free users.</li>
+  <li><strong>UX copy fixes:</strong> Invite email bullet 1 updated; join team modal helper text added; resend invite modal helper text updated; empty teams state updated; account/teams/settings page subtitles per-tab; "Manage Sharing" label fixes.</li>
+  <li><strong>Tab persistence fix:</strong> <code>renderTeams()</code> now targets <code>acctTabContent</code> when present, preventing tab bar from being wiped on team create/edit actions.</li>
+  <li><strong>Supabase SMTP sender:</strong> Updated from <code>noreply@jumpkit.ai</code> to <code>noreply@jumpkit.app</code> — was causing 500 errors on new account signup confirmation emails.</li>
+</ul>
+
+<h3>2026-05-30</h3>
+<ul>
+  <li><strong>Email domain migration:</strong> All outbound email addresses migrated from <code>@jumpkit.ai</code> to <code>@jumpkit.app</code> across 9 files (<code>help.js</code>, <code>send-feedback.js</code>, <code>send-invite.js</code>, and 6 Supabase edge functions). Sending domain: <code>noreply@jumpkit.app</code>. Support inbox: <code>support@jumpkit.app</code>.</li>
+  <li><strong>send-feedback edge function deployed:</strong> <code>supabase/send-feedback.js</code> existed but had never been placed in <code>supabase/functions/send-feedback/index.ts</code> — function was missing from Supabase entirely. Created, deployed, and verified.</li>
+  <li><strong>CORS fix for Electron:</strong> Edge function had <code>Access-Control-Allow-Origin: https://jumpkit.app</code> — Electron apps use <code>null</code> (file://) origin, causing all requests to be blocked silently. Changed to <code>*</code> (safe; bearer token auth still enforced).</li>
+  <li><strong>JWT bug fixed (<code>window.</code> prefix):</strong> <code>app.js</code> and <code>auth.js</code> referenced <code>window.SUPABASE_ANON_KEY</code> and <code>window.SUPABASE_URL</code>. Since <code>config.js</code> declares these as <code>const</code> (not <code>var</code>), they never attach to <code>window</code> — all edge function calls were sending <code>Bearer undefined</code> and getting 401. Removed <code>window.</code> prefix; both now resolve correctly from script scope.</li>
+  <li><strong>Resend domain + Proton Mail:</strong> Verified <code>jumpkit.app</code> in Resend dashboard. Redeployed all 6 edge functions. Added MX record <code>mail.protonmail.ch</code> (priority 10) in GoDaddy for <code>jumpkit.app</code>. Proton Mail now receives inbound email at <code>support@jumpkit.app</code>.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-05-30</code>.</li>
+</ul>
 
 <h3>2026-05-28</h3>
 <ul>
@@ -3478,5 +3523,92 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
             });
         });
     </script>
+<h2 id="release-protocol">11. Release Protocol</h2>
+<p>This section defines the standard steps to follow before publishing a new version of JumpKit. Follow every phase in order before uploading installers or announcing to users.</p>
+
+<h3 id="release-phase-1">Phase 1 — Code Freeze &amp; Testing</h3>
+<ul>
+  <li>Run the full unit test suite (Testing page in-app) — <strong>all 93 tests must pass or be manually verified</strong></li>
+  <li>Manual smoke test: log in, create/edit/delete a jump, open a jump, archive a jump, visit every page</li>
+  <li>Test on <strong>both platforms</strong> — macOS DMG and Windows EXE</li>
+  <li>Complete Test 93 manually: verify Lemon Squeezy webhook → Supabase subscription upgrade end-to-end</li>
+  <li>Test the team invite + join flow with a second account (see Section 4.3 test users)</li>
+</ul>
+
+<h3 id="release-phase-2">Phase 2 — Version &amp; Build</h3>
+<ul>
+  <li>Bump the version in <code>package.json</code> — follow semver: <code>patch</code> for bug fixes, <code>minor</code> for new features, <code>major</code> for breaking changes</li>
+  <li>Confirm the version number appears correctly in the Account page or About screen inside the app</li>
+  <li>Run a clean build: <code>npm run build</code> / <code>electron-builder</code> for both macOS and Windows targets</li>
+  <li>Verify installer file sizes look reasonable — an unusually small file indicates missing assets</li>
+</ul>
+
+<h3 id="release-phase-3">Phase 3 — Git Hygiene</h3>
+<ul>
+  <li>All changes committed and pushed to <code>main</code> on <code>jrod4404/JumpKit</code></li>
+  <li>Tag the release commit: <code>git tag v1.x.x &amp;&amp; git push --tags</code></li>
+  <li>Write a short changelog entry documenting what changed since the previous version</li>
+</ul>
+
+<h3 id="release-phase-4">Phase 4 — Deploy Installers</h3>
+<ul>
+  <li>Upload the new <code>.dmg</code> + <code>.exe</code> to <code>jrod4404/jumpkit-releases</code> as a <strong>new GitHub Release</strong> — do not overwrite the previous release; keep old versions available for existing users</li>
+  <li>Update landing page download button URLs to point to the new version paths</li>
+  <li>Verify that both download links work correctly from the live landing page</li>
+</ul>
+
+<h3 id="release-phase-5">Phase 5 — Backend Check</h3>
+<ul>
+  <li>Confirm all Supabase Edge Functions are deployed and returning healthy responses</li>
+  <li>If any DB schema changed: run migrations in production and verify no data loss</li>
+  <li>Spot-check key Supabase tables: <code>profiles</code>, <code>teams</code>, <code>shared_columns</code>, <code>shared_jumps</code></li>
+</ul>
+
+<h3 id="release-phase-6">Phase 6 — Landing Page QA</h3>
+<ul>
+  <li>Visit the live landing page — check pricing copy, download buttons, no broken images or layout issues</li>
+  <li>Test the landing page on mobile viewport</li>
+  <li>Confirm pricing tier names match in-app labels: <strong>JumpKit Free</strong> and <strong>JumpKit Unlimited</strong></li>
+</ul>
+
+<h3 id="release-phase-7">Phase 7 — Announce</h3>
+<ul>
+  <li>Post in target communities (Reddit, Indie Hackers, relevant forums)</li>
+  <li>Send release email to the subscriber list</li>
+  <li>Notify any MSP partners who earn commission on signups</li>
+  <li>Update <code>JUMPKIT_DOCS.html</code> with the new test count and any new sections added in this release</li>
+</ul>
+
+<h3 id="release-checklist">Release Checklist (Quick Reference)</h3>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 10px;color:#50CACC;white-space:nowrap">#</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Phase</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Step</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">1</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">All 93 unit tests pass (zero failures)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">2</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Manual smoke test on macOS + Windows</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">3</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Lemon Squeezy webhook end-to-end (Test 93)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">4</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Team invite + join flow with second account</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">5</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Bump version in package.json (semver)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">6</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Version visible in app Account page</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">7</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Clean build — both macOS + Windows targets</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">8</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">All changes committed + pushed to main</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">9</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Release tagged (git tag v1.x.x + push)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">10</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Changelog entry written</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">11</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">New GitHub Release created in jumpkit-releases (don't overwrite old)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">12</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">Landing page download URLs updated + verified</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">13</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">Edge Functions deployed and healthy</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">14</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">DB migrations applied (if any schema changes)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">15</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Live landing page QA — desktop + mobile</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">16</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Pricing names match in-app (JumpKit Free / JumpKit Unlimited)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">17</td><td style="padding:5px 10px">Announce</td><td style="padding:5px 10px">Community posts + email list + MSP partners notified</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">18</td><td style="padding:5px 10px">Docs</td><td style="padding:5px 10px">JUMPKIT_DOCS.html updated with new test count + sections</td></tr>
+</tbody>
+</table>
+
 </body>
 </html>
