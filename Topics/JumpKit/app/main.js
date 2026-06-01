@@ -84,10 +84,11 @@ function initDB() {
     addColumnIfMissing('user_prefs', 'navDefaultCollapsed', 'INTEGER DEFAULT 0');
     addColumnIfMissing('jumps',   'timeSavedUnit', 'TEXT DEFAULT NULL');
     addColumnIfMissing('jumps',   'teamId',   'TEXT DEFAULT NULL');
-    addColumnIfMissing('columns', 'isShared',   'INTEGER DEFAULT 0');
-    addColumnIfMissing('columns', 'teamId',     'TEXT DEFAULT NULL');
-    addColumnIfMissing('columns', 'supabaseId', 'TEXT DEFAULT NULL');
-    addColumnIfMissing('jumps',   'supabaseId', 'TEXT DEFAULT NULL');
+    addColumnIfMissing('columns', 'isShared',    'INTEGER DEFAULT 0');
+    addColumnIfMissing('columns', 'teamId',      'TEXT DEFAULT NULL');
+    addColumnIfMissing('columns', 'supabaseId',  'TEXT DEFAULT NULL');
+    addColumnIfMissing('columns', 'sharedTeams', 'TEXT DEFAULT NULL'); // JSON array: [{teamId, supabaseId}]
+    addColumnIfMissing('jumps',   'supabaseId',  'TEXT DEFAULT NULL');
 
     console.log('[JumpKit] SQLite DB initialized at', dbPath);
   } catch (e) {
@@ -293,7 +294,19 @@ ipcMain.handle('delete-jump', (_e, userId, id) => {
 // ── IPC: get-columns ───────────────────────────────────────────────
 ipcMain.handle('get-columns', (_e, userId) => {
   if (!db) return [];
-  return db.prepare('SELECT * FROM columns WHERE userId = ? ORDER BY `order` ASC').all(userId);
+  const rows = db.prepare('SELECT * FROM columns WHERE userId = ? ORDER BY `order` ASC').all(userId);
+  return rows.map(row => {
+    // Deserialize sharedTeams JSON → array
+    let sharedTeams = null;
+    if (row.sharedTeams) {
+      try { sharedTeams = JSON.parse(row.sharedTeams); } catch (_) { sharedTeams = null; }
+    }
+    // One-time migration: if no sharedTeams but old-format teamId+isShared exist, promote to sharedTeams
+    if (!sharedTeams && row.isShared && row.teamId) {
+      sharedTeams = [{ teamId: row.teamId, supabaseId: row.supabaseId || null }];
+    }
+    return { ...row, sharedTeams: sharedTeams || [] };
+  });
 });
 
 // ── IPC: save-columns (bulk replace) ──────────────────────────────
@@ -301,22 +314,24 @@ ipcMain.handle('save-columns', (_e, userId, cols) => {
   if (!db || !Array.isArray(cols)) return { ok: false };
   try {
     const insert = db.prepare(`
-      INSERT OR REPLACE INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId)
-      VALUES (@id, @userId, @name, @visible, @order, @createdAt, @isShared, @teamId, @supabaseId)
+      INSERT OR REPLACE INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId, sharedTeams)
+      VALUES (@id, @userId, @name, @visible, @order, @createdAt, @isShared, @teamId, @supabaseId, @sharedTeams)
     `);
     const tx = db.transaction(() => {
       db.prepare('DELETE FROM columns WHERE userId = ?').run(userId);
       for (const col of cols) {
+        const sharedTeamsArr = Array.isArray(col.sharedTeams) && col.sharedTeams.length > 0 ? col.sharedTeams : null;
         insert.run({
-          id:        col.id,
-          userId:    userId,
-          name:      col.name,
-          visible:   col.visible ? 1 : 0,
-          order:     col.order ?? 0,
-          createdAt: col.createdAt || Date.now(),
-          isShared:  col.isShared ? 1 : 0,
-          teamId:    col.teamId || null,
-          supabaseId: col.supabaseId || null,
+          id:          col.id,
+          userId:      userId,
+          name:        col.name,
+          visible:     col.visible ? 1 : 0,
+          order:       col.order ?? 0,
+          createdAt:   col.createdAt || Date.now(),
+          isShared:    col.isShared ? 1 : 0,
+          teamId:      col.teamId || null,
+          supabaseId:  col.supabaseId || null,
+          sharedTeams: sharedTeamsArr ? JSON.stringify(sharedTeamsArr) : null,
         });
       }
     });
@@ -331,19 +346,21 @@ ipcMain.handle('save-columns', (_e, userId, cols) => {
 ipcMain.handle('save-column', (_e, userId, col) => {
   if (!db) return { ok: false };
   try {
+    const sharedTeamsArr = Array.isArray(col.sharedTeams) && col.sharedTeams.length > 0 ? col.sharedTeams : null;
     db.prepare(`
-      INSERT OR REPLACE INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId)
-      VALUES (@id, @userId, @name, @visible, @order, @createdAt, @isShared, @teamId, @supabaseId)
+      INSERT OR REPLACE INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId, sharedTeams)
+      VALUES (@id, @userId, @name, @visible, @order, @createdAt, @isShared, @teamId, @supabaseId, @sharedTeams)
     `).run({
-      id:         col.id,
-      userId:     userId,
-      name:       col.name,
-      visible:    col.visible ? 1 : 0,
-      order:      col.order ?? 0,
-      createdAt:  col.createdAt || Date.now(),
-      isShared:   col.isShared ? 1 : 0,
-      teamId:     col.teamId || null,
-      supabaseId: col.supabaseId || null,
+      id:          col.id,
+      userId:      userId,
+      name:        col.name,
+      visible:     col.visible ? 1 : 0,
+      order:       col.order ?? 0,
+      createdAt:   col.createdAt || Date.now(),
+      isShared:    col.isShared ? 1 : 0,
+      teamId:      col.teamId || null,
+      supabaseId:  col.supabaseId || null,
+      sharedTeams: sharedTeamsArr ? JSON.stringify(sharedTeamsArr) : null,
     });
     return { ok: true };
   } catch (e) {
