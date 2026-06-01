@@ -55,12 +55,12 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
       ${canKeep
         ? `<div style="background:rgba(0,194,199,0.07);border:1px solid rgba(0,194,199,0.2);border-radius:8px;padding:11px 14px">
              <p style="margin:0;font-size:0.84rem;color:var(--turq);line-height:1.5">
-               <strong>JumpKit Core:</strong> You can keep these columns as personal jumps — your links and data stay, they just become private to you.
+               <strong>JumpKit Unlimited:</strong> You can keep these columns as personal jumps — your links and data stay, they just become private to you.
              </p>
            </div>`
         : `<div style="background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:11px 14px">
              <p style="margin:0;font-size:0.84rem;color:var(--text-dim);line-height:1.5">
-               Unlock JumpKit Core to keep all shared columns as personal columns when access is removed.
+               Unlock JumpKit Unlimited to keep all shared columns as personal columns when access is removed.
              </p>
            </div>`}`;
 
@@ -75,7 +75,7 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
            OK, Understood
          </button>
          <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="stale-upgrade" data-url="${LS_CHECKOUT_URL}">
-           <svg class="ti ti-lock" style="width:1rem;height:1rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Core
+           <svg class="ti ti-lock" style="width:1rem;height:1rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Unlimited
          </button>`;
 
     Modal.open(title, body, footer, { closeable: false });

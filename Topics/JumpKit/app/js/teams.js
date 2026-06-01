@@ -23,7 +23,7 @@ async function hashPassword(password) {
 }
 
 async function renderTeams(containerEl) {
-  const content = containerEl || document.getElementById('pageContent');
+  const content = containerEl || document.getElementById('acctTabContent') || document.getElementById('pageContent');
 
   content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
     <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
@@ -151,7 +151,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
 
   if (ownedTeams.length === 0) {
-    html += `<div class="acct-empty-state">No teams yet. Click <strong>New Team</strong> to get started.</div>`;
+    html += `<div class="acct-empty-state">No teams yet. Click <strong>Create Team</strong> to get started.</div>`;
   } else {
     for (const team of ownedTeams) {
       // Fetch members for this team
@@ -238,7 +238,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <div class="acct-team-cols-list">
                 ${teamSharedCols.length > 0
                   ? teamSharedCols.map(c => `<span class="acct-team-col-chip">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`).join('')
-                  : '<span class="acct-row-hint" style="font-size:0.8rem">None yet — click <strong>Share Col</strong> above to add one</span>'}
+                  : '<span class="acct-row-hint" style="font-size:0.8rem">None yet — click <strong>Manage Sharing</strong> above to add one</span>'}
               </div>
             </div>
           </div>
@@ -483,7 +483,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
             </button>
           </div>
           <div id="teamsPanel">
-            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">No teams yet.</p>
+            <p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">No teams yet. Click <strong>Create Team</strong> to get started.</p>
           </div>
         </div>
 
@@ -563,7 +563,7 @@ window.selectOrg = async function(orgId) {
     }
 
     if (teams.length === 0) {
-      teamsPanel.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">No teams yet.</p>`;
+      teamsPanel.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">No teams yet. Click <strong>Create Team</strong> to get started.</p>`;
     } else {
       teamsPanel.innerHTML = teams.map(t => {
         const mCount = memberCounts[t.id] || 0;
@@ -690,7 +690,7 @@ window.openAddTeamModal = async function() {
     if (existingTeams && existingTeams.length >= 1) {
       showUpgradeModal(
         'Team Limit Reached',
-        'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Core for unlimited teams, unlimited shared jumps, and unlimited launches.'
+        'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Unlimited for unlimited teams, unlimited shared jumps, and unlimited launches.'
       );
       return;
     }
@@ -1360,6 +1360,7 @@ async function openInviteModal(teamId) {
       <span class="form-error" id="inviteEmailsErr"></span>
     </div>
     <div class="form-group" style="margin-top:12px">
+      <p style="color:var(--text-muted);font-size:.82rem;margin:0 0 10px">Enter the current team password. Each user will receive this in their invitation email and will need it to join your team. If you don't have your team password, first reset it using the reset password button and then invite your team members.</p>
       <label class="form-label">Team Password *</label>
       <div style="position:relative">
         <input class="form-input" type="password" id="inviteTeamPassword" placeholder="Enter team password" autocomplete="off" />
@@ -1801,10 +1802,25 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
 };
 
 // ── Join Team Modal & Flow ─────────────────────────────────────────
-window.openJoinTeamModal = function(teamId, teamName, inviteId) {
+window.openJoinTeamModal = async function(teamId, teamName, inviteId) {
+  // Free tier: enforce 1-team join limit
+  const tier = window._supabaseProfile?.subscription_tier || 'free';
+  if (tier === 'free' && window._supabaseUser) {
+    const { data: memberships } = await supabaseClient
+      .from('team_members')
+      .select('id')
+      .eq('user_id', window._supabaseUser.id);
+    if (memberships && memberships.length >= 1) {
+      showUpgradeModal(
+        'Team Join Limit Reached',
+        'The free tier allows joining <strong>1 team</strong>. Upgrade to JumpKit Unlimited for unlimited teams.'
+      );
+      return;
+    }
+  }
   Modal.open(`<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team`, `
     <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">
-      Enter the team password to join <strong>${esc(teamName)}</strong>.
+      Enter the team password to join <strong>${esc(teamName)}</strong>. You can find this in your invitation email.
     </p>
     <div class="form-group">
       <label class="form-label">Team Password *</label>
