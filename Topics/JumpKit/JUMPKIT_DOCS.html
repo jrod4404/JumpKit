@@ -3204,7 +3204,58 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </ul>
 <p>This documentation covers architecture, data flows, components, and conventions. For specific questions about implementation details, refer to the source code and inline comments.</p>
 <p>Happy building! 🚀</p>
-<h2 id="changelog">11. Changelog</h2>
+
+<h2 id="next-features">11. Next Features &amp; Roadmap</h2>
+<p>Ranked by impact against JumpKit's current positioning as a local-first, category-based launcher with hotkeys, search, teams, and ROI tracking.</p>
+
+<h3 id="roadmap-priority">11.1 Priority Features</h3>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 10px;color:#50CACC;white-space:nowrap">Rank</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Feature</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Why</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 10px;white-space:nowrap;font-weight:700;color:#50CACC">1 🥇</td>
+  <td style="padding:6px 10px;font-weight:600">Browser Extension</td>
+  <td style="padding:6px 10px;color:var(--text-muted)">Biggest gap. One-click "Send to JumpKit" from any tab, add current page as a Jump, sync/import bookmarks. Directly kills the "browser-locked bookmarks" pain point. Biggest boost to daily usage and adoption.</td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 10px;white-space:nowrap;font-weight:700;color:#50CACC">2 🥈</td>
+  <td style="padding:6px 10px;font-weight:600">Tags on Jumps</td>
+  <td style="padding:6px 10px;color:var(--text-muted)">Multi-dimensional organization on top of columns (e.g. <code>#clientX #urgent #proposal</code>). Enables smart filtering and search. Easy to add to existing data model. High power-user value.</td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 10px;white-space:nowrap;font-weight:700;color:#50CACC">3 🥉</td>
+  <td style="padding:6px 10px;font-weight:600">Linux Support</td>
+  <td style="padding:6px 10px;color:var(--text-muted)">Broadens TAM for dev/sysadmin/enterprise audiences. Reinforces "local-first, cross-platform" story. Requires real packaging + hotkey work — do after Win/Mac are solid and demand is validated.</td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 10px;white-space:nowrap;font-weight:700;color:#50CACC">4</td>
+  <td style="padding:6px 10px;font-weight:600">OS File System Integration</td>
+  <td style="padding:6px 10px;color:var(--text-muted)">Right-click "Save to JumpKit" in Explorer/Finder, shell context menus, virtual shortcuts. Makes the app feel native. Current path-add flow covers most of this — treat as polish after top 3.</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="roadmap-other">11.2 Other Ideas (by impact)</h3>
+<ul>
+  <li><strong>Quick-add global hotkey capture</strong> — Grab current selection/URL/file and add as a Jump instantly. Extremely sticky for daily use.</li>
+  <li><strong>Advanced search &amp; smart filters</strong> — Fuzzy search improvements, saved searches, natural-language queries.</li>
+  <li><strong>Import from bookmarks/browsers</strong> — One-time or ongoing import to migrate users from Chrome/Firefox bookmarks.</li>
+  <li><strong>Collaboration enhancements</strong> — Version history on shared Jumps, comments/notes, approval workflows for enterprise.</li>
+  <li><strong>CLI / scripting support</strong> — <code>jumpkit add "Name" --url ... --tags ...</code> for power users and automation pipelines.</li>
+  <li><strong>Mobile companion (view-only)</strong> — Read-only access or QR-based sharing. Lower priority given the desktop focus.</li>
+  <li><strong>Snippets / quick actions</strong> — Light text expansion or common commands tied to Jumps.</li>
+  <li><strong>Analytics &amp; ROI enhancements</strong> — Per-Jump time estimates, exportable reports, team leaderboards.</li>
+  <li><strong>Theming &amp; UI customization</strong> — Column layouts, icon support, additional themes.</li>
+  <li><strong>Offline-first sync improvements</strong> — Better conflict resolution, selective cloud sync.</li>
+</ul>
+
+<h2 id="changelog">12. Changelog</h2>
 
 <h3>2026-05-31</h3>
 <ul>
