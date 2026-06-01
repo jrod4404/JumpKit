@@ -1057,7 +1057,7 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 }
 .plan-features {
   list-style: none;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
