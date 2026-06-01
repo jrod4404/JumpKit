@@ -393,11 +393,11 @@ window.navigateTo = function navigateTo(page) {
   }
   const pageSubs = {
     stats:    'Track your launch history and time saved',
-    account:  'Manage your teams and shared jumps',
+    account:  'Manage your teams and shared columns',
     settings: 'Configure display, productivity, and app behavior',
     help:     'Tips, features, and frequently asked questions',
     jet:      'AI-powered automation for Microsoft 365 — runs entirely on your machine',
-    teams:    'Manage your teams and shared jumps',
+    teams:    'Manage your teams and shared columns',
     tests:    'Core functionality verification — run before each deployment',
     home:     '',
     jumps:    '',
@@ -822,7 +822,7 @@ function renderAccount(initialTab = 'account') {
   // Wire tab clicks
   const acctTabSubs = {
     account:  'View your account details',
-    teams:    'Manage your teams and shared jumps',
+    teams:    'Manage your teams and shared columns',
     settings: 'Manage settings to personalize JumpKit behavior',
   };
   function setAcctSubtitle(tab) {
