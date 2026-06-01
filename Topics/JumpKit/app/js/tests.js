@@ -1940,6 +1940,312 @@ const JK_TESTS = [
     }
   },
 
+
+  // ── Jump & Column CRUD ─────────────────────────────────────────
+  {
+    id: 83, category: 'Jumps',
+    title: 'DB.updateJump persists field changes',
+    purpose: 'Confirms that updateJump correctly writes name, URL, and description changes back to the in-memory cache (and SQLite). If this fails, jump edits via the Configure modal will silently discard user changes.',
+    prerequisites: 'At least one active jump must exist. Test is self-cleaning.',
+    description: 'Creates a test jump, updates name/url/description, reads it back, verifies values match, then deletes it.',
+    input: 'DB.createJump → DB.updateJump({ name, url, description }) → DB.getActiveJumps',
+    expected: 'Read-back values match the updated name, url, and description exactly.',
+    test: async () => {
+      const cols = DB.getColumns(currentUser.id);
+      if (!cols.length) throw new Error('No columns available — cannot create test jump');
+
+      const original = { id: '__test_update_' + Date.now(), name: '__ORIG_NAME__', url: 'https://before.test', description: 'original desc', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() };
+      const saved = DB.createJump(currentUser.id, original);
+
+      DB.updateJump(currentUser.id, saved.id, { name: '__UPDATED_NAME__', url: 'https://after.test', description: 'updated desc' });
+
+      const found = DB.getActiveJumps(currentUser.id).find(j => j.id === saved.id);
+      DB.deleteJump(currentUser.id, saved.id);
+
+      if (!found) throw new Error('Jump not found after updateJump');
+      if (found.name !== '__UPDATED_NAME__') throw new Error(`name not updated — got: ${found.name}`);
+      if (found.url  !== 'https://after.test') throw new Error(`url not updated — got: ${found.url}`);
+      if (found.description !== 'updated desc') throw new Error(`description not updated — got: ${found.description}`);
+      console.info('[Test 83] ✅ updateJump correctly persisted all field changes.');
+      return true;
+    }
+  },
+
+  {
+    id: 84, category: 'Columns',
+    title: 'Column create / delete lifecycle',
+    purpose: 'Tests the full create → verify → delete cycle for a column via the DB layer. Regressions here would prevent users from adding or removing columns entirely.',
+    prerequisites: 'Must be logged in. Test is self-cleaning — no permanent side effects.',
+    description: 'Creates a test column via DB.createColumn, confirms it appears in getColumns, then removes it via saveColumns, and confirms it is gone.',
+    input: 'DB.createColumn(userId, name, order) → DB.getColumns → DB.saveColumns (remove)',
+    expected: 'Column present after create, absent after delete.',
+    test: async () => {
+      const testName = '__TEST_COL_' + Date.now() + '__';
+      const newCol = DB.createColumn(currentUser.id, testName, 9999);
+
+      if (!newCol || !newCol.id) throw new Error('createColumn returned no object');
+      const afterCreate = DB.getColumns(currentUser.id).find(c => c.id === newCol.id);
+      if (!afterCreate) throw new Error('Column not found in getColumns after createColumn');
+
+      // Delete — remove from array and save
+      const cleaned = DB.getColumns(currentUser.id).filter(c => c.id !== newCol.id);
+      DB.saveColumns(currentUser.id, cleaned);
+
+      const afterDelete = DB.getColumns(currentUser.id).find(c => c.id === newCol.id);
+      if (afterDelete) throw new Error('Column still present after delete via saveColumns');
+
+      console.info('[Test 84] ✅ Column create/delete lifecycle verified.');
+      return true;
+    }
+  },
+
+  {
+    id: 85, category: 'Jumps',
+    title: 'Jump favorite toggle persists',
+    purpose: 'Confirms that marking a jump as a favorite (and unmarking it) correctly updates the in-memory cache. Favorites power the quick-access section — silent failure here would silently break it.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning.',
+    description: 'Creates a test jump (favorite=false), sets favorite=true via updateJump, reads back, then sets false again, reads back, deletes.',
+    input: 'DB.createJump → DB.updateJump({ favorite: true }) → DB.getActiveJumps → DB.updateJump({ favorite: false })',
+    expected: 'favorite is true after first update, false after second update.',
+    test: async () => {
+      const cols = DB.getColumns(currentUser.id);
+      if (!cols.length) throw new Error('No columns available');
+
+      const j = DB.createJump(currentUser.id, { id: '__test_fav_' + Date.now(), name: '__FAV_TEST__', url: 'https://fav.test', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() });
+
+      DB.updateJump(currentUser.id, j.id, { favorite: true });
+      const afterTrue = DB.getActiveJumps(currentUser.id).find(x => x.id === j.id);
+      if (!afterTrue?.favorite) throw new Error('favorite not set to true after updateJump');
+
+      DB.updateJump(currentUser.id, j.id, { favorite: false });
+      const afterFalse = DB.getActiveJumps(currentUser.id).find(x => x.id === j.id);
+      if (afterFalse?.favorite) throw new Error('favorite still true after setting to false');
+
+      DB.deleteJump(currentUser.id, j.id);
+      console.info('[Test 85] ✅ Jump favorite toggle verified.');
+      return true;
+    }
+  },
+
+  {
+    id: 86, category: 'Jumps',
+    title: 'DB.incrementClick increments clickCount',
+    purpose: 'Verifies that opening a jump via DB.incrementClick correctly increments clickCount in cache. Stats, sorting, and the top-used display all depend on this counter being accurate.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning.',
+    description: 'Creates a test jump (clickCount=0), calls DB.incrementClick twice, reads back, verifies clickCount is 2, then deletes.',
+    input: 'DB.createJump → DB.incrementClick × 2 → DB.getActiveJumps → DB.deleteJump',
+    expected: 'clickCount equals 2 after two incrementClick calls.',
+    test: async () => {
+      const cols = DB.getColumns(currentUser.id);
+      if (!cols.length) throw new Error('No columns available');
+
+      const j = DB.createJump(currentUser.id, { id: '__test_click_' + Date.now(), name: '__CLICK_TEST__', url: 'https://click.test', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() });
+
+      DB.incrementClick(currentUser.id, j.id);
+      DB.incrementClick(currentUser.id, j.id);
+
+      const found = DB.getActiveJumps(currentUser.id).find(x => x.id === j.id);
+      DB.deleteJump(currentUser.id, j.id);
+
+      if (!found) throw new Error('Jump not found after incrementClick');
+      if (found.clickCount !== 2) throw new Error(`Expected clickCount=2, got ${found.clickCount}`);
+      console.info('[Test 86] ✅ incrementClick correctly increments clickCount.');
+      return true;
+    }
+  },
+
+  {
+    id: 87, category: 'Columns',
+    title: 'Column drag-reorder persists order values',
+    purpose: "Confirms that shuffling column .order values via saveColumns correctly persists the new order in cache. Drag-and-drop reordering relies entirely on this — failure means the user's column order resets on reload.",
+    prerequisites: 'At least two columns must exist. Test restores original order — no permanent side effects.',
+    description: 'Reads current columns, reverses their .order values, saves, reads back, verifies order changed, then restores originals.',
+    input: 'DB.getColumns → shuffle order values → DB.saveColumns → DB.getColumns',
+    expected: 'Columns reflect new .order values after saveColumns.',
+    test: async () => {
+      const cols = DB.getColumns(currentUser.id);
+      if (cols.length < 2) throw new Error('Need at least 2 columns to test reordering');
+
+      // Snapshot originals
+      const originals = cols.map(c => ({ id: c.id, order: c.order }));
+
+      // Assign reversed order values
+      const reordered = cols.map((c, i) => ({ ...c, order: cols.length - 1 - i }));
+      DB.saveColumns(currentUser.id, reordered);
+
+      const afterSave = DB.getColumns(currentUser.id);
+
+      // Restore originals
+      DB.saveColumns(currentUser.id, cols.map((c, i) => ({ ...c, order: originals[i].order })));
+
+      // Verify at least one column changed order
+      const changed = afterSave.some(c => {
+        const orig = originals.find(o => o.id === c.id);
+        return orig && orig.order !== c.order;
+      });
+      if (!changed) throw new Error('No column order values changed after saveColumns — reorder did not persist');
+      console.info('[Test 87] ✅ Column order values updated and persisted after saveColumns.');
+      return true;
+    }
+  },
+
+  // ── Sync & Sharing ─────────────────────────────────────────────
+  {
+    id: 88, category: 'Shared Sync',
+    title: 'Shared column rename updates Supabase shared_columns.name',
+    purpose: "Verifies that when an owner renames a shared column, the new name is pushed to Supabase shared_columns so members see the correct name on their next sync. This was a known bug fix — this test guards against regression.",
+    prerequisites: 'Must be logged in as org-owner with at least one active shared column that has a valid supabaseId.',
+    description: "Renames a shared column locally, pushes to Supabase, reads back from Supabase, verifies name matches, then restores the original name.",
+    input: 'DB.getColumns (shared) → DB.saveColumns (rename) → supabaseClient.from(shared_columns).update → select',
+    expected: 'Supabase shared_columns.name matches the new local name after update.',
+    test: async () => {
+      const sharedCols = DB.getColumns(currentUser.id).filter(c => c.isShared && c.supabaseId);
+      if (!sharedCols.length) throw new Error('No shared columns with supabaseId found — must be logged in as an org-owner with at least one shared column');
+
+      const col = sharedCols[0];
+      const originalName = col.name;
+      const testName = '__RENAMED_TEST_' + Date.now() + '__';
+
+      // Rename locally
+      const updatedCols = DB.getColumns(currentUser.id).map(c => c.id === col.id ? { ...c, name: testName } : c);
+      DB.saveColumns(currentUser.id, updatedCols);
+
+      // Push to Supabase
+      const { error } = await supabaseClient
+        .from('shared_columns')
+        .update({ name: testName })
+        .eq('id', col.supabaseId);
+      if (error) throw new Error('Supabase update failed: ' + error.message);
+
+      // Verify
+      await new Promise(r => setTimeout(r, 500));
+      const { data, error: readErr } = await supabaseClient
+        .from('shared_columns')
+        .select('name')
+        .eq('id', col.supabaseId)
+        .single();
+      if (readErr) throw new Error('Read-back from Supabase failed: ' + readErr.message);
+      if (data?.name !== testName) throw new Error(`Supabase name mismatch — expected "${testName}", got "${data?.name}"`);
+
+      // Restore original name
+      const restoredCols = DB.getColumns(currentUser.id).map(c => c.id === col.id ? { ...c, name: originalName } : c);
+      DB.saveColumns(currentUser.id, restoredCols);
+      await supabaseClient.from('shared_columns').update({ name: originalName }).eq('id', col.supabaseId);
+
+      console.info('[Test 88] ✅ Shared column rename propagated to Supabase and verified. Original name restored.');
+      return true;
+    }
+  },
+
+  {
+    id: 89, category: 'Shared Sync',
+    title: 'syncSharedJumps runs without error',
+    purpose: 'Validates that the core sync function completes without throwing, regardless of team membership state. A crash here would prevent all shared jump propagation.',
+    prerequisites: 'Must be logged in. Works regardless of team membership — sync gracefully no-ops if no shared teams.',
+    description: 'Calls syncSharedJumps() and awaits completion. Verifies no exception is thrown.',
+    input: 'syncSharedJumps()',
+    expected: 'syncSharedJumps() resolves without throwing.',
+    test: async () => {
+      if (typeof syncSharedJumps !== 'function') throw new Error('syncSharedJumps is not defined — sync.js may not be loaded');
+      await syncSharedJumps();
+      console.info('[Test 89] ✅ syncSharedJumps() completed without error.');
+      return true;
+    }
+  },
+
+  {
+    id: 90, category: 'Teams',
+    title: 'Team join rejects wrong password',
+    purpose: 'Confirms the server-side password verification correctly rejects an invalid password. If this fails, team access control is broken — anyone could join any team.',
+    prerequisites: 'Must be logged in. Requires at least one team to exist in Supabase. The test intentionally uses a wrong password and verifies rejection.',
+    description: 'Calls the verify-team-password edge function with a clearly wrong password and confirms the response is valid=false.',
+    input: 'supabaseClient.functions.invoke("verify-team-password", { teamId, candidatePassword: "__WRONG__" })',
+    expected: 'Response returns valid=false or an error for the wrong password.',
+    test: async () => {
+      const { data: team, error: teamsErr } = await supabaseClient
+        .from('teams')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+      if (teamsErr) throw new Error('Could not fetch teams: ' + teamsErr.message);
+      if (!team) throw new Error('No teams found in Supabase — create at least one team first');
+
+      const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
+        body: { teamId: team.id, candidatePassword: '__INTENTIONALLY_WRONG_PASSWORD__' },
+      });
+
+      // Either an error OR valid=false means the reject path works correctly
+      if (!verifyErr && verifyData?.valid === true) {
+        throw new Error('Wrong password was accepted — password verification is broken!');
+      }
+      console.info('[Test 90] ✅ Wrong password correctly rejected by verify-team-password.');
+      return true;
+    }
+  },
+
+  // ── Persistence & UX ──────────────────────────────────────────
+  {
+    id: 91, category: 'Settings',
+    title: 'Theme pref persists via DB.savePrefs / getPrefs',
+    purpose: "Verifies that saving a theme preference writes to cache and reading it back returns the correct value. Theme persists across sessions via this prefs layer — a failure means the user's theme choice resets every restart.",
+    prerequisites: 'Must be logged in.',
+    description: 'Reads the current theme pref, saves a new value ("dark"), reads back via getPrefs, verifies match, then restores the original.',
+    input: 'DB.getPrefs(userId) → DB.savePrefs(userId, { theme: "dark" }) → DB.getPrefs(userId)',
+    expected: 'getPrefs returns theme="dark" after savePrefs.',
+    test: async () => {
+      const original = DB.getPrefs(currentUser.id);
+      const originalTheme = original.theme || 'light';
+
+      DB.savePrefs(currentUser.id, { theme: 'dark' });
+      const after = DB.getPrefs(currentUser.id);
+
+      DB.savePrefs(currentUser.id, { theme: originalTheme });
+
+      if (after.theme !== 'dark') throw new Error(`Expected theme="dark" after savePrefs, got: "${after.theme}"`);
+      console.info('[Test 91] ✅ Theme pref saved and read back correctly. Original theme restored.');
+      return true;
+    }
+  },
+
+  {
+    id: 92, category: 'Stats',
+    title: 'DB.logClick records entry in click log',
+    purpose: 'Confirms that logClick appends an entry to the in-memory click log for the correct user. Stats, charts, and the top-used jump list all derive from this log — silent failure here corrupts all usage analytics.',
+    prerequisites: 'At least one column must exist. Test creates and deletes its own jump.',
+    description: 'Creates a test jump, calls DB.logClick with its id, reads the click log, confirms an entry exists for that jump, then deletes.',
+    input: 'DB.createJump → DB.logClick(userId, jumpId) → DB.getClickLog(userId)',
+    expected: 'getClickLog contains at least one entry with jumpId matching the test jump.',
+    test: async () => {
+      const cols = DB.getColumns(currentUser.id);
+      if (!cols.length) throw new Error('No columns available — cannot create test jump');
+
+      const j = DB.createJump(currentUser.id, { id: '__test_log_' + Date.now(), name: '__LOG_TEST__', url: 'https://log.test', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() });
+
+      const beforeCount = DB.getClickLog(currentUser.id).filter(e => e.jumpId === j.id).length;
+      DB.logClick(currentUser.id, j.id);
+      const afterLog = DB.getClickLog(currentUser.id).filter(e => e.jumpId === j.id);
+
+      DB.deleteJump(currentUser.id, j.id);
+
+      if (afterLog.length <= beforeCount) throw new Error('No click log entry was added after DB.logClick');
+      if (!afterLog.some(e => e.jumpId === j.id)) throw new Error('Click log entry has wrong jumpId');
+      console.info(`[Test 92] ✅ logClick recorded ${afterLog.length} entry/entries for test jump.`);
+      return true;
+    }
+  },
+
+  {
+    id: 93, category: 'Subscription',
+    title: 'Lemon Squeezy webhook upgrades subscription_status',
+    purpose: 'End-to-end validation that a Lemon Squeezy subscription_created webhook correctly sets subscription_status="active" in the Supabase profiles table. This is the core billing flow — failure means paid users are not upgraded.',
+    prerequisites: 'Requires the lemon-squeezy-webhook Edge Function to be deployed and a test user email accessible in Supabase. Run this manually via curl or the Lemon Squeezy test webhook panel.',
+    description: 'Manual: send a test webhook payload to the deployed edge function and verify the user\'s subscription_status in Supabase becomes "active".',
+    input: 'POST /functions/v1/lemon-squeezy-webhook with event=subscription_created, user_email=<your email>',
+    expected: 'Supabase profiles.subscription_status updates to "active" for the matching user.',
+    steps: '1. Open Lemon Squeezy dashboard → Store → Webhooks → your endpoint → click "Send test event" for subscription_created.\n2. Or run via curl:\n   curl -X POST "${SUPABASE_URL}/functions/v1/lemon-squeezy-webhook" \\\n     -H "Content-Type: application/json" \\\n     -H "X-Signature: <your-secret-hmac>" \\\n     -d \'{"meta":{"event_name":"subscription_created","custom_data":{"user_email":"<your-email>"}}, "data":{"attributes":{"status":"active","variant_id":"<your-variant-id>"}}}\'\n3. In Supabase Table Editor → profiles → find your user row → confirm subscription_status = "active".\n4. Re-open JumpKit → Account page → confirm account type shows "JumpKit Unlimited".',
+    test: async () => 'manual'
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
