@@ -61,6 +61,7 @@
             display: flex;
             min-height: 100vh;
             overflow: visible;
+            align-items: flex-start;
         }
 
         .sidebar {
@@ -70,7 +71,9 @@
             overflow-y: auto;
             padding: var(--spacing-unit) var(--spacing-unit) var(--spacing-unit) 6px;
             flex-shrink: 0;
-            position: relative;
+            position: sticky;
+            top: 0;
+            height: 100vh;
         }
 
         .sidebar::-webkit-scrollbar {
