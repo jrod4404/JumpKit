@@ -1379,7 +1379,7 @@ updated_at TIMESTAMPTZ</code></pre>
 <li><strong>organizations</strong> ↔ <strong>team_invites</strong> (pending invites stored per team)</li>
 </ul>
 <h3 id="section-5">2.4 Key Concepts &amp; Data Flows</h3>
-<h4 id="jumps-the-core-resource">2.5.1 Jumps — The Core Resource</h4>
+<h4 id="jumps-the-core-resource">2.4.1 Jumps — The Core Resource</h4>
 <p><strong>What is a jump?</strong><br/>
 A jump is a saved link (web URL or local file path) that users can click or trigger via hotkey to instantly launch it.</p>
 <p><strong>Jump Lifecycle:</strong></p>
@@ -1424,7 +1424,7 @@ const toArchive = allJumps.filter(j =&gt;
 );
 toArchive.forEach(j =&gt; DB.updateJump(userId, j.id, { isArchived: 1 }));
 addNotification({ message: \`\${toArchive.length} jumps auto-archived\` });</code></pre>
-<h4 id="columns-organization">2.5.2 Columns — Organization</h4>
+<h4 id="columns-organization">2.4.2 Columns — Organization</h4>
 <p><strong>What is a column?</strong><br/>
 A column is a category/folder that groups related jumps. Users can have up to 10 columns.</p>
 <p><strong>Column Properties:</strong></p>
@@ -1461,7 +1461,7 @@ shareColumnWithTeam(columnId, teamId);
 // 1. sync.js pulls shared_columns + shared_jumps from Supabase
 // 2. Upserts into local SQLite (same column.id from cloud)
 // 3. Jumps marked isShared=1 in UI</code></pre>
-<h4 id="teams-organizations">2.5.3 Teams &amp; Organizations</h4>
+<h4 id="teams-organizations">2.4.3 Teams &amp; Organizations</h4>
 <p><strong>Roles:</strong></p>
 <table>
 <thead>
@@ -1701,7 +1701,7 @@ else renderTeamMemberView(...);</code></pre>
 // - Rationale: gives owner chance to reupgrade and restore team structure
 // - Planned cleanup: dormant teams older than 6 months may be purged in a future job</code></pre>
 <h3 id="section-6">2.5 UI Components</h3>
-<h4 id="modal">2.6.1 Modal</h4>
+<h4 id="modal">2.4.1 Modal</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>Modal.open(
   '&lt;i class=&quot;ti ti-users&quot;&gt;&lt;/i&gt; Add Team Member',
@@ -1723,7 +1723,7 @@ Modal.close();</code></pre>
 <li>Click overlay closes</li>
 <li>Click X button closes</li>
 </ul>
-<h4 id="toast">2.6.2 Toast</h4>
+<h4 id="toast">2.4.2 Toast</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>Toast.success('Jump saved!');
 Toast.danger('Failed to save jump');</code></pre>
@@ -1734,7 +1734,7 @@ Toast.danger('Failed to save jump');</code></pre>
 <li>Icon + message centered</li>
 <li>Green for success, red for danger</li>
 </ul>
-<h4 id="ctxmenu-context-menu">2.6.3 CtxMenu (Context Menu)</h4>
+<h4 id="ctxmenu-context-menu">2.4.3 CtxMenu (Context Menu)</h4>
 <p><strong>Usage:</strong></p>
 <pre><code>CtxMenu.show(e.clientX, e.clientY, [
   { icon: '&lt;i class=&quot;ti ti-edit&quot;&gt;&lt;/i&gt;', label: 'Edit', action: () =&gt; editJump() },
@@ -1899,8 +1899,8 @@ if (navPrefs.navDefaultCollapsed) {
 
 <h3 id="section-7">2.6 IPC Handlers (main.js ↔ renderer)</h3>
 <p><strong>All IPC handlers are request-response pairs:</strong></p>
-<h4 id="jumps-ipc">2.6.1 Jumps IPC Group</h4>
-<h4 id="get-jumps">2.6.2 get-jumps</h4>
+<h4 id="jumps-ipc">2.4.1 Jumps IPC Group</h4>
+<h4 id="get-jumps">2.4.2 get-jumps</h4>
 <pre><code>// Renderer:
 const jumps = await window.electronAPI.getJumps(userId);
 
@@ -1909,7 +1909,7 @@ ipcMain.handle('get-jumps', (_e, userId) =&gt; {
   if (!db) return [];
   return db.prepare('SELECT * FROM jumps WHERE userId = ?').all(userId);
 });</code></pre>
-<h4 id="save-jump">2.6.3 save-jump</h4>
+<h4 id="save-jump">2.4.3 save-jump</h4>
 <pre><code>// Renderer:
 await window.electronAPI.saveJump(userId, jump);
 
@@ -2380,214 +2380,14 @@ localStorage.setItem('notifications', '[]');</code></pre>
 </tbody>
 </table>
 
-<h2 id="marketing-strategy">4. Marketing Strategy</h2>
-<p>This section covers how JumpKit is positioned and marketed to potential customers.</p>
+<h2 id="testing">4. Testing</h2>
 
-<h3 id="target-audience">3.1 Target Audience</h3>
-<ul>
-<li><strong>Individual knowledge workers</strong> — developers, analysts, sales reps, operations staff who navigate many web and file resources daily</li>
-<li><strong>Small to mid-size teams</strong> — teams that want to standardize their navigation stack and share jump collections</li>
-<li><strong>MSP-managed businesses</strong> — IT-managed companies in regulated industries (manufacturing, automotive, healthcare, finance) that value local-first data and audit trails</li>
-</ul>
-
-<h3 id="marketing-channels">3.2 Marketing Channels</h3>
-<ul>
-<li><strong>Online forums</strong> — Reddit (r/productivity, r/selfhosted, r/sysadmin), Hacker News, LinkedIn posts</li>
-<li><strong>Email broadcasts</strong> — Targeted outreach to productivity-focused lists</li>
-<li><strong>IT MSP Partners</strong> — Commission-based reseller program; partners earn a recurring commission for every user they sign up</li>
-<li><strong>Landing page (jumpkit.app)</strong> — SEO-optimized, showcases features, demo video, pricing, testimonials</li>
-</ul>
-
-<h3 id="distribution-model">3.3 Distribution Model</h3>
-<ul>
-<li>Free tier available immediately — users download and install with no friction</li>
-<li>Paid tier (JumpKit Core) via Lemon Squeezy checkout</li>
-<li>MSP partners earn a recurring commission on all active subscribers they refer</li>
-<li>Goal: reach passive income through partner network + organic growth by end of June 2026</li>
-</ul>
-
-<h3 id="key-messages">3.4 Key Messages</h3>
-<ul>
-<li>"Stop searching. Start jumping." — core brand tagline</li>
-<li>Quantifiable ROI — time saved and dollars recovered tracked automatically</li>
-<li>Local-first — no data leakage, works offline, your data stays yours</li>
-<li>Easy to install and use — no IT setup required for individuals</li>
-</ul>
-
-<h3 id="growth-projections">3.5 Growth Projections</h3>
-<p>5-year projections based on $10/mo or $99/yr per user (~$8.25 effective monthly with annual bias). Net revenue assumes 65% after 35% MSP revenue share.</p>
-
-<h4 id="modeling-assumptions">3.6.1 Key Modeling Assumptions</h4>
-<ul>
-<li><strong>Net revenue:</strong> 65% after 35% MSP revenue share</li>
-<li><strong>Plan mix:</strong> 60–70% annual plans (better cash flow and retention)</li>
-<li><strong>Churn:</strong> 4–8% monthly early on, improving to 3–5% with good onboarding/ROI features</li>
-<li><strong>Acquisition:</strong> Organic content on X/Reddit/LinkedIn + videos + MSP channel (accelerates Year 2+). No heavy paid ads assumed.</li>
-<li><strong>Conversion:</strong> Free to paid ~15–25% over time</li>
-<li><strong>ARPU:</strong> ~$8–9 net after discounts/churn</li>
-<li><strong>MSP contribution:</strong> ~20% of new users Year 1, growing to 50–60% by Year 3+</li>
-</ul>
-
-<h4 id="conservative-scenario">3.6.2 Conservative Scenario</h4>
-<p><em>Slow organic traction, modest MSP success, higher churn. CAGR ~60–70% early, slowing to 25–35%.</em></p>
-<table>
-<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>800–1,200</td><td>$80K–$120K</td><td>$50K–$80K</td></tr>
-<tr><td>2</td><td>2,500–3,500</td><td>$250K–$350K</td><td>$160K–$230K</td></tr>
-<tr><td>3</td><td>5,000–7,000</td><td>$500K–$700K</td><td>$325K–$450K</td></tr>
-<tr><td>4</td><td>8,000–11,000</td><td>$800K–$1.1M</td><td>$520K–$715K</td></tr>
-<tr><td>5</td><td>12,000–16,000</td><td>$1.2M–$1.6M</td><td>$780K–$1.04M</td></tr>
-</tbody>
-</table>
-
-<h4 id="realistic-scenario">3.6.3 Realistic Scenario</h4>
-<p><em>Solid content/virality, good MSP relationships. Most probable with consistent execution. CAGR ~80–100% early, then 40–60%.</em></p>
-<table>
-<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>1,500–2,500</td><td>$150K–$250K</td><td>$100K–$160K</td></tr>
-<tr><td>2</td><td>5,000–8,000</td><td>$500K–$800K</td><td>$325K–$520K</td></tr>
-<tr><td>3</td><td>12,000–18,000</td><td>$1.2M–$1.8M</td><td>$780K–$1.17M</td></tr>
-<tr><td>4</td><td>22,000–30,000</td><td>$2.2M–$3M</td><td>$1.43M–$1.95M</td></tr>
-<tr><td>5</td><td>35,000–45,000</td><td>$3.5M–$4.5M</td><td>$2.275M–$2.925M</td></tr>
-</tbody>
-</table>
-
-<h4 id="optimistic-scenario">3.5.4 Optimistic Scenario</h4>
-<p><em>Viral moments, strong product-led growth, effective MSP network. CAGR 100–150%+. Requires excellent execution and some luck.</em></p>
-<table>
-<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>4,000–6,000</td><td>$400K–$600K</td><td>$260K–$390K</td></tr>
-<tr><td>2</td><td>15,000–22,000</td><td>$1.5M–$2.2M</td><td>$975K–$1.43M</td></tr>
-<tr><td>3</td><td>35,000–50,000</td><td>$3.5M–$5M</td><td>$2.275M–$3.25M</td></tr>
-<tr><td>4</td><td>70,000–90,000</td><td>$7M–$9M</td><td>$4.55M–$5.85M</td></tr>
-<tr><td>5</td><td>120,000–150,000</td><td>$12M–$15M</td><td>$7.8M–$9.75M</td></tr>
-</tbody>
-</table>
-
-<h4 id="risks-and-levers">3.5.5 Key Risks &amp; Levers</h4>
-<ul>
-<li><strong>Conservative risks:</strong> Low visibility, high early churn, slow MSP adoption</li>
-<li><strong>Optimistic drivers:</strong> Viral demo videos, strong ROI dashboard adoption, MSPs treating JumpKit as a standard offering</li>
-<li><strong>Biggest variables:</strong> MSP partner quality/volume and content marketing consistency</li>
-<li><strong>Net margins:</strong> 40–70%+ once scaled, typical for desktop SaaS with local-first architecture</li>
-<li><strong>Bottom line (Realistic):</strong> Year 1 validates and generates $100K–$160K to you. Year 3 = comfortable full-time income. Year 5 = potentially life-changing (~$2.5M net)</li>
-</ul>
-
-<h3 id="marketing-plan">3.6 Marketing Plan</h3>
-<p>A phased organic growth plan focused on X, Reddit, LinkedIn, YouTube, and MSP channel enablement. Assumes bootstrapped/lean operation — consistency over volume.</p>
-
-<h4 id="core-strategy">3.6.1 Core Strategy Principles</h4>
-<ul>
-<li><strong>80/20 Value-First Rule:</strong> 80–90% educational/helpful content, 10–20% promotional</li>
-<li><strong>Product-Led Growth:</strong> Short demos/GIFs showing the "aha" moment (hotkey → instant jump + time saved)</li>
-<li><strong>Dual Audiences:</strong> End users (power users, IT pros, sales/ops, devs) focused on productivity/speed/privacy; MSPs &amp; decision makers focused on ROI, easy deployment, client productivity</li>
-<li><strong>Cross-Promotion:</strong> Drive traffic → landing page → free tier → paid. Track with UTM parameters.</li>
-</ul>
-
-<h4 id="platform-cadence">3.6.2 Platform & Posting Cadence</h4>
-<table>
-<thead><tr><th>Platform</th><th>Frequency</th><th>Best Content</th><th>Goals</th></tr></thead>
-<tbody>
-<tr><td><strong>LinkedIn</strong></td><td>4–7 posts/week + daily engagement</td><td>Carousels, short videos (30–60s), case studies, ROI stats, founder stories</td><td>B2B reach, MSPs, IT pros, managers</td></tr>
-<tr><td><strong>X (Twitter)</strong></td><td>5–10 posts/week + high engagement</td><td>Quick tips, before/after GIFs, threads, polls, hotkey demos</td><td>Virality, indie community, power users</td></tr>
-<tr><td><strong>Reddit</strong></td><td>3–5 quality posts/comments/week</td><td>Guides, AMAs, problem-solution posts</td><td>Qualified traffic, feedback — r/productivity, r/SaaS, r/sysadmin, r/Windows, r/macapps</td></tr>
-<tr><td><strong>YouTube</strong></td><td>1–2 videos/month (ramp to 4)</td><td>Short demos (45–90s), tutorials, "How I saved X hours"</td><td>SEO, visual proof</td></tr>
-<tr><td><strong>Email</strong></td><td>Bi-weekly</td><td>Onboarding tips, ROI reports, feature updates</td><td>Retention &amp; referrals</td></tr>
-</tbody>
-</table>
-<p><strong>Additional channels:</strong> Indie Hackers, Product Hunt (launch/relaunches), BetaList, Hacker News (occasional), relevant Discord/Slack groups.</p>
-
-<h4 id="content-pillars">3.6.3 Content Pillars</h4>
-<ul>
-<li><strong>Pain &amp; Empathy</strong> — Bookmark chaos, folder hunting, team link sharing issues</li>
-<li><strong>Quick Wins &amp; Demos</strong> — 10-second jumps, hotkey tutorials, ROI calculator examples</li>
-<li><strong>ROI &amp; Proof</strong> — User stats, time saved, team dashboards (anonymized)</li>
-<li><strong>Comparisons</strong> — "JumpKit vs Raycast/Raindrop" — highlight local-first, cross-platform, focused scope</li>
-<li><strong>Behind-the-Scenes</strong> — Roadmap, MSP partner spotlights, founder tips</li>
-<li><strong>MSP-Specific</strong> — "How MSPs Can Add $X Revenue with Productivity Tools", deployment guides</li>
-</ul>
-<p><strong>Monthly content mix:</strong> 8–10 demo/GIF posts · 4 educational threads · 2–3 case studies/testimonials · 1 AMA · 1–2 MSP-focused pieces</p>
-
-<h4 id="msp-enablement">3.6.4 MSP Partner Enablement</h4>
-<ul>
-<li>Create a <strong>Partner Portal</strong>: co-branded one-pagers, email templates, demo scripts, ROI pitch deck, deployment guides</li>
-<li>Provide ready-to-post social content for MSPs to share with clients</li>
-<li>Quarterly partner webinars: "How to Onboard Clients to JumpKit in Under 15 Minutes"</li>
-<li>MSP-specific coupons/codes for attribution tracking</li>
-</ul>
-
-<h4 id="phased-rollout">3.6.5 Phased 12-Month Rollout</h4>
-<ul>
-<li><strong>Months 1–3 (Launch &amp; Foundation):</strong> Target 1,000–3,000 users. Launch on Product Hunt + Indie Hackers. Daily engagement on X/LinkedIn. Seed Reddit with genuine value posts. Reach out to 10–20 MSPs with personalized pitches + free licenses.</li>
-<li><strong>Months 4–6 (Growth &amp; Optimization):</strong> Double down on video. Start email nurturing. Aim for 3–5 active MSP partners. Occasional giveaways or extended free trials.</li>
-<li><strong>Months 7–12 (Scale &amp; Retention):</strong> User-generated content (personal ROI shares). SEO blog (e.g., "Best Alternatives to Raycast on Windows"). MSP referral program. Community building (Discord/forum for power users).</li>
-</ul>
-
-<h4 id="execution-tips">3.6.6 Tools &amp; Execution Tips</h4>
-<ul>
-<li><strong>Scheduling:</strong> Buffer or native schedulers</li>
-<li><strong>Analytics:</strong> Google Analytics + platform insights + UTM tracking</li>
-<li><strong>Visuals:</strong> Canva for carousels; Loom/GIF for demos (strongest asset)</li>
-<li><strong>Engagement:</strong> 30–60 min/day replying — drives most organic growth</li>
-<li><strong>Budget:</strong> $0–500/mo to start (tools + occasional boosts). Organic first.</li>
-<li><strong>Always include CTA:</strong> "Try free at jumpkit.app"</li>
-<li><strong>Stay authentic:</strong> Reddit and indie audiences hate overt sales</li>
-<li><strong>Document everything:</strong> Turn user wins into content</li>
-</ul>
-
-<h3 id="competitive-landscape">3.7 Competitive Landscape</h3>
-<p>JumpKit's sweet spot is the overlap between general desktop launchers and dedicated bookmark/link managers: a desktop-native launcher focused on hyperlinks + local directories, with strong local-first storage, team sharing, and built-in time/ROI tracking.</p>
-
-<h4 id="desktop-launchers">3.7.1 Desktop Launchers (Strongest Direct Overlap)</h4>
-<ul>
-<li><strong>Raycast</strong> (Mac primary, Windows beta) — The closest premium competitor. Keyboard-driven launcher with Quicklinks for URLs/folders, extensions, snippets, and team features in Pro.</li>
-<li><strong>Alfred</strong> (Mac-only) — Long-time leader with powerful file navigation, Quicklinks/workflows, clipboard history, and actions via Powerpack.</li>
-<li><strong>LaunchBar</strong> (Mac) — Very fast for file/folder/URL actions and navigation.</li>
-<li><strong>Flow Launcher / PowerToys Run</strong> (Windows) — Fast, open-source/free launchers for apps, files, folders, and web searches.</li>
-<li><strong>Others:</strong> Ueli (cross-platform), Bookmark OS.</li>
-</ul>
-
-<h4 id="bookmark-link-managers">3.7.2 Bookmark / Link Managers</h4>
-<ul>
-<li><strong>Raindrop.io</strong> — Popular, visual, feature-rich cloud bookmark manager with collections, tags, search, and sharing. Strong on organization but web/cloud-first.</li>
-<li><strong>Toby</strong> — Focuses on saving/organizing browser tabs and links into workspaces; good for team sharing.</li>
-<li><strong>Others:</strong> Linkinize, start.me, Notion (as link database), Pocket, browser built-ins + extensions.</li>
-</ul>
-
-<h4 id="differentiation">3.7.3 Key Differentiation Opportunities</h4>
-<table>
-<thead><tr><th>Advantage</th><th>Details</th></tr></thead>
-<tbody>
-<tr><td><strong>Local-First + Privacy</strong></td><td>100% local storage by default, no mandatory cloud sync, offline-capable. "Your bookmarks and folders belong to you."</td></tr>
-<tr><td><strong>Link + Directory Specialist</strong></td><td>General launchers do many things (apps, AI, windows). JumpKit is the specialist for fast navigation to hyperlinks and project folders.</td></tr>
-<tr><td><strong>Time Saved + ROI Tracking</strong></td><td>Unique quantitative angle — dashboard shows jumps made, seconds saved, and estimated $ value. Turns a utility into a measurable productivity investment.</td></tr>
-<tr><td><strong>Team Sharing with Local Control</strong></td><td>Easy sharing of link collections while keeping core data local. Contrast with fully cloud tools like Raindrop/Toby.</td></tr>
-<tr><td><strong>Cross-Platform (Windows + Mac)</strong></td><td>Raycast is Mac-first; Alfred is Mac-only. JumpKit owns the "best cross-platform link/folder launcher" narrative.</td></tr>
-<tr><td><strong>Simpler Pricing</strong></td><td>More affordable and purpose-built vs. Raycast Pro or Alfred Powerpack. No bloat.</td></tr>
-</tbody>
-</table>
-
-<h4 id="recommended-positioning">3.7.4 Recommended Positioning & Messaging</h4>
-<ul>
-<li><strong>Hero/Tagline:</strong> "The fastest way to jump to your links and project folders — local, private, and measurable."</li>
-<li><strong>Vs. Raycast/Alfred:</strong> "Why use a Swiss Army knife when you need a precision launcher for your daily resources?"</li>
-<li><strong>Vs. Raindrop/Toby:</strong> "Cloud bookmark managers are great until you want instant desktop access and full data ownership."</li>
-<li><strong>Landing page action item:</strong> Add a comparison table showing local storage, desktop hotkeys, ROI dashboard, Windows+Mac support, and pricing vs. competitors.</li>
-<li><strong>Visual action item:</strong> Add screenshots/GIFs showing hotkey → search → jump flow to make differentiation tangible.</li>
-<li><strong>Test messaging:</strong> "Local-first productivity" — growing trend that resonates with privacy-conscious users and enterprises.</li>
-</ul>
-
-<h2 id="testing">5. Testing</h2>
-
-<h3 id="testing-overview">5.1 Overview</h3>
+<h3 id="testing-overview">4.1 Overview</h3>
 <p>JumpKit includes a built-in unit test suite accessible from the <strong>Testing</strong> page in the app. Tests cover core app functionality, security, database integrity, deployment checks, and code quality. Tests are written in vanilla JS and run directly in the Electron renderer process — no external test runner required.</p>
 <p>To run tests: open the app → navigate to <strong>Testing</strong> in the sidebar → click <strong>Run All Tests</strong> or run individual tests by category.</p>
 <p><strong>Current total: 93 tests</strong> across 9 categories.</p>
 
-<h3 id="testing-unit-tests">5.2 Unit Test Summary</h3>
+<h3 id="testing-unit-tests">4.2 Unit Test Summary</h3>
 <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px">
 <thead>
 <tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
@@ -2694,7 +2494,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
 </tbody>
 </table>
 
-<h3 id="testing-user-accounts">5.3 Test Users &amp; Teams</h3>
+<h3 id="testing-user-accounts">4.3 Test Users &amp; Teams</h3>
 <p>The following accounts and teams are used for manual and automated testing. <strong>Do not use these credentials in production or share publicly.</strong></p>
 
 <h4 id="test-users">Test User Accounts</h4>
@@ -2770,9 +2570,9 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <li>To reset a team password: log in as org-owner → Teams → click the 🔒 lock icon next to the team.</li>
 </ul>
 
-<h2 id="deployment">6. Deployment</h2>
+<h2 id="deployment">5. Deployment</h2>
 
-<h3 id="deployment-landing">6.1 Landing Page</h3>
+<h3 id="deployment-landing">4.1 Landing Page</h3>
 
 <h4 id="deployment-landing-overview">Overview</h4>
 <p>The JumpKit landing page is hosted on <strong>Vercel</strong> and served at <a href="https://jumpkit.app" target="_blank">https://jumpkit.app</a>. The landing page source lives in a subdirectory of the main GitHub repo.</p>
@@ -2830,7 +2630,7 @@ vercel --prod</code></pre>
 </tbody>
 </table>
 
-<h3 id="deployment-edge-functions">6.2 Supabase Edge Functions</h3>
+<h3 id="deployment-edge-functions">4.2 Supabase Edge Functions</h3>
 
 <p>JumpKit uses Supabase Edge Functions (Deno runtime) for server-side operations. All functions are deployed to the Supabase project <code>iuexwdjnqfidcwvwbgwr</code>.</p>
 
@@ -2913,7 +2713,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </tbody>
 </table>
 
-<h3 id="release-protocol">6.3 Release Protocol</h3>
+<h3 id="release-protocol">4.3 Release Protocol</h3>
 <p>Standard checklist to follow before publishing any new version of JumpKit. Complete every phase in order before uploading installers or announcing to users.</p>
 
 <h4 id="release-phase-1">Phase 1 — Code Freeze &amp; Testing</h4>
@@ -3000,7 +2800,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </tbody>
 </table>
 
-<h2 id="paid-services">7. Paid Services &amp; Subscriptions</h2>
+<h2 id="paid-services">6. Paid Services &amp; Subscriptions</h2>
 <p>The following table tracks all recurring paid services used by JumpKit.</p>
 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
   <thead>
@@ -3098,7 +2898,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </table>
 <p style="color:var(--text-muted);font-size:0.85rem">💡 <strong>Monthly burn rate:</strong> ~$29/month (Supabase Pro $25 + Proton Mail Plus ~$4, as of 2026-05-25). Domain costs TBD at renewal. Apple Developer Program: $99/yr (not yet enrolled).</p>
 
-<h2 id="tier-matrix">8. Tier Limits &amp; Sharing Matrix</h2>
+<h2 id="tier-matrix">7. Tier Limits &amp; Sharing Matrix</h2>
 <p>The table below captures all enforced combinations between JumpKit Core and Free tiers. Use it as the single source of truth when updating paywall logic, onboarding copy, or support docs.</p>
 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
   <thead>
@@ -3157,7 +2957,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   </tbody>
 </table>
 
-<h2 id="onboarding">9. User Onboarding</h2>
+<h2 id="onboarding">8. User Onboarding</h2>
 
 <h3>Overview</h3>
 <p>New users are guided through a 3-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
@@ -3189,6 +2989,206 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <li>Spinner: CSS <code>@keyframes ob-spin</code> injected once into <code>&lt;head&gt;</code> at runtime (1.4s rotation)</li>
 <li>No localStorage used — all state tracked server-side via Supabase <code>profiles</code> table</li>
 <li>Styling uses existing CSS variables (<code>var(--bg-card)</code>, <code>var(--text)</code>, etc.) so it works in both light and dark mode</li>
+</ul>
+
+<h2 id="marketing-strategy">9. Marketing Strategy</h2>
+<p>This section covers how JumpKit is positioned and marketed to potential customers.</p>
+
+<h3 id="target-audience">3.1 Target Audience</h3>
+<ul>
+<li><strong>Individual knowledge workers</strong> — developers, analysts, sales reps, operations staff who navigate many web and file resources daily</li>
+<li><strong>Small to mid-size teams</strong> — teams that want to standardize their navigation stack and share jump collections</li>
+<li><strong>MSP-managed businesses</strong> — IT-managed companies in regulated industries (manufacturing, automotive, healthcare, finance) that value local-first data and audit trails</li>
+</ul>
+
+<h3 id="marketing-channels">3.2 Marketing Channels</h3>
+<ul>
+<li><strong>Online forums</strong> — Reddit (r/productivity, r/selfhosted, r/sysadmin), Hacker News, LinkedIn posts</li>
+<li><strong>Email broadcasts</strong> — Targeted outreach to productivity-focused lists</li>
+<li><strong>IT MSP Partners</strong> — Commission-based reseller program; partners earn a recurring commission for every user they sign up</li>
+<li><strong>Landing page (jumpkit.app)</strong> — SEO-optimized, showcases features, demo video, pricing, testimonials</li>
+</ul>
+
+<h3 id="distribution-model">3.3 Distribution Model</h3>
+<ul>
+<li>Free tier available immediately — users download and install with no friction</li>
+<li>Paid tier (JumpKit Core) via Lemon Squeezy checkout</li>
+<li>MSP partners earn a recurring commission on all active subscribers they refer</li>
+<li>Goal: reach passive income through partner network + organic growth by end of June 2026</li>
+</ul>
+
+<h3 id="key-messages">3.4 Key Messages</h3>
+<ul>
+<li>"Stop searching. Start jumping." — core brand tagline</li>
+<li>Quantifiable ROI — time saved and dollars recovered tracked automatically</li>
+<li>Local-first — no data leakage, works offline, your data stays yours</li>
+<li>Easy to install and use — no IT setup required for individuals</li>
+</ul>
+
+<h3 id="growth-projections">3.5 Growth Projections</h3>
+<p>5-year projections based on $10/mo or $99/yr per user (~$8.25 effective monthly with annual bias). Net revenue assumes 65% after 35% MSP revenue share.</p>
+
+<h4 id="modeling-assumptions">3.4.1 Key Modeling Assumptions</h4>
+<ul>
+<li><strong>Net revenue:</strong> 65% after 35% MSP revenue share</li>
+<li><strong>Plan mix:</strong> 60–70% annual plans (better cash flow and retention)</li>
+<li><strong>Churn:</strong> 4–8% monthly early on, improving to 3–5% with good onboarding/ROI features</li>
+<li><strong>Acquisition:</strong> Organic content on X/Reddit/LinkedIn + videos + MSP channel (accelerates Year 2+). No heavy paid ads assumed.</li>
+<li><strong>Conversion:</strong> Free to paid ~15–25% over time</li>
+<li><strong>ARPU:</strong> ~$8–9 net after discounts/churn</li>
+<li><strong>MSP contribution:</strong> ~20% of new users Year 1, growing to 50–60% by Year 3+</li>
+</ul>
+
+<h4 id="conservative-scenario">3.4.2 Conservative Scenario</h4>
+<p><em>Slow organic traction, modest MSP success, higher churn. CAGR ~60–70% early, slowing to 25–35%.</em></p>
+<table>
+<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>800–1,200</td><td>$80K–$120K</td><td>$50K–$80K</td></tr>
+<tr><td>2</td><td>2,500–3,500</td><td>$250K–$350K</td><td>$160K–$230K</td></tr>
+<tr><td>3</td><td>5,000–7,000</td><td>$500K–$700K</td><td>$325K–$450K</td></tr>
+<tr><td>4</td><td>8,000–11,000</td><td>$800K–$1.1M</td><td>$520K–$715K</td></tr>
+<tr><td>5</td><td>12,000–16,000</td><td>$1.2M–$1.6M</td><td>$780K–$1.04M</td></tr>
+</tbody>
+</table>
+
+<h4 id="realistic-scenario">3.4.3 Realistic Scenario</h4>
+<p><em>Solid content/virality, good MSP relationships. Most probable with consistent execution. CAGR ~80–100% early, then 40–60%.</em></p>
+<table>
+<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>1,500–2,500</td><td>$150K–$250K</td><td>$100K–$160K</td></tr>
+<tr><td>2</td><td>5,000–8,000</td><td>$500K–$800K</td><td>$325K–$520K</td></tr>
+<tr><td>3</td><td>12,000–18,000</td><td>$1.2M–$1.8M</td><td>$780K–$1.17M</td></tr>
+<tr><td>4</td><td>22,000–30,000</td><td>$2.2M–$3M</td><td>$1.43M–$1.95M</td></tr>
+<tr><td>5</td><td>35,000–45,000</td><td>$3.5M–$4.5M</td><td>$2.275M–$2.925M</td></tr>
+</tbody>
+</table>
+
+<h4 id="optimistic-scenario">3.5.4 Optimistic Scenario</h4>
+<p><em>Viral moments, strong product-led growth, effective MSP network. CAGR 100–150%+. Requires excellent execution and some luck.</em></p>
+<table>
+<thead><tr><th>Year</th><th>Paying Users</th><th>Gross ARR</th><th>Your Net Revenue</th></tr></thead>
+<tbody>
+<tr><td>1</td><td>4,000–6,000</td><td>$400K–$600K</td><td>$260K–$390K</td></tr>
+<tr><td>2</td><td>15,000–22,000</td><td>$1.5M–$2.2M</td><td>$975K–$1.43M</td></tr>
+<tr><td>3</td><td>35,000–50,000</td><td>$3.5M–$5M</td><td>$2.275M–$3.25M</td></tr>
+<tr><td>4</td><td>70,000–90,000</td><td>$7M–$9M</td><td>$4.55M–$5.85M</td></tr>
+<tr><td>5</td><td>120,000–150,000</td><td>$12M–$15M</td><td>$7.8M–$9.75M</td></tr>
+</tbody>
+</table>
+
+<h4 id="risks-and-levers">3.5.5 Key Risks &amp; Levers</h4>
+<ul>
+<li><strong>Conservative risks:</strong> Low visibility, high early churn, slow MSP adoption</li>
+<li><strong>Optimistic drivers:</strong> Viral demo videos, strong ROI dashboard adoption, MSPs treating JumpKit as a standard offering</li>
+<li><strong>Biggest variables:</strong> MSP partner quality/volume and content marketing consistency</li>
+<li><strong>Net margins:</strong> 40–70%+ once scaled, typical for desktop SaaS with local-first architecture</li>
+<li><strong>Bottom line (Realistic):</strong> Year 1 validates and generates $100K–$160K to you. Year 3 = comfortable full-time income. Year 5 = potentially life-changing (~$2.5M net)</li>
+</ul>
+
+<h3 id="marketing-plan">3.6 Marketing Plan</h3>
+<p>A phased organic growth plan focused on X, Reddit, LinkedIn, YouTube, and MSP channel enablement. Assumes bootstrapped/lean operation — consistency over volume.</p>
+
+<h4 id="core-strategy">3.4.1 Core Strategy Principles</h4>
+<ul>
+<li><strong>80/20 Value-First Rule:</strong> 80–90% educational/helpful content, 10–20% promotional</li>
+<li><strong>Product-Led Growth:</strong> Short demos/GIFs showing the "aha" moment (hotkey → instant jump + time saved)</li>
+<li><strong>Dual Audiences:</strong> End users (power users, IT pros, sales/ops, devs) focused on productivity/speed/privacy; MSPs &amp; decision makers focused on ROI, easy deployment, client productivity</li>
+<li><strong>Cross-Promotion:</strong> Drive traffic → landing page → free tier → paid. Track with UTM parameters.</li>
+</ul>
+
+<h4 id="platform-cadence">3.4.2 Platform & Posting Cadence</h4>
+<table>
+<thead><tr><th>Platform</th><th>Frequency</th><th>Best Content</th><th>Goals</th></tr></thead>
+<tbody>
+<tr><td><strong>LinkedIn</strong></td><td>4–7 posts/week + daily engagement</td><td>Carousels, short videos (30–60s), case studies, ROI stats, founder stories</td><td>B2B reach, MSPs, IT pros, managers</td></tr>
+<tr><td><strong>X (Twitter)</strong></td><td>5–10 posts/week + high engagement</td><td>Quick tips, before/after GIFs, threads, polls, hotkey demos</td><td>Virality, indie community, power users</td></tr>
+<tr><td><strong>Reddit</strong></td><td>3–5 quality posts/comments/week</td><td>Guides, AMAs, problem-solution posts</td><td>Qualified traffic, feedback — r/productivity, r/SaaS, r/sysadmin, r/Windows, r/macapps</td></tr>
+<tr><td><strong>YouTube</strong></td><td>1–2 videos/month (ramp to 4)</td><td>Short demos (45–90s), tutorials, "How I saved X hours"</td><td>SEO, visual proof</td></tr>
+<tr><td><strong>Email</strong></td><td>Bi-weekly</td><td>Onboarding tips, ROI reports, feature updates</td><td>Retention &amp; referrals</td></tr>
+</tbody>
+</table>
+<p><strong>Additional channels:</strong> Indie Hackers, Product Hunt (launch/relaunches), BetaList, Hacker News (occasional), relevant Discord/Slack groups.</p>
+
+<h4 id="content-pillars">3.4.3 Content Pillars</h4>
+<ul>
+<li><strong>Pain &amp; Empathy</strong> — Bookmark chaos, folder hunting, team link sharing issues</li>
+<li><strong>Quick Wins &amp; Demos</strong> — 10-second jumps, hotkey tutorials, ROI calculator examples</li>
+<li><strong>ROI &amp; Proof</strong> — User stats, time saved, team dashboards (anonymized)</li>
+<li><strong>Comparisons</strong> — "JumpKit vs Raycast/Raindrop" — highlight local-first, cross-platform, focused scope</li>
+<li><strong>Behind-the-Scenes</strong> — Roadmap, MSP partner spotlights, founder tips</li>
+<li><strong>MSP-Specific</strong> — "How MSPs Can Add $X Revenue with Productivity Tools", deployment guides</li>
+</ul>
+<p><strong>Monthly content mix:</strong> 8–10 demo/GIF posts · 4 educational threads · 2–3 case studies/testimonials · 1 AMA · 1–2 MSP-focused pieces</p>
+
+<h4 id="msp-enablement">3.6.4 MSP Partner Enablement</h4>
+<ul>
+<li>Create a <strong>Partner Portal</strong>: co-branded one-pagers, email templates, demo scripts, ROI pitch deck, deployment guides</li>
+<li>Provide ready-to-post social content for MSPs to share with clients</li>
+<li>Quarterly partner webinars: "How to Onboard Clients to JumpKit in Under 15 Minutes"</li>
+<li>MSP-specific coupons/codes for attribution tracking</li>
+</ul>
+
+<h4 id="phased-rollout">3.6.5 Phased 12-Month Rollout</h4>
+<ul>
+<li><strong>Months 1–3 (Launch &amp; Foundation):</strong> Target 1,000–3,000 users. Launch on Product Hunt + Indie Hackers. Daily engagement on X/LinkedIn. Seed Reddit with genuine value posts. Reach out to 10–20 MSPs with personalized pitches + free licenses.</li>
+<li><strong>Months 4–6 (Growth &amp; Optimization):</strong> Double down on video. Start email nurturing. Aim for 3–5 active MSP partners. Occasional giveaways or extended free trials.</li>
+<li><strong>Months 7–12 (Scale &amp; Retention):</strong> User-generated content (personal ROI shares). SEO blog (e.g., "Best Alternatives to Raycast on Windows"). MSP referral program. Community building (Discord/forum for power users).</li>
+</ul>
+
+<h4 id="execution-tips">3.6.6 Tools &amp; Execution Tips</h4>
+<ul>
+<li><strong>Scheduling:</strong> Buffer or native schedulers</li>
+<li><strong>Analytics:</strong> Google Analytics + platform insights + UTM tracking</li>
+<li><strong>Visuals:</strong> Canva for carousels; Loom/GIF for demos (strongest asset)</li>
+<li><strong>Engagement:</strong> 30–60 min/day replying — drives most organic growth</li>
+<li><strong>Budget:</strong> $0–500/mo to start (tools + occasional boosts). Organic first.</li>
+<li><strong>Always include CTA:</strong> "Try free at jumpkit.app"</li>
+<li><strong>Stay authentic:</strong> Reddit and indie audiences hate overt sales</li>
+<li><strong>Document everything:</strong> Turn user wins into content</li>
+</ul>
+
+<h3 id="competitive-landscape">3.7 Competitive Landscape</h3>
+<p>JumpKit's sweet spot is the overlap between general desktop launchers and dedicated bookmark/link managers: a desktop-native launcher focused on hyperlinks + local directories, with strong local-first storage, team sharing, and built-in time/ROI tracking.</p>
+
+<h4 id="desktop-launchers">3.7.1 Desktop Launchers (Strongest Direct Overlap)</h4>
+<ul>
+<li><strong>Raycast</strong> (Mac primary, Windows beta) — The closest premium competitor. Keyboard-driven launcher with Quicklinks for URLs/folders, extensions, snippets, and team features in Pro.</li>
+<li><strong>Alfred</strong> (Mac-only) — Long-time leader with powerful file navigation, Quicklinks/workflows, clipboard history, and actions via Powerpack.</li>
+<li><strong>LaunchBar</strong> (Mac) — Very fast for file/folder/URL actions and navigation.</li>
+<li><strong>Flow Launcher / PowerToys Run</strong> (Windows) — Fast, open-source/free launchers for apps, files, folders, and web searches.</li>
+<li><strong>Others:</strong> Ueli (cross-platform), Bookmark OS.</li>
+</ul>
+
+<h4 id="bookmark-link-managers">3.7.2 Bookmark / Link Managers</h4>
+<ul>
+<li><strong>Raindrop.io</strong> — Popular, visual, feature-rich cloud bookmark manager with collections, tags, search, and sharing. Strong on organization but web/cloud-first.</li>
+<li><strong>Toby</strong> — Focuses on saving/organizing browser tabs and links into workspaces; good for team sharing.</li>
+<li><strong>Others:</strong> Linkinize, start.me, Notion (as link database), Pocket, browser built-ins + extensions.</li>
+</ul>
+
+<h4 id="differentiation">3.7.3 Key Differentiation Opportunities</h4>
+<table>
+<thead><tr><th>Advantage</th><th>Details</th></tr></thead>
+<tbody>
+<tr><td><strong>Local-First + Privacy</strong></td><td>100% local storage by default, no mandatory cloud sync, offline-capable. "Your bookmarks and folders belong to you."</td></tr>
+<tr><td><strong>Link + Directory Specialist</strong></td><td>General launchers do many things (apps, AI, windows). JumpKit is the specialist for fast navigation to hyperlinks and project folders.</td></tr>
+<tr><td><strong>Time Saved + ROI Tracking</strong></td><td>Unique quantitative angle — dashboard shows jumps made, seconds saved, and estimated $ value. Turns a utility into a measurable productivity investment.</td></tr>
+<tr><td><strong>Team Sharing with Local Control</strong></td><td>Easy sharing of link collections while keeping core data local. Contrast with fully cloud tools like Raindrop/Toby.</td></tr>
+<tr><td><strong>Cross-Platform (Windows + Mac)</strong></td><td>Raycast is Mac-first; Alfred is Mac-only. JumpKit owns the "best cross-platform link/folder launcher" narrative.</td></tr>
+<tr><td><strong>Simpler Pricing</strong></td><td>More affordable and purpose-built vs. Raycast Pro or Alfred Powerpack. No bloat.</td></tr>
+</tbody>
+</table>
+
+<h4 id="recommended-positioning">3.7.4 Recommended Positioning & Messaging</h4>
+<ul>
+<li><strong>Hero/Tagline:</strong> "The fastest way to jump to your links and project folders — local, private, and measurable."</li>
+<li><strong>Vs. Raycast/Alfred:</strong> "Why use a Swiss Army knife when you need a precision launcher for your daily resources?"</li>
+<li><strong>Vs. Raindrop/Toby:</strong> "Cloud bookmark managers are great until you want instant desktop access and full data ownership."</li>
+<li><strong>Landing page action item:</strong> Add a comparison table showing local storage, desktop hotkeys, ROI dashboard, Windows+Mac support, and pricing vs. competitors.</li>
+<li><strong>Visual action item:</strong> Add screenshots/GIFs showing hotkey → search → jump flow to make differentiation tangible.</li>
+<li><strong>Test messaging:</strong> "Local-first productivity" — growing trend that resonates with privacy-conscious users and enterprises.</li>
 </ul>
 
 <h2 id="conclusion">10. Conclusion</h2>
@@ -3417,7 +3417,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <li><strong>Shared Jump Sync (5 scenarios):</strong> New jump added to shared column → inserted to Supabase. Edited jump in shared column → updated in Supabase. Jump moved INTO shared column → inserted. Jump moved OUT of shared column → deleted from Supabase. Jump deleted from shared column → deleted from Supabase.</li>
 <li><strong>Share Column Fix:</strong> Fixed <code>currentUser.id</code> mismatch in <code>syncColumnToSupabase</code> — now uses <code>session.user.id</code> directly to fetch jumps for sharing.</li>
 <li><strong>Account Page:</strong> Card width increased 25% (640→800px). Tab bar aligned to match.</li>
-<li><strong>Docs:</strong> Added Section 6.2 — Supabase Edge Functions (all 4 functions, secrets, deploy commands). Added test users/teams table entries for <code>support@jumpkit.ai</code> and <code>E2E-Test-Team</code>. Landing page deployment notes (Section 5.1) added.</li>
+<li><strong>Docs:</strong> Added Section 4.2 — Supabase Edge Functions (all 4 functions, secrets, deploy commands). Added test users/teams table entries for <code>support@jumpkit.ai</code> and <code>E2E-Test-Team</code>. Landing page deployment notes (Section 5.1) added.</li>
 <li><strong>Vercel Deploy:</strong> Switched to CLI-based deploy (<code>vercel --prod</code>) after git webhook proved unreliable. Root Directory must be blank in Vercel settings.</li>
 </ul>
 
