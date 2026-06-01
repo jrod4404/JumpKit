@@ -566,7 +566,7 @@
     </style>
 </head>
 <body>
-<div id="version-banner" style="background:#e63946;color:#fff;text-align:center;padding:10px;font-weight:700;font-size:1rem;letter-spacing:0.5px">✅ UPDATED — Includes Section 12: Release Protocol + 93 tests — Jun 1 2026</div>
+<div id="version-banner" style="background:#e63946;color:#fff;text-align:center;padding:10px;font-weight:700;font-size:1rem;letter-spacing:0.5px">✅ UPDATED — Release Protocol now at Section 5.3 — Jun 1 2026</div>
     <div class="container">
         <!-- Sidebar with TOC -->
         <aside class="sidebar">
@@ -2799,6 +2799,93 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </tbody>
 </table>
 
+<h3 id="release-protocol">5.3 Release Protocol</h3>
+<p>Standard checklist to follow before publishing any new version of JumpKit. Complete every phase in order before uploading installers or announcing to users.</p>
+
+<h4 id="release-phase-1">Phase 1 — Code Freeze &amp; Testing</h4>
+<ul>
+  <li>Run the full unit test suite (Testing page in-app) — <strong>all 93 tests must pass or be manually verified</strong></li>
+  <li>Manual smoke test: log in, create/edit/delete a jump, open a jump, archive a jump, visit every page</li>
+  <li>Test on <strong>both platforms</strong> — macOS DMG and Windows EXE</li>
+  <li>Complete Test 93 manually: verify Lemon Squeezy webhook → Supabase subscription upgrade end-to-end</li>
+  <li>Test the team invite + join flow with a second account</li>
+</ul>
+
+<h4 id="release-phase-2">Phase 2 — Version &amp; Build</h4>
+<ul>
+  <li>Bump the version in <code>package.json</code> — follow semver: <code>patch</code> for bug fixes, <code>minor</code> for new features, <code>major</code> for breaking changes</li>
+  <li>Confirm the version number appears correctly in the Account page or About screen inside the app</li>
+  <li>Run a clean build: <code>npm run build</code> / <code>electron-builder</code> for both macOS and Windows targets</li>
+  <li>Verify installer file sizes look reasonable — an unusually small file indicates missing assets</li>
+</ul>
+
+<h4 id="release-phase-3">Phase 3 — Git Hygiene</h4>
+<ul>
+  <li>All changes committed and pushed to <code>main</code> on <code>jrod4404/JumpKit</code></li>
+  <li>Tag the release commit: <code>git tag v1.x.x &amp;&amp; git push --tags</code></li>
+  <li>Write a short changelog entry — add it to Section 11 (Changelog) in this doc</li>
+</ul>
+
+<h4 id="release-phase-4">Phase 4 — Deploy Installers</h4>
+<ul>
+  <li>Upload new <code>.dmg</code> + <code>.exe</code> to <code>jrod4404/jumpkit-releases</code> as a <strong>new GitHub Release</strong> — do not overwrite the previous release; keep old versions for existing users</li>
+  <li>Update landing page download button URLs to point to the new version</li>
+  <li>Verify both download links work from the live landing page</li>
+</ul>
+
+<h4 id="release-phase-5">Phase 5 — Backend Check</h4>
+<ul>
+  <li>Confirm all Supabase Edge Functions are deployed and returning healthy responses</li>
+  <li>If any DB schema changed: run migrations in production and verify no data loss</li>
+  <li>Spot-check key Supabase tables: <code>profiles</code>, <code>teams</code>, <code>shared_columns</code>, <code>shared_jumps</code></li>
+</ul>
+
+<h4 id="release-phase-6">Phase 6 — Landing Page QA</h4>
+<ul>
+  <li>Visit the live landing page — check pricing copy, download buttons, no broken images or layout issues</li>
+  <li>Test on mobile viewport</li>
+  <li>Confirm pricing tier names match in-app labels: <strong>JumpKit Free</strong> and <strong>JumpKit Unlimited</strong></li>
+</ul>
+
+<h4 id="release-phase-7">Phase 7 — Announce</h4>
+<ul>
+  <li>Post in target communities (Reddit, Indie Hackers, relevant forums)</li>
+  <li>Send release email to the subscriber list</li>
+  <li>Notify any MSP partners who earn commission on signups</li>
+  <li>Update <code>JUMPKIT_DOCS.html</code> with new test count and any new sections added this release</li>
+</ul>
+
+<h4 id="release-checklist">Release Checklist — Quick Reference</h4>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
+<thead>
+<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
+  <th style="text-align:left;padding:8px 10px;color:#50CACC;white-space:nowrap">#</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Phase</th>
+  <th style="text-align:left;padding:8px 10px;color:#50CACC">Step</th>
+</tr>
+</thead>
+<tbody>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">1</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">All 93 unit tests pass (zero failures)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">2</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Manual smoke test on macOS + Windows</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">3</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Lemon Squeezy webhook end-to-end (Test 93)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">4</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Team invite + join flow with second account</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">5</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Version bumped in package.json (semver)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">6</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Version visible in app Account page</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">7</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Clean build — macOS + Windows targets</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">8</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">All changes committed + pushed to main</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">9</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Release tagged: git tag v1.x.x + push</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">10</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Changelog entry written in Section 11</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">11</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">New GitHub Release in jumpkit-releases (don't overwrite old)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">12</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">Landing page download URLs updated + verified</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">13</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">Edge Functions deployed and healthy</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">14</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">DB migrations applied (if any schema changes)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">15</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Live landing page QA — desktop + mobile</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">16</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Pricing names match in-app (JumpKit Free / JumpKit Unlimited)</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">17</td><td style="padding:5px 10px">Announce</td><td style="padding:5px 10px">Community posts + email list + MSP partners notified</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">18</td><td style="padding:5px 10px">Docs</td><td style="padding:5px 10px">JUMPKIT_DOCS.html updated with new test count + sections</td></tr>
+</tbody>
+</table>
+
 <h2 id="paid-services">6. Paid Services &amp; Subscriptions</h2>
 <p>The following table tracks all recurring paid services used by JumpKit.</p>
 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
@@ -3367,92 +3454,6 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <li><strong>Landing Page — CTA:</strong> Updated to post-launch copy ("Start jumping today", "Get Early Access").</li>
 <li><strong>Landing Page — Nav:</strong> Desktop nav buttons full-width and centered.</li>
 </ul>
-<h2 id="release-protocol">12. Release Protocol</h2>
-<p>Standard checklist to follow before publishing any new version of JumpKit. Complete every phase in order before uploading installers or announcing to users.</p>
-
-<h3 id="release-phase-1">Phase 1 — Code Freeze &amp; Testing</h3>
-<ul>
-  <li>Run the full unit test suite (Testing page in-app) — <strong>all 93 tests must pass or be manually verified</strong></li>
-  <li>Manual smoke test: log in, create/edit/delete a jump, open a jump, archive a jump, visit every page</li>
-  <li>Test on <strong>both platforms</strong> — macOS DMG and Windows EXE</li>
-  <li>Complete Test 93 manually: verify Lemon Squeezy webhook → Supabase subscription upgrade end-to-end</li>
-  <li>Test the team invite + join flow with a second account</li>
-</ul>
-
-<h3 id="release-phase-2">Phase 2 — Version &amp; Build</h3>
-<ul>
-  <li>Bump the version in <code>package.json</code> — follow semver: <code>patch</code> for bug fixes, <code>minor</code> for new features, <code>major</code> for breaking changes</li>
-  <li>Confirm the version number appears correctly in the Account page or About screen inside the app</li>
-  <li>Run a clean build: <code>npm run build</code> / <code>electron-builder</code> for both macOS and Windows targets</li>
-  <li>Verify installer file sizes look reasonable — an unusually small file indicates missing assets</li>
-</ul>
-
-<h3 id="release-phase-3">Phase 3 — Git Hygiene</h3>
-<ul>
-  <li>All changes committed and pushed to <code>main</code> on <code>jrod4404/JumpKit</code></li>
-  <li>Tag the release commit: <code>git tag v1.x.x &amp;&amp; git push --tags</code></li>
-  <li>Write a short changelog entry — add it to Section 11 (Changelog) in this doc</li>
-</ul>
-
-<h3 id="release-phase-4">Phase 4 — Deploy Installers</h3>
-<ul>
-  <li>Upload new <code>.dmg</code> + <code>.exe</code> to <code>jrod4404/jumpkit-releases</code> as a <strong>new GitHub Release</strong> — do not overwrite the previous release; keep old versions for existing users</li>
-  <li>Update landing page download button URLs to point to the new version</li>
-  <li>Verify both download links work from the live landing page</li>
-</ul>
-
-<h3 id="release-phase-5">Phase 5 — Backend Check</h3>
-<ul>
-  <li>Confirm all Supabase Edge Functions are deployed and returning healthy responses</li>
-  <li>If any DB schema changed: run migrations in production and verify no data loss</li>
-  <li>Spot-check key Supabase tables: <code>profiles</code>, <code>teams</code>, <code>shared_columns</code>, <code>shared_jumps</code></li>
-</ul>
-
-<h3 id="release-phase-6">Phase 6 — Landing Page QA</h3>
-<ul>
-  <li>Visit the live landing page — check pricing copy, download buttons, no broken images or layout issues</li>
-  <li>Test on mobile viewport</li>
-  <li>Confirm pricing tier names match in-app labels: <strong>JumpKit Free</strong> and <strong>JumpKit Unlimited</strong></li>
-</ul>
-
-<h3 id="release-phase-7">Phase 7 — Announce</h3>
-<ul>
-  <li>Post in target communities (Reddit, Indie Hackers, relevant forums)</li>
-  <li>Send release email to the subscriber list</li>
-  <li>Notify any MSP partners who earn commission on signups</li>
-  <li>Update <code>JUMPKIT_DOCS.html</code> with new test count and any new sections added this release</li>
-</ul>
-
-<h3 id="release-checklist">Release Checklist — Quick Reference</h3>
-<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-top:12px">
-<thead>
-<tr style="border-bottom:2px solid var(--border);background:rgba(0,194,199,0.07)">
-  <th style="text-align:left;padding:8px 10px;color:#50CACC;white-space:nowrap">#</th>
-  <th style="text-align:left;padding:8px 10px;color:#50CACC">Phase</th>
-  <th style="text-align:left;padding:8px 10px;color:#50CACC">Step</th>
-</tr>
-</thead>
-<tbody>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">1</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">All 93 unit tests pass (zero failures)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">2</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Manual smoke test on macOS + Windows</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">3</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Lemon Squeezy webhook end-to-end (Test 93)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">4</td><td style="padding:5px 10px">Testing</td><td style="padding:5px 10px">Team invite + join flow with second account</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">5</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Version bumped in package.json (semver)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">6</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Version visible in app Account page</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">7</td><td style="padding:5px 10px">Build</td><td style="padding:5px 10px">Clean build — macOS + Windows targets</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">8</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">All changes committed + pushed to main</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">9</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Release tagged: git tag v1.x.x + push</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">10</td><td style="padding:5px 10px">Git</td><td style="padding:5px 10px">Changelog entry written in Section 11</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">11</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">New GitHub Release in jumpkit-releases (don't overwrite old)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">12</td><td style="padding:5px 10px">Deploy</td><td style="padding:5px 10px">Landing page download URLs updated + verified</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">13</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">Edge Functions deployed and healthy</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">14</td><td style="padding:5px 10px">Backend</td><td style="padding:5px 10px">DB migrations applied (if any schema changes)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">15</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Live landing page QA — desktop + mobile</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">16</td><td style="padding:5px 10px">Landing</td><td style="padding:5px 10px">Pricing names match in-app (JumpKit Free / JumpKit Unlimited)</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">17</td><td style="padding:5px 10px">Announce</td><td style="padding:5px 10px">Community posts + email list + MSP partners notified</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">18</td><td style="padding:5px 10px">Docs</td><td style="padding:5px 10px">JUMPKIT_DOCS.html updated with new test count + sections</td></tr>
-</tbody>
-</table>
 
         `;
 
