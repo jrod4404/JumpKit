@@ -61,7 +61,6 @@ _Last updated: 2026-06-01_
 
 ## 🔵 Low Priority / Post-launch
 
-- [ ] **Apple Developer Account ($99/yr)** — required for macOS code signing + notarization + auto-update via GitHub Releases. Steps once enrolled: generate Developer ID Application cert → add signing config to electron-builder → build → notarize → publish to jumpkit-releases.
 - [ ] **Dev vs. prod Supabase separation** — duplicate project/config, add environment switching
 - [ ] **Pagination on large lists** — teams, members, invites; keep UI responsive at scale
 - [ ] **Supabase backups** — verify/upgrade plan (currently Pro = daily backups, verify in dashboard)
