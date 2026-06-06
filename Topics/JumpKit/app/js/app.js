@@ -8,17 +8,17 @@ async function initAuth() {
     if (session) {
       _supabaseUser = session.user;
       window._supabaseUser = session.user; // expose globally
-      const supaId = _supabaseUser.id; // Supabase UUID — use as canonical local ID
+      const supaId = _supabaseUser.id; // Supabase UUID - use as canonical local ID
 
       // Ensure a local DB user exists for this Supabase user
       let localUser = DB.findUserByEmail(_supabaseUser.email);
       if (!localUser) {
-        // First Supabase login on this device — create local profile using Supabase UUID
+        // First Supabase login on this device - create local profile using Supabase UUID
         DB.createUser(_supabaseUser.email.split('@')[0], _supabaseUser.email, '__supabase__', supaId);
         localUser = DB.findUserByEmail(_supabaseUser.email);
         if (localUser) DB.seedNewUser(localUser.id);
       } else if (localUser.id !== supaId) {
-        // ID mismatch — migrate SQLite data from old local ID to Supabase UUID
+        // ID mismatch - migrate SQLite data from old local ID to Supabase UUID
         console.debug('[Auth] Migrating local user ID', localUser.id, '→', supaId);
         try {
           await window.electronAPI.migrateUserId(localUser.id, supaId);
@@ -38,22 +38,22 @@ async function initAuth() {
         currentUser = localUser;
       }
     } else {
-      // No Supabase session — redirect to login
+      // No Supabase session - redirect to login
       window.location.href = 'index.html';
       return;
     }
   } catch (_) {
-    // Supabase unavailable — redirect to login (no local session fallback)
+    // Supabase unavailable - redirect to login (no local session fallback)
     window.location.href = 'index.html';
     return;
   }
   // Load all app data into DB cache from SQLite
   await DB.init(currentUser.id);
-  // Session confirmed — boot the app
+  // Session confirmed - boot the app
   initApp();
 }
 
-// Placeholder — real initApp() wraps all startup logic below
+// Placeholder - real initApp() wraps all startup logic below
 // ── Auto-update banner ────────────────────────────────────────────
 if (window.electronAPI?.onUpdateReady) {
   window.electronAPI.onUpdateReady(() => {
@@ -72,10 +72,10 @@ async function initApp() {
     Object.keys(localStorage)
       .filter(k => oldPrefixes.some(prefix => k.startsWith(prefix)))
       .forEach(k => localStorage.removeItem(k));
-    // Remove legacy scalar keys — no longer written; stale values must not persist.
+    // Remove legacy scalar keys - no longer written; stale values must not persist.
     // subscription/role: removed to prevent paywall tampering.
     // jk_current_user: Supabase session owns identity now.
-    // jk_last_sync: was never read — dead code removed.
+    // jk_last_sync: was never read - dead code removed.
     // jk_teams_collapsed: renamed to jk_teams_expanded (new unambiguous format)
     ['jk_role', 'jk_subscription_status', 'jk_subscription_tier', 'jk_current_user', 'jk_last_sync', 'jk_teams_collapsed'].forEach(k => localStorage.removeItem(k));
   } catch(_) {}
@@ -89,7 +89,7 @@ async function initApp() {
       if (data) {
         window._supabaseProfile = data;
         // NOTE: role/subscription_status/subscription_tier are intentionally NOT written
-        // to localStorage — always read from window._supabaseProfile (in-memory, resets
+        // to localStorage - always read from window._supabaseProfile (in-memory, resets
         // on reload from Supabase) to prevent client-side tampering of paywall gates.
         // Persist subscription/role data to user_prefs (SQLite) and update cache
         if (currentUser) {
@@ -100,18 +100,22 @@ async function initApp() {
             subscriptionTier:   data.subscription_tier   || 'free',
           });
         }
-        // If overdue — show paywall immediately after load
+        // If overdue - show paywall immediately after load
         if (data.subscription_status === 'overdue' || data.subscription_status === 'cancelled') {
           // Notify once per day max
           const lastLicenseNotifTs = parseInt(localStorage.getItem('jk_license_notif_ts') || '0');
           if (Date.now() - lastLicenseNotifTs > 24 * 60 * 60 * 1000) {
             const msg = data.subscription_status === 'cancelled'
-              ? 'Your JumpKit subscription has been cancelled. Renew to keep Core features.'
+              ? 'Your JumpKit Unlimited subscription has been cancelled. Reactivate to restore unlimited access.'
               : 'Your JumpKit subscription payment is overdue. Update billing to avoid interruption.';
             addNotification({ type: 'license-expiring', message: msg, ts: Date.now() });
             localStorage.setItem('jk_license_notif_ts', Date.now().toString());
           }
-          setTimeout(() => showPaywall(), 1200);
+          if (data.subscription_status === 'cancelled') {
+            setTimeout(() => checkAndHandleDowngrade(), 1200);
+          } else {
+            setTimeout(() => showPaywall(), 1200);
+          }
         }
 
         // Show onboarding for first-time users
@@ -211,21 +215,101 @@ const savedTheme = localStorage.getItem('jk_theme') || 'dark';
 document.documentElement.dataset.theme = savedTheme;
 const themeBtn  = document.getElementById('themeBtn');
 const notifBtn  = document.getElementById('notifBtn');
+// ── Notification type config ────────────────────────────────────────────────
+const NOTIF_TYPE_CONFIG = {
+  'invite-received':  { icon: 'tabler-bell',           color: '#2B9ED8' },
+  'trial-ending':     { icon: 'tabler-alert-triangle',  color: '#D69E2E' },
+  'backup':           { icon: 'tabler-device-floppy',   color: '#48BB78' },
+  'backup-reminder':  { icon: 'tabler-device-floppy',   color: '#48BB78' },
+  'auto-archive':     { icon: 'tabler-archive',         color: '#7A93B4' },
+  'backup-failed':    { icon: 'tabler-device-floppy',   color: '#E05252' },
+  'license-expiring': { icon: 'tabler-alert-triangle',  color: '#D69E2E' },
+};
+const NOTIF_DEFAULT_CFG = { icon: 'tabler-bell', color: '#7A93B4' };
+
+function notifRelativeTime(ts) {
+  const diff = Date.now() - ts;
+  const min  = Math.floor(diff / 60000);
+  if (min < 1)    return 'just now';
+  if (min < 60)   return `${min} min ago`;
+  const hrs = Math.floor(min / 60);
+  if (hrs < 24)   return `${hrs} hour${hrs > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7)   return `${days} days ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
+function notifIcon(id) {
+  return `<svg class="ti"><use href="img/tabler-sprite.svg#${id}"/></svg>`;
+}
+
+window.dismissNotif = function dismissNotif(id) {
+  const notifs = getNotifications().filter(n => n.id !== id);
+  saveNotifications(notifs);
+  updateNotifBadge();
+  const item = document.querySelector(`.notif-item[data-id="${id}"]`);
+  if (!item) return;
+  const prev = item.previousElementSibling;
+  if (prev && prev.classList.contains('notif-divider')) prev.remove();
+  else { const next = item.nextElementSibling; if (next && next.classList.contains('notif-divider')) next.remove(); }
+  item.remove();
+  if (!document.querySelector('.notif-item')) {
+    document.getElementById('modalBody').innerHTML = _notifEmptyHTML();
+    document.getElementById('modalFooter').innerHTML = `<button class="btn btn-subtle" data-jaction="modal-close">${notifIcon('tabler-x')} Close</button>`;
+  }
+};
+
+window._notifEmptyHTML = function _notifEmptyHTML() {
+  return `<div class="notif-empty">
+    ${notifIcon('tabler-bell-off')}
+    <p>You're all caught up</p>
+    <span>No new notifications</span>
+  </div>`;
+};
+const _notifEmptyHTML = window._notifEmptyHTML;
+
 notifBtn.addEventListener('click', () => {
   const notifs = getNotifications();
-  const listHTML = notifs.length === 0
-    ? '<p style="color:var(--text-muted);text-align:center;padding:16px 0">No notifications</p>'
-    : notifs.map(n => `
-        <div style="padding:10px 0;${n.read ? '' : 'font-weight:600'}">
-          <div style="font-size:0.85rem;color:var(--text)">${esc(n.message)}</div>
-          <div style="font-size:0.75rem;color:var(--text-muted);margin-top:3px">${new Date(n.ts).toLocaleString()}</div>
-        </div>`).join('');
-  Modal.open('<svg class="ti ti-bell"><use href="img/tabler-sprite.svg#tabler-bell"/></svg> Notifications', listHTML,
-    `<button class="btn btn-subtle" data-jaction="notif-mark-read"><svg class="ti ti-checks"><use href="img/tabler-sprite.svg#tabler-checks"/></svg> Mark all read</button>
-     <button class="btn btn-subtle" data-jaction="notif-clear" style="color:var(--text-muted)"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Clear</button>`
-  );
+  const unread = notifs.filter(n => !n.read).length;
   markAllNotificationsRead();
+
+  const titleHTML = `${notifIcon('tabler-bell')} Notifications${
+    notifs.length > 0 ? ` <span class="notif-unread-count" id="notifCountLabel">(${notifs.length} open)</span>` : ''}`;
+
+  let bodyHTML;
+  if (notifs.length === 0) {
+    bodyHTML = _notifEmptyHTML();
+  } else {
+    bodyHTML = `<div class="notif-list">` + notifs.map((n, i) => {
+      const cfg = NOTIF_TYPE_CONFIG[n.type] || NOTIF_DEFAULT_CFG;
+      return `
+        ${i > 0 ? '<div class="notif-divider"></div>' : ''}
+        <div class="notif-item${n.read ? '' : ' unread'}" data-id="${n.id}">
+          <div class="notif-left-border" style="background:${cfg.color}"></div>
+          <div class="notif-icon" style="color:${cfg.color}">${notifIcon(cfg.icon)}</div>
+          <div class="notif-content">
+            <div class="notif-message">${esc(n.message)}</div>
+            <div class="notif-time">${notifRelativeTime(n.ts)}</div>
+          </div>
+          <button class="notif-dismiss" data-jaction="notif-dismiss" data-id="${n.id}" title="Dismiss">${notifIcon('tabler-x')}</button>
+        </div>`;
+    }).join('') + `</div>`;
+  }
+
+  const footerHTML = notifs.length > 0
+    ? `<button class="btn btn-subtle" data-jaction="notif-clear">${notifIcon('tabler-trash')} Clear all</button>
+       <button class="btn btn-subtle" data-jaction="modal-close">${notifIcon('tabler-x')} Close</button>`
+    : `<button class="btn btn-subtle" data-jaction="modal-close">${notifIcon('tabler-x')} Close</button>`;
+
+  Modal.open(titleHTML, bodyHTML, footerHTML, 'sm');
+  // Lock modal height so dismissing items doesn't resize it
+  requestAnimationFrame(() => {
+    const box = document.getElementById('modalBox');
+    if (box) box.style.minHeight = box.offsetHeight + 'px';
+  });
 });
+
 function updateThemeIcon(t) {
   themeBtn.innerHTML = t === 'dark' ? '<svg class="ti ti-sun"><use href="img/tabler-sprite.svg#tabler-sun"/></svg>' : '<svg class="ti ti-moon"><use href="img/tabler-sprite.svg#tabler-moon"/></svg>';
   const logo = document.getElementById('sidebarLogo');
@@ -396,9 +480,9 @@ window.navigateTo = function navigateTo(page) {
     account:  'Manage your teams and shared jumps',
     settings: 'Change settings to personalize app behavior',
     help:     'Tips, features, and frequently asked questions',
-    jet:      'AI-powered automation for Microsoft 365 — runs entirely on your machine',
+    jet:      'AI-powered automation for Microsoft 365 - runs entirely on your machine',
     teams:    'Manage your teams and shared columns',
-    tests:    'Core functionality verification — run before each deployment',
+    tests:    'Core functionality verification - run before each deployment',
     home:     '',
     jumps:    '',
   };
@@ -433,10 +517,10 @@ const Modal = window.Modal = {
     const mb = document.getElementById('modalBody');
     if (mb) mb.scrollTop = 0;
   },
-  close() { this.overlay.style.display = 'none'; },
+  close() { this.overlay.style.display = 'none'; this.box.style.minHeight = ''; },
 };
 document.getElementById('modalClose').addEventListener('click', () => Modal.close());
-// Overlay click intentionally does NOT close the modal — use Save or Close buttons.
+// Overlay click intentionally does NOT close the modal - use Save or Close buttons.
 
 // ── Modal Queue ───────────────────────────────────────────────────
 // Ensures modals are shown one at a time. If a modal is already open
@@ -578,7 +662,7 @@ function renderHome() {
       </div>
       <div class="tip-card">
         <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
-        <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
+        <p>Toggle the favorite flag on any jump - <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths - to highlight your most-used jumps in every column.</p>
       </div>
       <div class="tip-card">
         <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
@@ -629,7 +713,7 @@ function renderAccount(initialTab = 'account') {
   const launchesUsed = sbProfile.trial_launches_used || 0;
   const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : tier === 'core' ? 'JumpKit Unlimited' : 'JumpKit Free';
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
-  const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—';
+  const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '-';
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
   const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
@@ -684,18 +768,18 @@ function renderAccount(initialTab = 'account') {
               </div>
             </div>
             <div class="acct-upgrade-cta">
-              ${buildUnlockButton('Unlock JumpKit Unlimited', {width:'100%'})}
+              ${buildUnlockButton('Unlock JumpKit Unlimited', {width:'100%', fontSize:'0.83rem', padding:'8px 16px'})}
             </div>
           </div>` : ''}
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Name</span></div>
-              <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '—'}</span>
+              <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '-'}</span>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Email</span></div>
-              <span class="acct-profile-email" style="font-size:0.88rem;color:var(--text-muted)">${email || '—'}</span>
+              <span class="acct-profile-email" style="font-size:0.88rem;color:var(--text-muted)">${email || '-'}</span>
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Member Since</span></div>
@@ -979,7 +1063,7 @@ window.openFeedbackModal = function openFeedbackModal() {
       <input type="hidden" id="fbCat" value=""/>
       <div class="custom-select" id="fbCatDrop">
         <div class="custom-select-trigger" id="fbCatTrigger" tabindex="1">
-          <span id="fbCatLabel" style="color:var(--text-dim)">— Select a category —</span>
+          <span id="fbCatLabel" style="color:var(--text-dim)">- Select a category -</span>
           <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="fbCatMenu">
@@ -991,7 +1075,7 @@ window.openFeedbackModal = function openFeedbackModal() {
     </div>
     <div class="form-group">
       <label class="form-label">Message *</label>
-      <textarea class="form-textarea" id="fbMsg" tabindex="2" placeholder="Share your thoughts…" style="min-height:120px"></textarea>
+      <textarea class="form-textarea" id="fbMsg" tabindex="2" placeholder="Share your thoughts..." style="min-height:120px"></textarea>
       <span class="form-error" id="fbMsgErr">A message is required.</span>
     </div>`;
 
@@ -1019,10 +1103,10 @@ window.submitFeedback = async function submitFeedback() {
 
   // Show sending state
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending…</button>`;
+    `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending...</button>`;
 
   try {
-    console.debug('[Feedback] Calling edge function…');
+    console.debug('[Feedback] Calling edge function...');
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
       method: 'POST',
       headers: {
@@ -1041,7 +1125,7 @@ window.submitFeedback = async function submitFeedback() {
     if (!res.ok && !data.ok) throw new Error(data.error || 'Send failed');
   } catch (e) {
     console.warn('Feedback send error:', e);
-    // Still show success to user — don't block on edge fn errors
+    // Still show success to user - don't block on edge fn errors
   }
 
   document.getElementById('modalBody').innerHTML = `
@@ -1081,7 +1165,7 @@ async function renderStats() {
   const _statsLaunchPct = Math.min(100, Math.round((_statsLaunchesUsed / 250) * 100));
   const _statsBarColor = _statsLaunchPct >= 90 ? 'var(--danger)' : _statsLaunchPct >= 70 ? '#f59e0b' : 'var(--turq)';
   const _statsLaunchBanner = _statsTier === 'free' ? `
-    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <div style="background:linear-gradient(135deg,rgba(80,202,204,0.15),rgba(26,79,214,0.18));border:1px solid rgba(80,202,204,0.25);border-radius:10px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div style="flex:1;min-width:180px">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
           <span style="font-size:0.85rem;color:var(--text-muted);font-weight:600">Free Launch Usage</span>
@@ -1090,10 +1174,10 @@ async function renderStats() {
         <div style="height:6px;background:var(--bg-input);border-radius:99px;overflow:hidden">
           <div style="height:100%;width:${_statsLaunchPct}%;background:${_statsBarColor};border-radius:99px;transition:width 0.4s"></div>
         </div>
-        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:5px">${_statsLaunchesRemaining} launches remaining — upgrade to Core for unlimited launches</div>
+        <div style="font-size:0.78rem;color:var(--text-dim);margin-top:5px">${_statsLaunchesRemaining} launches remaining - upgrade to JumpKit Unlimited for unlimited launches</div>
       </div>
       <div style="flex-shrink:0">
-        ${buildUnlockButton('Unlock JumpKit Unlimited', { fontSize: '0.8rem', padding: '6px 14px' })}
+        ${buildUnlockButton('Unlock JumpKit Unlimited', { fontSize: '0.83rem', padding: '8px 16px' })}
       </div>
     </div>` : '';
 
@@ -1180,6 +1264,7 @@ function renderStatsDash() {
   const tc     = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.50)';
   const gc     = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
   const barClr = 'rgba(0,194,199,0.75)';
+  const doughColors=['#00C2C7','#1A4FD6','#2B9ED8','#ff7a45','#faad14','#a0d911','#9254de','#eb2f96','#69c0ff','#389e0d'];
   const jumps  = DB.getActiveJumps(currentUser.id);
   const cols   = DB.getColumns(currentUser.id).filter(c=>c.visible).sort((a,b)=>a.order-b.order);
 
@@ -1223,7 +1308,6 @@ function renderStatsDash() {
       data30.push(log.filter(e=>new Date(e.ts).toISOString().slice(0,10)===key).length);
     }
 
-    const doughColors=['#00C2C7','#1A4FD6','#2B9ED8','#ff7a45','#faad14','#a0d911','#9254de','#eb2f96','#69c0ff','#389e0d'];
     const colEntries=Object.entries(byCol);
     const favCount=jumps.filter(j=>j.favorite).length;
 
@@ -1270,16 +1354,16 @@ function renderStatsDash() {
   let chartLabels=[], chartData=[], chartTitle='';
 
   if (currentStatView === 'daily') {
-    // This week — one bar per day
-    chartTitle = `Launches by Day — Week of ${new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
+    // This week - one bar per day
+    chartTitle = `Launches by Day - Week of ${new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
     ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((_,i)=>{
       const ds = s + i*86400000;
       chartLabels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]);
       chartData.push(clicks.filter(e=>e.ts>=ds&&e.ts<ds+86400000).length);
     });
   } else if (currentStatView === 'weekly') {
-    // Last 52 calendar weeks — one bar per week
-    chartTitle = `Launches by Week — Last 52 Weeks`;
+    // Last 52 calendar weeks - one bar per week
+    chartTitle = `Launches by Week - Last 52 Weeks`;
     const weekStart = startOf('week') - 51*7*86400000;
     for (let w=0; w<52; w++) {
       const ws = weekStart + w*7*86400000;
@@ -1290,8 +1374,8 @@ function renderStatsDash() {
       chartData.push(log.filter(e=>e.ts>=ws&&e.ts<we).length);
     }
   } else if (currentStatView === 'monthly') {
-    // This year — one bar per month
-    chartTitle = `Launches by Month — ${now.getFullYear()}`;
+    // This year - one bar per month
+    chartTitle = `Launches by Month - ${now.getFullYear()}`;
     ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((_,i)=>{
       const ms=new Date(now.getFullYear(),i,1).getTime();
       const me=new Date(now.getFullYear(),i+1,1).getTime();
@@ -1300,7 +1384,7 @@ function renderStatsDash() {
     });
   } else if (currentStatView === 'yearly') {
     // Last 4 full years + current year YTD
-    chartTitle = `Launches by Year — ${now.getFullYear()-4} to ${now.getFullYear()}`;
+    chartTitle = `Launches by Year - ${now.getFullYear()-4} to ${now.getFullYear()}`;
     for (let yr=now.getFullYear()-4; yr<=now.getFullYear(); yr++) {
       const ys=new Date(yr,0,1).getTime();
       const ye=new Date(yr+1,0,1).getTime();
@@ -1313,6 +1397,17 @@ function renderStatsDash() {
   // Top jumps for this period
   const byJumpP = {};
   clicks.forEach(e => { byJumpP[e.jumpId]=(byJumpP[e.jumpId]||0)+1; });
+
+  // Launches by column for this period
+  const byColP = {};
+  clicks.forEach(e => {
+    const jump = jumps.find(j => j.id === e.jumpId);
+    const colName = jump
+      ? (DB.getColumns(currentUser.id).find(c => c.id === jump.columnId)?.name || 'Uncategorized')
+      : 'Removed';
+    byColP[colName] = (byColP[colName] || 0) + 1;
+  });
+  const colEntriesP = Object.entries(byColP).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const top5P = Object.entries(byJumpP).sort((a,b)=>b[1]-a[1]).slice(0,5)
     .map(([id,ct]) => ({ name: jumps.find(j=>j.id===id)?.name||'Removed', ct }));
   const topRowsP = top5P.map((j,i)=>`
@@ -1332,15 +1427,22 @@ function renderStatsDash() {
       <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div></div>
     </div>
     <div class="stats-chart-row">
-      <div class="stats-chart-box full">
+      <div class="stats-chart-box">
         <div class="stats-chart-title">Top Jumps This Period</div>
         ${top5P.length ? topRowsP : '<p style="color:var(--text-dim);font-size:0.85rem">No jump data for this period.</p>'}
+      </div>
+      <div class="stats-chart-box">
+        <div class="stats-chart-title">Launches by Column</div>
+        <div style="height:200px"><canvas id="chColP"></canvas></div>
       </div>
     </div>`;
 
   requestAnimationFrame(() => {
     mkChart('chPeriod','bar',
       { labels:chartLabels, datasets:[{data:chartData,backgroundColor:barClr,borderRadius:3}] });
+    mkChart('chColP','doughnut',
+      { labels:colEntriesP.map(e=>e[0]), datasets:[{data:colEntriesP.map(e=>e[1]),backgroundColor:doughColors.slice(0,colEntriesP.length),borderWidth:0}] },
+      { scales:{}, plugins:{ legend:{ display:true, position:'bottom', labels:{ color:tc, boxWidth:10, font:{size:11}, padding:10 } } } });
   });
 }
 
@@ -1353,7 +1455,7 @@ function renderJet() {
     document.getElementById('pageContent').innerHTML = `
       <div class="placeholder-page">
         <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
-        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — JumpKit + Jet AI Plan</h3>
+        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI - JumpKit + Jet AI Plan</h3>
         <p style="color:var(--text-muted);line-height:1.6">Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
         <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
         <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Jet AI</a>
@@ -1364,7 +1466,7 @@ function renderJet() {
   document.getElementById('pageContent').innerHTML = `
     <div class="placeholder-page">
       <div class="big-icon"><svg class="ti ti-brain"><use href="img/tabler-sprite.svg#tabler-brain"/></svg></div>
-      <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI — Coming Soon</h3>
+      <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI - Coming Soon</h3>
       <p>Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
       <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
     </div>`;
@@ -1434,7 +1536,7 @@ function wirePasswordToggles(root = document) {
     wrap.appendChild(btn);
   });
 }
-// Modal password toggle wiring — patched after Modal is initialized
+// Modal password toggle wiring - patched after Modal is initialized
 function patchModalForPwToggles() {
   if (typeof Modal === 'undefined' || !Modal?.open) return;
   const _origOpen = Modal.open.bind(Modal);
@@ -1446,14 +1548,17 @@ function patchModalForPwToggles() {
 }
 
 // ── Paywall ───────────────────────────────────────────────────────
-const LS_CHECKOUT_URL = 'https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb';
+const LS_CHECKOUT_URL = 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0';
 const CTA_ICON_SVG = '<svg class="jump-cta-icon" viewBox="0 0 105.74 122.88" aria-hidden="true"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31-0.83-1.07-1.31-1.7-1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66-0.15,1.03-0.97,0.83-1.83c-0.19-0.86-0.88-1.44-1.54-1.29L22.26,22.99z"/></path></svg>';
 
 function buildUnlockButton(label = 'Unlock JumpKit Unlimited', opts = {}) {
-  const width = opts.width || 'auto';
   const extraClass = opts.extraClass || '';
-  const style = width && width !== 'auto' ? `width:${width};` : '';
-  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${style}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>${label}</span></button>`;
+  let btnStyle = '';
+  let spanStyle = '';
+  if (opts.width && opts.width !== 'auto') btnStyle += `width:${opts.width};`;
+  if (opts.padding) btnStyle += `padding:${opts.padding};`;
+  if (opts.fontSize) spanStyle += `font-size:${opts.fontSize};`;
+  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span style="${spanStyle}">${label}</span></button>`;
 }
 
 window.showUpgradeModal = function(title, message) {
@@ -1473,7 +1578,7 @@ window.showPaywall = function() {
     <div style="text-align:center;padding:16px 0">
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px">Your free trial has ended</h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;line-height:1.6">
-        You've used all 250 free launches.<br>Upgrade to Core for unlimited launches, unlimited teams, and unlimited shared jumps.
+        You've used all 250 free launches.<br>Upgrade to JumpKit Unlimited for unlimited launches, unlimited teams, and unlimited shared jumps.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
@@ -1497,7 +1602,7 @@ window.saveNotifications = function saveNotifications(notifs) {
 };
 window.addNotification = function addNotification(notif) {
   const notifs = getNotifications();
-  notifs.unshift({ ...notif, id: Date.now().toString(36), read: false });
+  notifs.unshift({ ...notif, id: Date.now().toString(36) + Math.random().toString(36).slice(2), read: false });
   // Keep max 50
   saveNotifications(notifs.slice(0, 50));
   updateNotifBadge();
@@ -1512,15 +1617,15 @@ window.markAllNotificationsRead = function markAllNotificationsRead() {
   updateNotifBadge();
 };
 window.updateNotifBadge = function updateNotifBadge() {
-  const unread = getNotifications().filter(n => !n.read).length;
+  const total = getNotifications().length;
   const btn = document.getElementById('notifBtn');
   if (!btn) return;
   // Remove existing badge
   btn.querySelector('.notif-badge')?.remove();
-  if (unread > 0) {
+  if (total > 0) {
     const badge = document.createElement('span');
     badge.className = 'notif-badge';
-    badge.textContent = unread > 99 ? '99+' : unread;
+    badge.textContent = total > 99 ? '99+' : total;
     btn.appendChild(badge);
   }
 };
@@ -1556,14 +1661,18 @@ window.runAutoArchive = function runAutoArchive() {
 };
 
 // ── Cloud Backup ──────────────────────────────────────────────────
+function _stripInternalFields(arr) {
+  return arr.map(({ userId: _u, supabaseId: _s, sharedTeams: _t, ...rest }) => rest);
+}
+
 window.forceBackup = async function forceBackup() {
   const backup = {
     version: 1,
     exportedAt: new Date().toISOString(),
     userId: currentUser.id,
     email: currentUser.email,
-    jumps:   DB.getJumps(currentUser.id),
-    columns: DB.getColumns(currentUser.id),
+    jumps:   _stripInternalFields(DB.getJumps(currentUser.id)),
+    columns: _stripInternalFields(DB.getColumns(currentUser.id)),
     prefs:   DB.getPrefs(currentUser.id),
   };
   if (window.electronAPI?.saveBackup) {
@@ -1577,7 +1686,7 @@ window.forceBackup = async function forceBackup() {
         </div>`,
         `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
       );
-    } else {
+    } else if (result?.reason !== 'canceled') {
       addNotification({ type: 'backup-failed', message: `Backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
       Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Backup Failed',
         `<p style="color:var(--text-muted);font-size:0.9rem">${esc(result?.reason || 'Unknown error')}</p>`,
@@ -1598,8 +1707,8 @@ window.runCloudBackup = async function runCloudBackup() {
     exportedAt: new Date().toISOString(),
     userId: currentUser.id,
     email: currentUser.email,
-    jumps:   DB.getJumps(currentUser.id),
-    columns: DB.getColumns(currentUser.id),
+    jumps:   _stripInternalFields(DB.getJumps(currentUser.id)),
+    columns: _stripInternalFields(DB.getColumns(currentUser.id)),
     prefs:   prefs,
   };
 
@@ -1617,7 +1726,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
   try {
     if (!window._supabaseUser) return;
     const email = window._supabaseUser.email;
-    
+
     // Check for pending invites for this email (flat query to avoid stack depth limit)
     const { data: rawInvites = [] } = await supabaseClient
       .from('team_invites')
@@ -1671,7 +1780,7 @@ window.checkAndHandleUpgrade = function checkAndHandleUpgrade(tier) {
       { free: 'Join 1 team as a member',            core: 'Join unlimited teams as a member' },
       { free: '10 jumps visible per shared column', core: 'Unlimited shared jumps' },
       { free: 'Basic jump management',              core: 'Full team collaboration &amp; sharing' },
-      { free: '—',                                  core: 'Auto cloud backup' },
+      { free: '-',                                  core: 'Auto cloud backup' },
     ];
 
     const rows = comparisons.map((c, i) => `
@@ -1734,7 +1843,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         // Remove shared jumps for this team from Supabase
         await supabaseClient.from('shared_jumps').delete().eq('team_id', t.id);
       }
-      // Update local columns — unshare any belonging to pruned teams
+      // Update local columns - unshare any belonging to pruned teams
       const pruneTeamIds = new Set(pruneTeams.map(t => t.id));
       const updatedCols = allCols.map(c =>
         c.isShared && pruneTeamIds.has(c.teamId)
@@ -1812,11 +1921,17 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         Unlock JumpKit Unlimited!
       </button>`;
 
-    Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
-      `<button class="btn btn-subtle" data-jaction="modal-close">OK</button>
-       ${upgradeBtn.replace('Unlock JumpKit Unlimited!', 'Reactivate JumpKit Unlimited')}`,
-      'lg'
-    );
+    // Only show once per 24h — don't nag on every login
+    const _downgradeNotifKey = `jk_downgrade_notif_${currentUser.id}`;
+    const _lastDowngradeTs = parseInt(localStorage.getItem(_downgradeNotifKey) || '0');
+    if (Date.now() - _lastDowngradeTs > 24 * 60 * 60 * 1000) {
+      localStorage.setItem(_downgradeNotifKey, Date.now().toString());
+      Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
+        `<button class="btn btn-subtle" data-jaction="modal-close">OK</button>
+         ${upgradeBtn.replace('Unlock JumpKit Unlimited!', 'Reactivate JumpKit Unlimited')}`,
+        'lg'
+      );
+    }
 
     if (typeof renderColumns === 'function') renderColumns();
   } catch(e) {
@@ -1874,13 +1989,21 @@ function openTierFeaturesModal() {
   Modal.open(`<svg class="ti ti-sparkles"><use href="img/tabler-sprite.svg#tabler-sparkles"/></svg> ${tierLabel} Features`, body, footer, 'sm');
 }
 
-// ── Event delegation — app-level actions ───────────────────────────
+// ── Event delegation - app-level actions ───────────────────────────
 document.addEventListener('click', e => {
   const btn = e.target.closest('[data-jaction]');
   if (!btn) return;
   switch (btn.dataset.jaction) {
     case 'notif-mark-read':    markAllNotificationsRead(); Modal.close(); break;
-    case 'notif-clear':        clearAllNotifications(); document.getElementById('notifBtn')?.click(); break;
+    case 'notif-clear': {
+      clearAllNotifications();
+      updateNotifBadge();
+      document.getElementById('modalBody').innerHTML   = window._notifEmptyHTML();
+      document.getElementById('modalFooter').innerHTML = `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
+      const _lbl = document.getElementById('notifCountLabel');
+      if (_lbl) _lbl.remove();
+      break;
+    }
     case 'open-feedback-modal': openFeedbackModal(); break;
     case 'open-tier-features':  openTierFeaturesModal(); break;
     case 'force-backup':       forceBackup(); break;
@@ -1894,5 +2017,30 @@ document.addEventListener('click', e => {
       if (window.electronAPI) window.electronAPI.openUrl(btn.dataset.url);
       Modal.close();
       break;
+    case 'modal-close':    Modal.close(); break;
+    case 'notif-dismiss': {
+      const id = btn.dataset.id;
+      if (!id) break;
+      saveNotifications(getNotifications().filter(n => n.id !== id));
+      updateNotifBadge();
+      const item = document.querySelector(`.notif-item[data-id="${id}"]`);
+      if (item) {
+        const prev = item.previousElementSibling;
+        if (prev && prev.classList.contains('notif-divider')) prev.remove();
+        else { const next = item.nextElementSibling; if (next && next.classList.contains('notif-divider')) next.remove(); }
+        item.remove();
+      }
+      const remaining = document.querySelectorAll('.notif-item').length;
+      if (remaining === 0) {
+        document.getElementById('modalBody').innerHTML   = _notifEmptyHTML();
+        document.getElementById('modalFooter').innerHTML = `<button class="btn btn-subtle" data-jaction="modal-close">${notifIcon('tabler-x')} Close</button>`;
+        const lbl = document.getElementById('notifCountLabel');
+        if (lbl) lbl.remove();
+      } else {
+        const lbl = document.getElementById('notifCountLabel');
+        if (lbl) lbl.textContent = `(${remaining} open)`;
+      }
+      break;
+    }
   }
 });

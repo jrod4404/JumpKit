@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Email Confirmed — JumpKit</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .confirmed-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: #0E1827;
+    }
+    .confirmed-card {
+      background: #111d2e;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 44px 40px 36px;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+    }
+    .confirmed-logo {
+      max-height: 56px;
+      width: auto;
+      display: block;
+      margin: 0 auto 28px;
+    }
+    .confirmed-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(80,202,204,0.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .confirmed-icon svg {
+      width: 32px;
+      height: 32px;
+      color: #50CACC;
+    }
+    .confirmed-card h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #C8D6E8;
+      margin-bottom: 12px;
+    }
+    .confirmed-card p {
+      color: #7A93B4;
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .confirmed-card p strong {
+      color: #C8D6E8;
+    }
+    .btn-confirmed {
+      display: inline-block;
+      background: linear-gradient(135deg, #50CACC, #1A4FD6);
+      color: white;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 12px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .btn-confirmed:hover { opacity: 0.88; }
+    .confirmed-footer {
+      margin-top: 32px;
+      color: #4A6280;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="confirmed-wrap">
+    <div class="confirmed-card">
+      <img src="/logo-dark-mode.png" alt="JumpKit" class="confirmed-logo" />
+
+      <div class="confirmed-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+          <polyline points="22 4 12 14.01 9 11.01"/>
+        </svg>
+      </div>
+
+      <h1>Email Confirmed!</h1>
+      <p>
+        Your JumpKit account is now active.<br />
+        Open the <strong style="color:#C8D6E8;font-weight:700">JumpKit Desktop app</strong> and sign in to get started.
+      </p>
+
+      <div style="margin-top:20px;font-size:0.85rem"><a href="https://jumpkit.app" style="color:#50CACC;text-decoration:none">← Back to jumpkit.app</a></div>
+    </div>
+  </div>
+</body>
+</html>

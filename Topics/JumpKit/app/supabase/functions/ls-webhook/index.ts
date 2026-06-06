@@ -14,9 +14,10 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// TODO: Update these with your actual Lemon Squeezy variant IDs
-const CORE_VARIANT_IDS = ['1445234'];
-const TEAMS_JET_VARIANT_IDS = ['1445252'];
+// JumpKit Unlimited variants — both map to 'core' tier
+// Variant 1445234 = $99/yr, Variant 1742152 = $10/mo
+const CORE_VARIANT_IDS = ['1754948', '1754951']; // Annual: 1754948, Monthly: 1754951
+const TEAMS_JET_VARIANT_IDS: string[] = []; // legacy, unused
 
 serve(async (req) => {
   try {
@@ -48,7 +49,10 @@ serve(async (req) => {
     if (eventName === 'subscription_created' || eventName === 'subscription_updated') {
       if (status === 'active') subStatus = 'active';
       else if (status === 'past_due') subStatus = 'overdue';
-      else if (status === 'cancelled' || status === 'expired') subStatus = 'cancelled';
+      else if (status === 'cancelled' || status === 'expired') {
+        subStatus = 'cancelled';
+        tier = 'free';
+      }
     } else if (eventName === 'subscription_cancelled' || eventName === 'subscription_expired') {
       subStatus = 'cancelled';
       tier = 'free';

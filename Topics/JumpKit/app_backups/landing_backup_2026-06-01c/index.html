@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit — Stop Searching. Start Jumping.</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <!-- Tabler Icons: SVG sprite (crisp at any resolution, no webfont blur) -->
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    svg.ti.hero-platform-icon { width: 1.1em; height: 1.1em; vertical-align: -0.2em; }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;"><img id="navLogo" src="logo-dark.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg viewBox="0 0 105.74 122.88" style="width:1.32em;height:1.32em;flex-shrink:0;fill:#fff" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92z M75.85,119.82c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21z M59.12,9.04c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04z"/></svg>Jump Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="#" class="offcanvas-link"><svg class="ti ti-home"><use href="assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="#testimonialCarousel" class="offcanvas-link"><svg class="ti ti-quote"><use href="assets/tabler-sprite.svg#tabler-quote"/></svg> Testimonials</a>
+      <a href="#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="#statistics" class="offcanvas-link"><svg class="ti ti-chart-bar"><use href="assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Dashboard</a>
+      <a href="#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</a>
+      <a href="#pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:1.05rem;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg viewBox="0 0 105.74 122.88" style="width:1.4em;height:1.4em;flex-shrink:0;fill:#fff" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92z M75.85,119.82c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21z M59.12,9.04c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04z"/></svg>Jump Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <section class="hero">
+  <div class="hero-inner-wrap">
+    <div class="hero-inner">
+      <h1 class="hero-title">Stop Searching. Start Jumping.</h1>
+      <p class="hero-sub">Jump to any link, folder, or file in one click.</p>
+      <p class="hero-desc">JumpKit displays your navigation links in one place — web links, local directories, shared resources — organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. No more bookmarks. Just jump. Save time, save money, and track the savings automatically. Available for single users and shareable among teams.</p>
+      <div class="hero-platforms">Available for <span class="hero-platform-pair"><svg class="ti ti-brand-windows hero-platform-icon"><use href="assets/tabler-sprite.svg#tabler-brand-windows"/></svg><strong>Windows</strong></span> &amp; <span class="hero-platform-pair"><svg class="ti ti-brand-apple hero-platform-icon"><use href="assets/tabler-sprite.svg#tabler-brand-apple"/></svg><strong>macOS</strong></span></div>
+      <nav class="hero-section-nav">
+        <a href="#">Home</a>
+        <a href="#problem">The Problem</a>
+        <a href="#solution">The Solution</a>
+        <a href="#testimonialCarousel">Testimonials</a>
+        <a href="#features">Features</a>
+        <a href="#statistics">Dashboard</a>
+        <a href="#how">How It Works</a>
+        <a href="#pricing">Pricing</a>
+      </nav>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-screenshots-stack">
+        <div class="hero-screenshot-wrap" onclick="openLightboxThemed(this)">
+          <img src="assets/hero-mac-dark.jpg?v=2" alt="JumpKit macOS" class="hero-screenshot hero-screenshot-dark" />
+          <img src="assets/hero-mac-light.jpg?v=2" alt="JumpKit macOS" class="hero-screenshot hero-screenshot-light" />
+        </div>
+        <div class="hero-screenshot-wrap hero-screenshot-win" onclick="openLightboxThemed(this)">
+          <img src="assets/hero-windows-dark.jpg?v=6" alt="JumpKit Windows" class="hero-screenshot hero-screenshot-dark" />
+          <img src="assets/hero-windows-light.jpg?v=6" alt="JumpKit Windows" class="hero-screenshot hero-screenshot-light" />
+        </div>
+      </div>
+    </div>
+  </div><!-- /hero-inner-wrap -->
+  </section>
+
+  <!-- THE PROBLEM -->
+  <section class="section" id="problem">
+    <div class="section-inner" style="text-align:center">
+      <div class="section-label"><svg class="ti ti-alert-circle"><use href="assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</div>
+      <h2 class="section-title">Bookmarks Don't Cut It</h2>
+      <p class="section-sub" style="text-align:center;width:100%">Bookmarks simply don't cut it for many reasons. Below are just a few.</p>
+      <div class="features-grid" style="margin-top:1.5rem;" id="problem-grid">
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-mood-sad-dizzy" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-mood-sad-dizzy"/></svg> They get disorganized</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-folder" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-folder"/></svg> They can't launch directories</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-share" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-share"/></svg> Can't be shared with teammates</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-database" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-database"/></svg> Difficult to back up or migrate</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-search" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-search"/></svg> Hard to search or filter</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-browser" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-browser"/></svg> Locked to one browser</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-refresh-alert" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-refresh-alert"/></svg> Browser updates break your layout</p>
+        </div>
+        <div class="feature-card" style="padding:14px 20px">
+          <p><svg class="ti ti-chart-bar" style="color:#e05555;width:1.4em;height:1.4em;vertical-align:-0.25em;margin-right:.6em"><use href="assets/tabler-sprite.svg#tabler-chart-bar"/></svg> No usage stats or notes</p>
+        </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE SOLUTION -->
+  <section class="section section-dark" id="solution">
+    <div class="section-inner" style="text-align:center">
+      <div class="section-label"><svg class="ti ti-bulb"><use href="assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</div>
+      <h2 class="section-title">Jumpkit</h2>
+      <p class="section-sub" style="text-align:center;width:100%">JumpKit replaces scattered bookmarks with one organized, searchable, shareable layout. Launch anything in one click — and automatically track the time and money you save.</p>
+      <div class="demo-thumbnail" onclick="Supademo.open('cmopzrg0m0510xa0jfqglvrfv')" style="margin-top:1.5rem">
+        <img src="assets/hero-mac-dark.jpg?v=1" class="demo-thumb-img demo-thumb-dark" alt="JumpKit demo" />
+        <img src="assets/hero-mac-light.jpg?v=1" class="demo-thumb-img demo-thumb-light" alt="JumpKit demo" />
+        <div class="demo-play-overlay">
+          <div class="demo-play-btn">
+            <svg class="ti ti-player-play-filled"><use href="assets/tabler-sprite.svg#tabler-player-play-filled"/></svg>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS CAROUSEL -->
+  <div class="testimonial-carousel" id="testimonialCarousel">
+    <div class="testimonial-header">
+      <div class="section-label"><svg class="ti ti-quote"><use href="assets/tabler-sprite.svg#tabler-quote"/></svg> What Our Users Say</div>
+    </div>
+    <div class="testimonial-row">
+    <button class="testimonial-nav testimonial-prev" onclick="testimonialMove(-1)" aria-label="Previous">
+      <svg class="ti ti-chevron-left"><use href="assets/tabler-sprite.svg#tabler-chevron-left"/></svg>
+    </button>
+    <div class="testimonial-viewport">
+      <div class="testimonial-track" id="testimonialTrack">
+        <div class="testimonial-slide">
+          <div class="testimonial-card-inner">
+            <img src="assets/testimonial-it.png" alt="IT Consultant" class="testimonial-img" />
+            <div class="testimonial-content">
+              <p class="testimonial-quote">"JumpKit is the tool that makes my clients happy. It's easy and it works."</p>
+              <p class="testimonial-author">Andrew D. <span class="testimonial-role">IT Consultant</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-slide">
+          <div class="testimonial-card-inner">
+            <img src="assets/testimonial-semiconductor.png" alt="Semiconductor Sales" class="testimonial-img" />
+            <div class="testimonial-content">
+              <p class="testimonial-quote">"JumpKit was the tool I was always looking for! It makes work easier."</p>
+              <p class="testimonial-author">Mark P. <span class="testimonial-role">Semiconductor Sales</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-slide">
+          <div class="testimonial-card-inner">
+            <img src="assets/testimonial-car.png" alt="Automotive Tier 1" class="testimonial-img" />
+            <div class="testimonial-content">
+              <p class="testimonial-quote">"After using JumpKit for 3 months, I can't work without it. Everything I need is right there."</p>
+              <p class="testimonial-author">Jennifer S. <span class="testimonial-role">Automotive Tier 1</span></p>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-slide">
+          <div class="testimonial-card-inner">
+            <img src="assets/testimonial-software.png" alt="Software Engineering" class="testimonial-img" />
+            <div class="testimonial-content">
+              <p class="testimonial-quote">"I love that I can onboard new team members and give them all key info in one step."</p>
+              <p class="testimonial-author">Jared C. <span class="testimonial-role">Software Engineering</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <button class="testimonial-nav testimonial-next" onclick="testimonialMove(1)" aria-label="Next">
+      <svg class="ti ti-chevron-right"><use href="assets/tabler-sprite.svg#tabler-chevron-right"/></svg>
+    </button>
+    </div><!-- /testimonial-row -->
+    <div class="testimonial-mobile-nav">
+      <button class="testimonial-nav" onclick="testimonialMove(-1)" aria-label="Previous">
+        <svg class="ti ti-chevron-left"><use href="assets/tabler-sprite.svg#tabler-chevron-left"/></svg>
+      </button>
+      <button class="testimonial-nav" onclick="testimonialMove(1)" aria-label="Next">
+        <svg class="ti ti-chevron-right"><use href="assets/tabler-sprite.svg#tabler-chevron-right"/></svg>
+      </button>
+    </div>
+    <div class="testimonial-dots" id="testimonialDots"></div>
+  </div>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-sparkles"><use href="assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</div>
+      <h2 class="section-title">Everything at your fingertips</h2>
+      <p class="section-sub">Built for single users, teams, and enterprises who are tired of wasting time navigating, and want their data local.</p>
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3><svg class="jump-icon-inline" viewBox="0 0 105.74 122.88" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><path fill="#00C2C7" style="flex-shrink:0" d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92z M75.85,119.82c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21z M59.12,9.04c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04z"/></svg> Instant Jump Launcher</h3>
+          <p>Store web links, local directories, and file paths in organized categories. Click once to jump — no drilling through folders or bookmarks.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-columns"><use href="assets/tabler-sprite.svg#tabler-columns"/></svg> Categories &amp; Filters</h3>
+          <p>Organize jumps into drag-ready categories, mark favorites, and filter views (Active, Favorites, Recent, Archive) so you always see the right jumps at the right time.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-search"><use href="assets/tabler-sprite.svg#tabler-search"/></svg> Instant Search</h3>
+          <p>Find any jump in seconds with real-time search across all your links, folders, and categories — no scrolling, no digging.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-keyboard"><use href="assets/tabler-sprite.svg#tabler-keyboard"/></svg> Hotkey Access</h3>
+          <p>Launch any Jump within JumpKit via its saved global hotkey. Your entire navigation space, one keystroke away.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-report-analytics"><use href="assets/tabler-sprite.svg#tabler-report-analytics"/></svg> Time &amp; Money Saved</h3>
+          <p>Track total Jumps launched, launches per day, view data in a fully automated dashboard, and see your real ROI. Show your team exactly how many hours JumpKit gives back every month.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-users-group"><use href="assets/tabler-sprite.svg#tabler-users-group"/></svg> Team &amp; Group Jumps</h3>
+          <p>Create teams, add team members, and define Jumps to share with your teams. Then everyone starts from the same page.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-cloud-upload"><use href="assets/tabler-sprite.svg#tabler-cloud-upload"/></svg> Auto-Backup</h3>
+          <p>Never lose your jumps. JumpKit automatically backs up your data so you're protected when switching machines or recovering from a crash.</p>
+        </div>
+        <div class="feature-card">
+          <h3><svg class="ti ti-lock"><use href="assets/tabler-sprite.svg#tabler-lock"/></svg> 100% Local Storage</h3>
+          <p>All your data lives on your machine. No cloud required, no data leaves your network. Optional cloud backup available when you want it.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- INSIGHTS -->
+    <section class="section section-dark" id="statistics">
+    <div class="section-inner stats-section-inner">
+      <div class="section-label"><svg class="ti ti-chart-bar"><use href="assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Dashboard</div>
+      <h2 class="section-title">Automatic Statistics</h2>
+      <p class="section-sub">JumpKit counts every jump launched and shows you exactly how much time and money you're saving. All data stays local in an automatic dashboard.</p>
+      <div class="stats-bar-inline">
+        <div class="stat"><span class="stat-num">~10s</span><span class="stat-label">saved per jump</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">1-click</span><span class="stat-label">to any resource</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">100%</span><span class="stat-label">local — your data stays yours</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">∞</span><span class="stat-label">links, folders &amp; files</span></div>
+      </div>
+      <div class="stats-charts-row">
+      <div class="stats-chart-demo">
+        <div class="chart-title">174 jumps this week</div>
+        <div class="chart-bars">
+          <div class="chart-bar-group"><div class="chart-val">28</div><div class="chart-bar" style="height: 115px"></div><div class="chart-label">Mon</div></div>
+          <div class="chart-bar-group"><div class="chart-val">35</div><div class="chart-bar" style="height: 144px"></div><div class="chart-label">Tue</div></div>
+          <div class="chart-bar-group"><div class="chart-val">39</div><div class="chart-bar" style="height: 160px"></div><div class="chart-label">Wed</div></div>
+          <div class="chart-bar-group"><div class="chart-val">31</div><div class="chart-bar" style="height: 127px"></div><div class="chart-label">Thu</div></div>
+          <div class="chart-bar-group"><div class="chart-val">22</div><div class="chart-bar" style="height: 90px"></div><div class="chart-label">Fri</div></div>
+          <div class="chart-bar-group"><div class="chart-val">12</div><div class="chart-bar" style="height: 49px"></div><div class="chart-label">Sat</div></div>
+          <div class="chart-bar-group"><div class="chart-val">7</div><div class="chart-bar" style="height: 29px"></div><div class="chart-label">Sun</div></div>
+        </div>
+      </div>
+      <div class="stats-chart-demo roi-chart">
+        <div class="chart-title">Weekly ROI • 29.0 min saved • $72 recovered</div>
+        <div class="roi-lines">
+          <div class="roi-row">
+            <div class="roi-day">Mon</div>
+            <div class="roi-track"><div class="roi-fill" style="width:72%"></div></div>
+            <div class="roi-label">4.7m · $12</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Tue</div>
+            <div class="roi-track"><div class="roi-fill" style="width:90%"></div></div>
+            <div class="roi-label">5.8m · $15</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Wed</div>
+            <div class="roi-track"><div class="roi-fill" style="width:100%"></div></div>
+            <div class="roi-label">6.5m · $16</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Thu</div>
+            <div class="roi-track"><div class="roi-fill" style="width:79%"></div></div>
+            <div class="roi-label">5.2m · $13</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Fri</div>
+            <div class="roi-track"><div class="roi-fill" style="width:56%"></div></div>
+            <div class="roi-label">3.7m · $9</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Sat</div>
+            <div class="roi-track"><div class="roi-fill" style="width:31%"></div></div>
+            <div class="roi-label">2.0m · $5</div>
+          </div>
+          <div class="roi-row">
+            <div class="roi-day">Sun</div>
+            <div class="roi-track"><div class="roi-fill" style="width:18%"></div></div>
+            <div class="roi-label">1.2m · $3</div>
+          </div>
+        </div>
+      </div>
+      </div><!-- /stats-charts-row -->
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <div class="section-inner" style="text-align:center">
+      <div class="section-label"><svg class="ti ti-list-check"><use href="assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</div>
+      <h2 class="section-title">Up and running in minutes</h2>
+      <div class="how-steps">
+
+        <div class="how-step">
+          <div class="how-step-circle">
+            <svg class="ti ti-layout-columns"><use href="assets/tabler-sprite.svg#tabler-layout-columns"/></svg>
+          </div>
+          <div class="how-step-num">01</div>
+          <h3 class="how-step-title">Define Your Categories</h3>
+          <p class="how-step-desc">Download, install, and define your column category names and set their order.</p>
+        </div>
+
+        <div class="how-step-connector">
+          <div class="how-connector-line"></div>
+          <svg class="ti ti-chevron-right how-connector-arrow"><use href="assets/tabler-sprite.svg#tabler-chevron-right"/></svg>
+        </div>
+
+        <div class="how-step">
+          <div class="how-step-circle">
+            <svg class="ti ti-plus"><use href="assets/tabler-sprite.svg#tabler-plus"/></svg>
+          </div>
+          <div class="how-step-num">02</div>
+          <h3 class="how-step-title">Add Your Jumps</h3>
+          <p class="how-step-desc">Use the add jump button to create a new jump. Choose its name and category. Paste in a web URL, local folder path, or file location. Save.</p>
+        </div>
+
+        <div class="how-step-connector">
+          <div class="how-connector-line"></div>
+          <svg class="ti ti-chevron-right how-connector-arrow"><use href="assets/tabler-sprite.svg#tabler-chevron-right"/></svg>
+        </div>
+
+        <div class="how-step">
+          <div class="how-step-circle">
+            <svg class="ti ti-rocket"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>
+          </div>
+          <div class="how-step-num">03</div>
+          <h3 class="how-step-title">Jump!</h3>
+          <p class="how-step-desc">Click any jump and you are there instantly. Watch your time savings and ROI add up in your personal dashboard.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- JET AI — COMING SOON (commented out until ready)
+  <section class="section section-dark" id="jet">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-rocket"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg> Coming Soon</div>
+      <h2 class="section-title">Meet <span class="accent">Jet</span> — Your Personal AI Agent</h2>
+      <p class="section-sub">Enterprise AI without the data risk. Jet is your personal, private AI agent running entirely on your machine locally — no API queries, no data leaks, nothing ever leaves your network.</p>
+      <div class="jet-grid">
+        <div class="jet-card">
+          <h3><svg class="ti ti-robot"><use href="assets/tabler-sprite.svg#tabler-robot"/></svg> Agentic AI, Locally Run</h3>
+          <p>Jet AI is powered by OpenClaw — the leading open-source agent framework — running in a strict Docker sandbox with our custom security gateway, immutable audit log, and packaged into one simple installer.</p>
+        </div>
+        <div class="jet-card">
+          <h3><svg class="ti ti-shield-lock"><use href="assets/tabler-sprite.svg#tabler-shield-lock"/></svg> Zero Data Leakage</h3>
+          <p>The #1 concern holding enterprises from AI adoption is data leakage to cloud servers. Jet solves it completely — your data never leaves your machine.</p>
+        </div>
+        <div class="jet-card">
+          <h3><svg class="ti ti-device-desktop-analytics"><use href="assets/tabler-sprite.svg#tabler-device-desktop-analytics"/></svg> Office Automation</h3>
+          <p>Jet pilots Outlook, Excel, Word, PowerPoint, OneNote and so much more directly on your machine. Repetitive email, reporting, scheduling, slide decks, and data analysis work now finishes itself in one command.</p>
+        </div>
+        <div class="jet-card">
+          <h3><svg class="ti ti-clipboard-check"><use href="assets/tabler-sprite.svg#tabler-clipboard-check"/></svg> Logging for Audits</h3>
+          <p>Export every action Jet takes with timestamped context so compliance teams can review, verify, and approve activity in seconds.</p>
+        </div>
+        <div class="jet-card">
+          <h3><svg class="ti ti-building"><use href="assets/tabler-sprite.svg#tabler-building"/></svg> Industries</h3>
+          <p>Jet AI was designed to support data security and audit demands of regulated industries without compromise. Jet is perfect for automotive, aerospace, finance, healthcare, energy, telecommunications, and legal.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  -->
+
+  <!-- PRICING -->
+  <section class="section" id="pricing">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</div>
+      <h2 class="section-title">Simple, per-user pricing</h2>
+      <p class="section-sub">Get started with <strong style="color:var(--text)">JumpKit Free</strong> or signup for <strong style="color:var(--text)">JumpKit Unlimited</strong> for full unlimited access.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Free</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:0px">
+            <li>✅ Web links &amp; local folders</li>
+            <li>✅ 250 jump launches</li>
+            <li>✅ 2 teams (1 owner + 1 member)</li>
+            <li>✅ Hotkey launcher</li>
+            <li>✅ Filters &amp; search</li>
+            <li>✅ Time saved &amp; ROI dashboard</li>
+            <li>✅ Windows and Mac supported</li>
+          </ul>
+          <div class="plan-price-main" style="margin:0 0 14px">
+            <div class="price-line"><strong>$0</strong></div>
+            <div class="price-line" style="margin-bottom:10px">Free</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit.Setup.1.0.0.exe" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg class="ti ti-brand-windows" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-windows"/></svg>
+              Download for Windows
+            </a>
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit-1.0.0-universal.dmg" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg class="ti ti-brand-apple" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-apple"/></svg>
+              Download for Mac
+            </a>
+          </div>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Unlimited</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:0px">
+            <li>✅ Everything in JumpKit Free</li>
+            <li>✅ Unlimited jump launches</li>
+            <li>✅ Unlimited teams</li>
+            <li>✅ Team jump sharing</li>
+            <li>✅ Team statistics and ROI</li>
+            <li>✅ Auto-archive</li>
+            <li>✅ Auto-backup</li>
+          </ul>
+          <div class="plan-price-main" style="margin:0 0 14px">
+            <div class="price-line"><strong>$10</strong> / month</div>
+            <div class="price-line" style="margin-bottom:10px">or $99 / year</div>
+          </div>
+          <a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" class="btn btn-primary">Get JumpKit Unlimited</a>
+        </div>
+        <!-- JumpKit + Jet AI card — commented out until ready
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit + Jet AI</div>
+          <div class="plan-price" style="text-align:center">Coming Soon</div>
+          <ul class="plan-features">
+            <li>✅ Everything in JumpKit Unlimited</li>
+            <li>✅ Locally-run AI (no cloud)</li>
+            <li>✅ Personal Agentic Assistant</li>
+            <li>✅ Shareable agent workflows</li>
+            <li>✅ MS Office automation</li>
+            <li>✅ Audit logging</li>
+          </ul>
+          <div class="plan-price-main">
+            <div class="price-line"><strong>$39</strong> / month</div>
+            <div class="price-line">or $399 / year</div>
+          </div>
+          <button class="btn btn-primary" disabled style="opacity:.45;cursor:not-allowed;">Get JumpKit + Jet AI</button>
+        </div>
+        -->
+      </div>
+    </div>
+  </section>
+
+
+  <!-- CTA -->
+  <section class="section cta-section" id="cta">
+    <div class="section-inner cta-inner">
+      <h2 class="section-title">Start jumping today.</h2>
+      <form class="cta-form" onsubmit="handleSubmit(event)">
+        <input type="email" class="cta-input" placeholder="Enter your email" required />
+        <button type="submit" class="btn btn-primary btn-lg">Get Early Access</button>
+      </form>
+      <p class="cta-note">Join the JumpKit community. Get tips, updates, and exclusive offers. No spam, ever.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- LIGHTBOX -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="" />
+  </div>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script src="script.js"></script>
+  <script src="https://script.supademo.com/supademo.js"></script>
+</body>
+</html>
+

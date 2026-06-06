@@ -429,7 +429,8 @@ function handleJumpClick(id) {
   if (!jump) return;
   DB.incrementClick(currentUser.id, id);
   // Increment trial_launches_used in Supabase for free tier users
-  if (window._supabaseProfile?.subscription_status === 'free') {
+  const _subTier = window._supabaseProfile?.subscription_tier;
+  if (!_subTier || _subTier === 'free') {
     const newCount = (window._supabaseProfile.trial_launches_used || 0) + 1;
     window._supabaseProfile.trial_launches_used = newCount;
     supabaseClient.from('profiles')
@@ -443,6 +444,7 @@ function handleJumpClick(id) {
     }
   }
   refreshStatsBar();
+  if (window.activePage === 'stats' && typeof renderStatsDash === 'function') renderStatsDash();
   Toast.success(`Launched <strong>${esc(jump.name)}</strong>`);
   if (window.electronAPI?.isElectron) {
     window.electronAPI.openUrl(jump.url, !!(jump.isShared || jump.teamId));
@@ -565,10 +567,11 @@ function openJumpFormModal(editId) {
     </div>
     <div class="form-group">
       <label class="form-label">Hotkey</label>
-      <div style="display:flex;gap:8px;align-items:center;position:relative">
-        <input class="form-input" id="jHotkey" tabindex="6" value="${esc(jump?.hotkey || '')}" placeholder="Tab or click here, then press combo…" autocomplete="off" style="cursor:pointer;flex:1"/>
-        <button type="button" id="btnPickHotkey" style="white-space:nowrap;font-size:0.93rem;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text);cursor:pointer;transition:border-color var(--transition)" title="Show available hotkeys">
-          <svg class="ti ti-keyboard" style="width:1em;height:1em;vertical-align:-0.1em"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Pick
+      <div style="position:relative">
+        <input type="hidden" id="jHotkey" value="${esc(jump?.hotkey || '')}"/>
+        <button type="button" id="btnPickHotkey" style="width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:0.93rem;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text);cursor:pointer;transition:border-color var(--transition)" title="Pick a hotkey">
+          <span id="btnPickHotkeyLabel" style="color:${jump?.hotkey ? 'var(--text)' : 'var(--text-dim)'}">${jump?.hotkey ? esc(jump.hotkey) : 'Select a hotkey…'}</span>
+          <svg class="ti ti-chevron-down" style="width:1em;height:1em;flex-shrink:0;opacity:0.6"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
         </button>
         <div id="hotkeyPicker" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.3)"></div>
       </div>
@@ -646,32 +649,6 @@ function openJumpFormModal(editId) {
     });
   }
 
-  // Hotkey recorder — captures combo on keydown, clears on Backspace/Delete
-  const hotkeyInput = document.getElementById('jHotkey');
-  if (hotkeyInput) {
-    function activateHotkeyRecorder() {
-      hotkeyInput.dataset.recording = '1';
-      hotkeyInput.style.borderColor = 'var(--hover-accent)';
-      hotkeyInput.placeholder = 'Press your key combo…';
-    }
-    hotkeyInput.addEventListener('click', activateHotkeyRecorder);
-    hotkeyInput.addEventListener('focus', activateHotkeyRecorder);
-    hotkeyInput.addEventListener('blur', () => {
-      delete hotkeyInput.dataset.recording;
-      hotkeyInput.style.borderColor = '';
-      hotkeyInput.placeholder = 'Tab or click here, then press combo…';
-    });
-    hotkeyInput.addEventListener('keydown', e => {
-      if (!hotkeyInput.dataset.recording) return;
-      e.preventDefault();
-      e.stopPropagation();
-      if (e.key === 'Escape') { hotkeyInput.blur(); return; }
-      if (e.key === 'Backspace' || e.key === 'Delete') { hotkeyInput.value = ''; return; }
-      const chord = buildChord(e);
-      if (chord) hotkeyInput.value = chord;
-    });
-  }
-
   // ── Hotkey picker ───────────────────────────────────────────────
   const btnPickHotkey = document.getElementById('btnPickHotkey');
   const hotkeyPicker  = document.getElementById('hotkeyPicker');
@@ -680,19 +657,20 @@ function openJumpFormModal(editId) {
       e.stopPropagation();
       if (hotkeyPicker.style.display !== 'none') { hotkeyPicker.style.display = 'none'; return; }
 
-      // Collect all used hotkeys (excluding this jump if editing), normalized to lowercase
+      // Collect all used hotkeys (excluding this jump if editing) → Map: normalizedKey → jump name
       const allJumps  = DB.getJumps(currentUser.id);
-      const usedKeys  = new Set(
-        allJumps
-          .filter(j => j.hotkey && j.id !== (editId || null))
-          .map(j => j.hotkey.toLowerCase().replace(/ctrl/i,'ctrl').replace(/cmd/i,'cmd'))
-      );
-      // Helper: check if a generated combo matches any stored hotkey (normalize mod key)
-      function isUsed(combo) {
+      const usedKeys  = new Map();
+      allJumps
+        .filter(j => j.hotkey && j.id !== (editId || null))
+        .forEach(j => {
+          const norm = j.hotkey.toLowerCase().replace(/ctrl/i,'ctrl').replace(/cmd/i,'cmd');
+          usedKeys.set(norm, j.name);
+        });
+      // Helper: return jump name if combo is used, else null
+      function usedBy(combo) {
         const norm = combo.toLowerCase();
-        // Also check with swapped mod (Cmd↔Ctrl) for cross-platform stored hotkeys
         const swapped = norm.replace(/^cmd/, 'ctrl').replace(/^ctrl/, 'cmd');
-        return usedKeys.has(norm) || usedKeys.has(swapped);
+        return usedKeys.get(norm) || usedKeys.get(swapped) || null;
       }
 
       const mod = 'Ctrl';
@@ -702,19 +680,46 @@ function openJumpFormModal(editId) {
       for (let i = 65; i <= 90; i++) allCombos.push(`${mod}+Shift+${String.fromCharCode(i)}`);
       for (let i = 0; i <= 9; i++) allCombos.push(`${mod}+Shift+${i}`);
 
-      hotkeyPicker.innerHTML = allCombos.map(k => {
-        const used = isUsed(k);
-        const bg   = used ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)';
-        const col  = used ? '#ef4444' : '#22c55e';
-        const cur  = used ? 'default' : 'pointer';
-        const jaction = used ? '' : `data-jaction="pick-hotkey" data-key="${k}"`;
-        return `<button type="button" ${jaction} style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid ${col};background:${bg};color:${col};cursor:${cur};opacity:${used ? '0.7' : '1'}">${k}</button>`;
+      const clearBtn = `<button type="button" data-jaction="pick-hotkey" data-key="" style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid var(--border);background:var(--bg-hover);color:var(--text-muted);cursor:pointer">✕ Clear</button><div style="border-top:1px solid var(--border);margin:6px 0 4px"></div>`;
+      hotkeyPicker.innerHTML = clearBtn + allCombos.map(k => {
+        const owner  = usedBy(k);
+        const bg     = owner ? 'rgba(239,68,68,0.10)' : 'rgba(34,197,94,0.10)';
+        const col    = owner ? '#ef4444' : '#22c55e';
+        const cur    = owner ? 'default' : 'pointer';
+        const jaction = owner ? '' : `data-jaction="pick-hotkey" data-key="${k}"`;
+        const ownerAttr = owner ? `data-hotkey-owner="${owner.replace(/"/g,'&quot;')}"` : '';
+        return `<button type="button" ${jaction} ${ownerAttr} style="font-size:0.75rem;padding:4px 10px;margin:3px 2px;border-radius:6px;border:1px solid ${col};background:${bg};color:${col};cursor:${cur};opacity:${owner ? '0.7' : '1'}">${k}</button>`;
       }).join('');
       hotkeyPicker.style.display = 'block';
+
+      // Custom instant tooltip for used hotkeys
+      let _hkTip = document.getElementById('hotkeyOwnerTip');
+      if (!_hkTip) {
+        _hkTip = document.createElement('div');
+        _hkTip.id = 'hotkeyOwnerTip';
+        _hkTip.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.78rem;color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.25);white-space:nowrap;display:none';
+        document.body.appendChild(_hkTip);
+      }
+      hotkeyPicker.addEventListener('mouseover', ev => {
+        const target = ev.target.closest('[data-hotkey-owner]');
+        if (!target) { _hkTip.style.display = 'none'; return; }
+        _hkTip.textContent = 'Used by: ' + target.dataset.hotkeyOwner;
+        _hkTip.style.display = 'block';
+        const r = target.getBoundingClientRect();
+        _hkTip.style.left = r.left + 'px';
+        _hkTip.style.top  = (r.bottom + 4) + 'px';
+      });
+      hotkeyPicker.addEventListener('mouseout', ev => {
+        if (!ev.relatedTarget?.closest('[data-hotkey-owner]')) _hkTip.style.display = 'none';
+      });
     });
 
     // Close picker when clicking outside
-    document.addEventListener('click', () => { hotkeyPicker.style.display = 'none'; }, { once: false, capture: false });
+    document.addEventListener('click', () => {
+      hotkeyPicker.style.display = 'none';
+      const tip = document.getElementById('hotkeyOwnerTip');
+      if (tip) tip.style.display = 'none';
+    }, { once: false, capture: false });
   }
 }
 
@@ -1233,9 +1238,15 @@ document.addEventListener('click', e => {
     case 'show-upgrade-modal':  showUpgradeModal(btn.dataset.title, btn.dataset.msg); break;
     case 'pick-hotkey': {
       e.stopPropagation(); // prevent hotkeyPicker close-on-click listener from firing
-      const inp = document.getElementById('jHotkey');
+      const inp    = document.getElementById('jHotkey');
+      const lbl    = document.getElementById('btnPickHotkeyLabel');
       const picker = document.getElementById('hotkeyPicker');
-      if (inp) inp.value = btn.dataset.key;
+      const key    = btn.dataset.key || '';
+      if (inp) inp.value = key;
+      if (lbl) {
+        lbl.textContent = key || 'Select a hotkey…';
+        lbl.style.color = key ? 'var(--text)' : 'var(--text-dim)';
+      }
       if (picker) picker.style.display = 'none';
       break;
     }

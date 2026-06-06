@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script>document.documentElement.dataset.theme = localStorage.getItem('jk_theme') || 'dark';</script>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JumpKit — Sign In</title>
+  <link rel="icon" type="image/png" href="img/logo-sm.png"/>
+  <link rel="stylesheet" href="css/vars.css"/>
+  <link rel="stylesheet" href="css/auth.css"/>
+  <!-- Tabler Icons: SVG sprite (crisp at any resolution, no webfont blur) -->
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ── Auth Tabs ── */
+    .auth-tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+      background: var(--bg-input);
+      border-radius: var(--radius);
+      padding: 0;
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .auth-tab {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 10px 10px;
+      border-radius: 0;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      border-right: 1px solid rgba(255,255,255,0.03);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .auth-tab:last-child { border-right: none; }
+    [data-theme="light"] .auth-tab { border-right-color: rgba(0,0,0,0.08); }
+    [data-theme="light"] .auth-tab:last-child { border-right: none; }
+    .auth-tab .ti { font-size: 1.2rem; }
+    .auth-tab.active {
+      background: var(--bg-card);
+      color: var(--turq);
+      box-shadow: none;
+    }
+    .auth-tab:hover:not(.active) {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body class="auth-body">
+  <button class="auth-theme-btn" id="themeBtn">☀️</button>
+
+  <!-- SHARED LOGO / TABS WRAPPER -->
+  <div class="auth-card" id="authCard">
+    <div class="auth-header">
+    <div class="auth-logo"><img id="authLogoMain" src="img/logo.png" alt="JumpKit" class="auth-logo-img"/></div>
+    <p class="auth-tagline">Stop searching. Start jumping.</p>
+
+    <!-- TABS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-view="viewLogin">
+        <svg class="ti ti-login"><use href="img/tabler-sprite.svg#tabler-login"/></svg> Sign In
+      </button>
+      <button class="auth-tab" data-view="viewSignup">
+        <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Sign Up
+      </button>
+    </div>
+    </div><!-- /auth-header -->
+    <div class="auth-view-content">
+
+    <!-- SIGN IN -->
+    <div id="viewLogin">
+      <h2 class="auth-title">Welcome back</h2>
+      <p class="auth-sub">Sign in to your account</p>
+      <div class="auth-alert" id="loginAlert"></div>
+      <form id="loginForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="loginEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="loginPassword" placeholder="••••••••"/>
+          <span class="form-error" id="loginPassErr">Password is required.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="loginBtn" style="margin-top:4px"><span class="btn-spinner"></span><span class="btn-label" style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><svg class="ti ti-login" style="width:1.32rem;height:1.32rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-login"/></svg>Sign In</span></button>
+      </form>
+      <div class="auth-footer">
+        <a onclick="showView('viewForgot')" style="cursor:pointer">Forgot password?</a>
+      </div>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="viewSignup" style="display:none">
+      <h2 class="auth-title">Create account</h2>
+      <p class="auth-sub">Get started for free</p>
+      <div class="auth-alert" id="signupAlert"></div>
+      <form id="signupForm" novalidate>
+        <div class="form-group" style="display:flex;gap:10px;">
+          <div style="flex:1">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" id="signupFirstName" placeholder="Jeff"/>
+            <span class="form-error" id="signupFirstNameErr">First name is required.</span>
+          </div>
+          <div style="flex:1">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" id="signupLastName" placeholder="Smith"/>
+            <span class="form-error" id="signupLastNameErr">Last name is required.</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="signupEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="signupEmailErr">Please enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="signupPassword" placeholder="Min 8 characters"/>
+          <span class="form-error" id="signupPassErr">Password must be at least 8 characters.</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-input" id="signupConfirm" placeholder="Re-enter password"/>
+          <span class="form-error" id="signupConfirmErr">Passwords do not match.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="signupBtn" style="margin-top:4px"><span class="btn-spinner"></span><span class="btn-label" style="display:inline-flex;align-items:center;gap:6px;white-space:nowrap"><svg class="ti ti-user-plus" style="width:1.32rem;height:1.32rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg>Create Account</span></button>
+      </form>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div id="viewForgot" style="display:none">
+      <h2 class="auth-title">Reset password</h2>
+      <p class="auth-sub">Enter your email and we'll send a reset link.</p>
+      <div class="auth-alert" id="forgotAlert"></div>
+      <form id="forgotForm" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="forgotEmail" placeholder="you@example.com"/>
+          <span class="form-error" id="forgotEmailErr">Please enter a valid email.</span>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Send Reset Link</button>
+      </form>
+      <div class="auth-footer"><a onclick="showView('viewLogin')" style="cursor:pointer">← Back to sign in</a></div>
+        </div><!-- /auth-view-content -->
+  </div><!-- /authCard -->
+
+  <script src="supabase/config.js"></script>
+  <script src="supabase/client.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    // Wire password reveal toggles on auth page
+    document.addEventListener('DOMContentLoaded', () => {
+      function wirePwToggles() {
+        document.querySelectorAll('input[type="password"]:not([data-pw-wired])').forEach(input => {
+          input.setAttribute('data-pw-wired', '1');
+          const wrap = document.createElement('div');
+          wrap.className = 'pw-wrap';
+          input.parentNode.insertBefore(wrap, input);
+          wrap.appendChild(input);
+          const btn = document.createElement('button');
+          btn.type = 'button'; btn.className = 'pw-eye'; btn.setAttribute('tabindex', '-1');
+          btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+          btn.addEventListener('click', () => {
+            const show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            btn.innerHTML = show
+              ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+              : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+          });
+          wrap.appendChild(btn);
+        });
+      }
+      wirePwToggles();
+      // Re-wire when tabs switch (new fields may appear)
+      document.querySelectorAll('.auth-tab').forEach(tab => tab.addEventListener('click', () => requestAnimationFrame(wirePwToggles)));
+    });
+  </script>
+</body>
+</html>

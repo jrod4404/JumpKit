@@ -49,18 +49,14 @@ _Last updated: 2026-06-01_
 
 ## 🔴 High Priority
 
-- [ ] **Paywall E2E** — Real Lemon Squeezy purchase → webhook → profile upgrade → welcome-core email still untested end-to-end
+- [ ] **Create LLC for JumpKit** — Form Michigan LLC (broader name like "Roder Software LLC"); update Apple Developer account entity; rebuild + re-notarize installer under LLC name; update Lemon Squeezy payout info
+
+- [x] **Paywall E2E** — Full E2E tested 2026-06-06: checkout → webhook (200) → profile upgrade → welcome email → upgrade modal → cancellation → downgrade → cancellation email → "Subscription Ended" modal ✅
 
 ---
 
 ## 🟡 Medium Priority
 
-- [ ] **Rebuild and redistribute installers** — current builds (Jun 1) are unsigned on Mac. Users see "unidentified developer" warning on first install. Requires Apple Developer Account.
+- [ ] **Rebuild and redistribute installers** — current builds (Jun 1) are unsigned on Mac. Users see "unidentified developer" warning on first install. Apple Developer Account now enrolled (Order #W1459598921). Next: generate Developer ID cert → configure electron-builder → notarize → rebuild → publish to GitHub.
 
----
 
-## 🔵 Low Priority / Post-launch
-
-- [ ] **Dev vs. prod Supabase separation** — duplicate project/config, add environment switching
-- [ ] **Pagination on large lists** — teams, members, invites; keep UI responsive at scale
-- [ ] **Supabase backups** — verify/upgrade plan (currently Pro = daily backups, verify in dashboard)

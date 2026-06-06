@@ -48,9 +48,9 @@ serve(async (req) => {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: 'JumpKit <noreply@jumpkit.ai>',
+        from: 'JumpKit <noreply@jumpkit.app>',
         to: email,
-        subject: 'Welcome to JumpKit Core ⚡',
+        subject: 'Welcome to JumpKit Unlimited ⚡',
         html,
       }),
     });
@@ -85,14 +85,14 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
 
     <!-- BODY -->
     <tr><td style="padding:36px 40px">
-      <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You're now on JumpKit Core, ${esc(firstName)}! ⚡</h2>
+      <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You're now on JumpKit Unlimited, ${esc(firstName)}! ⚡</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
         Thank you for upgrading. Your Core subscription is active and you've unlocked everything JumpKit has to offer.
       </p>
 
       <!-- What's unlocked -->
       <div style="background:rgba(80,202,204,0.06);border-radius:10px;padding:20px 24px;border:1px solid rgba(80,202,204,0.15);margin-bottom:24px">
-        <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#50CACC">What's included in Core:</p>
+        <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#50CACC">What's included in JumpKit Unlimited:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
             <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited personal jumps

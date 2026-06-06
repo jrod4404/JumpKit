@@ -208,15 +208,21 @@ ipcMain.handle('write-test-results', (_e, content) => {
 });
 
 // ── IPC: save-backup ──────────────────────────────────────────────
-ipcMain.handle('save-backup', (_e, jsonStr) => {
+ipcMain.handle('save-backup', async (_e, jsonStr) => {
   try {
     const fs = require('fs');
-    const os = require('os');
-    const backupDir = path.join(os.homedir(), 'Documents', 'JumpKit Backups');
-
-    if (!fs.existsSync(backupDir)) fs.mkdirSync(backupDir, { recursive: true });
+    const { dialog } = require('electron');
     const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const filePath = path.join(backupDir, `jumpkit-backup-${ts}.json`);
+    const defaultName = `jumpkit-backup-${ts}.json`;
+
+    const { canceled, filePath } = await dialog.showSaveDialog({
+      title: 'Export JumpKit Backup',
+      defaultPath: defaultName,
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+      buttonLabel: 'Export'
+    });
+
+    if (canceled || !filePath) return { ok: false, reason: 'canceled' };
     fs.writeFileSync(filePath, jsonStr, 'utf8');
     return { ok: true, path: filePath };
   } catch (e) {

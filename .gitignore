@@ -9,3 +9,4 @@ out/
 *.AppImage
 *.deb
 *.rpm
+.vercel
