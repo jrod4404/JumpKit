@@ -3710,6 +3710,24 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-06</h3>
+<ul>
+  <li><strong>Paywall E2E — fully tested and fixed:</strong> Complete checkout → webhook → profile upgrade → welcome email → in-app modal → cancellation → downgrade flow tested end-to-end. All bugs found and fixed.</li>
+  <li><strong>Lemon Squeezy products recreated:</strong> New variant IDs — Annual: 1754948, Monthly: 1754951. New checkout URL: <code>81c37b98-510a-4ca9-9849-06f10fd3a8d0</code>. Webhook signing secret updated (40-char). All 3 edge functions (<code>ls-webhook</code>, <code>send-welcome-core</code>, <code>send-cancellation</code>) redeployed with <code>--no-verify-jwt</code>.</li>
+  <li><strong>Cancellation bug fix:</strong> <code>subscription_updated</code> event with <code>status: cancelled</code> now correctly resets <code>subscription_tier</code> to <code>free</code> (was staying as <code>core</code>).</li>
+  <li><strong>Cancelled user login UX:</strong> Cancelled subscribers now see a &ldquo;Subscription Ended&rdquo; modal with Reactivate CTA instead of the generic &ldquo;Launch Limit Reached&rdquo; paywall. Modal throttled to once per 24h per user.</li>
+  <li><strong>Welcome email subject:</strong> Updated from &ldquo;Welcome to JumpKit Core&rdquo; → &ldquo;Welcome to JumpKit Unlimited&rdquo;.</li>
+  <li><strong>Trial launch counting fix:</strong> Counter now increments for <code>subscription_tier = null/free/cancelled</code> users (was strict <code>=== 'free'</code> status check, missing null and cancelled accounts).</li>
+  <li><strong>Stats/Account live refresh:</strong> Jump clicks now immediately update the launch counter on Stats and Account pages without requiring navigation. Fixed <code>window.activePage</code> not being exposed to <code>jumps.js</code>; exposed <code>renderStats</code> and <code>renderAccount</code> as window globals.</li>
+  <li><strong>Stats page improvements:</strong> Max-width bumped to 960px (matches Teams/Settings). Period views (daily/weekly/monthly/yearly) now render Launches by Column donut. Top Jumps renamed to &ldquo;Top 10 Jumps&rdquo;, shows 10 entries (was 8/5), scroll bar removed. Donut height 310px for visual symmetry. No border on last row.</li>
+  <li><strong>Deleted jump names preserved:</strong> Click log now stores jump name at click time. On load, backfills names for all existing entries. Deleted jumps appear as <em>Name (removed)</em> in dimmed italic instead of just &ldquo;Removed&rdquo;.</li>
+  <li><strong>Export (manual backup) fixes:</strong> Now uses native Save dialog (fixes macOS EACCES permission error on <code>~/Documents</code>). Strips internal fields (<code>userId</code>, <code>supabaseId</code>, <code>sharedTeams</code>) from JSON output.</li>
+  <li><strong>Shared jump notification false positive:</strong> &ldquo;New shared jump added&rdquo; notification no longer fires when the current user created the jump (was firing on every sync for owner-created shared jumps).</li>
+  <li><strong>Account page CTA hero:</strong> Moved above the My Account / My Teams / Settings tab slider.</li>
+  <li><strong>UI polish:</strong> Sidebar CTA font reduced; <code>buildUnlockButton</code> fontSize/padding opts now correctly apply to span element; hero CTA buttons 0.83rem font with 1.1rem lock icon; Stats hero gradient background matches Account page; all &ldquo;upgrade to Core&rdquo; copy updated to &ldquo;JumpKit Unlimited&rdquo;.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-06</code>.</li>
+</ul>
+
 <h3>2026-05-31</h3>
 <ul>
   <li><strong>Free tier paywall rules enforced:</strong> Free users limited to owning 1 team (<code>openAddTeamModal</code> blocks if already own 1) and joining 1 team as a member (<code>openJoinTeamModal</code> blocks if already a member of 1 team). Both show upgrade modal on violation.</li>
