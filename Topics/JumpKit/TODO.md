@@ -49,7 +49,7 @@ _Last updated: 2026-06-01_
 
 ## 🔴 High Priority
 
-- [ ] **Create LLC for JumpKit** — Form Michigan LLC (broader name like "Roder Software LLC"); update Apple Developer account entity; rebuild + re-notarize installer under LLC name; update Lemon Squeezy payout info
+- [ ] **Create LLC for JumpKit** — Name: **JumpKit LLC** (or broader holding name TBD). Form Michigan LLC; update Apple Developer account entity; rebuild + re-notarize installer under LLC name; update Lemon Squeezy payout info
 
 - [x] **Paywall E2E** — Full E2E tested 2026-06-06: checkout → webhook (200) → profile upgrade → welcome email → upgrade modal → cancellation → downgrade → cancellation email → "Subscription Ended" modal ✅
 
@@ -57,6 +57,6 @@ _Last updated: 2026-06-01_
 
 ## 🟡 Medium Priority
 
-- [ ] **Rebuild and redistribute installers** — current builds (Jun 1) are unsigned on Mac. Users see "unidentified developer" warning on first install. Apple Developer Account now enrolled (Order #W1459598921). Next: generate Developer ID cert → configure electron-builder → notarize → rebuild → publish to GitHub.
+- [x] **Signed installers built and distributed** — Apple Developer Account enrolled (Order #W1459598921), Developer ID cert generated (Jeff Roder, ZDJSH728ND), electron-builder configured with hardenedRuntime + notarize.js hook. Signed + notarized DMG and EXE published to GitHub Releases (jrod4404/jumpkit-releases).
 
 
