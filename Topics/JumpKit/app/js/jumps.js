@@ -444,7 +444,8 @@ function handleJumpClick(id) {
     }
   }
   refreshStatsBar();
-  if (window.activePage === 'stats' && typeof renderStatsDash === 'function') renderStatsDash();
+  if (window.activePage === 'stats' && typeof renderStats === 'function') renderStats();
+  if (['account','teams','settings'].includes(window.activePage) && typeof renderAccount === 'function') renderAccount();
   Toast.success(`Launched <strong>${esc(jump.name)}</strong>`);
   if (window.electronAPI?.isElectron) {
     window.electronAPI.openUrl(jump.url, !!(jump.isShared || jump.teamId));

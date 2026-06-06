@@ -459,11 +459,13 @@ const pageIcons = {
   stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', jet:'ti-brain', feedback:'ti-message-circle', teams:'ti-user-circle', tests:'ti-test-pipe'
 };
 let activePage = 'home';
+window.activePage = activePage;
 
 window.navigateTo = function navigateTo(page) {
   // Kill any lingering tooltip before DOM swap
   document.documentElement.classList.add('hide-tooltips');
   activePage = page;
+  window.activePage = page;
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.page === page);
   });
@@ -699,7 +701,7 @@ const Toast = window.Toast = (() => {
 // Route and direct links still work: navigateTo('settings') -> renderAccount('settings').
 function renderSettings() { renderAccount('settings'); }
 
-function renderAccount(initialTab = 'account') {
+window.renderAccount = function renderAccount(initialTab = 'account') {
   const u = currentUser;
   const sbUser = window._supabaseUser || {};
   const sbProfile = window._supabaseProfile || {};
@@ -1157,7 +1159,7 @@ function loadScript(src) {
   });
 }
 
-async function renderStats() {
+window.renderStats = async function renderStats() {
   await loadScript('js/chart.min.js');
   const _statsTier = window._supabaseProfile?.subscription_tier || 'free';
   const _statsLaunchesUsed = window._supabaseProfile?.trial_launches_used || 0;
