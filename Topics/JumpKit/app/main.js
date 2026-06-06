@@ -50,8 +50,10 @@ function initDB() {
         id        INTEGER PRIMARY KEY AUTOINCREMENT,
         userId    TEXT NOT NULL,
         jumpId    TEXT NOT NULL,
-        ts        INTEGER NOT NULL
+        ts        INTEGER NOT NULL,
+        jumpName  TEXT
       );
+
       CREATE TABLE IF NOT EXISTS user_prefs (
         userId             TEXT PRIMARY KEY,
         startPage          TEXT DEFAULT 'home',
@@ -381,10 +383,21 @@ ipcMain.handle('get-click-log', (_e, userId) => {
 });
 
 // ── IPC: log-click ─────────────────────────────────────────────────
-ipcMain.handle('log-click', (_e, userId, jumpId, ts) => {
+// Migrate: add jumpName column if missing (safe no-op if already exists)
+try { db && db.prepare('ALTER TABLE click_log ADD COLUMN jumpName TEXT').run(); } catch (_) {}
+
+// ── IPC: log-click-name (backfill jumpName by row id) ─────────────
+ipcMain.handle('log-click-name', (_e, id, jumpName) => {
   if (!db) return { ok: false };
   try {
-    db.prepare('INSERT INTO click_log (userId, jumpId, ts) VALUES (?, ?, ?)').run(userId, jumpId, ts || Date.now());
+    db.prepare('UPDATE click_log SET jumpName = ? WHERE id = ?').run(jumpName, id);
+    return { ok: true };
+  } catch (e) { return { ok: false }; }
+});
+ipcMain.handle('log-click', (_e, userId, jumpId, ts, jumpName) => {
+  if (!db) return { ok: false };
+  try {
+    db.prepare('INSERT INTO click_log (userId, jumpId, ts, jumpName) VALUES (?, ?, ?, ?)').run(userId, jumpId, ts || Date.now(), jumpName || null);
     return { ok: true };
   } catch (e) {
     return { ok: false, reason: e.message };

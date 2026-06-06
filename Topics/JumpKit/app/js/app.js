@@ -733,8 +733,23 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const ACCT_LABELS = { account: 'My Account', teams: 'My Teams', settings: 'Settings' };
   let currentAcctTab = ACCT_TABS.includes(initialTab) ? initialTab : 'account';
 
+  const _upgradeBannerHTML = (tier === 'free') ? `
+    <div class="acct-upgrade-banner" style="max-width:960px;margin:0 auto 16px;width:100%">
+      <div>
+        <h3>Unlock JumpKit Unlimited</h3>
+        <p>Remove all limits and unlock full team collaboration.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:10px">
+          ${['Unlimited jump launches','Own unlimited teams','Join unlimited teams as a member','Unlimited shared jumps','Full team collaboration &amp; sharing','Auto cloud backup'].map(f=>`<div style="display:flex;align-items:flex-start;gap:7px;font-size:0.85rem;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:0.95rem;height:0.95rem;flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${f}</div>`).join('')}
+        </div>
+      </div>
+      <div class="acct-upgrade-cta">
+        ${buildUnlockButton('Unlock JumpKit Unlimited', {width:'100%', fontSize:'0.83rem', padding:'8px 16px'})}
+      </div>
+    </div>` : '';
+
   document.getElementById('pageContent').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:0;height:100%">
+      ${_upgradeBannerHTML}
       <div style="max-width:960px;margin:0 auto;width:100%;flex-shrink:0;padding:0 0 16px 0">
         <div class="jump-filter-bar" id="acctTabBar">
           <div class="jfb-slider" id="acctTabPill"></div>
@@ -750,29 +765,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     if (tab === 'account') {
       el.innerHTML = `
         <div class="acct-grid">
-          ${tier === 'free' ? `
-          <div class="acct-upgrade-banner">
-            <div>
-              <h3>Unlock JumpKit Unlimited</h3>
-              <p>Remove all limits and unlock full team collaboration.</p>
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:10px">
-                ${[
-                  'Unlimited jump launches',
-                  'Own unlimited teams',
-                  'Join unlimited teams as a member',
-                  'Unlimited shared jumps',
-                  'Full team collaboration &amp; sharing',
-                  'Auto cloud backup',
-                ].map(f => `<div style="display:flex;align-items:flex-start;gap:7px;font-size:0.85rem;color:var(--text-muted)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:0.95rem;height:0.95rem;flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>
-                  ${f}
-                </div>`).join('')}
-              </div>
-            </div>
-            <div class="acct-upgrade-cta">
-              ${buildUnlockButton('Unlock JumpKit Unlimited', {width:'100%', fontSize:'0.83rem', padding:'8px 16px'})}
-            </div>
-          </div>` : ''}
+
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
             <div class="acct-row">
@@ -1291,7 +1284,7 @@ function renderStatsDash() {
     const byJump = {};
     log.forEach(e => { byJump[e.jumpId]=(byJump[e.jumpId]||0)+1; });
     const top8 = Object.entries(byJump).sort((a,b)=>b[1]-a[1]).slice(0,8)
-      .map(([id,ct]) => ({ name: jumps.find(j=>j.id===id)?.name||'Removed', ct }));
+      .map(([id,ct]) => { const _n=jumps.find(j=>j.id===id)?.name; const _logName=log.find(e=>e.jumpId===id)?.jumpName; return { name: _n||(_logName?`${_logName} (removed)`:'Removed'), removed:!_n, ct }; });
 
     // By column doughnut
     const byCol = {};
@@ -1317,7 +1310,7 @@ function renderStatsDash() {
     const topRows = top8.map((j,i)=>`
       <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.84rem">
         <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i+1}</span>
-        <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.name)}</span>
+        <span style="flex:1;color:${j.removed?'var(--text-dim)':'var(--text-muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:${j.removed?'italic':'normal'}">${esc(j.name)}</span>
         <span style="font-weight:700;color:var(--hover-accent)">${j.ct}</span>
       </div>`).join('');
 
@@ -1411,11 +1404,11 @@ function renderStatsDash() {
   });
   const colEntriesP = Object.entries(byColP).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const top5P = Object.entries(byJumpP).sort((a,b)=>b[1]-a[1]).slice(0,5)
-    .map(([id,ct]) => ({ name: jumps.find(j=>j.id===id)?.name||'Removed', ct }));
+    .map(([id,ct]) => { const _n=jumps.find(j=>j.id===id)?.name; const _logName=clicks.find(e=>e.jumpId===id)?.jumpName; return { name: _n||(_logName?`${_logName} (removed)`:'Removed'), removed:!_n, ct }; });
   const topRowsP = top5P.map((j,i)=>`
     <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.84rem">
       <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i+1}</span>
-      <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(j.name)}</span>
+      <span style="flex:1;color:${j.removed?'var(--text-dim)':'var(--text-muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:${j.removed?'italic':'normal'}">${esc(j.name)}</span>
       <span style="font-weight:700;color:var(--hover-accent)">${j.ct}</span>
     </div>`).join('');
 

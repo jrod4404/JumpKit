@@ -431,8 +431,10 @@ async function syncSharedJumps() {
           teamId: rj.team_id,
           supabaseId: rj.id,
         });
-        // Track new shared jump for notification (skip on first-ever sync when no prior shared jumps)
-        if (existingSharedJumpIds.size > 0 && !existingSharedJumpIds.has(rj.id)) {
+        // Track new shared jump for notification
+        // Skip: first-ever sync, or jump was created by the current user (they already know)
+        const _createdByMe = rj.created_by && window._supabaseUser?.id && rj.created_by === window._supabaseUser.id;
+        if (existingSharedJumpIds.size > 0 && !existingSharedJumpIds.has(rj.id) && !_createdByMe) {
           if (!_newJumpsByTeam[rj.team_id]) _newJumpsByTeam[rj.team_id] = [];
           _newJumpsByTeam[rj.team_id].push(rj.name);
         }

@@ -95,6 +95,22 @@ const DB = (() => {
           this._cache.clickLog = log     || [];
           this._cache.prefs    = prefs   || defaultPrefs();
 
+          // Backfill jumpName on existing click log entries where it's missing
+          // This preserves names for currently-existing jumps if they're deleted later
+          let _backfillDirty = false;
+          this._cache.clickLog.forEach(e => {
+            if (!e.jumpName) {
+              const _j = this._cache.jumps.find(j => j.id === e.jumpId);
+              if (_j?.name) { e.jumpName = _j.name; _backfillDirty = true; }
+            }
+          });
+          if (_backfillDirty && window.electronAPI?.logClickName) {
+            // Persist backfilled names to SQLite
+            this._cache.clickLog.filter(e => e.jumpName && e.id).forEach(e => {
+              window.electronAPI.logClickName(e.id, e.jumpName).catch(() => {});
+            });
+          }
+
           // Auto-seed if this user has no personal (non-shared) columns
           // Re-fetch columns fresh after any migration to avoid seeding over existing data
           const freshCols = await window.electronAPI.getColumns(userId);
@@ -270,7 +286,8 @@ const DB = (() => {
         this._cache.jumps[idx].updatedAt  = Date.now();
         this._persistJump(userId, this._cache.jumps[idx]);
       }
-      this.logClick(userId, id);
+      const _clickedJump = this._cache.jumps.find(j => j.id === id);
+      this.logClick(userId, id, _clickedJump?.name || null);
     },
 
     getActiveJumps(userId)   { return this.getJumps(userId).filter(j => !j.isArchived); },
@@ -281,8 +298,8 @@ const DB = (() => {
       return this._cache.clickLog.filter(e => e.userId === userId);
     },
 
-    logClick(userId, jumpId) {
-      const entry = { userId, jumpId, ts: Date.now() };
+    logClick(userId, jumpId, jumpName) {
+      const entry = { userId, jumpId, ts: Date.now(), jumpName: jumpName || null };
       this._cache.clickLog.push(entry);
       // Trim in-memory log to 10 000 entries per user
       const userLog = this._cache.clickLog.filter(e => e.userId === userId);
@@ -295,7 +312,7 @@ const DB = (() => {
         });
       }
       if (window.electronAPI) {
-        window.electronAPI.logClick(userId, jumpId, entry.ts).catch(e => console.warn('[DB.logClick]', e));
+        window.electronAPI.logClick(userId, jumpId, entry.ts, jumpName).catch(e => console.warn('[DB.logClick]', e));
       } else {
         lsSet(`jk_clicks_${userId}`, this.getClickLog(userId));
       }
