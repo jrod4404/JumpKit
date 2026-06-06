@@ -1283,7 +1283,7 @@ function renderStatsDash() {
   if (currentStatView === 'summary') {
     const byJump = {};
     log.forEach(e => { byJump[e.jumpId]=(byJump[e.jumpId]||0)+1; });
-    const top8 = Object.entries(byJump).sort((a,b)=>b[1]-a[1]).slice(0,8)
+    const top8 = Object.entries(byJump).sort((a,b)=>b[1]-a[1]).slice(0,10)
       .map(([id,ct]) => { const _n=jumps.find(j=>j.id===id)?.name; const _logName=log.find(e=>e.jumpId===id)?.jumpName; return { name: _n||(_logName?`${_logName} (removed)`:'Removed'), removed:!_n, ct }; });
 
     // By column doughnut
@@ -1308,7 +1308,7 @@ function renderStatsDash() {
 
     // Top jumps table rows
     const topRows = top8.map((j,i)=>`
-      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.84rem">
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;${i<top8.length-1?'border-bottom:1px solid var(--border);':''}font-size:0.84rem">
         <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i+1}</span>
         <span style="flex:1;color:${j.removed?'var(--text-dim)':'var(--text-muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:${j.removed?'italic':'normal'}">${esc(j.name)}</span>
         <span style="font-weight:700;color:var(--hover-accent)">${j.ct}</span>
@@ -1326,12 +1326,12 @@ function renderStatsDash() {
       </div>
       <div class="stats-chart-row">
         <div class="stats-chart-box">
-          <div class="stats-chart-title">Top Jumps</div>
-          <div style="overflow-y:auto;max-height:220px;margin-right:-18px;padding-right:18px">${topRows}</div>
+          <div class="stats-chart-title">Top 10 Jumps</div>
+          <div>${topRows}</div>
         </div>
         <div class="stats-chart-box">
           <div class="stats-chart-title">Launches by Column</div>
-          <div style="height:200px"><canvas id="chCol"></canvas></div>
+          <div style="height:310px"><canvas id="chCol"></canvas></div>
         </div>
       </div>`;
 
@@ -1403,10 +1403,10 @@ function renderStatsDash() {
     byColP[colName] = (byColP[colName] || 0) + 1;
   });
   const colEntriesP = Object.entries(byColP).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const top5P = Object.entries(byJumpP).sort((a,b)=>b[1]-a[1]).slice(0,5)
+  const top10P = Object.entries(byJumpP).sort((a,b)=>b[1]-a[1]).slice(0,10)
     .map(([id,ct]) => { const _n=jumps.find(j=>j.id===id)?.name; const _logName=clicks.find(e=>e.jumpId===id)?.jumpName; return { name: _n||(_logName?`${_logName} (removed)`:'Removed'), removed:!_n, ct }; });
-  const topRowsP = top5P.map((j,i)=>`
-    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:0.84rem">
+  const topRowsP = top10P.map((j,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:7px 0;${i<top10P.length-1?'border-bottom:1px solid var(--border);':''}font-size:0.84rem">
       <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i+1}</span>
       <span style="flex:1;color:${j.removed?'var(--text-dim)':'var(--text-muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:${j.removed?'italic':'normal'}">${esc(j.name)}</span>
       <span style="font-weight:700;color:var(--hover-accent)">${j.ct}</span>
@@ -1423,12 +1423,12 @@ function renderStatsDash() {
     </div>
     <div class="stats-chart-row">
       <div class="stats-chart-box">
-        <div class="stats-chart-title">Top Jumps This Period</div>
-        ${top5P.length ? topRowsP : '<p style="color:var(--text-dim);font-size:0.85rem">No jump data for this period.</p>'}
+        <div class="stats-chart-title">Top 10 Jumps</div>
+        ${top10P.length ? topRowsP : '<p style="color:var(--text-dim);font-size:0.85rem">No jump data for this period.</p>'}
       </div>
       <div class="stats-chart-box">
         <div class="stats-chart-title">Launches by Column</div>
-        <div style="height:200px"><canvas id="chColP"></canvas></div>
+        <div style="height:310px"><canvas id="chColP"></canvas></div>
       </div>
     </div>`;
 
