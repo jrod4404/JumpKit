@@ -49,9 +49,18 @@ _Last updated: 2026-06-01_
 
 ## 🔴 High Priority
 
-- [ ] **Create LLC for JumpKit** — Name: **JumpKit LLC** (or broader holding name TBD). Form Michigan LLC; update Apple Developer account entity; rebuild + re-notarize installer under LLC name; update Lemon Squeezy payout info
+- [ ] **Create LLC for JumpKit** — Name: **JumpKit LLC**
+  - [x] Articles of Organization filed (CD-700, Michigan, 2026-06-06) — pending state processing
+  - [x] EIN obtained (2026-06-06)
+  - [ ] State approval received
+  - [x] Relay bank account created (2026-06-06)
+  - [ ] Upload EIN letter + Articles of Organization to Relay (waiting on state docs)
+  - [ ] Update Lemon Squeezy to point to Relay bank account
+  - [ ] Draft + sign Operating Agreement
+  - [ ] Update Apple Developer account entity → rebuild + re-notarize installer
 
 - [x] **Paywall E2E** — Full E2E tested 2026-06-06: checkout → webhook (200) → profile upgrade → welcome email → upgrade modal → cancellation → downgrade → cancellation email → "Subscription Ended" modal ✅
+- [ ] **Test 5-member free-tier team cap** — verify paywall fires correctly at all 3 enforcement points: (1) `sendOrgInvites` blocks invite when team is full/over limit, (2) `sendInvites` same check, (3) `doJoinTeam` blocks join if owner is free tier and team has 4+ members. Also verify Unlimited owners are never blocked.
 
 ---
 
