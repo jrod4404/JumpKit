@@ -1453,6 +1453,8 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 @media (max-width: 645px) {
   .plan-availability { margin-bottom: 9px; }
   .plan-features[style] { padding-bottom: 0 !important; }
+  .plan-features li { font-size: 0.82rem; }
+  .plan-features li:nth-child(3) { font-size: 0.78rem; white-space: nowrap; }
 }
 
 @media (max-width: 782px) {
