@@ -851,8 +851,10 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto Cloud Backup</span><span class="acct-row-hint">Sync jumps to the cloud</span></div>
-              <label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>
+              <div class="acct-row-label"><span>Auto Cloud Backup</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Sync jumps to the cloud'}</span></div>
+              ${tier==='free'
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" onclick="showUpgradeModal('Auto Cloud Backup','Auto cloud backup is available on JumpKit Unlimited.')">Upgrade</button>`
+                : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
@@ -881,11 +883,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Archive unused jumps after</span></div>
-              <div class="custom-select acct-select" id="autoArchiveDrop">
+              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Archive unused jumps after'}</span></div>
+              ${tier==='free'
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" onclick="showUpgradeModal('Auto-Archive','Auto-archive is available on JumpKit Unlimited.')">Upgrade</button>`
+                : `<div class="custom-select acct-select" id="autoArchiveDrop">
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
-              </div>
+              </div>`}
             </div>
           </div>
           <div class="acct-save-row">
@@ -894,7 +898,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
         </div>`;
       wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
       wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
-      wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
+      if (document.getElementById('autoArchiveDrop')) wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
     }
   }
 
@@ -1026,12 +1030,12 @@ window.saveAccountPrefs = function saveAccountPrefs() {
   const prefs = {
     startPage:       startSel ? startSel.dataset.value : cur.startPage,
     notifications:   document.getElementById('prefNotif').checked,
-    cloudBackup:     document.getElementById('prefCloud').checked,
+    cloudBackup:     (window._supabaseProfile?.subscription_tier || 'free') !== 'free' && document.getElementById('prefCloud')?.checked,
     timePerClick:    Math.max(1, parseInt(document.getElementById('prefTime').value)  || cur.timePerClick),
     dollarsPerHour:  Math.max(1, parseInt(document.getElementById('prefDollar').value) || cur.dollarsPerHour),
     showDescription: document.getElementById('prefDesc').checked,
     showHotkey:      document.getElementById('prefHotkey').checked,
-    autoArchive:         archSel ? archSel.dataset.value : cur.autoArchive,
+    autoArchive:         (window._supabaseProfile?.subscription_tier || 'free') !== 'free' ? (archSel ? archSel.dataset.value : cur.autoArchive) : 'never',
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
   };
   try {
@@ -1788,6 +1792,8 @@ window.updateNotifBadge = function updateNotifBadge() {
 
 // ── Auto Archive ──────────────────────────────────────────────────
 window.runAutoArchive = function runAutoArchive() {
+  const _autoArchiveTier = window._supabaseProfile?.subscription_tier || 'free';
+  if (_autoArchiveTier === 'free') return; // auto-archive is Unlimited only
   const prefs = DB.getPrefs(currentUser.id);
   if (!prefs.autoArchive || prefs.autoArchive === 'never') return;
 
@@ -1855,6 +1861,8 @@ window.forceBackup = async function forceBackup() {
 };
 
 window.runCloudBackup = async function runCloudBackup() {
+  const _backupTier = window._supabaseProfile?.subscription_tier || 'free';
+  if (_backupTier === 'free') return; // auto-backup is Unlimited only
   const prefs = DB.getPrefs(currentUser.id);
   if (!prefs.cloudBackup) return;
 
