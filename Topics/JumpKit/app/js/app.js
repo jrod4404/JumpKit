@@ -853,7 +853,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto Cloud Backup</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Sync jumps to the cloud'}</span></div>
               ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" onclick="showUpgradeModal('Auto Cloud Backup','Auto cloud backup is available on JumpKit Unlimited.')">Upgrade</button>`
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto Cloud Backup" data-msg="Auto cloud backup is available on JumpKit Unlimited.">Upgrade</button>`
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
@@ -885,7 +885,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Archive unused jumps after'}</span></div>
               ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" onclick="showUpgradeModal('Auto-Archive','Auto-archive is available on JumpKit Unlimited.')">Upgrade</button>`
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive" data-msg="Auto-archive is available on JumpKit Unlimited.">Upgrade</button>`
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
@@ -2184,6 +2184,7 @@ document.addEventListener('click', e => {
       Modal.close();
       break;
     case 'export-stats-pdf': exportStatsPDF(); break;
+    case 'show-upgrade-modal': showUpgradeModal(btn.dataset.title || 'Upgrade', btn.dataset.msg || ''); break;
     case 'modal-close':    Modal.close(); break;
     case 'notif-dismiss': {
       const id = btn.dataset.id;
