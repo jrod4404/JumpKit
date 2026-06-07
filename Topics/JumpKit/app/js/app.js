@@ -1391,7 +1391,7 @@ function renderStatsDash() {
   }
   const ranges = {
     summary: [0, Infinity],
-    daily:   [startOf('week'),  startOf('week')+7*86400000],
+    daily:   [startOf('day')-6*86400000, startOf('day')+86400000],
     weekly:  [startOf('week')-51*7*86400000, startOf('week')+7*86400000],
     monthly: [startOf('year'),  new Date(now.getFullYear()+1,0,1).getTime()],
     yearly:  [new Date(now.getFullYear()-4,0,1).getTime(), new Date(now.getFullYear()+1,0,1).getTime()],
@@ -1508,13 +1508,15 @@ function renderStatsDash() {
   let chartLabels=[], chartData=[], chartTitle='';
 
   if (currentStatView === 'daily') {
-    // This week - one bar per day
-    chartTitle = `Launches by Day - Week of ${new Date(s).toLocaleDateString('en-US',{month:'short',day:'numeric'})}`;
-    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((_,i)=>{
-      const ds = s + i*86400000;
-      chartLabels.push(['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][i]);
-      chartData.push(clicks.filter(e=>e.ts>=ds&&e.ts<ds+86400000).length);
-    });
+    // Last 7 days - one bar per day
+    chartTitle = 'Launches by Day - Last 7 Days';
+    for (let i = 6; i >= 0; i--) {
+      const ds = startOf('day') - i*86400000;
+      const de = ds + 86400000;
+      const d  = new Date(ds);
+      chartLabels.push(i === 0 ? 'Today' : d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'}));
+      chartData.push(clicks.filter(e=>e.ts>=ds&&e.ts<de).length);
+    }
   } else if (currentStatView === 'weekly') {
     // Last 52 calendar weeks - one bar per week
     chartTitle = `Launches by Week - Last 52 Weeks`;
