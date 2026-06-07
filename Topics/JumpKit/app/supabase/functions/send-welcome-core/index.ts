@@ -87,7 +87,7 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
     <tr><td style="padding:36px 40px">
       <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You're now on JumpKit Unlimited, ${esc(firstName)}! ⚡</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
-        Thank you for upgrading. Your Core subscription is active and you've unlocked everything JumpKit has to offer.
+        Thank you for upgrading. Your Unlimited subscription is active and you've unlocked everything JumpKit has to offer.
       </p>
 
       <!-- What's unlocked -->
@@ -95,16 +95,19 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#50CACC">What's included in JumpKit Unlimited:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited personal jumps
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited jump launches
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Create and manage teams
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited teams, members &amp; jumps
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Shared team jumps synced across all members
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal &amp; team ROI dashboard
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Priority support
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Auto-archive &amp; auto-backup
+          </td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Early access to new features
           </td></tr>
         </table>
       </div>

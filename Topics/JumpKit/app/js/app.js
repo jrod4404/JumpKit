@@ -739,7 +739,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
         <h3>Unlock JumpKit Unlimited</h3>
         <p>Remove all limits and unlock full team collaboration.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:10px">
-          ${['Unlimited jump launches','Own unlimited teams','Join unlimited teams as a member','Unlimited shared jumps','Full team collaboration &amp; sharing','Auto cloud backup'].map(f=>`<div style="display:flex;align-items:flex-start;gap:7px;font-size:0.85rem;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:0.95rem;height:0.95rem;flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${f}</div>`).join('')}
+          ${['Unlimited jump launches','Unlimited teams, members &amp; jumps','Personal &amp; team ROI dashboard','Auto-archive &amp; auto-backup','Early access to new features'].map(f=>`<div style="display:flex;align-items:flex-start;gap:7px;font-size:0.85rem;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:0.95rem;height:0.95rem;flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${f}</div>`).join('')}
         </div>
       </div>
       <div class="acct-upgrade-cta">
@@ -1573,7 +1573,7 @@ window.showPaywall = function() {
     <div style="text-align:center;padding:16px 0">
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px">Your free trial has ended</h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:24px;line-height:1.6">
-        You've used all 250 free launches.<br>Upgrade to JumpKit Unlimited for unlimited launches, unlimited teams, and unlimited shared jumps.
+        You've used all 250 free launches.<br>Upgrade to JumpKit Unlimited for unlimited launches, unlimited teams, members &amp; jumps.
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
@@ -1770,12 +1770,11 @@ window.checkAndHandleUpgrade = function checkAndHandleUpgrade(tier) {
   try {
     const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : 'JumpKit Unlimited';
     const comparisons = [
-      { free: '250 lifetime launches',              core: 'Unlimited launches' },
-      { free: 'Own 1 team',                         core: 'Own unlimited teams' },
-      { free: 'Join 1 team as a member',            core: 'Join unlimited teams as a member' },
-      { free: '10 jumps visible per shared column', core: 'Unlimited shared jumps' },
-      { free: 'Basic jump management',              core: 'Full team collaboration &amp; sharing' },
-      { free: '-',                                  core: 'Auto cloud backup' },
+      { free: '250 jump launches',                    core: 'Unlimited jump launches' },
+      { free: '2 teams · 5 members · 10 jumps/team',  core: 'Unlimited teams, members &amp; jumps' },
+      { free: 'Personal ROI dashboard',               core: 'Personal &amp; team ROI dashboard' },
+      { free: '—',                                    core: 'Auto-archive &amp; auto-backup' },
+      { free: '—',                                    core: 'Early access to new features' },
     ];
 
     const rows = comparisons.map((c, i) => `
@@ -1794,7 +1793,7 @@ window.checkAndHandleUpgrade = function checkAndHandleUpgrade(tier) {
         <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:4px 0;margin-bottom:4px;font-size:0.75rem;color:var(--text-dim);padding:0 0 4px">
           <span style="text-align:right;padding-right:10px">Free</span>
           <span style="width:1rem"></span>
-          <span style="padding-left:10px">Core</span>
+          <span style="padding-left:10px">Unlimited</span>
         </div>
         ${rows}
       </div>`;
@@ -1907,7 +1906,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
         </div>
         <p style="margin:12px 0">Your account has been moved to the free tier.${hasChanges ? ' The following changes were made:' : ''}</p>
         ${changesList}
-        <p style="margin:12px 0">Reactivate Core to restore unlimited teams, unlimited shared jumps, and unlimited launches.</p>
+        <p style="margin:12px 0">Reactivate JumpKit Unlimited to restore unlimited launches, unlimited teams, members &amp; jumps, and your team ROI dashboard.</p>
       </div>`;
 
     const upgradeBtn = `
@@ -1944,19 +1943,22 @@ function openTierFeaturesModal() {
   const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : isCore ? 'JumpKit Unlimited' : 'JumpKit Free';
 
   const freeFeatures = [
-    'Up to 250 lifetime launches',
-    'Own 1 team',
-    'Join 1 team as a member',
-    'Up to 10 shared jumps visible per shared column',
-    'Basic jump management',
+    'Web links &amp; local folders',
+    '250 jump launches',
+    '2 teams · 5 members · 10 jumps / team',
+    'Personal ROI dashboard',
+    'Hotkey launcher',
+    'Filters &amp; search',
+    'Windows &amp; Mac',
   ];
   const coreFeatures = [
-    'Unlimited launches',
-    'Own unlimited teams',
-    'Join unlimited teams as a member',
-    'Unlimited shared jumps',
-    'Full team collaboration &amp; sharing',
-    'Auto cloud backup',
+    'Everything in JumpKit Free',
+    'Unlimited jump launches',
+    'Unlimited teams, members &amp; jumps',
+    'Personal &amp; team ROI dashboard',
+    'Auto-archive',
+    'Auto-backup',
+    'Early access to new features',
   ];
   const features = isCore ? coreFeatures : freeFeatures;
   const color = isCore ? 'var(--turq)' : 'var(--text-muted)';

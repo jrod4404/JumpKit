@@ -83,7 +83,7 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
     <tr><td style="padding:36px 40px">
       <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">We'll miss you, ${firstName}.</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
-        Your JumpKit Core subscription has ended. Your account has been moved back to the free tier — your personal jumps are still saved and accessible.
+        Your JumpKit Unlimited subscription has ended. Your account has been moved back to the free tier — your personal jumps are still saved and accessible.
       </p>
 
       <!-- What you still have -->
@@ -91,10 +91,13 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">What you still have access to:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved personal jumps
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved jumps &amp; data retained
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Free tier features
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> 250 launches · 2 teams · 5 members · 10 jumps / team
+          </td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal ROI dashboard
           </td></tr>
         </table>
       </div>
@@ -104,7 +107,13 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">No longer included:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Unlimited Jump launches
+            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Unlimited jump launches
+          </td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Unlimited teams, members &amp; jumps
+          </td></tr>
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <span style="color:#f87171;margin-right:10px;font-weight:700">✕</span> Team ROI dashboard
           </td></tr>
         </table>
       </div>
