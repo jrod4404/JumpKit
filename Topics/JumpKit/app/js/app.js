@@ -1179,11 +1179,12 @@ window.renderStats = async function renderStats() {
   document.getElementById('pageContent').innerHTML = `
     <div class="stats-wrap">
       ${_statsLaunchBanner}
-      <div style="margin-bottom:18px">
-        <div class="jump-filter-bar" id="statsBar">
+      <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="jump-filter-bar" id="statsBar" style="flex:1;min-width:0">
           <div class="jfb-slider" id="statsPill"></div>
           ${STAT_VIEWS.map(v=>`<button class="jfb-tab${v===currentStatView?' active':''}" data-sv="${v}">${STAT_LABELS[v]}</button>`).join('')}
         </div>
+        <button class="btn btn-subtle" style="font-size:0.82rem;padding:6px 14px;white-space:nowrap;flex-shrink:0" onclick="exportStatsPDF()"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>
       </div>
       <div id="statsDash"></div>
     </div>`;
@@ -1199,6 +1200,150 @@ window.renderStats = async function renderStats() {
 
   requestAnimationFrame(() => { posStatsPill(); renderStatsDash(); });
 }
+
+window.exportStatsPDF = function exportStatsPDF() {
+  if (!currentUser) return;
+  const prefs    = DB.getPrefs(currentUser.id);
+  const log      = DB.getClickLog(currentUser.id);
+  const allJumps = DB.getJumps(currentUser.id);
+  const jumps    = DB.getActiveJumps(currentUser.id);
+  const cols     = DB.getColumns(currentUser.id).filter(c => c.visible).sort((a, b) => a.order - b.order);
+  const now      = new Date();
+
+  // All-time summary stats
+  const n = log.length;
+  const totalSecondsSaved = log.reduce((sum, c) => {
+    const j = allJumps.find(j => j.id === c.jumpId);
+    return sum + (j?.timeSaved != null ? j.timeSaved : prefs.timePerClick);
+  }, 0);
+  const mins    = Math.round(totalSecondsSaved / 60);
+  const dollars = ((totalSecondsSaved / 3600) * prefs.dollarsPerHour).toFixed(2);
+  const fmtUSD  = v => '$' + parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // Top 10 jumps
+  const byJump = {};
+  log.forEach(e => { byJump[e.jumpId] = (byJump[e.jumpId] || 0) + 1; });
+  const top10 = Object.entries(byJump).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([id, ct]) => {
+    const name = jumps.find(j => j.id === id)?.name || (log.find(e => e.jumpId === id)?.jumpName ? log.find(e => e.jumpId === id).jumpName + ' (removed)' : 'Removed');
+    return { name, removed: !jumps.find(j => j.id === id), ct };
+  });
+
+  // Last 30 days
+  const labels30 = [], data30 = [];
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now); d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0, 10);
+    labels30.push(i === 0 ? 'Today' : i % 5 === 0 ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
+    data30.push(log.filter(e => new Date(e.ts).toISOString().slice(0, 10) === key).length);
+  }
+
+  // By column
+  const byCol = {};
+  log.forEach(e => {
+    const j = jumps.find(j => j.id === e.jumpId);
+    const name = j ? (cols.find(c => c.id === j.columnId)?.name || 'Unknown') : 'Unknown';
+    byCol[name] = (byCol[name] || 0) + 1;
+  });
+
+  // Capture chart canvases (only available in Summary view)
+  const lineImg = document.getElementById('chLine')?.toDataURL?.('image/png') || '';
+  const colImg  = document.getElementById('chCol')?.toDataURL?.('image/png') || '';
+
+  // User info
+  const userName   = [window._supabaseProfile?.first_name, window._supabaseProfile?.last_name].filter(Boolean).join(' ') || window._supabaseUser?.email || 'JumpKit User';
+  const exportDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  const topRowsHTML = top10.map((j, i) => `
+    <tr style="border-bottom:1px solid #e5e7eb">
+      <td style="padding:8px 12px;color:#9ca3af;font-size:13px">${i + 1}</td>
+      <td style="padding:8px 12px;font-size:13px;color:${j.removed ? '#9ca3af' : '#374151'};font-style:${j.removed ? 'italic' : 'normal'}">${j.name}</td>
+      <td style="padding:8px 12px;font-weight:700;color:#00C2C7;font-size:13px;text-align:right">${j.ct}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>JumpKit ROI Report — ${exportDate}</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#1f2937; background:#fff; padding:40px; }
+    .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; padding-bottom:18px; border-bottom:3px solid #00C2C7; }
+    .header h1 { font-size:22px; font-weight:800; color:#1f2937; }
+    .header p  { font-size:13px; color:#6b7280; margin-top:4px; }
+    .header-right { text-align:right; font-size:12px; color:#9ca3af; }
+    .section-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; margin:24px 0 12px; }
+    .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+    .stat-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; text-align:center; }
+    .stat-value { font-size:20px; font-weight:900; color:#1f2937; }
+    .stat-label { font-size:10px; color:#9ca3af; margin-top:4px; text-transform:uppercase; letter-spacing:0.05em; }
+    .chart-row { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-bottom:20px; }
+    .chart-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; }
+    .chart-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px; }
+    table { width:100%; border-collapse:collapse; }
+    .footer { margin-top:32px; padding-top:14px; border-top:1px solid #e5e7eb; text-align:center; font-size:11px; color:#9ca3af; }
+    @media print { body { padding:20px; } @page { margin:1.2cm; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>🚀 JumpKit ROI Report</h1>
+      <p>${userName} &middot; All-time summary</p>
+    </div>
+    <div class="header-right">
+      <div style="font-size:14px;font-weight:700;color:#00C2C7">jumpkit.app</div>
+      <div>${exportDate}</div>
+    </div>
+  </div>
+
+  <div class="section-title">Summary</div>
+  <div class="stat-grid">
+    <div class="stat-box"><div class="stat-value">${n.toLocaleString()}</div><div class="stat-label">Total Launches</div></div>
+    <div class="stat-box"><div class="stat-value">${mins.toLocaleString()} min</div><div class="stat-label">Time Saved</div></div>
+    <div class="stat-box"><div class="stat-value">${fmtUSD(dollars)}</div><div class="stat-label">Dollars Saved</div></div>
+    <div class="stat-box"><div class="stat-value">${jumps.length}</div><div class="stat-label">Active Jumps</div></div>
+  </div>
+
+  ${lineImg ? `
+  <div class="section-title">Last 30 Days</div>
+  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;padding:16px;margin-bottom:20px">
+    <img src="${lineImg}" style="width:100%;height:auto" />
+  </div>` : ''}
+
+  <div class="chart-row">
+    <div class="chart-box">
+      <div class="chart-title">Top Jumps</div>
+      <table><tbody>${topRowsHTML}</tbody></table>
+    </div>
+    ${colImg ? `
+    <div class="chart-box">
+      <div class="chart-title">Launches by Column</div>
+      <img src="${colImg}" style="width:100%;height:auto" />
+    </div>` : ''}
+  </div>
+
+  <div class="footer">Generated by JumpKit &middot; jumpkit.app &middot; ${exportDate}</div>
+</body>
+</html>`;
+
+  if (currentStatView !== 'summary') {
+    Toast.info('Switching to Summary view for export…');
+    currentStatView = 'summary';
+    document.querySelectorAll('#statsBar .jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.sv === 'summary'));
+    posStatsPill();
+    renderStatsDash();
+    setTimeout(() => exportStatsPDF(), 600);
+    return;
+  }
+
+  const win = window.open('', '_blank');
+  if (!win) { Toast.danger('Pop-up blocked — please allow pop-ups for this app to export PDF.'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.focus();
+  setTimeout(() => { win.print(); }, 400);
+};
 
 function posStatsPill() {
   const bar    = document.getElementById('statsBar');
