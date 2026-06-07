@@ -1180,7 +1180,7 @@ window.renderStats = async function renderStats() {
     <div class="stats-wrap">
       ${_statsLaunchBanner}
       <div style="margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div class="jump-filter-bar" id="statsBar" style="flex:1;min-width:0">
+        <div class="jump-filter-bar" id="statsBar">
           <div class="jfb-slider" id="statsPill"></div>
           ${STAT_VIEWS.map(v=>`<button class="jfb-tab${v===currentStatView?' active':''}" data-sv="${v}">${STAT_LABELS[v]}</button>`).join('')}
         </div>
