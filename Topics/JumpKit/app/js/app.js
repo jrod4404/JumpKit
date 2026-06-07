@@ -851,9 +851,9 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto Cloud Backup</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Sync jumps to the cloud'}</span></div>
+              <div class="acct-row-label"><span>Auto Backup</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Auto-save a local backup on login'}</span></div>
               ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto Cloud Backup" data-msg="Auto cloud backup is available on JumpKit Unlimited.">Upgrade</button>`
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto Backup" data-msg="Auto backup is available on JumpKit Unlimited.">Upgrade</button>`
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
