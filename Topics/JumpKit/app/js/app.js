@@ -1253,6 +1253,14 @@ window.exportStatsPDF = async function exportStatsPDF() {
   const userName   = [window._supabaseProfile?.first_name, window._supabaseProfile?.last_name].filter(Boolean).join(' ') || window._supabaseUser?.email || 'JumpKit User';
   const exportDate = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
+  // Load logo as base64 for inline embedding in PDF
+  let logoDataUrl = '';
+  try {
+    const logoResp = await fetch('assets/logo-jumpkit-circle.png');
+    const blob = await logoResp.blob();
+    logoDataUrl = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
+  } catch (_) {}
+
   const topRowsHTML = top10.map((j, i) => `
     <tr style="border-bottom:1px solid #e5e7eb">
       <td style="padding:8px 12px;color:#9ca3af;font-size:13px">${i + 1}</td>
@@ -1288,7 +1296,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
 <body>
   <div class="header">
     <div>
-      <h1>🚀 JumpKit ROI Report</h1>
+      <h1>${logoDataUrl ? `<img src="${logoDataUrl}" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:50%" />` : ''}JumpKit ROI Report</h1>
       <p>${userName} &middot; All-time summary</p>
     </div>
     <div class="header-right">
