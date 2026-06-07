@@ -896,6 +896,25 @@ window.sendOrgInvites = async function() {
     if (alreadyInvited.length > 0) {
       if (errEl) { errEl.textContent = `Already has a pending invitation: ${alreadyInvited.join(', ')}`; errEl.classList.add('show'); } return;
     }
+
+    // Free tier: enforce 5-member-per-team cap (owner + 4 members max)
+    const inviterTier = window._supabaseProfile?.subscription_tier || 'free';
+    if (inviterTier === 'free') {
+      const FREE_MEMBER_CAP = 4; // max non-owner members (5 total including owner)
+      const { count: curMembers } = await supabaseClient
+        .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', selectedTeamId);
+      const { count: curPending } = await supabaseClient
+        .from('team_invites').select('id', { count: 'exact', head: true }).eq('team_id', selectedTeamId).eq('status', 'pending');
+      const occupied = (curMembers || 0) + (curPending || 0);
+      const slotsAvailable = FREE_MEMBER_CAP - occupied;
+      if (uniqueEmails.length > slotsAvailable) {
+        const msg = slotsAvailable <= 0
+          ? 'Free teams are limited to 5 members. This team is full. Upgrade to JumpKit Unlimited for unlimited members.'
+          : `Free teams are limited to 5 members. You can only invite ${slotsAvailable} more member${slotsAvailable !== 1 ? 's' : ''}. Upgrade to JumpKit Unlimited for unlimited members.`;
+        if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+        return;
+      }
+    }
   } catch (checkErr) {
     console.warn('[sendOrgInvites] pre-check failed:', checkErr.message);
   }
@@ -1448,6 +1467,25 @@ async function sendInvites(teamId) {
       if (errEl) errEl.textContent = `Already has a pending invitation: ${alreadyInvited.join(', ')}`;
       errEl?.classList.add('show'); return;
     }
+
+    // Free tier: enforce 5-member-per-team cap (owner + 4 members max)
+    const inviterTier = window._supabaseProfile?.subscription_tier || 'free';
+    if (inviterTier === 'free') {
+      const FREE_MEMBER_CAP = 4; // max non-owner members (5 total including owner)
+      const { count: curMembers } = await supabaseClient
+        .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', teamId);
+      const { count: curPending } = await supabaseClient
+        .from('team_invites').select('id', { count: 'exact', head: true }).eq('team_id', teamId).eq('status', 'pending');
+      const occupied = (curMembers || 0) + (curPending || 0);
+      const slotsAvailable = FREE_MEMBER_CAP - occupied;
+      if (emails.length > slotsAvailable) {
+        const msg = slotsAvailable <= 0
+          ? 'Free teams are limited to 5 members. This team is full. Upgrade to JumpKit Unlimited for unlimited members.'
+          : `Free teams are limited to 5 members. You can only invite ${slotsAvailable} more member${slotsAvailable !== 1 ? 's' : ''}. Upgrade to JumpKit Unlimited for unlimited members.`;
+        if (errEl) { errEl.textContent = msg; errEl.classList.add('show'); }
+        return;
+      }
+    }
   } catch (checkErr) {
     console.warn('[sendInvites] pre-check failed:', checkErr.message);
   }
@@ -1885,6 +1923,23 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
       }
       return;
     }
+
+    // Enforce 5-member cap on free-tier teams at join time
+    try {
+      const { data: teamRow } = await supabaseClient.from('teams').select('owner_id').eq('id', teamId).single();
+      if (teamRow?.owner_id) {
+        const { data: ownerProfile } = await supabaseClient.from('profiles').select('subscription_tier').eq('id', teamRow.owner_id).single();
+        if ((ownerProfile?.subscription_tier || 'free') === 'free') {
+          const { count: curMembers } = await supabaseClient
+            .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', teamId);
+          if ((curMembers || 0) >= 4) {
+            if (errEl) { errEl.textContent = 'This team has reached its 5-member limit.'; errEl.classList.add('show'); }
+            else { Toast.danger('This team has reached its 5-member limit.'); }
+            return;
+          }
+        }
+      }
+    } catch (_capErr) { /* non-fatal — allow join if cap check fails */ }
 
     // Add user to team_members
     const { error: joinErr } = await supabaseClient
