@@ -61,6 +61,7 @@ _Last updated: 2026-06-01_
 
 - [x] **Paywall E2E** — Full E2E tested 2026-06-06: checkout → webhook (200) → profile upgrade → welcome email → upgrade modal → cancellation → downgrade → cancellation email → "Subscription Ended" modal ✅
 - [ ] **Implement ROI export reports** — allow users to export their personal (free) and team (unlimited) ROI data as a shareable report (PDF or CSV). Hook into existing stats/dashboard data.
+- [ ] **Disable auto-archive & auto-backup for free tier; test both in Unlimited** — free users should not have access to these features; verify both work correctly for Unlimited users and are blocked/hidden for free users
 - [ ] **Test 5-member free-tier team cap** — verify paywall fires correctly at all 3 enforcement points: (1) `sendOrgInvites` blocks invite when team is full/over limit, (2) `sendInvites` same check, (3) `doJoinTeam` blocks join if owner is free tier and team has 4+ members. Also verify Unlimited owners are never blocked.
 
 ---
