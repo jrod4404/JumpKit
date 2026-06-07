@@ -1337,12 +1337,32 @@ window.exportStatsPDF = function exportStatsPDF() {
     return;
   }
 
-  const win = window.open('', '_blank');
-  if (!win) { Toast.danger('Pop-up blocked — please allow pop-ups for this app to export PDF.'); return; }
-  win.document.write(html);
-  win.document.close();
-  win.focus();
-  setTimeout(() => { win.print(); }, 400);
+  // Inject print frame into current window (window.open is blocked in Electron)
+  let frame = document.getElementById('jk-print-frame');
+  if (frame) frame.remove();
+  let style = document.getElementById('jk-print-style');
+  if (style) style.remove();
+
+  frame = document.createElement('div');
+  frame.id = 'jk-print-frame';
+  frame.innerHTML = html;
+  document.body.appendChild(frame);
+
+  style = document.createElement('style');
+  style.id = 'jk-print-style';
+  style.textContent = `@media print { body > *:not(#jk-print-frame) { display:none !important; } #jk-print-frame { display:block !important; position:static !important; } }`;
+  document.head.appendChild(style);
+
+  frame.style.display = 'none';
+
+  const cleanup = () => {
+    document.getElementById('jk-print-frame')?.remove();
+    document.getElementById('jk-print-style')?.remove();
+    window.removeEventListener('afterprint', cleanup);
+  };
+  window.addEventListener('afterprint', cleanup);
+
+  window.print();
 };
 
 function posStatsPill() {
