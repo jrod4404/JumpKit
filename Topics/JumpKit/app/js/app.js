@@ -1201,7 +1201,7 @@ window.renderStats = async function renderStats() {
   requestAnimationFrame(() => { posStatsPill(); renderStatsDash(); });
 }
 
-window.exportStatsPDF = function exportStatsPDF() {
+window.exportStatsPDF = async function exportStatsPDF() {
   if (!currentUser) return;
   const prefs    = DB.getPrefs(currentUser.id);
   const log      = DB.getClickLog(currentUser.id);
