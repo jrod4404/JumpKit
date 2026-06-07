@@ -1328,7 +1328,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
 </html>`;
 
   if (currentStatView !== 'summary') {
-    Toast.info('Switching to Summary view for export…');
+    Toast.success('Switching to Summary view for export…');
     currentStatView = 'summary';
     document.querySelectorAll('#statsBar .jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.sv === 'summary'));
     posStatsPill();
@@ -1338,7 +1338,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
   }
 
   // Use Electron save dialog + printToPDF via IPC
-  Toast.info('Preparing report…');
+  Toast.success('Preparing report…');
   try {
     const result = await window.electronAPI.exportPDF(html);
     if (result?.success) {
