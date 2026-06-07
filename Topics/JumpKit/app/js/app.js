@@ -1337,32 +1337,18 @@ window.exportStatsPDF = function exportStatsPDF() {
     return;
   }
 
-  // Inject print frame into current window (window.open is blocked in Electron)
-  let frame = document.getElementById('jk-print-frame');
-  if (frame) frame.remove();
-  let style = document.getElementById('jk-print-style');
-  if (style) style.remove();
-
-  frame = document.createElement('div');
-  frame.id = 'jk-print-frame';
-  frame.innerHTML = html;
-  document.body.appendChild(frame);
-
-  style = document.createElement('style');
-  style.id = 'jk-print-style';
-  style.textContent = `@media print { body > *:not(#jk-print-frame) { display:none !important; } #jk-print-frame { display:block !important; position:static !important; } }`;
-  document.head.appendChild(style);
-
-  frame.style.display = 'none';
-
-  const cleanup = () => {
-    document.getElementById('jk-print-frame')?.remove();
-    document.getElementById('jk-print-style')?.remove();
-    window.removeEventListener('afterprint', cleanup);
-  };
-  window.addEventListener('afterprint', cleanup);
-
-  window.print();
+  // Use Electron save dialog + printToPDF via IPC
+  Toast.info('Preparing report…');
+  try {
+    const result = await window.electronAPI.exportPDF(html);
+    if (result?.success) {
+      Toast.success('ROI report saved!');
+    } else if (!result?.canceled) {
+      Toast.danger('Failed to save PDF: ' + (result?.error || 'unknown error'));
+    }
+  } catch (err) {
+    Toast.danger('Export failed: ' + err.message);
+  }
 };
 
 function posStatsPill() {

@@ -32,4 +32,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
   homeDir:    process.env.HOME || process.env.USERPROFILE || '~',
   isElectron: true,
   isPackaged: () => ipcRenderer.invoke('is-packaged'),
+  exportPDF:  (html) => ipcRenderer.invoke('export-pdf', html),
 });

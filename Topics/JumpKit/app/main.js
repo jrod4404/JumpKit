@@ -688,6 +688,45 @@ ipcMain.handle('install-update', () => {
   autoUpdater.quitAndInstall();
 });
 
+ipcMain.handle('export-pdf', async (_e, html) => {
+  const { dialog } = require('electron');
+  const fs  = require('fs');
+  const os  = require('os');
+  const datePart = new Date().toISOString().slice(0, 10);
+
+  const { filePath, canceled } = await dialog.showSaveDialog({
+    title:       'Save JumpKit ROI Report',
+    defaultPath: `JumpKit-ROI-Report-${datePart}.pdf`,
+    filters:     [{ name: 'PDF Files', extensions: ['pdf'] }],
+  });
+  if (canceled || !filePath) return { success: false, canceled: true };
+
+  // Write HTML to a temp file so the hidden window can load it cleanly
+  const tmpHtml = path.join(os.tmpdir(), `jk-report-${Date.now()}.html`);
+  fs.writeFileSync(tmpHtml, html, 'utf-8');
+
+  const pdfWin = new BrowserWindow({
+    show: false,
+    webPreferences: { nodeIntegration: false, contextIsolation: true },
+  });
+  await pdfWin.loadFile(tmpHtml);
+
+  try {
+    const pdfData = await pdfWin.webContents.printToPDF({
+      printBackground: true,
+      pageSize:        'Letter',
+      margins:         { marginType: 'custom', top: 0.5, bottom: 0.5, left: 0.5, right: 0.5 },
+    });
+    fs.writeFileSync(filePath, pdfData);
+    return { success: true, filePath };
+  } catch (err) {
+    return { success: false, error: err.message };
+  } finally {
+    pdfWin.close();
+    try { fs.unlinkSync(tmpHtml); } catch (_) {}
+  }
+});
+
 // Single instance lock — prevent two processes opening the same SQLite db
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
