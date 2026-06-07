@@ -12,15 +12,19 @@ function renderHelp() {
           <li>Right-click context menus for fast actions</li>
           <li>Global hotkey support</li>
           <li>Favorite jump highlighting</li>
-          <li>Click counting & time-saved tracking</li>
-          <li>Archive & restore jumps</li>
-          <li>Team & group jump sharing</li>
+          <li>Click counting, time-saved & ROI tracking</li>
+          <li>Personal ROI dashboard with charts &amp; stats</li>
+          <li>Export ROI report as PDF</li>
+          <li>Archive &amp; restore jumps</li>
+          <li>Team jump sharing (up to 2 teams on Free, unlimited on Unlimited)</li>
+          <li>Up to 5 members per team (Free) or unlimited members (Unlimited)</li>
+          <li>Auto-archive unused jumps — Unlimited tier</li>
+          <li>Auto-backup to local JSON file — Unlimited tier</li>
           <li>${window.electronAPI?.platform === 'win32'
             ? 'Zoom in with <kbd>Ctrl</kbd><kbd>+</kbd> and zoom out with <kbd>Ctrl</kbd><kbd>-</kbd>'
             : 'Zoom in with <kbd>⌘</kbd><kbd>+</kbd> and zoom out with <kbd>⌘</kbd><kbd>-</kbd>'}</li>
           <li>100% local storage — your data never leaves your machine</li>
-          <li>Optional cloud backup</li>
-          <li>Light & dark mode</li>
+          <li>Light &amp; dark mode</li>
           <li>Windows and macOS support</li>
         </ul>
       </div>
@@ -79,7 +83,7 @@ function renderHelp() {
         </div>
         <div class="faq-item">
           <div class="faq-q">Version</div>
-          <div class="faq-a">JumpKit v5.0 — Beta</div>
+          <div class="faq-a">JumpKit v1.0.0 — Last updated June 7, 2026</div>
         </div>
       </div>
 
