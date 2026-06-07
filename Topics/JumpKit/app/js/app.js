@@ -1184,7 +1184,7 @@ window.renderStats = async function renderStats() {
           <div class="jfb-slider" id="statsPill"></div>
           ${STAT_VIEWS.map(v=>`<button class="jfb-tab${v===currentStatView?' active':''}" data-sv="${v}">${STAT_LABELS[v]}</button>`).join('')}
         </div>
-        <button class="btn btn-subtle" style="font-size:0.82rem;padding:6px 14px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>
+        <button class="btn btn-subtle" style="font-size:0.82rem;padding:0 14px;height:34px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>
       </div>
       <div id="statsDash"></div>
     </div>`;
