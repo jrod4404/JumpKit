@@ -1449,7 +1449,7 @@ const JK_TESTS = [
         if (!res.ok && res.status !== 404) throw new Error(`Supabase unreachable: ${res.status}`);
       } catch(e) { throw new Error('Cannot reach Supabase URL: ' + e.message); }
       console.warn('[Test 63] ⚠️ Manual check required: verify backups in Supabase dashboard → Settings → Backups. Free tier has NO auto-backups.');
-      return true;
+      return 'manual';
     }
   },
 
@@ -1522,7 +1522,7 @@ const JK_TESTS = [
       const knownMigrations = ['20240001_add_name_fields.sql', '20240002_profile_trigger.sql', '20240003_subscription_fields.sql'];
       console.info('[Test 67] Migrations in version control: ' + knownMigrations.join(', '));
       console.warn('[Test 67] Reminder: ALL future schema changes must be added as new files in supabase/migrations/ — never make manual dashboard changes without a migration file.');
-      return true;
+      return 'manual';
     }
   },
 
@@ -1563,7 +1563,7 @@ const JK_TESTS = [
       // Anon key should be a valid JWT (3 parts separated by dots)
       if (SUPABASE_ANON_KEY.split('.').length !== 3) throw new Error('SUPABASE_ANON_KEY does not look like a valid JWT');
       console.warn('[Test 69] ⚠️ Cannot verify Edge Function secrets (RESEND_API_KEY, SUPABASE_SERVICE_ROLE_KEY, LEMON_SQUEEZY_SIGNING_SECRET) from client. Verify manually in Supabase dashboard → Edge Functions → Secrets.');
-      return true;
+      return 'manual';
     }
   },
 
@@ -1732,7 +1732,7 @@ const JK_TESTS = [
       const lastAuditResult = '0 vulnerabilities (after fixing tar + picomatch issues)';
       console.info(`[Test 77] Last npm audit: ${lastAuditDate} — Result: ${lastAuditResult}`);
       console.warn('[Test 77] ⚠️ Re-run "npm audit" before each production release to catch new vulnerabilities.');
-      return true;
+      return 'manual';
     }
   },
 
