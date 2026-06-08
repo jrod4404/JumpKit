@@ -2585,7 +2585,22 @@ function _openTestDetail(id, state, message) {
       <td style="${tdLabel}">Details</td>
       <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
     </tr>
-  </table>`;
+  </table>
+  ${(() => {
+    const logs = (stored.logs || []);
+    if (!logs.length) return '';
+    const levelColor = { info: 'var(--text-muted)', warn: '#c99a3a', error: '#e15b59', debug: 'var(--text-dim)' };
+    const levelIcon  = { info: 'info-circle', warn: 'alert-triangle', error: 'x-circle', debug: 'code' };
+    const rows = logs.map(l => `
+      <div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid var(--border);font-size:0.82rem">
+        <svg class="ti ti-${levelIcon[l.level]||'info-circle'}" style="flex-shrink:0;margin-top:1px;width:0.9rem;height:0.9rem;color:${levelColor[l.level]||'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-${levelIcon[l.level]||'info-circle'}"/></svg>
+        <span style="color:${levelColor[l.level]||'var(--text-muted)'};font-family:monospace;word-break:break-all">${_esc(l.text)}</span>
+      </div>`).join('');
+    return `<div style="margin-top:14px">
+      <div style="font-size:0.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-dim);margin-bottom:6px">Console Output</div>
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:8px 12px;max-height:220px;overflow-y:auto">${rows}</div>
+    </div>`;
+  })()}`;
 
   const _orderedTests = window._jkTestDisplayOrder || JK_TESTS;
   const currentIdx = _orderedTests.findIndex(t => t.id === id);
@@ -2666,13 +2681,18 @@ function _patchConsoleForTest(internalId, displayNum) {
   const TAG = `[Test ${internalId}]`;
   const NEW = `[Test ${displayNum}]`;
   const _orig = { info: console.info, warn: console.warn, error: console.error, debug: console.debug };
+  const captured = []; // collect log entries for this test
   ['info','warn','error','debug'].forEach(level => {
     console[level] = function(...args) {
       const patched = args.map(a => typeof a === 'string' ? a.replace(TAG, NEW) : a);
-      _orig[level].apply(console, patched);
+      captured.push({ level, text: patched.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ') });
+      // suppress forwarding to actual console — output goes to modal only
     };
   });
-  return () => { Object.assign(console, _orig); }; // returns restore function
+  return {
+    restore: () => { Object.assign(console, _orig); },
+    getLogs: () => captured
+  };
 }
 
 async function _runSingleTest(id) {
@@ -2683,22 +2703,24 @@ async function _runSingleTest(id) {
   if (btn) { btn.disabled = true; btn.innerHTML = '<svg class="ti ti-loader-2 jk-spin" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>'; }
   _setRowResult(id, 'running');
   if (!window._jkTestResults) window._jkTestResults = {};
-  const _restoreConsole = _patchConsoleForTest(id, displayNum);
+  const _consolePatch = _patchConsoleForTest(id, displayNum);
   try {
     const result = await testDef.test();
+    const logs = _consolePatch.getLogs();
     if (result === 'manual') {
-      window._jkTestResults[id] = { state: 'manual', received: 'Manual verification required', message: null };
+      window._jkTestResults[id] = { state: 'manual', received: 'Manual verification required', message: null, logs };
       _setRowResult(id, 'manual');
     } else {
-      window._jkTestResults[id] = { state: 'pass', received: String(result === true ? 'true' : JSON.stringify(result)), message: null };
+      window._jkTestResults[id] = { state: 'pass', received: String(result === true ? 'true' : JSON.stringify(result)), message: null, logs };
       _setRowResult(id, 'pass');
     }
   } catch (err) {
     const msg = err.message || String(err);
-    window._jkTestResults[id] = { state: 'fail', received: msg, message: msg };
+    const logs = _consolePatch.getLogs();
+    window._jkTestResults[id] = { state: 'fail', received: msg, message: msg, logs };
     _setRowResult(id, 'fail', msg);
   } finally {
-    _restoreConsole();
+    _consolePatch.restore();
     if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>'; }
     _refreshSummary();
   }
