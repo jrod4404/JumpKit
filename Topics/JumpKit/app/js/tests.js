@@ -2246,9 +2246,6 @@ const JK_TESTS = [
     test: async () => 'manual'
   },
 
-
-  ,
-
   {
     id: 94, category: 'Maintenance',
     title: 'Auto-archive fires correctly and creates notification',
@@ -2366,7 +2363,7 @@ const JK_TESTS = [
       console.info('[Test 95] ✅ Cleanup complete — test notification removed.');
       return true;
     }
-  },
+  }
 
 ];
 
