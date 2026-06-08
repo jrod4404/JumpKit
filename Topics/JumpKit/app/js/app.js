@@ -850,24 +850,24 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">Show or mute in-app notification alerts</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
-          </div>
-          <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
-            <div class="acct-row">
-              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch, set to what is accurate for you</span></div>
-              <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
-            </div>
-            <div class="acct-row">
-              <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Your personal dollars per hour, used to calculate ROI, set to what is accurate for you</span></div>
-              <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
-            </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Show or hide description under jump name on jump page</span></div>
               <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
-            <div class="acct-row">
+            <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Show or hide hotkey pill next to jump name on jumps page</span></div>
               <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg> ROI</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch, set to what is accurate for you</span></div>
+              <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Your personal dollars per hour, used to calculate ROI, set to what is accurate for you</span></div>
+              <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
             </div>
           </div>
           <div class="acct-section">
