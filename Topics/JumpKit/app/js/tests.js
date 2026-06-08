@@ -2507,37 +2507,37 @@ function _sectionBlock(label, icon, tests, startNum) {
     </div>`;
 }
 
+function _testRow(t, displayNum) {
+  return `
+  <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
+    <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${displayNum}</td>
+    <td style="padding:10px 12px">
+      <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${_CATEGORY_COLORS[t.category] || '#6b7280'}22;color:${_CATEGORY_COLORS[t.category] || '#6b7280'}">
+        ${_esc(t.category)}
+      </span>
+    </td>
+    <td style="padding:10px 12px">
+      <div style="font-weight:600;font-size:0.87rem;color:var(--text)">${_esc(t.title)}</div>
+      <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${_esc(t.description)}</div>
+    </td>
+    <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
+    <td style="padding:10px 12px;text-align:center">
+      <button data-jaction="test-run" data-testid="${t.id}" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
+        <svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>
+      </button>
+    </td>
+    <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
+      <span style="color:var(--text-muted)">—</span>
+    </td>
+  </tr>`;
+}
+
 function _buildTestRows() {
   const wrap = document.getElementById('testsTablesWrap');
   if (!wrap) return;
 
   const autoTests   = JK_TESTS.filter(t => !t.steps).slice().sort(_byCategory);
   const manualTests = JK_TESTS.filter(t =>  t.steps).slice().sort(_byCategory);
-
-  function _testRow(t, displayNum) {
-    return `
-    <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
-      <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${displayNum}</td>
-      <td style="padding:10px 12px">
-        <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${_CATEGORY_COLORS[t.category] || '#6b7280'}22;color:${_CATEGORY_COLORS[t.category] || '#6b7280'}">
-          ${_esc(t.category)}
-        </span>
-      </td>
-      <td style="padding:10px 12px">
-        <div style="font-weight:600;font-size:0.87rem;color:var(--text)">${_esc(t.title)}</div>
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">${_esc(t.description)}</div>
-      </td>
-      <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
-      <td style="padding:10px 12px;text-align:center">
-        <button data-jaction="test-run" data-testid="${t.id}" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
-          <svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>
-        </button>
-      </td>
-      <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
-        <span style="color:var(--text-muted)">—</span>
-      </td>
-    </tr>`;
-  }
 
   // Build global display order + number map for use in detail modal
   const _displayOrder = [...autoTests, ...manualTests];
