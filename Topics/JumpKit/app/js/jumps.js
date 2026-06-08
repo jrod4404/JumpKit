@@ -1225,7 +1225,6 @@ document.addEventListener('click', e => {
   const id     = btn.dataset.id || '';
 
   switch (action) {
-    case 'modal-close':         Modal.close(); break;
     case 'confirm-unarchive':   confirmUnarchive(id); break;
     case 'confirm-delete':      confirmDelete(id); break;
     case 'do-unarchive':        doUnarchive(id); break;
@@ -1236,7 +1235,6 @@ document.addEventListener('click', e => {
     case 'save-shared-hotkey':  saveSharedHotkey(id); break;
     case 'save-columns':        saveColumns(); break;
     case 'close-edit-jump':     Modal.close(); openEditJumpModal(id); break;
-    case 'show-upgrade-modal':  showUpgradeModal(btn.dataset.title, btn.dataset.msg); break;
     case 'pick-hotkey': {
       e.stopPropagation(); // prevent hotkeyPicker close-on-click listener from firing
       const inp    = document.getElementById('jHotkey');
