@@ -873,7 +873,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Automatically moves unused jumps to the archive after a set time period'}</span></div>
+              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span><br><span style="font-size:0.78rem">Automatically moves unused jumps to the archive after a set time period</span>':'Automatically moves unused jumps to the archive after a set time period'}</span></div>
               ${tier==='free'
                 ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button>`
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
@@ -882,7 +882,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>`}
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Automatically saves a local backup of all your jumps on each login'}</span></div>
+              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span><br><span style="font-size:0.78rem">Automatically saves a local backup of all your jumps on each login</span>':'Automatically saves a local backup of all your jumps on each login'}</span></div>
               ${tier==='free'
                 ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button>`
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
