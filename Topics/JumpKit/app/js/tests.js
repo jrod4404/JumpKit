@@ -1485,7 +1485,7 @@ const JK_TESTS = [
       const devUrl = typeof DEV_SUPABASE_URL !== 'undefined' ? DEV_SUPABASE_URL : null;
       if (!devUrl) {
         console.warn('[Test 65] ⚠️ No separate dev database. Dev and prod share: ' + SUPABASE_URL + '. Create a separate Supabase project for dev before launch.');
-        return true;
+        return 'manual';
       }
       if (devUrl === SUPABASE_URL) throw new Error('DEV_SUPABASE_URL equals SUPABASE_URL — dev and prod are not separated!');
       return true;
