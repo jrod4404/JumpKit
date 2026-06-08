@@ -2516,6 +2516,12 @@ function _buildTestRows() {
     </tr>`;
   }
 
+  // Build global display order + number map for use in detail modal
+  const _displayOrder = [...autoTests, ...manualTests];
+  window._jkTestDisplayOrder = _displayOrder;
+  window._jkTestDisplayNumMap = {};
+  _displayOrder.forEach((t, i) => { window._jkTestDisplayNumMap[t.id] = i + 1; });
+
   tbody.innerHTML =
     _sectionHeader('Automatic Tests', 'player-play', autoTests.length, false) +
     autoTests.map((t, i) => _testRow(t, i + 1)).join('') +
@@ -2552,7 +2558,8 @@ function _openTestDetail(id, state, message) {
     detailsText = manualInstructions; detailsColor = 'var(--text-muted)';
   }
 
-  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> Unit Test ${id} — ${_esc(testDef.title)}`;
+  const displayNum = (window._jkTestDisplayNumMap || {})[id] || id;
+  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> Unit Test ${displayNum} — ${_esc(testDef.title)}`;
   const catColor = _CATEGORY_COLORS[testDef.category] || '#6b7280';
   const catPill = `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${catColor}22;color:${catColor}">${_esc(testDef.category)}</span>`;
   const stored = (window._jkTestResults || {})[id] || {};
@@ -2605,9 +2612,10 @@ function _openTestDetail(id, state, message) {
     </tr>
   </table>`;
 
-  const currentIdx = JK_TESTS.findIndex(t => t.id === id);
-  const prevId = currentIdx > 0 ? JK_TESTS[currentIdx - 1].id : null;
-  const nextId = currentIdx < JK_TESTS.length - 1 ? JK_TESTS[currentIdx + 1].id : null;
+  const _orderedTests = window._jkTestDisplayOrder || JK_TESTS;
+  const currentIdx = _orderedTests.findIndex(t => t.id === id);
+  const prevId = currentIdx > 0 ? _orderedTests[currentIdx - 1].id : null;
+  const nextId = currentIdx < _orderedTests.length - 1 ? _orderedTests[currentIdx + 1].id : null;
 
   const _results = window._jkTestResults || {};
   const prevRes = prevId ? (_results[prevId] || null) : null;
