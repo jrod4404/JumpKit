@@ -854,7 +854,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">Seconds saved per jump launch</span></div>
+              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch</span></div>
               <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
             </div>
             <div class="acct-row">
