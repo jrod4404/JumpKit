@@ -2567,10 +2567,10 @@ function _openTestDetail(id, state, message) {
     color = 'var(--text-muted)'; iconName = 'clock'; stateLabel = 'Not Run';
     detailsText = isManualTest ? manualInstructions : '—'; detailsColor = 'var(--text-muted)';
   } else if (state === 'pass') {
-    color = '#5cb885'; iconName = 'check'; stateLabel = 'Pass';
+    color = '#3fbe71'; iconName = 'check'; stateLabel = 'Pass';
     detailsText = isManualTest ? manualInstructions : 'Test passed successfully.'; detailsColor = 'var(--text-muted)';
   } else if (state === 'fail') {
-    color = '#d4736e'; iconName = 'x'; stateLabel = 'Fail';
+    color = '#e15b59'; iconName = 'x'; stateLabel = 'Fail';
     detailsText = isManualTest ? manualInstructions : (message || 'Test failed.'); detailsColor = 'var(--text-muted)';
   } else {
     color = '#f59e0b'; iconName = 'alert-triangle'; stateLabel = 'Manual';
@@ -2587,7 +2587,7 @@ function _openTestDetail(id, state, message) {
   const tdValue     = `padding:8px 0;color:var(--text);line-height:1.6;font-size:0.88rem`;
   const tdValueMuted = `padding:8px 0;color:var(--text-muted);line-height:1.6;font-size:0.88rem`;
   const codeStyle   = `font-size:0.82rem;background:var(--bg-input);padding:3px 8px;border-radius:6px`;
-  const receivedColor = state==='pass'?'#5cb885':state==='fail'?'#d4736e':'var(--text-muted)';
+  const receivedColor = state==='pass'?'#3fbe71':state==='fail'?'#e15b59':'var(--text-muted)';
   const bodyHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
     <tr>
       <td style="${tdLabel}">ID</td>
@@ -2641,8 +2641,8 @@ function _openTestDetail(id, state, message) {
   const nextRes = nextId ? (_results[nextId] || null) : null;
 
   const manualBtns = isManualTest ? `
-      <button class="btn btn-subtle" data-jaction="test-mark-pass" data-testid="${id}" style="color:#5cb885;border-color:rgba(92,184,133,0.3)"><svg class="ti ti-check" style="color:#5cb885"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
-      <button class="btn btn-subtle" data-jaction="test-mark-fail" data-testid="${id}" style="color:#d4736e;border-color:rgba(212,115,110,0.3)"><svg class="ti ti-x" style="color:#d4736e"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
+      <button class="btn btn-subtle" data-jaction="test-mark-pass" data-testid="${id}" style="color:#3fbe71;border-color:rgba(63,190,113,0.3)"><svg class="ti ti-check" style="color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
+      <button class="btn btn-subtle" data-jaction="test-mark-fail" data-testid="${id}" style="color:#e15b59;border-color:rgba(225,91,89,0.3)"><svg class="ti ti-x" style="color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
 
   const footerHTML = `
     <div style="display:flex;gap:8px;align-items:center;width:100%">
@@ -2670,15 +2670,15 @@ function _setRowResult(id, state, message) {
     cell.onclick = null;
     if (row) row.style.background = '';
   } else if (state === 'pass') {
-    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(92,184,133,0.12);color:#5cb885;border:1px solid rgba(92,184,133,0.3);cursor:pointer"><svg class="ti ti-check" style="font-size:0.85rem;line-height:1;color:#5cb885"><use href="img/tabler-sprite.svg#tabler-check"/></svg><span style="line-height:1">Pass</span></span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3);cursor:pointer"><svg class="ti ti-check" style="font-size:0.85rem;line-height:1;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg><span style="line-height:1">Pass</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
-    if (row) row.style.background = 'rgba(92,184,133,0.04)';
+    if (row) row.style.background = 'rgba(63,190,113,0.04)';
   } else if (state === 'fail') {
-    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(212,115,110,0.12);color:#d4736e;border:1px solid rgba(212,115,110,0.3);cursor:pointer"><svg class="ti ti-x" style="font-size:0.85rem;line-height:1;color:#d4736e"><use href="img/tabler-sprite.svg#tabler-x"/></svg><span style="line-height:1">Fail</span></span>`;
+    cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(225,91,89,0.12);color:#e15b59;border:1px solid rgba(225,91,89,0.3);cursor:pointer"><svg class="ti ti-x" style="font-size:0.85rem;line-height:1;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg><span style="line-height:1">Fail</span></span>`;
     cell.style.cursor = 'pointer';
     cell.onclick = () => _openTestDetail(id, state, message);
-    if (row) row.style.background = 'rgba(212,115,110,0.04)';
+    if (row) row.style.background = 'rgba(225,91,89,0.04)';
   } else if (state === 'manual') {
     cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);cursor:pointer"><svg class="ti ti-alert-triangle" style="font-size:0.85rem;line-height:1;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="line-height:1">Manual</span></span>`;
     cell.style.cursor = 'pointer';
@@ -2699,8 +2699,8 @@ function _refreshSummary() {
   const sp = document.getElementById('summaryPass');
   const sf = document.getElementById('summaryFail');
   const sm = document.getElementById('summaryManual');
-  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#5cb885':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#5cb885':'var(--text-muted)'; }
-  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#d4736e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#d4736e':'var(--text-muted)'; }
+  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#3fbe71':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#3fbe71':'var(--text-muted)'; }
+  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#e15b59':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#e15b59':'var(--text-muted)'; }
   if (sm) { sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
 }
 
@@ -2831,8 +2831,8 @@ async function _runAllTests() {
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#5cb885"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
-    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#d4736e"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
+    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
+    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
     document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#c99a3a"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
   }
