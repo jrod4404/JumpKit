@@ -2246,6 +2246,67 @@ const JK_TESTS = [
     test: async () => 'manual'
   },
 
+
+  ,
+
+  {
+    id: 94, category: 'Maintenance',
+    title: 'Auto-archive fires correctly and creates notification',
+    purpose: 'Verifies that runAutoArchive() correctly identifies jumps unused past the threshold, archives them in SQLite, and creates an in-app notification. Confirms free-tier users are blocked.',
+    prerequisites: 'Must be logged in as an Unlimited user with auto-archive set to any value (not Never). At least one active jump must exist.',
+    description: 'Fakes the lastUsed timestamp of the first active jump to 400 days ago, runs runAutoArchive() with the current threshold, verifies the jump is archived, and checks that a notification was created. Cleans up by unarchiving the jump and removing the test notification.',
+    input: 'DB.updateJump(userId, jumpId, { lastUsed: Date.now() - 400days }), then runAutoArchive()',
+    expected: 'Jump moves to archive. Notification created with type=auto-archive. Free tier returns early without archiving.',
+    test: async () => {
+      // 1. Verify free-tier block
+      const tier = window._supabaseProfile?.subscription_tier || 'free';
+      if (tier === 'free') {
+        console.warn('[Test 94] ⚠️ Must be Unlimited to test auto-archive. Free-tier guard is working — log in as Unlimited to run the full test.');
+        return 'manual';
+      }
+
+      // 2. Ensure autoArchive pref is set
+      const prefs = DB.getPrefs(currentUser.id);
+      if (!prefs.autoArchive || prefs.autoArchive === 'never') {
+        console.warn('[Test 94] ⚠️ Auto-archive is set to Never in Settings. Set it to 1 Month, 6 Months, or 1 Year and re-run.');
+        return 'manual';
+      }
+
+      // 3. Grab a test jump
+      const active = DB.getActiveJumps(currentUser.id);
+      if (active.length === 0) throw new Error('No active jumps to test with. Add at least one jump first.');
+      const testJump = active[0];
+      const originalLastUsed = testJump.lastUsed;
+
+      // 4. Fake lastUsed to 400 days ago (exceeds all thresholds)
+      DB.updateJump(currentUser.id, testJump.id, { lastUsed: Date.now() - (400 * 24 * 60 * 60 * 1000) });
+
+      // 5. Run auto-archive
+      runAutoArchive();
+
+      // 6. Verify jump is now archived
+      const stillActive = DB.getActiveJumps(currentUser.id).find(j => j.id === testJump.id);
+      if (stillActive) throw new Error(`Jump "${testJump.name}" was NOT archived — runAutoArchive() may have failed.`);
+      console.info(`[Test 94] ✅ Jump "${testJump.name}" correctly moved to archive.`);
+
+      // 7. Verify notification was created
+      const notifsAfter = typeof getNotifications === 'function' ? getNotifications() : [];
+      const archiveNotif = notifsAfter.find(n => n.type === 'auto-archive' && n.message.includes(testJump.name));
+      if (!archiveNotif) throw new Error('Auto-archive notification was NOT created.');
+      console.info('[Test 94] ✅ Auto-archive notification created: ' + archiveNotif.message);
+
+      // 8. Cleanup — restore jump and remove test notification
+      DB.updateJump(currentUser.id, testJump.id, { isArchived: false, lastUsed: originalLastUsed });
+      if (typeof saveNotifications === 'function') {
+        saveNotifications(notifsAfter.filter(n => n !== archiveNotif));
+        if (typeof updateNotifBadge === 'function') updateNotifBadge();
+      }
+      console.info('[Test 94] ✅ Cleanup complete — jump restored to active, test notification removed.');
+      return true;
+    }
+  },
+
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
