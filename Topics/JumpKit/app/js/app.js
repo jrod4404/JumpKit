@@ -876,7 +876,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill on jump cards</span></div>
+              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill under jump name</span></div>
               <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
           </div>
