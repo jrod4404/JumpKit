@@ -922,14 +922,14 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     setAcctSubtitle(currentAcctTab);
     renderAcctTabContent(currentAcctTab);
     // Sync sidebar nav highlight with the active tab
-    const tabNavMap = { teams: 'teams', settings: 'settings', account: 'settings' };
-    const navPage = tabNavMap[currentAcctTab] || 'settings';
-    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === navPage));
+    const tabNavMap = { teams: 'teams', settings: 'settings', account: null };
+    const navPage = tabNavMap[currentAcctTab];
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', navPage ? b.dataset.page === navPage : false));
     // Update topbar title and activePage to reflect the active tab
-    activePage = navPage;
-    window.activePage = navPage;
+    activePage = navPage || 'account';
+    window.activePage = activePage;
     const titleEl = document.getElementById('topbarTitle');
-    if (titleEl) titleEl.textContent = pageTitles[currentAcctTab] || pageTitles[navPage] || '';
+    if (titleEl) titleEl.textContent = pageTitles[currentAcctTab] || '';
   });
 
   function moveAcctPill() {
