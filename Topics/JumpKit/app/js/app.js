@@ -862,11 +862,11 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Display description under jump name</span></div>
+              <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Display description under jump name on jump page</span></div>
               <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill under jump name</span></div>
+              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill next to jump name on jumps page</span></div>
               <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
           </div>
