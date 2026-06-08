@@ -2701,8 +2701,8 @@ function _refreshSummary() {
   const sp = document.getElementById('summaryPass');
   const sf = document.getElementById('summaryFail');
   const sm = document.getElementById('summaryManual');
-  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#22c55e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#22c55e':'var(--text-muted)'; }
-  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#ef4444':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#ef4444':'var(--text-muted)'; }
+  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#5cb885':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#5cb885':'var(--text-muted)'; }
+  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#d4736e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#d4736e':'var(--text-muted)'; }
   if (sm) { sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
 }
 
@@ -2833,9 +2833,9 @@ async function _runAllTests() {
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
-    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
-    document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
+    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#5cb885"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
+    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#d4736e"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
+    document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#c99a3a"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
   }
 
