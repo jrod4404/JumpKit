@@ -452,7 +452,7 @@ const pages = {
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'My Account', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'My Account', tests:'Tests'
+  stats:'Statistics', settings:'My Account', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'Teams', tests:'Tests'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
@@ -821,7 +821,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
       renderTeams(el.firstElementChild);
     } else if (tab === 'settings') {
       const p = DB.getPrefs(currentUser.id);
-      const pageChoices = ['home','jumps','stats','settings','help'].map(pg =>
+      const pageChoices = ['home','jumps','stats','teams','settings','help'].map(pg =>
         `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
       const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
         `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
