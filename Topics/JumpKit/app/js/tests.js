@@ -1396,6 +1396,7 @@ const JK_TESTS = [
     description: 'Checks Supabase project URL is reachable and logs a reminder to verify backup plan in Supabase dashboard.',
     input: 'SUPABASE_URL ping',
     expected: 'URL reachable. Manual verification required in Supabase dashboard → Settings → Backups.',
+    steps: '1. Open Supabase dashboard for your JumpKit project.\n2. Go to Settings → Backups.\n3. Confirm the backup plan is active (Pro plan = daily backups; Free plan = no auto-backups).\n4. If on free plan, consider upgrading to Pro or scheduling manual exports.\n5. Mark as Pass once confirmed.',
     test: async () => {
       if (!SUPABASE_URL) throw new Error('SUPABASE_URL not defined');
       try {
@@ -1681,6 +1682,7 @@ const JK_TESTS = [
     description: 'Checks that npm audit fix has been run and package-lock.json is committed. Cannot run npm audit from renderer — serves as a reminder and audit log.',
     input: 'Known audit state from last npm audit fix run (2026-05-10)',
     expected: '0 vulnerabilities. Reminder to re-run before each release.',
+    steps: '1. Open Terminal in the JumpKit project directory.\n2. Run: npm audit\n3. If any critical or high vulnerabilities are found, run: npm audit fix\n4. Commit the updated package-lock.json.\n5. Last clean audit: 2026-05-10 (0 vulnerabilities). Mark as Pass after re-running before this release.';
     test: async () => {
       // We cannot run npm audit from the renderer process
       // This test validates that the audit was run and documents the last known clean state
