@@ -2404,22 +2404,8 @@ function renderTests() {
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
 
-      <!-- Table -->
-      <div class="card" style="overflow-x:auto;padding:0">
-        <table id="testsTable" style="width:100%;border-collapse:collapse">
-          <thead>
-            <tr style="border-bottom:1px solid var(--border)">
-              <th style="padding:10px 12px;text-align:left;width:40px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">#</th>
-              <th style="padding:10px 12px;text-align:left;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">CATEGORY</th>
-              <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">TITLE</th>
-              <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXPECTED</th>
-              <th style="padding:10px 12px;text-align:center;width:80px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RUN</th>
-              <th style="padding:10px 12px;text-align:center;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RESULT</th>
-            </tr>
-          </thead>
-          <tbody id="testsBody"></tbody>
-        </table>
-      </div>
+      <!-- Tables rendered by _buildTestRows() -->
+      <div id="testsTablesWrap"></div>
     </div>`;
 
   // Build initial rows
@@ -2477,27 +2463,54 @@ const _CATEGORY_COLORS = {
   Maintenance:  '#22d3ee',
 };
 
-function _buildTestRows() {
-  const tbody = document.getElementById('testsBody');
-  if (!tbody) return;
+const _CATEGORY_ORDER = [
+  'Auth', 'Database', 'Navigation', 'Account', 'Settings',
+  'Jumps', 'Columns', 'Archive', 'Stats',
+  'Subscription', 'Paywall', 'Teams', 'Shared Sync',
+  'Security', 'UI', 'Code Quality', 'Deployment', 'Maintenance'
+];
+const _byCategory = (a, b) => {
+  const ai = _CATEGORY_ORDER.indexOf(a.category);
+  const bi = _CATEGORY_ORDER.indexOf(b.category);
+  const aOrder = ai === -1 ? 999 : ai;
+  const bOrder = bi === -1 ? 999 : bi;
+  return aOrder !== bOrder ? aOrder - bOrder : a.id - b.id;
+};
 
-  // Dependency-aware category order:
-  // Auth → Database → Navigation → Account → Settings → Jumps → Columns
-  // → Archive → Stats → Subscription → Paywall → Teams → Shared Sync
-  // → Security → UI → Code Quality → Deployment → Maintenance
-  const _CATEGORY_ORDER = [
-    'Auth', 'Database', 'Navigation', 'Account', 'Settings',
-    'Jumps', 'Columns', 'Archive', 'Stats',
-    'Subscription', 'Paywall', 'Teams', 'Shared Sync',
-    'Security', 'UI', 'Code Quality', 'Deployment', 'Maintenance'
-  ];
-  const _byCategory = (a, b) => {
-    const ai = _CATEGORY_ORDER.indexOf(a.category);
-    const bi = _CATEGORY_ORDER.indexOf(b.category);
-    const aOrder = ai === -1 ? 999 : ai;
-    const bOrder = bi === -1 ? 999 : bi;
-    return aOrder !== bOrder ? aOrder - bOrder : a.id - b.id;
-  };
+const _COL_HEADERS = `
+  <thead>
+    <tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:10px 12px;text-align:left;width:40px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">#</th>
+      <th style="padding:10px 12px;text-align:left;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">CATEGORY</th>
+      <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">TITLE</th>
+      <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXPECTED</th>
+      <th style="padding:10px 12px;text-align:center;width:80px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RUN</th>
+      <th style="padding:10px 12px;text-align:center;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">RESULT</th>
+    </tr>
+  </thead>`;
+
+function _sectionBlock(label, icon, tests, startNum) {
+  const rows = tests.map((t, i) => _testRow(t, startNum + i)).join('');
+  return `
+    <div style="margin-bottom:28px">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 12px 10px;background:var(--bg-card);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+        <svg class="ti ti-${icon}" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>
+        <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${tests.length})</span>
+      </div>
+      <div class="card" style="overflow-x:auto;padding:0;border-radius:0 0 var(--radius-lg) var(--radius-lg)">
+        <table style="width:100%;border-collapse:collapse">
+          ${_COL_HEADERS}
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+function _buildTestRows() {
+  const wrap = document.getElementById('testsTablesWrap');
+  if (!wrap) return;
+
   const autoTests   = JK_TESTS.filter(t => !t.steps).slice().sort(_byCategory);
   const manualTests = JK_TESTS.filter(t =>  t.steps).slice().sort(_byCategory);
 
@@ -2526,29 +2539,15 @@ function _buildTestRows() {
     </tr>`;
   }
 
-  function _sectionHeader(label, icon, count, extraTopPad) {
-    return `<tr>
-      <td colspan="6" style="padding:${extraTopPad ? '28px' : '14px'} 12px 8px;background:var(--bg);border-bottom:2px solid var(--border);border-top:${extraTopPad ? '2px solid var(--border)' : 'none'}">
-        <div style="display:flex;align-items:center;gap:8px">
-          <svg class="ti ti-${icon}" style="font-size:1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>
-          <span style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
-          <span style="font-size:0.72rem;color:var(--text-dim);font-weight:500">(${count})</span>
-        </div>
-      </td>
-    </tr>`;
-  }
-
   // Build global display order + number map for use in detail modal
   const _displayOrder = [...autoTests, ...manualTests];
   window._jkTestDisplayOrder = _displayOrder;
   window._jkTestDisplayNumMap = {};
   _displayOrder.forEach((t, i) => { window._jkTestDisplayNumMap[t.id] = i + 1; });
 
-  tbody.innerHTML =
-    _sectionHeader('Automatic Tests', 'player-play', autoTests.length, false) +
-    autoTests.map((t, i) => _testRow(t, i + 1)).join('') +
-    _sectionHeader('Manual Tests', 'clipboard-list', manualTests.length, true) +
-    manualTests.map((t, i) => _testRow(t, autoTests.length + i + 1)).join('');
+  wrap.innerHTML =
+    _sectionBlock('Automatic Tests', 'player-play', autoTests, 1) +
+    _sectionBlock('Manual Tests', 'clipboard-list', manualTests, autoTests.length + 1);
 }
 
 function _markManualResult(id, result) {
