@@ -2707,13 +2707,30 @@ function _refreshSummary() {
   if (sm) { sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
 }
 
+// Temporarily patch console methods to replace internal test ID with display number in log messages.
+// e.g. "[Test 94]" becomes "[Test 35]" matching the page numbering.
+function _patchConsoleForTest(internalId, displayNum) {
+  const TAG = `[Test ${internalId}]`;
+  const NEW = `[Test ${displayNum}]`;
+  const _orig = { info: console.info, warn: console.warn, error: console.error, debug: console.debug };
+  ['info','warn','error','debug'].forEach(level => {
+    console[level] = function(...args) {
+      const patched = args.map(a => typeof a === 'string' ? a.replace(TAG, NEW) : a);
+      _orig[level].apply(console, patched);
+    };
+  });
+  return () => { Object.assign(console, _orig); }; // returns restore function
+}
+
 async function _runSingleTest(id) {
   const testDef = JK_TESTS.find(t => t.id === id);
   if (!testDef) return;
+  const displayNum = (window._jkTestDisplayNumMap || {})[id] || id;
   const btn = document.getElementById(`test-run-btn-${id}`);
   if (btn) { btn.disabled = true; btn.innerHTML = '<svg class="ti ti-loader-2 jk-spin" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>'; }
   _setRowResult(id, 'running');
   if (!window._jkTestResults) window._jkTestResults = {};
+  const _restoreConsole = _patchConsoleForTest(id, displayNum);
   try {
     const result = await testDef.test();
     if (result === 'manual') {
@@ -2728,6 +2745,7 @@ async function _runSingleTest(id) {
     window._jkTestResults[id] = { state: 'fail', received: msg, message: msg };
     _setRowResult(id, 'fail', msg);
   } finally {
+    _restoreConsole();
     if (btn) { btn.disabled = false; btn.innerHTML = '<svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>'; }
     _refreshSummary();
   }
