@@ -719,7 +719,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
   const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
-  const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 150) : 150;
+  const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 100) : 100;
   const lifetimeSeconds = lifetimeLaunches * timePerClick;
   const lifetimeHours   = Math.floor(lifetimeSeconds / 3600);
   const lifetimeMins    = Math.floor((lifetimeSeconds % 3600) / 60);
