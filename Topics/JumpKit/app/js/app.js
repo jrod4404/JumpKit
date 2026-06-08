@@ -921,6 +921,10 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     moveAcctPill();
     setAcctSubtitle(currentAcctTab);
     renderAcctTabContent(currentAcctTab);
+    // Sync sidebar nav highlight with the active tab
+    const tabNavMap = { teams: 'teams', settings: 'settings', account: 'settings' };
+    const navPage = tabNavMap[currentAcctTab] || 'settings';
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === navPage));
   });
 
   function moveAcctPill() {
