@@ -586,7 +586,7 @@
                 <p class="header-tagline">Stop searching. Start jumping.</p>
                 <h1>Developer and Marketing Documentation</h1>
                 <p class="header-subtext">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p class="header-updated">Last updated: 2026-06-01</p>
+                <p class="header-updated">Last updated: 2026-06-07</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -632,12 +632,12 @@
 <tr>
 <td><strong>JumpKit Free</strong></td>
 <td>$0</td>
-<td>Up to 250 lifetime launches; web links + local folders; hotkey launcher; filters &amp; search; time &amp; ROI dashboard; Windows + Mac; own 1 team; join 1 team as a member; up to 10 shared jumps visible per shared column</td>
+<td>250 lifetime launches; web links &amp; local folders; hotkey launcher; filters &amp; search; personal ROI dashboard; Windows &amp; Mac; 2 teams; 5 members per team; 10 jumps per team</td>
 </tr>
 <tr>
-<td><strong>JumpKit Core</strong></td>
+<td><strong>JumpKit Unlimited</strong></td>
 <td>$10/mo or $99/yr</td>
-<td>Everything in Free + unlimited launches; own unlimited teams; join unlimited teams as a member; unlimited shared jumps; full team collaboration &amp; sharing; auto-archive; auto-backup</td>
+<td>Everything in Free + unlimited jump launches; unlimited teams, members &amp; jumps; personal &amp; team ROI dashboard; auto-archive (Unlimited only); auto-backup (Unlimited only); early access to new features</td>
 </tr>
 </tbody>
 </table>
@@ -3709,6 +3709,18 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3>2026-06-07</h3>
+<ul>
+  <li><strong>Pricing cards overhauled:</strong> Both Free and Unlimited landing page cards trimmed to 7 clean bullets. Cards widened to 385px with mobile word-wrap fix. Vercel GitHub integration fixed (<code>autoAssignCustomDomains: false</code>) to stop auto-deploys stealing domain aliases.</li>
+  <li><strong>Feature list consistency sweep (7 touch points):</strong> All locations updated to match landing page — My Account features modal, upgrade banner, Welcome to Unlimited modal (comparison table + &ldquo;Core&rdquo; label → &ldquo;Unlimited&rdquo;), downgrade modal copy, launch limit paywall popup, <code>send-welcome-core</code> email, <code>send-cancellation</code> email.</li>
+  <li><strong>5-member free-tier team cap:</strong> Free teams now limited to 5 members (owner + 4). Enforced at 3 points in <code>teams.js</code>: <code>sendOrgInvites</code>, <code>sendInvites</code>, <code>doJoinTeam</code>. Landing page updated with &ldquo;5 members per team&rdquo; (Free) and &ldquo;Unlimited members per team&rdquo; (Unlimited).</li>
+  <li><strong>Auto-archive &amp; auto-backup gated to Unlimited:</strong> Free users see 🔒 lock + &ldquo;Upgrade&rdquo; button in Settings. Runtime guards in <code>runAutoArchive()</code> and <code>runCloudBackup()</code> block execution for free accounts. Save-prefs handler also guards these values. &ldquo;Auto Cloud Backup&rdquo; renamed to &ldquo;Auto Backup&rdquo; (clarifies it saves a local JSON file, not cloud storage).</li>
+  <li><strong>Export ROI Report (PDF):</strong> &ldquo;Export PDF&rdquo; button added to Stats page. Available to all users (Free + Unlimited). Generates all-time summary report: total launches, time saved, dollars saved, last 30 days chart, top jumps table, launches by column chart. Uses Electron <code>dialog.showSaveDialog()</code> + <code>printToPDF()</code> via IPC. JumpKit circle logo embedded in report header. CSP-safe via <code>data-jaction</code> pattern.</li>
+  <li><strong>Daily stats view fix:</strong> Changed from &ldquo;current calendar week (Sun–Sat)&rdquo; to &ldquo;last 7 days&rdquo; rolling window. Fixes empty state that appeared every Sunday.</li>
+  <li><strong>FUTURE_FEATURES.md created:</strong> Captures browser bookmark auto-import idea (Chrome/Edge/Firefox/Safari) with implementation plan, file paths, gotchas, and phasing.</li>
+  <li><strong>Backup:</strong> <code>jumpkit_backup_2026-06-07.zip</code> (294KB) saved to <code>backups/</code> folder.</li>
+</ul>
 
 <h3>2026-06-06</h3>
 <ul>
