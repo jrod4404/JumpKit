@@ -854,11 +854,11 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch</span></div>
+              <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch, set to what is accurate for you</span></div>
               <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Your personal dollars per hour, used to calculate ROI</span></div>
+              <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Your personal dollars per hour, used to calculate ROI, set to what is accurate for you</span></div>
               <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
             </div>
             <div class="acct-row">
