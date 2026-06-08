@@ -1481,6 +1481,9 @@ const JK_TESTS = [
     description: 'Checks if a separate dev Supabase URL is configured. If not, logs a warning.',
     input: 'SUPABASE_URL, DEV_SUPABASE_URL (if set)',
     expected: 'Two separate URLs configured, or warning shown.',
+    steps: '1. Create a separate Supabase project for development (free tier is fine).
+2. Add DEV_SUPABASE_URL to your supabase/config.js pointing to the dev project.
+3. Re-run this test — it will pass automatically once a separate URL is configured.',
     test: async () => {
       const devUrl = typeof DEV_SUPABASE_URL !== 'undefined' ? DEV_SUPABASE_URL : null;
       if (!devUrl) {
@@ -1518,6 +1521,10 @@ const JK_TESTS = [
     description: 'Validates that 3 known migration files exist and logs reminder to always add new migrations as files.',
     input: 'Known migration file list',
     expected: 'All 3 migrations accounted for in supabase/migrations/.',
+    steps: '1. Confirm the 3 known migration files exist in supabase/migrations/: 20240001_add_name_fields.sql, 20240002_profile_trigger.sql, 20240003_subscription_fields.sql.
+2. Any future schema change must be saved as a NEW .sql file in supabase/migrations/ before being applied.
+3. Never apply schema changes directly in the Supabase dashboard without a corresponding migration file.
+4. Mark as Pass once you have confirmed the above.',
     test: async () => {
       const knownMigrations = ['20240001_add_name_fields.sql', '20240002_profile_trigger.sql', '20240003_subscription_fields.sql'];
       console.info('[Test 67] Migrations in version control: ' + knownMigrations.join(', '));
