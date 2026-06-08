@@ -2463,10 +2463,10 @@ function _buildTestRows() {
   const autoTests   = JK_TESTS.filter(t => !t.steps).slice().sort(_byCategory);
   const manualTests = JK_TESTS.filter(t =>  t.steps).slice().sort(_byCategory);
 
-  function _testRow(t) {
+  function _testRow(t, displayNum) {
     return `
     <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
-      <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${t.id}</td>
+      <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${displayNum}</td>
       <td style="padding:10px 12px">
         <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${_CATEGORY_COLORS[t.category] || '#6b7280'}22;color:${_CATEGORY_COLORS[t.category] || '#6b7280'}">
           ${_esc(t.category)}
@@ -2502,9 +2502,9 @@ function _buildTestRows() {
 
   tbody.innerHTML =
     _sectionHeader('Automatic Tests', 'player-play', autoTests.length, false) +
-    autoTests.map(_testRow).join('') +
+    autoTests.map((t, i) => _testRow(t, i + 1)).join('') +
     _sectionHeader('Manual Tests', 'clipboard-list', manualTests.length, true) +
-    manualTests.map(_testRow).join('');
+    manualTests.map((t, i) => _testRow(t, autoTests.length + i + 1)).join('');
 }
 
 function _markManualResult(id, result) {
