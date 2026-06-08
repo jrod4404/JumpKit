@@ -2386,7 +2386,7 @@ function renderTests() {
     <div id="pageTests">
 
       <!-- Summary + Buttons row -->
-      <div style="margin:0 0 16px 0;display:flex;align-items:center;gap:12px">
+      <div style="margin:0 0 16px 0;display:flex;align-items:stretch;gap:12px">
         <div id="testSummary" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:16px">
           <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
           <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
