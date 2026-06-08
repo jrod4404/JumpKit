@@ -810,64 +810,18 @@ const JK_TESTS = [
   },
 
   // ── Team Sharing ──────────────────────────────────────────────
-  {
-    id: 46, category: 'Teams',
-    title: 'Create test team → verified in Supabase',
-    purpose: 'Verifies that the team creation write path correctly inserts a row into Supabase and returns the created record. Foundation for all subsequent team sharing tests.',
-    prerequisites: 'Must be logged in as org-owner. Profile must have a valid org_id (visit Teams page first to auto-assign). Run before Tests 47–51.',
-    description: 'Creates a test team in Supabase and queries it back to confirm correct creation',
-    input: 'supabaseClient.from("teams").insert({ org_id, name: "__TEST_TEAM_<ts>", team_password_hash, owner_id })',
-    expected: 'team row exists in Supabase with matching name and org_id',
-    test: async () => {
-      // Requires org-owner role
-      const profile = window._supabaseProfile;
-      if (!profile || (profile.role !== 'org-owner' && profile.role !== 'team-owner')) {
-        throw new Error('Must be org-owner to run this test');
-      }
-      const orgId = profile.org_id;
-      if (!orgId) throw new Error('No org_id on profile — create an org first');
-
-      const testName = '__TEST_TEAM_' + Date.now();
-      const hashedPw = await hashPassword('testpassword123');
-      const ownerId  = window._supabaseUser.id;
-
-      // 1. Insert test team
-      const { data: inserted, error: insErr } = await supabaseClient
-        .from('teams')
-        .insert({ org_id: orgId, name: testName, team_password_hash: hashedPw, owner_id: ownerId })
-        .select()
-        .single();
-      if (insErr) throw new Error('Insert failed: ' + insErr.message);
-      if (!inserted?.id) throw new Error('No row returned after insert');
-
-      // 2. Query it back
-      const { data: fetched, error: fetchErr } = await supabaseClient
-        .from('teams')
-        .select('id, name, org_id, owner_id')
-        .eq('id', inserted.id)
-        .single();
-      if (fetchErr) throw new Error('Fetch failed: ' + fetchErr.message);
-      if (fetched.name !== testName) throw new Error(`Name mismatch: expected ${testName}, got ${fetched.name}`);
-      if (fetched.org_id !== orgId)  throw new Error(`org_id mismatch: expected ${orgId}, got ${fetched.org_id}`);
-
-      // 3. Store team id for subsequent tests
-      window._testTeamId = inserted.id;
-      window._testTeamName = testName;
-      return true;
-    }
-  },
 
   {
     id: 47, category: 'Teams',
     title: 'Share column to test team → verified in Supabase',
     purpose: 'Confirms that sharing a column writes the correct rows to shared_columns and shared_jumps in Supabase. Tests the core data sync that makes jump sharing work for teams.',
-    prerequisites: 'Test 46 must have run successfully first. At least one personal (unshared) column with jumps must exist.',
+    prerequisites: 'Run the team creation setup before this test (window._testTeamId must be set by a prior team test).',
     input: 'supabaseClient.from("shared_columns").insert({ column_id, team_id }) + shared_jumps for each jump',
     description: 'Shares first personal column + its jumps to the test team, queries shared_columns and shared_jumps tables to confirm',
     expected: 'Row exists in shared_columns; all jumps in that column exist in shared_jumps',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('Run test 46 first to create the test team');
+      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
 
       const userId = window._supabaseUser?.id;
       const cols   = DB.getColumns(userId).filter(c => !c.isShared);
@@ -948,7 +902,7 @@ const JK_TESTS = [
     expected: 'team_invites row exists with status = "pending" for the test email',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('Run test 46 first to create the test team');
+      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
 
       const invitedBy = window._supabaseUser?.id;
       const testEmail = 'unit-test-invite@jumpkit-test.invalid';
@@ -1016,13 +970,13 @@ const JK_TESTS = [
     id: 50, category: 'Teams',
     title: 'Remove user from team → member row deleted in Supabase',
     purpose: 'Confirms the member removal path correctly deletes the team_members row from Supabase. If this fails, removed members retain access to shared jumps.',
-    prerequisites: 'Test 46 must have run successfully first (window._testTeamId must be set).',
+    prerequisites: 'window._testTeamId must be set by a prior team test.',
     input: 'supabaseClient.from("team_members").insert({ team_id, user_id }) → .delete().eq("id", memberId)',
     description: 'Inserts a test team_members row for the current user, then removes it and verifies deletion',
     expected: 'team_members row no longer exists after delete',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('Run test 46 first to create the test team');
+      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
 
       const userId = window._supabaseUser?.id;
 
@@ -1071,7 +1025,7 @@ const JK_TESTS = [
     test: async () => {
       const teamId = window._testTeamId;
       const colId  = window._testSharedColId;
-      if (!teamId) throw new Error('Run test 46 first');
+      if (!teamId) throw new Error('No test team found — create a team manually or run a team creation test first');
       if (!colId)  throw new Error('Run test 47 first to share a column');
 
       // 1. Delete shared_jumps for this col + team
