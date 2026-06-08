@@ -2445,14 +2445,23 @@ const _CATEGORY_COLORS = {
   Subscription: '#f97316',
   Teams:        '#14b8a6',
   UI:           '#84cc16',
+  Security:     '#ef4444',
+  Database:     '#0ea5e9',
+  'Shared Sync':'#a855f7',
+  'Code Quality':'#78716c',
+  Settings:     '#64748b',
+  Deployment:   '#f43f5e',
+  Paywall:      '#d97706',
+  Maintenance:  '#22d3ee',
 };
 
 function _buildTestRows() {
   const tbody = document.getElementById('testsBody');
   if (!tbody) return;
 
-  const autoTests   = JK_TESTS.filter(t => !t.steps);
-  const manualTests = JK_TESTS.filter(t =>  t.steps);
+  const _byCategory = (a, b) => a.category.localeCompare(b.category);
+  const autoTests   = JK_TESTS.filter(t => !t.steps).slice().sort(_byCategory);
+  const manualTests = JK_TESTS.filter(t =>  t.steps).slice().sort(_byCategory);
 
   function _testRow(t) {
     return `
@@ -2479,9 +2488,9 @@ function _buildTestRows() {
     </tr>`;
   }
 
-  function _sectionHeader(label, icon, count) {
+  function _sectionHeader(label, icon, count, extraTopPad) {
     return `<tr>
-      <td colspan="6" style="padding:14px 12px 8px;background:var(--bg);border-bottom:2px solid var(--border)">
+      <td colspan="6" style="padding:${extraTopPad ? '28px' : '14px'} 12px 8px;background:var(--bg);border-bottom:2px solid var(--border);border-top:${extraTopPad ? '2px solid var(--border)' : 'none'}">
         <div style="display:flex;align-items:center;gap:8px">
           <svg class="ti ti-${icon}" style="font-size:1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>
           <span style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
@@ -2492,9 +2501,9 @@ function _buildTestRows() {
   }
 
   tbody.innerHTML =
-    _sectionHeader('Automatic Tests', 'player-play', autoTests.length) +
+    _sectionHeader('Automatic Tests', 'player-play', autoTests.length, false) +
     autoTests.map(_testRow).join('') +
-    _sectionHeader('Manual Tests', 'clipboard-list', manualTests.length) +
+    _sectionHeader('Manual Tests', 'clipboard-list', manualTests.length, true) +
     manualTests.map(_testRow).join('');
 }
 
