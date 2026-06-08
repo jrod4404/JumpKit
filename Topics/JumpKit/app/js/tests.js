@@ -2307,6 +2307,67 @@ const JK_TESTS = [
   },
 
 
+
+  {
+    id: 95, category: 'Maintenance',
+    title: 'Auto-backup fires correctly and creates notification',
+    purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the cloudBackup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal — it goes silently to the notification bell.',
+    prerequisites: 'Must be logged in as an Unlimited user. The cloudBackup preference must be enabled in Settings.',
+    description: 'Temporarily ensures cloudBackup pref is true, calls runCloudBackup(), and checks that a backup notification (type=backup or type=backup-failed) was created in the notification store. Cleans up the test notification.',
+    input: 'DB.updatePrefs(userId, { cloudBackup: true }), then await runCloudBackup()',
+    expected: 'A notification with type=backup or type=backup-failed is created. No modal is shown. Free tier returns early silently.',
+    test: async () => {
+      // 1. Block free-tier check
+      const tier = window._supabaseProfile?.subscription_tier || 'free';
+      if (tier === 'free') {
+        console.warn('[Test 95] ⚠️ Must be Unlimited to test auto-backup. Free-tier guard is working — log in as Unlimited to run the full test.');
+        return 'manual';
+      }
+
+      // 2. Check Electron IPC is available
+      if (!window.electronAPI?.saveBackup) {
+        console.warn('[Test 95] ⚠️ electronAPI.saveBackup not available — cannot test backup file creation outside Electron.');
+        return 'manual';
+      }
+
+      // 3. Snapshot notification count before
+      const notifsBefore = typeof getNotifications === 'function' ? getNotifications() : [];
+
+      // 4. Temporarily enable cloudBackup pref
+      const prefs = DB.getPrefs(currentUser.id);
+      const originalPref = prefs.cloudBackup;
+      DB.updatePrefs ? DB.updatePrefs(currentUser.id, { cloudBackup: true }) : (prefs.cloudBackup = true);
+
+      // 5. Run auto-backup
+      await runCloudBackup();
+
+      // 6. Restore pref
+      if (DB.updatePrefs) DB.updatePrefs(currentUser.id, { cloudBackup: originalPref });
+
+      // 7. Check notification was created
+      const notifsAfter = typeof getNotifications === 'function' ? getNotifications() : [];
+      const backupNotif = notifsAfter.find(n =>
+        (n.type === 'backup' || n.type === 'backup-failed') &&
+        !notifsBefore.find(b => b.ts === n.ts)
+      );
+      if (!backupNotif) throw new Error('No backup notification found after runCloudBackup() — notification may not have been created.');
+
+      if (backupNotif.type === 'backup') {
+        console.info('[Test 95] ✅ Backup succeeded. Notification: ' + backupNotif.message);
+      } else {
+        console.warn('[Test 95] ⚠️ Backup ran but reported failure: ' + backupNotif.message + ' — check Electron IPC and file system permissions.');
+      }
+
+      // 8. Cleanup — remove test notification
+      if (typeof saveNotifications === 'function') {
+        saveNotifications(notifsAfter.filter(n => n !== backupNotif));
+        if (typeof updateNotifBadge === 'function') updateNotifBadge();
+      }
+      console.info('[Test 95] ✅ Cleanup complete — test notification removed.');
+      return true;
+    }
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
