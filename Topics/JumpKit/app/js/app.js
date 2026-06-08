@@ -925,6 +925,11 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     const tabNavMap = { teams: 'teams', settings: 'settings', account: 'settings' };
     const navPage = tabNavMap[currentAcctTab] || 'settings';
     document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === navPage));
+    // Update topbar title and activePage to reflect the active tab
+    activePage = navPage;
+    window.activePage = navPage;
+    const titleEl = document.getElementById('topbarTitle');
+    if (titleEl) titleEl.textContent = pageTitles[currentAcctTab] || pageTitles[navPage] || '';
   });
 
   function moveAcctPill() {
