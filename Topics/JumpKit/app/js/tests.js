@@ -2459,7 +2459,23 @@ function _buildTestRows() {
   const tbody = document.getElementById('testsBody');
   if (!tbody) return;
 
-  const _byCategory = (a, b) => a.category.localeCompare(b.category);
+  // Dependency-aware category order:
+  // Auth → Database → Navigation → Account → Settings → Jumps → Columns
+  // → Archive → Stats → Subscription → Paywall → Teams → Shared Sync
+  // → Security → UI → Code Quality → Deployment → Maintenance
+  const _CATEGORY_ORDER = [
+    'Auth', 'Database', 'Navigation', 'Account', 'Settings',
+    'Jumps', 'Columns', 'Archive', 'Stats',
+    'Subscription', 'Paywall', 'Teams', 'Shared Sync',
+    'Security', 'UI', 'Code Quality', 'Deployment', 'Maintenance'
+  ];
+  const _byCategory = (a, b) => {
+    const ai = _CATEGORY_ORDER.indexOf(a.category);
+    const bi = _CATEGORY_ORDER.indexOf(b.category);
+    const aOrder = ai === -1 ? 999 : ai;
+    const bOrder = bi === -1 ? 999 : bi;
+    return aOrder !== bOrder ? aOrder - bOrder : a.id - b.id;
+  };
   const autoTests   = JK_TESTS.filter(t => !t.steps).slice().sort(_byCategory);
   const manualTests = JK_TESTS.filter(t =>  t.steps).slice().sort(_byCategory);
 
