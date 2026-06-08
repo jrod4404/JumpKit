@@ -2493,7 +2493,7 @@ function _sectionBlock(label, icon, tests, startNum) {
   const rows = tests.map((t, i) => _testRow(t, startNum + i)).join('');
   return `
     <div style="margin-bottom:28px">
-      <div style="display:flex;align-items:center;gap:8px;padding:14px 12px 10px;background:var(--bg-card);border:1px solid var(--border);border-bottom:none;border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+      <div style="display:flex;align-items:center;gap:8px;padding:14px 4px 10px">
         <svg class="ti ti-${icon}" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>
         <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
         <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${tests.length})</span>
