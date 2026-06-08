@@ -867,7 +867,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Dollars per Hour</span><span class="acct-row-hint">Your personal dollars per hour, used to calculate ROI, set to what is accurate for you</span></div>
-              <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
+              <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/ hr</span></div>
             </div>
           </div>
           <div class="acct-section">
