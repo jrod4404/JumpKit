@@ -862,29 +862,29 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-number-wrap"><span class="acct-unit">$</span><input class="form-input acct-number" type="number" id="prefDollar" min="1" max="9999" value="${p.dollarsPerHour}"/><span class="acct-unit">/hr</span></div>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Display description under jump name on jump page</span></div>
+              <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Show or hide description under jump name on jump page</span></div>
               <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Display hotkey pill next to jump name on jumps page</span></div>
+              <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Show or hide hotkey pill next to jump name on jumps page</span></div>
               <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span><br><span style="font-size:0.78rem">Automatically moves unused jumps to the archive after a set time period</span>':'Automatically moves unused jumps to the archive after a set time period'}</span></div>
+              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Automatically moves unused jumps to the archive after a set time period</span></div>
               ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button>`
+                ? `<div style="display:flex;align-items:center;gap:8px"><span style="color:var(--turq);font-size:0.75rem;font-weight:600;white-space:nowrap">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
               </div>`}
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span><br><span style="font-size:0.78rem">Automatically saves a local backup of all your jumps on each login</span>':'Automatically saves a local backup of all your jumps on each login'}</span></div>
+              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
               ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button>`
+                ? `<div style="display:flex;align-items:center;gap:8px"><span style="color:var(--turq);font-size:0.75rem;font-weight:600;white-space:nowrap">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
