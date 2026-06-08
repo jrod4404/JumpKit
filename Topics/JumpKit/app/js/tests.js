@@ -2393,11 +2393,11 @@ function renderTests() {
           <div id="summaryManual" style="display:none"></div>
           <span id="summaryTime" style="color:var(--text-muted);font-size:0.8rem"></span>
         </div>
-        <button class="btn btn-subtle" id="btnRunTests" style="display:flex;align-items:center;gap:.4rem">
-          <svg class="ti ti-player-play"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests
+        <button class="btn btn-subtle" id="btnRunTests" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+          <svg class="ti ti-player-play" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests
         </button>
-        <button class="btn btn-subtle" id="btnResetTests" style="display:flex;align-items:center;gap:.4rem">
-          <svg class="ti ti-refresh"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Reset
+        <button class="btn btn-subtle" id="btnResetTests" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+          <svg class="ti ti-refresh" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Reset
         </button>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
@@ -2699,8 +2699,8 @@ function _refreshSummary() {
   const sp = document.getElementById('summaryPass');
   const sf = document.getElementById('summaryFail');
   const sm = document.getElementById('summaryManual');
-  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#5cb885':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#5cb885':'var(--text-muted)'; }
-  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#d4736e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#d4736e':'var(--text-muted)'; }
+  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#22c55e':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#22c55e':'var(--text-muted)'; }
+  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#ef4444':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#ef4444':'var(--text-muted)'; }
   if (sm) { sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:${manual>0?'#f59e0b':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`; sm.style.color = manual>0?'#f59e0b':'var(--text-muted)'; }
 }
 
@@ -2831,8 +2831,8 @@ async function _runAllTests() {
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#5cb885"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
-    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#d4736e"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
+    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
+    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
     document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#c99a3a"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
   }
