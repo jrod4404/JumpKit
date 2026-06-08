@@ -2386,20 +2386,20 @@ function renderTests() {
     <div id="pageTests">
 
       <!-- Summary + Buttons row -->
-      <div id="testSummary" style="margin:0 0 16px 0;padding:10px 16px 10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:16px">
-        <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
-        <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
-        <div id="summaryManual" style="display:none"></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
+      <div style="margin:0 0 16px 0;display:flex;align-items:center;gap:12px">
+        <div id="testSummary" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:16px">
+          <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
+          <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
+          <div id="summaryManual" style="display:none"></div>
           <span id="summaryTime" style="color:var(--text-muted);font-size:0.8rem"></span>
-          <button class="btn btn-subtle" id="btnRunTests" style="display:flex;align-items:center;gap:.4rem">
-            <svg class="ti ti-player-play"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests
-          </button>
-          <button class="btn btn-subtle" id="btnResetTests" style="display:flex;align-items:center;gap:.4rem">
-            <svg class="ti ti-refresh"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Reset
-          </button>
         </div>
+        <button class="btn btn-subtle" id="btnRunTests" style="display:flex;align-items:center;gap:.4rem">
+          <svg class="ti ti-player-play"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg> Run All Tests
+        </button>
+        <button class="btn btn-subtle" id="btnResetTests" style="display:flex;align-items:center;gap:.4rem">
+          <svg class="ti ti-refresh"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Reset
+        </button>
+        <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
 
       <!-- Tables rendered by _buildTestRows() -->
