@@ -2450,7 +2450,12 @@ const _CATEGORY_COLORS = {
 function _buildTestRows() {
   const tbody = document.getElementById('testsBody');
   if (!tbody) return;
-  tbody.innerHTML = JK_TESTS.map(t => `
+
+  const autoTests   = JK_TESTS.filter(t => !t.steps);
+  const manualTests = JK_TESTS.filter(t =>  t.steps);
+
+  function _testRow(t) {
+    return `
     <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
       <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${t.id}</td>
       <td style="padding:10px 12px">
@@ -2471,7 +2476,26 @@ function _buildTestRows() {
       <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
         <span style="color:var(--text-muted)">—</span>
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }
+
+  function _sectionHeader(label, icon, count) {
+    return `<tr>
+      <td colspan="6" style="padding:14px 12px 8px;background:var(--bg);border-bottom:2px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px">
+          <svg class="ti ti-${icon}" style="font-size:1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>
+          <span style="font-size:0.75rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
+          <span style="font-size:0.72rem;color:var(--text-dim);font-weight:500">(${count})</span>
+        </div>
+      </td>
+    </tr>`;
+  }
+
+  tbody.innerHTML =
+    _sectionHeader('Automatic Tests', 'player-play', autoTests.length) +
+    autoTests.map(_testRow).join('') +
+    _sectionHeader('Manual Tests', 'clipboard-list', manualTests.length) +
+    manualTests.map(_testRow).join('');
 }
 
 function _markManualResult(id, result) {
