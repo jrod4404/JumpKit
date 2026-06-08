@@ -452,7 +452,7 @@ const pages = {
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'My Account', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'Teams', tests:'Tests'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'Teams', tests:'Tests'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
@@ -729,8 +729,8 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     ? `$${(lifetimeDollars / 1000).toFixed(1)}k`
     : `$${lifetimeDollars.toFixed(2)}`;
 
-  const ACCT_TABS = ['account', 'teams', 'settings'];
-  const ACCT_LABELS = { account: 'My Account', teams: 'My Teams', settings: 'Settings' };
+  const ACCT_TABS = ['teams', 'settings', 'account'];
+  const ACCT_LABELS = { account: 'My Account', teams: 'Teams', settings: 'Settings' };
   let currentAcctTab = ACCT_TABS.includes(initialTab) ? initialTab : 'account';
 
   const _upgradeBannerHTML = (tier === 'free') ? `
@@ -821,7 +821,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
       renderTeams(el.firstElementChild);
     } else if (tab === 'settings') {
       const p = DB.getPrefs(currentUser.id);
-      const pageChoices = ['home','jumps','stats','teams','settings','help'].map(pg =>
+      const pageChoices = ['home','jumps','stats','teams','settings','account','help'].map(pg =>
         `<div class="custom-select-option${p.startPage===pg?' selected':''}" data-value="${pg}">${pageTitles[pg]||pg}</div>`).join('');
       const archiveChoices = [['never','Never'],['1m','1 Month'],['6m','6 Months'],['1y','1 Year']].map(([v,l]) =>
         `<div class="custom-select-option${p.autoArchive===v?' selected':''}" data-value="${v}">${l}</div>`).join('');
@@ -879,13 +879,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
               ${tier==='free'
-                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
+                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px"><svg class="ti ti-lock" style="width:0.75rem;height:0.75rem;flex-shrink:0;color:rgba(0,194,199,0.65);stroke:rgba(0,194,199,0.65)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Automatically moves unused jumps to the archive after a set time period</span></div>
               ${tier==='free'
-                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
+                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px"><svg class="ti ti-lock" style="width:0.75rem;height:0.75rem;flex-shrink:0;color:rgba(0,194,199,0.65);stroke:rgba(0,194,199,0.65)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
