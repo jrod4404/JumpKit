@@ -2428,6 +2428,28 @@ function renderTests() {
   // Wire buttons
   document.getElementById('btnRunTests').addEventListener('click', _runAllTests);
   document.getElementById('btnResetTests').addEventListener('click', _resetTests);
+
+  // Delegated handler for all test-specific jactions (avoids CSP-blocked inline onclick)
+  document.addEventListener('click', function _testsJaction(e) {
+    if (!document.getElementById('pageTests')) {
+      document.removeEventListener('click', _testsJaction);
+      return;
+    }
+    const btn = e.target.closest('[data-jaction]');
+    if (!btn) return;
+    const action = btn.dataset.jaction;
+    if (action === 'test-run') {
+      _runSingleTest(parseInt(btn.dataset.testid));
+    } else if (action === 'test-mark-pass') {
+      _markManualResult(parseInt(btn.dataset.testid), 'pass');
+    } else if (action === 'test-mark-fail') {
+      _markManualResult(parseInt(btn.dataset.testid), 'fail');
+    } else if (action === 'test-nav') {
+      const navId = parseInt(btn.dataset.navid);
+      const res = (window._jkTestResults || {})[navId] || {};
+      _openTestDetail(navId, res.state || null, res.message || null);
+    }
+  });
 }
 
 function _esc(str) {
@@ -2494,7 +2516,7 @@ function _buildTestRows() {
       </td>
       <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
       <td style="padding:10px 12px;text-align:center">
-        <button onclick="_runSingleTest(${t.id})" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
+        <button data-jaction="test-run" data-testid="${t.id}" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
           <svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>
         </button>
       </td>
@@ -2622,19 +2644,19 @@ function _openTestDetail(id, state, message) {
   const nextRes = nextId ? (_results[nextId] || null) : null;
 
   const manualBtns = isManualTest ? `
-      <button class="btn btn-subtle" onclick="_markManualResult(${id},'pass')" style="color:#22c55e;border-color:rgba(34,197,94,0.3)"><svg class="ti ti-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
-      <button class="btn btn-subtle" onclick="_markManualResult(${id},'fail')" style="color:#ef4444;border-color:rgba(239,68,68,0.3)"><svg class="ti ti-x" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
+      <button class="btn btn-subtle" data-jaction="test-mark-pass" data-testid="${id}" style="color:#22c55e;border-color:rgba(34,197,94,0.3)"><svg class="ti ti-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
+      <button class="btn btn-subtle" data-jaction="test-mark-fail" data-testid="${id}" style="color:#ef4444;border-color:rgba(239,68,68,0.3)"><svg class="ti ti-x" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
 
   const footerHTML = `
     <div style="display:flex;gap:8px;align-items:center;width:100%">
-      <button class="btn btn-subtle" ${prevId ? '' : 'disabled'} onclick="${prevId ? `_openTestDetail(${prevId},${prevRes ? `'${prevRes.state}'` : 'null'},${prevRes?.message ? JSON.stringify(prevRes.message) : 'null'})` : ''}">
+      <button class="btn btn-subtle" ${prevId ? `data-jaction="test-nav" data-navid="${prevId}"` : 'disabled'}>
         <svg class="ti ti-chevron-left"><use href="img/tabler-sprite.svg#tabler-chevron-left"/></svg> Prev
       </button>
-      <button class="btn btn-subtle" ${nextId ? '' : 'disabled'} onclick="${nextId ? `_openTestDetail(${nextId},${nextRes ? `'${nextRes.state}'` : 'null'},${nextRes?.message ? JSON.stringify(nextRes.message) : 'null'})` : ''}">
+      <button class="btn btn-subtle" ${nextId ? `data-jaction="test-nav" data-navid="${nextId}"` : 'disabled'}>
         Next <svg class="ti ti-chevron-right"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
       </button>
       ${manualBtns}
-      <button class="btn btn-subtle" onclick="Modal.close()" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
+      <button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
     </div>`;
 
   Modal.open(modalTitle, bodyHTML, footerHTML, 'xl');
