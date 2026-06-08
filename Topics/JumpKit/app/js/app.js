@@ -850,16 +850,6 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">In-app notification alerts</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
-            <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Auto-save a local backup on login'}</span></div>
-              ${tier==='free'
-                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button>`
-                : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
-            </div>
-            <div class="acct-row" style="border-bottom:none">
-              <div class="acct-row-label"><span>Backup Now</span><span class="acct-row-hint">Export all data to JSON file</span></div>
-              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
-            </div>
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-rocket"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Productivity</div>
@@ -890,6 +880,16 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
               </div>`}
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">${tier==='free'?'<span style="color:var(--turq);font-size:0.75rem;font-weight:600">🔒 Unlimited only</span>':'Auto-save a local backup on login'}</span></div>
+              ${tier==='free'
+                ? `<button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button>`
+                : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all data to JSON file</span></div>
+              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
             </div>
           </div>
           <div class="acct-save-row">
