@@ -873,13 +873,8 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Automatically moves unused jumps to the archive after a set time period</span></div>
-              ${tier==='free'
-                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
-                : `<div class="custom-select acct-select" id="autoArchiveDrop">
-                <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
-                <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
-              </div>`}
+              <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all data to a local JSON file</span></div>
+              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
@@ -888,8 +883,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
-              <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all data to a local JSON file</span></div>
-              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
+              <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Automatically moves unused jumps to the archive after a set time period</span></div>
+              ${tier==='free'
+                ? `<div style="display:flex;align-items:center;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px">🔒 Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
+                : `<div class="custom-select acct-select" id="autoArchiveDrop">
+                <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
+              </div>`}
             </div>
           </div>
           <div class="acct-save-row">
