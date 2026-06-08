@@ -847,7 +847,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>
             </div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">In-app notification alerts</span></div>
+              <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">Show or mute in-app notification alerts</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
           </div>
