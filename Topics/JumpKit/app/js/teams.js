@@ -11,8 +11,8 @@ window.showTeamsTipsModal = function() {
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
       <div style="padding:20px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0">
-        <svg class="ti ti-users" style="width:1.15rem;height:1.15rem;color:var(--hover-accent);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
-        <span style="font-size:1rem;font-weight:700;color:var(--text);flex:1">Teams — Getting Started</span>
+        <svg class="ti ti-users" style="width:1.15rem;height:1.15rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+        <span style="font-size:1rem;font-weight:700;color:var(--text-muted);flex:1">Teams — Getting Started</span>
         <button data-jaction="teams-tips-close" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1;flex-shrink:0">
           <svg class="ti ti-x" style="width:18px;height:18px"><use href="img/tabler-sprite.svg#tabler-x"/></svg>
         </button>
