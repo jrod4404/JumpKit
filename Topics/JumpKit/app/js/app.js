@@ -2483,6 +2483,8 @@ document.addEventListener('click', e => {
       break;
     case 'export-stats-pdf': exportStatsPDF(); break;
     case 'show-upgrade-modal': showUpgradeModal(btn.dataset.title || 'Upgrade', btn.dataset.msg || ''); break;
+    case 'show-teams-tips':  if (typeof showTeamsTipsModal === 'function') showTeamsTipsModal(); break;
+    case 'teams-tips-close': { const _o = document.getElementById('teamsTipsOverlay'); if (_o) _o.remove(); break; }
     case 'modal-close':    Modal.close(); break;
     case 'notif-dismiss': {
       const id = btn.dataset.id;

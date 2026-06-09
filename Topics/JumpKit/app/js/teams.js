@@ -18,7 +18,7 @@ window.showTeamsTipsModal = function() {
           <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Teams — Getting Started</div>
           <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px">Everything you need to know about teams in JumpKit</div>
         </div>
-        <button onclick="document.getElementById('teamsTipsOverlay').remove()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1">
+        <button data-jaction="teams-tips-close" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1">
           <svg class="ti ti-x" style="width:20px;height:20px"><use href="img/tabler-sprite.svg#tabler-x"/></svg>
         </button>
       </div>
@@ -214,7 +214,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px">
         No teams yet. Click <strong>Create Team</strong> to get started, or
-        <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
+        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
       </div>`;
   } else {
     for (const team of ownedTeams) {
@@ -317,7 +317,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px">
         No teams joined yet. When a team owner invites you, it appears here —
-        <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
+        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
       </div>`;
   } else {
     for (const team of memberTeams) {
