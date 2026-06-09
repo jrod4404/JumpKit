@@ -225,8 +225,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _sharerIds = [...new Set(teamSharedCols.map(c => c.created_by).filter(Boolean))];
       const _sharerMap = {};
       if (_sharerIds.length) {
-        const { data: _sharerProfs = [] } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _sharerIds);
+        const { data: _sharerProfs = [], error: _sharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _sharerIds);
+        console.debug('[Teams] sharer IDs:', _sharerIds);
+        console.debug('[Teams] sharer profiles result:', _sharerProfs, 'error:', _sharerErr);
         _sharerProfs.forEach(p => { _sharerMap[p.id] = p; });
+      } else {
+        console.debug('[Teams] no created_by IDs found on cols:', teamSharedCols);
       }
 
       const teamOwnerId = team.owner_id;
@@ -338,8 +342,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _jSharerIds = [...new Set(joinedTeamCols.map(c => c.created_by).filter(Boolean))];
       const _jSharerMap = {};
       if (_jSharerIds.length) {
-        const { data: _jSharerProfs = [] } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _jSharerIds);
+        const { data: _jSharerProfs = [], error: _jSharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _jSharerIds);
+        console.debug('[Teams] joined sharer IDs:', _jSharerIds);
+        console.debug('[Teams] joined sharer profiles result:', _jSharerProfs, 'error:', _jSharerErr);
         _jSharerProfs.forEach(p => { _jSharerMap[p.id] = p; });
+      } else {
+        console.debug('[Teams] joined: no created_by IDs found on cols:', joinedTeamCols);
       }
       const totalJoinedUsers = memberCount + 1; // +1 for owner (not in team_members table)
       const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
