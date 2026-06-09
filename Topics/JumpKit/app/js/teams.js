@@ -220,7 +220,14 @@ async function renderUnifiedTeamsView(content, supaUser) {
       // Fetch members for this team
       const { data: members = [] } = await supabaseClient.from('team_members').select('id, user_id, profiles(email, first_name, last_name)').eq('team_id', team.id);
       const { data: pendingTeamInvites = [] } = await supabaseClient.from('team_invites').select('id, email, invited_at').eq('team_id', team.id).eq('status', 'pending');
-      const { data: teamSharedCols = [] } = await supabaseClient.from('shared_columns').select('id, name, created_by, profiles!created_by(first_name, last_name, email)').eq('team_id', team.id).order('position');
+      const { data: teamSharedCols = [] } = await supabaseClient.from('shared_columns').select('id, name, created_by').eq('team_id', team.id).order('position');
+      // Batch-fetch sharer profiles for tooltips
+      const _sharerIds = [...new Set(teamSharedCols.map(c => c.created_by).filter(Boolean))];
+      const _sharerMap = {};
+      if (_sharerIds.length) {
+        const { data: _sharerProfs = [] } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _sharerIds);
+        _sharerProfs.forEach(p => { _sharerMap[p.id] = p; });
+      }
 
       const teamOwnerId = team.owner_id;
 
@@ -300,7 +307,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
                 ${teamSharedCols.length > 0
-                  ? teamSharedCols.map(c => { const p = c.profiles; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`; }).join('')
+                  ? teamSharedCols.map(c => { const p = _sharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`; }).join('')
                   : '<span class="acct-row-hint" style="font-size:0.8rem">None yet - click <strong>Manage Sharing</strong> above to add one</span>'}
               </div>
             </div>
@@ -326,7 +333,14 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const ownerLabel = ownerName || ownerEmail || '-';
       // Fetch total member count for stats
       const { count: memberCount = 0 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
-      const { data: joinedTeamCols = [] } = await supabaseClient.from('shared_columns').select('name, created_by, profiles!created_by(first_name, last_name, email)').eq('team_id', team.id).order('position');
+      const { data: joinedTeamCols = [] } = await supabaseClient.from('shared_columns').select('name, created_by').eq('team_id', team.id).order('position');
+      // Batch-fetch sharer profiles for tooltips
+      const _jSharerIds = [...new Set(joinedTeamCols.map(c => c.created_by).filter(Boolean))];
+      const _jSharerMap = {};
+      if (_jSharerIds.length) {
+        const { data: _jSharerProfs = [] } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _jSharerIds);
+        _jSharerProfs.forEach(p => { _jSharerMap[p.id] = p; });
+      }
       const totalJoinedUsers = memberCount + 1; // +1 for owner (not in team_members table)
       const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
       const joinedStatsParts = [`${totalJoinedUsers} user${totalJoinedUsers !== 1 ? 's' : ''}`];
@@ -359,7 +373,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
                 ${joinedTeamCols.length > 0
-                  ? joinedTeamCols.map(c => { const p = c.profiles; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}</span>`; }).join('')
+                  ? joinedTeamCols.map(c => { const p = _jSharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}</span>`; }).join('')
                   : '<span class="acct-row-hint" style="font-size:0.8rem">No shared columns</span>'}
               </div>
             </div>
