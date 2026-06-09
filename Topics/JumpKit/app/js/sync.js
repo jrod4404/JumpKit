@@ -507,6 +507,8 @@ async function syncSharedJumps() {
     }
 
     console.debug(`[JumpKit Sync] Synced ${remoteCols.length} columns, ${remoteJumps.length} jumps`);
+    // Sync aggregate stats for Team ROI (unlimited users only)
+    try { await syncMemberStats(); } catch (_) {}
   } catch (err) {
     console.warn('[JumpKit Sync] Error:', err.message);
     // Notify user of sync failure — throttled to once per hour
@@ -677,6 +679,66 @@ function _applyMatch(col, remote, teamId) {
     col.sharedTeams.push({ teamId, supabaseId: remote.id });
   }
   col.isShared = 1;
+}
+
+// ── Member Stats Sync ──────────────────────────────────────────────────────────────────
+// Upserts this user's aggregate launch stats for each team they belong to.
+// Only runs for unlimited (non-free) users. Called after syncSharedJumps().
+async function syncMemberStats() {
+  const tier = window._supabaseProfile?.subscription_tier || 'free';
+  if (tier === 'free') return;
+
+  let session = null;
+  try {
+    const res = await supabaseClient.auth.getSession();
+    session = res?.data?.session;
+  } catch (_) {}
+  if (!session) return;
+
+  const userId = session.user.id;
+  const localUser = DB.getCurrentUser();
+  if (!localUser) return;
+
+  const prefs    = DB.getPrefs(localUser.id);
+  const log      = DB.getClickLog(localUser.id);
+  const allJumps = DB.getJumps(localUser.id);
+
+  const totalLaunches     = log.length;
+  const totalSecondsSaved = log.reduce((sum, c) => {
+    const j = allJumps.find(j => j.id === c.jumpId);
+    return sum + (j?.timeSaved != null ? j.timeSaved : prefs.timePerClick);
+  }, 0);
+  const dollarsPerHour = prefs.dollarsPerHour || 100;
+
+  try {
+    // Get all teams the user belongs to (owned + member)
+    const [{ data: ownedTeams = [] }, { data: memberships = [] }] = await Promise.all([
+      supabaseClient.from('teams').select('id').eq('owner_id', userId),
+      supabaseClient.from('team_members').select('team_id').eq('user_id', userId),
+    ]);
+    const teamIds = [
+      ...ownedTeams.map(t => t.id),
+      ...memberships.map(m => m.team_id),
+    ].filter((v, i, a) => a.indexOf(v) === i); // dedupe
+
+    if (teamIds.length === 0) return;
+
+    const upsertRows = teamIds.map(team_id => ({
+      user_id: userId,
+      team_id,
+      total_launches: totalLaunches,
+      total_seconds_saved: totalSecondsSaved,
+      dollars_per_hour: dollarsPerHour,
+      updated_at: new Date().toISOString(),
+    }));
+
+    const { error } = await supabaseClient
+      .from('member_stats')
+      .upsert(upsertRows, { onConflict: 'user_id,team_id' });
+    if (error) console.warn('[syncMemberStats] upsert error:', error.message);
+  } catch (err) {
+    console.warn('[syncMemberStats] error:', err.message);
+  }
 }
 
 // Kick off sync after a short delay to let the page initialize

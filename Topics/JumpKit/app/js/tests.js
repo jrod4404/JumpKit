@@ -1682,7 +1682,7 @@ const JK_TESTS = [
     description: 'Checks that npm audit fix has been run and package-lock.json is committed. Cannot run npm audit from renderer — serves as a reminder and audit log.',
     input: 'Known audit state from last npm audit fix run (2026-05-10)',
     expected: '0 vulnerabilities. Reminder to re-run before each release.',
-    steps: '1. Open Terminal in the JumpKit project directory.\n2. Run: npm audit\n3. If any critical or high vulnerabilities are found, run: npm audit fix\n4. Commit the updated package-lock.json.\n5. Last clean audit: 2026-05-10 (0 vulnerabilities). Mark as Pass after re-running before this release.';
+    steps: '1. Open Terminal in the JumpKit project directory.\n2. Run: npm audit\n3. If any critical or high vulnerabilities are found, run: npm audit fix\n4. Commit the updated package-lock.json.\n5. Last clean audit: 2026-05-10 (0 vulnerabilities). Mark as Pass after re-running before this release.',
     test: async () => {
       // We cannot run npm audit from the renderer process
       // This test validates that the audit was run and documents the last known clean state

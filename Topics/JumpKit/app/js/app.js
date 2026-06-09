@@ -1258,6 +1258,64 @@ window.exportStatsPDF = async function exportStatsPDF() {
     byCol[name] = (byCol[name] || 0) + 1;
   });
 
+  // Team ROI data for PDF (unlimited users only, owned teams)
+  let teamRoiHtml = '';
+  const pdfTier = window._supabaseProfile?.subscription_tier || 'free';
+  if (pdfTier !== 'free') {
+    try {
+      let pdfSession = null;
+      try { const r = await supabaseClient.auth.getSession(); pdfSession = r?.data?.session; } catch (_) {}
+      if (pdfSession) {
+        const pdfUserId = pdfSession.user.id;
+        const { data: pdfOwnedTeams = [] } = await supabaseClient
+          .from('teams').select('id, name').eq('owner_id', pdfUserId).order('name');
+        if (pdfOwnedTeams.length > 0) {
+          const pdfTeamIds = pdfOwnedTeams.map(t => t.id);
+          const { data: pdfStats = [] } = await supabaseClient
+            .from('member_stats')
+            .select('user_id, team_id, total_launches, total_seconds_saved, dollars_per_hour, updated_at')
+            .in('team_id', pdfTeamIds);
+          const pdfUserIds = [...new Set(pdfStats.map(s => s.user_id))];
+          let pdfProfileMap = {};
+          if (pdfUserIds.length > 0) {
+            const { data: pdfProfiles = [] } = await supabaseClient.from('profiles').select('id,first_name,last_name,email').in('id', pdfUserIds);
+            pdfProfiles.forEach(p => { pdfProfileMap[p.id] = p; });
+          }
+          const teamSections = pdfOwnedTeams.map(team => {
+            const ts = pdfStats.filter(s => s.team_id === team.id);
+            if (ts.length === 0) return `<div style="margin-bottom:16px"><strong style="font-size:13px">${team.name}</strong><p style="font-size:12px;color:#6b7280;margin-top:4px">No usage data yet.</p></div>`;
+            const tL = ts.reduce((s, r) => s + (r.total_launches || 0), 0);
+            const tMins = Math.round(ts.reduce((s, r) => s + (r.total_seconds_saved || 0), 0) / 60);
+            const tDollars = ts.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 100)), 0).toFixed(2);
+            const mRows = ts.sort((a, b) => b.total_launches - a.total_launches).map((s, i) => {
+              const p = pdfProfileMap[s.user_id];
+              const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
+              const mMins = Math.round((s.total_seconds_saved || 0) / 60);
+              const mDollars = (((s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 100)).toFixed(2);
+              return `<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px 10px;font-size:12px;color:#9ca3af">${i+1}</td><td style="padding:6px 10px;font-size:12px;color:#374151">${name}</td><td style="padding:6px 10px;font-size:12px;text-align:right;font-weight:700;color:#00C2C7">${(s.total_launches||0).toLocaleString()}</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">${mMins.toLocaleString()} min</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">$${parseFloat(mDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;
+            }).join('');
+            return `
+              <div style="margin-bottom:20px">
+                <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px">${team.name}</div>
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">
+                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">${tL.toLocaleString()}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team Launches</div></div>
+                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">${tMins.toLocaleString()} min</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team Time Saved</div></div>
+                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">$${parseFloat(tDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team $ Saved</div></div>
+                </div>
+                <table style="width:100%;border-collapse:collapse">
+                  <thead><tr style="background:#f3f4f6"><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">#</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">Member</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Launches</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Time</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">$ Saved</th></tr></thead>
+                  <tbody>${mRows}</tbody>
+                </table>
+              </div>`;
+          }).join('');
+          teamRoiHtml = `
+            <div class="section-title" style="margin-top:28px">Team ROI</div>
+            ${teamSections}`;
+        }
+      }
+    } catch (_) {}
+  }
+
   // Capture chart canvases (only available in Summary view)
   const lineImg = document.getElementById('chLine')?.toDataURL?.('image/png') || '';
   const colImg  = document.getElementById('chCol')?.toDataURL?.('image/png') || '';
@@ -1344,6 +1402,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
     </div>` : ''}
   </div>
 
+  ${teamRoiHtml}
   <div class="footer">Generated by JumpKit &middot; jumpkit.app &middot; ${exportDate}</div>
 </body>
 </html>`;
@@ -1514,6 +1573,7 @@ function renderStatsDash() {
         { labels:colEntries.map(e=>e[0]), datasets:[{data:colEntries.map(e=>e[1]),backgroundColor:doughColors.slice(0,colEntries.length),borderWidth:0}] },
         { scales:{}, plugins:{ legend:{ display:true, position:'bottom', labels:{ color:tc, boxWidth:10, font:{size:11}, padding:10 } } } });
     });
+    renderTeamROISection().catch(() => {});
     return;
   }
 
@@ -1613,6 +1673,235 @@ function renderStatsDash() {
       { labels:colEntriesP.map(e=>e[0]), datasets:[{data:colEntriesP.map(e=>e[1]),backgroundColor:doughColors.slice(0,colEntriesP.length),borderWidth:0}] },
       { scales:{}, plugins:{ legend:{ display:true, position:'bottom', labels:{ color:tc, boxWidth:10, font:{size:11}, padding:10 } } } });
   });
+}
+
+// ── Team ROI Section ──────────────────────────────────────────────────────────────────
+// Appended to stats dash summary view. Shows per-team ROI.
+// Free: personal contribution to shared jumps + upgrade teaser.
+// Unlimited: full per-member breakdown from member_stats table.
+async function renderTeamROISection() {
+  if (!currentUser) return;
+  const dash = document.getElementById('statsDash');
+  if (!dash) return;
+
+  const tier    = window._supabaseProfile?.subscription_tier || 'free';
+  const prefs   = DB.getPrefs(currentUser.id);
+  const log     = DB.getClickLog(currentUser.id);
+  const allJumps= DB.getJumps(currentUser.id);
+  const allCols = DB.getColumns(currentUser.id);
+
+  // Find shared columns (isShared = true, either format: sharedTeams[] or teamId)
+  const sharedCols = allCols.filter(c => c.isShared);
+  if (sharedCols.length === 0) return; // No team activity — skip section
+
+  const sharedColIds   = new Set(sharedCols.map(c => c.id));
+  const sharedJumpMap  = {};
+  allJumps.filter(j => sharedColIds.has(j.columnId)).forEach(j => { sharedJumpMap[j.id] = j; });
+
+  const sharedClicks   = log.filter(c => sharedJumpMap[c.jumpId]);
+  const myLaunches     = sharedClicks.length;
+  const mySeconds      = sharedClicks.reduce((sum, c) => {
+    const j = sharedJumpMap[c.jumpId];
+    return sum + (j?.timeSaved != null ? j.timeSaved : prefs.timePerClick);
+  }, 0);
+  const myMins         = Math.round(mySeconds / 60);
+  const myDollars      = ((mySeconds / 3600) * prefs.dollarsPerHour).toFixed(2);
+  const fmtUSD         = v => '$' + parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  // ── Placeholder while loading ─────────────────────────────────────────────
+  const section = document.createElement('div');
+  section.id = 'teamRoiSection';
+  section.innerHTML = `
+    <div style="margin-top:24px">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
+      <div style="color:var(--text-dim);font-size:0.85rem;padding:16px 0">Loading team data…</div>
+    </div>`;
+  dash.appendChild(section);
+
+  try {
+    let session = null;
+    try { const r = await supabaseClient.auth.getSession(); session = r?.data?.session; } catch (_) {}
+    if (!session) { section.remove(); return; }
+    const userId = session.user.id;
+
+    if (tier === 'free') {
+      // ── Option A: Personal contribution + estimated team total ──
+      // Query teams the user is in for member count
+      const [{ data: ownedTeams = [] }, { data: memberships = [] }] = await Promise.all([
+        supabaseClient.from('teams').select('id, name').eq('owner_id', userId),
+        supabaseClient.from('team_members').select('team_id').eq('user_id', userId),
+      ]);
+      const memberTeamIds = memberships.map(m => m.team_id).filter(id => !ownedTeams.find(t => t.id === id));
+      let memberTeams = [];
+      if (memberTeamIds.length > 0) {
+        const { data: mt = [] } = await supabaseClient.from('teams').select('id,name').in('id', memberTeamIds);
+        memberTeams = mt;
+      }
+      const allTeams = [...ownedTeams, ...memberTeams];
+      if (allTeams.length === 0) { section.remove(); return; }
+
+      // Get member counts for owned teams
+      const memberCountMap = {};
+      for (const t of ownedTeams) {
+        const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+        memberCountMap[t.id] = (count || 0) + 1; // +1 for owner
+      }
+      for (const t of memberTeams) {
+        // For teams we're just a member of, we don't know exact count — show a note
+        memberCountMap[t.id] = null;
+      }
+
+      const teamNames = allTeams.map(t => t.name).join(', ');
+      const avgMembers = Object.values(memberCountMap).filter(v => v != null);
+      const estimatedMultiplier = avgMembers.length ? Math.round(avgMembers.reduce((s,v) => s+v, 0) / avgMembers.length) : 2;
+      const estTeamMins    = myMins * estimatedMultiplier;
+      const estTeamDollars = (parseFloat(myDollars) * estimatedMultiplier).toFixed(2);
+
+      section.innerHTML = `
+        <div style="margin-top:24px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
+          <div class="stats-chart-row">
+            <div class="stats-chart-box" style="flex:1">
+              <div class="stats-chart-title">Your Contribution to Team Jumps</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0">
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Your Launches</div></div>
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Your Time Saved</div></div>
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">Your $ Saved</div></div>
+              </div>
+              <div style="margin-top:10px;font-size:0.8rem;color:var(--text-dim)">
+                Active in: <span style="color:var(--text-muted);font-weight:600">${esc(teamNames)}</span>
+              </div>
+            </div>
+            <div class="stats-chart-box" style="flex:1;background:linear-gradient(135deg,rgba(0,194,199,0.06),rgba(0,194,199,0.02));border:1px dashed rgba(0,194,199,0.3)">
+              <div class="stats-chart-title" style="color:var(--hover-accent)">🔒 Estimated Team Total</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0;opacity:0.6">
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">~${estTeamMins.toLocaleString()} min</div><div class="stat-card-label">Est. Team Time</div></div>
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">~${fmtUSD(estTeamDollars)}</div><div class="stat-card-label">Est. Team $</div></div>
+              </div>
+              <div style="margin-top:12px;font-size:0.8rem;color:var(--text-dim);line-height:1.5">
+                Estimated based on your usage × ${estimatedMultiplier} members.
+                Upgrade to see <strong style="color:var(--hover-accent)">real per-member stats</strong>.
+              </div>
+              <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:14px;font-size:0.8rem;padding:7px 16px">
+                <svg class="ti ti-bolt" style="width:0.85rem;height:0.85rem"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg>
+                Upgrade to Unlimited
+              </a>
+            </div>
+          </div>
+        </div>`;
+
+    } else {
+      // ── Option B: Full per-member breakdown ──
+      // Fetch teams owned by this user
+      const { data: ownedTeams = [] } = await supabaseClient
+        .from('teams').select('id, name').eq('owner_id', userId).order('name');
+
+      if (ownedTeams.length === 0) {
+        // User is unlimited but doesn't own any teams — show their contribution
+        section.innerHTML = `
+          <div style="margin-top:24px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
+            <div class="stats-chart-box">
+              <div class="stats-chart-title">Your Contribution to Team Jumps</div>
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0">
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Launches</div></div>
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
+                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">$ Saved</div></div>
+              </div>
+              <div style="margin-top:8px;font-size:0.8rem;color:var(--text-dim)">You're a team member. Create your own team to see full team ROI breakdown.</div>
+            </div>
+          </div>`;
+        return;
+      }
+
+      const ownedTeamIds = ownedTeams.map(t => t.id);
+
+      // Fetch member_stats + profile names for all owned teams
+      const { data: memberStats = [], error: msErr } = await supabaseClient
+        .from('member_stats')
+        .select('user_id, team_id, total_launches, total_seconds_saved, dollars_per_hour, updated_at')
+        .in('team_id', ownedTeamIds);
+      if (msErr) throw msErr;
+
+      // Fetch profile names for all users in stats
+      const statUserIds = [...new Set(memberStats.map(s => s.user_id))];
+      let profileMap = {};
+      if (statUserIds.length > 0) {
+        const { data: profiles = [] } = await supabaseClient
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .in('id', statUserIds);
+        profiles.forEach(p => { profileMap[p.id] = p; });
+      }
+
+      const teamBlocks = ownedTeams.map(team => {
+        const teamStats = memberStats.filter(s => s.team_id === team.id);
+        if (teamStats.length === 0) {
+          return `
+            <div style="margin-bottom:20px">
+              <div style="font-size:0.85rem;font-weight:700;color:var(--text-muted);margin-bottom:8px">${esc(team.name)}</div>
+              <div style="font-size:0.8rem;color:var(--text-dim)">No usage data yet — members will sync after their next launch.</div>
+            </div>`;
+        }
+
+        const totalL = teamStats.reduce((s, r) => s + (r.total_launches || 0), 0);
+        const totalSec = teamStats.reduce((s, r) => s + (r.total_seconds_saved || 0), 0);
+        const totalMins = Math.round(totalSec / 60);
+        const totalDollars = teamStats.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 100)), 0).toFixed(2);
+
+        const memberRows = teamStats
+          .sort((a, b) => b.total_launches - a.total_launches)
+          .map((s, i) => {
+            const p = profileMap[s.user_id];
+            const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
+            const isMe = s.user_id === userId;
+            const mMins = Math.round((s.total_seconds_saved || 0) / 60);
+            const mDollars = ((( s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 100)).toFixed(2);
+            const lastSeen = s.updated_at ? new Date(s.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+            return `
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i < teamStats.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}font-size:0.84rem">
+                <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i + 1}</span>
+                <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:${isMe ? '700' : '400'}">${esc(name)}${isMe ? ' <span style="font-size:0.7rem;color:var(--hover-accent)">(you)</span>' : ''}</span>
+                <span style="min-width:60px;text-align:right;font-weight:700;color:var(--hover-accent)">${(s.total_launches || 0).toLocaleString()}</span>
+                <span style="min-width:70px;text-align:right;color:var(--text-muted)">${mMins.toLocaleString()} min</span>
+                <span style="min-width:70px;text-align:right;color:var(--text-muted)">${fmtUSD(mDollars)}</span>
+                <span style="min-width:60px;text-align:right;font-size:0.75rem;color:var(--text-dim)">${lastSeen}</span>
+              </div>`;
+          }).join('');
+
+        return `
+          <div style="margin-bottom:20px">
+            <div style="font-size:0.85rem;font-weight:700;color:var(--text-muted);margin-bottom:10px">${esc(team.name)}</div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${totalL.toLocaleString()}</div><div class="stat-card-label">Team Launches</div></div>
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${totalMins.toLocaleString()} min</div><div class="stat-card-label">Team Time Saved</div></div>
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${fmtUSD(totalDollars)}</div><div class="stat-card-label">Team $ Saved</div></div>
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${teamStats.length}</div><div class="stat-card-label">Members w/ Data</div></div>
+            </div>
+            <div style="font-size:0.75rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;display:flex;gap:10px;padding:0 4px">
+              <span style="min-width:18px"></span>
+              <span style="flex:1">Member</span>
+              <span style="min-width:60px;text-align:right">Launches</span>
+              <span style="min-width:70px;text-align:right">Time</span>
+              <span style="min-width:70px;text-align:right">$ Saved</span>
+              <span style="min-width:60px;text-align:right">Last Sync</span>
+            </div>
+            ${memberRows}
+          </div>`;
+      }).join('');
+
+      section.innerHTML = `
+        <div style="margin-top:24px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
+          <div class="stats-chart-box">
+            ${teamBlocks}
+          </div>
+        </div>`;
+    }
+  } catch (err) {
+    console.warn('[renderTeamROISection] error:', err.message);
+    section.remove();
+  }
 }
 
 function renderJet() {
