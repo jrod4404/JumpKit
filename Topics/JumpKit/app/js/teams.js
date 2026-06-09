@@ -346,9 +346,6 @@ async function renderUnifiedTeamsView(content, supaUser) {
                 <span class="acct-team-stats">${joinedStats}</span>
               </div>
             </div>
-            <button class="btn btn-subtle tooltip-left" style="font-size:0.75rem;padding:4px 10px;color:var(--danger,#ef4444)" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}">
-              <svg class="ti ti-door-exit" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave
-            </button>
           </div>
           <div class="acct-team-members">
             <div class="acct-row acct-member-row">
@@ -356,6 +353,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
             </div>
             <div class="acct-row acct-member-row">
               <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
+              <div class="acct-member-actions"><button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button></div>
             </div>
             <div class="acct-team-cols-section">
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
