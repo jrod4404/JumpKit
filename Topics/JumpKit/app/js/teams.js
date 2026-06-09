@@ -346,6 +346,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
                 <span class="acct-team-stats">${joinedStats}</span>
               </div>
             </div>
+            <button class="btn btn-subtle tooltip-left" style="font-size:0.75rem;padding:4px 10px;color:var(--danger,#ef4444)" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}">
+              <svg class="ti ti-door-exit" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave
+            </button>
           </div>
           <div class="acct-team-members">
             <div class="acct-row acct-member-row">
@@ -1783,6 +1786,31 @@ window.doRemoveMember = async function(memberId, memberName) {
   } catch(e) { Toast.danger('Error: ' + e.message); }
 };
 
+// ── Leave Team (member self-remove) ──────────────────────────────────
+window.confirmLeaveTeam = function(teamId, teamName) {
+  Modal.open(
+    '<svg class="ti ti-door-exit"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave Team',
+    `<p style="color:var(--text-muted);font-size:.95rem">Leave <strong style="color:var(--text-card-title)">${esc(teamName)}</strong>? You will lose access to all shared jumps from this team.</p>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-leave-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-door-exit"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave Team</button>`, 'sm');
+};
+window.doLeaveTeam = async function(teamId, teamName) {
+  Modal.close();
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) throw new Error('Not logged in.');
+    const { error } = await supabaseClient.from('team_members')
+      .delete()
+      .eq('team_id', teamId)
+      .eq('user_id', session.user.id);
+    if (error) throw new Error('Leave team failed: ' + error.message);
+    Toast.success(`Left team: ${teamName}`);
+    window.addNotification?.({ type: 'team-left', message: `You left team: ${teamName}`, ts: Date.now() });
+    if (typeof updateNotifBadge === 'function') updateNotifBadge();
+    renderTeams();
+  } catch(e) { Toast.danger('Error: ' + e.message); }
+};
+
 // ── Change Team Password ──────────────────────────────────────────
 window.openChangeTeamPasswordModal = function(teamId, teamName) {
   const body = `
@@ -2428,6 +2456,8 @@ document.addEventListener('click', e => {
     case 't-share-col-modal':     openShareColumnModal(id, name); break;
     case 't-remove-team':         removeTeam(id, name); break;
     case 't-confirm-remove-member': confirmRemoveMember(id, btn.dataset.label || ''); break;
+    case 't-confirm-leave-team':   confirmLeaveTeam(btn.dataset.id || id, btn.dataset.name || name); break;
+    case 't-do-leave-team':        doLeaveTeam(btn.dataset.id || id, btn.dataset.name || name); break;
     case 't-save-add-team':       saveAddTeam(); break;
     case 't-send-org-invites':    sendOrgInvites(); break;
     case 't-save-new-team':       saveNewTeam(btn.dataset.orgId || ''); break;
