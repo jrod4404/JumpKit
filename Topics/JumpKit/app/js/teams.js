@@ -27,7 +27,7 @@ async function renderTeams(containerEl) {
 
   content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
     <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
-    Loading teams…
+    Loading teams...
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
 
@@ -59,10 +59,10 @@ async function renderTeams(containerEl) {
 
 // ── Unified Teams View (replaces org-owner / team-owner / team-member views) ─
 // ── Team collapse/expand ─────────────────────────────────────────
-// Key: jk_teams_expanded — stores only teams the user has explicitly opened (true).
+// Key: jk_teams_expanded - stores only teams the user has explicitly opened (true).
 // Default state for any team not in this object is COLLAPSED.
 // Renamed from jk_teams_collapsed to avoid ambiguity with the old format
-// (old format used true=collapsed, false=expanded — opposite semantics).
+// (old format used true=collapsed, false=expanded - opposite semantics).
 function _getTeamCollapsedState() {
   try { return JSON.parse(localStorage.getItem('jk_teams_expanded') || '{}'); } catch { return {}; }
 }
@@ -77,10 +77,10 @@ window.toggleTeam = function(teamId) {
   const nowCollapsed = entry.classList.toggle('acct-team-collapsed');
   const state = _getTeamCollapsedState();
   if (nowCollapsed) {
-    // User collapsed it — remove from expanded set (revert to default collapsed)
+    // User collapsed it - remove from expanded set (revert to default collapsed)
     delete state[teamId];
   } else {
-    // User expanded it — save explicit expanded preference
+    // User expanded it - save explicit expanded preference
     state[teamId] = true;
   }
   localStorage.setItem('jk_teams_expanded', JSON.stringify(state));
@@ -151,48 +151,44 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
 
   if (ownedTeams.length === 0) {
-    if (memberTeams.length === 0 && pendingInvites.length === 0) {
-      // Truly no teams at all — show rich intro
-      html += `
-        <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:28px 28px 24px;margin:4px 0 8px">
-          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">
-            <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
-              <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
-            </div>
-            <div>
-              <div style="font-size:0.97rem;font-weight:700;color:var(--text);margin-bottom:4px">Collaborate with your team</div>
-              <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">
-                Teams let you share jump links with colleagues so everyone on the team lands in the same places — shared tools, folders, dashboards, and resources, always up to date.
-              </div>
+    // Always show rich intro when My Teams is empty
+    html += `
+      <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:28px 28px 24px;margin:4px 0 8px">
+        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">
+          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
+            <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+          </div>
+          <div>
+            <div style="font-size:0.97rem;font-weight:700;color:var(--text);margin-bottom:4px">Collaborate with your team</div>
+            <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">
+              Teams let you share jump links with colleagues so everyone lands in the same places — shared tools, folders, dashboards, and resources, always up to date.
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-              <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What you can do</div>
-              <ul style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
-                <li>Share jump links with your whole team</li>
-                <li>Organize shared links into columns</li>
-                <li>Invite members by email</li>
-                <li>Track team-wide time &amp; ROI savings</li>
-              </ul>
-            </div>
-            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-              <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to get started</div>
-              <ol style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
-                <li>Click <strong style="color:var(--text)">Create Team</strong> above</li>
-                <li>Give your team a name</li>
-                <li>Invite members by email</li>
-                <li>Add shared jump links for the team</li>
-              </ol>
-            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+            <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What you can do</div>
+            <ul style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
+              <li>Share jump links with your whole team</li>
+              <li>Organize shared links into columns</li>
+              <li>Invite members by email</li>
+              <li>Track team-wide time &amp; ROI savings</li>
+            </ul>
           </div>
-          <div style="font-size:0.8rem;color:var(--text-muted);opacity:0.65;border-top:1px solid var(--border);padding-top:12px">
-            Already been invited to a team? Ask your team owner to resend the invite — you’ll see it appear here.
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+            <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to get started</div>
+            <ol style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
+              <li>Click <strong style="color:var(--text)">Create Team</strong> above</li>
+              <li>Give your team a name</li>
+              <li>Invite members by email</li>
+              <li>Add shared jump links for the team</li>
+            </ol>
           </div>
-        </div>`;
-    } else {
-      html += `<div class="acct-empty-state">No teams created yet. Click <strong>Create Team</strong> above to create one.</div>`;
-    }
+        </div>
+        <div style="font-size:0.8rem;color:var(--text-muted);opacity:0.65;border-top:1px solid var(--border);padding-top:12px">
+          Already been invited to a team? Ask your team owner to resend the invite — it will appear in <strong style="color:var(--text-muted)">Teams I've Joined</strong> below.
+        </div>
+      </div>`;
   } else {
     for (const team of ownedTeams) {
       // Fetch members for this team
@@ -279,7 +275,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <div class="acct-team-cols-list">
                 ${teamSharedCols.length > 0
                   ? teamSharedCols.map(c => `<span class="acct-team-col-chip">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`).join('')
-                  : '<span class="acct-row-hint" style="font-size:0.8rem">None yet — click <strong>Manage Sharing</strong> above to add one</span>'}
+                  : '<span class="acct-row-hint" style="font-size:0.8rem">None yet - click <strong>Manage Sharing</strong> above to add one</span>'}
               </div>
             </div>
           </div>
@@ -289,13 +285,31 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `</div>`; // end My Teams section
 
   // ── Teams I've Joined ──
-  if (memberTeams.length > 0) {
-    html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
+  html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
+  if (memberTeams.length === 0) {
+    html += `
+      <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin:4px 0 8px">
+        <div style="display:flex;align-items:flex-start;gap:16px">
+          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center">
+            <svg class="ti ti-users-group" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg>
+          </div>
+          <div>
+            <div style="font-size:0.93rem;font-weight:700;color:var(--text);margin-bottom:6px">No teams joined yet</div>
+            <div style="font-size:0.84rem;color:var(--text-muted);line-height:1.7">
+              When a team owner invites you by email, the team will appear here. You'll have access to the team's shared jump links and columns right away.
+            </div>
+            <div style="margin-top:12px;font-size:0.82rem;color:var(--text-muted);opacity:0.75">
+              Expecting an invite? Ask your team owner to send it to <strong style="color:var(--text-muted)">${esc(supaUser.email)}</strong>.
+            </div>
+          </div>
+        </div>
+      </div>`;
+  } else {
     for (const team of memberTeams) {
       const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', team.owner_id).single();
       const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
       const ownerEmail = ownerProf?.email || '';
-      const ownerLabel = ownerName || ownerEmail || '—';
+      const ownerLabel = ownerName || ownerEmail || '-';
       // Fetch total member count for stats
       const { count: memberCount = 0 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
       const { data: joinedTeamCols = [] } = await supabaseClient.from('shared_columns').select('name').eq('team_id', team.id).order('position');
@@ -337,8 +351,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
           </div>
         </div>`;
     }
-    html += `</div>`;
   }
+  html += `</div>`; // end Teams I've Joined section
 
   // ── Pending Invitations ──
   if (pendingInvites.length > 0) {
@@ -380,7 +394,7 @@ let _orgOwnerSupaUser = null; // captured for modal callbacks
 async function renderOrgOwnerView(content, supaUser, profile) {
   _orgOwnerSupaUser = supaUser;
 
-  // Check if user owns any org (bypass org_id check — fetch directly)
+  // Check if user owns any org (bypass org_id check - fetch directly)
   const { data: ownedOrg } = await supabaseClient
     .from('organizations')
     .select('*')
@@ -395,7 +409,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     if (window._supabaseProfile) { window._supabaseProfile.org_id = ownedOrg.id; window._supabaseProfile.role = 'org-owner'; }
   }
 
-  // If no org yet — show create org form
+  // If no org yet - show create org form
   if (!ownedOrg && !profile.org_id) {
     content.innerHTML = `
       <div class="acct-grid">
@@ -417,7 +431,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
       const name = document.getElementById('newOrgName')?.value.trim();
       const msg = document.getElementById('createOrgMsg');
       if (!name) { if (msg) { msg.style.color='#ef4444'; msg.textContent='Organization name is required.'; } return; }
-      if (msg) { msg.style.color='var(--text-muted)'; msg.textContent='Creating…'; }
+      if (msg) { msg.style.color='var(--text-muted)'; msg.textContent='Creating...'; }
       try {
         const { data: org, error } = await supabaseClient
           .from('organizations')
@@ -427,7 +441,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
         if (error) throw error;
         // Update profile org_id
         { const { error: _e2 } = await supabaseClient.from('profiles').update({ org_id: org.id }).eq('id', supaUser.id); if (_e2) console.warn('[Teams] org profile update failed:', _e2.message); }
-        if (msg) { msg.style.color='#22c55e'; msg.textContent='Organization created! Reloading…'; }
+        if (msg) { msg.style.color='#22c55e'; msg.textContent='Organization created! Reloading...'; }
         setTimeout(() => renderTeams(), 800);
       } catch(e) {
         if (msg) { msg.style.color='#ef4444'; msg.textContent='Error: ' + e.message; }
@@ -478,7 +492,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     const { count } = await supabaseClient.from('team_members').select('id', { count: 'exact', head: true }).in('team_id', orgTeamIds);
     orgMemberCount = count || 0;
   }
-  const orgCreated = org.created_at ? new Date(org.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '—';
+  const orgCreated = org.created_at ? new Date(org.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : '-';
 
   // New layout: org on top, teams + members side by side below
   content.innerHTML = `
@@ -574,7 +588,7 @@ window.selectOrg = async function(orgId) {
   // Fetch and render teams
   const teamsPanel = document.getElementById('teamsPanel');
   if (!teamsPanel) return;
-  teamsPanel.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">Loading…</p>`;
+  teamsPanel.innerHTML = `<p style="color:var(--text-muted);font-size:0.85rem;padding:8px 0">Loading...</p>`;
 
   try {
     const { data: teams = [], error } = await supabaseClient
@@ -609,7 +623,7 @@ window.selectOrg = async function(orgId) {
       teamsPanel.innerHTML = teams.map(t => {
         const mCount = memberCounts[t.id] || 0;
         const iCount = inviteCounts[t.id] || 0;
-        const created = t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '—';
+        const created = t.created_at ? new Date(t.created_at).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' }) : '-';
         const inviteHint = ` · ${iCount} pending invite${iCount !== 1 ? 's' : ''}`;
         return `
         <div class="acct-row teams-selectable-row" id="teamRow_${t.id}" data-jaction="t-select-team" data-id="${esc(t.id)}">
@@ -647,7 +661,7 @@ window.selectTeam = async function(teamId) {
   // Fetch and render members
   const membersPanel = document.getElementById('membersPanel');
   if (!membersPanel) return;
-  membersPanel.innerHTML = `<p style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:24px 8px">Loading…</p>`;
+  membersPanel.innerHTML = `<p style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:24px 8px">Loading...</p>`;
 
   try {
     const { data: members = [], error } = await supabaseClient
@@ -693,11 +707,11 @@ window.selectTeam = async function(teamId) {
       membersPanel.innerHTML = members.map(m => {
         const name = [m.profiles?.first_name, m.profiles?.last_name].filter(Boolean).join(' ');
         const email = m.profiles?.email || m.user_id;
-        const joined = m.joined_at ? new Date(m.joined_at).toLocaleDateString() : '—';
+        const joined = m.joined_at ? new Date(m.joined_at).toLocaleDateString() : '-';
         const role = m.profiles?.role || 'team-member';
         const roleLabel = role === 'org-owner' ? 'Org Owner' : role === 'team-owner' ? 'Team Owner' : 'Member';
         const pillStyle = role === 'org-owner'
-          ? 'background:rgba(26,79,214,0.18);color:#7aa8f7;border:1px solid rgba(26,79,214,0.35)'     // blue — matches org card
+          ? 'background:rgba(26,79,214,0.18);color:#7aa8f7;border:1px solid rgba(26,79,214,0.35)'     // blue - matches org card
           : role === 'team-owner'
           ? 'background:rgba(250,204,21,0.12);color:#fbbf24;border:1px solid rgba(250,204,21,0.25)'   // gold
           : 'background:rgba(160,174,192,0.10);color:#8a9bb0;border:1px solid rgba(160,174,192,0.2)'; // grey
@@ -838,9 +852,9 @@ window.saveAddTeam = async function() {
   if (password && password !== passwordConfirm) { document.getElementById('atTeamPasswordConfirmErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
-  // Spinner on save button — show for at least 1.5s
+  // Spinner on save button - show for at least 1.5s
   const saveBtn = document.querySelector('[data-jaction="t-save-add-team"]');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving...'; }
   const _atSpinStart = Date.now();
 
   try {
@@ -964,7 +978,7 @@ window.sendOrgInvites = async function() {
 
   // Show spinner on button
   const sendOrgBtn = document.getElementById('sendOrgInvitesBtn');
-  if (sendOrgBtn) { sendOrgBtn.disabled = true; sendOrgBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
+  if (sendOrgBtn) { sendOrgBtn.disabled = true; sendOrgBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     const invitedBy = _orgOwnerSupaUser?.id;
@@ -979,7 +993,7 @@ window.sendOrgInvites = async function() {
           status:     'pending',
         });
         if (insertErr) throw insertErr;
-        // Try to send invite email — non-fatal if Edge Function not yet deployed
+        // Try to send invite email - non-fatal if Edge Function not yet deployed
         try {
           await supabaseClient.functions.invoke('send-invite', {
             body: { email, teamId: selectedTeamId, invitedBy },
@@ -1037,7 +1051,7 @@ window.doResendInvite = async function(inviteId, email, teamId) {
   }
 
   const resendBtn = document.getElementById('resendConfirmBtn');
-  if (resendBtn) { resendBtn.disabled = true; resendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
+  if (resendBtn) { resendBtn.disabled = true; resendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     // Verify password server-side first
@@ -1156,7 +1170,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
         <div class="acct-row"><div class="acct-row-label"><span>Team Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.name)}</span></div>
         <div class="acct-row"><div class="acct-row-label"><span>Organization</span></div>
-          <span style="color:var(--text-muted);font-size:.88rem">${esc(org?.name || '—')}</span></div>
+          <span style="color:var(--text-muted);font-size:.88rem">${esc(org?.name || '-')}</span></div>
         <div class="acct-row" style="border-bottom:none"><div class="acct-row-label"><span>Your Role</span></div>
           <span class="teams-badge teams-badge-owner">Team Owner</span></div>
       </div>
@@ -1296,7 +1310,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
       <div class="acct-section">
         <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Organization</div>
         <div class="acct-row"><div class="acct-row-label"><span>Org Name</span></div>
-          <span style="color:var(--text-muted);font-size:.88rem">${esc(team.organizations?.name || '—')}</span></div>
+          <span style="color:var(--text-muted);font-size:.88rem">${esc(team.organizations?.name || '-')}</span></div>
         <div class="acct-row" style="border-bottom:none"><div class="acct-row-label"><span>Team Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.name)}</span></div>
       </div>
@@ -1304,7 +1318,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
       <div class="acct-section">
         <div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Team Members</div>
         <div class="acct-row"><div class="acct-row-label"><span>Team Owner</span></div>
-          <span style="color:var(--text-muted);font-size:.88rem">${esc(ownerProfile?.email || '—')}</span></div>
+          <span style="color:var(--text-muted);font-size:.88rem">${esc(ownerProfile?.email || '-')}</span></div>
         ${allMembers.map(m => `
           <div class="acct-row">
             <div class="acct-row-label"><span>${esc(m.profiles?.email || m.user_id)}</span></div>
@@ -1372,7 +1386,7 @@ async function saveNewTeam(orgId) {
     }
     const ownerId = ownerProfiles[0].id;
 
-    // Create team — hash password with PBKDF2 before storing
+    // Create team - hash password with PBKDF2 before storing
     const hashedAdminPassword = await hashPassword(password);
     const { data: team, error } = await supabaseClient
       .from('teams')
@@ -1478,13 +1492,13 @@ async function sendInvites(teamId) {
     const { data: { session: chkSession } } = await supabaseClient.auth.getSession();
     const currentUserEmail = chkSession?.user?.email?.toLowerCase();
 
-    // #3 — self-invite
+    // #3 - self-invite
     if (currentUserEmail && emails.includes(currentUserEmail)) {
       if (errEl) errEl.textContent = 'You cannot invite yourself.';
       errEl?.classList.add('show'); return;
     }
 
-    // #1 — already a member (look up by email via profiles)
+    // #1 - already a member (look up by email via profiles)
     const { data: memberProfiles = [] } = await supabaseClient
       .from('team_members')
       .select('profiles(email)')
@@ -1496,7 +1510,7 @@ async function sendInvites(teamId) {
       errEl?.classList.add('show'); return;
     }
 
-    // #2 — already has pending invite
+    // #2 - already has pending invite
     const { data: pendingInvites = [] } = await supabaseClient
       .from('team_invites')
       .select('email')
@@ -1547,7 +1561,7 @@ async function sendInvites(teamId) {
 
   // Show spinner on button
   const sendBtn = document.getElementById('sendInvitesBtn');
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending…'; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1567,7 +1581,7 @@ async function sendInvites(teamId) {
     let sent = 0, failed = 0;
     for (const email of emails) {
       try {
-        // Insert invite record — must always succeed
+        // Insert invite record - must always succeed
         const { error: insertErr } = await supabaseClient.from('team_invites').insert({
           team_id: teamId,
           email,
@@ -1576,7 +1590,7 @@ async function sendInvites(teamId) {
         });
         if (insertErr && !insertErr.message.includes('duplicate')) throw insertErr;
 
-        // Call Edge Function to send email — non-fatal if not configured
+        // Call Edge Function to send email - non-fatal if not configured
         try {
           await supabaseClient.functions.invoke('send-invite', {
             body: {
@@ -1669,7 +1683,7 @@ window.doRemoveTeam = async function(teamId, teamName) {
     const ownerName = [ownerProfile.first_name, ownerProfile.last_name].filter(Boolean).join(' ')
       || window._supabaseUser?.email || 'Team Owner';
 
-    // Fire email notification (fire-and-forget — don't block delete on email)
+    // Fire email notification (fire-and-forget - don't block delete on email)
     supabaseClient.functions.invoke('send-team-deleted', {
       body: { teamId, teamName, ownerName },
     }).catch(e => console.warn('[doRemoveTeam] email notification failed:', e.message));
@@ -1684,7 +1698,7 @@ window.doRemoveTeam = async function(teamId, teamName) {
 
     // ── 3. Clean owner's local SQLite immediately ──
     // Strip isShared/teamId from owner's shared columns + jumps for this team.
-    // Convert to personal rather than delete — owner keeps their data.
+    // Convert to personal rather than delete - owner keeps their data.
     if (currentUser) {
       const localCols = DB.getColumns(currentUser.id);
       // Find columns that were shared with this team (both old and new format)
@@ -1856,9 +1870,9 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
   if (newPw !== confirmPw) { document.getElementById('ctpConfirmPasswordErr')?.classList.add('show'); ok = false; }
   if (!ok) return;
 
-  // Spinner on save button — show for at least 1.5s
+  // Spinner on save button - show for at least 1.5s
   const ctpSaveBtn = document.querySelector('[data-jaction="t-do-change-pw"]');
-  if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving…'; }
+  if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving...'; }
   const _ctpSpinStart = Date.now();
 
   try {
@@ -1932,11 +1946,11 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
   const pw = document.getElementById('joinTeamPassword')?.value;
   const errEl = document.getElementById('joinTeamPasswordErr');
   if (errEl) errEl.classList.remove('show');
-  
+
   if (!pw) { if (errEl) errEl.classList.add('show'); return; }
 
   try {
-    // Verify password server-side — hash never leaves the server
+    // Verify password server-side - hash never leaves the server
     const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
       body: { teamId, candidatePassword: pw },
     });
@@ -1980,7 +1994,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
           }
         }
       }
-    } catch (_capErr) { /* non-fatal — allow join if cap check fails */ }
+    } catch (_capErr) { /* non-fatal - allow join if cap check fails */ }
 
     // Add user to team_members
     const { error: joinErr } = await supabaseClient
@@ -2022,7 +2036,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
           <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">Welcome to ${esc(teamName)}!</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
             You've successfully joined <strong>${esc(teamName)}</strong>.<br>
-            Visit your <strong>Jumps</strong> page — your team's shared jumps will appear there automatically.
+            Visit your <strong>Jumps</strong> page - your team's shared jumps will appear there automatically.
           </p>
         </div>`,
         `<button class="btn btn-subtle" data-jaction="modal-close">Stay here</button>
@@ -2197,7 +2211,7 @@ window.openShareColumnModal = async function(teamId, teamName) {
   }).join('');
 
   Modal.open(
-    '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns — ' + esc(teamName),
+    '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns - ' + esc(teamName),
     `<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px">Toggle which columns are shared with this team.</p>
      <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">${rows}</div>`,
     `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
@@ -2366,7 +2380,7 @@ async function _doUnshareColumnFromTeam(teamId, colSupabaseId, colName) {
       c.id === col.id ? { ...c, isShared: false, teamId: null, supabaseId: null } : c
     ));
   } else {
-    // No local copy (e.g. member's column) — just delete from Supabase
+    // No local copy (e.g. member's column) - just delete from Supabase
     try {
       await supabaseClient.from('shared_columns').delete().eq('id', colSupabaseId);
     } catch (err) { console.warn('_doUnshareColumnFromTeam:', err.message); }
@@ -2377,7 +2391,7 @@ async function _doUnshareColumnFromTeam(teamId, colSupabaseId, colName) {
   renderTeams();
 }
 
-// ── Event delegation — teams actions ─────────────────────────────
+// ── Event delegation - teams actions ─────────────────────────────
 document.addEventListener('click', e => {
   const btn = e.target.closest('[data-jaction]');
   if (!btn) return;
