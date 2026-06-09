@@ -24,13 +24,13 @@ window.showTeamsTipsModal = function() {
       </div>
       <div style="padding:0 28px 28px">
         <div style="margin-bottom:22px">
-          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">What are teams?</div>
+          <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">What are teams?</div>
           <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;margin:0">
             Teams let you share jump links with colleagues so everyone on the team instantly lands in the same places — shared tools, internal dashboards, network folders, and resources, always in sync.
           </p>
         </div>
         <div style="margin-bottom:22px">
-          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Why it's useful</div>
+          <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Why it's useful</div>
           <ul style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
             <li>One place to manage all shared links — no more Slack threads or sticky notes</li>
             <li>New team members are productive from day one</li>
@@ -39,7 +39,7 @@ window.showTeamsTipsModal = function() {
           </ul>
         </div>
         <div style="margin-bottom:22px">
-          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">How to get started</div>
+          <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">How to get started</div>
           <ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
             <li>Click <strong style="color:var(--text)">Create Team</strong> on the My Teams card</li>
             <li>Give your team a name</li>
@@ -214,7 +214,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px">
         No teams yet. Click <strong>Create Team</strong> to get started, or
-        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
+        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:var(--hover-accent);font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
       </div>`;
   } else {
     for (const team of ownedTeams) {
@@ -317,7 +317,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px">
         No teams joined yet. When a team owner invites you, it appears here —
-        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
+        <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:var(--hover-accent);font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
       </div>`;
   } else {
     for (const team of memberTeams) {
