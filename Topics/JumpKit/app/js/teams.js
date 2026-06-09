@@ -196,6 +196,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
     pendingInvites.push({ ...inv, teams: t, ownerLabel });
   }
 
+  const _isFree = (window._supabaseProfile?.subscription_tier || 'free') === 'free';
+
   let html = `<div class="acct-grid">`;
 
   // ── My Teams (owned) ──
@@ -206,7 +208,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <button class="btn btn-subtle tooltip-below" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" data-jaction="open-add-team-modal">
           <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team
         </button>
-      </div>`;
+      </div>
+      ${_isFree ? `<div class="acct-row-hint" style="font-size:0.8rem;padding:4px 2px 6px;display:flex;align-items:center;gap:6px">
+        <svg class="ti ti-lock" style="width:0.85rem;height:0.85rem;flex-shrink:0;opacity:0.6"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+        Free plan: limited to <strong style="margin:0 2px">1 owned team</strong>. <button class="btn btn-subtle" style="font-size:0.75rem;padding:1px 8px;margin-left:2px" data-jaction="show-upgrade-modal" data-title="Unlimited Teams" data-msg="JumpKit Unlimited gives you unlimited owned teams, unlimited members, and full team ROI reporting.">Upgrade</button>
+      </div>` : ''}`;
 
   if (ownedTeams.length === 0) {
     // Simplified empty state — tips live in the modal
@@ -320,7 +326,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `</div>`; // end My Teams section
 
   // ── Teams I've Joined ──
-  html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
+  html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>
+    ${_isFree ? `<div class="acct-row-hint" style="font-size:0.8rem;padding:4px 2px 6px;display:flex;align-items:center;gap:6px">
+      <svg class="ti ti-lock" style="width:0.85rem;height:0.85rem;flex-shrink:0;opacity:0.6"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+      Free plan: limited to <strong style="margin:0 2px">1 joined team</strong>. <button class="btn btn-subtle" style="font-size:0.75rem;padding:1px 8px;margin-left:2px" data-jaction="show-upgrade-modal" data-title="Unlimited Teams" data-msg="JumpKit Unlimited gives you unlimited joined teams, unlimited members per team, and full team ROI reporting.">Upgrade</button>
+    </div>` : ''}`;
   if (memberTeams.length === 0) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px">
