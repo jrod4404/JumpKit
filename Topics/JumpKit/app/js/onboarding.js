@@ -54,7 +54,7 @@ function showOnboardingModal(firstName) {
 }
 
 function setOnboardingProgress(step) {
-  const pct = step === 1 ? '33.3%' : step === 2 ? '66.6%' : '100%';
+  const pct = step === 1 ? '25%' : step === 2 ? '50%' : step === 3 ? '75%' : '100%';
   const bar = document.getElementById('onboardingProgress');
   if (bar) bar.style.width = pct;
 }
@@ -81,6 +81,70 @@ function renderOnboardingStep(step, firstName) {
     document.getElementById('obNext1').addEventListener('click', () => renderOnboardingStep(2, firstName));
 
   } else if (step === 2) {
+    // ROI Setup step
+    const prefs = DB.getPrefs(currentUser.id);
+    content.innerHTML = `
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <div style="width:52px;height:52px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg class="ti ti-clock-dollar" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-clock-dollar"/></svg>
+          </div>
+          <div>
+            <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Set Up Your ROI</h2>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 1 of 3</p>
+          </div>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 18px">
+          JumpKit tracks time and money saved every time you launch a jump. Set your defaults &mdash; you can change these any time in Settings.
+        </p>
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-bottom:5px">
+            Time saved per click
+            <span style="font-weight:400;opacity:0.7"> (seconds)</span>
+          </label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input id="obTimePerClick" type="number" min="1" max="600" value="${prefs.timePerClick || 10}"
+              style="flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box" />
+            <span style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;flex-shrink:0">sec / click</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.78rem;margin:5px 0 0;opacity:0.65">How many seconds does using a jump save you vs. navigating manually?</p>
+        </div>
+        <div style="margin-bottom:20px">
+          <label style="display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-bottom:5px">
+            Your hourly rate
+            <span style="font-weight:400;opacity:0.7"> ($/hr)</span>
+          </label>
+          <div style="display:flex;align-items:center;gap:10px">
+            <input id="obDollarsPerHour" type="number" min="1" max="10000" value="${prefs.dollarsPerHour || 100}"
+              style="flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box" />
+            <span style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;flex-shrink:0">$ / hr</span>
+          </div>
+          <p style="color:var(--text-muted);font-size:0.78rem;margin:5px 0 0;opacity:0.65">Used to calculate the dollar value of time saved &mdash; yours and your team's.</p>
+        </div>
+        <div id="obRoiErr" style="color:#f87171;font-size:0.82rem;margin-bottom:10px;display:none"></div>
+        <div style="display:flex;gap:10px">
+          <button id="obBack2" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+          </button>
+          <button id="obNextRoi" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          </button>
+        </div>
+      </div>`;
+
+    document.getElementById('obBack2').addEventListener('click', () => renderOnboardingStep(1, firstName));
+    document.getElementById('obNextRoi').addEventListener('click', () => {
+      const tpc = parseInt(document.getElementById('obTimePerClick').value, 10);
+      const dph = parseInt(document.getElementById('obDollarsPerHour').value, 10);
+      const errEl = document.getElementById('obRoiErr');
+      errEl.style.display = 'none';
+      if (!tpc || tpc < 1) { errEl.textContent = 'Please enter a valid time per click (min 1 second).'; errEl.style.display = 'block'; return; }
+      if (!dph || dph < 1) { errEl.textContent = 'Please enter a valid hourly rate (min $1).'; errEl.style.display = 'block'; return; }
+      DB.savePrefs(currentUser.id, { timePerClick: tpc, dollarsPerHour: dph });
+      renderOnboardingStep(3, firstName);
+    });
+
+  } else if (step === 3) {
     // Build column config rows from current user's columns
     const cols = DB.getColumns(currentUser.id);
     const rows = cols.map((c, i) => `
@@ -104,7 +168,7 @@ function renderOnboardingStep(step, firstName) {
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Configure Your Columns</h2>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 1 of 2</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 2 of 3</p>
           </div>
         </div>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 16px">
@@ -112,17 +176,17 @@ function renderOnboardingStep(step, firstName) {
         </p>
         <div id="obColRows" style="max-height:260px;overflow-y:auto;padding-right:4px">${rows}</div>
         <div style="display:flex;gap:10px;margin-top:20px">
-          <button id="obBack2" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
+          <button id="obBackCols" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
-          <button id="obNext2" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
+          <button id="obNextCols" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
             Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
 
-    document.getElementById('obBack2').addEventListener('click', () => renderOnboardingStep(1, firstName));
-    document.getElementById('obNext2').addEventListener('click', () => {
+    document.getElementById('obBackCols').addEventListener('click', () => renderOnboardingStep(2, firstName));
+    document.getElementById('obNextCols').addEventListener('click', () => {
       // Save column names + visibility
       const nameInputs = document.querySelectorAll('.ob-col-name');
       const visInputs  = document.querySelectorAll('.ob-col-vis');
@@ -136,10 +200,10 @@ function renderOnboardingStep(step, firstName) {
         cols = cols.map(c => c.id === id ? { ...c, visible: inp.checked } : c);
       });
       DB.saveColumns(currentUser.id, cols);
-      renderOnboardingStep(3, firstName);
+      renderOnboardingStep(4, firstName);
     });
 
-  } else if (step === 3) {
+  } else if (step === 4) {
     // Build column dropdown from visible columns
     const cols = DB.getColumns(currentUser.id).filter(c => c.visible).sort((a, b) => a.order - b.order);
     const colOptions = cols.map(c => `<option value="${escHtml(c.id)}">${escHtml(c.name)}</option>`).join('');
@@ -152,7 +216,7 @@ function renderOnboardingStep(step, firstName) {
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Add Your First Jump</h2>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 2 of 2</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 3 of 3</p>
           </div>
         </div>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 18px">
@@ -192,7 +256,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
       </div>`;
 
-    document.getElementById('obBack3').addEventListener('click', () => renderOnboardingStep(2, firstName));
+    document.getElementById('obBack3').addEventListener('click', () => renderOnboardingStep(3, firstName));
 
     // Wire custom column select — use fixed positioning so menu escapes modal overflow
     const obTrigger = document.getElementById('obColTrigger');
@@ -275,7 +339,7 @@ function renderOnboardingStep(step, firstName) {
 }
 
 function renderOnboardingComplete() {
-  setOnboardingProgress(3); // fill bar to 100%
+  setOnboardingProgress(4); // fill bar to 100%
   const content = document.getElementById('onboardingContent');
   if (!content) return;
   content.innerHTML = `
