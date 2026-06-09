@@ -483,7 +483,7 @@ window.navigateTo = function navigateTo(page) {
     settings: 'Change settings to personalize app behavior',
     help:     'Tips, features, and frequently asked questions',
     jet:      'AI-powered automation for Microsoft 365 - runs entirely on your machine',
-    teams:    'Manage your teams and shared columns',
+    teams:    'Manage your teams and shared columns. Get started with these <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">tips</button>',
     tests:    'Core functionality verification - run before each deployment',
     home:     '',
     jumps:    '',
@@ -905,7 +905,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   // Wire tab clicks
   const acctTabSubs = {
     account:  'View your account details',
-    teams:    'Manage your teams and shared columns',
+    teams:    'Manage your teams and shared columns. Get started with these <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">tips</button>',
     settings: 'Change settings to personalize app behavior',
   };
   function setAcctSubtitle(tab) {

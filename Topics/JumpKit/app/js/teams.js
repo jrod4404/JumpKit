@@ -1,6 +1,65 @@
 // ── Teams Page ─────────────────────────────────────────────────────
 // Roles: org-owner | team-owner | team-member
 
+// ── Teams Tips Modal ────────────────────────────────────────────────
+window.showTeamsTipsModal = function() {
+  const existing = document.getElementById('teamsTipsOverlay');
+  if (existing) { existing.remove(); return; }
+  const overlay = document.createElement('div');
+  overlay.id = 'teamsTipsOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9990;padding:20px';
+  overlay.innerHTML = `
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+      <div style="padding:28px 28px 0;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:24px">
+        <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
+          <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Teams — Getting Started</div>
+          <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px">Everything you need to know about teams in JumpKit</div>
+        </div>
+        <button onclick="document.getElementById('teamsTipsOverlay').remove()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1">
+          <svg class="ti ti-x" style="width:20px;height:20px"><use href="img/tabler-sprite.svg#tabler-x"/></svg>
+        </button>
+      </div>
+      <div style="padding:0 28px 28px">
+        <div style="margin-bottom:22px">
+          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">What are teams?</div>
+          <p style="font-size:0.88rem;color:var(--text-muted);line-height:1.7;margin:0">
+            Teams let you share jump links with colleagues so everyone on the team instantly lands in the same places — shared tools, internal dashboards, network folders, and resources, always in sync.
+          </p>
+        </div>
+        <div style="margin-bottom:22px">
+          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Why it's useful</div>
+          <ul style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
+            <li>One place to manage all shared links — no more Slack threads or sticky notes</li>
+            <li>New team members are productive from day one</li>
+            <li>Track how much time your team saves across every jump</li>
+            <li>Shared columns keep everyone organized the same way</li>
+          </ul>
+        </div>
+        <div style="margin-bottom:22px">
+          <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">How to get started</div>
+          <ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
+            <li>Click <strong style="color:var(--text)">Create Team</strong> on the My Teams card</li>
+            <li>Give your team a name</li>
+            <li>Invite members by email — they'll receive an invite link</li>
+            <li>Add shared jump links your team uses every day</li>
+            <li>Optionally organize shared links into columns</li>
+          </ol>
+        </div>
+        <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:5px">Joining a team</div>
+          <p style="font-size:0.84rem;color:var(--text-muted);line-height:1.65;margin:0">
+            If someone has invited you, you'll see the team appear in <strong style="color:var(--text-muted)">Teams I've Joined</strong> with a Join button. If you're expecting an invite, ask the team owner to send it to your account email.
+          </p>
+        </div>
+      </div>
+    </div>`;
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+};
+
 // Module-level utility: SHA-256 hash for team passwords
 async function hashPassword(password) {
   const encoder = new TextEncoder();
@@ -151,43 +210,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
 
   if (ownedTeams.length === 0) {
-    // Always show rich intro when My Teams is empty
+    // Simplified empty state — tips live in the modal
     html += `
-      <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:28px 28px 24px;margin:4px 0 8px">
-        <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">
-          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
-          </div>
-          <div>
-            <div style="font-size:0.97rem;font-weight:700;color:var(--text);margin-bottom:4px">Collaborate with your team</div>
-            <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">
-              Teams let you share jump links with colleagues so everyone lands in the same places — shared tools, folders, dashboards, and resources, always up to date.
-            </div>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
-          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-            <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What you can do</div>
-            <ul style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
-              <li>Share jump links with your whole team</li>
-              <li>Organize shared links into columns</li>
-              <li>Invite members by email</li>
-              <li>Track team-wide time &amp; ROI savings</li>
-            </ul>
-          </div>
-          <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-            <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to get started</div>
-            <ol style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
-              <li>Click <strong style="color:var(--text)">Create Team</strong> above</li>
-              <li>Give your team a name</li>
-              <li>Invite members by email</li>
-              <li>Add shared jump links for the team</li>
-            </ol>
-          </div>
-        </div>
-        <div style="font-size:0.8rem;color:var(--text-muted);opacity:0.65;border-top:1px solid var(--border);padding-top:12px">
-          Already been invited to a team? Ask your team owner to resend the invite — it will appear in <strong style="color:var(--text-muted)">Teams I've Joined</strong> below.
-        </div>
+      <div class="acct-empty-state" style="padding:18px 4px">
+        No teams yet. Click <strong>Create Team</strong> to get started, or
+        <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
       </div>`;
   } else {
     for (const team of ownedTeams) {
@@ -288,21 +315,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
   if (memberTeams.length === 0) {
     html += `
-      <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin:4px 0 8px">
-        <div style="display:flex;align-items:flex-start;gap:16px">
-          <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center">
-            <svg class="ti ti-users-group" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg>
-          </div>
-          <div>
-            <div style="font-size:0.93rem;font-weight:700;color:var(--text);margin-bottom:6px">No teams joined yet</div>
-            <div style="font-size:0.84rem;color:var(--text-muted);line-height:1.7">
-              When a team owner invites you by email, the team will appear here. You'll have access to the team's shared jump links and columns right away.
-            </div>
-            <div style="margin-top:12px;font-size:0.82rem;color:var(--text-muted);opacity:0.75">
-              Expecting an invite? Ask your team owner to send it to <strong style="color:var(--text-muted)">${esc(supaUser.email)}</strong>.
-            </div>
-          </div>
-        </div>
+      <div class="acct-empty-state" style="padding:18px 4px">
+        No teams joined yet. When a team owner invites you, it appears here —
+        <button onclick="showTeamsTipsModal()" style="background:none;border:none;padding:0;color:#50CACC;font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
       </div>`;
   } else {
     for (const team of memberTeams) {
