@@ -41,17 +41,16 @@ window.showTeamsTipsModal = function() {
         <div style="margin-bottom:22px">
           <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">How to get started</div>
           <ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
-            <li>Click <strong style="color:var(--text)">Create Team</strong> on the My Teams card</li>
-            <li>Give your team a name</li>
+            <li>Click <button class="btn btn-subtle" style="font-size:0.8rem;padding:2px 9px;pointer-events:none;opacity:0.85"><svg class="ti ti-plus" style="width:0.85em;height:0.85em;vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team</button> on the My Teams card</li>
+            <li>Give your team a name and set a team password</li>
             <li>Invite members by email — they'll receive an invite link</li>
-            <li>Add shared jump links your team uses every day</li>
-            <li>Optionally organize shared links into columns</li>
+            <li>Share whole columns of Jumps with your team</li>
           </ol>
         </div>
         <div style="margin-bottom:4px">
           <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Joining a team</div>
           <p style="font-size:0.87rem;color:var(--text-muted);line-height:1.7;margin:0">
-            If someone has invited you, the team appears in <strong style="color:var(--text)">Teams I've Joined</strong> with a Join button. If you're expecting an invite, ask the team owner to send it to your account email.
+            If someone has invited you, the team will appear under <strong style="color:var(--text)">Teams I've Joined</strong> with a Join button. If you're expecting an invite, ask the team owner to send it to your account email.
           </p>
         </div>
       </div>
