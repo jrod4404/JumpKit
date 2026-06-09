@@ -3083,7 +3083,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <h2 id="onboarding">8. User Onboarding</h2>
 
 <h3>8.1 Overview</h3>
-<p>New users are guided through a 3-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
+<p>New users are guided through a 4-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
 
 <h3>8.2 Trigger Logic</h3>
 <ul>
@@ -3096,13 +3096,14 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <h3>8.3 Step Flow</h3>
 <ol>
 <li><strong>Welcome to JumpKit</strong> - Greeting screen with JumpKit jumping man icon (turquoise SVG), welcome message, "Let's Go" button. No step label shown.</li>
-<li><strong>Configure Your Columns (Step 1 of 2)</strong> - Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
-<li><strong>Add Your First Jump (Step 2 of 2)</strong> - Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
+<li><strong>Set Up Your ROI (Step 1 of 3)</strong> - ROI defaults form: two numeric inputs — <em>Time saved per click (seconds)</em> (default: 10) and <em>Your hourly rate ($/hr)</em> (default: $50). Pre-filled from current prefs. Saves via <code>DB.savePrefs()</code> on "Save &amp; Continue". These values drive all personal and team ROI calculations.</li>
+<li><strong>Configure Your Columns (Step 2 of 3)</strong> - Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
+<li><strong>Add Your First Jump (Step 3 of 3)</strong> - Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
 <li><strong>Setup Complete</strong> - Success screen with checkmark icon and "Go to Your Jumps Page" button that calls <code>navigateTo('jumps')</code> and closes the overlay.</li>
 </ol>
 
 <h3>8.4 Progress Indicator</h3>
-<p>A gradient progress bar at the top of the modal fills as the user advances: 33% → 67% → 100% (completion screen).</p>
+<p>A gradient progress bar at the top of the modal fills as the user advances: 25% → 50% → 75% → 100% (completion screen).</p>
 
 <h3>8.5 Key Implementation Details</h3>
 <ul>
