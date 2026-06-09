@@ -139,6 +139,20 @@ $$;
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (
   auth.uid() = id
   OR current_user_role() = 'org-owner'
+  OR id IN (
+    -- Allow reading profiles of teammates (members of teams you belong to)
+    SELECT tm2.user_id FROM team_members tm2
+    WHERE tm2.team_id IN (
+      SELECT team_id FROM team_members WHERE user_id = auth.uid()
+    )
+  )
+  OR id IN (
+    -- Allow reading profiles of team owners for teams you belong to
+    SELECT t.owner_id FROM teams t
+    WHERE t.id IN (
+      SELECT team_id FROM team_members WHERE user_id = auth.uid()
+    )
+  )
 );
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);

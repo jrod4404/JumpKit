@@ -227,7 +227,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       if (_sharerIds.length) {
         const { data: _sharerProfs = [], error: _sharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _sharerIds);
         console.debug('[Teams] sharer IDs:', _sharerIds);
-        console.debug('[Teams] sharer profiles result:', _sharerProfs, 'error:', _sharerErr);
+        console.debug('[Teams] sharer profiles result:', JSON.stringify(_sharerProfs), 'error:', _sharerErr);
         _sharerProfs.forEach(p => { _sharerMap[p.id] = p; });
       } else {
         console.debug('[Teams] no created_by IDs found on cols:', teamSharedCols);
@@ -344,7 +344,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       if (_jSharerIds.length) {
         const { data: _jSharerProfs = [], error: _jSharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _jSharerIds);
         console.debug('[Teams] joined sharer IDs:', _jSharerIds);
-        console.debug('[Teams] joined sharer profiles result:', _jSharerProfs, 'error:', _jSharerErr);
+        console.debug('[Teams] joined sharer profiles result:', JSON.stringify(_jSharerProfs), 'error:', _jSharerErr);
         _jSharerProfs.forEach(p => { _jSharerMap[p.id] = p; });
       } else {
         console.debug('[Teams] joined: no created_by IDs found on cols:', joinedTeamCols);
