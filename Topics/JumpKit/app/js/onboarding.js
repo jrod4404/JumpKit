@@ -115,7 +115,7 @@ function renderOnboardingStep(step, firstName) {
             <span style="font-weight:400;opacity:0.7"> ($/hr)</span>
           </label>
           <div style="display:flex;align-items:center;gap:10px">
-            <input id="obDollarsPerHour" type="number" min="1" max="10000" value="${prefs.dollarsPerHour || 100}"
+            <input id="obDollarsPerHour" type="number" min="1" max="10000" value="${prefs.dollarsPerHour || 50}"
               style="flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box" />
             <span style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;flex-shrink:0">$ / hr</span>
           </div>

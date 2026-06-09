@@ -30,7 +30,7 @@ const DB = (() => {
       notifications:      true,
       cloudBackup:        false,
       timePerClick:       10,
-      dollarsPerHour:     100,
+      dollarsPerHour:     50,
       showDescription: false,
       showHotkey:      false,
       autoArchive:        'never',

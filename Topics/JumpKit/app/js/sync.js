@@ -708,7 +708,7 @@ async function syncMemberStats() {
     const j = allJumps.find(j => j.id === c.jumpId);
     return sum + (j?.timeSaved != null ? j.timeSaved : prefs.timePerClick);
   }, 0);
-  const dollarsPerHour = prefs.dollarsPerHour || 100;
+  const dollarsPerHour = prefs.dollarsPerHour || 50;
 
   try {
     // Get all teams the user belongs to (owned + member)

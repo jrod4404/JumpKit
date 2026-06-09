@@ -719,7 +719,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
   const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
-  const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 100) : 100;
+  const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 50) : 50;
   const lifetimeSeconds = lifetimeLaunches * timePerClick;
   const lifetimeHours   = Math.floor(lifetimeSeconds / 3600);
   const lifetimeMins    = Math.floor((lifetimeSeconds % 3600) / 60);
@@ -1286,12 +1286,12 @@ window.exportStatsPDF = async function exportStatsPDF() {
             if (ts.length === 0) return `<div style="margin-bottom:16px"><strong style="font-size:13px">${team.name}</strong><p style="font-size:12px;color:#6b7280;margin-top:4px">No usage data yet.</p></div>`;
             const tL = ts.reduce((s, r) => s + (r.total_launches || 0), 0);
             const tMins = Math.round(ts.reduce((s, r) => s + (r.total_seconds_saved || 0), 0) / 60);
-            const tDollars = ts.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 100)), 0).toFixed(2);
+            const tDollars = ts.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 50)), 0).toFixed(2);
             const mRows = ts.sort((a, b) => b.total_launches - a.total_launches).map((s, i) => {
               const p = pdfProfileMap[s.user_id];
               const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
               const mMins = Math.round((s.total_seconds_saved || 0) / 60);
-              const mDollars = (((s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 100)).toFixed(2);
+              const mDollars = (((s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 50)).toFixed(2);
               return `<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px 10px;font-size:12px;color:#9ca3af">${i+1}</td><td style="padding:6px 10px;font-size:12px;color:#374151">${name}</td><td style="padding:6px 10px;font-size:12px;text-align:right;font-weight:700;color:#00C2C7">${(s.total_launches||0).toLocaleString()}</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">${mMins.toLocaleString()} min</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">$${parseFloat(mDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;
             }).join('');
             return `
@@ -1847,7 +1847,7 @@ async function renderTeamROISection() {
         const totalL = teamStats.reduce((s, r) => s + (r.total_launches || 0), 0);
         const totalSec = teamStats.reduce((s, r) => s + (r.total_seconds_saved || 0), 0);
         const totalMins = Math.round(totalSec / 60);
-        const totalDollars = teamStats.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 100)), 0).toFixed(2);
+        const totalDollars = teamStats.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 50)), 0).toFixed(2);
 
         const memberRows = teamStats
           .sort((a, b) => b.total_launches - a.total_launches)
@@ -1856,7 +1856,7 @@ async function renderTeamROISection() {
             const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
             const isMe = s.user_id === userId;
             const mMins = Math.round((s.total_seconds_saved || 0) / 60);
-            const mDollars = ((( s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 100)).toFixed(2);
+            const mDollars = ((( s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 50)).toFixed(2);
             const lastSeen = s.updated_at ? new Date(s.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
             return `
               <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i < teamStats.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}font-size:0.84rem">
