@@ -151,7 +151,48 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
 
   if (ownedTeams.length === 0) {
-    html += `<div class="acct-empty-state">No teams yet. Click <strong>Create Team</strong> to get started.</div>`;
+    if (memberTeams.length === 0 && pendingInvites.length === 0) {
+      // Truly no teams at all — show rich intro
+      html += `
+        <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:14px;padding:28px 28px 24px;margin:4px 0 8px">
+          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:18px">
+            <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
+              <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.97rem;font-weight:700;color:var(--text);margin-bottom:4px">Collaborate with your team</div>
+              <div style="font-size:0.85rem;color:var(--text-muted);line-height:1.6">
+                Teams let you share jump links with colleagues so everyone on the team lands in the same places — shared tools, folders, dashboards, and resources, always up to date.
+              </div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+              <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">What you can do</div>
+              <ul style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
+                <li>Share jump links with your whole team</li>
+                <li>Organize shared links into columns</li>
+                <li>Invite members by email</li>
+                <li>Track team-wide time &amp; ROI savings</li>
+              </ul>
+            </div>
+            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
+              <div style="font-size:0.78rem;font-weight:700;color:#50CACC;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">How to get started</div>
+              <ol style="margin:0;padding-left:16px;color:var(--text-muted);font-size:0.83rem;line-height:1.8">
+                <li>Click <strong style="color:var(--text)">Create Team</strong> above</li>
+                <li>Give your team a name</li>
+                <li>Invite members by email</li>
+                <li>Add shared jump links for the team</li>
+              </ol>
+            </div>
+          </div>
+          <div style="font-size:0.8rem;color:var(--text-muted);opacity:0.65;border-top:1px solid var(--border);padding-top:12px">
+            Already been invited to a team? Ask your team owner to resend the invite — you’ll see it appear here.
+          </div>
+        </div>`;
+    } else {
+      html += `<div class="acct-empty-state">No teams created yet. Click <strong>Create Team</strong> above to create one.</div>`;
+    }
   } else {
     for (const team of ownedTeams) {
       // Fetch members for this team
