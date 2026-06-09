@@ -12,10 +12,10 @@ window.showTeamsTipsModal = function() {
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
       <div style="padding:28px 28px 0;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:24px">
         <div style="flex-shrink:0;width:44px;height:44px;background:rgba(80,202,204,0.12);border-radius:10px;display:flex;align-items:center;justify-content:center">
-          <svg class="ti ti-users" style="width:22px;height:22px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+          <svg class="ti ti-users" style="width:22px;height:22px;color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
         </div>
         <div style="flex:1">
-          <div style="font-size:1.05rem;font-weight:700;color:var(--text)">Teams — Getting Started</div>
+          <div style="font-size:1.05rem;font-weight:700;color:var(--hover-accent)">Teams — Getting Started</div>
           <div style="font-size:0.82rem;color:var(--text-muted);margin-top:2px">Everything you need to know about teams in JumpKit</div>
         </div>
         <button data-jaction="teams-tips-close" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1">
@@ -48,10 +48,10 @@ window.showTeamsTipsModal = function() {
             <li>Optionally organize shared links into columns</li>
           </ol>
         </div>
-        <div style="background:var(--bg-input);border:1px solid var(--border);border-radius:10px;padding:14px 16px">
-          <div style="font-size:0.78rem;font-weight:700;color:var(--text-muted);margin-bottom:5px">Joining a team</div>
-          <p style="font-size:0.84rem;color:var(--text-muted);line-height:1.65;margin:0">
-            If someone has invited you, you'll see the team appear in <strong style="color:var(--text-muted)">Teams I've Joined</strong> with a Join button. If you're expecting an invite, ask the team owner to send it to your account email.
+        <div style="margin-bottom:4px">
+          <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Joining a team</div>
+          <p style="font-size:0.87rem;color:var(--text-muted);line-height:1.7;margin:0">
+            If someone has invited you, the team appears in <strong style="color:var(--text)">Teams I've Joined</strong> with a Join button. If you're expecting an invite, ask the team owner to send it to your account email.
           </p>
         </div>
       </div>
