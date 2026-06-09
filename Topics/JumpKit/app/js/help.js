@@ -65,6 +65,10 @@ function renderHelp() {
           <div class="faq-q">How are time savings calculated?</div>
           <div class="faq-a">JumpKit multiplies your total click count by the time-per-click value you configure on the <strong>Settings</strong> page. Adjust that value to match your real-world estimate.</div>
         </div>
+        <div class="faq-item">
+          <div class="faq-q">How do I specify which browser is opened when I click a jump link?</div>
+          <div class="faq-a">To specify which browser opens after clicking a jump link, set your default browser in your macOS or Windows system settings. JumpKit will always launch whichever browser you have set as the system default.</div>
+        </div>
       </div>
 
       <div class="help-card">
