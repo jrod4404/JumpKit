@@ -129,15 +129,11 @@ serve(async (req) => {
 });
 
 function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
-  return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"/></head>
-<body style="margin:0;padding:0;background:#0f1117;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:40px auto;background:#0E1827;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.09)">
+    return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:40px auto;background:#0E1827;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.09)">
 
     <!-- HEADER -->
     <tr><td style="background:linear-gradient(180deg,#060C15 0%,#0E1827 100%);padding:32px 40px;text-align:center">
-      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:50px;display:block;margin:0 auto 12px;opacity:0.9" /></a>
+      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:50px;display:inline-block;margin:0 8px 12px 0;opacity:0.9" /></a>
       <p style="margin:0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
     </td></tr>
 
@@ -146,7 +142,7 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
 
     <!-- BODY -->
     <tr><td style="padding:36px 40px">
-      <h2 style="margin:0 0 36px;font-size:20px;color:#C8D6E8;font-weight:600">You've been invited! 🎉</h2>
+      <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You've been invited! 🎉</h2>
       <p style="margin:0 0 24px;font-size:15px;color:#7A93B4;line-height:1.6">
         <strong style="color:#C8D6E8">${esc(inviterName)}</strong> has invited you to join
         <strong style="color:#50CACC">${esc(teamName)}</strong> on JumpKit.
@@ -172,7 +168,7 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
         <ol style="margin:0;padding-left:20px;color:#7A93B4;font-size:14px;line-height:1.8">
           <li>Download the JumpKit desktop app</li>
           <li>Create your account (or sign in if you already have one)</li>
-          <li>Click <strong style="color:#50CACC">Join a Team</strong> from the Account page</li>
+          <li>Click <strong style="color:#50CACC">Join a Team</strong> from the Teams page</li>
           <li>Input the <strong style="color:#50CACC">${esc(teamName)}</strong> password = <strong style="color:#50CACC">${esc(teamPassword)}</strong></li>
         </ol>
       </div>
@@ -200,33 +196,14 @@ function buildEmailHTML({ inviterName, teamName, orgName, teamPassword }) {
       <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:36px;display:block;margin:0 auto 10px;opacity:0.8" /></a>
       <p style="margin:0 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px"><tr>
-        <td style="padding:0 6px">
-          <a href="https://x.com/jumpkitapp" style="text-decoration:none">
-            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
-              <img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="display:block;margin-top:2px" alt="X" />
-            </td></tr></table>
-          </a>
-        </td>
-        <td style="padding:0 6px">
-          <a href="https://youtube.com/@jumpkitapp" style="text-decoration:none">
-            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
-              <img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="display:block;margin-top:2px" alt="YouTube" />
-            </td></tr></table>
-          </a>
-        </td>
-        <td style="padding:0 6px">
-          <a href="https://linkedin.com/company/jumpkitapp" style="text-decoration:none">
-            <table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle">
-              <img src="https://jumpkit.app/email-icons/icon-social-li.png" width="18" height="18" style="display:block;margin-top:2px" alt="LinkedIn" />
-            </td></tr></table>
-          </a>
-        </td>
+        <td style="padding:0 6px"><a href="https://x.com/jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="display:block;margin-top:2px" alt="X" /></td></tr></table></a></td>
+        <td style="padding:0 6px"><a href="https://youtube.com/@jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="display:block;margin-top:2px" alt="YouTube" /></td></tr></table></a></td>
+        <td style="padding:0 6px"><a href="https://linkedin.com/company/jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-li.png" width="18" height="18" style="display:block;margin-top:2px" alt="LinkedIn" /></td></tr></table></a></td>
       </tr></table>
-      <p style="margin:0;font-size:11px;color:#2e3d52">© 2026 JumpKit. All rights reserved.</p>
+      <p style="margin:0;font-size:11px;color:#2e3d52">© 2026 JumpKit LLC. All rights reserved.</p>
     </td></tr>
 
-  </table>
-</body></html>`;
+  </table>`;
 }
 
 function esc(s) {

@@ -2267,6 +2267,126 @@ localStorage.setItem('jk_notifs_user123', JSON.stringify(notifs));
 localStorage.setItem('theme', 'dark');
 localStorage.setItem('notifications', '[]');</code></pre>
 <p>This prevents collisions with other apps on the same domain.</p>
+
+<h3 id="section-emails">2.10 Transactional Emails</h3>
+<p>All 8 transactional emails are stored as standalone HTML preview files in <code>app/emails/</code>. Each file mirrors the HTML embedded in the corresponding Supabase Edge Function. Edit the preview file, then copy the HTML back into the edge function's <code>buildHTML()</code> function to deploy.</p>
+
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+  <thead>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.12)">
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">File</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Edge Function</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Trigger</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>confirm-email.html</code></td>
+      <td style="padding:10px 14px"><em>Supabase Auth (built-in)</em></td>
+      <td style="padding:10px 14px">User signs up</td>
+      <td style="padding:10px 14px">Asks user to click a link to confirm their email address before the account activates</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>reset-email.html</code></td>
+      <td style="padding:10px 14px"><em>Supabase Auth (built-in)</em></td>
+      <td style="padding:10px 14px">User requests password reset</td>
+      <td style="padding:10px 14px">Delivers a one-time reset link; expires in 1 hour</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>invite-email.html</code></td>
+      <td style="padding:10px 14px"><code>send-invite</code></td>
+      <td style="padding:10px 14px">Team owner invites a member</td>
+      <td style="padding:10px 14px">Notifies invitee they've been added to a team; includes team name and owner</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>welcome-email.html</code></td>
+      <td style="padding:10px 14px"><code>send-welcome</code></td>
+      <td style="padding:10px 14px">New free-tier signup confirmed</td>
+      <td style="padding:10px 14px">Onboards new user; explains 3-step quick start, links to app</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>welcome-unlimited-email.html</code></td>
+      <td style="padding:10px 14px"><code>send-welcome-core</code></td>
+      <td style="padding:10px 14px"><code>subscription_created</code> (paid tier) via <code>ls-webhook</code></td>
+      <td style="padding:10px 14px">Confirms Unlimited plan is active; lists all unlocked features</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>cancellation-email.html</code></td>
+      <td style="padding:10px 14px"><code>send-cancellation</code></td>
+      <td style="padding:10px 14px"><code>subscription_cancelled</code> / <code>subscription_expired</code> via <code>ls-webhook</code></td>
+      <td style="padding:10px 14px">Notifies user their plan ended; shows what's lost vs. retained; CTA to reactivate</td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>team-deleted-email.html</code></td>
+      <td style="padding:10px 14px"><code>send-team-deleted</code></td>
+      <td style="padding:10px 14px">Team owner deletes a team</td>
+      <td style="padding:10px 14px">Emails all members &amp; pending invitees; lists removed shared columns; reassures personal jumps are safe</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 14px"><code>waitlist-email.html</code></td>
+      <td style="padding:10px 14px"><code>waitlist-signup</code></td>
+      <td style="padding:10px 14px">Visitor submits waitlist form on landing page</td>
+      <td style="padding:10px 14px">Confirms spot on waitlist; brief product teaser</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-subpages">2.11 Landing Page Subpages</h3>
+<p>These are destination pages users land on after clicking links in transactional emails — not emails themselves. Located in <code>landing/subpages/</code>.</p>
+
+<table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+  <thead>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.12)">
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">File</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Production URL</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Arrives From</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px"><code>confirmed.html</code></td>
+      <td style="padding:10px 14px"><code>jumpkit.app/confirmed</code></td>
+      <td style="padding:10px 14px"><code>confirm-email</code> link</td>
+      <td style="padding:10px 14px">Shows ✅ success card; tells user to open the desktop app and sign in</td>
+    </tr>
+    <tr>
+      <td style="padding:10px 14px"><code>reset-password.html</code></td>
+      <td style="padding:10px 14px"><code>jumpkit.app/reset-password</code></td>
+      <td style="padding:10px 14px"><code>reset-email</code> link</td>
+      <td style="padding:10px 14px">Interactive form to set a new password; live password-strength checklist; calls Supabase auth on submit</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="section-local-preview">2.12 Local Preview Server</h3>
+<p>Start the dev server from the <code>JumpKit/</code> root to preview all HTML assets under one base URL:</p>
+<pre><code>cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit
+python3 -m http.server 8899</code></pre>
+<table style="width:100%;border-collapse:collapse;margin-bottom:8px">
+  <thead>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.12)">
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">Asset Type</th>
+      <th style="text-align:left;padding:10px 14px;color:#50CACC;font-size:0.85rem;text-transform:uppercase;letter-spacing:0.05em">URL Pattern</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px">Emails</td>
+      <td style="padding:10px 14px"><code>http://localhost:8899/app/emails/&lt;filename&gt;</code></td>
+    </tr>
+    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+      <td style="padding:10px 14px">Landing subpages</td>
+      <td style="padding:10px 14px"><code>http://localhost:8899/landing/subpages/&lt;filename&gt;</code></td>
+    </tr>
+    <tr>
+      <td style="padding:10px 14px">Landing page</td>
+      <td style="padding:10px 14px"><code>http://localhost:8899/landing/index.html</code></td>
+    </tr>
+  </tbody>
+</table>
+
 <h2 id="security">3. Security Architecture</h2>
 <p>This section documents JumpKit's security model, known issues addressed, and remaining hardening work. Updated 2026-05-27.</p>
 
@@ -3989,6 +4109,8 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <li><strong>Landing Page - CTA:</strong> Updated to post-launch copy ("Start jumping today", "Get Early Access").</li>
 <li><strong>Landing Page - Nav:</strong> Desktop nav buttons full-width and centered.</li>
 </ul>
+
+
 
         `;
 
