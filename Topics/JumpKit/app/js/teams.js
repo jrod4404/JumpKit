@@ -226,11 +226,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _sharerMap = {};
       if (_sharerIds.length) {
         const { data: _sharerProfs = [], error: _sharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _sharerIds);
-        console.debug('[Teams] sharer IDs:', _sharerIds);
-        console.debug('[Teams] sharer profiles result:', JSON.stringify(_sharerProfs), 'error:', _sharerErr);
+
         _sharerProfs.forEach(p => { _sharerMap[p.id] = p; });
       } else {
-        console.debug('[Teams] no created_by IDs found on cols:', teamSharedCols);
       }
 
       const teamOwnerId = team.owner_id;
@@ -311,7 +309,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
                 ${teamSharedCols.length > 0
-                  ? teamSharedCols.map(c => { console.debug('[Teams] chip c.created_by:', c.created_by, 'lookup:', JSON.stringify(_sharerMap[c.created_by])); const p = _sharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`; }).join('')
+                  ? teamSharedCols.map(c => {
                   : '<span class="acct-row-hint" style="font-size:0.8rem">None yet - click <strong>Manage Sharing</strong> above to add one</span>'}
               </div>
             </div>
@@ -343,11 +341,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _jSharerMap = {};
       if (_jSharerIds.length) {
         const { data: _jSharerProfs = [], error: _jSharerErr } = await supabaseClient.from('profiles').select('id, first_name, last_name, email').in('id', _jSharerIds);
-        console.debug('[Teams] joined sharer IDs:', _jSharerIds);
-        console.debug('[Teams] joined sharer profiles result:', JSON.stringify(_jSharerProfs), 'error:', _jSharerErr);
+
         _jSharerProfs.forEach(p => { _jSharerMap[p.id] = p; });
       } else {
-        console.debug('[Teams] joined: no created_by IDs found on cols:', joinedTeamCols);
       }
       const totalJoinedUsers = memberCount + 1; // +1 for owner (not in team_members table)
       const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';

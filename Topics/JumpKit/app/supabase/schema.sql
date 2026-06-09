@@ -99,7 +99,7 @@ ALTER TABLE shared_jumps   ENABLE ROW LEVEL SECURITY;
 
 -- Returns the current user's role (or 'anon' if not logged in)
 CREATE OR REPLACE FUNCTION current_user_role()
-RETURNS TEXT LANGUAGE sql STABLE AS $$
+RETURNS TEXT LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT COALESCE(
     (SELECT role FROM profiles WHERE id = auth.uid()),
     'anon'
@@ -108,7 +108,7 @@ $$;
 
 -- Returns the org_id of the current user
 CREATE OR REPLACE FUNCTION current_user_org()
-RETURNS UUID LANGUAGE sql STABLE AS $$
+RETURNS UUID LANGUAGE sql STABLE SECURITY DEFINER AS $$
   SELECT org_id FROM profiles WHERE id = auth.uid();
 $$;
 
@@ -136,23 +136,26 @@ $$;
 
 -- ── profiles ──────────────────────────────────────────────────────
 -- Org-owners see all profiles in their org; others see only their own row.
+-- Helper: returns true if current user shares any team with target_user_id
+CREATE OR REPLACE FUNCTION is_teammate(target_user_id UUID)
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM team_members tm1
+    JOIN team_members tm2 ON tm1.team_id = tm2.team_id
+    WHERE tm1.user_id = auth.uid()
+    AND tm2.user_id = target_user_id
+  ) OR EXISTS (
+    SELECT 1 FROM team_members tm
+    JOIN teams t ON tm.team_id = t.id
+    WHERE tm.user_id = auth.uid()
+    AND t.owner_id = target_user_id
+  );
+$$;
+
 CREATE POLICY "profiles_select" ON profiles FOR SELECT USING (
   auth.uid() = id
   OR current_user_role() = 'org-owner'
-  OR id IN (
-    -- Allow reading profiles of teammates (members of teams you belong to)
-    SELECT tm2.user_id FROM team_members tm2
-    WHERE tm2.team_id IN (
-      SELECT team_id FROM team_members WHERE user_id = auth.uid()
-    )
-  )
-  OR id IN (
-    -- Allow reading profiles of team owners for teams you belong to
-    SELECT t.owner_id FROM teams t
-    WHERE t.id IN (
-      SELECT team_id FROM team_members WHERE user_id = auth.uid()
-    )
-  )
+  OR is_teammate(id)
 );
 CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);
