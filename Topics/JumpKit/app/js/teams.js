@@ -788,9 +788,10 @@ window.openAddTeamModal = async function() {
   if (tier === 'free') {
     const { data: existingTeams } = await supabaseClient.from('teams').select('id').eq('org_id', selectedOrgId);
     if (existingTeams && existingTeams.length >= 1) {
+      trackPaywallEvent('team_create').catch(()=>{});
       showUpgradeModal(
         'Team Limit Reached',
-        'The free tier allows <strong>1 team</strong>. Upgrade to JumpKit Unlimited for unlimited teams, unlimited shared jumps, and unlimited launches.'
+        'The free tier allows <strong>1 owned team</strong>. You can still join 1 team as a member. Upgrade to JumpKit Unlimited for unlimited teams, unlimited shared jumps, and unlimited launches.'
       );
       return;
     }
@@ -1974,6 +1975,7 @@ window.openJoinTeamModal = async function(teamId, teamName, inviteId) {
       .select('id')
       .eq('user_id', window._supabaseUser.id);
     if (memberships && memberships.length >= 1) {
+      trackPaywallEvent('team_member_limit').catch(()=>{});
       showUpgradeModal(
         'Team Join Limit Reached',
         'The free tier allows joining <strong>1 team</strong>. Upgrade to JumpKit Unlimited for unlimited teams.'

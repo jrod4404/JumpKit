@@ -509,6 +509,7 @@ async function syncSharedJumps() {
     console.debug(`[JumpKit Sync] Synced ${remoteCols.length} columns, ${remoteJumps.length} jumps`);
     // Sync aggregate stats for Team ROI (unlimited users only)
     try { await syncMemberStats(); } catch (_) {}
+    try { await syncPersonalStats(); } catch (_) {}
   } catch (err) {
     console.warn('[JumpKit Sync] Error:', err.message);
     // Notify user of sync failure — throttled to once per hour
@@ -738,6 +739,36 @@ async function syncMemberStats() {
     if (error) console.warn('[syncMemberStats] upsert error:', error.message);
   } catch (err) {
     console.warn('[syncMemberStats] error:', err.message);
+  }
+}
+
+// ── Personal Stats Sync ──────────────────────────────────────────────────────────────────
+// Syncs this user's total personal launch count and last_active_at to their profile row.
+// Runs for ALL tiers (free AND unlimited). Called after syncMemberStats().
+async function syncPersonalStats() {
+  let session = null;
+  try {
+    const res = await supabaseClient.auth.getSession();
+    session = res?.data?.session;
+  } catch (_) {}
+  if (!session) return;
+
+  const userId = session.user.id;
+  const localUser = DB.getCurrentUser();
+  if (!localUser) return;
+
+  const log = DB.getClickLog(localUser.id);
+  const totalLaunches = log.length;
+  const now = new Date().toISOString();
+
+  try {
+    const { error } = await supabaseClient
+      .from('profiles')
+      .update({ personal_launches_total: totalLaunches, last_active_at: now })
+      .eq('id', userId);
+    if (error) console.warn('[syncPersonalStats] error:', error.message);
+  } catch (err) {
+    console.warn('[syncPersonalStats] error:', err.message);
   }
 }
 

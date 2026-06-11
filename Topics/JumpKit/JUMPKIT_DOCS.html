@@ -3815,6 +3815,16 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   <li><strong>Mobile companion (view-only)</strong> - Read-only access or QR-based sharing. Lower priority given the desktop focus.</li>
   <li><strong>Snippets / quick actions</strong> - Light text expansion or common commands tied to Jumps.</li>
   <li><strong>Analytics &amp; ROI enhancements</strong> - Per-Jump time estimates, exportable reports, team leaderboards.</li>
+  <li><strong>Admin: Advanced user analytics (future stats)</strong> - The following stats would add significant insight for user growth and free→unlimited conversion. Not yet implemented; collect and surface when user base grows:
+    <ul>
+      <li><strong>Engagement depth:</strong> Days since signup, login frequency (DAU/WAU/MAU), time between signup and first jump created, time between signup and first launch, jump creation rate, column count per user, favorites count</li>
+      <li><strong>Conversion signals:</strong> Which paywall triggers most (launch limit vs team limit vs member limit), days from signup to first paywall hit, days from first paywall hit to upgrade (identify hot leads = multiple paywall hits, no upgrade), upgrade page visit count per user</li>
+      <li><strong>Team/collaboration signals:</strong> Team owners with 0 members (lonely owners → nudge to invite), team members with low launches (inactive members), teams with high member counts (viral potential), users active in multiple teams</li>
+      <li><strong>Churn/retention signals:</strong> 7-day and 30-day active users, users not launched in 30+ days (at-risk), days on unlimited before cancellation, cancellation reason (survey)</li>
+      <li><strong>Revenue signals:</strong> MRR tracking over time, churn rate (unlimited→cancelled), average LTV by signup cohort</li>
+      <li><strong>Power user identification:</strong> Top 10% by launches, top users by $ saved, users who export PDF reports regularly</li>
+    </ul>
+  </li>
   <li><strong>Theming &amp; UI customization</strong> - Column layouts, icon support, additional themes.</li>
   <li><strong>Offline-first sync improvements</strong> - Better conflict resolution, selective cloud sync.</li>
   <li><strong>Password Manager</strong> - Store and share credentials (username/password/URL) as a special Jump type. Encrypted at rest, optional team sharing with role-based access. Eliminates the need for a separate password tool for small teams using JumpKit daily.</li>
@@ -3832,6 +3842,30 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3>2026-06-10 (evening — Users page)</h3>
+<ul>
+  <li><strong>Admin page renamed to &ldquo;Users&rdquo;</strong> with <code>ti-users</code> icon. Page subtitle: &ldquo;User and app usage stats&rdquo;.</li>
+  <li><strong>Row 1 tiles (Total Users):</strong> 5 tiles &mdash; Total Users, Unlimited, Free, Cancelled, Admins. Each tile has category-colored number, matching label color, and subtle tinted background. Order: Total &rarr; Unlimited &rarr; Free &rarr; Cancelled &rarr; Admins. Section label: &ldquo;TOTAL USERS&rdquo;.</li>
+  <li><strong>Row 2 tiles (Incremental Users):</strong> Today / This Week / This Month / This Year. Each shows +total (green/gray/red based on value), Unlimited (green), Free (gray), Cancelled (red). Tile background: green tint if positive, gray tint if zero. Section label: &ldquo;INCREMENTAL USERS&rdquo;. Powered by new <code>get_admin_growth_stats()</code> Supabase RPC.</li>
+  <li><strong>Total Users line chart</strong> (last 90 days, cumulative). Chart.js lazy-loaded inline for the Users page independently of the Stats page.</li>
+  <li><strong>All Users table:</strong> Sortable on every column (&uarr;/&darr;/&updownarrow; indicators). Searchable via jump-search-styled input (&ldquo;Search users...&rdquo;). Subscription pills: Admin=turquoise, Unlimited=green, Free=gray, Cancelled=red. Email column added.</li>
+  <li><strong>Theme-aware charts:</strong> Theme toggle now re-renders the Users page (same as Stats page) so axis/legend colors update immediately in dark mode.</li>
+  <li><strong>Supabase RPC fixes:</strong> <code>get_admin_user_stats</code> updated to return <code>user_role</code> (avoids ambiguous column), use <code>core</code>/<code>teams_jet</code> tiers. <code>get_admin_summary</code> fixed to correctly exclude admins from all subscription buckets. <code>get_admin_growth_stats</code> added with cancelled breakdowns per period.</li>
+  <li><strong>support@jumpkit.app</strong> upgraded to <code>core/active</code> tier.</li>
+  <li><strong>Future analytics ideas</strong> added to Section 11 roadmap (conversion signals, churn signals, power user identification, MRR tracking).</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-10_20-58.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
+<h3>2026-06-10</h3>
+<ul>
+  <li><strong>Feature/free consistency audit:</strong> Audited all 9 locations where free vs. unlimited features are listed (landing page, app.js, teams.js, jumps.js). One wording bug found and fixed &mdash; create-team paywall modal now correctly says &ldquo;1 owned team. You can still join 1 team as a member.&rdquo;</li>
+  <li><strong>Statistics page &mdash; Team ROI section redesign:</strong> One card per team (was all teams crammed into one box). Each card has a styled gray header (team name + member count + active badge, <code>var(--team-header-bg)</code> CSS variable for light/dark theme switching). Four stat subcards per card: Members Active (first), Team Launches, Time Saved, $ Saved. Member leaderboard table with Last Sync date, &ldquo;(you)&rdquo; badge, and Team Total footer row. Empty-state card for teams with no data yet. &ldquo;PERSONAL ROI&rdquo; label added above personal stats section. Theme toggle now triggers stats re-render so Chart.js axis/legend colors update instantly on mode switch.</li>
+  <li><strong>PDF export (ROI Report) overhaul:</strong> Full sync with updated stats page layout &mdash; Personal ROI label, team cards with gray headers, 4-stat grid (Members Active first), member tables with Last Sync and Team Total footer. New header layout: left side has JumpKit logo + &ldquo;Stop searching. Start jumping.&rdquo; + jumpkit.app; right side has &ldquo;ROI Summary&rdquo; + user name + date (all row-aligned via CSS grid). Header underline changed to gray. Per-page footer via Electron <code>displayHeaderFooter</code> + <code>footerTemplate</code>: &ldquo;Generated by JumpKit &middot; jumpkit.app &middot; [date] &middot; Page X of Y&rdquo;. Page break before Team ROI section; <code>page-break-inside:avoid</code> on every team card. Logo switched from 334px circle PNG to 935&times;267px <code>img/logo.png</code> (no more pixelation). Logo fetch path updated in <code>main.js</code>.</li>
+  <li><strong>Stale preview email files removed:</strong> 7 root-level <code>*_preview.html</code> files deleted (all superseded by <code>app/emails/</code> folder). <code>app/emails/</code> is now single source of truth for all email templates.</li>
+  <li><strong>Admin analytics feature (new):</strong> New Admin page (shield icon, visible only when <code>role = &lsquo;admin&rsquo;</code> in Supabase profiles). Shows summary tiles (Total / Free / Unlimited / Trial users) and a full per-user stats table (launches, teams owned/joined, paywall hits, last active, signup date). Supabase migration <code>admin_analytics.sql</code> adds <code>personal_launches_total</code> + <code>last_active_at</code> columns to profiles, creates <code>paywall_events</code> table with RLS, and two SECURITY DEFINER RPC functions (<code>get_admin_summary</code>, <code>get_admin_user_stats</code>). <code>syncPersonalStats()</code> added to sync.js &mdash; runs for all tiers on every sync, pushing launch count + last active to Supabase. <code>trackPaywallEvent(type)</code> added to app.js and hooked into all paywall triggers: <code>launch_limit</code>, <code>upgrade_modal</code>, <code>team_create</code>, <code>team_member_limit</code>, <code>team_jump_limit</code>. Admin nav item placed above Tests in sidebar.</li>
+  <li><strong>Backups:</strong> <code>app_backup_2026-06-10_16-06</code> and <code>app_backup_2026-06-10_16-36</code> saved to <code>app_backups/</code>.</li>
+</ul>
 
 <h3>2026-06-09</h3>
 <ul>

@@ -274,6 +274,25 @@
 .stats-summary strong { color: var(--text-card-title); font-size: 0.9rem; }
 .home-welcome h1 { font-size: 1.8rem; font-weight: 900; margin-bottom: 6px; }
 .home-welcome p { color: var(--text-muted); font-size: 1rem; }
+.home-dash { display: flex; flex-direction: column; gap: 0; }
+/* Section label — consistent spacing above every section except the first */
+.home-dash-section-label { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; margin-top: 0; }
+.home-dash-section-label:not(:first-child) { margin-top: 20px; }
+/* All home-dash grids — 4 per row default, consistent 20px bottom gap */
+.home-roi-grid  { grid-template-columns: repeat(4, 1fr) !important; margin-bottom: 20px; }
+.home-teams-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.home-dash .tips-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 20px; }
+/* Consistent hover for ALL cards in the home dash (stat-cards + tip-cards) */
+.home-dash .stat-card { transition: all var(--transition); }
+.home-dash .stat-card:hover,
+.home-roi-link:hover { border-color: var(--hover-accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,79,214,0.12), 0 0 40px rgba(0,194,199,0.08); }
+.home-team-card { display: flex; flex-direction: column; }
+.teams-badge { display: inline-flex; align-items: center; justify-content: center; padding: 1px 7px; border-radius: 10px; font-size: 0.69rem; font-weight: 600; min-width: 70px; background: rgba(34,197,94,0.13); color: #178a3a; border: 1px solid rgba(34,197,94,0.35); white-space: nowrap; }
+.teams-badge-owner { background: rgba(0,194,199,0.15); color: #00a8ad; border-color: rgba(0,194,199,0.32); }
+.teams-badge-pending { background: rgba(250,173,20,0.15); color: #a07010; border-color: rgba(250,173,20,0.32); }
+/* Responsive breakpoints */
+@media (max-width: 900px) { .home-roi-grid, .home-teams-grid, .home-dash .tips-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+@media (max-width: 500px) { .home-roi-grid, .home-teams-grid, .home-dash .tips-grid { grid-template-columns: 1fr !important; } }
 .tips-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
 .tip-card {
   background: var(--bg-card); border: 1px solid var(--border);

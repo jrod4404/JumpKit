@@ -186,6 +186,8 @@ async function initApp() {
     if (testNavBtn) testNavBtn.style.display = '';
     const adminLabel = document.getElementById('adminNavLabel');
     if (adminLabel) adminLabel.style.display = '';
+    const adminNavBtn = document.getElementById('adminNavBtn');
+    if (adminNavBtn) adminNavBtn.style.display = '';
   }
 
   // Check free tier limit on load
@@ -321,6 +323,17 @@ themeBtn.addEventListener('click', () => {
   document.documentElement.dataset.theme = next;
   localStorage.setItem('jk_theme', next);
   updateThemeIcon(next);
+  // Re-render stats charts so axis/legend colors update immediately
+  if (window.activePage === 'stats') {
+    renderStatsDash();
+    const teamSec = document.getElementById('teamRoiSection');
+    if (teamSec) { teamSec.remove(); }
+    renderTeamROISection().catch(() => {});
+  }
+  // Re-render Users page chart on theme toggle
+  if (window.activePage === 'admin') {
+    renderAdmin().catch(() => {});
+  }
 });
 
 // ── Sidebar collapse + nav tooltips ────────────────────────────────
@@ -399,7 +412,7 @@ function renderSidebarCTA() {
     if (!cta) {
       cta = document.createElement('button');
       cta.className = 'sidebar-cta btn btn-primary unlock-btn';
-      cta.innerHTML = `<svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>Unlock JumpKit Unlimited</span>`;
+      cta.innerHTML = `<svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>Upgrade to Unlimited</span>`;
       cta.addEventListener('click', () => window.electronAPI?.openUrl(LS_CHECKOUT_URL));
       const toggleBtn = container.querySelector('.sidebar-toggle-btn');
       if (toggleBtn) container.insertBefore(cta, toggleBtn);
@@ -446,17 +459,17 @@ const pages = {
   settings: () => renderAccount('settings'),
   help:     () => renderHelp(),
   account:  () => renderAccount('account'),
-  jet:      () => renderJet(),
   teams:    () => renderAccount('teams'),
   tests:    async () => { await loadScript('js/tests.js'); renderTests(); },
+  admin:    () => renderAdmin(),
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', jet:'Jet AI', feedback:'Feedback', teams:'Teams', tests:'Tests'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Tests'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', jet:'ti-brain', feedback:'ti-message-circle', teams:'ti-user-circle', tests:'ti-test-pipe'
+  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-user-circle', admin:'ti-users', tests:'ti-test-pipe'
 };
 let activePage = 'home';
 window.activePage = activePage;
@@ -482,8 +495,8 @@ window.navigateTo = function navigateTo(page) {
     account:  'Manage your teams and shared jumps',
     settings: 'Change settings to personalize app behavior',
     help:     'Tips, features, and frequently asked questions',
-    jet:      'AI-powered automation for Microsoft 365 - runs entirely on your machine',
     teams:    'Manage your teams and shared columns',
+    admin:    'User and app usage stats',
     tests:    'Core functionality verification - run before each deployment',
     home:     '',
     jumps:    '',
@@ -638,39 +651,261 @@ function getStatsHTML(filter) {
 }
 
 // ── Home Page ──────────────────────────────────────────────────────
-function renderHome() {
+async function renderHome() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const sub = document.getElementById('topbarSubtitle');
-  const _homeFName = (window._supabaseProfile?.first_name || currentUser.name || '').split(' ')[0] || 'there';
-  if (sub) sub.textContent = `${greeting}, ${_homeFName}!   Here's a few tips to get started, enjoy!`;
+  const _homeFName = (window._supabaseProfile?.first_name || currentUser?.name || '').split(' ')[0] || 'there';
+  if (sub) sub.textContent = `Welcome back, ${_homeFName}!`;
+
+  // ── ROI stats ─────────────────────────────────────────────────────
+  const clickLog       = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
+  const lifetimeLaunches = clickLog.length;
+  const prefs          = (DB.getPrefs && currentUser) ? DB.getPrefs(currentUser.id) : {};
+  const timePerClick   = prefs.timePerClick   || 10;
+  const dollarsPerHour = prefs.dollarsPerHour || 50;
+  const lifetimeSeconds = lifetimeLaunches * timePerClick;
+  const lifetimeHours   = Math.floor(lifetimeSeconds / 3600);
+  const lifetimeMins    = Math.floor((lifetimeSeconds % 3600) / 60);
+  const lifetimeTimeStr = lifetimeHours > 0 ? `${lifetimeHours}h ${lifetimeMins}m` : `${lifetimeMins}m`;
+  const lifetimeDollars = (lifetimeSeconds / 3600) * dollarsPerHour;
+  const lifetimeDollarStr = lifetimeDollars >= 1000
+    ? `$${(lifetimeDollars / 1000).toFixed(1)}k`
+    : `$${lifetimeDollars.toFixed(2)}`;
+
+  // ── Account summary vars ──────────────────────────────────────
+  const _tier      = window._supabaseProfile?.subscription_tier || 'free';
+  const _tierLabel = (_tier === 'core' || _tier === 'teams_jet') ? 'JumpKit Unlimited' : 'JumpKit Free';
+  const _launchesUsed = window._supabaseProfile?.trial_launches_used || 0;
+  const _launchesLeft   = Math.max(0, 250 - _launchesUsed);
+  const _jumpsRemaining  = (_tier === 'core' || _tier === 'teams_jet')
+    ? 'Unlimited'
+    : `${_launchesLeft.toLocaleString()} of 250`;
+  const _launchesLabel   = (_tier === 'free' && _launchesLeft === 1) ? 'Launch Remaining' : 'Launches Remaining';
+  const _joinDate = currentUser?.createdAt
+    ? new Date(currentUser.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : '—';
+
   document.getElementById('pageContent').innerHTML = `
-    <div class="tips-grid">
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
-        <p>Click the <strong style="color:var(--hover-accent)">Configure Columns</strong> button on the <strong style="color:var(--hover-accent)">Jumps</strong> page to create up to 10 custom categories. Name them and order them according to your work.</p>
+    <div class="home-dash">
+
+      <!-- ── Account Section ───────────────────────────────────── -->
+      <div class="home-dash-section-label">YOUR ACCOUNT</div>
+      <div class="stats-cards home-roi-grid">
+        <div class="stat-card" style="gap:8px">
+          <div class="stat-card-value" style="font-size:1.2rem">${_tierLabel}</div>
+          <div class="stat-card-label">Account Type</div>
+          ${_tier === 'free' ? `<div style="margin-top:4px">${buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.75rem', padding: '5px 12px' })}</div>` : ''}
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value" style="font-size:1.2rem">${_joinDate}</div>
+          <div class="stat-card-label" style="margin-top:6px">Member Since</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value" style="font-size:1.2rem">${_jumpsRemaining}</div>
+          <div class="stat-card-label" style="margin-top:6px">${_launchesLabel}</div>
+        </div>
       </div>
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="var(--text-card-title)" style="width:1.4rem;height:1.4rem;display:block"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg></span>Add Your First Jump</h3>
-        <p>Go to the <strong style="color:var(--hover-accent)">Jumps</strong> page and click the <strong style="color:var(--hover-accent)">Add Jump</strong> button to create your first jump. Paste in a URL, file path, or network share.</p>
+
+      <!-- ── ROI Section ─────────────────────────────────────────── -->
+      <div class="home-dash-section-label">YOUR STATISTICS</div>
+      <div class="stats-cards home-roi-grid">
+        <div class="stat-card">
+          ${(() => { const n = currentUser ? DB.getActiveJumps(currentUser.id).length : 0; return `<div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">${n === 1 ? 'Jump' : 'Jumps'}</div>`; })()}
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">${lifetimeLaunches.toLocaleString()}</div>
+          <div class="stat-card-label">${lifetimeLaunches === 1 ? 'Total Launch' : 'Total Launches'}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">${lifetimeTimeStr}</div>
+          <div class="stat-card-label">Time Saved</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-value">${lifetimeDollarStr}</div>
+          <div class="stat-card-label">$ Saved</div>
+        </div>
       </div>
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
-        <p>Left-click any jump to instantly launch it. Web links open in your browser. Local paths open in your OS. One click, you're there.</p>
+
+      <!-- ── Teams Section ───────────────────────────────────────── -->
+      <div class="home-dash-section-label">YOUR TEAMS</div>
+      <div id="homeTeamsSummary">
+        <div style="color:var(--text-dim);font-size:0.85rem;padding:4px 0">Loading teams…</div>
       </div>
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
-        <p>Give each jump a hotkey code when you create or edit it. JumpKit will register it as a global shortcut so you can launch any jump without touching the mouse.</p>
+
+      <!-- ── App Features Section ────────────────────────────────── -->
+      <div class="home-dash-section-label">APP FEATURES</div>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
+          <p>Click the <strong style="color:var(--hover-accent)">Configure Columns</strong> button on the <strong style="color:var(--hover-accent)">Jumps</strong> page to create up to 10 custom categories. Name them and order them to match your workflow.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="var(--text-card-title)" style="width:1.4rem;height:1.4rem;display:block"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg></span>Add Your First Jump</h3>
+          <p>Go to the <strong style="color:var(--hover-accent)">Jumps</strong> page and click <strong style="color:var(--hover-accent)">Add Jump</strong> to create your first jump. Paste in a URL, file path, or network share.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
+          <p>Left-click any jump to instantly launch it. Web links open in your browser. Local paths open in your OS. One click, you're there.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
+          <p>Give each jump a hotkey code when you create or edit it. JumpKit registers it as a global shortcut so you can launch any jump without touching the mouse.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
+          <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
+          <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong style="color:var(--hover-accent)">Statistics</strong> page to see your full ROI breakdown.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-users" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-users"/></svg></span>Collaborate with Teams</h3>
+          <p>Create teams and share your best columns and jumps with colleagues. Everyone on the team gets instant access — keeping your whole group moving at the same speed.</p>
+        </div>
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-adjustments-horizontal" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg></span>Customize Your Settings</h3>
+          <p>Tailor JumpKit to your workflow in <strong style="color:var(--hover-accent)">Settings</strong> — set your starting page, configure your ROI values, toggle hotkey display, manage backups, and more.</p>
+        </div>
       </div>
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
-        <p>Toggle the favorite flag on any jump - <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths - to highlight your most-used jumps in every column.</p>
+
+      <!-- ── Help & Feedback Section ───────────────────────────────── -->
+      <div class="home-dash-section-label">HELP AND FEEDBACK</div>
+      <div class="tips-grid" style="margin-bottom:8px">
+        <div class="tip-card">
+          <h3><span class="tip-icon"><svg class="ti ti-help-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-help-circle"/></svg></span>Help &amp; Documentation</h3>
+          <p>The <strong style="color:var(--hover-accent)">Help</strong> page covers everything you need: a full feature list, hotkey reference, FAQ, tips for getting the most out of JumpKit, and plan comparison.</p>
+        </div>
+        <div class="tip-card" style="cursor:pointer" data-jaction="open-feedback-modal">
+          <h3><span class="tip-icon"><svg class="ti ti-message-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg></span>Send Feedback</h3>
+          <p>Have a bug report, feature request, or just want to share a thought? Click here to send feedback directly to the JumpKit team. We read every message.</p>
+        </div>
       </div>
-      <div class="tip-card">
-        <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
-        <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong style="color:var(--hover-accent)">Statistics</strong> page to see your ROI.</p>
-      </div>
+
     </div>`;
+
+  // ── Teams section async fill ───────────────────────────────────────
+  try {
+    const tier        = window._supabaseProfile?.subscription_tier || 'free';
+    const isUnlimited = tier === 'core' || tier === 'teams_jet';
+    const teamsEl     = document.getElementById('homeTeamsSummary');
+    if (!teamsEl) return;
+
+    // Get a fresh session — same approach as teams.js so we don't depend on
+    // window._supabaseUser being populated or org_id being set yet.
+    let supaUser = null;
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session) supaUser = session.user;
+    } catch (_) {}
+
+    if (!supaUser) {
+      teamsEl.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem">Sign in to see your teams.</div>';
+      return;
+    }
+
+    // 1. Fetch owned + joined team IDs (query by owner_id — no org_id required)
+    const [ownedRes, membershipRes] = await Promise.all([
+      supabaseClient.from('teams').select('id, name').eq('owner_id', supaUser.id).order('name'),
+      supabaseClient.from('team_members').select('team_id').eq('user_id', supaUser.id),
+    ]);
+    const ownedTeams  = ownedRes.data || [];
+    const ownedIds    = new Set(ownedTeams.map(t => t.id));
+    const joinedTeamIds = (membershipRes.data || []).map(r => r.team_id).filter(id => !ownedIds.has(id));
+
+    // Fetch joined team details
+    let joinedTeams = [];
+    if (joinedTeamIds.length > 0) {
+      const { data } = await supabaseClient.from('teams').select('id, name').in('id', joinedTeamIds).order('name');
+      joinedTeams = data || [];
+    }
+
+    const allTeams   = [...ownedTeams, ...joinedTeams];
+    const allTeamIds = allTeams.map(t => t.id);
+
+    if (allTeams.length === 0) {
+      teamsEl.innerHTML = isUnlimited
+        ? `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">No teams yet</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Create a team to share your best jumps and columns with colleagues.</div>
+            </div>
+            <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create a Team</button>
+          </div>`
+        : `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
+            <div>
+              <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">Teams require JumpKit Unlimited</div>
+              <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Upgrade to share jumps and columns across unlimited teams and members.</div>
+            </div>
+            ${buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.83rem', padding: '8px 16px' })}
+          </div>`;
+      return;
+    }
+
+    // 2. Batch: member counts + column counts for all teams
+    const [allMemberRes, allColRes] = await Promise.all([
+      supabaseClient.from('team_members').select('team_id').in('team_id', allTeamIds),
+      supabaseClient.from('shared_columns').select('id, team_id').in('team_id', allTeamIds),
+    ]);
+
+    const memberCountByTeam = {};
+    (allMemberRes.data || []).forEach(r => {
+      memberCountByTeam[r.team_id] = (memberCountByTeam[r.team_id] || 0) + 1;
+    });
+    // Owner (+1) is not in team_members
+    ownedTeams.forEach(t => {
+      memberCountByTeam[t.id] = (memberCountByTeam[t.id] || 0) + 1;
+    });
+
+    const colCountByTeam = {};
+    (allColRes.data || []).forEach(r => {
+      colCountByTeam[r.team_id] = (colCountByTeam[r.team_id] || 0) + 1;
+    });
+
+    // 3. Local data: jumps per team
+    const allLocalJumps = currentUser ? DB.getJumps(currentUser.id) : [];
+
+    // Build per-team card HTML
+    const teamCards = allTeams.map(team => {
+      const isOwner   = ownedIds.has(team.id);
+      const members   = memberCountByTeam[team.id] || 1;
+      const colCount  = colCountByTeam[team.id]    || 0;
+      const teamJumps = allLocalJumps.filter(j => j.isShared && j.teamId === team.id && !j.isArchived);
+      const jumpCount = teamJumps.length;
+
+      // Role pill — matching teams page color scheme exactly
+      const roleBadge = isOwner
+        ? `<span class="teams-badge teams-badge-owner" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Owner</span>`
+        : `<span class="teams-badge" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Member</span>`;
+
+      return `
+        <div class="stat-card home-team-card">
+          <div style="margin-bottom:6px">${roleBadge}</div>
+          <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:12px;width:100%">${esc(team.name)}</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div>
+              <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${members}</div>
+              <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${members === 1 ? 'Member' : 'Members'}</div>
+            </div>
+            <div>
+              <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${colCount}</div>
+              <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${colCount === 1 ? 'Column' : 'Columns'}</div>
+            </div>
+            <div>
+              <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${jumpCount}</div>
+              <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${jumpCount === 1 ? 'Jump' : 'Jumps'}</div>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    teamsEl.innerHTML = `<div class="home-teams-grid">${teamCards}</div>`;
+
+  } catch (e) {
+    const el = document.getElementById('homeTeamsSummary');
+    if (el) el.innerHTML = '<div style="color:var(--text-dim);font-size:0.85rem">Could not load teams.</div>';
+  }
 }
 
 // ── Stats / Settings / Account Placeholders ────────────────────────
@@ -713,7 +948,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const status    = sbProfile.subscription_status || 'free';
   const role      = sbProfile.role || 'team-member';
   const launchesUsed = sbProfile.trial_launches_used || 0;
-  const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : tier === 'core' ? 'JumpKit Unlimited' : 'JumpKit Free';
+  const tierLabel = (tier === 'core' || tier === 'teams_jet') ? 'JumpKit Unlimited' : 'JumpKit Free';
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
   const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '-';
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
@@ -736,14 +971,14 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const _upgradeBannerHTML = (tier === 'free') ? `
     <div class="acct-upgrade-banner" style="max-width:960px;margin:0 auto 16px;width:100%">
       <div>
-        <h3>Unlock JumpKit Unlimited</h3>
+        <h3>Upgrade to Unlimited</h3>
         <p>Remove all limits and unlock full team collaboration.</p>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-top:10px">
           ${['Unlimited jump launches','Unlimited teams, members &amp; jumps','Personal &amp; team ROI dashboard','Auto-archive &amp; auto-backup','Early access to new features'].map(f=>`<div style="display:flex;align-items:flex-start;gap:7px;font-size:0.85rem;color:var(--text-muted)"><svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:0.95rem;height:0.95rem;flex-shrink:0;margin-top:2px"><polyline points="20 6 9 17 4 12"/></svg>${f}</div>`).join('')}
         </div>
       </div>
       <div class="acct-upgrade-cta">
-        ${buildUnlockButton('Unlock JumpKit Unlimited', {width:'100%', fontSize:'0.83rem', padding:'8px 16px'})}
+        ${buildUnlockButton('Upgrade to Unlimited', {width:'100%', fontSize:'0.83rem', padding:'8px 16px'})}
       </div>
     </div>` : '';
 
@@ -879,13 +1114,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
               ${tier==='free'
-                ? `<div style="display:flex;align-items:stretch;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px"><svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:rgba(0,194,199,0.65);stroke:rgba(0,194,199,0.65)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Backup Jumps" data-msg="Automatically saves a local backup of all your jumps each time you log in, keeping your data safe and recoverable. Auto-Backup Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
+                ? buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.78rem', padding: '5px 12px' })
                 : `<label class="toggle"><input type="checkbox" id="prefCloud" ${p.cloudBackup?'checked':''}/><span class="toggle-slider"></span></label>`}
             </div>
             <div class="acct-row" style="border-bottom:none">
               <div class="acct-row-label"><span>Auto-Archive Jumps</span><span class="acct-row-hint">Automatically moves unused jumps to the archive after a set time period</span></div>
               ${tier==='free'
-                ? `<div style="display:flex;align-items:stretch;gap:8px"><span style="display:inline-flex;align-items:center;gap:4px;color:rgba(0,194,199,0.65);font-size:0.75rem;font-weight:600;white-space:nowrap;border:1px solid rgba(0,194,199,0.28);background:rgba(0,194,199,0.07);border-radius:20px;padding:3px 10px"><svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:rgba(0,194,199,0.65);stroke:rgba(0,194,199,0.65)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlimited only</span><button class="btn btn-subtle" style="font-size:0.75rem;padding:3px 10px" data-jaction="show-upgrade-modal" data-title="Auto-Archive Jumps" data-msg="Automatically moves jumps you haven't used in a set time period to the archive, keeping your workspace clean and organized. Auto-Archive Jumps is available on JumpKit Unlimited.">Upgrade</button></div>`
+                ? buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.78rem', padding: '5px 12px' })
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
                 <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
@@ -1185,7 +1420,7 @@ window.renderStats = async function renderStats() {
         <div style="font-size:0.78rem;color:var(--text-dim);margin-top:5px">${_statsLaunchesRemaining} launches remaining - upgrade to JumpKit Unlimited for unlimited launches</div>
       </div>
       <div style="flex-shrink:0">
-        ${buildUnlockButton('Unlock JumpKit Unlimited', { fontSize: '0.83rem', padding: '8px 16px' })}
+        ${buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.83rem', padding: '8px 16px' })}
       </div>
     </div>` : '';
 
@@ -1281,35 +1516,82 @@ window.exportStatsPDF = async function exportStatsPDF() {
             const { data: pdfProfiles = [] } = await supabaseClient.from('profiles').select('id,first_name,last_name,email').in('id', pdfUserIds);
             pdfProfiles.forEach(p => { pdfProfileMap[p.id] = p; });
           }
+          // Fetch member counts per team (owner counts as +1)
+          const pdfMemberCountMap = {};
+          await Promise.all(pdfOwnedTeams.map(async t => {
+            const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+            pdfMemberCountMap[t.id] = (count || 0) + 1;
+          }));
           const teamSections = pdfOwnedTeams.map(team => {
             const ts = pdfStats.filter(s => s.team_id === team.id);
-            if (ts.length === 0) return `<div style="margin-bottom:16px"><strong style="font-size:13px">${team.name}</strong><p style="font-size:12px;color:#6b7280;margin-top:4px">No usage data yet.</p></div>`;
+            const memberCount = pdfMemberCountMap[team.id] ?? 0;
+            if (ts.length === 0) return `
+              <div style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;page-break-inside:avoid">
+                <div style="background:#f3f4f6;padding:12px 16px;border-bottom:1px solid #e5e7eb">
+                  <div style="font-size:13px;font-weight:700;color:#374151">${team.name}</div>
+                  <div style="font-size:10px;color:#9ca3af;margin-top:2px">${memberCount} member${memberCount !== 1 ? 's' : ''}</div>
+                </div>
+                <div style="padding:16px"><p style="font-size:12px;color:#6b7280">No usage data yet.</p></div>
+              </div>`;
             const tL = ts.reduce((s, r) => s + (r.total_launches || 0), 0);
-            const tMins = Math.round(ts.reduce((s, r) => s + (r.total_seconds_saved || 0), 0) / 60);
+            const tSec = ts.reduce((s, r) => s + (r.total_seconds_saved || 0), 0);
+            const tMins = Math.round(tSec / 60);
             const tDollars = ts.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 50)), 0).toFixed(2);
+            const activeCount = ts.length;
+            const activeBadge = activeCount < memberCount ? ` &middot; <span style="color:#00C2C7">${activeCount} active</span>` : '';
             const mRows = ts.sort((a, b) => b.total_launches - a.total_launches).map((s, i) => {
               const p = pdfProfileMap[s.user_id];
               const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
+              const isMe = s.user_id === pdfUserId;
               const mMins = Math.round((s.total_seconds_saved || 0) / 60);
               const mDollars = (((s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 50)).toFixed(2);
-              return `<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px 10px;font-size:12px;color:#9ca3af">${i+1}</td><td style="padding:6px 10px;font-size:12px;color:#374151">${name}</td><td style="padding:6px 10px;font-size:12px;text-align:right;font-weight:700;color:#00C2C7">${(s.total_launches||0).toLocaleString()}</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">${mMins.toLocaleString()} min</td><td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">$${parseFloat(mDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td></tr>`;
+              const lastSeen = s.updated_at ? new Date(s.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
+              return `<tr style="border-bottom:1px solid #e5e7eb">
+                <td style="padding:6px 10px;color:#9ca3af;font-size:12px">${i+1}</td>
+                <td style="padding:6px 10px;font-size:12px;color:#374151">
+                  <div style="font-weight:${isMe ? '700' : '400'}">${name}${isMe ? ' <span style="font-size:10px;color:#00C2C7">(you)</span>' : ''}</div>
+                  ${lastSeen ? `<div style="font-size:10px;color:#9ca3af">Last sync: ${lastSeen}</div>` : ''}
+                </td>
+                <td style="padding:6px 10px;font-size:12px;text-align:right;font-weight:700;color:#00C2C7">${(s.total_launches||0).toLocaleString()}</td>
+                <td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">${mMins.toLocaleString()} min</td>
+                <td style="padding:6px 10px;font-size:12px;text-align:right;color:#374151">$${parseFloat(mDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+              </tr>`;
             }).join('');
             return `
-              <div style="margin-bottom:20px">
-                <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:8px">${team.name}</div>
-                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px">
-                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">${tL.toLocaleString()}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team Launches</div></div>
-                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">${tMins.toLocaleString()} min</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team Time Saved</div></div>
-                  <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:16px;font-weight:900;color:#1f2937">$${parseFloat(tDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team $ Saved</div></div>
+              <div style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;page-break-inside:avoid">
+                <div style="background:#f3f4f6;padding:12px 16px;border-bottom:1px solid #e5e7eb">
+                  <div style="font-size:13px;font-weight:700;color:#374151">${team.name}</div>
+                  <div style="font-size:10px;color:#9ca3af;margin-top:2px">${memberCount} member${memberCount !== 1 ? 's' : ''}${activeBadge}</div>
                 </div>
-                <table style="width:100%;border-collapse:collapse">
-                  <thead><tr style="background:#f3f4f6"><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">#</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">Member</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Launches</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Time</th><th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">$ Saved</th></tr></thead>
-                  <tbody>${mRows}</tbody>
-                </table>
+                <div style="padding:16px">
+                  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center"><div style="font-size:14px;font-weight:900;color:#1f2937">${activeCount} / ${memberCount}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Members Active</div></div>
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center"><div style="font-size:14px;font-weight:900;color:#1f2937">${tL.toLocaleString()}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Team Launches</div></div>
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center"><div style="font-size:14px;font-weight:900;color:#1f2937">${tMins.toLocaleString()} min</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">Time Saved</div></div>
+                    <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:10px;text-align:center"><div style="font-size:14px;font-weight:900;color:#1f2937">$${parseFloat(tDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em">$ Saved</div></div>
+                  </div>
+                  <table style="width:100%;border-collapse:collapse">
+                    <thead><tr style="background:#f3f4f6">
+                      <th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">#</th>
+                      <th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:left;font-weight:700;text-transform:uppercase">Member</th>
+                      <th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Launches</th>
+                      <th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">Time</th>
+                      <th style="padding:6px 10px;font-size:10px;color:#6b7280;text-align:right;font-weight:700;text-transform:uppercase">$ Saved</th>
+                    </tr></thead>
+                    <tbody>${mRows}</tbody>
+                    <tfoot><tr style="border-top:2px solid #d1d5db;background:#f9fafb">
+                      <td colspan="2" style="padding:8px 10px;font-size:12px;font-weight:700;color:#374151">Team Total</td>
+                      <td style="padding:8px 10px;font-size:12px;font-weight:700;text-align:right;color:#00C2C7">${tL.toLocaleString()}</td>
+                      <td style="padding:8px 10px;font-size:12px;font-weight:700;text-align:right;color:#374151">${tMins.toLocaleString()} min</td>
+                      <td style="padding:8px 10px;font-size:12px;font-weight:700;text-align:right;color:#374151">$${parseFloat(tDollars).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>
+                    </tr></tfoot>
+                  </table>
+                </div>
               </div>`;
           }).join('');
           teamRoiHtml = `
-            <div class="section-title" style="margin-top:28px">Team ROI</div>
+            <div style="page-break-before:always"></div>
+            <div class="section-title" style="margin-top:0">Team ROI</div>
             ${teamSections}`;
         }
       }
@@ -1327,7 +1609,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
   // Load logo as base64 for inline embedding in PDF
   let logoDataUrl = '';
   try {
-    const logoResp = await fetch('assets/logo-jumpkit-circle.png');
+    const logoResp = await fetch('img/logo.png');
     const blob = await logoResp.blob();
     logoDataUrl = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
   } catch (_) {}
@@ -1343,14 +1625,12 @@ window.exportStatsPDF = async function exportStatsPDF() {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>JumpKit ROI Report — ${exportDate}</title>
+  <title>ROI Report — ${exportDate}</title>
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#1f2937; background:#fff; padding:40px; }
-    .header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; padding-bottom:18px; border-bottom:3px solid #00C2C7; }
-    .header h1 { font-size:22px; font-weight:800; color:#1f2937; }
-    .header p  { font-size:13px; color:#6b7280; margin-top:4px; }
-    .header-right { text-align:right; font-size:12px; color:#9ca3af; }
+    .header { display:grid; grid-template-columns:1fr auto; row-gap:5px; margin-bottom:28px; padding-bottom:16px; border-bottom:2px solid #e5e7eb; align-items:center; }
+    .header-right { text-align:right; }
     .section-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; margin:24px 0 12px; }
     .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
     .stat-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; text-align:center; }
@@ -1360,23 +1640,21 @@ window.exportStatsPDF = async function exportStatsPDF() {
     .chart-box { background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:16px; }
     .chart-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px; }
     table { width:100%; border-collapse:collapse; }
-    .footer { margin-top:32px; padding-top:14px; border-top:1px solid #e5e7eb; text-align:center; font-size:11px; color:#9ca3af; }
+    .footer { display:none; }
     @media print { body { padding:20px; } @page { margin:1.2cm; } }
   </style>
 </head>
 <body>
   <div class="header">
-    <div>
-      <h1>${logoDataUrl ? `<img src="${logoDataUrl}" style="width:32px;height:32px;vertical-align:middle;margin-right:8px;border-radius:50%" />` : ''}JumpKit ROI Report</h1>
-      <p>${userName} &middot; All-time summary</p>
-    </div>
-    <div class="header-right">
-      <div style="font-size:14px;font-weight:700;color:#00C2C7">jumpkit.app</div>
-      <div>${exportDate}</div>
-    </div>
+    ${logoDataUrl ? `<img src="${logoDataUrl}" style="height:34px;width:auto" />` : '<div></div>'}
+    <div class="header-right" style="font-size:18px;font-weight:800;color:#1f2937">ROI Summary</div>
+    <div style="font-size:12px;color:#6b7280">Stop searching. Start jumping.</div>
+    <div class="header-right" style="font-size:12px;color:#6b7280">${userName} &middot; All-time summary</div>
+    <div style="font-size:12px;color:#9ca3af">jumpkit.app</div>
+    <div class="header-right" style="font-size:12px;color:#9ca3af">${exportDate}</div>
   </div>
 
-  <div class="section-title">Summary</div>
+  <div class="section-title">Personal ROI</div>
   <div class="stat-grid">
     <div class="stat-box"><div class="stat-value">${n.toLocaleString()}</div><div class="stat-label">Total Launches</div></div>
     <div class="stat-box"><div class="stat-value">${mins.toLocaleString()} min</div><div class="stat-label">Time Saved</div></div>
@@ -1403,7 +1681,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
   </div>
 
   ${teamRoiHtml}
-  <div class="footer">Generated by JumpKit &middot; jumpkit.app &middot; ${exportDate}</div>
+
 </body>
 </html>`;
 
@@ -1546,6 +1824,7 @@ function renderStatsDash() {
       </div>`).join('');
 
     dash.innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
       <div class="stats-cards" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
         <div class="stat-card"><div class="stat-card-value">${mins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
@@ -1677,8 +1956,8 @@ function renderStatsDash() {
 
 // ── Team ROI Section ──────────────────────────────────────────────────────────────────
 // Appended to stats dash summary view. Shows per-team ROI.
-// Free: personal contribution to shared jumps + upgrade teaser.
-// Unlimited: full per-member breakdown from member_stats table.
+// Free: personal contribution to shared jumps + estimated team total (upgrade teaser).
+// Unlimited: one card per owned team with full per-member breakdown from member_stats.
 async function renderTeamROISection() {
   if (!currentUser) return;
   const dash = document.getElementById('statsDash');
@@ -1694,29 +1973,36 @@ async function renderTeamROISection() {
   const sharedCols = allCols.filter(c => c.isShared);
   if (sharedCols.length === 0) return; // No team activity — skip section
 
-  const sharedColIds   = new Set(sharedCols.map(c => c.id));
-  const sharedJumpMap  = {};
+  const sharedColIds  = new Set(sharedCols.map(c => c.id));
+  const sharedJumpMap = {};
   allJumps.filter(j => sharedColIds.has(j.columnId)).forEach(j => { sharedJumpMap[j.id] = j; });
 
-  const sharedClicks   = log.filter(c => sharedJumpMap[c.jumpId]);
-  const myLaunches     = sharedClicks.length;
-  const mySeconds      = sharedClicks.reduce((sum, c) => {
+  const sharedClicks = log.filter(c => sharedJumpMap[c.jumpId]);
+  const myLaunches   = sharedClicks.length;
+  const mySeconds    = sharedClicks.reduce((sum, c) => {
     const j = sharedJumpMap[c.jumpId];
     return sum + (j?.timeSaved != null ? j.timeSaved : prefs.timePerClick);
   }, 0);
-  const myMins         = Math.round(mySeconds / 60);
-  const myDollars      = ((mySeconds / 3600) * prefs.dollarsPerHour).toFixed(2);
-  const fmtUSD         = v => '$' + parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const myMins    = Math.round(mySeconds / 60);
+  const myDollars = ((mySeconds / 3600) * prefs.dollarsPerHour).toFixed(2);
+  const fmtUSD    = v => '$' + parseFloat(v).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // ── Placeholder while loading ─────────────────────────────────────────────
   const section = document.createElement('div');
   section.id = 'teamRoiSection';
   section.innerHTML = `
-    <div style="margin-top:24px">
+    <div style="margin-top:40px">
       <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
       <div style="color:var(--text-dim);font-size:0.85rem;padding:16px 0">Loading team data…</div>
     </div>`;
   dash.appendChild(section);
+
+  // ── Shared card-header builder ────────────────────────────────────────────
+  const teamCardHeader = (teamName, memberCount, extraBadge = '') => `
+    <div style="background:var(--team-header-bg);margin:-18px -18px 14px -18px;padding:12px 18px;border-bottom:1px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0">
+      <div style="font-size:0.95rem;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${String(teamName || '')}</div>
+      <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">${memberCount != null ? `${memberCount} member${memberCount !== 1 ? 's' : ''}` : 'Team member'}${extraBadge}</div>
+    </div>`;
 
   try {
     let session = null;
@@ -1725,8 +2011,7 @@ async function renderTeamROISection() {
     const userId = session.user.id;
 
     if (tier === 'free') {
-      // ── Option A: Personal contribution + estimated team total ──
-      // Query teams the user is in for member count
+      // ── Free: Personal contribution card + estimated team total card ──
       const [{ data: ownedTeams = [] }, { data: memberships = [] }] = await Promise.all([
         supabaseClient.from('teams').select('id, name').eq('owner_id', userId),
         supabaseClient.from('team_members').select('team_id').eq('user_id', userId),
@@ -1740,16 +2025,12 @@ async function renderTeamROISection() {
       const allTeams = [...ownedTeams, ...memberTeams];
       if (allTeams.length === 0) { section.remove(); return; }
 
-      // Get member counts for owned teams
       const memberCountMap = {};
       for (const t of ownedTeams) {
         const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
-        memberCountMap[t.id] = (count || 0) + 1; // +1 for owner
+        memberCountMap[t.id] = (count || 0) + 1;
       }
-      for (const t of memberTeams) {
-        // For teams we're just a member of, we don't know exact count — show a note
-        memberCountMap[t.id] = null;
-      }
+      for (const t of memberTeams) { memberCountMap[t.id] = null; }
 
       const teamNames = allTeams.map(t => t.name).join(', ');
       const avgMembers = Object.values(memberCountMap).filter(v => v != null);
@@ -1758,32 +2039,32 @@ async function renderTeamROISection() {
       const estTeamDollars = (parseFloat(myDollars) * estimatedMultiplier).toFixed(2);
 
       section.innerHTML = `
-        <div style="margin-top:24px">
+        <div style="margin-top:40px">
           <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
           <div class="stats-chart-row">
             <div class="stats-chart-box" style="flex:1">
-              <div class="stats-chart-title">Your Contribution to Team Jumps</div>
-              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0">
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Your Launches</div></div>
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Your Time Saved</div></div>
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">Your $ Saved</div></div>
+              ${teamCardHeader('Your Team Contribution', null)}
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 8px">
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Your Launches</div></div>
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Your Time Saved</div></div>
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">Your $ Saved</div></div>
               </div>
               <div style="margin-top:10px;font-size:0.8rem;color:var(--text-dim)">
                 Active in: <span style="color:var(--text-muted);font-weight:600">${esc(teamNames)}</span>
               </div>
             </div>
             <div class="stats-chart-box" style="flex:1;background:linear-gradient(135deg,rgba(0,194,199,0.06),rgba(0,194,199,0.02));border:1px dashed rgba(0,194,199,0.3)">
-              <div class="stats-chart-title" style="color:var(--hover-accent)">🔒 Estimated Team Total</div>
-              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0;opacity:0.6">
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">~${estTeamMins.toLocaleString()} min</div><div class="stat-card-label">Est. Team Time</div></div>
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">~${fmtUSD(estTeamDollars)}</div><div class="stat-card-label">Est. Team $</div></div>
+              ${teamCardHeader('Estimated Team Total', null)}
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 8px;opacity:0.6">
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">~${estTeamMins.toLocaleString()} min</div><div class="stat-card-label">Est. Team Time</div></div>
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">~${fmtUSD(estTeamDollars)}</div><div class="stat-card-label">Est. Team $</div></div>
               </div>
               <div style="margin-top:12px;font-size:0.8rem;color:var(--text-dim);line-height:1.5">
                 Estimated based on your usage × ${estimatedMultiplier} members.
                 Upgrade to see <strong style="color:var(--hover-accent)">real per-member stats</strong>.
               </div>
               <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:14px;font-size:0.8rem;padding:7px 16px">
-                <svg class="ti ti-bolt" style="width:0.85rem;height:0.85rem"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg>
+                <svg class="ti ti-lock" style="width:0.85rem;height:0.85rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
                 Upgrade to Unlimited
               </a>
             </div>
@@ -1791,24 +2072,23 @@ async function renderTeamROISection() {
         </div>`;
 
     } else {
-      // ── Option B: Full per-member breakdown ──
-      // Fetch teams owned by this user
+      // ── Unlimited: one card per owned team ──
       const { data: ownedTeams = [] } = await supabaseClient
         .from('teams').select('id, name').eq('owner_id', userId).order('name');
 
       if (ownedTeams.length === 0) {
-        // User is unlimited but doesn't own any teams — show their contribution
+        // Member-only — show personal contribution card
         section.innerHTML = `
-          <div style="margin-top:24px">
+          <div style="margin-top:40px">
             <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
             <div class="stats-chart-box">
-              <div class="stats-chart-title">Your Contribution to Team Jumps</div>
-              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:8px 0">
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Launches</div></div>
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
-                <div class="stat-card" style="flex:1;min-width:100px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">$ Saved</div></div>
+              ${teamCardHeader('Your Team Contribution', null)}
+              <div style="display:flex;gap:16px;flex-wrap:wrap;padding:4px 0 8px">
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${myLaunches.toLocaleString()}</div><div class="stat-card-label">Launches</div></div>
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${myMins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
+                <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${fmtUSD(myDollars)}</div><div class="stat-card-label">$ Saved</div></div>
               </div>
-              <div style="margin-top:8px;font-size:0.8rem;color:var(--text-dim)">You're a team member. Create your own team to see full team ROI breakdown.</div>
+              <div style="margin-top:8px;font-size:0.8rem;color:var(--text-dim)">You're a team member. Create your own team to see the full per-member ROI breakdown.</div>
             </div>
           </div>`;
         return;
@@ -1816,86 +2096,106 @@ async function renderTeamROISection() {
 
       const ownedTeamIds = ownedTeams.map(t => t.id);
 
-      // Fetch member_stats + profile names for all owned teams
+      // Fetch member counts for header badges (parallel)
+      const memberCountMap = {};
+      await Promise.all(ownedTeams.map(async t => {
+        const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+        memberCountMap[t.id] = (count || 0) + 1; // +1 for owner
+      }));
+
+      // Fetch member_stats for all owned teams
       const { data: memberStats = [], error: msErr } = await supabaseClient
         .from('member_stats')
         .select('user_id, team_id, total_launches, total_seconds_saved, dollars_per_hour, updated_at')
         .in('team_id', ownedTeamIds);
       if (msErr) throw msErr;
 
-      // Fetch profile names for all users in stats
+      // Fetch profile names for all stat rows
       const statUserIds = [...new Set(memberStats.map(s => s.user_id))];
       let profileMap = {};
       if (statUserIds.length > 0) {
         const { data: profiles = [] } = await supabaseClient
-          .from('profiles')
-          .select('id, first_name, last_name, email')
-          .in('id', statUserIds);
+          .from('profiles').select('id, first_name, last_name, email').in('id', statUserIds);
         profiles.forEach(p => { profileMap[p.id] = p; });
       }
 
-      const teamBlocks = ownedTeams.map(team => {
-        const teamStats = memberStats.filter(s => s.team_id === team.id);
+      // ── One card per team ─────────────────────────────────────────────────
+      const teamCards = ownedTeams.map(team => {
+        const teamStats   = memberStats.filter(s => s.team_id === team.id);
+        const memberCount = memberCountMap[team.id] ?? 0;
+
+        // Empty-state card
         if (teamStats.length === 0) {
           return `
-            <div style="margin-bottom:20px">
-              <div style="font-size:0.85rem;font-weight:700;color:var(--text-muted);margin-bottom:8px">${esc(team.name)}</div>
-              <div style="font-size:0.8rem;color:var(--text-dim)">No usage data yet — members will sync after their next launch.</div>
+            <div class="stats-chart-box" style="margin-bottom:24px">
+              ${teamCardHeader(team.name, memberCount)}
+              <div style="font-size:0.85rem;color:var(--text-dim);padding:4px 0 8px">No usage data yet — members will sync stats after their next jump launch.</div>
             </div>`;
         }
 
-        const totalL = teamStats.reduce((s, r) => s + (r.total_launches || 0), 0);
-        const totalSec = teamStats.reduce((s, r) => s + (r.total_seconds_saved || 0), 0);
-        const totalMins = Math.round(totalSec / 60);
+        const totalL       = teamStats.reduce((s, r) => s + (r.total_launches || 0), 0);
+        const totalSec     = teamStats.reduce((s, r) => s + (r.total_seconds_saved || 0), 0);
+        const totalMins    = Math.round(totalSec / 60);
         const totalDollars = teamStats.reduce((s, r) => s + ((r.total_seconds_saved / 3600) * (r.dollars_per_hour || 50)), 0).toFixed(2);
+        const activeCount  = teamStats.length;
 
         const memberRows = teamStats
           .sort((a, b) => b.total_launches - a.total_launches)
-          .map((s, i) => {
-            const p = profileMap[s.user_id];
-            const name = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
-            const isMe = s.user_id === userId;
-            const mMins = Math.round((s.total_seconds_saved || 0) / 60);
-            const mDollars = ((( s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 50)).toFixed(2);
-            const lastSeen = s.updated_at ? new Date(s.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+          .map((s, i, arr) => {
+            const p        = profileMap[s.user_id];
+            const name     = p ? ([p.first_name, p.last_name].filter(Boolean).join(' ') || p.email || 'Member') : 'Member';
+            const isMe     = s.user_id === userId;
+            const mMins    = Math.round((s.total_seconds_saved || 0) / 60);
+            const mDollar  = (((s.total_seconds_saved || 0) / 3600) * (s.dollars_per_hour || 50)).toFixed(2);
+            const lastSeen = s.updated_at ? new Date(s.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null;
             return `
-              <div style="display:flex;align-items:center;gap:10px;padding:8px 0;${i < teamStats.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}font-size:0.84rem">
-                <span style="color:var(--text-dim);min-width:18px;font-size:0.75rem">${i + 1}</span>
-                <span style="flex:1;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:${isMe ? '700' : '400'}">${esc(name)}${isMe ? ' <span style="font-size:0.7rem;color:var(--hover-accent)">(you)</span>' : ''}</span>
-                <span style="min-width:60px;text-align:right;font-weight:700;color:var(--hover-accent)">${(s.total_launches || 0).toLocaleString()}</span>
-                <span style="min-width:70px;text-align:right;color:var(--text-muted)">${mMins.toLocaleString()} min</span>
-                <span style="min-width:70px;text-align:right;color:var(--text-muted)">${fmtUSD(mDollars)}</span>
-                <span style="min-width:60px;text-align:right;font-size:0.75rem;color:var(--text-dim)">${lastSeen}</span>
+              <div style="display:flex;align-items:center;gap:10px;padding:8px 4px;${i < arr.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}">
+                <span style="color:var(--text-dim);min-width:20px;font-size:0.75rem;text-align:right">${i + 1}</span>
+                <span style="flex:1;min-width:0">
+                  <span style="display:block;font-size:0.84rem;color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:${isMe ? '700' : '400'}">${esc(name)}${isMe ? ` <span style="font-size:0.7rem;color:var(--hover-accent)">(you)</span>` : ''}</span>
+                  ${lastSeen ? `<span style="display:block;font-size:0.7rem;color:var(--text-dim)">Last sync: ${lastSeen}</span>` : ''}
+                </span>
+                <span style="min-width:64px;text-align:right;font-size:0.84rem;font-weight:700;color:var(--hover-accent)">${(s.total_launches || 0).toLocaleString()}</span>
+                <span style="min-width:72px;text-align:right;font-size:0.84rem;color:var(--text-muted)">${mMins.toLocaleString()} min</span>
+                <span style="min-width:72px;text-align:right;font-size:0.84rem;color:var(--text-muted)">${fmtUSD(mDollar)}</span>
               </div>`;
           }).join('');
 
+        const activeBadge = activeCount < memberCount
+          ? ` &middot; <span style="color:var(--hover-accent)">${activeCount} active</span>`
+          : '';
+
         return `
-          <div style="margin-bottom:20px">
-            <div style="font-size:0.85rem;font-weight:700;color:var(--text-muted);margin-bottom:10px">${esc(team.name)}</div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+          <div class="stats-chart-box" style="margin-bottom:24px">
+            ${teamCardHeader(team.name, memberCount, activeBadge)}
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${activeCount} / ${memberCount}</div><div class="stat-card-label">Members Active</div></div>
               <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${totalL.toLocaleString()}</div><div class="stat-card-label">Team Launches</div></div>
-              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${totalMins.toLocaleString()} min</div><div class="stat-card-label">Team Time Saved</div></div>
-              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${fmtUSD(totalDollars)}</div><div class="stat-card-label">Team $ Saved</div></div>
-              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${teamStats.length}</div><div class="stat-card-label">Members w/ Data</div></div>
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${totalMins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
+              <div class="stat-card" style="flex:1;min-width:90px"><div class="stat-card-value">${fmtUSD(totalDollars)}</div><div class="stat-card-label">$ Saved</div></div>
             </div>
-            <div style="font-size:0.75rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;display:flex;gap:10px;padding:0 4px">
-              <span style="min-width:18px"></span>
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em;display:flex;gap:10px;padding:0 4px 6px;border-bottom:1px solid var(--border)">
+              <span style="min-width:20px"></span>
               <span style="flex:1">Member</span>
-              <span style="min-width:60px;text-align:right">Launches</span>
-              <span style="min-width:70px;text-align:right">Time</span>
-              <span style="min-width:70px;text-align:right">$ Saved</span>
-              <span style="min-width:60px;text-align:right">Last Sync</span>
+              <span style="min-width:64px;text-align:right">Launches</span>
+              <span style="min-width:72px;text-align:right">Time</span>
+              <span style="min-width:72px;text-align:right">$ Saved</span>
             </div>
             ${memberRows}
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 4px 2px;border-top:2px solid var(--border);margin-top:2px">
+              <span style="min-width:20px"></span>
+              <span style="flex:1;font-size:0.84rem;font-weight:700;color:var(--text-muted)">Team Total</span>
+              <span style="min-width:64px;text-align:right;font-size:0.84rem;font-weight:700;color:var(--hover-accent)">${totalL.toLocaleString()}</span>
+              <span style="min-width:72px;text-align:right;font-size:0.84rem;font-weight:700;color:var(--text-muted)">${totalMins.toLocaleString()} min</span>
+              <span style="min-width:72px;text-align:right;font-size:0.84rem;font-weight:700;color:var(--text-muted)">${fmtUSD(totalDollars)}</span>
+            </div>
           </div>`;
       }).join('');
 
       section.innerHTML = `
-        <div style="margin-top:24px">
+        <div style="margin-top:40px">
           <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Team ROI</div>
-          <div class="stats-chart-box">
-            ${teamBlocks}
-          </div>
+          ${teamCards}
         </div>`;
     }
   } catch (err) {
@@ -1904,31 +2204,6 @@ async function renderTeamROISection() {
   }
 }
 
-function renderJet() {
-  const tier = window._supabaseProfile?.subscription_tier || 'free';
-  const status = window._supabaseProfile?.subscription_status || 'free';
-  const hasAccess = window._supabaseProfile?.role === 'admin' || ((tier === 'teams_jet') && (status === 'active'));
-
-  if (!hasAccess) {
-    document.getElementById('pageContent').innerHTML = `
-      <div class="placeholder-page">
-        <div class="big-icon"><svg class="ti ti-lock" style="color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></div>
-        <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI - JumpKit + Jet AI Plan</h3>
-        <p style="color:var(--text-muted);line-height:1.6">Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
-        <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
-        <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:24px"><svg class="ti ti-bolt"><use href="img/tabler-sprite.svg#tabler-bolt"/></svg> Upgrade to unlock Jet AI</a>
-      </div>`;
-    return;
-  }
-
-  document.getElementById('pageContent').innerHTML = `
-    <div class="placeholder-page">
-      <div class="big-icon"><svg class="ti ti-brain"><use href="img/tabler-sprite.svg#tabler-brain"/></svg></div>
-      <h3 style="margin-bottom:10px;color:var(--text-card-title)">Jet AI - Coming Soon</h3>
-      <p>Your local AI co-pilot for Microsoft 365 apps. No cloud data leakage. Immutable audit trail. Pure productivity.</p>
-      <p style="margin-top:10px;font-size:0.82rem;font-weight:700;color:var(--accent);letter-spacing:0.04em">100% local. API free.</p>
-    </div>`;
-}
 
 // ── Global team sharing API ────────────────────────────────────────
 // Exposed as window globals so teams.js and sync.js can call them.
@@ -2009,7 +2284,7 @@ function patchModalForPwToggles() {
 const LS_CHECKOUT_URL = 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0';
 const CTA_ICON_SVG = '<svg class="jump-cta-icon" viewBox="0 0 105.74 122.88" aria-hidden="true"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31-0.83-1.07-1.31-1.7-1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66-0.15,1.03-0.97,0.83-1.83c-0.19-0.86-0.88-1.44-1.54-1.29L22.26,22.99z"/></path></svg>';
 
-function buildUnlockButton(label = 'Unlock JumpKit Unlimited', opts = {}) {
+function buildUnlockButton(label = 'Upgrade to Unlimited', opts = {}) {
   const extraClass = opts.extraClass || '';
   let btnStyle = '';
   let spanStyle = '';
@@ -2019,19 +2294,31 @@ function buildUnlockButton(label = 'Unlock JumpKit Unlimited', opts = {}) {
   return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span style="${spanStyle}">${label}</span></button>`;
 }
 
+// ── Paywall event tracking ────────────────────────────────────────────────────────────────
+window.trackPaywallEvent = async function trackPaywallEvent(type) {
+  try {
+    const res = await supabaseClient.auth.getSession();
+    const userId = res?.data?.session?.user?.id;
+    if (!userId) return;
+    await supabaseClient.from('paywall_events').insert({ user_id: userId, paywall_type: type });
+  } catch (_) {}
+};
+
 window.showUpgradeModal = function(title, message) {
+  trackPaywallEvent('upgrade_modal').catch(()=>{});
   const body = `<p style="color:var(--text-muted);font-size:0.95rem;line-height:1.7">${message}</p>`;
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">
       <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
     </button>
     <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-      <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Unlimited
+      <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Upgrade to Unlimited
     </button>`;
   Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
 };
 
 window.showPaywall = function() {
+  trackPaywallEvent('launch_limit').catch(()=>{});
   const body = `
     <div style="text-align:center;padding:16px 0">
       <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:10px">Your free trial has ended</h3>
@@ -2040,7 +2327,7 @@ window.showPaywall = function() {
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Unlimited
+          <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Upgrade to Unlimited
         </button>
         <button class="btn btn-ghost" data-jaction="modal-close" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
           Maybe later
@@ -2235,7 +2522,7 @@ window.checkPendingInvites = async function checkPendingInvites() {
 // ── Upgrade Handler ──────────────────────────────────────────────
 window.checkAndHandleUpgrade = function checkAndHandleUpgrade(tier) {
   try {
-    const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : 'JumpKit Unlimited';
+    const tierLabel = 'JumpKit Unlimited';
     const comparisons = [
       { free: '250 jump launches',                    core: 'Unlimited jump launches' },
       { free: '2 teams · 5 members · 10 jumps/team',  core: 'Unlimited teams, members &amp; jumps' },
@@ -2379,7 +2666,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     const upgradeBtn = `
       <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}">
         <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
-        Unlock JumpKit Unlimited
+        Upgrade to Unlimited
       </button>`;
 
     // Only show once per 24h — don't nag on every login
@@ -2407,7 +2694,7 @@ initAuth();
 function openTierFeaturesModal() {
   const tier = window._supabaseProfile?.subscription_tier || 'free';
   const isCore = tier === 'core' || tier === 'teams_jet';
-  const tierLabel = tier === 'teams_jet' ? 'JumpKit + Jet AI' : isCore ? 'JumpKit Unlimited' : 'JumpKit Free';
+  const tierLabel = isCore ? 'JumpKit Unlimited' : 'JumpKit Free';
 
   const freeFeatures = [
     'Web links &amp; local folders',
@@ -2448,10 +2735,197 @@ function openTierFeaturesModal() {
   const footer = isCore
     ? `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
     : `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>
-       ${buildUnlockButton('Unlock JumpKit Unlimited', {})}`;
+       ${buildUnlockButton('Upgrade to Unlimited', {})}`;
 
   Modal.open(`<svg class="ti ti-sparkles"><use href="img/tabler-sprite.svg#tabler-sparkles"/></svg> ${tierLabel} Features`, body, footer, 'sm');
 }
+
+// ── Admin Dashboard ────────────────────────────────────────────────
+window.renderAdmin = async function renderAdmin() {
+  const content = document.getElementById('pageContent');
+  if (!content) return;
+
+  // Gate to admin only
+  if (window._supabaseProfile?.role !== 'admin') {
+    content.innerHTML = '<div style="padding:32px;color:var(--text-dim)">Access denied.</div>';
+    return;
+  }
+
+  content.innerHTML = `
+    <div style="padding:24px 28px;max-width:1200px">
+      <div id="adminDash" style="color:var(--text-dim);font-size:0.9rem">Loading…</div>
+    </div>`;
+
+  try {
+    // Ensure Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = 'js/chart.min.js';
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load chart.min.js'));
+        document.head.appendChild(s);
+      });
+    }
+
+    const [summaryRes, usersRes, growthRes] = await Promise.all([
+      supabaseClient.rpc('get_admin_summary'),
+      supabaseClient.rpc('get_admin_user_stats'),
+      supabaseClient.rpc('get_admin_growth_stats'),
+    ]);
+
+    if (summaryRes.error) throw new Error('get_admin_summary: ' + summaryRes.error.message);
+    if (usersRes.error) throw new Error('get_admin_user_stats: ' + usersRes.error.message);
+    // growth errors are non-fatal
+
+    const s = summaryRes.data || {};
+    const users = usersRes.data || [];
+    const g = growthRes.data || {};
+    const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+    const fmtLaunches = (u) => {
+      if ((u.subscription_tier === 'core' || u.subscription_tier === 'teams_jet') && u.subscription_status === 'active') return '∞';
+      const used = u.personal_launches_total || 0;
+      return `${used} / 250`;
+    };
+
+    const buildAdminRow = (u) => {
+      const name = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || '—';
+      const isAdminU    = u.user_role === 'admin';
+      const isUnlimitedU = !isAdminU && (u.subscription_tier === 'core' || u.subscription_tier === 'teams_jet') && u.subscription_status === 'active';
+      const isCancelledU = !isAdminU && u.subscription_status === 'cancelled';
+      const sub       = isAdminU ? 'Admin' : isUnlimitedU ? 'Unlimited' : isCancelledU ? 'Cancelled' : 'Free';
+      const pillBg    = isAdminU ? 'rgba(0,194,199,0.12)' : isUnlimitedU ? 'rgba(72,187,120,0.12)' : isCancelledU ? 'rgba(229,62,62,0.12)' : 'rgba(128,128,128,0.12)';
+      const pillColor = isAdminU ? '#00C2C7' : isUnlimitedU ? '#48BB78' : isCancelledU ? '#e53e3e' : 'var(--text-dim)';
+      return `
+        <tr style="border-bottom:1px solid var(--border)">
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted)">${esc(name)}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-dim)">${esc(u.email || '—')}</td>
+          <td style="padding:9px 12px;font-size:0.82rem"><span style="background:${pillBg};color:${pillColor};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${sub}</span></td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${fmtLaunches(u)}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_owned || 0}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_joined || 0}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.total_paywall_hits || 0}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-dim)">${fmtDate(u.last_active_at)}</td>
+          <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-dim)">${fmtDate(u.created_at)}</td>
+        </tr>`;
+    };
+    const userRows = users.map(buildAdminRow).join('');
+
+    // Growth tile helper
+    const growthTile = (label, data) => {
+      const d = data || {};
+      const total = d.total || 0;
+      const tileBg = total > 0 ? 'rgba(72,187,120,0.07)' : total < 0 ? 'rgba(229,62,62,0.07)' : 'rgba(128,128,128,0.06)';
+      return `<div class="stats-chart-box" style="min-height:unset;flex:1;background:${tileBg}">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">${label}</div>
+        <div style="font-size:1.6rem;font-weight:900;color:${total > 0 ? '#48BB78' : total < 0 ? '#e53e3e' : 'var(--text-muted)'};line-height:1">+${total.toLocaleString()}</div>
+        <div style="font-size:0.72rem;color:var(--text-dim);margin-top:2px">total</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px">
+          <div><div style="font-size:1rem;font-weight:700;color:#48BB78">${(d.unlimited||0).toLocaleString()}</div><div style="font-size:0.7rem;color:#48BB78">unlimited</div></div>
+          <div><div style="font-size:1rem;font-weight:700;color:var(--text-dim)">${(d.free||0).toLocaleString()}</div><div style="font-size:0.7rem;color:var(--text-dim)">free</div></div>
+          <div><div style="font-size:1rem;font-weight:700;color:#e53e3e">${(d.cancelled||0).toLocaleString()}</div><div style="font-size:0.7rem;color:#e53e3e">cancelled</div></div>
+        </div>
+      </div>`;
+    };
+
+    // Chart data
+    const chartRows = Array.isArray(g.chart) ? g.chart : [];
+    const chartLabels = chartRows.map(r => r.day ? r.day.slice(5) : ''); // MM-DD
+    const chartData   = chartRows.map(r => r.cumulative || 0);
+
+    document.getElementById('adminDash').innerHTML = `
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Total Users</div>
+      <div class="stats-cards" style="grid-template-columns:repeat(5,1fr);margin-bottom:24px">
+        <div class="stat-card" style="background:rgba(128,128,128,0.06)"><div class="stat-card-value" style="color:var(--text-muted)">${(s.total_users||0).toLocaleString()}</div><div class="stat-card-label" style="color:var(--text-muted)">Total Users</div></div>
+        <div class="stat-card" style="background:rgba(72,187,120,0.07)"><div class="stat-card-value" style="color:#48BB78">${(s.unlimited_users||0).toLocaleString()}</div><div class="stat-card-label" style="color:#48BB78">Unlimited</div></div>
+        <div class="stat-card" style="background:rgba(128,128,128,0.06)"><div class="stat-card-value" style="color:var(--text-dim)">${(s.free_users||0).toLocaleString()}</div><div class="stat-card-label" style="color:var(--text-dim)">Free</div></div>
+        <div class="stat-card" style="background:rgba(229,62,62,0.07)"><div class="stat-card-value" style="color:#e53e3e">${(s.cancelled_users||0).toLocaleString()}</div><div class="stat-card-label" style="color:#e53e3e">Cancelled</div></div>
+        <div class="stat-card" style="background:rgba(0,194,199,0.07)"><div class="stat-card-value" style="color:#00C2C7">${(s.admin_users||0).toLocaleString()}</div><div class="stat-card-label" style="color:#00C2C7">Admins</div></div>
+      </div>
+      <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Incremental Users</div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:24px">
+        ${growthTile('Today', g.today)}
+        ${growthTile('This Week', g.week)}
+        ${growthTile('This Month', g.month)}
+        ${growthTile('This Year', g.year)}
+      </div>
+      <div class="stats-chart-box full" style="margin-bottom:24px">
+        <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Total Users — Last 90 Days</div>
+        <div style="height:180px"><canvas id="adminUserChart"></canvas></div>
+      </div>
+      <div class="stats-chart-box" style="min-height:unset;overflow-x:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em">All Users</div>
+          <div class="jump-search-wrap">
+            <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
+            <input id="adminSearch" type="text" placeholder="Search users..." class="jump-search-input" style="width:200px" />
+          </div>
+        </div>
+        <table id="adminUserTable" style="width:100%;border-collapse:collapse;min-width:700px">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border)">
+              <th data-col="name" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">User<span class="sort-ind"> ↕</span></th>
+              <th data-col="email" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Email<span class="sort-ind"> ↕</span></th>
+              <th data-col="sub" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Subscription<span class="sort-ind"> ↕</span></th>
+              <th data-col="personal_launches_total" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Launches<span class="sort-ind"> ↕</span></th>
+              <th data-col="teams_owned" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Teams Owned<span class="sort-ind"> ↕</span></th>
+              <th data-col="teams_joined" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Teams Joined<span class="sort-ind"> ↕</span></th>
+              <th data-col="total_paywall_hits" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Paywall Hits<span class="sort-ind"> ↕</span></th>
+              <th data-col="last_active_at" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Last Active<span class="sort-ind"> ↕</span></th>
+              <th data-col="created_at" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Joined<span class="sort-ind"> ↕</span></th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTbody">${userRows}</tbody>
+        </table>
+      </div>`;
+
+    // Render chart + wire sort/search
+    requestAnimationFrame(() => {
+      // Chart
+      if (growthRes.error) console.warn('[adminChart] growth stats error:', growthRes.error.message);
+      if (typeof Chart !== 'undefined') {
+        const dark = document.documentElement.dataset.theme === 'dark';
+        const tc = dark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.50)';
+        const gc = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+        const el = document.getElementById('adminUserChart');
+        if (el) new Chart(el, {
+          type: 'line',
+          data: { labels: chartLabels, datasets: [{ data: chartData, borderColor: '#00C2C7', backgroundColor: 'rgba(0,194,199,0.08)', borderWidth: 2, pointRadius: 0, tension: 0.3, fill: true }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+            scales: { x: { ticks: { color: tc, font: { size: 11 }, maxTicksLimit: 10 }, grid: { color: gc } }, y: { ticks: { color: tc, font: { size: 11 } }, grid: { color: gc }, beginAtZero: false } } },
+        });
+      }
+      // Sort + search
+      let _sortCol = 'created_at', _sortDir = -1, _searchQ = '';
+      const _getVal = (u, col) => {
+        if (col === 'name') return ([u.first_name, u.last_name].filter(Boolean).join(' ') || u.email || '').toLowerCase();
+        if (col === 'sub') return (u.user_role === 'admin' ? '0admin' : (u.subscription_tier === 'core' || u.subscription_tier === 'teams_jet') && u.subscription_status === 'active' ? '1unlimited' : u.subscription_status === 'cancelled' ? '3cancelled' : '2free');
+        if (col === 'email') return (u.email || '').toLowerCase();
+        return u[col] ?? '';
+      };
+      const _rerender = () => {
+        let data = [...users];
+        if (_searchQ) { const q = _searchQ.toLowerCase(); data = data.filter(u => ([u.first_name, u.last_name].filter(Boolean).join(' ') + ' ' + (u.email || '')).toLowerCase().includes(q)); }
+        data.sort((a, b) => { const va = _getVal(a, _sortCol), vb = _getVal(b, _sortCol); return va < vb ? _sortDir : va > vb ? -_sortDir : 0; });
+        const tbody = document.getElementById('adminUserTbody');
+        if (tbody) tbody.innerHTML = data.map(buildAdminRow).join('') || `<tr><td colspan="9" style="padding:24px;text-align:center;color:var(--text-dim)">No matches.</td></tr>`;
+        document.querySelectorAll('#adminUserTable th[data-col]').forEach(th => {
+          const ind = th.querySelector('.sort-ind');
+          if (ind) ind.textContent = th.dataset.col === _sortCol ? (_sortDir === -1 ? ' ▼' : ' ▲') : ' ↕';
+        });
+      };
+      document.querySelectorAll('#adminUserTable th[data-col]').forEach(th => {
+        th.addEventListener('click', () => { if (_sortCol === th.dataset.col) _sortDir *= -1; else { _sortCol = th.dataset.col; _sortDir = -1; } _rerender(); });
+      });
+      const searchEl = document.getElementById('adminSearch');
+      if (searchEl) searchEl.addEventListener('input', e => { _searchQ = e.target.value; _rerender(); });
+    });
+
+  } catch (err) {
+    const dash = document.getElementById('adminDash');
+    if (dash) dash.innerHTML = `<div style="color:var(--text-dim);padding:16px">Failed to load admin data: ${err.message}</div>`;
+  }
+};
 
 // ── Event delegation - app-level actions ───────────────────────────
 document.addEventListener('click', e => {
@@ -2470,6 +2944,8 @@ document.addEventListener('click', e => {
     }
     case 'open-feedback-modal': openFeedbackModal(); break;
     case 'open-tier-features':  openTierFeaturesModal(); break;
+    case 'nav-stats':           navigateTo('stats'); break;
+    case 'nav-teams':           navigateTo('teams'); break;
     case 'force-backup':       forceBackup(); break;
     case 'save-account-prefs': saveAccountPrefs(); break;
     case 'submit-feedback':    submitFeedback(); break;

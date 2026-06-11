@@ -806,6 +806,7 @@ function saveJump(editId) {
             const _sharedCount = DB.getActiveJumps(currentUser.id).filter(j => j.teamId === _colCheck.teamId && j.isShared).length;
             if (_sharedCount >= 10) {
               Modal.close();
+              trackPaywallEvent('team_jump_limit').catch(()=>{});
               showUpgradeModal(
                 'Shared Jump Limit Reached',
                 'The free tier allows up to <strong>10 shared jumps per team</strong>. Upgrade to JumpKit Unlimited for unlimited shared jumps, unlimited teams, and unlimited launches.'
@@ -1143,6 +1144,7 @@ async function syncColumnToSupabase(col, teamId) {
     // Free tier: max 10 shared jumps per team
     const tier = window._supabaseProfile?.subscription_tier || 'free';
     if (tier === 'free' && jumps.length > 10) {
+      trackPaywallEvent('team_jump_limit').catch(()=>{});
       showUpgradeModal(
         'Shared Jump Limit Reached',
         'The free tier allows up to <strong>10 shared jumps per team</strong>. Only the first 10 will be synced. Upgrade to JumpKit Unlimited for unlimited shared jumps.'

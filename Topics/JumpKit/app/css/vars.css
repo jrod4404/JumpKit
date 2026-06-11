@@ -11,6 +11,7 @@
   --transition: 0.2s ease;
 }
 [data-theme="dark"] {
+  --team-header-bg: rgba(255,255,255,0.06);
   --bg:           #080F1A;
   --bg-card:      #0E1827;
   --bg-sidebar:   #0D1829;
@@ -28,6 +29,7 @@
   --overlay:      rgba(0,0,0,0.7);
 }
 [data-theme="light"] {
+  --team-header-bg: rgba(240,244,250,0.5);
   --bg:           #F0F4FA;
   --bg-card:      #FFFFFF;
   --bg-sidebar:   #DDE3EF;
