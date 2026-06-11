@@ -93,7 +93,7 @@ function renderOnboardingStep(step, firstName) {
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Set Up Your ROI</h2>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 1 of 3</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 1 of 4</p>
           </div>
         </div>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 18px">
@@ -170,7 +170,7 @@ function renderOnboardingStep(step, firstName) {
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Configure Your Columns</h2>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 2 of 3</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 2 of 4</p>
           </div>
         </div>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 16px">
@@ -218,7 +218,7 @@ function renderOnboardingStep(step, firstName) {
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Add Your First Jump</h2>
-            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 3 of 3</p>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 3 of 4</p>
           </div>
         </div>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 18px">
@@ -253,7 +253,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinish" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish Setup
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -352,40 +352,39 @@ function renderOnboardingStep(step, firstName) {
             <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 4 of 4</p>
           </div>
         </div>
-        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:12px 0 20px">
-          We added a few example jumps to help you get started. Would you like to keep them or start with a clean slate?
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:12px 0 16px">
+          We added a few example jumps to help you get started. Check the ones you want to keep &mdash; uncheck any you don't need.
         </p>
-        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
           ${seedJumps.slice(0, 4).map(j => `
-            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border)">
-              <svg class="ti ti-link" style="width:16px;height:16px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-link"/></svg>
-              <span style="font-size:0.88rem;color:var(--text);font-weight:500">${escHtml(j.name)}</span>
-              <span style="font-size:0.8rem;color:var(--text-muted);margin-left:auto;opacity:0.7">${escHtml(j.url)}</span>
-            </div>`).join('')}
+            <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border);cursor:pointer">
+              <input type="checkbox" class="ob-seed-cb" data-jumpid="${escHtml(j.id)}" checked
+                style="width:16px;height:16px;accent-color:#50CACC;cursor:pointer;flex-shrink:0" />
+              <svg class="ti ti-link" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-link"/></svg>
+              <span style="font-size:0.88rem;color:var(--text);font-weight:500;flex:1">${escHtml(j.name)}</span>
+              <span style="font-size:0.78rem;color:var(--text-muted);opacity:0.65;white-space:nowrap">${escHtml(j.url)}</span>
+            </label>`).join('')}
         </div>
         <div style="display:flex;gap:10px">
           <button id="obBack5" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
-          <button id="obRemoveSeed" class="btn btn-subtle" style="flex:1;padding:13px;font-size:0.95rem;font-weight:600">
-            <svg class="ti ti-trash" style="vertical-align:middle;margin-right:6px;width:18px;height:18px"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>Remove Examples
-          </button>
-          <button id="obKeepSeed" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Keep Them <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          <button id="obFinishSeed" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
+            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish
           </button>
         </div>
       </div>`;
 
     document.getElementById('obBack5').addEventListener('click', () => renderOnboardingStep(4, firstName));
 
-    document.getElementById('obRemoveSeed').addEventListener('click', async () => {
-      // Delete seed jumps
-      seedJumps.forEach(j => DB.deleteJump(currentUser.id, j.id));
-      await markOnboardingComplete();
-      renderOnboardingComplete();
-    });
-
-    document.getElementById('obKeepSeed').addEventListener('click', async () => {
+    document.getElementById('obFinishSeed').addEventListener('click', async () => {
+      // Delete unchecked seed jumps
+      document.querySelectorAll('.ob-seed-cb').forEach(cb => {
+        if (!cb.checked) {
+          const j = seedJumps.find(s => s.id === cb.dataset.jumpid);
+          if (j) DB.deleteJump(currentUser.id, j.id);
+        }
+      });
       await markOnboardingComplete();
       renderOnboardingComplete();
     });
