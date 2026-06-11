@@ -1,10 +1,12 @@
 // ============================================================
 // JumpKit — Onboarding Modal
 // ============================================================
-// 3-step inline onboarding shown once after first login.
+// 5-step inline onboarding shown once after first login.
 // Step 1: Welcome
-// Step 2: Configure Columns
-// Step 3: Add First Jump
+// Step 2: ROI Setup
+// Step 3: Configure Columns
+// Step 4: Add First Jump
+// Step 5: Keep or Remove example jumps
 // Tracked server-side via profiles.onboarding_completed
 // ============================================================
 
@@ -41,12 +43,12 @@ function showOnboardingModal(firstName) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9998;padding:20px';
 
   overlay.innerHTML = `
-    <div id="onboardingCard" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;height:600px;box-shadow:0 8px 40px rgba(0,0,0,0.5);overflow:hidden;display:flex;flex-direction:column">
+    <div id="onboardingCard" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.5);overflow:hidden">
       <!-- Progress bar -->
-      <div style="height:4px;background:var(--bg-input);position:relative;flex-shrink:0">
-        <div id="onboardingProgress" style="height:100%;background:linear-gradient(90deg,#50CACC,#1A4FD6);width:33.3%;transition:width 0.4s ease;border-radius:4px"></div>
+      <div style="height:4px;background:var(--bg-input);position:relative">
+        <div id="onboardingProgress" style="height:100%;background:linear-gradient(90deg,#50CACC,#1A4FD6);width:20%;transition:width 0.4s ease;border-radius:4px"></div>
       </div>
-      <div id="onboardingContent" style="padding:40px 36px 32px;flex:1;overflow-y:auto"></div>
+      <div id="onboardingContent" style="padding:40px 36px 32px"></div>
     </div>`;
 
   document.body.appendChild(overlay);
@@ -54,7 +56,7 @@ function showOnboardingModal(firstName) {
 }
 
 function setOnboardingProgress(step) {
-  const pct = step === 1 ? '25%' : step === 2 ? '50%' : step === 3 ? '75%' : '100%';
+  const pct = step === 1 ? '20%' : step === 2 ? '40%' : step === 3 ? '60%' : step === 4 ? '80%' : '100%';
   const bar = document.getElementById('onboardingProgress');
   if (bar) bar.style.width = pct;
 }
@@ -329,10 +331,62 @@ function renderOnboardingStep(step, firstName) {
       // Save the jump
       DB.createJump(currentUser.id, { name, url, columnId: colId, favorite: false, hotkey: '', notes: '' });
 
-      // Mark onboarding complete server-side
-      await markOnboardingComplete();
+      // Go to seed jumps step
+      renderOnboardingStep(5, firstName);
+    });
+  } else if (step === 5) {
+    // Seed jumps step — keep or remove example jumps
+    const seedUrls = ['https://google.com', 'https://slack.com', '~', 'C:\\'];
+    const seedJumps = DB.getJumps(currentUser.id).filter(j =>
+      !j.isArchived && seedUrls.some(u => j.url === u)
+    );
 
-      // Show complete step
+    content.innerHTML = `
+      <div>
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+          <div style="width:52px;height:52px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg class="ti ti-list-check" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-list-check"/></svg>
+          </div>
+          <div>
+            <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Example Jumps</h2>
+            <p style="color:var(--text-muted);font-size:0.8rem;margin:0;opacity:0.7">Step 4 of 4</p>
+          </div>
+        </div>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:12px 0 20px">
+          We added a few example jumps to help you get started. Would you like to keep them or start with a clean slate?
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+          ${seedJumps.slice(0, 4).map(j => `
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border)">
+              <svg class="ti ti-link" style="width:16px;height:16px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-link"/></svg>
+              <span style="font-size:0.88rem;color:var(--text);font-weight:500">${escHtml(j.name)}</span>
+              <span style="font-size:0.8rem;color:var(--text-muted);margin-left:auto;opacity:0.7">${escHtml(j.url)}</span>
+            </div>`).join('')}
+        </div>
+        <div style="display:flex;gap:10px">
+          <button id="obBack5" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+          </button>
+          <button id="obRemoveSeed" class="btn btn-subtle" style="flex:1;padding:13px;font-size:0.95rem;font-weight:600">
+            <svg class="ti ti-trash" style="vertical-align:middle;margin-right:6px;width:18px;height:18px"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>Remove Examples
+          </button>
+          <button id="obKeepSeed" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
+            Keep Them <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          </button>
+        </div>
+      </div>`;
+
+    document.getElementById('obBack5').addEventListener('click', () => renderOnboardingStep(4, firstName));
+
+    document.getElementById('obRemoveSeed').addEventListener('click', async () => {
+      // Delete seed jumps
+      seedJumps.forEach(j => DB.deleteJump(currentUser.id, j.id));
+      await markOnboardingComplete();
+      renderOnboardingComplete();
+    });
+
+    document.getElementById('obKeepSeed').addEventListener('click', async () => {
+      await markOnboardingComplete();
       renderOnboardingComplete();
     });
   }

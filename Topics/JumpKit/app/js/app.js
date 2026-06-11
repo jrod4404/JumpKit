@@ -830,7 +830,7 @@ async function renderHome() {
               <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">No teams yet</div>
               <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Create a team to share your best jumps and columns with colleagues.</div>
             </div>
-            <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create a Team</button>
+            <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users" style="color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create a Team</button>
           </div>`;
       return;
     }
