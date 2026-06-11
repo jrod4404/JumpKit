@@ -586,7 +586,7 @@
                 <p class="header-tagline">Stop searching. Start jumping.</p>
                 <h1>Developer and Marketing Documentation</h1>
                 <p class="header-subtext">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p class="header-updated">Last updated: 2026-06-09</p>
+                <p class="header-updated">Last updated: 2026-06-11</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -1997,15 +1997,27 @@ await window.electronAPI.openUrl('~/Documents');
 await window.electronAPI.openUrl('C:\\\\Users\\\\John\\\\Desktop');</code></pre>
 <p><strong>Main logic:</strong></p>
 <pre><code>ipcMain.handle('open-url', (_e, url) =&gt; {
-  const isWeb = /^(https?:\/\/|www\.)/i.test(url);
-  const fullUrl = isWeb && url.startsWith('www.') ? 'https://' + url : url;
+  // Detect bare domains (e.g. "google.com", "jumpkit.ai") via TLD suffix check
+  const hasTld = /^[^/\\\s]+\.(com|net|org|io|ai|app|co|dev|gov|edu|info|biz|me|tv|us|uk|ca|de|fr|au|jp|cn|in|br|ru|nl|se|no|dk|fi|it|es|pt|mx|nz|sg|hk|za|ly|gg|cloud|tech|xyz|social|store|shop)(\/|$)/i.test(url);
+  const isWeb = /^(https?:\/\/|www\.)/i.test(url) || hasTld;
+  const fullUrl = isWeb && !/^https?:\/\//i.test(url) ? 'https://' + url : url;
 
   if (isWeb) {
-    shell.openExternal(fullUrl);
+    shell.openExternal(fullUrl);  // Opens in default browser
   } else {
-    shell.openPath(url);  // Cross-platform file explorer
+    shell.openPath(url);  // Cross-platform file explorer (local path)
   }
 });</code></pre>
+<p><strong>URL detection priority order:</strong></p>
+<ol>
+  <li><code>https://</code> or <code>http://</code> prefix → browser (protocol explicit)</li>
+  <li><code>www.</code> prefix → browser (prepends <code>https://</code>)</li>
+  <li>Bare domain with known TLD (e.g. <code>google.com</code>, <code>site.app</code>, <code>tool.ai</code>) → browser (prepends <code>https://</code>)</li>
+  <li>Everything else (<code>~/Documents</code>, <code>C:\Users\Jeff</code>, <code>\\server\share</code>, relative paths) → local path via <code>shell.openPath</code></li>
+</ol>
+<p><strong>Supported TLDs for bare-domain detection:</strong><br/>
+<code>.com .net .org .io .ai .app .co .dev .gov .edu .info .biz .me .tv .ly .gg .cloud .tech .xyz .social .store .shop</code><br/>
+Country codes: <code>.us .uk .ca .de .fr .au .jp .cn .in .br .ru .nl .se .no .dk .fi .it .es .pt .mx .nz .sg .hk .za</code></p>
 <h4 id="backup-ipc">2.6.24 Backup IPC Group</h4>
 <h4 id="save-backup">2.6.25 save-backup</h4>
 <pre><code>const backup = {
@@ -3855,6 +3867,26 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   <li><strong>support@jumpkit.app</strong> upgraded to <code>core/active</code> tier.</li>
   <li><strong>Future analytics ideas</strong> added to Section 11 roadmap (conversion signals, churn signals, power user identification, MRR tracking).</li>
   <li><strong>Backup:</strong> <code>app_backup_2026-06-10_20-58.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
+<h3>2026-06-11 (afternoon — bug fixes &amp; onboarding)</h3>
+<ul>
+  <li><strong>Resend SMTP key replaced:</strong> The Resend API key stored in Supabase&rsquo;s SMTP config had expired, silently failing all auth emails (confirmations, password resets). Updated with new key. Edge Functions <code>RESEND_API_KEY</code> secret also updated to match. Auth email rate limit raised from 2/hr &rarr; 100/hr (project-wide Supabase setting).</li>
+  <li><strong>Vercel deployment fix:</strong> <code>jumpkit.app</code> was pinned to a 96-day-old Vercel deployment alias. Re-pointed to the active <code>jumpkit-landing</code> project. Correct deploy command confirmed: <code>cd Topics/JumpKit/landing &amp;&amp; vercel --prod</code>.</li>
+  <li><strong>Git history cleanup:</strong> Three tar.gz backup archives (~1.2 GB each, ~3.5 GB total) had been committed to git, causing <code>git push</code> to hang indefinitely. Removed via <code>git-filter-repo</code>, force-pushed clean history. Added <code>app_backups/</code>, <code>landing_backups/</code>, <code>app_backup*/</code>, <code>landing_backup*/</code>, <code>*.tar.gz</code> to <code>.gitignore</code>.</li>
+  <li><strong>Reset password page (landing):</strong> Both <code>landing/reset-password.html</code> and <code>landing/subpages/reset-password.html</code> updated &mdash; success card now uses green (#48BB78) with SVG check icon instead of turquoise.</li>
+  <li><strong>Home page teams section:</strong> Removed free-tier upgrade gate from the &ldquo;YOUR TEAMS&rdquo; section. Free users now see the &ldquo;No teams yet / Create a Team&rdquo; card instead of an upgrade wall. &ldquo;Create a Team&rdquo; button icon color fixed to white (matching button text).</li>
+  <li><strong>Create Account button loading state:</strong> Spinner now replaces only the icon; &ldquo;Create Account&rdquo; text stays visible during submission. Fixed via <code>.btn-loading .btn-icon { display:none }</code> CSS rule and restructured button HTML.</li>
+  <li><strong>Onboarding flow expanded to 5 steps:</strong>
+    <ul>
+      <li>Step 1 &mdash; Welcome: copy updated to &ldquo;four quick steps&rdquo;.</li>
+      <li>Step 2 &mdash; ROI Setup: label corrected to &ldquo;Step 1 of 4&rdquo;.</li>
+      <li>Step 3 &mdash; Configure Columns: label corrected to &ldquo;Step 2 of 4&rdquo;.</li>
+      <li>Step 4 &mdash; Add First Jump: label corrected to &ldquo;Step 3 of 4&rdquo;; button updated to &ldquo;&#10003; Save and Finish&rdquo;.</li>
+      <li>Step 5 (new) &mdash; Example Jumps: &ldquo;Step 4 of 4&rdquo;. Shows seed jumps as checkboxes (pre-checked). User unchecks any to remove; &ldquo;Finish&rdquo; button deletes unchecked jumps. Directory paths show folder icon; web URLs show link icon.</li>
+    </ul>
+  </li>
+  <li><strong>Jump URL detection improved:</strong> Bare domain names like <code>google.com</code> and <code>site.app</code> are now correctly opened in the browser instead of treated as local paths. Detection uses TLD suffix matching against a list of 45+ TLDs. Auto-prepends <code>https://</code> when no protocol is present. See Section 2.6.23 for full TLD list and detection priority order.</li>
 </ul>
 
 <h3>2026-06-11</h3>

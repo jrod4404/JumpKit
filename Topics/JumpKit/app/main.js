@@ -641,7 +641,7 @@ ipcMain.handle('open-url', async (_e, url, isShared) => {
   if (!url) return;
 
   // Detect web URLs: explicit protocol/www, OR bare domain like "google.com", "site.app", etc.
-  const hasTld = /^[^/\\\s]+\.(com|net|org|io|ai|app|co|dev|gov|edu|info|biz|me|tv|us|uk|ca|de|fr|au|jp|cn|in|br|ru|nl|se|no|dk|fi|it|es|pt|mx|nz|sg|hk|za)(\/|$)/i.test(url);
+  const hasTld = /^[^/\\\s]+\.(com|net|org|io|ai|app|co|dev|gov|edu|info|biz|me|tv|us|uk|ca|de|fr|au|jp|cn|in|br|ru|nl|se|no|dk|fi|it|es|pt|mx|nz|sg|hk|za|ly|gg|cloud|tech|xyz|social|store|shop)(\/|$)/i.test(url);
   const isWeb = /^(https?:\/\/|www\.)/i.test(url) || hasTld;
   const fullUrl = isWeb && !/^https?:\/\//i.test(url) ? 'https://' + url : url;
 
