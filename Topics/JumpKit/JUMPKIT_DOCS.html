@@ -3857,6 +3857,25 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   <li><strong>Backup:</strong> <code>app_backup_2026-06-10_20-58.tar.gz</code> saved to <code>app_backups/</code>.</li>
 </ul>
 
+<h3>2026-06-11</h3>
+<ul>
+  <li><strong>Jet AI removal:</strong> All user-visible &ldquo;Jet&rdquo; / &ldquo;Jet AI&rdquo; references removed from the app. Route, page title/icon/description entries, and the <code>renderJet()</code> function deleted. Navigation button and landing page sections were already commented out. Backend <code>teams_jet</code> tier identifier preserved.</li>
+  <li><strong>Account type labels locked:</strong> Tier display throughout the app is now restricted to &ldquo;JumpKit Free&rdquo; or &ldquo;JumpKit Unlimited&rdquo; only. Removed the &ldquo;JumpKit + Jet AI&rdquo; label from 3 locations (account page, upgrade modal, tier features modal).</li>
+  <li><strong>CTA button standardization:</strong> All upgrade CTA buttons across the entire app now use the lock icon + &ldquo;Upgrade to Unlimited&rdquo; text. Updated 9 locations including sidebar, home page, account page banner, upgrade modal, paywall modal, tier features modal, and settings page. Exception: cancelled-subscription modal retains &ldquo;Reactivate JumpKit Unlimited&rdquo;.</li>
+  <li><strong>Settings page upgrade CTAs:</strong> Replaced the two-piece &ldquo;Unlimited only&rdquo; badge + &ldquo;Upgrade&rdquo; button on Auto-Backup Jumps and Auto-Archive Jumps rows with the standard <code>buildUnlockButton</code> CTA.</li>
+  <li><strong>Home page rebuilt as dashboard:</strong> Complete redesign of the home page as a 5-section quickview dashboard. Topbar subtitle updated to &ldquo;Welcome back, [First Name]!&rdquo;.
+    <ul>
+      <li><strong>YOUR ACCOUNT:</strong> 3 stat cards &mdash; Account Type (free users see Upgrade CTA inline), Member Since, Launches Remaining (&ldquo;X of 250&rdquo; for free; &ldquo;Unlimited&rdquo; for paid).</li>
+      <li><strong>YOUR STATISTICS:</strong> 4 stat cards &mdash; Total Jumps, Total Launches, Time Saved, $ Saved. Labels pluralize correctly (1 Jump vs 2 Jumps etc.).</li>
+      <li><strong>YOUR TEAMS:</strong> One card per team (async Supabase fetch). Each card shows role pill (Owner/Member, matching Teams page color scheme), team name, Members count, Columns count, Jumps count. Free users without teams see upgrade CTA. Auth uses fresh session &mdash; no <code>org_id</code> dependency.</li>
+      <li><strong>APP FEATURES:</strong> 8 tip cards (original 6 + new Teams benefits card + new Settings card). 4-per-row responsive grid.</li>
+      <li><strong>HELP AND FEEDBACK:</strong> Help &amp; Documentation card (static) + Send Feedback card (opens feedback modal on click).</li>
+    </ul>
+  </li>
+  <li><strong>CSP compliance:</strong> All home page click handlers converted from inline <code>onclick</code> to <code>data-jaction</code> event delegation to comply with Content Security Policy. New switch cases: <code>nav-stats</code>, <code>nav-teams</code>.</li>
+  <li><strong>CSS additions:</strong> <code>.home-dash</code>, <code>.home-dash-section-label</code>, <code>.home-roi-grid</code>, <code>.home-teams-grid</code>, <code>.home-team-card</code>, <code>.teams-badge</code>/<code>.teams-badge-owner</code> (moved to global CSS for reuse). Consistent hover styles, 4-per-row responsive grids (breakpoints at &le;900px and &le;500px), uniform section spacing.</li>
+</ul>
+
 <h3>2026-06-10</h3>
 <ul>
   <li><strong>Feature/free consistency audit:</strong> Audited all 9 locations where free vs. unlimited features are listed (landing page, app.js, teams.js, jumps.js). One wording bug found and fixed &mdash; create-team paywall modal now correctly says &ldquo;1 owned team. You can still join 1 team as a member.&rdquo;</li>
