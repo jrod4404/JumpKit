@@ -10,3 +10,11 @@ out/
 *.deb
 *.rpm
 .vercel
+
+# Backup folders — large, don't commit
+Topics/JumpKit/app_backups/
+Topics/JumpKit/landing_backups/
+Topics/JumpKit/app_backup*/
+Topics/JumpKit/landing_backup*/
+*.tar.gz
+*.tar.bz2
