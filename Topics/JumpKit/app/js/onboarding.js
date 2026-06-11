@@ -356,14 +356,14 @@ function renderOnboardingStep(step, firstName) {
           We added a few example jumps to help you get started. Check the ones you want to keep &mdash; uncheck any you don't need.
         </p>
         <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px">
-          ${seedJumps.slice(0, 4).map(j => `
+          ${seedJumps.slice(0, 4).map(j => { const isDir = /^(~|[A-Za-z]:\\|\/)/.test(j.url); return `
             <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border);cursor:pointer">
               <input type="checkbox" class="ob-seed-cb" data-jumpid="${escHtml(j.id)}" checked
                 style="width:16px;height:16px;accent-color:#50CACC;cursor:pointer;flex-shrink:0" />
-              <svg class="ti ti-link" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-link"/></svg>
+              <svg class="ti" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-${isDir ? 'folder' : 'link'}"/></svg>
               <span style="font-size:0.88rem;color:var(--text);font-weight:500;flex:1">${escHtml(j.name)}</span>
               <span style="font-size:0.78rem;color:var(--text-muted);opacity:0.65;white-space:nowrap">${escHtml(j.url)}</span>
-            </label>`).join('')}
+            </label>`;}).join('')}
         </div>
         <div style="display:flex;gap:10px">
           <button id="obBack5" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
