@@ -110,6 +110,7 @@
   flex-shrink: 0;
 }
 .btn-loading .btn-spinner { display: block; }
+.btn-loading .btn-label { display: none !important; }
 .btn-loading { display: flex !important; align-items: center; justify-content: center; gap: 8px; pointer-events: none; opacity: 0.85; }
 /* Prevent layout shift on auth submit buttons */
 #loginForm [type=submit],
