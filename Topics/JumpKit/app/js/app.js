@@ -825,20 +825,12 @@ async function renderHome() {
     const allTeamIds = allTeams.map(t => t.id);
 
     if (allTeams.length === 0) {
-      teamsEl.innerHTML = isUnlimited
-        ? `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
+      teamsEl.innerHTML = `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
             <div>
               <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">No teams yet</div>
               <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Create a team to share your best jumps and columns with colleagues.</div>
             </div>
             <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create a Team</button>
-          </div>`
-        : `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
-            <div>
-              <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">Teams require JumpKit Unlimited</div>
-              <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Upgrade to share jumps and columns across unlimited teams and members.</div>
-            </div>
-            ${buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.83rem', padding: '8px 16px' })}
           </div>`;
       return;
     }
