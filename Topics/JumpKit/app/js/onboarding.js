@@ -74,7 +74,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
         <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">Welcome to JumpKit! 🎉</h2>
         <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
-          Let's get you set up in under a minute. We'll walk you through two quick steps so JumpKit is ready to use right away.
+          Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.
         </p>
         <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
           Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
@@ -253,7 +253,7 @@ function renderOnboardingStep(step, firstName) {
             <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinish" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save and Finish
           </button>
         </div>
       </div>`;
