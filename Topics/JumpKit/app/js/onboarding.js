@@ -41,12 +41,12 @@ function showOnboardingModal(firstName) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9998;padding:20px';
 
   overlay.innerHTML = `
-    <div id="onboardingCard" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;box-shadow:0 8px 40px rgba(0,0,0,0.5);overflow:hidden;display:flex;flex-direction:column">
+    <div id="onboardingCard" style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:520px;height:600px;box-shadow:0 8px 40px rgba(0,0,0,0.5);overflow:hidden;display:flex;flex-direction:column">
       <!-- Progress bar -->
       <div style="height:4px;background:var(--bg-input);position:relative;flex-shrink:0">
         <div id="onboardingProgress" style="height:100%;background:linear-gradient(90deg,#50CACC,#1A4FD6);width:33.3%;transition:width 0.4s ease;border-radius:4px"></div>
       </div>
-      <div id="onboardingContent" style="padding:40px 36px 32px;min-height:500px;overflow-y:auto"></div>
+      <div id="onboardingContent" style="padding:40px 36px 32px;flex:1;overflow-y:auto"></div>
     </div>`;
 
   document.body.appendChild(overlay);
