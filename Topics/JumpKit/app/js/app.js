@@ -697,16 +697,16 @@ async function renderHome() {
       <div class="home-dash-section-label">YOUR ACCOUNT</div>
       <div class="stats-cards home-roi-grid">
         <div class="stat-card" style="gap:8px">
-          <div class="stat-card-value" style="font-size:1.2rem">${_tierLabel}</div>
+          <div class="stat-card-value" style="font-size:1.2rem;color:var(--text-card-title)">${_tierLabel}</div>
           <div class="stat-card-label">Account Type</div>
           ${_tier === 'free' ? `<div style="margin-top:4px">${buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.75rem', padding: '5px 12px' })}</div>` : ''}
         </div>
         <div class="stat-card">
-          <div class="stat-card-value" style="font-size:1.2rem">${_joinDate}</div>
+          <div class="stat-card-value" style="font-size:1.2rem;color:var(--text-card-title)">${_joinDate}</div>
           <div class="stat-card-label" style="margin-top:6px">Member Since</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-value" style="font-size:1.2rem">${_jumpsRemaining}</div>
+          <div class="stat-card-value" style="font-size:1.2rem;color:var(--text-card-title)">${_jumpsRemaining}</div>
           <div class="stat-card-label" style="margin-top:6px">${_launchesLabel}</div>
         </div>
       </div>
@@ -715,18 +715,18 @@ async function renderHome() {
       <div class="home-dash-section-label">YOUR STATISTICS</div>
       <div class="stats-cards home-roi-grid">
         <div class="stat-card">
-          ${(() => { const n = currentUser ? DB.getActiveJumps(currentUser.id).length : 0; return `<div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">${n === 1 ? 'Jump' : 'Jumps'}</div>`; })()}
+          ${(() => { const n = currentUser ? DB.getActiveJumps(currentUser.id).length : 0; return `<div class="stat-card-value" style="color:var(--text-card-title)">${n.toLocaleString()}</div><div class="stat-card-label">${n === 1 ? 'Jump' : 'Jumps'}</div>`; })()}
         </div>
         <div class="stat-card">
-          <div class="stat-card-value">${lifetimeLaunches.toLocaleString()}</div>
+          <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeLaunches.toLocaleString()}</div>
           <div class="stat-card-label">${lifetimeLaunches === 1 ? 'Total Launch' : 'Total Launches'}</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-value">${lifetimeTimeStr}</div>
+          <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeTimeStr}</div>
           <div class="stat-card-label">Time Saved</div>
         </div>
         <div class="stat-card">
-          <div class="stat-card-value">${lifetimeDollarStr}</div>
+          <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeDollarStr}</div>
           <div class="stat-card-label">$ Saved</div>
         </div>
       </div>
@@ -829,7 +829,7 @@ async function renderHome() {
     const allTeamIds = allTeams.map(t => t.id);
 
     if (allTeams.length === 0) {
-      teamsEl.innerHTML = `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap">
+      teamsEl.innerHTML = `<div class="stat-card" style="flex-direction:row;align-items:center;gap:16px;justify-content:space-between;flex-wrap:wrap;margin-bottom:20px">
             <div>
               <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">No teams yet</div>
               <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Create a team to share your best jumps and columns with colleagues.</div>
