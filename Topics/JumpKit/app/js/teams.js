@@ -1001,7 +1001,7 @@ window.sendOrgInvites = async function() {
     // Free tier: enforce 5-member-per-team cap (owner + 4 members max)
     const inviterTier = window._supabaseProfile?.subscription_tier || 'free';
     if (inviterTier === 'free') {
-      const FREE_MEMBER_CAP = 4; // max non-owner members (5 total including owner)
+      const FREE_MEMBER_CAP = 5; // 5 total (owner is already in team_members)
       const { count: curMembers } = await supabaseClient
         .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', selectedTeamId);
       const { count: curPending } = await supabaseClient
@@ -1572,7 +1572,7 @@ async function sendInvites(teamId) {
     // Free tier: enforce 5-member-per-team cap (owner + 4 members max)
     const inviterTier = window._supabaseProfile?.subscription_tier || 'free';
     if (inviterTier === 'free') {
-      const FREE_MEMBER_CAP = 4; // max non-owner members (5 total including owner)
+      const FREE_MEMBER_CAP = 5; // 5 total (owner is already in team_members)
       const { count: curMembers } = await supabaseClient
         .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', teamId);
       const { count: curPending } = await supabaseClient
@@ -2059,7 +2059,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
         if ((ownerProfile?.subscription_tier || 'free') === 'free') {
           const { count: curMembers } = await supabaseClient
             .from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', teamId);
-          if ((curMembers || 0) >= 4) {
+          if ((curMembers || 0) >= 5) {
             if (errEl) { errEl.textContent = 'This team has reached its 5-member limit.'; errEl.classList.add('show'); }
             else { Toast.danger('This team has reached its 5-member limit.'); }
             return;
