@@ -2321,6 +2321,201 @@ const JK_TESTS = [
       console.info('[Test 95] ✅ Cleanup complete — test notification removed.');
       return true;
     }
+  },
+
+  // ── Email Tests (96–97) ───────────────────────────────────────────
+  {
+    id: 96, category: 'Email',
+    title: 'Account-exists email — Edge Function returns ok:true',
+    purpose: 'Automatically calls the send-account-exists Edge Function with the current user\'s email and confirms it returns { ok: true }. Verifies the function is deployed, reachable, and responds without error. Does NOT verify email delivery — check your inbox after running.',
+    prerequisites: 'Must be logged in. The send-account-exists Edge Function must be deployed to Supabase.',
+    description: 'POSTs to /functions/v1/send-account-exists with the current user email, checks the response is { ok: true }.',
+    input: 'POST /functions/v1/send-account-exists { email: currentUser.email }',
+    expected: 'Response JSON has ok === true. Then manually verify the account-exists email arrives in your inbox.',
+    steps: 'After this test passes automatically, check your inbox for the "You already have a JumpKit account" email to confirm delivery end-to-end.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      if (!email) throw new Error('No user email found — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-account-exists`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ email }),
+      });
+
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+
+      console.info(`[Test 96] ✅ send-account-exists called for ${email}. Check inbox to confirm delivery.`);
+      // Auto portion passed — remind tester to verify inbox
+      return 'manual';
+    }
+  },
+
+  {
+    id: 97, category: 'Email',
+    title: 'Account-exists email — correct content delivered to inbox',
+    purpose: 'Manual confirmation that the account-exists email arrived with the correct branding and updated copy. Run after Test 96 passes.',
+    prerequisites: 'Test 96 must have passed first. Check the inbox for the email address shown in your JumpKit account.',
+    description: 'Open the "You already have a JumpKit account" email and verify the content matches the latest approved copy.',
+    input: 'Email inbox for logged-in user account',
+    expected: 'Email arrives with correct subject, correct body text, and no sign-in or forgot-password buttons.',
+    steps: '1. Open your inbox for the logged-in JumpKit account email.\n2. Find the email with subject "Sign in to your JumpKit account".\n3. Verify the body contains: "your account already exists and is still active! If that was not you, don\'t worry, we\'ve detected it and protected your account."\n4. Verify the body contains: "To access your account, first open your JumpKit desktop app. Next sign in with your email above and existing password, or if you no longer have your password, reset it."\n5. Verify there are NO sign-in or forgot-password buttons in the email.\n6. Mark as Pass once confirmed.',
+    test: async () => 'manual'
+  },
+
+  // ── Pending Upgrade Flow (Tests 98–101) ─────────────────────────
+  {
+    id: 98, category: 'Subscription',
+    title: 'apply-pending-upgrade — returns applied:false when no pending row',
+    purpose: 'Confirms apply-pending-upgrade gracefully returns { ok:true, applied:false } for a normal user with no pending upgrade row. This is the common-case path hit on every login.',
+    prerequisites: 'Must be logged in. No pending_upgrades row should exist for this user (normal state).',
+    description: 'POSTs to /functions/v1/apply-pending-upgrade with current user email and verifies applied:false is returned.',
+    input: 'POST /functions/v1/apply-pending-upgrade { email }',
+    expected: 'Response JSON has ok:true and applied:false.',
+    steps: 'Automatic.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      if (!email) throw new Error('No user email — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ email }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Expected ok:true, got: ${JSON.stringify(body)}`);
+      if (body.applied !== false) throw new Error(`Expected applied:false (no pending row), got applied:${body.applied}`);
+
+      console.info(`[Test 98] ✅ apply-pending-upgrade correctly returned applied:false for ${email}`);
+      return true;
+    }
+  },
+
+  {
+    id: 99, category: 'Subscription',
+    title: 'apply-pending-upgrade — returns applied:true when pending row exists',
+    purpose: 'Confirms apply-pending-upgrade applies the upgrade, deletes the pending row, and returns { ok:true, applied:true } when a pending_upgrades row exists for the user.',
+    prerequisites: 'Must be logged in. A pending_upgrades row must be manually inserted first in Supabase SQL. IMPORTANT: this test upgrades your profile to core — reset manually after.',
+    description: 'After inserting a test pending_upgrades row via Supabase SQL, call apply-pending-upgrade and verify applied:true is returned.',
+    input: 'INSERT INTO pending_upgrades (email,tier,ls_customer_id) VALUES (your-email,\'core\',\'test-99\') ON CONFLICT (email) DO UPDATE SET tier=\'core\'; then run this test.',
+    expected: 'Response has ok:true and applied:true. Row deleted from pending_upgrades.',
+    steps: '1. In Supabase SQL editor run:\n   INSERT INTO pending_upgrades (email, tier, ls_customer_id) VALUES (\'{your-email}\', \'core\', \'test-99\') ON CONFLICT (email) DO UPDATE SET tier=\'core\';\n2. Run this test — verify applied:true.\n3. Reset after: UPDATE profiles SET subscription_tier=\'free\', subscription_status=\'free\' WHERE email=\'{your-email}\';',
+    test: async () => 'manual'
+  },
+
+  {
+    id: 100, category: 'Email',
+    title: 'send-pending-upgrade — Edge Function returns ok:true',
+    purpose: 'Automatically calls the send-pending-upgrade Edge Function with the current user email and confirms it returns { ok:true }. Verifies the function is deployed and reachable.',
+    prerequisites: 'Must be logged in. send-pending-upgrade Edge Function must be deployed.',
+    description: 'POSTs to /functions/v1/send-pending-upgrade with current user email and checks response is { ok:true }.',
+    input: 'POST /functions/v1/send-pending-upgrade { email }',
+    expected: 'Response JSON has ok:true. Check inbox to confirm the onboarding email arrives.',
+    steps: 'After this test passes automatically, check inbox for the "Your JumpKit Unlimited subscription is confirmed" email.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      if (!email) throw new Error('No user email — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pending-upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ email }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+
+      console.info(`[Test 100] ✅ send-pending-upgrade called for ${email}. Check inbox to confirm delivery.`);
+      return 'manual';
+    }
+  },
+
+  {
+    id: 101, category: 'Email',
+    title: 'send-pending-upgrade — correct content delivered to inbox',
+    purpose: 'Manual confirmation that the pending-upgrade onboarding email arrived with correct content, 3-step instructions, and Mac/Windows download buttons.',
+    prerequisites: 'Test 100 must have passed first.',
+    description: 'Open the "Your JumpKit Unlimited subscription is confirmed" email and verify content matches spec.',
+    input: 'Email inbox for logged-in user account',
+    expected: 'Email arrives with correct subject, 3-step getting-started section, Mac and Windows download buttons, and help@jumpkit.app in support text.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Your JumpKit Unlimited subscription is confirmed 🎉".\n3. Verify it contains 3 numbered steps: Download JumpKit, Create your account, Log in.\n4. Verify Mac and Windows download buttons are present and link to GitHub releases.\n5. Verify footer support text contains help@jumpkit.app.\n6. Mark as Pass once confirmed.',
+    test: async () => 'manual'
+  },
+
+  // ── Onboarding Flow (Tests 102–103) ─────────────────────────────
+  {
+    id: 102, category: 'Auth',
+    title: 'Onboarding — checkAndShowOnboarding gated by onboarding_completed',
+    purpose: 'Confirms checkAndShowOnboarding() exists and does NOT show the onboarding modal when onboarding_completed is already true. This is the normal state for existing users.',
+    prerequisites: 'Must be logged in and have completed onboarding.',
+    description: 'Calls checkAndShowOnboarding() and verifies no #onboardingOverlay element appears in the DOM.',
+    input: 'checkAndShowOnboarding()',
+    expected: 'Function is accessible. No onboarding overlay appears (onboarding already done).',
+    steps: 'Automatic.',
+    test: async () => {
+      if (typeof checkAndShowOnboarding !== 'function') throw new Error('checkAndShowOnboarding is not defined — check onboarding.js is loaded');
+
+      const before = document.getElementById('onboardingOverlay');
+      if (before) before.remove();
+
+      await checkAndShowOnboarding();
+      await new Promise(r => setTimeout(r, 400));
+
+      const overlay = document.getElementById('onboardingOverlay');
+      if (overlay) {
+        overlay.remove();
+        throw new Error('Onboarding overlay appeared — onboarding_completed may be false for this user. Complete onboarding first and re-run.');
+      }
+
+      console.info('[Test 102] ✅ Onboarding correctly skipped for user with onboarding_completed=true.');
+      return true;
+    }
+  },
+
+  {
+    id: 103, category: 'Subscription',
+    title: 'Upgrade modal — checkAndHandleUpgrade renders correctly',
+    purpose: 'Confirms checkAndHandleUpgrade() renders the Welcome to JumpKit Unlimited modal without errors. Validates title contains "Unlimited" and the CTA button is present.',
+    prerequisites: 'Must be logged in.',
+    description: 'Calls checkAndHandleUpgrade("core"), verifies the modal title and footer CTA, then closes the modal.',
+    input: 'checkAndHandleUpgrade("core")',
+    expected: 'Modal opens. Title contains "Unlimited". Footer has "Let\'s Go" button. Modal is closed after test.',
+    steps: 'Automatic — modal will briefly open and close.',
+    test: async () => {
+      if (typeof checkAndHandleUpgrade !== 'function') throw new Error('checkAndHandleUpgrade is not defined');
+
+      if (typeof Modal !== 'undefined') Modal.close();
+      await new Promise(r => setTimeout(r, 150));
+
+      checkAndHandleUpgrade('core');
+      await new Promise(r => setTimeout(r, 300));
+
+      const titleEl = document.getElementById('modalTitle');
+      const footerEl = document.getElementById('modalFooter');
+
+      if (!titleEl) throw new Error('modalTitle element not found');
+      if (!titleEl.textContent.includes('Unlimited')) throw new Error(`Modal title missing "Unlimited" — got: "${titleEl.textContent.trim()}"`);
+      if (!footerEl || !footerEl.textContent.includes('Go')) throw new Error('Modal footer missing "Let\'s Go" button');
+
+      console.info('[Test 103] ✅ Upgrade modal rendered correctly: ' + titleEl.textContent.trim());
+      if (typeof Modal !== 'undefined') Modal.close();
+      return true;
+    }
   }
 
 ];
