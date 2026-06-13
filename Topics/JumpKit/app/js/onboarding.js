@@ -108,7 +108,8 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
       // ── Free welcome ────────────────────────────────────────────
       const freeFeatures = [
         '250 jump launches',
-        '1 team · 5 members · 10 jumps/team',
+        'Own 1 team (5 members, 10 shared jumps)',
+        'Join 1 team as a member',
         'Personal ROI dashboard',
         'Global hotkeys',
       ];
@@ -164,7 +165,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
             <span style="font-weight:400;opacity:0.7"> (seconds)</span>
           </label>
           <div style="display:flex;align-items:center;gap:10px">
-            <input id="obTimePerClick" type="number" min="1" max="600" value="${prefs.timePerClick || 10}"
+            <input id="obTimePerClick" type="number" min="1" max="600" value="10"
               style="flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box" />
             <span style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;flex-shrink:0">sec / click</span>
           </div>
@@ -176,7 +177,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
             <span style="font-weight:400;opacity:0.7"> ($/hr)</span>
           </label>
           <div style="display:flex;align-items:center;gap:10px">
-            <input id="obDollarsPerHour" type="number" min="1" max="10000" value="${prefs.dollarsPerHour || 50}"
+            <input id="obDollarsPerHour" type="number" min="1" max="10000" value="50"
               style="flex:1;background:var(--bg-input);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:0.9rem;outline:none;box-sizing:border-box" />
             <span style="color:var(--text-muted);font-size:0.85rem;white-space:nowrap;flex-shrink:0">$ / hr</span>
           </div>
