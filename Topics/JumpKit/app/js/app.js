@@ -118,9 +118,8 @@ async function initApp() {
           }
         }
 
-        // Show onboarding for first-time users — skip if pending upgrade modal is about to show
-        const _pendingUpgradeCheck = sessionStorage.getItem('jk_pending_upgrade_applied');
-        if (!data.onboarding_completed && !_pendingUpgradeCheck) {
+        // Show onboarding for first-time users
+        if (!data.onboarding_completed) {
           setTimeout(() => checkAndShowOnboarding(), 600);
         }
 
@@ -141,8 +140,8 @@ async function initApp() {
         const lastKnownTier = data.last_known_tier || currentTier;
         const pendingUpgradeApplied = sessionStorage.getItem('jk_pending_upgrade_applied');
         if (pendingUpgradeApplied) {
+          // Clear flag — onboarding step 1 shows the Unlimited welcome, no separate modal needed
           sessionStorage.removeItem('jk_pending_upgrade_applied');
-          setTimeout(() => checkAndHandleUpgrade(currentTier), 1500);
         } else if (lastKnownTier === 'core' && currentTier === 'free') {
           setTimeout(() => checkAndHandleDowngrade(), 1500);
         } else if (lastKnownTier === 'free' && (currentTier === 'core' || currentTier === 'teams_jet')) {

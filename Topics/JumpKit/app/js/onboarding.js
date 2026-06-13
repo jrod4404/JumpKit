@@ -19,7 +19,9 @@ async function checkAndShowOnboarding() {
       .eq('id', _supabaseUser.id)
       .single();
     if (!data || data.onboarding_completed) return;
-    showOnboardingModal(data.first_name || '');
+    const tier = window._supabaseProfile?.subscription_tier || 'free';
+    const isUnlimited = tier === 'core' || tier === 'teams_jet';
+    showOnboardingModal(data.first_name || '', isUnlimited);
   } catch (_) {}
 }
 
@@ -33,7 +35,7 @@ async function markOnboardingComplete() {
   } catch (_) {}
 }
 
-function showOnboardingModal(firstName) {
+function showOnboardingModal(firstName, isUnlimited = false) {
   // Remove any existing onboarding overlay
   const existing = document.getElementById('onboardingOverlay');
   if (existing) existing.remove();
@@ -52,7 +54,7 @@ function showOnboardingModal(firstName) {
     </div>`;
 
   document.body.appendChild(overlay);
-  renderOnboardingStep(1, firstName);
+  renderOnboardingStep(1, firstName, isUnlimited);
 }
 
 function setOnboardingProgress(step) {
@@ -61,26 +63,83 @@ function setOnboardingProgress(step) {
   if (bar) bar.style.width = pct;
 }
 
-function renderOnboardingStep(step, firstName) {
+function renderOnboardingStep(step, firstName, isUnlimited = false) {
   setOnboardingProgress(step);
   const content = document.getElementById('onboardingContent');
   if (!content) return;
 
   if (step === 1) {
-    content.innerHTML = `
-      <div style="text-align:center">
-        <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="#50CACC" style="width:32px;height:32px;display:block"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg>
-        </div>
-        <h2 style="color:var(--text);font-size:1.4rem;font-weight:700;margin:0 0 12px">Welcome to JumpKit! 🎉</h2>
-        <p style="color:var(--text-muted);font-size:0.93rem;line-height:1.7;margin:0 0 32px">
-          Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.
-        </p>
-        <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
-          Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
-        </button>
-      </div>`;
-    document.getElementById('obNext1').addEventListener('click', () => renderOnboardingStep(2, firstName));
+    if (isUnlimited) {
+      // ── Unlimited welcome ───────────────────────────────────────
+      const features = [
+        'Unlimited jump launches',
+        'Unlimited teams, members &amp; jumps',
+        'Personal &amp; team ROI dashboard',
+        'Auto-archive &amp; auto-backup',
+        'Early access to new features',
+      ];
+      const featureRows = features.map(f => `
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,#50CACC,#1A4FD6);flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span style="font-size:0.85rem;color:var(--text-muted);font-weight:500">${f}</span>
+        </div>`).join('');
+      content.innerHTML = `
+        <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#50CACC,#1A4FD6);flex-shrink:0;box-shadow:0 3px 14px rgba(80,202,204,0.3)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:26px;height:26px"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </span>
+            <div>
+              <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 3px">Welcome to JumpKit Unlimited! &#9889;</h2>
+              <p style="color:var(--text-muted);font-size:0.82rem;margin:0">Your subscription is active. Here's what you have:</p>
+            </div>
+          </div>
+          <div style="background:rgba(80,202,204,0.06);border:1px solid rgba(80,202,204,0.18);border-radius:10px;padding:14px 16px;margin-bottom:22px">
+            ${featureRows}
+          </div>
+          <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 22px">Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.</p>
+          <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6);border:none">
+            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          </button>
+        </div>`;
+    } else {
+      // ── Free welcome ────────────────────────────────────────────
+      const freeFeatures = [
+        '250 jump launches',
+        '1 team · 5 members · 10 jumps/team',
+        'Personal ROI dashboard',
+        'Global hotkeys',
+      ];
+      const freeFRows = freeFeatures.map(f => `
+        <div style="display:flex;align-items:center;gap:10px;padding:5px 0">
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:rgba(80,202,204,0.15);flex-shrink:0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="width:11px;height:11px"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+          <span style="font-size:0.85rem;color:var(--text-muted);font-weight:500">${f}</span>
+        </div>`).join('');
+      content.innerHTML = `
+        <div>
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+            <span style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:50%;background:rgba(80,202,204,0.12);flex-shrink:0">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="#50CACC" style="width:28px;height:28px;display:block"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg>
+            </span>
+            <div>
+              <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 3px">Welcome to JumpKit Free! &#127881;</h2>
+              <p style="color:var(--text-muted);font-size:0.82rem;margin:0">Here's what's included on your plan:</p>
+            </div>
+          </div>
+          <div style="background:rgba(80,202,204,0.06);border:1px solid rgba(80,202,204,0.12);border-radius:10px;padding:14px 16px;margin-bottom:22px">
+            ${freeFRows}
+          </div>
+          <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 22px">Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.</p>
+          <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
+            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+          </button>
+        </div>`;
+    }
+    document.getElementById('obNext1').addEventListener('click', () => renderOnboardingStep(2, firstName, isUnlimited));
 
   } else if (step === 2) {
     // ROI Setup step
@@ -134,7 +193,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
       </div>`;
 
-    document.getElementById('obBack2').addEventListener('click', () => renderOnboardingStep(1, firstName));
+    document.getElementById('obBack2').addEventListener('click', () => renderOnboardingStep(1, firstName, isUnlimited));
     document.getElementById('obNextRoi').addEventListener('click', () => {
       const tpc = parseInt(document.getElementById('obTimePerClick').value, 10);
       const dph = parseInt(document.getElementById('obDollarsPerHour').value, 10);
@@ -143,7 +202,7 @@ function renderOnboardingStep(step, firstName) {
       if (!tpc || tpc < 1) { errEl.textContent = 'Please enter a valid time per click (min 1 second).'; errEl.style.display = 'block'; return; }
       if (!dph || dph < 1) { errEl.textContent = 'Please enter a valid hourly rate (min $1).'; errEl.style.display = 'block'; return; }
       DB.savePrefs(currentUser.id, { timePerClick: tpc, dollarsPerHour: dph });
-      renderOnboardingStep(3, firstName);
+      renderOnboardingStep(3, firstName, isUnlimited);
     });
 
   } else if (step === 3) {
@@ -187,7 +246,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
       </div>`;
 
-    document.getElementById('obBackCols').addEventListener('click', () => renderOnboardingStep(2, firstName));
+    document.getElementById('obBackCols').addEventListener('click', () => renderOnboardingStep(2, firstName, isUnlimited));
     document.getElementById('obNextCols').addEventListener('click', () => {
       // Save column names + visibility
       const nameInputs = document.querySelectorAll('.ob-col-name');
@@ -202,7 +261,7 @@ function renderOnboardingStep(step, firstName) {
         cols = cols.map(c => c.id === id ? { ...c, visible: inp.checked } : c);
       });
       DB.saveColumns(currentUser.id, cols);
-      renderOnboardingStep(4, firstName);
+      renderOnboardingStep(4, firstName, isUnlimited);
     });
 
   } else if (step === 4) {
@@ -258,7 +317,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
       </div>`;
 
-    document.getElementById('obBack3').addEventListener('click', () => renderOnboardingStep(3, firstName));
+    document.getElementById('obBack3').addEventListener('click', () => renderOnboardingStep(3, firstName, isUnlimited));
 
     // Wire custom column select — use fixed positioning so menu escapes modal overflow
     const obTrigger = document.getElementById('obColTrigger');
@@ -332,7 +391,7 @@ function renderOnboardingStep(step, firstName) {
       DB.createJump(currentUser.id, { name, url, columnId: colId, favorite: false, hotkey: '', notes: '' });
 
       // Go to seed jumps step
-      renderOnboardingStep(5, firstName);
+      renderOnboardingStep(5, firstName, isUnlimited);
     });
   } else if (step === 5) {
     // Seed jumps step — keep or remove example jumps
@@ -375,7 +434,7 @@ function renderOnboardingStep(step, firstName) {
         </div>
       </div>`;
 
-    document.getElementById('obBack5').addEventListener('click', () => renderOnboardingStep(4, firstName));
+    document.getElementById('obBack5').addEventListener('click', () => renderOnboardingStep(4, firstName, isUnlimited));
 
     document.getElementById('obFinishSeed').addEventListener('click', async () => {
       // Delete unchecked seed jumps
