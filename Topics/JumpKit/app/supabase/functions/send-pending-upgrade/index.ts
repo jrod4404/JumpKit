@@ -101,12 +101,16 @@ function buildPendingUpgradeHTML(): string {
             <td style="padding-left:12px;vertical-align:top">
               <p style="margin:0 0 4px;font-size:13px;font-weight:600;color:#C8D6E8">Download JumpKit</p>
               <p style="margin:0 0 10px;font-size:13px;color:#7A93B4;line-height:1.5">Get the desktop app for your platform:</p>
-              <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%"><tr>
-                <td style="padding-right:6px;width:50%">
-                  <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit-1.0.0-universal-signed.dmg" style="display:block;padding:10px 14px;background:linear-gradient(135deg,#50CACC,#1A4FD6);border-radius:8px;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;text-align:center">&#8595;&nbsp; Download for Mac</a>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+                <td width="50%" style="padding-right:8px">
+                  <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit-1.0.0-universal-signed.dmg" style="display:block;padding:14px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:14px;font-weight:600">
+                    <img src="https://jumpkit.app/email-icons/icon-apple.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="Apple" /> Download for macOS
+                  </a>
                 </td>
-                <td style="padding-left:6px;width:50%">
-                  <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit.Setup.1.0.0.exe" style="display:block;padding:10px 14px;background:linear-gradient(135deg,#50CACC,#1A4FD6);border-radius:8px;color:#ffffff;font-size:13px;font-weight:700;text-decoration:none;text-align:center">&#8595;&nbsp; Download for Windows</a>
+                <td width="50%" style="padding-left:8px">
+                  <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v1.0.0/JumpKit.Setup.1.0.0.exe" style="display:block;padding:14px 0;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:10px;text-align:center;text-decoration:none;color:#C8D6E8;font-size:14px;font-weight:600">
+                    <img src="https://jumpkit.app/email-icons/icon-windows.png" width="20" height="20" style="vertical-align:middle;margin-right:6px" alt="Windows" /> Download for Windows
+                  </a>
                 </td>
               </tr></table>
             </td>
