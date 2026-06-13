@@ -2798,7 +2798,7 @@ window.renderAdmin = async function renderAdmin() {
       const pillColor = isAdminU ? '#00C2C7' : isUnlimitedU ? '#48BB78' : isCancelledU ? '#e53e3e' : 'var(--text-dim)';
       const _adminPlanLabel = u.subscription_plan === 'annual' ? 'Annual' : u.subscription_plan === 'monthly' ? 'Monthly' : u.subscription_plan === 'annual-test' ? 'Annual (test)' : u.subscription_plan === 'monthly-test' ? 'Monthly (test)' : null;
       const _adminPlanIsTest = u.subscription_plan && u.subscription_plan.includes('test');
-      const planBadge = isUnlimitedU && _adminPlanLabel
+      const planBadge = _adminPlanLabel
         ? `<span style="background:${_adminPlanIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(72,187,120,0.12)'};color:${_adminPlanIsTest ? '#d97706' : '#48BB78'};font-weight:600;font-size:0.7rem;padding:2px 7px;border-radius:20px;margin-left:5px;white-space:nowrap">${_adminPlanLabel}</span>`
         : '';
       return `
