@@ -849,10 +849,7 @@ async function renderHome() {
     (allMemberRes.data || []).forEach(r => {
       memberCountByTeam[r.team_id] = (memberCountByTeam[r.team_id] || 0) + 1;
     });
-    // Owner (+1) is not in team_members
-    ownedTeams.forEach(t => {
-      memberCountByTeam[t.id] = (memberCountByTeam[t.id] || 0) + 1;
-    });
+    // Owner IS in team_members — no manual +1 needed
 
     const colCountByTeam = {};
     (allColRes.data || []).forEach(r => {
@@ -2029,7 +2026,7 @@ async function renderTeamROISection() {
       const memberCountMap = {};
       for (const t of ownedTeams) {
         const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
-        memberCountMap[t.id] = (count || 0) + 1;
+        memberCountMap[t.id] = (count || 0); // owner is already a team_members row
       }
       for (const t of memberTeams) { memberCountMap[t.id] = null; }
 
@@ -2101,7 +2098,7 @@ async function renderTeamROISection() {
       const memberCountMap = {};
       await Promise.all(ownedTeams.map(async t => {
         const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
-        memberCountMap[t.id] = (count || 0) + 1; // +1 for owner
+        memberCountMap[t.id] = (count || 0); // owner is already a team_members row
       }));
 
       // Fetch member_stats for all owned teams

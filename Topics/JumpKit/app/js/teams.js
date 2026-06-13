@@ -357,7 +357,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         _jSharerProfs.forEach(p => { _jSharerMap[p.id] = p; });
       } else {
       }
-      const totalJoinedUsers = memberCount + 1; // +1 for owner (not in team_members table)
+      const totalJoinedUsers = memberCount; // owner is already in team_members
       const joinedCreatedDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
       const joinedStatsParts = [`${totalJoinedUsers} user${totalJoinedUsers !== 1 ? 's' : ''}`];
       if (joinedCreatedDate) joinedStatsParts.push(`created ${joinedCreatedDate}`);
