@@ -890,7 +890,7 @@ async function renderHome() {
         : (ownerTierById[team.owner_id] || 'free');
       const isUnlimitedTeam = teamTier === 'core' || teamTier === 'teams_jet';
       const tierPill = isUnlimitedTeam
-        ? `<span style="background:rgba(72,187,120,0.12);color:#48BB78;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(72,187,120,0.3)">Unlimited Team</span>`
+        ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
         : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
       // Role pill — show 'Access paused' if locked member
