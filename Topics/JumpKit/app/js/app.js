@@ -949,7 +949,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const subPlan   = sbProfile.subscription_plan || null;
   const _planLabel = subPlan === 'annual' ? 'Annual' : subPlan === 'monthly' ? 'Monthly' : subPlan === 'annual-test' ? 'Annual (test)' : subPlan === 'monthly-test' ? 'Monthly (test)' : null;
   const _planIsTest = subPlan && subPlan.includes('test');
-  const planBadge = _planLabel ? `<span style="background:${_planIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(26,79,214,0.12)'};color:${_planIsTest ? '#d97706' : '#6B93D6'};font-weight:600;font-size:0.72rem;padding:2px 8px;border-radius:20px;margin-left:6px">${_planLabel}</span>` : '';
+  const planBadge = _planLabel ? `<span style="background:${_planIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(72,187,120,0.12)'};color:${_planIsTest ? '#d97706' : '#48BB78'};font-weight:600;font-size:0.72rem;padding:2px 8px;border-radius:20px;margin-left:6px">${_planLabel}</span>` : '';
   const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '-';
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
@@ -2799,7 +2799,7 @@ window.renderAdmin = async function renderAdmin() {
       const _adminPlanLabel = u.subscription_plan === 'annual' ? 'Annual' : u.subscription_plan === 'monthly' ? 'Monthly' : u.subscription_plan === 'annual-test' ? 'Annual (test)' : u.subscription_plan === 'monthly-test' ? 'Monthly (test)' : null;
       const _adminPlanIsTest = u.subscription_plan && u.subscription_plan.includes('test');
       const planBadge = isUnlimitedU && _adminPlanLabel
-        ? `<span style="background:${_adminPlanIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(26,79,214,0.12)'};color:${_adminPlanIsTest ? '#d97706' : '#6B93D6'};font-weight:600;font-size:0.7rem;padding:2px 7px;border-radius:20px;margin-left:5px;white-space:nowrap">${_adminPlanLabel}</span>`
+        ? `<span style="background:${_adminPlanIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(72,187,120,0.12)'};color:${_adminPlanIsTest ? '#d97706' : '#48BB78'};font-weight:600;font-size:0.7rem;padding:2px 7px;border-radius:20px;margin-left:5px;white-space:nowrap">${_adminPlanLabel}</span>`
         : '';
       return `
         <tr style="border-bottom:1px solid var(--border)">
