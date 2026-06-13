@@ -884,26 +884,21 @@ async function renderHome() {
       const teamJumps = allLocalJumps.filter(j => j.isShared && j.teamId === team.id && !j.isArchived);
       const jumpCount = teamJumps.length;
 
-      // Determine team tier for pill
+      // Determine team tier
       const teamTier = isOwner
         ? (window._supabaseProfile?.subscription_tier || 'free')
         : (ownerTierById[team.owner_id] || 'free');
       const isUnlimitedTeam = teamTier === 'core' || teamTier === 'teams_jet';
-      const tierPill = isUnlimitedTeam
-        ? `<span style="background:rgba(139,92,246,0.12);color:#8b5cf6;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(139,92,246,0.3)">Unlimited Team</span>`
-        : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
-
-      // Role pill — show 'Access paused' if locked member
-      const roleBadge = isOwner
-        ? `<span class="teams-badge teams-badge-owner" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Owner</span>`
-        : (isLocked
-          ? `<span style="background:rgba(229,62,62,0.12);color:#e53e3e;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(229,62,62,0.3)">Access paused</span>`
-          : `<span class="teams-badge" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Member</span>`);
+      const teamTypeLabel = isUnlimitedTeam ? 'Unlimited Team' : 'Free Team';
+      const roleLabel = isOwner ? 'Owner' : (isLocked ? 'Access paused' : 'Member');
 
       return `
         <div class="stat-card home-team-card"${isLocked ? ' style="border-color:rgba(229,62,62,0.3)"' : ''}>
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">${roleBadge}${tierPill}</div>
-          <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:12px;width:100%">${esc(team.name)}</div>
+          <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:4px;width:100%">${esc(team.name)}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:10px;display:flex;flex-direction:column;gap:1px">
+            <span><span style="font-weight:600;color:var(--text-muted)">Type:</span> ${teamTypeLabel}</span>
+            <span><span style="font-weight:600;color:var(--text-muted)">Your Role:</span> <span${isLocked ? ' style="color:#e53e3e"' : ''}>${roleLabel}</span></span>
+          </div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div>
               <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${members}</div>
