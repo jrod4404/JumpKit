@@ -108,6 +108,16 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       });
     } catch (_) {}
 
+    // Apply any pending upgrade (user paid for Unlimited before creating an account)
+    // Awaited so the profile is upgraded before app.html loads and reads the tier
+    try {
+      await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ email })
+      });
+    } catch (_) {}
+
     window.location.href = 'app.html';
   } catch (err) {
     const msg = err.message || '';
@@ -166,6 +176,19 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     // If email confirmation is enabled, Supabase won't auto-log in — show success modal
     if (!data?.session) {
       btn.classList.remove('btn-loading'); btn.disabled = false;
+
+      // Detect re-signup with an already-confirmed email: Supabase returns identities: []
+      // Silently send a "you already have an account" email so the user knows what to do.
+      // The UI still shows the same generic modal — no email enumeration from the UI.
+      if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
+        try {
+          await fetch(`${SUPABASE_URL}/functions/v1/send-account-exists`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+            body: JSON.stringify({ email })
+          });
+        } catch (_) {}
+      }
       // Show modal overlay
       const overlay = document.createElement('div');
       overlay.id = 'signupSuccessOverlay';
@@ -175,9 +198,10 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
           <div style="width:64px;height:64px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px">
             <svg viewBox="0 0 24 24" fill="none" stroke="#50CACC" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
           </div>
-          <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 12px">Account Created!</h2>
+          <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 12px">Check Your Email</h2>
           <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0 0 28px">
-            Check your email at <strong style="color:var(--text)">${email}</strong> and click the confirmation link to activate your account. Then go to the JumpKit sign in page to sign in.
+            If this is a new account, check <strong style="color:var(--text)">${email}</strong> for a confirmation link to activate your account.<br><br>
+            If you already have an account with this email, use the <strong style="color:var(--text)">Sign In</strong> tab or <strong style="color:var(--text)">reset your password</strong> instead.
           </p>
           <button id="signupSuccessOk" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:700;font-size:0.95rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem;flex-shrink:0"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
