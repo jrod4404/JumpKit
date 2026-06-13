@@ -2751,10 +2751,7 @@ window.renderAdmin = async function renderAdmin() {
     return;
   }
 
-  content.innerHTML = `
-    <div style="padding:24px 28px">
-      <div id="adminDash" style="color:var(--text-dim);font-size:0.9rem">Loading…</div>
-    </div>`;
+  content.innerHTML = `<div id="adminDash" style="color:var(--text-dim);font-size:0.9rem;padding:0">Loading…</div>`;
 
   try {
     // Ensure Chart.js is loaded
