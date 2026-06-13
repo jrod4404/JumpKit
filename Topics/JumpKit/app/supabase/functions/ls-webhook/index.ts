@@ -60,8 +60,8 @@ serve(async (req) => {
       subStatus = 'overdue';
     }
 
-    // Update profile by email
-    const { error } = await supabase
+    // Update profile by email; select() returns updated rows so we can detect 0-row case
+    const { data: updatedRows, error } = await supabase
       .from('profiles')
       .update({
         subscription_status: subStatus,
@@ -69,11 +69,29 @@ serve(async (req) => {
         ls_customer_id: customerId,
         trial_launches_used: 0  // reset trial on upgrade
       })
-      .eq('email', customerEmail);
+      .eq('email', customerEmail)
+      .select('id');
 
     if (error) {
       console.error('Supabase update error:', error);
       return new Response('DB error', { status: 500 });
+    }
+
+    // No profile exists yet — user paid before creating an account.
+    // Store the upgrade so it can be applied on their first login.
+    const profileExists = updatedRows && updatedRows.length > 0;
+    if (!profileExists && (eventName === 'subscription_created' || eventName === 'subscription_updated') && tier !== 'free') {
+      const { error: pendingErr } = await supabase
+        .from('pending_upgrades')
+        .upsert({ email: customerEmail, tier, ls_customer_id: customerId }, { onConflict: 'email' });
+      if (pendingErr) console.error('pending_upgrades upsert error:', pendingErr);
+      // Send onboarding email — tells the new customer how to download + set up JumpKit
+      fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-pending-upgrade`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}` },
+        body: JSON.stringify({ email: customerEmail }),
+      }).catch(e => console.error('send-pending-upgrade error:', e));
+      return new Response('OK', { status: 200 });
     }
 
     // Look up first name for personalized emails
