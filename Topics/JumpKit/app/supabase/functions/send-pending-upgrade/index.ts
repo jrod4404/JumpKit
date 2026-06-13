@@ -83,7 +83,7 @@ function buildPendingUpgradeHTML(): string {
 
     <!-- BODY -->
     <tr><td style="padding:36px 40px">
-      <h2 style="margin:0 0 10px;font-size:20px;color:#C8D6E8;font-weight:600">Your JumpKit Unlimited subscription is confirmed! ⚡</h2>
+      <h2 style="margin:0 0 10px;font-size:20px;color:#C8D6E8;font-weight:600">Your JumpKit Unlimited subscription is confirmed! 🎉</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
         Your payment went through and your Unlimited subscription is ready and waiting. You just need to download JumpKit and create your account — it takes about 2 minutes.
       </p>
