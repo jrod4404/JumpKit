@@ -451,7 +451,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
 }
 
 function renderOnboardingComplete() {
-  setOnboardingProgress(4); // fill bar to 100%
+  setOnboardingProgress(5); // fill bar to 100%
   const content = document.getElementById('onboardingContent');
   if (!content) return;
   content.innerHTML = `
