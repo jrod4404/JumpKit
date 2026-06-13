@@ -111,11 +111,15 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Apply any pending upgrade (user paid for Unlimited before creating an account)
     // Awaited so the profile is upgraded before app.html loads and reads the tier
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
+      const upgradeRes = await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({ email })
       });
+      const upgradeData = await upgradeRes.json().catch(() => ({}));
+      if (upgradeData.applied) {
+        sessionStorage.setItem('jk_pending_upgrade_applied', '1');
+      }
     } catch (_) {}
 
     window.location.href = 'app.html';

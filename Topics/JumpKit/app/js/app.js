@@ -138,7 +138,11 @@ async function initApp() {
         // Check for Core → free downgrade or free → Core upgrade
         const currentTier = data.subscription_tier || 'free';
         const lastKnownTier = data.last_known_tier || currentTier;
-        if (lastKnownTier === 'core' && currentTier === 'free') {
+        const pendingUpgradeApplied = sessionStorage.getItem('jk_pending_upgrade_applied');
+        if (pendingUpgradeApplied) {
+          sessionStorage.removeItem('jk_pending_upgrade_applied');
+          setTimeout(() => checkAndHandleUpgrade(currentTier), 1500);
+        } else if (lastKnownTier === 'core' && currentTier === 'free') {
           setTimeout(() => checkAndHandleDowngrade(), 1500);
         } else if (lastKnownTier === 'free' && (currentTier === 'core' || currentTier === 'teams_jet')) {
           setTimeout(() => checkAndHandleUpgrade(currentTier), 1500);
