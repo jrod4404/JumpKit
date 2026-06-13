@@ -307,11 +307,13 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
-                ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
+                <span style="display:flex;align-items:center;gap:6px">
+                  ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
+                  ${_ownedTierPill.replace('font-size:0.65rem;padding:2px 8px', 'font-size:0.62rem;padding:1px 6px')}
+                </span>
               </div>
             </div>
             <div class="acct-team-actions">
-              ${_ownedTierPill}
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" data-jaction="t-invite-for-team" data-id="${esc(team.id)}"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" data-jaction="t-share-col-modal" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-share"><use href="img/tabler-sprite.svg#tabler-share"/></svg> Manage Sharing</button>
@@ -389,11 +391,13 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
-                <span class="acct-team-stats">${joinedStats}</span>
+                <span style="display:flex;align-items:center;gap:6px">
+                  <span class="acct-team-stats">${joinedStats}</span>
+                  ${_joinedTierPill.replace('font-size:0.65rem;padding:2px 8px', 'font-size:0.62rem;padding:1px 6px')}
+                </span>
               </div>
             </div>
             <div class="acct-team-actions">
-              ${_joinedTierPill}
               <button class="btn btn-delete tooltip-left" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
           </div>
