@@ -946,6 +946,8 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const launchesUsed = sbProfile.trial_launches_used || 0;
   const tierLabel = (tier === 'core' || tier === 'teams_jet') ? 'JumpKit Unlimited' : 'JumpKit Free';
   const statusLabel = status === 'active' ? 'Active' : status === 'overdue' ? 'Overdue' : status === 'cancelled' ? 'Cancelled' : 'Free';
+  const subPlan   = sbProfile.subscription_plan || null;
+  const planBadge = subPlan ? `<span style="background:rgba(26,79,214,0.12);color:#6B93D6;font-weight:600;font-size:0.72rem;padding:2px 8px;border-radius:20px;margin-left:6px">${subPlan === 'annual' ? 'Annual' : 'Monthly'}</span>` : '';
   const memberSince = u && u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '-';
   const clickLog = (currentUser && DB.getClickLog) ? DB.getClickLog(currentUser.id) : [];
   const lifetimeLaunches = clickLog.length;
@@ -1017,7 +1019,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <div class="acct-row">
               <div class="acct-row-label"><span>Account Type</span></div>
               <span style="display:inline-flex;align-items:center;gap:8px">
-                <span class="acct-tier-badge" style="font-size:0.88rem;color:var(--text-muted)">${tierLabel}</span>
+                <span class="acct-tier-badge" style="font-size:0.88rem;color:var(--text-muted)">${tierLabel}${planBadge}</span>
                 <button class="btn btn-subtle" style="font-size:0.75rem;padding:2px 10px" data-jaction="open-tier-features">Features</button>
               </span>
             </div>
@@ -2792,11 +2794,14 @@ window.renderAdmin = async function renderAdmin() {
       const sub       = isAdminU ? 'Admin' : isUnlimitedU ? 'Unlimited' : isCancelledU ? 'Cancelled' : 'Free';
       const pillBg    = isAdminU ? 'rgba(0,194,199,0.12)' : isUnlimitedU ? 'rgba(72,187,120,0.12)' : isCancelledU ? 'rgba(229,62,62,0.12)' : 'rgba(128,128,128,0.12)';
       const pillColor = isAdminU ? '#00C2C7' : isUnlimitedU ? '#48BB78' : isCancelledU ? '#e53e3e' : 'var(--text-dim)';
+      const planBadge = isUnlimitedU && u.subscription_plan
+        ? `<span style="background:rgba(26,79,214,0.12);color:#6B93D6;font-weight:600;font-size:0.7rem;padding:2px 7px;border-radius:20px;margin-left:5px;white-space:nowrap">${u.subscription_plan === 'annual' ? 'Annual' : 'Monthly'}</span>`
+        : '';
       return `
         <tr style="border-bottom:1px solid var(--border)">
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted)">${esc(name)}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-dim)">${esc(u.email || '—')}</td>
-          <td style="padding:9px 12px;font-size:0.82rem"><span style="background:${pillBg};color:${pillColor};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${sub}</span></td>
+          <td style="padding:9px 12px;font-size:0.82rem"><span style="background:${pillBg};color:${pillColor};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${sub}</span>${planBadge}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${fmtLaunches(u)}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_owned || 0}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_joined || 0}</td>

@@ -15,8 +15,9 @@ import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // JumpKit Unlimited variants — both map to 'core' tier
-// Variant 1445234 = $99/yr, Variant 1742152 = $10/mo
-const CORE_VARIANT_IDS = ['1754948', '1754951']; // Annual: 1754948, Monthly: 1754951
+const ANNUAL_VARIANT_ID  = '1754948'; // $99/yr
+const MONTHLY_VARIANT_ID = '1754951'; // $10/mo
+const CORE_VARIANT_IDS = [ANNUAL_VARIANT_ID, MONTHLY_VARIANT_ID];
 const TEAMS_JET_VARIANT_IDS: string[] = []; // legacy, unused
 
 serve(async (req) => {
@@ -39,9 +40,13 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     );
 
-    // Determine tier from variant ID
+    // Determine tier + plan from variant ID
     let tier = 'free';
-    if (CORE_VARIANT_IDS.includes(variantId)) tier = 'core';
+    let plan: string | null = null;
+    if (CORE_VARIANT_IDS.includes(variantId)) {
+      tier = 'core';
+      plan = variantId === ANNUAL_VARIANT_ID ? 'annual' : 'monthly';
+    }
     if (TEAMS_JET_VARIANT_IDS.includes(variantId)) tier = 'teams_jet';
 
     // Map LS status to our status
@@ -61,14 +66,18 @@ serve(async (req) => {
     }
 
     // Update profile by email; select() returns updated rows so we can detect 0-row case
+    const profileUpdate: Record<string, unknown> = {
+      subscription_status: subStatus,
+      subscription_tier: tier,
+      ls_customer_id: customerId,
+      trial_launches_used: 0,  // reset trial on upgrade
+    };
+    if (plan !== null) profileUpdate.subscription_plan = plan;
+    if (tier === 'free') profileUpdate.subscription_plan = null; // clear on cancellation
+
     const { data: updatedRows, error } = await supabase
       .from('profiles')
-      .update({
-        subscription_status: subStatus,
-        subscription_tier: tier,
-        ls_customer_id: customerId,
-        trial_launches_used: 0  // reset trial on upgrade
-      })
+      .update(profileUpdate)
       .eq('email', customerEmail)
       .select('id');
 
@@ -83,7 +92,7 @@ serve(async (req) => {
     if (!profileExists && (eventName === 'subscription_created' || eventName === 'subscription_updated') && tier !== 'free') {
       const { error: pendingErr } = await supabase
         .from('pending_upgrades')
-        .upsert({ email: customerEmail, tier, ls_customer_id: customerId }, { onConflict: 'email' });
+        .upsert({ email: customerEmail, tier, plan, ls_customer_id: customerId }, { onConflict: 'email' });
       if (pendingErr) console.error('pending_upgrades upsert error:', pendingErr);
       // Send onboarding email — tells the new customer how to download + set up JumpKit
       fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-pending-upgrade`, {
