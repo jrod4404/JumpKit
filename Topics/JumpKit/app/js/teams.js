@@ -175,8 +175,10 @@ async function renderUnifiedTeamsView(content, supaUser) {
   const { data: ownedTeams = [] } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name');
 
   // Fetch teams this user is a member of (but doesn't own)
-  const { data: memberRows = [] } = await supabaseClient.from('team_members').select('team_id').eq('user_id', supaUser.id);
+  const { data: memberRows = [] } = await supabaseClient.from('team_members').select('team_id, locked').eq('user_id', supaUser.id);
   const memberTeamIds = memberRows.map(r => r.team_id).filter(id => !ownedTeams.find(t => t.id === id));
+  // Track locked status for joined teams
+  const _lockedTeamIds = new Set(memberRows.filter(r => r.locked).map(r => r.team_id));
   let memberTeams = [];
   for (const tid of memberTeamIds) {
     const { data: t } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('id', tid).single();
@@ -197,6 +199,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
   }
 
   const _isFree = (window._supabaseProfile?.subscription_tier || 'free') === 'free';
+  // Tier pill for owned teams (current user is the owner)
+  const _ownedTier = window._supabaseProfile?.subscription_tier || 'free';
+  const _ownedIsUnlimited = _ownedTier === 'core' || _ownedTier === 'teams_jet';
+  const _ownedTierPill = _ownedIsUnlimited
+    ? `<span style="background:rgba(72,187,120,0.12);color:#48BB78;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(72,187,120,0.3)">Unlimited Team</span>`
+    : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
   let html = `<div class="acct-grid">`;
 
@@ -299,6 +307,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
+                ${_ownedTierPill}
                 ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
               </div>
             </div>
@@ -341,7 +350,14 @@ async function renderUnifiedTeamsView(content, supaUser) {
       </div>`;
   } else {
     for (const team of memberTeams) {
-      const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', team.owner_id).single();
+      const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name, subscription_tier').eq('id', team.owner_id).single();
+      // Tier pill for joined teams (based on owner's subscription tier)
+      const _joinedOwnerTier = ownerProf?.subscription_tier || 'free';
+      const _joinedIsUnlimited = _joinedOwnerTier === 'core' || _joinedOwnerTier === 'teams_jet';
+      const _joinedTierPill = _joinedIsUnlimited
+        ? `<span style="background:rgba(72,187,120,0.12);color:#48BB78;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(72,187,120,0.3)">Unlimited Team</span>`
+        : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
+      const _isLockedFromTeam = _lockedTeamIds.has(team.id);
       const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
       const ownerEmail = ownerProf?.email || '';
       const ownerLabel = ownerName || ownerEmail || '-';
@@ -373,6 +389,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
+                ${_joinedTierPill}
                 <span class="acct-team-stats">${joinedStats}</span>
               </div>
             </div>
@@ -388,9 +405,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
             <div class="acct-team-cols-section">
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
-                ${joinedTeamCols.length > 0
-                  ? joinedTeamCols.map(c => { const p = _jSharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}</span>`; }).join('')
-                  : '<span class="acct-row-hint" style="font-size:0.8rem">No shared columns</span>'}
+                ${_isLockedFromTeam
+                  ? `<div style="background:rgba(229,62,62,0.07);border:1px solid rgba(229,62,62,0.2);border-radius:8px;padding:16px;text-align:center;color:#e53e3e;font-size:0.875rem">Your access to <strong>${esc(team.name)}</strong> has been paused. Contact the team owner to restore access.</div>`
+                  : (joinedTeamCols.length > 0
+                    ? joinedTeamCols.map(c => { const p = _jSharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}</span>`; }).join('')
+                    : '<span class="acct-row-hint" style="font-size:0.8rem">No shared columns</span>')}
               </div>
             </div>
           </div>

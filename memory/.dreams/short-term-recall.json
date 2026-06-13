@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-11T12:09:46.408Z",
+  "updatedAt": "2026-06-13T12:46:26.719Z",
   "entries": {
     "memory:memory/2026-03-01.md:73:82": {
       "key": "memory:memory/2026-03-01.md:73:82",
@@ -9,13 +9,13 @@
       "endLine": 82,
       "source": "memory",
       "snippet": "## JumpKit App — Tech Notes - Auth: localStorage-based (signup/login/forgot password) - DB: localStorage abstraction in db.js (easy swap to SQLite in Electron) - Styling: Tabler Icons throughout (grayscale), turquoise+royal blue accent, light/dark mode - Color palette: --royal #1A4FD6, --turq #00C2C7, --hover-accent #2B9ED8 - Text softened: dark --text #C8D6E8, light --text #2C3E52 - Pages: Home, Jumps (columns + context menus), Archive, Stats (placeholder), Help, Settings (placeholder), Account (placeholder) - User dropdown in topbar (Settings, My Account, Logout) - Drag-and-drop column reordering in configure columns modal",
-      "recallCount": 30,
+      "recallCount": 31,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 11.834728625416755,
+      "totalScore": 12.214307406544684,
       "maxScore": 0.45596020221710204,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-11T12:09:46.408Z",
+      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
       "queryHashes": [
         "401b0ff2f490",
         "cd71ff1b4e59",
@@ -43,7 +43,8 @@
         "6ed9e6f9fb2f",
         "f0be698caf08",
         "797f0e4cec23",
-        "6319bcef2e02"
+        "6319bcef2e02",
+        "8d672aa6babe"
       ],
       "recallDays": [
         "2026-05-20",
@@ -58,7 +59,8 @@
         "2026-06-05",
         "2026-06-08",
         "2026-06-10",
-        "2026-06-11"
+        "2026-06-11",
+        "2026-06-12"
       ],
       "conceptTags": [
         "localstorage-based",
@@ -208,13 +210,13 @@
       "endLine": 61,
       "source": "memory",
       "snippet": "- [ ] Welcome to JumpKit Core — test with a real paid subscription event - [ ] Cancellation email — test - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer - [ ] Pagination on list queries ## Key Identifiers - New Edge Functions: `send-welcome` (deployed ✅), `send-welcome-core` (not yet deployed), `send-cancellation` (not yet deployed) - Onboarding file: `Topics/JumpKit/app/js/onboarding.js` - Git corruption: object `be1cf517c9cde53a9290fbe61a8472f56a4e8eb3` - Backups: `a",
-      "recallCount": 7,
+      "recallCount": 9,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 2.9631530212488597,
+      "totalScore": 3.744951330336613,
       "maxScore": 0.6260774808254667,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-08T12:10:31.942Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
       "queryHashes": [
         "401b0ff2f490",
         "8fb8a0cac588",
@@ -222,7 +224,9 @@
         "c9788a011d93",
         "3371fbb38341",
         "a8f73330640f",
-        "7917f319bb86"
+        "7917f319bb86",
+        "de346ae63b5e",
+        "7539dcba99c1"
       ],
       "recallDays": [
         "2026-05-20",
@@ -231,7 +235,8 @@
         "2026-05-28",
         "2026-06-05",
         "2026-06-06",
-        "2026-06-08"
+        "2026-06-08",
+        "2026-06-13"
       ],
       "conceptTags": [
         "backup",
@@ -251,13 +256,13 @@
       "endLine": 30,
       "source": "memory",
       "snippet": "# 2026-04-07 — Session Notes ## 📋 JumpKit To-Do List (as of Apr 10) 1. **Audit tests 46–51** — verify team sharing writes to Supabase + local SQLite are in sync 2. **Live invite email test** — trigger a real team invite, verify end-to-end delivery via Resend 3. **Account + Teams page UI cleanup** — review layout/design, evaluate merging into one page 4. **Supademo** — Jeff records demo, Max swaps into landing page in place of static screenshots 5. **Connect \"Get JumpKit Now\" landing page buttons to Lemon Squeezy** — free tier card button still links to `#` (download placeholder), needs to be wired to actual download or LS flow 6. **Security + vibe coding audit + backup** — check for secur",
-      "recallCount": 17,
+      "recallCount": 19,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 6.535354498028755,
+      "totalScore": 7.293107488751411,
       "maxScore": 0.4214278906583786,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-08T20:23:04.195Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -272,7 +277,9 @@
         "13e14f23d88f",
         "6ed9e6f9fb2f",
         "f3926a289e7c",
-        "f0be698caf08"
+        "f0be698caf08",
+        "8d672aa6babe",
+        "095836eeb37a"
       ],
       "recallDays": [
         "2026-05-20",
@@ -283,7 +290,9 @@
         "2026-06-01",
         "2026-06-03",
         "2026-06-05",
-        "2026-06-08"
+        "2026-06-08",
+        "2026-06-12",
+        "2026-06-13"
       ],
       "conceptTags": [
         "backup",
@@ -303,13 +312,13 @@
       "endLine": 65,
       "source": "memory",
       "snippet": "- [ ] Verify Vercel SSL cert resolved for jumpkit.app (was pending) - [ ] Audit tests 46–51 — team sharing Supabase + SQLite sync - [ ] Live invite email test end-to-end via Resend - [ ] Account + Teams page UI cleanup (consider merging) - [ ] Wire \"Get JumpKit Free Tier\" button → actual download or Lemon Squeezy - [ ] Security + vibe coding audit + backup - [ ] Once jumpkit.ai verified in Resend → swap from/to addresses in send-feedback edge function - [ ] Add Windows screenshot of JumpKit to hero section - [x] Add industry icons and cards to hero section - [x] Add two more cards to Features section",
-      "recallCount": 17,
+      "recallCount": 18,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 6.483552411198615,
+      "totalScore": 6.8498048067092885,
       "maxScore": 0.4440046966075897,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-08T20:23:04.195Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.665Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -324,7 +333,8 @@
         "6ed9e6f9fb2f",
         "f3926a289e7c",
         "a8f73330640f",
-        "7917f319bb86"
+        "7917f319bb86",
+        "de346ae63b5e"
       ],
       "recallDays": [
         "2026-05-20",
@@ -337,7 +347,8 @@
         "2026-06-03",
         "2026-06-05",
         "2026-06-06",
-        "2026-06-08"
+        "2026-06-08",
+        "2026-06-13"
       ],
       "conceptTags": [
         "backup",
@@ -357,13 +368,13 @@
       "endLine": 28,
       "source": "memory",
       "snippet": "# 2026-03-29 — JumpKit Session Notes ## Session summary Long JumpKit dev session. Context grew to ~900k tokens — compacted to save costs. Haiku set as default model for new sessions. ## Features completed today ### Column config modal - Replaced native `<select>` with custom-select component for \"Share With\" dropdown - Grid updated to `28px 1fr 70px 240px`; labels (\"Column Name\", \"Visible\", \"Share With\") added above each control - Share dropdown height fixed to 30.4px matching inputs; drag handle padding tuned to 7px - Close handler scoped to modalBox element only (not document) to avoid interfering with other modals ### Add Jump modal - Column dropdown placeholder \"Select Column\" in mut",
-      "recallCount": 17,
+      "recallCount": 18,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 6.5501595556735985,
-      "maxScore": 0.44063537716865536,
+      "totalScore": 7.024143409729003,
+      "maxScore": 0.4739838540554046,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-10T18:53:16.854Z",
+      "lastRecalledAt": "2026-06-13T12:46:26.719Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -378,7 +389,8 @@
         "6ed9e6f9fb2f",
         "f3926a289e7c",
         "f0be698caf08",
-        "797f0e4cec23"
+        "797f0e4cec23",
+        "1bf0b7afa8b5"
       ],
       "recallDays": [
         "2026-05-20",
@@ -391,7 +403,8 @@
         "2026-06-03",
         "2026-06-05",
         "2026-06-08",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-13"
       ],
       "conceptTags": [
         "custom-select",
@@ -490,13 +503,13 @@
       "endLine": 119,
       "source": "memory",
       "snippet": "- GitHub: `https://github.com/jrod4404/JumpKit.git` - Supabase URL: `https://iuexwdjnqfidcwvwbgwr.supabase.co` - Lemon Squeezy checkout: `https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb` - Admin email: `jeffroder@gmail.com` - App SQLite DB: `/Users/jeffroder/Library/Application Support/jumpkit/jumpkit.db` --- ## 2026-05-11 Afternoon Updates ### Account + Teams merge complete - Slider toggle (My Account | My Teams) added to Account page - Teams nav item removed from sidebar - navigateTo('teams') now opens Account with My Teams tab active - Button updates: \"Unlock JumpKit Core!\" with JumpKit icon, no hover shift ### Account page new fields - Trial Launche",
-      "recallCount": 7,
+      "recallCount": 10,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 2.658172696828842,
+      "totalScore": 3.795573917031288,
       "maxScore": 0.4456766098737716,
       "firstRecalledAt": "2026-05-21T11:22:31.234Z",
-      "lastRecalledAt": "2026-06-10T18:53:21.946Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
       "queryHashes": [
         "84f72e652e71",
         "8fb8a0cac588",
@@ -504,7 +517,10 @@
         "75f6d7c47531",
         "a8f73330640f",
         "b750ece5f092",
-        "563b36c52816"
+        "563b36c52816",
+        "8d672aa6babe",
+        "de346ae63b5e",
+        "7539dcba99c1"
       ],
       "recallDays": [
         "2026-05-21",
@@ -512,7 +528,9 @@
         "2026-06-01",
         "2026-06-06",
         "2026-06-09",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-12",
+        "2026-06-13"
       ],
       "conceptTags": [
         "github.com/jrod4404/jumpkit.git",
@@ -732,13 +750,13 @@
       "endLine": 99,
       "source": "memory",
       "snippet": "- Test users: jeffroder@gmail.com / KickAss11!! (org owner), jeff.roder@us.bosch.com / KickAss22@@ (member), support@jumpkit.ai / TestUser1! (Test User 1) - Test teams: JeffTestOrg-Team1/JeffTestOrg-Team1!, JeffTestOrg-Team2/JeffTestOrg-Team2@, E2E-Test-Team/TestPass123! - Lemon Squeezy checkout: https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb - send-invite Edge Function: `Topics/JumpKit/app/supabase/functions/send-invite/index.ts` - Vercel deploy: `cd Topics/JumpKit/landing && vercel --prod` - Edge Function deploy: `cd Topics/JumpKit/app && npx supabase functions deploy send-invite` - Git commits (2026-05-13): ae8b365 (invite modal password field), 4f4232e",
-      "recallCount": 7,
+      "recallCount": 9,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 2.878465259975995,
+      "totalScore": 3.638199124641026,
       "maxScore": 0.6401916721530808,
       "firstRecalledAt": "2026-05-23T12:57:51.834Z",
-      "lastRecalledAt": "2026-06-07T12:54:40.312Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
       "queryHashes": [
         "c9d5194a7fb5",
         "86bd0f4206c7",
@@ -746,7 +764,9 @@
         "7dacacef797c",
         "3371fbb38341",
         "a8f73330640f",
-        "66cd7cfa2560"
+        "66cd7cfa2560",
+        "bbfcde8fe8d9",
+        "095836eeb37a"
       ],
       "recallDays": [
         "2026-05-23",
@@ -754,7 +774,9 @@
         "2026-06-01",
         "2026-06-05",
         "2026-06-06",
-        "2026-06-07"
+        "2026-06-07",
+        "2026-06-11",
+        "2026-06-13"
       ],
       "conceptTags": [
         "gmail.com",
@@ -962,18 +984,20 @@
       "endLine": 82,
       "source": "memory",
       "snippet": "- Join only checks: org name + team name + password hash - Anyone with the invite email forwarded to them can join **Target state (3-factor join):** 1. Correct org name + team name 2. Correct team password (PBKDF2 hash match) 3. User's Supabase account email must exist as a `pending` invite in `team_invites` for that team **Remaining attack vector + fix:** - Attack: Mallory creates JumpKit account using Alice's email before Alice does, then joins - Fix: Enable Supabase email confirmation — new accounts must verify email via inbox link before active - Since only Alice can access her inbox, Mallory is blocked **Implementation steps:** 1. **Add invite check to `joinTeam()` in `teams.js`:**",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.43808498084545133,
+      "totalScore": 0.823263981938362,
       "maxScore": 0.43808498084545133,
       "firstRecalledAt": "2026-05-27T12:37:31.154Z",
-      "lastRecalledAt": "2026-05-27T12:37:31.154Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
       "queryHashes": [
-        "86bd0f4206c7"
+        "86bd0f4206c7",
+        "095836eeb37a"
       ],
       "recallDays": [
-        "2026-05-27"
+        "2026-05-27",
+        "2026-06-13"
       ],
       "conceptTags": [
         "3-factor",
@@ -1060,18 +1084,20 @@
       "endLine": 67,
       "source": "memory",
       "snippet": "- If found → proceed with join, then update invite status to `'accepted'` 3. **Test the full flow** end to end **Files to change:** - `teams.js` → `joinTeam()` function — add invite check before `team_members` insert - Supabase Dashboard → Auth settings — enable email confirmation - Possibly `index.html` / `auth.js` — handle email confirmation deep-link in Electron **Note:** Supabase email confirmation redirect URL is the same problem as the forgot password flow — Electron can't receive standard web redirects. Need to design a custom solution (e.g. custom protocol handler or web-based intermediate page). --- ### Key Identifiers (carried forward) - App path: `/Users/jeffroder/.openclaw",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.3956147789955139,
-      "maxScore": 0.3956147789955139,
+      "totalScore": 0.8111407905817032,
+      "maxScore": 0.41552601158618924,
       "firstRecalledAt": "2026-05-27T12:37:31.154Z",
-      "lastRecalledAt": "2026-05-27T12:37:31.154Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
       "queryHashes": [
-        "86bd0f4206c7"
+        "86bd0f4206c7",
+        "095836eeb37a"
       ],
       "recallDays": [
-        "2026-05-27"
+        "2026-05-27",
+        "2026-06-13"
       ],
       "conceptTags": [
         "teams.js",
@@ -1158,20 +1184,22 @@
       "endLine": 27,
       "source": "memory",
       "snippet": "# Memory — 2026-05-14 ## JumpKit Session Carry-Forward (from 2026-05-13) ### Completed 2026-05-13 - ✅ Email icon PNGs regenerated with transparent backgrounds using node-canvas - ✅ Social media footer icons restored as circles with hosted PNG icons (X, YouTube, LinkedIn) - ✅ Invite email live-tested and confirmed working end-to-end in real inbox - ✅ `team_password_plain` column added to Supabase `teams` table (ALTER TABLE teams ADD COLUMN IF NOT EXISTS team_password_plain text) - ✅ Invite modal now auto-fetches plaintext password — no manual re-entry by owner - ✅ `resendInvite` fixed — was sending email without teamName, orgName, or password - ✅ Backup: `app_backups/app_backup_2026-05-13`",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.9501942171824729,
+      "totalScore": 1.3253993376267705,
       "maxScore": 0.5710535093320167,
       "firstRecalledAt": "2026-05-28T18:12:36.050Z",
-      "lastRecalledAt": "2026-06-08T20:23:07.465Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
       "queryHashes": [
         "7eb8dc00caa7",
-        "ab55d7c81f1e"
+        "ab55d7c81f1e",
+        "095836eeb37a"
       ],
       "recallDays": [
         "2026-05-28",
-        "2026-06-08"
+        "2026-06-08",
+        "2026-06-13"
       ],
       "conceptTags": [
         "backup",
@@ -1359,18 +1387,21 @@
       "endLine": 34,
       "source": "memory",
       "snippet": "3. **`window.SUPABASE_ANON_KEY` was undefined** — `config.js` uses `const` which doesn't attach to `window`. `app.js` and `auth.js` were referencing `window.SUPABASE_ANON_KEY` → sending `Bearer undefined` → 401 Invalid JWT. Fixed to `SUPABASE_ANON_KEY` (no window prefix). Same bug was in `auth.js` for `window.SUPABASE_URL` on the send-welcome call. ### Resend + DNS setup - `jumpkit.app` domain verified in Resend - All 6 edge functions redeployed with `noreply@jumpkit.app` - GoDaddy DNS: added MX record `mail.protonmail.ch` priority 10 for `@` - Secondary MX `mailsec.protonmail.ch` could not be added (GoDaddy \"Invalid data\" error — likely a `.ch` TLD issue in their validator). Not critical —",
-      "recallCount": 1,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.4003575652837753,
+      "totalScore": 1.1513581484556197,
       "maxScore": 0.4003575652837753,
       "firstRecalledAt": "2026-05-31T12:13:31.579Z",
-      "lastRecalledAt": "2026-05-31T12:13:31.579Z",
+      "lastRecalledAt": "2026-06-11T16:05:49.659Z",
       "queryHashes": [
-        "72b915f02b87"
+        "72b915f02b87",
+        "bbfcde8fe8d9",
+        "b784fd8dfc63"
       ],
       "recallDays": [
-        "2026-05-31"
+        "2026-05-31",
+        "2026-06-11"
       ],
       "conceptTags": [
         "window.supabase-anon-key",
@@ -1390,18 +1421,21 @@
       "endLine": 26,
       "source": "memory",
       "snippet": "# 2026-05-30 ## JumpKit — Email Infrastructure Overhaul Jeff gained ownership of `sales@jumpkit.app` and `support@jumpkit.app`. Full migration from `@jumpkit.ai` to `@jumpkit.app` completed. ### Code changes - 9 files updated: all `@jumpkit.ai` → `@jumpkit.app` - `js/help.js` — fixed broken `mailto:` mismatch - `supabase/send-feedback.js` — from + to + comment - `supabase/send-invite.js` — from - `supabase/functions/waitlist-signup/index.ts` - `supabase/functions/send-welcome/index.ts` - `supabase/functions/send-invite/index.ts` - `supabase/functions/send-team-deleted/index.ts` - `supabase/functions/send-cancellation/index.ts` - `supabase/functions/send-welcome-core/inde",
-      "recallCount": 1,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.39215164482593534,
+      "totalScore": 1.1305181145668028,
       "maxScore": 0.39215164482593534,
       "firstRecalledAt": "2026-05-31T12:13:31.579Z",
-      "lastRecalledAt": "2026-05-31T12:13:31.579Z",
+      "lastRecalledAt": "2026-06-11T16:05:49.659Z",
       "queryHashes": [
-        "72b915f02b87"
+        "72b915f02b87",
+        "bbfcde8fe8d9",
+        "b784fd8dfc63"
       ],
       "recallDays": [
-        "2026-05-31"
+        "2026-05-31",
+        "2026-06-11"
       ],
       "conceptTags": [
         "jumpkit.app",
@@ -1421,20 +1455,22 @@
       "endLine": 77,
       "source": "memory",
       "snippet": "4. Member joined team confirmation → sent to team owner when a member joins - [ ] Fix forgot password reset flow (Electron deep-link / redirect URL issue) - [ ] Create org-created confirmation email - [ ] Create team-created confirmation email - [ ] Create welcome-to-JumpKit email - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` and deploy - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy or download - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer with latest code - [ ] Pagination on list queries (teams, members) ### Key Identifiers (unchanged) - Jeff's Supabase UUI",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.934011085008962,
+      "totalScore": 1.3137939554208349,
       "maxScore": 0.5650338273995947,
       "firstRecalledAt": "2026-05-31T12:13:31.579Z",
-      "lastRecalledAt": "2026-06-06T01:29:58.434Z",
+      "lastRecalledAt": "2026-06-11T16:02:45.625Z",
       "queryHashes": [
         "72b915f02b87",
-        "3371fbb38341"
+        "3371fbb38341",
+        "bbfcde8fe8d9"
       ],
       "recallDays": [
         "2026-05-31",
-        "2026-06-05"
+        "2026-06-05",
+        "2026-06-11"
       ],
       "conceptTags": [
         "deep-link",
@@ -1454,18 +1490,20 @@
       "endLine": 55,
       "source": "memory",
       "snippet": "- Added inline \"Features\" button next to Account Type on My Account tab - Opens `openTierFeaturesModal()` — tier-specific feature list with checkmarks - Free modal includes upgrade nudge + \"Unlock JumpKit Core\" button - Core modal shows all 6 features, Close button only ### Free Tier Paywall Rules Enforced - **Own max 1 team** — already existed in `openAddTeamModal` - **Join max 1 team** — NEW: `openJoinTeamModal` now checks `team_members` count, blocks with upgrade modal if ≥ 1 - Features modal updated: \"Own 1 team\" + \"Join 1 team as a member\" - Core features: \"Own unlimited teams\" + \"Join unlimited teams as a member\" ### Upgrade Banner (Account page, free users) - Updated feature list to",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.4252668261528015,
+      "totalScore": 0.8288208305835723,
       "maxScore": 0.4252668261528015,
       "firstRecalledAt": "2026-06-01T11:19:53.783Z",
-      "lastRecalledAt": "2026-06-01T11:19:53.783Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
       "queryHashes": [
-        "75f6d7c47531"
+        "75f6d7c47531",
+        "7539dcba99c1"
       ],
       "recallDays": [
-        "2026-06-01"
+        "2026-06-01",
+        "2026-06-13"
       ],
       "conceptTags": [
         "tier-specific",
@@ -1485,18 +1523,20 @@
       "endLine": 81,
       "source": "memory",
       "snippet": "- Turquoise checkmark icon (40px) + subtitle text on same line ### Subscription Ended Modal Fixes - 250 launches bullet now appears **first** (unshift instead of push) - Team name lookup falls back to direct Supabase query for members who don't own the team — fixes \"your team\" placeholder showing instead of actual team name ### Invite Email Updates - Bullet 1: \"Download and open JumpKit\" → \"Download the JumpKit desktop app\" - Deployed to Supabase: `send-invite` edge function redeployed ### Invite Members Modal - Helper text added above Team Password field - Join Team modal: added \"You can find this in your invitation email.\" to password prompt ### Signup Success Modal - Text updated to i",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.3967873901128769,
+      "totalScore": 0.7790492892265319,
       "maxScore": 0.3967873901128769,
       "firstRecalledAt": "2026-06-01T11:19:53.783Z",
-      "lastRecalledAt": "2026-06-01T11:19:53.783Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
       "queryHashes": [
-        "75f6d7c47531"
+        "75f6d7c47531",
+        "7539dcba99c1"
       ],
       "recallDays": [
-        "2026-06-01"
+        "2026-06-01",
+        "2026-06-13"
       ],
       "conceptTags": [
         "send-invite",
@@ -1916,6 +1956,317 @@
         "summary",
         "shared",
         "jump"
+      ]
+    },
+    "memory:memory/2026-06-09.md:205:232": {
+      "key": "memory:memory/2026-06-09.md:205:232",
+      "path": "memory/2026-06-09.md",
+      "startLine": 205,
+      "endLine": 232,
+      "source": "memory",
+      "snippet": "- `confirm-email.html` — Supabase Auth built-in (confirm signup) - `reset-email.html` — Supabase Auth built-in (password reset) - `invite-email.html` → `send-invite` edge function - `welcome-email.html` → `send-welcome` edge function - `welcome-unlimited-email.html` → `send-welcome-core` edge function (renamed from welcome-core) - `cancellation-email.html` → `send-cancellation` edge function - `team-deleted-email.html` → `send-team-deleted` edge function - `waitlist-email.html` → `waitlist-signup` edge function ### Landing subpages Location: `/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/landing/subpages/` - `confirmed.html` — post-email-confirm landing page - `reset-password.html` —",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3753824025392532,
+      "maxScore": 0.3753824025392532,
+      "firstRecalledAt": "2026-06-11T16:02:45.625Z",
+      "lastRecalledAt": "2026-06-11T16:02:45.625Z",
+      "queryHashes": [
+        "bbfcde8fe8d9"
+      ],
+      "recallDays": [
+        "2026-06-11"
+      ],
+      "conceptTags": [
+        "confirm-email.html",
+        "built-in",
+        "reset-email.html",
+        "invite-email.html",
+        "send-invite",
+        "welcome-email.html",
+        "send-welcome",
+        "welcome-unlimited-email.html"
+      ]
+    },
+    "memory:memory/2026-06-09.md:22:49": {
+      "key": "memory:memory/2026-06-09.md:22:49",
+      "path": "memory/2026-06-09.md",
+      "startLine": 22,
+      "endLine": 49,
+      "source": "memory",
+      "snippet": "- `confirm-email.html` — Supabase Auth built-in (confirm signup) - `reset-email.html` — Supabase Auth built-in (password reset) - `invite-email.html` → `send-invite` edge function - `welcome-email.html` → `send-welcome` edge function - `welcome-unlimited-email.html` → `send-welcome-core` edge function (renamed from welcome-core) - `cancellation-email.html` → `send-cancellation` edge function - `team-deleted-email.html` → `send-team-deleted` edge function - `waitlist-email.html` → `waitlist-signup` edge function ### Landing subpages Location: `/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/landing/subpages/` - `confirmed.html` — post-email-confirm landing page - `reset-password.html` —",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3753824025392532,
+      "maxScore": 0.3753824025392532,
+      "firstRecalledAt": "2026-06-11T16:02:45.625Z",
+      "lastRecalledAt": "2026-06-11T16:02:45.625Z",
+      "queryHashes": [
+        "bbfcde8fe8d9"
+      ],
+      "recallDays": [
+        "2026-06-11"
+      ],
+      "conceptTags": [
+        "confirm-email.html",
+        "built-in",
+        "reset-email.html",
+        "invite-email.html",
+        "send-invite",
+        "welcome-email.html",
+        "send-welcome",
+        "welcome-unlimited-email.html"
+      ]
+    },
+    "memory:memory/2026-06-06.md:62:85": {
+      "key": "memory:memory/2026-06-06.md:62:85",
+      "path": "memory/2026-06-06.md",
+      "startLine": 62,
+      "endLine": 85,
+      "source": "memory",
+      "snippet": "1. Killed stale notarytool (PID 42652) + npm build (PID 15910) 2. Stapled accepted Apple ticket to .app — Gatekeeper: source=Notarized Developer ID, origin=Developer ID Application: Jeff Roder (ZDJSH728ND) ✅ 3. Built JumpKit-1.0.0-universal-signed.dmg (228 MB) 4. Uploaded to GitHub Releases (jrod4404/jumpkit-releases), removed old unsigned DMG 5. Updated landing/index.html Mac download button → new signed file 6. Deployed to Vercel — live Mac users now get signed/notarized installer from jumpkit.app — no more \"unidentified developer\" warning. ## JumpKit LLC — Filed 2026-06-06 - Entity: JumpKit LLC (Michigan Domestic LLC, CD-700) - Filed: 2026-06-06, pending state processing - EIN: 42-3009",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.37538405060768126,
+      "maxScore": 0.37538405060768126,
+      "firstRecalledAt": "2026-06-12T13:16:57.078Z",
+      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
+      "queryHashes": [
+        "8d672aa6babe"
+      ],
+      "recallDays": [
+        "2026-06-12"
+      ],
+      "conceptTags": [
+        "jrod4404/jumpkit-releases",
+        "landing/index.html",
+        "signed/notarized",
+        "jumpkit.app",
+        "cd-700",
+        "42-3009",
+        "killed",
+        "stale"
+      ]
+    },
+    "memory:memory/2026-05-31.md:1:33": {
+      "key": "memory:memory/2026-05-31.md:1:33",
+      "path": "memory/2026-05-31.md",
+      "startLine": 1,
+      "endLine": 33,
+      "source": "memory",
+      "snippet": "# 2026-05-31 ## JumpKit — Paywall Testing + UX Polish Session Long session working through the to-do list, primarily #1 (paywall edge cases). ### Infrastructure Fix - **Supabase SMTP sender** updated from `noreply@jumpkit.ai` → `noreply@jumpkit.app` — was causing 500 errors on new account signup confirmation emails ### Teams Page Fixes - `renderTeams()` now targets `acctTabContent` when present — prevents tab bar (My Account / My Teams / Settings) from being wiped on team create/edit/delete actions - \"No teams yet.\" empty state updated to \"No teams yet. Click **Create Team** to get started.\" (3 locations in teams.js) - \"None yet — click Share Col above\" → \"None yet — click **Manage Shari",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.36975817084312435,
+      "maxScore": 0.36975817084312435,
+      "firstRecalledAt": "2026-06-12T13:16:57.078Z",
+      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
+      "queryHashes": [
+        "8d672aa6babe"
+      ],
+      "recallDays": [
+        "2026-06-12"
+      ],
+      "conceptTags": [
+        "to-do",
+        "jumpkit.ai",
+        "jumpkit.app",
+        "create/edit/delete",
+        "teams.js",
+        "jumpkit",
+        "paywall",
+        "testing"
+      ]
+    },
+    "memory:memory/2026-06-11.md:141:163": {
+      "key": "memory:memory/2026-06-11.md:141:163",
+      "path": "memory/2026-06-11.md",
+      "startLine": 141,
+      "endLine": 163,
+      "source": "memory",
+      "snippet": "- **New onboarding step 5:** \"Keep or Remove Example Jumps\" — shows seed jumps list, user chooses \"Remove Examples\" (deletes them via `DB.deleteJump`) or \"Keep Them\"; flows to onboarding complete - Onboarding flow is now 5 steps: Welcome → ROI Setup → Configure Columns → Add First Jump → Seed Jumps → Complete ### Known Issues / Notes - `admin@jumpkit.app` already existed in Supabase — signup attempts with it silently no-op (email enumeration protection) - Reset password email was rate-limited during debug session (same few addresses hammered); will work fine for real users - Supabase `smtp_max_frequency: 60` = 1 email per address per 60 seconds (separate from hourly project limit) ## Windo",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3681979715824127,
+      "maxScore": 0.3681979715824127,
+      "firstRecalledAt": "2026-06-12T13:16:57.078Z",
+      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
+      "queryHashes": [
+        "8d672aa6babe"
+      ],
+      "recallDays": [
+        "2026-06-12"
+      ],
+      "conceptTags": [
+        "db.deletejump",
+        "jumpkit.app",
+        "no-op",
+        "rate-limited",
+        "smtp-max-frequency",
+        "new",
+        "onboarding",
+        "step"
+      ]
+    },
+    "memory:memory/2026-03-17.md:25:63": {
+      "key": "memory:memory/2026-03-17.md:25:63",
+      "path": "memory/2026-03-17.md",
+      "startLine": 25,
+      "endLine": 63,
+      "source": "memory",
+      "snippet": "- `nav-right` changed from `flex: 1` to `margin-left: auto` - `nav-logo-img` set to 36px consistently (removed mobile 36px override) - Nav theme toggle (sun · slider · moon) added to nav-right on ≥1024px; synced with offcanvas toggle via `navThemeSwitch` in script.js ### Mobile (≤782px) - `hero-inner-wrap` stacks vertically - `hero-inner` full width, centered text - `hero-visual` centered - `mock-stack` centered with `margin-top: -16px` ### Backup created - `Topics/JumpKit/landing_backup_2026-03-17b/` ## MSTR Options cron fired at 9:35am - MSTR price: $146.96; ~20% OTM strike $175 - Mar 20: mid $0.20 | Mar 27: mid $0.81 | Apr 2: mid $1.52 - Cron ran successfully, result delivered to Jeff",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.38450441956520076,
+      "maxScore": 0.38450441956520076,
+      "firstRecalledAt": "2026-06-13T11:20:14.665Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.665Z",
+      "queryHashes": [
+        "de346ae63b5e"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "backup",
+        "nav-right",
+        "margin-left",
+        "nav-logo-img",
+        "script.js",
+        "hero-inner-wrap",
+        "hero-inner",
+        "hero-visual"
+      ]
+    },
+    "memory:memory/2026-06-11.md:103:131": {
+      "key": "memory:memory/2026-06-11.md:103:131",
+      "path": "memory/2026-06-11.md",
+      "startLine": 103,
+      "endLine": 131,
+      "source": "memory",
+      "snippet": "UPDATE profiles SET subscription_tier = 'free', subscription_status = 'free', trial_launches_used = 0 WHERE id = (SELECT id FROM auth.users WHERE email = 'sales@jumpkit.app'); ``` ### Reverted Changes - \"Click here for more details\" nav links under each section — Jeff asked to revert after implementation ### Files Modified Today - `Topics/JumpKit/app/js/app.js` — primary - `Topics/JumpKit/app/css/app.css` — CSS additions - Workspace root copies kept in sync --- ## JumpKit Session — Afternoon Fixes (2026-06-11) ### Deployments & Git - Reset password green card (#48BB78 + SVG check icon) deployed to both `landing/reset-password.html` and `landing/subpages/reset-password.html` - **Critical",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7533480167388915,
+      "maxScore": 0.37905822098255154,
+      "firstRecalledAt": "2026-06-13T11:20:14.665Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
+      "queryHashes": [
+        "de346ae63b5e",
+        "7539dcba99c1"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "subscription-tier",
+        "subscription-status",
+        "trial-launches-used",
+        "auth.users",
+        "jumpkit.app",
+        "topics/jumpkit/app/js/app.js",
+        "topics/jumpkit/app/css/app.css",
+        "landing/reset-password.html"
+      ]
+    },
+    "memory:memory/2026-06-06.md:22:44": {
+      "key": "memory:memory/2026-06-06.md:22:44",
+      "path": "memory/2026-06-06.md",
+      "startLine": 22,
+      "endLine": 44,
+      "source": "memory",
+      "snippet": "## Paywall E2E Test — PASSED (2026-06-06) Full end-to-end test completed successfully: - New LS products recreated: Annual variant ID 1754948, Monthly 1754951 - New checkout URL: https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0 - Webhook signing secret (40 chars): 6bbf0f23e6fcb8ec18f303f29d008e8bf0d690ad - Fixed: ls-webhook, send-welcome-core, send-cancellation all deployed with --no-verify-jwt - Fixed: cancellation event not resetting tier to free (subscription_updated branch) - Fixed: cancelled users now see \"Subscription Ended\" modal on login, not generic paywall - send-welcome-core subject updated: \"Welcome to JumpKit Unlimited\" - All bugs found and fixe",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.37041426897048946,
+      "maxScore": 0.37041426897048946,
+      "firstRecalledAt": "2026-06-13T11:20:14.665Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.665Z",
+      "queryHashes": [
+        "de346ae63b5e"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "end-to-end",
+        "ls-webhook",
+        "send-welcome-core",
+        "send-cancellation",
+        "no-verify-jwt",
+        "subscription-updated",
+        "paywall",
+        "e2e"
+      ]
+    },
+    "memory:memory/2026-05-13.md:29:52": {
+      "key": "memory:memory/2026-05-13.md:29:52",
+      "path": "memory/2026-05-13.md",
+      "startLine": 29,
+      "endLine": 52,
+      "source": "memory",
+      "snippet": "**Target state (secure — 3-factor join):** 1. Correct org name + team name 2. Correct team password (PBKDF2 hash match) 3. **User's Supabase email must exist as a pending invite in `team_invites` for that team** **Remaining attack vector + fix:** - Attack: Mallory creates JumpKit account with Alice's email before Alice does - Fix: Enable **Supabase email confirmation** — account not active until user clicks verification link in their inbox. Since only Alice can access her inbox, Mallory is blocked. **Implementation steps:** 1. **Enable Supabase email confirmation** in Supabase Dashboard → Auth → Email → \"Confirm email\" toggle ON - Resend is already configured as the email provider -",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3806309998035431,
+      "maxScore": 0.3806309998035431,
+      "firstRecalledAt": "2026-06-13T11:20:14.708Z",
+      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
+      "queryHashes": [
+        "095836eeb37a"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "3-factor",
+        "team-invites",
+        "target",
+        "state",
+        "secure",
+        "factor",
+        "join",
+        "correct"
+      ]
+    },
+    "memory:memory/2026-06-11.md:155:181": {
+      "key": "memory:memory/2026-06-11.md:155:181",
+      "path": "memory/2026-06-11.md",
+      "startLine": 155,
+      "endLine": 181,
+      "source": "memory",
+      "snippet": "- Action: Purchase cert under JumpKit LLC once entity finalized; configure via Electron Builder `win.certificateFile` setting - Added to TODO.md under Medium Priority ## Evening Session (2026-06-11) ### Corner Cases Addressed **Re-signup with existing email:** - Supabase silently returns `identities: []` — no error, no email sent - Fixed: updated signup modal to generic \"Check Your Email\" text covering both cases (Option A) - Then upgraded to Option B: `send-account-exists` edge function deployed — fires when `identities: []` detected, sends branded \"you already have an account\" email with Sign In + Reset Password CTAs - Email preview: `app/emails/account-exists-email.html` **Unverified",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3805247098207474,
+      "maxScore": 0.3805247098207474,
+      "firstRecalledAt": "2026-06-13T11:20:20.627Z",
+      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
+      "queryHashes": [
+        "7539dcba99c1"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "win.certificatefile",
+        "todo.md",
+        "re-signup",
+        "send-account-exists",
+        "action",
+        "purchase",
+        "cert",
+        "under"
       ]
     }
   }

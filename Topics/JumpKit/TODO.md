@@ -44,6 +44,8 @@ _Last updated: 2026-06-01_
 - [x] **Bug fix: rebuildOwnerSharedTeams** — recovers lost sharedTeams from Supabase on login; pushes local renamed col names to Supabase
 - [x] **App rename: JumpKit Core → JumpKit Unlimited** throughout all UI text (app.js, teams.js, jumps.js, sync.js); internal `'core'` tier value untouched
 - [x] **Teams page copy/UI** — "shared jumps" → "shared columns" on teams view; member badge color blue → subtle green; settings subtitle updated
+- [x] **Implement ROI export reports** — completed
+- [x] **Disable auto-archive & auto-backup for free tier** — completed and tested
 
 ---
 
@@ -60,8 +62,6 @@ _Last updated: 2026-06-01_
   - [ ] Update Apple Developer account entity → rebuild + re-notarize installer
 
 - [x] **Paywall E2E** — Full E2E tested 2026-06-06: checkout → webhook (200) → profile upgrade → welcome email → upgrade modal → cancellation → downgrade → cancellation email → "Subscription Ended" modal ✅
-- [ ] **Implement ROI export reports** — allow users to export their personal (free) and team (unlimited) ROI data as a shareable report (PDF or CSV). Hook into existing stats/dashboard data.
-- [ ] **Disable auto-archive & auto-backup for free tier; test both in Unlimited** — code done (2026-06-07): UI shows 🔒 lock + "Upgrade" button for free users → opens upgrade modal → Lemon Squeezy checkout. Jeff needs to test in app: (1) free user sees lock on both toggles, (2) upgrade btn opens correct modal, (3) Unlimited user sees normal toggles, (4) auto-archive and auto-backup actually run for Unlimited and are silently blocked for free — free users should not have access to these features; verify both work correctly for Unlimited users and are blocked/hidden for free users
 - [ ] **Test 5-member free-tier team cap** — verify paywall fires correctly at all 3 enforcement points: (1) `sendOrgInvites` blocks invite when team is full/over limit, (2) `sendInvites` same check, (3) `doJoinTeam` blocks join if owner is free tier and team has 4+ members. Also verify Unlimited owners are never blocked.
 
 ---
@@ -69,5 +69,6 @@ _Last updated: 2026-06-01_
 ## 🟡 Medium Priority
 
 - [x] **Signed installers built and distributed** — Apple Developer Account enrolled (Order #W1459598921), Developer ID cert generated (Jeff Roder, ZDJSH728ND), electron-builder configured with hardenedRuntime + notarize.js hook. Signed + notarized DMG and EXE published to GitHub Releases (jrod4404/jumpkit-releases).
+- [x] **Windows SmartScreen / "Unknown Developer" warning** — documented; purchase OV/EV cert under JumpKit LLC once entity finalized; configure Electron Builder `win.certificateFile` to auto-sign on build.
 
 

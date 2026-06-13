@@ -103,16 +103,108 @@ serve(async (req) => {
       return new Response('OK', { status: 200 });
     }
 
-    // Look up first name for personalized emails
+    // Look up first name + profile ID for personalized emails and lockout logic
     let firstName = 'there';
+    let profileId: string | null = null;
     try {
       const { data: profile } = await supabase
         .from('profiles')
-        .select('first_name')
+        .select('id, first_name')
         .eq('email', customerEmail)
         .single();
       if (profile?.first_name) firstName = profile.first_name;
+      if (profile?.id) profileId = profile.id;
     } catch (_) {}
+
+    // ── Downgrade lockout: identify over-cap team members ───────────
+    if (tier === 'free' && profileExists && profileId) {
+      try {
+        // 1. Get all teams owned by this user
+        const { data: ownedTeams = [] } = await supabase
+          .from('teams')
+          .select('id, name')
+          .eq('owner_id', profileId);
+
+        for (const team of ownedTeams) {
+          // 2. Get all team_members ordered by created_at ASC
+          const { data: allMembers = [] } = await supabase
+            .from('team_members')
+            .select('id, user_id, profiles(email, first_name, last_name)')
+            .eq('team_id', team.id)
+            .order('created_at', { ascending: true });
+
+          // 3. Keep first 5 (owner counts as position 1 since owner IS in team_members)
+          //    members at positions 6+ get lock_at = now() + 14 days
+          if (allMembers.length <= 5) continue;
+
+          const overCapMembers = allMembers.slice(5);
+          const lockAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+          const lockDate = new Date(lockAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+          const overCapIds = overCapMembers.map((m: { id: string }) => m.id);
+          const { error: lockErr } = await supabase
+            .from('team_members')
+            .update({ lock_at: lockAt })
+            .in('id', overCapIds);
+
+          if (lockErr) {
+            console.error(`lockout update error for team ${team.id}:`, lockErr);
+            continue;
+          }
+
+          // 4. If any affected members, call send-team-downgrade-alert
+          const affectedMembers = overCapMembers
+            .map((m: { user_id: string; profiles?: { email?: string; first_name?: string; last_name?: string } }) => {
+              const p = m.profiles;
+              if (!p?.email) return null;
+              const name = p.first_name ? `${p.first_name} ${p.last_name || ''}`.trim() : '';
+              return { email: p.email, name: name || p.email };
+            })
+            .filter(Boolean);
+
+          if (affectedMembers.length > 0) {
+            fetch(`${SUPABASE_URL_VAL}/functions/v1/send-team-downgrade-alert`, {
+              method: 'POST',
+              headers: emailHeaders,
+              body: JSON.stringify({
+                ownerId: profileId,
+                teamId: team.id,
+                teamName: team.name,
+                lockDate,
+                affectedMembers,
+                variant: 'alert',
+              }),
+            }).catch(e => console.error('send-team-downgrade-alert error:', e));
+          }
+        }
+      } catch (lockoutErr) {
+        console.error('Downgrade lockout error:', lockoutErr);
+      }
+    }
+
+    // ── Re-upgrade: clear any pending locks for this owner's teams ─
+    if (tier !== 'free' && subStatus === 'active' && profileId) {
+      try {
+        const { data: ownerTeams = [] } = await supabase
+          .from('teams')
+          .select('id')
+          .eq('owner_id', profileId);
+
+        if (ownerTeams.length > 0) {
+          const teamIds = ownerTeams.map((t: { id: string }) => t.id);
+          const { error: clearErr } = await supabase
+            .from('team_members')
+            .update({ locked: false, lock_at: null, lock_notified_2day: false })
+            .in('team_id', teamIds)
+            .or('locked.eq.true,lock_at.not.is.null');
+
+          if (clearErr) console.error('Re-upgrade lock clear error:', clearErr);
+          else console.log(`Cleared locks for ${teamIds.length} teams owned by ${profileId}`);
+        }
+      } catch (clearErr) {
+        console.error('Re-upgrade lock clear error:', clearErr);
+      }
+    }
 
     const SUPABASE_URL_VAL = Deno.env.get('SUPABASE_URL') || '';
     const ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY') || '';

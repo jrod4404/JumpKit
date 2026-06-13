@@ -812,17 +812,33 @@ async function renderHome() {
     // 1. Fetch owned + joined team IDs (query by owner_id — no org_id required)
     const [ownedRes, membershipRes] = await Promise.all([
       supabaseClient.from('teams').select('id, name').eq('owner_id', supaUser.id).order('name'),
-      supabaseClient.from('team_members').select('team_id').eq('user_id', supaUser.id),
+      supabaseClient.from('team_members').select('team_id, locked').eq('user_id', supaUser.id),
     ]);
     const ownedTeams  = ownedRes.data || [];
     const ownedIds    = new Set(ownedTeams.map(t => t.id));
-    const joinedTeamIds = (membershipRes.data || []).map(r => r.team_id).filter(id => !ownedIds.has(id));
+    const membershipRows = membershipRes.data || [];
+    const joinedTeamIds = membershipRows.map(r => r.team_id).filter(id => !ownedIds.has(id));
+    // Track locked status for joined teams
+    const lockedTeamIds = new Set(membershipRows.filter(r => r.locked).map(r => r.team_id));
 
-    // Fetch joined team details
+    // Fetch joined team details (include owner_id for tier pill)
     let joinedTeams = [];
     if (joinedTeamIds.length > 0) {
-      const { data } = await supabaseClient.from('teams').select('id, name').in('id', joinedTeamIds).order('name');
+      const { data } = await supabaseClient.from('teams').select('id, name, owner_id').in('id', joinedTeamIds).order('name');
       joinedTeams = data || [];
+    }
+
+    // Batch-fetch owner subscription tiers for joined teams
+    const ownerTierById = {};
+    if (joinedTeams.length > 0) {
+      const ownerIds = [...new Set(joinedTeams.map(t => t.owner_id).filter(Boolean))];
+      if (ownerIds.length > 0) {
+        const { data: ownerProfs = [] } = await supabaseClient
+          .from('profiles')
+          .select('id, subscription_tier')
+          .in('id', ownerIds);
+        ownerProfs.forEach(p => { ownerTierById[p.id] = p.subscription_tier || 'free'; });
+      }
     }
 
     const allTeams   = [...ownedTeams, ...joinedTeams];
@@ -862,19 +878,31 @@ async function renderHome() {
     // Build per-team card HTML
     const teamCards = allTeams.map(team => {
       const isOwner   = ownedIds.has(team.id);
+      const isLocked  = !isOwner && lockedTeamIds.has(team.id);
       const members   = memberCountByTeam[team.id] || 1;
       const colCount  = colCountByTeam[team.id]    || 0;
       const teamJumps = allLocalJumps.filter(j => j.isShared && j.teamId === team.id && !j.isArchived);
       const jumpCount = teamJumps.length;
 
-      // Role pill — matching teams page color scheme exactly
+      // Determine team tier for pill
+      const teamTier = isOwner
+        ? (window._supabaseProfile?.subscription_tier || 'free')
+        : (ownerTierById[team.owner_id] || 'free');
+      const isUnlimitedTeam = teamTier === 'core' || teamTier === 'teams_jet';
+      const tierPill = isUnlimitedTeam
+        ? `<span style="background:rgba(72,187,120,0.12);color:#48BB78;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(72,187,120,0.3)">Unlimited Team</span>`
+        : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
+
+      // Role pill — show 'Access paused' if locked member
       const roleBadge = isOwner
         ? `<span class="teams-badge teams-badge-owner" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Owner</span>`
-        : `<span class="teams-badge" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Member</span>`;
+        : (isLocked
+          ? `<span style="background:rgba(229,62,62,0.12);color:#e53e3e;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(229,62,62,0.3)">Access paused</span>`
+          : `<span class="teams-badge" style="font-size:0.65rem;min-width:unset;padding:2px 8px">Member</span>`);
 
       return `
-        <div class="stat-card home-team-card">
-          <div style="margin-bottom:6px">${roleBadge}</div>
+        <div class="stat-card home-team-card"${isLocked ? ' style="border-color:rgba(229,62,62,0.3)"' : ''}>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">${roleBadge}${tierPill}</div>
           <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:12px;width:100%">${esc(team.name)}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
             <div>
