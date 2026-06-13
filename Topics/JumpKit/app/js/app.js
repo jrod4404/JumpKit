@@ -2752,7 +2752,7 @@ window.renderAdmin = async function renderAdmin() {
   }
 
   content.innerHTML = `
-    <div style="padding:24px 28px;max-width:1200px">
+    <div style="padding:24px 28px">
       <div id="adminDash" style="color:var(--text-dim);font-size:0.9rem">Loading…</div>
     </div>`;
 
