@@ -1398,6 +1398,7 @@ function loadScript(src) {
 
 window.renderStats = async function renderStats() {
   await loadScript('js/chart.min.js');
+  const _statsHasData = currentUser ? (DB.getClickLog(currentUser.id).length > 0) : false;
   const _statsTier = window._supabaseProfile?.subscription_tier || 'free';
   const _statsLaunchesUsed = window._supabaseProfile?.trial_launches_used || 0;
   const _statsLaunchesRemaining = Math.max(250 - _statsLaunchesUsed, 0);
@@ -1428,7 +1429,7 @@ window.renderStats = async function renderStats() {
           <div class="jfb-slider" id="statsPill"></div>
           ${STAT_VIEWS.map(v=>`<button class="jfb-tab${v===currentStatView?' active':''}" data-sv="${v}">${STAT_LABELS[v]}</button>`).join('')}
         </div>
-        <button class="btn btn-subtle" style="font-size:0.82rem;padding:0 14px;height:34px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>
+        ${_statsHasData ? `<button class="btn btn-subtle" style="font-size:0.82rem;padding:0 14px;height:34px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>` : ''}
       </div>
       <div id="statsDash"></div>
     </div>`;
@@ -1756,7 +1757,7 @@ function renderStatsDash() {
   const fmtUSD = v => '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   if (n === 0) {
-    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p>No launch data yet for this period.</p></div>`;
+    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;text-align:center"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p style="margin-bottom:6px">No launch data yet.</p><p style="font-size:0.82rem;color:var(--text-dim)">Head to the <strong style="color:var(--text-muted)">Jumps</strong> page and click a jump — your stats will show up here.</p></div>`;
     return;
   }
 
