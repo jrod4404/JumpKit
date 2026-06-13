@@ -307,11 +307,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
-                ${_ownedTierPill}
                 ${statsText ? `<span class="acct-team-stats">${statsText}</span>` : ''}
               </div>
             </div>
             <div class="acct-team-actions">
+              ${_ownedTierPill}
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" data-jaction="t-invite-for-team" data-id="${esc(team.id)}"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
               <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" data-jaction="t-share-col-modal" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-share"><use href="img/tabler-sprite.svg#tabler-share"/></svg> Manage Sharing</button>
@@ -389,9 +389,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
-                ${_joinedTierPill}
                 <span class="acct-team-stats">${joinedStats}</span>
               </div>
+            </div>
+            <div class="acct-team-actions">
+              ${_joinedTierPill}
+              <button class="btn btn-delete tooltip-left" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
             </div>
           </div>
           <div class="acct-team-members">
@@ -400,7 +403,6 @@ async function renderUnifiedTeamsView(content, supaUser) {
             </div>
             <div class="acct-row acct-member-row">
               <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
-              <div class="acct-member-actions"><button class="btn btn-delete tooltip-left" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button></div>
             </div>
             <div class="acct-team-cols-section">
               <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
