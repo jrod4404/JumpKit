@@ -203,7 +203,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   const _ownedTier = window._supabaseProfile?.subscription_tier || 'free';
   const _ownedIsUnlimited = _ownedTier === 'core' || _ownedTier === 'teams_jet';
   const _ownedTierPill = _ownedIsUnlimited
-    ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
+    ? `<span style="background:rgba(139,92,246,0.12);color:#8b5cf6;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(139,92,246,0.3)">Unlimited Team</span>`
     : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
   let html = `<div class="acct-grid">`;
@@ -357,7 +357,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _joinedOwnerTier = ownerProf?.subscription_tier || 'free';
       const _joinedIsUnlimited = _joinedOwnerTier === 'core' || _joinedOwnerTier === 'teams_jet';
       const _joinedTierPill = _joinedIsUnlimited
-        ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
+        ? `<span style="background:rgba(139,92,246,0.12);color:#8b5cf6;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(139,92,246,0.3)">Unlimited Team</span>`
         : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
       const _isLockedFromTeam = _lockedTeamIds.has(team.id);
       const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
