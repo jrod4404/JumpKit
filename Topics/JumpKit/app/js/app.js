@@ -118,8 +118,9 @@ async function initApp() {
           }
         }
 
-        // Show onboarding for first-time users
-        if (!data.onboarding_completed) {
+        // Show onboarding for first-time users — skip if pending upgrade modal is about to show
+        const _pendingUpgradeCheck = sessionStorage.getItem('jk_pending_upgrade_applied');
+        if (!data.onboarding_completed && !_pendingUpgradeCheck) {
           setTimeout(() => checkAndShowOnboarding(), 600);
         }
 
