@@ -89,7 +89,7 @@ function buildPendingUpgradeHTML(): string {
       </p>
 
       <!-- Getting Started Steps -->
-      <div style="background:rgba(80,202,204,0.06);border-radius:10px;padding:22px 24px;border:1px solid rgba(80,202,204,0.15);margin-bottom:24px">
+      <div style="background:rgba(255,255,255,0.03);border-radius:10px;padding:22px 24px;border:1px solid rgba(255,255,255,0.06);margin-bottom:24px">
         <p style="margin:0 0 18px;font-size:14px;font-weight:600;color:#50CACC">Get started in 3 steps:</p>
 
         <!-- Step 1 -->
