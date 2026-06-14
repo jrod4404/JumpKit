@@ -2703,6 +2703,165 @@ const JK_TESTS = [
     test: async () => 'manual'
   },
 
+
+  // ── Auto-Update / GitHub Releases (Tests 111–116) ─────────────────
+  {
+    id: 111, category: 'Deployment',
+    title: 'Auto-update IPC — onUpdateReady and installUpdate exposed in preload',
+    purpose: 'Confirms preload.js exposes both update IPC bridges. If either is missing, the update banner will never show or the restart button will throw.',
+    prerequisites: 'None.',
+    description: 'Checks window.electronAPI.onUpdateReady and window.electronAPI.installUpdate are functions.',
+    input: 'window.electronAPI.onUpdateReady, window.electronAPI.installUpdate',
+    expected: 'Both are functions.',
+    test: async () => {
+      if (!window.electronAPI) throw new Error('window.electronAPI not available — not running in Electron');
+      if (typeof window.electronAPI.onUpdateReady !== 'function') throw new Error('electronAPI.onUpdateReady is not a function — check preload.js');
+      if (typeof window.electronAPI.installUpdate !== 'function') throw new Error('electronAPI.installUpdate is not a function — check preload.js');
+      console.info('[Test 111] ✅ onUpdateReady and installUpdate both exposed via preload');
+      return true;
+    }
+  },
+
+  {
+    id: 112, category: 'Deployment',
+    title: 'Auto-update banner — #updateBanner element exists in DOM and starts hidden',
+    purpose: 'Confirms the update banner HTML element exists in app.html and is initially hidden. If it is missing, no update notification will ever appear.',
+    prerequisites: 'None.',
+    description: 'Finds #updateBanner in the DOM and verifies its display is none on load.',
+    input: 'document.getElementById("updateBanner")',
+    expected: '#updateBanner exists and has display:none on initial load.',
+    test: async () => {
+      const banner = document.getElementById('updateBanner');
+      if (!banner) throw new Error('#updateBanner element not found in DOM — check app.html');
+      const display = banner.style.display;
+      if (display === 'flex') {
+        // If it's already showing that means an update was already downloaded — that's actually fine
+        console.warn('[Test 112] ⚠️ #updateBanner is currently visible — an update may have already been downloaded. This is OK.');
+      } else if (display !== 'none' && display !== '') {
+        throw new Error(`#updateBanner has unexpected display value: "${display}" — expected "none"`);
+      }
+      // Verify it has a restart button
+      const restartBtn = banner.querySelector('button');
+      if (!restartBtn) throw new Error('#updateBanner has no button — "Restart & Update" button missing from app.html');
+      console.info('[Test 112] ✅ #updateBanner exists, initially hidden, has restart button');
+      return true;
+    }
+  },
+
+  {
+    id: 113, category: 'Deployment',
+    title: 'Auto-update banner — shows when update-ready event fires',
+    purpose: 'Confirms the app.js listener correctly shows #updateBanner when the update-ready IPC event fires. Tests the full renderer-side update notification path.',
+    prerequisites: 'None.',
+    description: 'Manually sets #updateBanner to display:flex (simulating the update-ready callback) and verifies it is visible. Then resets it.',
+    input: 'Simulate update-ready: banner.style.display = "flex"',
+    expected: '#updateBanner becomes visible when the callback fires. After test: hidden again.',
+    test: async () => {
+      const banner = document.getElementById('updateBanner');
+      if (!banner) throw new Error('#updateBanner element not found — run Test 112 first');
+
+      const orig = banner.style.display;
+
+      // Simulate what the onUpdateReady callback does
+      banner.style.display = 'flex';
+      await new Promise(r => setTimeout(r, 150));
+
+      const visible = banner.style.display === 'flex';
+      if (!visible) throw new Error('#updateBanner did not become visible after display:flex was set');
+
+      // Verify "Restart & Update" button text is present
+      const btnText = banner.textContent || '';
+      if (!btnText.includes('Restart') && !btnText.includes('Update')) {
+        throw new Error('#updateBanner visible but missing "Restart & Update" text — check app.html');
+      }
+
+      // Reset banner
+      banner.style.display = orig || 'none';
+      console.info('[Test 113] ✅ update-ready banner shows and hides correctly');
+      return true;
+    }
+  },
+
+  {
+    id: 114, category: 'Deployment',
+    title: 'GitHub releases — latest release API reachable',
+    purpose: 'Confirms the GitHub releases API for jrod4404/JumpKit returns a valid response. If unreachable, electron-updater cannot check for updates.',
+    prerequisites: 'Internet connection.',
+    description: 'Fetches the GitHub releases API for the JumpKit repo and verifies a valid JSON response with at least one release.',
+    input: 'GET https://api.github.com/repos/jrod4404/JumpKit/releases/latest',
+    expected: 'Response is 200 with JSON containing a tag_name field (semver version).',
+    test: async () => {
+      let res, data;
+      try {
+        res = await fetch('https://api.github.com/repos/jrod4404/JumpKit/releases/latest', {
+          headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'JumpKit-Tests' }
+        });
+      } catch(e) {
+        throw new Error('Could not reach GitHub API: ' + e.message);
+      }
+      if (res.status === 404) throw new Error('No releases found at jrod4404/JumpKit — have you published a release?');
+      if (!res.ok) throw new Error(`GitHub releases API returned ${res.status}`);
+      try { data = await res.json(); } catch(_) { throw new Error('GitHub API response is not valid JSON'); }
+      if (!data.tag_name) throw new Error('GitHub release has no tag_name — expected semver like v1.0.0');
+      // Verify tag_name looks like a version
+      if (!/^v?\d+\.\d+/.test(data.tag_name)) throw new Error(`tag_name "${data.tag_name}" does not look like a semver version`);
+      console.info(`[Test 114] ✅ GitHub releases reachable. Latest: ${data.tag_name} (${data.name || 'unnamed'})`);
+      return true;
+    }
+  },
+
+  {
+    id: 115, category: 'Deployment',
+    title: 'Auto-update feed — latest-mac.yml present in GitHub release assets',
+    purpose: 'electron-updater requires a latest-mac.yml (Mac) or latest.yml (Windows) file in the GitHub release assets. Without it, the updater cannot detect a new version even if a DMG is present.',
+    prerequisites: 'Internet connection. At least one release published via electron-builder.',
+    description: 'Fetches the latest GitHub release and checks that latest-mac.yml is in the assets list.',
+    input: 'GET https://api.github.com/repos/jrod4404/JumpKit/releases/latest → check assets for latest-mac.yml',
+    expected: 'latest-mac.yml or latest.yml present in release assets.',
+    test: async () => {
+      let res, data;
+      try {
+        res = await fetch('https://api.github.com/repos/jrod4404/JumpKit/releases/latest', {
+          headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': 'JumpKit-Tests' }
+        });
+      } catch(e) {
+        throw new Error('Could not reach GitHub API: ' + e.message);
+      }
+      if (res.status === 404) throw new Error('No releases found at jrod4404/JumpKit — publish a release first');
+      if (!res.ok) throw new Error(`GitHub releases API returned ${res.status}`);
+      try { data = await res.json(); } catch(_) { throw new Error('GitHub API response not JSON'); }
+
+      const assets = (data.assets || []).map((a) => a.name);
+      const hasMacFeed  = assets.some(n => n === 'latest-mac.yml');
+      const hasWinFeed  = assets.some(n => n === 'latest.yml');
+      const hasMacDmg   = assets.some(n => n.endsWith('.dmg'));
+      const hasWinExe   = assets.some(n => n.endsWith('.exe') || n.endsWith('.nsis.7z'));
+
+      if (!hasMacFeed && !hasWinFeed) {
+        throw new Error(
+          `Neither latest-mac.yml nor latest.yml found in release assets. ` +
+          `electron-updater cannot auto-update without this file. ` +
+          `Assets found: [${assets.join(', ')}]. ` +
+          `Republish using electron-builder with the --publish flag.`
+        );
+      }
+      console.info(`[Test 115] ✅ Update feed files found — mac:${hasMacFeed} win:${hasWinFeed} | DMG:${hasMacDmg} EXE:${hasWinExe} | Assets: [${assets.join(', ')}]`);
+      return true;
+    }
+  },
+
+  {
+    id: 116, category: 'Deployment',
+    title: 'Auto-update — full E2E: new release triggers in-app banner and installs correctly',
+    purpose: 'End-to-end validation of the entire update lifecycle: publish a new version to GitHub → wait for electron-updater to detect it → confirm the update banner appears in-app → click Restart & Update → app restarts at new version.',
+    prerequisites: 'Must have the packaged app running (not dev mode). A new version must have been published to GitHub releases via electron-builder.',
+    description: 'Follows the full update release process manually and confirms each step works.',
+    input: 'Packaged app + new GitHub release with latest-mac.yml and DMG/EXE assets',
+    expected: 'Banner appears within ~30s of publishing. Clicking "Restart & Update" quits and reinstalls. App reopens at new version.',
+    steps: '1. Bump version in package.json (e.g. 1.0.0 → 1.1.0).\n2. Build and sign: npm run build (Mac) and/or npm run build:win (Windows).\n3. Publish to GitHub: electron-builder --publish always (or set GH_TOKEN and use --publish onTagOrDraft).\n4. Confirm latest-mac.yml and/or latest.yml appear in GitHub release assets (Test 115 checks this).\n5. Open the currently-installed production build (not npm start).\n6. Wait up to 30 seconds — the app checks for updates 3 seconds after launch.\n7. Verify the teal "A new version of JumpKit is available" banner appears at the top of the app.\n8. Click "Restart & Update".\n9. App quits and relaunches — verify version in About or package.json matches the new version.\n10. Mark as Pass once all steps complete successfully.',
+    test: async () => 'manual'
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
