@@ -1369,11 +1369,12 @@ const JK_TESTS = [
   {
     id: 62, category: 'Security',
     title: 'Session invalidated on logout — signOut clears session',
-    purpose: 'Confirms that calling signOut removes the local session. Note: this test logs out — you will need to log back in.',
-    prerequisites: 'Must be logged in. WARNING: This test logs you out.',
-    description: 'Calls supabaseClient.auth.signOut() and confirms session is null afterward.',
+    purpose: 'Confirms that calling signOut removes the local session. Must be run manually — running during Run All would log the user out mid-run, destroying the tests page DOM and causing all subsequent tests to appear blank.',
+    prerequisites: 'Must be logged in. WARNING: This test logs you out. Run it individually, not via Run All.',
+    description: 'Calls supabaseClient.auth.signOut() and confirms session is null afterward. This test is intentionally manual-only to prevent it from breaking the Run All test sequence.',
     input: 'supabaseClient.auth.signOut()',
-    expected: 'Session is null after signOut.',
+    expected: 'Session is null after signOut. You will need to log back in afterward.',
+    steps: '1. Click the Run button for THIS TEST ONLY (do not use Run All).\n2. The test calls signOut() and verifies session is null.\n3. After it passes, you will be logged out \u2014 log back in to continue.',
     test: async () => {
       const { data: before } = await supabaseClient.auth.getSession();
       if (!before?.session) throw new Error('No session before logout — must be logged in to run this test');
@@ -1381,7 +1382,6 @@ const JK_TESTS = [
       if (error) throw new Error('signOut failed: ' + error.message);
       const { data: after } = await supabaseClient.auth.getSession();
       if (after?.session) throw new Error('Session still active after signOut — logout is not working!');
-      // Note to user: they will need to log back in
       console.warn('[Test 62] You have been logged out. Please log back in.');
       return true;
     }
