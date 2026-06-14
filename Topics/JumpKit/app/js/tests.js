@@ -2516,8 +2516,7 @@ const JK_TESTS = [
       if (typeof Modal !== 'undefined') Modal.close();
       return true;
     }
-  }
-
+  },
 
   // ── Team Member Lockout System (Tests 104–110) ─────────────────
   {
