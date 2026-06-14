@@ -2518,6 +2518,192 @@ const JK_TESTS = [
     }
   }
 
+
+  // ── Team Member Lockout System (Tests 104–110) ─────────────────
+  {
+    id: 104, category: 'DB Schema',
+    title: 'team_members — lockout columns exist in schema',
+    purpose: 'Confirms the DB migration for the lockout system was applied. The columns locked, lock_at, and lock_notified_2day must exist on team_members or the entire lockout system silently fails.',
+    prerequisites: 'Must be logged in with Supabase access.',
+    description: 'Queries team_members via Supabase and inspects the returned row shape to confirm all 3 lockout columns are present.',
+    input: 'supabaseClient.from("team_members").select("id,locked,lock_at,lock_notified_2day").limit(1)',
+    expected: 'Query succeeds (no column-not-found error) and returned data/error confirms the 3 columns exist.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!supabaseClient) throw new Error('supabaseClient not available');
+
+      const { data, error } = await supabaseClient
+        .from('team_members')
+        .select('id, locked, lock_at, lock_notified_2day')
+        .limit(1);
+
+      if (error) {
+        if (error.message && error.message.includes('column')) {
+          throw new Error(`Migration not applied — column error: ${error.message}`);
+        }
+        throw new Error(`Supabase error: ${error.message}`);
+      }
+
+      if (data && data.length > 0) {
+        const row = data[0];
+        if (!('locked' in row)) throw new Error('Column "locked" missing from team_members');
+        if (!('lock_at' in row)) throw new Error('Column "lock_at" missing from team_members');
+        if (!('lock_notified_2day' in row)) throw new Error('Column "lock_notified_2day" missing from team_members');
+      }
+
+      console.info('[Test 104] ✅ team_members lockout columns confirmed: locked, lock_at, lock_notified_2day');
+      return true;
+    }
+  },
+
+  {
+    id: 105, category: 'Email',
+    title: 'send-team-downgrade-alert — Edge Function returns ok:true (alert variant)',
+    purpose: 'Calls send-team-downgrade-alert with variant:"alert" and a test member list, confirming the function is deployed and returns { ok:true }. This fires when a subscription is cancelled.',
+    prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
+    description: 'POSTs to /functions/v1/send-team-downgrade-alert with ownerId (current user), a dummy teamName, lockDate, and a 1-member affectedMembers list.',
+    input: 'POST /functions/v1/send-team-downgrade-alert { ownerId, teamName, lockDate, affectedMembers, variant:"alert" }',
+    expected: 'Response JSON has ok:true. An email should be sent to the logged-in user\'s address (owner) and the test member address.',
+    steps: 'Automatic. After this test passes, check inbox for the downgrade alert email.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      const profileId = window._supabaseProfile?.id;
+      if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const lockDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-team-downgrade-alert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({
+          ownerId: profileId,
+          teamId: 'test-team-105',
+          teamName: 'Test Team (Test 105)',
+          lockDate,
+          affectedMembers: [{ email, name: 'Test Member' }],
+          variant: 'alert',
+        }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+
+      console.info('[Test 105] ✅ send-team-downgrade-alert (alert) returned ok:true. Check inbox for downgrade alert email.');
+      return 'manual';
+    }
+  },
+
+  {
+    id: 106, category: 'Email',
+    title: 'send-team-downgrade-alert — correct alert email content in inbox',
+    purpose: 'Manual verification that the downgrade alert email arrived with correct branding, member list, lock date, and re-upgrade CTA.',
+    prerequisites: 'Test 105 must have passed first.',
+    description: 'Open the downgrade alert email sent by Test 105 and verify the content matches spec.',
+    input: 'Email inbox for logged-in user account',
+    expected: 'Email arrives with subject "Important: your JumpKit team members may lose access", contains the team name, lock date, member list, and Re-upgrade CTA button.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Important: your JumpKit team members may lose access".\n3. Verify it contains the team name "Test Team (Test 105)".\n4. Verify it lists "Test Member" in the affected members section.\n5. Verify a lock date (14 days from today) is shown in red.\n6. Verify the "Re-upgrade to Unlimited" CTA button is present and links to jumpkit.app/#pricing.\n7. Mark as Pass once confirmed.',
+    test: async () => 'manual'
+  },
+
+  {
+    id: 107, category: 'Email',
+    title: 'send-team-downgrade-alert — Edge Function returns ok:true (warning variant)',
+    purpose: 'Calls send-team-downgrade-alert with variant:"warning", confirming the 2-day warning email path works. This is the variant fired by check-member-lockouts 2 days before lock_at.',
+    prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
+    description: 'POSTs to /functions/v1/send-team-downgrade-alert with variant:"warning" and verifies ok:true is returned.',
+    input: 'POST /functions/v1/send-team-downgrade-alert { ownerId, teamName, lockDate, affectedMembers, variant:"warning" }',
+    expected: 'Response JSON has ok:true. A warning-variant email should be sent to the logged-in user\'s address.',
+    steps: 'Automatic. After this test passes, check inbox for the 2-day warning email.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      const profileId = window._supabaseProfile?.id;
+      if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const lockDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-team-downgrade-alert`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({
+          ownerId: profileId,
+          teamId: 'test-team-107',
+          teamName: 'Test Team (Test 107)',
+          lockDate,
+          affectedMembers: [{ email, name: 'Test Member' }],
+          variant: 'warning',
+        }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+
+      console.info('[Test 107] ✅ send-team-downgrade-alert (warning) returned ok:true. Check inbox for 2-day warning email.');
+      return 'manual';
+    }
+  },
+
+  {
+    id: 108, category: 'Email',
+    title: 'send-team-downgrade-alert — correct warning email content in inbox',
+    purpose: 'Manual verification that the 2-day warning email uses the correct subject, heading, and copy (distinct from the alert variant).',
+    prerequisites: 'Test 107 must have passed first.',
+    description: 'Open the warning email sent by Test 107 and verify it uses the warning-variant subject and copy.',
+    input: 'Email inbox for logged-in user account',
+    expected: 'Email subject contains "Reminder: JumpKit team access ending in 2 days". Heading says "Reminder: team access ending in 2 days" (not the alert heading). Re-upgrade CTA present.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 107)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
+    test: async () => 'manual'
+  },
+
+  {
+    id: 109, category: 'Subscription',
+    title: 'check-member-lockouts — Edge Function reachable and returns ok:true',
+    purpose: 'Confirms check-member-lockouts is deployed and responds with { ok:true, locked:N, warned:N }. This function runs daily to apply locks and send warnings.',
+    prerequisites: 'check-member-lockouts Edge Function must be deployed with --no-verify-jwt.',
+    description: 'POSTs to /functions/v1/check-member-lockouts and verifies ok:true is returned along with locked and warned counts.',
+    input: 'POST /functions/v1/check-member-lockouts (no body required)',
+    expected: 'Response JSON has ok:true, locked (number), warned (number).',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/check-member-lockouts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({}),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (typeof body.locked !== 'number') throw new Error(`Expected locked (number) in response — got: ${JSON.stringify(body)}`);
+      if (typeof body.warned !== 'number') throw new Error(`Expected warned (number) in response — got: ${JSON.stringify(body)}`);
+
+      console.info(`[Test 109] ✅ check-member-lockouts returned ok:true — locked:${body.locked}, warned:${body.warned}`);
+      return true;
+    }
+  },
+
+  {
+    id: 110, category: 'Subscription',
+    title: 'check-member-lockouts — actually locks a member when lock_at has passed',
+    purpose: 'End-to-end manual test: insert a team_members row with lock_at in the past, run check-member-lockouts, confirm the row is now locked=true. Validates the core lock-apply logic.',
+    prerequisites: 'Must have a team in Supabase. Requires direct SQL access to insert a test row.',
+    description: 'Manually insert a team_members row with lock_at set to 1 hour ago, call check-member-lockouts (Test 109), then verify locked=true in Supabase.',
+    input: 'INSERT test row into team_members with lock_at=now()-1h → POST /functions/v1/check-member-lockouts → SELECT locked FROM team_members WHERE id=<id>',
+    expected: 'After running check-member-lockouts, the test row has locked=true.',
+    steps: '1. In Supabase SQL editor, get a real team_id you own:\n   SELECT id, name FROM teams WHERE owner_id = (SELECT id FROM profiles WHERE email=\'your-email\');\n\n2. Insert a test lockout row:\n   INSERT INTO team_members (team_id, user_id, role, locked, lock_at, lock_notified_2day)\n   VALUES (\'<your-team-id>\', (SELECT id FROM profiles WHERE email=\'your-email\'), \'member\', false, NOW() - INTERVAL \'1 hour\', false)\n   RETURNING id;\n   -- Save the returned id.\n\n3. Run Test 109 (auto-calls check-member-lockouts).\n\n4. Verify the row is now locked:\n   SELECT id, locked, lock_at FROM team_members WHERE id=\'<saved-id>\';\n   Expected: locked=true\n\n5. Clean up:\n   DELETE FROM team_members WHERE id=\'<saved-id>\';\n\n6. Mark as Pass if locked=true was confirmed.',
+    test: async () => 'manual'
+  },
+
 ];
 
 // ── Render Function ────────────────────────────────────────────────
