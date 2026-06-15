@@ -51,6 +51,8 @@ async function initAuth() {
   await DB.init(currentUser.id);
   // Session confirmed - boot the app
   initApp();
+  // Register this device session + start heartbeat watcher
+  _initSessionLock(_supabaseUser.id);
 }
 
 // Placeholder - real initApp() wraps all startup logic below
@@ -60,6 +62,48 @@ if (window.electronAPI?.onUpdateReady) {
     const banner = document.getElementById('updateBanner');
     if (banner) banner.style.display = 'flex';
   });
+}
+
+// ── Session lock ─────────────────────────────────────────────────────
+function _initSessionLock(userId) {
+  const myToken = sessionStorage.getItem('jk_session_token');
+  if (!myToken) return; // no token — logged in before lock was added, skip
+
+  // Write / refresh our token on load
+  const _writeSession = () => supabaseClient.from('user_sessions').upsert(
+    { user_id: userId, session_token: myToken, device_hint: navigator.platform || 'Unknown', last_seen: new Date().toISOString() },
+    { onConflict: 'user_id' }
+  ).catch(() => {});
+
+  _writeSession();
+
+  // Poll every 3 minutes — if our token was replaced, force logout
+  const _interval = setInterval(async () => {
+    try {
+      const { data } = await supabaseClient
+        .from('user_sessions')
+        .select('session_token')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (!data) return; // row gone (logged out elsewhere)
+      if (data.session_token !== myToken) {
+        clearInterval(_interval);
+        // Show notice then redirect
+        const toast = document.createElement('div');
+        toast.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#e53e3e;color:#fff;padding:12px 22px;border-radius:10px;font-size:0.9rem;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
+        toast.textContent = '⚠️  You were logged in from another device.';
+        document.body.appendChild(toast);
+        setTimeout(async () => {
+          toast.remove();
+          try { await supabaseClient.auth.signOut(); } catch (_) {}
+          window.location.href = 'index.html';
+        }, 3000);
+      } else {
+        // Refresh last_seen
+        _writeSession();
+      }
+    } catch (_) {}
+  }, 3 * 60 * 1000);
 }
 
 async function initApp() {
@@ -449,6 +493,14 @@ document.querySelectorAll('.dropdown-item[data-page]').forEach(btn => {
 
 // ── Logout ────────────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+  // Clear session lock record before signing out
+  try {
+    const tok = sessionStorage.getItem('jk_session_token');
+    if (tok && _supabaseUser?.id) {
+      await supabaseClient.from('user_sessions')
+        .delete().eq('user_id', _supabaseUser.id).eq('session_token', tok);
+    }
+  } catch (_) {}
   try { await supabaseClient.auth.signOut(); } catch (_) {}
   DB.clearSession();
   window.location.href = 'index.html';

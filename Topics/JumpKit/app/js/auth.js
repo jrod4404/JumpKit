@@ -97,8 +97,37 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
     if (error) throw error;
 
-    // Send welcome email — Edge Function handles the "only once" check server-side
+    // ── Single-session lock ──────────────────────────────────────────
     const userId = data?.user?.id || '';
+    const newToken = crypto.randomUUID();
+    try {
+      const { data: existingRow } = await supabaseClient
+        .from('user_sessions')
+        .select('session_token, device_hint, last_seen')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+      if (existingRow) {
+        // Another session active — pause, show conflict modal
+        btn.disabled = false; btn.style.opacity = '';
+        const spinIcon2 = btn.querySelector('.btn-label svg');
+        if (spinIcon2 && loginIconHTML) spinIcon2.outerHTML = loginIconHTML;
+        await _showSessionConflictModal(userId, newToken, existingRow);
+        return; // modal handles redirect or cancel
+      }
+
+      // No conflict — write our session and proceed
+      await supabaseClient.from('user_sessions').insert({
+        user_id: userId, session_token: newToken,
+        device_hint: _deviceHint(), last_seen: new Date().toISOString()
+      });
+      sessionStorage.setItem('jk_session_token', newToken);
+    } catch (_) {
+      // Session table unavailable — fail open
+    }
+    // ── End session lock ─────────────────────────────────────────────
+
+    // Send welcome email — Edge Function handles the "only once" check server-side
     const firstName = data?.user?.user_metadata?.first_name || '';
     try {
       await fetch(`${SUPABASE_URL}/functions/v1/send-welcome`, {
@@ -282,3 +311,62 @@ document.addEventListener('click', e => {
   if (!el) return;
   showView(el.dataset.view);
 });
+
+// ── Session lock helpers ───────────────────────────────────────────
+function _deviceHint() {
+  try { return navigator.platform || 'Unknown device'; } catch (_) { return 'Unknown device'; }
+}
+
+function _showSessionConflictModal(userId, newToken, existingRow) {
+  return new Promise((resolve) => {
+    const lastSeen = existingRow.last_seen
+      ? new Date(existingRow.last_seen).toLocaleString()
+      : 'unknown time';
+    const deviceHint = existingRow.device_hint || 'another device';
+
+    const overlay = document.createElement('div');
+    overlay.id = 'sessionConflictOverlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:9999';
+    overlay.innerHTML = `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
+        <div style="width:60px;height:60px;background:rgba(255,180,50,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#FFB432" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h2 style="color:var(--text);font-size:1.2rem;font-weight:700;margin:0 0 10px">Already Logged In</h2>
+        <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.65;margin:0 0 24px">
+          This account is active on <strong style="color:var(--text)">${deviceHint}</strong><br>
+          <span style="font-size:0.82rem">Last seen: ${lastSeen}</span><br><br>
+          Log out that device to continue here.
+        </p>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button id="sessionForceBtn" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:700;font-size:0.92rem;padding:11px 24px;border-radius:10px;border:none;cursor:pointer;width:100%">
+            Log out other device &amp; continue
+          </button>
+          <button id="sessionCancelBtn" style="background:transparent;color:var(--text-muted);font-size:0.88rem;padding:8px;border:1px solid var(--border);border-radius:10px;cursor:pointer;width:100%">
+            Cancel
+          </button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    document.getElementById('sessionForceBtn').addEventListener('click', async () => {
+      overlay.remove();
+      try {
+        // Overwrite the existing session with our new token
+        await supabaseClient.from('user_sessions').upsert({
+          user_id: userId, session_token: newToken,
+          device_hint: _deviceHint(), last_seen: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+        sessionStorage.setItem('jk_session_token', newToken);
+      } catch (_) {}
+      window.location.href = 'app.html';
+      resolve('force');
+    });
+
+    document.getElementById('sessionCancelBtn').addEventListener('click', async () => {
+      overlay.remove();
+      try { await supabaseClient.auth.signOut(); } catch (_) {}
+      resolve('cancel');
+    });
+  });
+}
