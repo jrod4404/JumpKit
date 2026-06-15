@@ -3685,11 +3685,11 @@ function renderTests() {
           <div id="summaryManFail" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0</div>
         </div>
 
-        <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px;background:rgba(0,194,199,0.08);border-color:rgba(0,194,199,0.3);color:var(--turq)">
-          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing
-        </button>
         <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
+        </button>
+        <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing
         </button>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
