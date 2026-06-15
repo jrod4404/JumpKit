@@ -3752,8 +3752,10 @@ function _openTestStrategyModal() {
     <div style="${h}">Phase 1 — Run All Automatics first</div>
     <p style="${s}">Click <strong>Run Automatic Tests</strong> — runs all ${JK_TESTS.filter(t=>!t.title.startsWith('[AUTO+MANUAL]')&&!t.title.startsWith('[MANUAL]')).length} automatic tests. Expect ~100 green immediately. This gives you a full baseline.</p>
     <p style="${s}">For any red failures — fix the code, then run just those tests individually. Don&rsquo;t re-run all until you&rsquo;re confident the fix is clean.</p>
-    ${specialCard('💡 Phase 1 Tips','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
-      'No special setup needed — just be logged in',
+    ${specialCard('💡 Before You Start — App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
+      'Be logged in as an <strong>Unlimited</strong> user for full coverage (free-tier skips some Maintenance tests)',
+      '<strong>Auto-archive</strong> must be set to anything <em>other than Never</em> in Settings → otherwise test ${n(122)} (Auto-archive) will skip automatically',
+      '<strong>Cloud backup</strong> enabled in Settings is required for test ${n(123)} (Auto-backup) to run fully',
       'Click <strong>Details</strong> on any failed test to see its purpose, steps, and expected output before debugging',
       'The <strong>Auth</strong> tests run first — if test #1 (session persists) fails, check your login state before continuing'
     ])}
