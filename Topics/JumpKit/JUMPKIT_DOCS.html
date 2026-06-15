@@ -3879,6 +3879,18 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-14 (evening &mdash; test suite reliability, UI polish &amp; DB cleanup)</h3>
+<ul>
+  <li><strong>Test suite: all 107 automatic tests now pass reliably on every full run.</strong> Root cause of recurring failures (tests 74, 75, 78, 79) identified and fixed: test 374 (cleanup) was positioned in the array before Shared Sync tests 78&ndash;84, wiping <code>_testTeamId</code> before those tests could use it. Moved cleanup to after test 84 in the array. Full auto suite now green from test 1 to 107 every time.</li>
+  <li><strong>Test 374 rewritten &mdash; full Supabase artifact sweep.</strong> Previously only cleaned up the current run&rsquo;s team. Now queries Supabase for ALL stale test artifacts across all runs using name-pattern matching (<code>__jk_test_team_*</code>, <code>__test_team_*</code>, <code>__TEST_*</code>) and cascades deletes through <code>team_invites</code> &rarr; <code>team_members</code> &rarr; <code>shared_jumps</code> &rarr; <code>shared_columns</code> &rarr; <code>teams</code>. Verified 4 orphan teams cleaned up. Sweep summary returned as test detail (not console noise).</li>
+  <li><strong>Reset buttons fixed.</strong> <code>_refreshSummary()</code> was scraping DOM icon classes to count pass/fail &mdash; fragile and broken after reset. Rewrote to read directly from <code>window._jkTestResults</code> (the source of truth). All 3 section Reset buttons (Auto, Auto+Manual, Manual) now correctly zero out their section card and the Total card. Manual section was also missing its Reset button entirely &mdash; added.</li>
+  <li><strong>Test page sticky header architecture.</strong> Replaced fragile <code>position:sticky</code> approach with proper flex-column layout: <code>.page-content:has(#pageTests)</code> CSS rule disables page-level scroll; <code>#testsTablesWrap</code> gets its own <code>overflow-y:auto</code>. Summary cards and &ldquo;How to Run Tests&rdquo; button are a true pinned header &mdash; test rows can never appear above the border-bottom cutoff line regardless of scroll position.</li>
+  <li><strong>CSP fix.</strong> <code>onclick=&quot;event.stopPropagation()&quot;</code> removed from section Run/Reset buttons &mdash; inline handlers are blocked by Electron&rsquo;s Content Security Policy. The handler was unnecessary since those buttons live in the section body, not the collapsible header.</li>
+  <li><strong>Tests 20 &amp; 21 fixed:</strong> both now call <code>renderTests()</code> at the end to return to the test page (same as test 22).</li>
+  <li><strong>Test 102 fixed:</strong> replaced the intentional <code>nonexistent_col_xyz</code> query (caused a console HTTP 400 from the Supabase SDK) with a nil-UUID <code>maybeSingle()</code> call that tests the same no-row handling path with no network noise.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-14_evening.tar.gz</code> (1.4 GB) saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-14 (morning &mdash; emails, tests &amp; test page overhaul)</h3>
 <ul>
   <li><strong>Two new transactional emails added:</strong> <code>member-joined-email.html</code> (notifies team owner when a member joins) and <code>member-removed-email.html</code> (notifies removed member). Both match existing brand styles. &ldquo;What changed&rdquo; card in member-removed uses red-tinted cancellation style. Total email count: 14.</li>
