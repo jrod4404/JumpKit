@@ -3289,7 +3289,7 @@ const JK_TESTS = [
 
   {
     id: 142, category: 'Email',
-    title: '[AUTO+MANUAL] send-team-deleted — Edge Function returns ok:true',
+    title: 'send-team-deleted — Edge Function returns ok:true',
     purpose: 'Confirms the send-team-deleted Edge Function is deployed and returns ok:true. Uses a fake teamId so no real members are emailed — notified:0 is expected and correct for this test.',
     prerequisites: 'Must be logged in. send-team-deleted Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-team-deleted with a fake teamId and the current user as ownerName. Verifies ok:true is returned. No inbox check needed — notified:0 means the function ran correctly but found no members for the test ID.',
@@ -3314,7 +3314,7 @@ const JK_TESTS = [
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
       if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
 
-      return 'manual';
+      return true;
     }
   },
 
