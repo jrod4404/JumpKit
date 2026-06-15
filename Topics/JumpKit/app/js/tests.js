@@ -2266,24 +2266,20 @@ const JK_TESTS = [
 
   {
     id: 122, category: 'Maintenance',
-    title: '[AUTO+MANUAL] Auto-archive fires correctly and creates notification',
+    title: 'Auto-archive fires correctly and creates notification',
     purpose: 'Verifies that runAutoArchive() correctly identifies jumps unused past the threshold, archives them in SQLite, and creates an in-app notification. Confirms free-tier users are blocked.',
     prerequisites: 'Must be logged in as an Unlimited user with auto-archive set to any value (not Never). At least one active jump must exist.',
     description: 'Fakes the lastUsed timestamp of the first active jump to 400 days ago, runs runAutoArchive() with the current threshold, verifies the jump is archived, and checks that a notification was created. Cleans up by unarchiving the jump and removing the test notification.',
     input: 'DB.updateJump(userId, jumpId, { lastUsed: Date.now() - 400days }), then runAutoArchive()',
     expected: 'Jump moves to archive. Notification created with type=auto-archive. Free tier returns early without archiving.',
     test: async () => {
-      // 1. Verify free-tier block
+      // 1. Verify Unlimited tier
       const tier = window._supabaseProfile?.subscription_tier || 'free';
-      if (tier === 'free') {
-        return 'manual';
-      }
+      if (tier === 'free') throw new Error('Unlimited tier required — auto-archive is not available on free tier');
 
       // 2. Ensure autoArchive pref is set
       const prefs = DB.getPrefs(currentUser.id);
-      if (!prefs.autoArchive || prefs.autoArchive === 'never') {
-        return 'manual';
-      }
+      if (!prefs.autoArchive || prefs.autoArchive === 'never') throw new Error('Auto-archive is set to Never — go to Settings and set it to any other value before running this test');
 
       // 3. Grab a test jump
       const active = DB.getActiveJumps(currentUser.id);
