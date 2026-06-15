@@ -3968,8 +3968,10 @@ async function _saveReleaseSection(mode) {
     } catch(_) {}
   }
 
-  // Merge: overwrite matching IDs, append new
-  const merged = { ...existingEntries, ...newEntries };
+  // Merge: keep ALL existing entries untouched, only overwrite/append entries
+  // that belong to the section currently being saved. Other sections are never modified.
+  const merged = { ...existingEntries };
+  sectionTests.forEach(t => { merged[t.id] = newEntries[t.id]; });
 
   // Build HTML
   const html = _buildReleaseTestingHTML(merged, version, filePath);
