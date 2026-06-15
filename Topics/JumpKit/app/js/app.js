@@ -2520,7 +2520,7 @@ window.runCloudBackup = async function runCloudBackup() {
     });
 
     if (!confirmed) {
-      Toast.success('Auto-backup skipped.');
+      window.Toast?.success('Auto-backup skipped.');
       return;
     }
 
