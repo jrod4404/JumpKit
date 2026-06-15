@@ -2604,8 +2604,8 @@ const JK_TESTS = [
     prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-team-downgrade-alert with ownerId (current user), a dummy teamName, lockDate, and a 1-member affectedMembers list.',
     input: 'POST /functions/v1/send-team-downgrade-alert { ownerId, teamName, lockDate, affectedMembers, variant:"alert" }',
-    expected: 'Response JSON has ok:true. An email should be sent to the logged-in user\'s address (owner) and the test member address.',
-    steps: 'Automatic. After this test passes, check inbox for the downgrade alert email.',
+    expected: 'Response JSON has ok:true. Two emails should be received in the logged-in user\'s inbox: (1) \'Team member access changing\' sent to the team owner, and (2) \'Your team access may be changing\' sent to the affected team member.',
+    steps: 'Automatic. After this test passes, check inbox for two emails: the owner email with subject \'Team member access changing\' and the member email with subject \'Your team access may be changing\'.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const profileId = window._supabaseUser?.id;
@@ -2619,8 +2619,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           ownerId: profileId,
-          teamId: 'test-team-105',
-          teamName: 'Test Team (Test 105)',
+          teamId: 'test-team-112',
+          teamName: 'Test Team (Test 112)',
           lockDate,
           affectedMembers: [{ email, name: 'Test Member' }],
           variant: 'alert',
@@ -2641,11 +2641,11 @@ const JK_TESTS = [
     id: 134, category: 'Email',
     title: '[MANUAL] send-team-downgrade-alert — correct alert email content in inbox',
     purpose: 'Manual verification that the downgrade alert email arrived with correct branding, member list, lock date, and re-upgrade CTA.',
-    prerequisites: 'Test 105 must have passed first.',
-    description: 'Open the downgrade alert email sent by Test 105 and verify the content matches spec.',
+    prerequisites: 'Test 112 must have passed first.',
+    description: 'Open the two downgrade alert emails sent by Test 112 and verify content matches spec.',
     input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with subject "Important: your JumpKit team members may lose access", contains the team name, lock date, member list, and Re-upgrade CTA button.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Important: your JumpKit team members may lose access".\n3. Verify it contains the team name "Test Team (Test 105)".\n4. Verify it lists "Test Member" in the affected members section.\n5. Verify a lock date (14 days from today) is shown in red.\n6. Verify the "Re-upgrade to Unlimited" CTA button is present and links to jumpkit.app/#pricing.\n7. Mark as Pass once confirmed.',
+    expected: 'Two emails arrive: (1) owner email with subject "Important: your JumpKit team members may lose access" (heading: \'Team member access changing\'), and (2) member email with subject "Your team access may be changing". Both reference team name, lock date, and member list.',
+    steps: '1. Open your inbox.\n2. Find the owner email with subject "Important: your JumpKit team members may lose access".\n3. Verify the heading reads \'Team member access changing\' and contains the team name "Test Team (Test 112)".\n4. Verify it lists \'Test Member\' in the affected members section with a lock date (14 days from today) shown in red.\n5. Verify the \'Re-upgrade to Unlimited\' CTA button is present and links to jumpkit.app/#pricing.\n6. Find the member email with subject \'Your team access may be changing\'.\n7. Verify it references the same team and lock date.\n8. Mark as Pass once both emails are confirmed.',
     test: async () => 'manual'
   },
 
