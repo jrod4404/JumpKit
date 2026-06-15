@@ -2315,9 +2315,9 @@ const JK_TESTS = [
   {
     id: 123, category: 'Maintenance',
     title: '[AUTO+MANUAL] Auto-backup fires correctly and creates notification',
-    purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the cloudBackup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal — it goes silently to the notification bell.',
-    prerequisites: 'Must be logged in as an Unlimited user. The cloudBackup preference must be enabled in Settings.',
-    description: 'Temporarily ensures cloudBackup pref is true, calls runCloudBackup(), and checks that a backup notification (type=backup or type=backup-failed) was created in the notification store. Cleans up the test notification.',
+    purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the auto-backup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal — it goes silently to the notification bell.',
+    prerequisites: 'Must be logged in as an Unlimited user. Auto-backup must be enabled in Settings.',
+    description: 'Temporarily ensures auto-backup pref is true, calls runCloudBackup(), and checks that a backup notification (type=backup or type=backup-failed) was created in the notification store. Cleans up the test notification.',
     input: 'DB.updatePrefs(userId, { cloudBackup: true }), then await runCloudBackup()',
     expected: 'A notification with type=backup or type=backup-failed is created. No modal is shown. Free tier returns early silently.',
     test: async () => {
@@ -3751,7 +3751,7 @@ function _openTestStrategyModal() {
     ${specialCard('💡 Before You Start — App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
       'Be logged in as an <strong>Unlimited</strong> user for full coverage (free-tier skips some Maintenance tests)',
       '<strong>Auto-archive</strong> must be set to anything <em>other than Never</em> in Settings → otherwise test ${n(122)} (Auto-archive) will skip automatically',
-      '<strong>Cloud backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> — required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
+      '<strong>Auto-backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> — required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
       'Click <strong>Details</strong> on any failed test to see its purpose, steps, and expected output before debugging',
       'The <strong>Auth</strong> tests run first — if test #1 (session persists) fails, check your login state before continuing'
     ])}
