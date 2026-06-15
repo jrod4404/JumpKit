@@ -3899,6 +3899,7 @@ async function _openReleaseTestingModal() {
 }
 
 async function _saveReleaseSection(mode) {
+  try {
   const state = _getReleaseState();
   if (!state?.filePath || !state?.version) {
     alert('No release testing file configured. Click "Create Release Testing" first.');
@@ -3964,7 +3965,11 @@ async function _saveReleaseSection(mode) {
     const sectionLabel = mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
     window.Toast?.success(`${sectionLabel} results saved to file.`);
   } else {
-    window.Toast?.success(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
+    window.Toast?.danger(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
+  }
+  } catch(err) {
+    console.error('[SaveReleaseSection] Error:', err);
+    window.Toast?.danger(`Save failed: ${err.message}`);
   }
 }
 
@@ -4235,7 +4240,7 @@ function _buildTestRows() {
   _displayOrder.forEach((t, i) => { window._jkTestDisplayNumMap[t.id] = i + 1; });
 
   const _secBtn = (id, icon, label, extra='') => `<button id="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;padding:5px 12px${extra}"><svg class="ti ti-${icon}" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>${label}</button>`;
-  const _saveBtn = (id) => _secBtn(id, 'file-download', 'Save Results', ';color:var(--turq);border-color:rgba(0,194,199,0.3);background:rgba(0,194,199,0.06)');
+  const _saveBtn = (id) => _secBtn(id, 'file-download', 'Save Results');
 
   wrap.innerHTML =
     _sectionBlock('Automatic Tests', 'player-play', autoTests, 1,
