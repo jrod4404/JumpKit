@@ -3847,7 +3847,7 @@ function _updateRTLabel() {
   const s = _getReleaseState();
   if (s?.version && s?.filePath) {
     const fname = s.filePath.split(/[\/\\]/).pop();
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Saving to: <strong style="color:var(--text)">${fname}</strong> (v${s.version})</span>`;
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Saving to: <strong style="color:var(--text)">${fname}</strong></span>`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No release testing file configured</span>`;
   }
