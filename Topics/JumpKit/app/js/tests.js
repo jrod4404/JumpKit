@@ -2927,8 +2927,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           memberEmail: email,
-          memberName: 'Test User (Test 119)',
-          teamName: 'Test Team (Test 119)',
+          memberName: 'Test User (Test 115)',
+          teamName: 'Test Team (Test 115)',
           ownerName: 'Jane Owner',
         }),
       });
@@ -2947,11 +2947,11 @@ const JK_TESTS = [
     id: 137, category: 'Email',
     title: '[MANUAL] send-member-removed — correct email content in inbox',
     purpose: "Manual verification that the member-removed email arrived with correct branding, red-tinted What changed card, turquoise What's safe card, and help contact.",
-    prerequisites: 'Test 119 must have passed first.',
-    description: 'Open the member-removed email sent by Test 119 and verify content and styling match spec.',
+    prerequisites: 'Test 115 must have passed first.',
+    description: 'Open the member-removed email sent by Test 115 and verify content and styling match spec.',
     input: 'Email inbox for logged-in user account',
-    expected: "Email arrives with subject \"You've been removed from Test Team (Test 119) on JumpKit\". Red-tinted card with bold red X items, turquoise check card with safe items, and help@jumpkit.app link.",
-    steps: "1. Open your inbox.\n2. Find email with subject \"You've been removed from Test Team (Test 119) on JumpKit\".\n3. Verify greeting says \"Hi Test User\".\n4. Verify \"What changed\" card has red background tint and bold red X icons.\n5. Verify \"Your personal jumps are not affected\" card has turquoise check icons.\n6. Verify turquoise info box links to help@jumpkit.app.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.",
+    expected: "Email arrives with subject \"You've been removed from Test Team (Test 115) on JumpKit\". Red-tinted card with bold red X items, turquoise check card with safe items, and help@jumpkit.app link.",
+    steps: "1. Open your inbox.\n2. Find email with subject \"You've been removed from Test Team (Test 115) on JumpKit\".\n3. Verify greeting says \"Hi Test User\".\n4. Verify \"What changed\" card has red background tint and bold red X icons.\n5. Verify \"Your personal jumps are not affected\" card has turquoise check icons.\n6. Verify turquoise info box links to help@jumpkit.app.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.",
     test: async () => 'manual'
   },
 
