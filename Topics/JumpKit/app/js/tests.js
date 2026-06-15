@@ -3331,6 +3331,10 @@ const JK_TESTS = [
       } catch(e) {
         throw new Error('exportStatsPDF threw an error: ' + e.message);
       }
+
+      // Nav back to tests page after export completes
+      if (typeof renderTests === 'function') renderTests();
+
       return 'manual';
     }
   },
