@@ -3522,7 +3522,7 @@ const JK_TESTS = [
       const { data: teams } = await supabaseClient
         .from('teams')
         .select('id, name')
-        .eq('created_by', userId)
+        .eq('owner_id', userId)
         .limit(1);
 
       if (!teams || teams.length === 0) throw new Error('No owned teams found — create at least one team before running this test');
