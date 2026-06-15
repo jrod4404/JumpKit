@@ -3569,7 +3569,7 @@ function renderTests() {
           <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);margin-right:4px">Total</span>
           <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
           <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
-          <div id="summaryManual" style="display:none"></div>
+          <div id="summaryManual" style="display:none !important"></div>
           <span id="summaryTime" style="color:var(--text-muted);font-size:0.8rem"></span>
         </div>
         <!-- Per-section summary cards -->
@@ -3849,13 +3849,13 @@ function _sectionBlock(label, icon, tests, startNum, actionBtns) {
     <div style="margin-bottom:28px">
       <div style="padding:14px 4px 0;cursor:pointer;user-select:none" data-jaction="section-toggle" data-section="${sectionId}">
         <div style="display:flex;align-items:center;gap:8px">
-          <svg class="ti ti-chevron-down" id="chevron-${sectionId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          <svg class="ti ti-chevron-down" id="chevron-${sectionId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(-90deg)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
           ${(Array.isArray(icon)?icon:[icon]).map(ic=>`<svg class="ti ti-${ic}" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${ic}"/></svg>`).join('')}
           <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
           <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${tests.length})</span>
         </div>
       </div>
-      <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;margin-left:26px">
+      <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;margin-left:26px;max-height:0px" data-collapsed="true">
         ${btns}
         <div class="card" style="overflow-x:auto;padding:0;border-radius:0 0 var(--radius-lg) var(--radius-lg)">
           <table style="width:100%;border-collapse:collapse">
@@ -4132,13 +4132,8 @@ function _refreshSummary() {
   const sm = document.getElementById('summaryManual');
   if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#3fbe71':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#3fbe71':'var(--text-muted)'; }
   if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#e15b59':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#e15b59':'var(--text-muted)'; }
-  if (sm) {
-    sm.style.display = manual > 0 ? 'flex' : 'none';
-    if (manual > 0) {
-      sm.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
-      sm.style.color = '#f59e0b';
-    }
-  }
+  // summaryManual intentionally hidden from total card — manual results tracked per-section only
+  if (sm) sm.style.display = 'none';
 
   // Per-section cards
   const _secCard = (passId, failId, p, f) => {
