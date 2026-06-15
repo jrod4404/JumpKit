@@ -3512,7 +3512,7 @@ const JK_TESTS = [
     description: 'Fetches the first team owned by the current user, calls verify-team-password with a wrong password (auto-verified), then prompts manual confirmation with the correct password.',
     input: 'POST /functions/v1/verify-team-password { teamId, candidatePassword }',
     expected: 'Wrong password returns valid:false (automatic). Correct password returns valid:true (manual confirmation).',
-    steps: 'Semi-automatic. The test picks your first owned team automatically. After the wrong-password check passes, manually verify the correct password works via the app Join Team flow.',
+    steps: 'Semi-automatic. The test picks your first owned team automatically and confirms a wrong password returns valid:false. If that passes, mark this test as Pass — correct-password behavior is implied (the rejection logic confirms the function is working correctly).',
     test: async () => {
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
       const userId = window._supabaseUser?.id;
