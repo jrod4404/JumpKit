@@ -718,6 +718,33 @@ App ready to render</code></pre>
 <li><strong>Profile auto-creation</strong>: Supabase trigger <code>on_auth_user_created</code> automatically inserts a row into the <code>profiles</code> table on signup</li>
 <li><strong>Roles</strong>: <code>org-owner</code>, <code>team-owner</code>, <code>team-member</code> - stored in profiles table, checked on Teams page</li>
 </ul>
+
+<h5 id="single-session-lock">Single-Session Lock</h5>
+<p>JumpKit enforces one active session per account to prevent credential sharing across multiple devices.</p>
+<p><strong>How it works:</strong></p>
+<ul>
+<li>After a successful <code>signInWithPassword</code>, the client queries the <code>user_sessions</code> table (Supabase) for an existing row for that user</li>
+<li>If a row already exists, login is <strong>blocked</strong> and a modal is shown: <em>"Already Logged In — active on [device] since [time]"</em></li>
+<li>The user can click <strong>"Log out other device &amp; continue"</strong> to overwrite the session token and proceed, or <strong>Cancel</strong> to stay logged out</li>
+<li>If no existing row, a new UUID session token is written to <code>user_sessions</code> and stored in <code>sessionStorage</code></li>
+</ul>
+<p><strong>Heartbeat watcher (app.html):</strong></p>
+<ul>
+<li>On app load, the session token is written/refreshed in <code>user_sessions</code></li>
+<li>Every 3 minutes, the app checks whether its token is still the active one</li>
+<li>If the token was replaced (another device force-logged this one out), a red toast <em>"⚠️ You were logged in from another device"</em> is shown for 3 seconds, then the user is redirected to the login screen</li>
+</ul>
+<p><strong>On logout:</strong> the <code>user_sessions</code> row is deleted before <code>signOut()</code> is called, freeing the lock immediately.</p>
+<p><strong>Supabase schema:</strong></p>
+<pre><code>user_sessions (
+  user_id      UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  session_token TEXT NOT NULL,   -- UUID generated on each login
+  device_hint  TEXT,             -- navigator.platform (e.g. "MacIntel")
+  last_seen    TIMESTAMPTZ       -- updated every 3 min while active
+)
+-- RLS: user can SELECT / INSERT / UPDATE / DELETE their own row only</code></pre>
+<p><strong>Design rationale:</strong> Blocks the 2nd login entirely (rather than kicking out the 1st) to prevent invisible displacement. The force-logout button on the conflict modal gives legitimate users a self-service escape hatch without requiring a support ticket. Fail-open: if <code>user_sessions</code> is unreachable, the lock is skipped and the user is allowed in.</p>
+
 <h4 id="sync-engine">2.1.5 Sync Engine: Local SQLite ↔ Supabase</h4>
 
 <p><strong>Overview:</strong> JumpKit uses a <em>local-first</em> architecture. All data lives in SQLite on the user's machine. Supabase is only used for <em>shared</em> data (columns + jumps that the team owner explicitly shares). Personal jumps never leave the device.</p>
