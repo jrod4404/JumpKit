@@ -3689,8 +3689,9 @@ function renderTests() {
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
-          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing
+          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create New Release Testing
         </button>
+        <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
 
@@ -3720,6 +3721,7 @@ function renderTests() {
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
+  _updateRTLabel();
   document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
   document.getElementById('btnSaveAMResults').addEventListener('click', () => _saveReleaseSection('auto-manual'));
   document.getElementById('btnSaveManualResults').addEventListener('click', () => _saveReleaseSection('manual'));
@@ -3837,6 +3839,18 @@ function _getReleaseState() {
 }
 function _setReleaseState(state) {
   localStorage.setItem(_RT_KEY, JSON.stringify(state));
+  _updateRTLabel();
+}
+function _updateRTLabel() {
+  const el = document.getElementById('rtActiveLabel');
+  if (!el) return;
+  const s = _getReleaseState();
+  if (s?.version && s?.filePath) {
+    const fname = s.filePath.split(/[\/\\]/).pop();
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Saving to: <strong style="color:var(--text)">${fname}</strong> (v${s.version})</span>`;
+  } else {
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No release testing file configured</span>`;
+  }
 }
 
 async function _openReleaseTestingModal() {
