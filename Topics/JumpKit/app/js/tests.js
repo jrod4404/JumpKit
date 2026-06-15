@@ -3284,6 +3284,99 @@ const JK_TESTS = [
   },
 
   // ══════════════════════════════════════════════════════════════════
+  // EMAIL — TEAM DELETED + WAITLIST
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: 142, category: 'Email',
+    title: '[AUTO+MANUAL] send-team-deleted — Edge Function returns ok:true',
+    purpose: 'Confirms the send-team-deleted Edge Function is deployed and returns ok:true. Uses a fake teamId so no real members are emailed — notified:0 is expected and correct for this test.',
+    prerequisites: 'Must be logged in. send-team-deleted Edge Function must be deployed.',
+    description: 'POSTs to /functions/v1/send-team-deleted with a fake teamId and the current user as ownerName. Verifies ok:true is returned. No inbox check needed — notified:0 means the function ran correctly but found no members for the test ID.',
+    input: 'POST /functions/v1/send-team-deleted { teamId: \'test-team-142\', teamName: \'Test Team (Test 142)\', ownerName }',
+    expected: 'Response JSON has ok:true. notified:0 is expected (fake teamId has no members). No inbox email will arrive — this is correct behavior for a deployment check.',
+    steps: 'Automatic. Confirm ok:true in the result. notified:0 is expected — mark Pass.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      const prof = window._supabaseProfile || {};
+      const ownerName = [prof.first_name, prof.last_name].filter(Boolean).join(' ') || 'Test Owner';
+      if (!email) throw new Error('No user email — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/send-team-deleted`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ teamId: 'test-team-142', teamName: 'Test Team (Test 142)', ownerName }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+
+      return 'manual';
+    }
+  },
+
+  {
+    id: 143, category: 'Email',
+    title: '[MANUAL] send-team-deleted — deployment check only (no inbox email expected)',
+    purpose: 'Manual confirmation that test 142 returned ok:true and notified:0, confirming the function is deployed and working correctly.',
+    prerequisites: 'Test 142 must have passed first.',
+    description: 'Confirm the result from test 142 shows ok:true and notified:0. No inbox email is expected — the fake teamId has no members in Supabase.',
+    input: 'Result from test 142',
+    expected: 'ok:true and notified:0 in the test 142 result. No email in inbox (correct — fake team has no members).',
+    steps: '1. Confirm test 142 showed ok:true.\n2. Confirm notified was 0 (expected for fake teamId).\n3. No inbox check needed.\n4. Mark as Pass.',
+    test: async () => 'manual'
+  },
+
+  {
+    id: 144, category: 'Email',
+    title: '[AUTO+MANUAL] waitlist-signup — Edge Function returns ok:true or duplicate:true',
+    purpose: 'Confirms the waitlist-signup Edge Function is deployed and returns a valid response. Uses the current user email — if already on the waitlist, duplicate:true is returned (also a pass).',
+    prerequisites: 'Must be logged in. waitlist-signup Edge Function must be deployed.',
+    description: 'POSTs to /functions/v1/waitlist-signup with the current user email. Accepts either { success:true } (new signup + email sent) or { duplicate:true } (already on waitlist). Cleans up the test row if a new entry was created.',
+    input: 'POST /functions/v1/waitlist-signup { email }',
+    expected: 'Response JSON has success:true (new signup, check inbox for waitlist email) or duplicate:true (already signed up, no email). Both are Pass.',
+    steps: 'Automatic. If success:true — check inbox for the waitlist confirmation email. If duplicate:true — no email, mark Pass.',
+    test: async () => {
+      const email = window._supabaseUser?.email || currentUser?.email;
+      if (!email) throw new Error('No user email — must be logged in');
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/waitlist-signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+        body: JSON.stringify({ email }),
+      });
+      let body;
+      try { body = await res.json(); } catch(_) { body = {}; }
+      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
+      if (body.success !== true && body.duplicate !== true) throw new Error(`Unexpected response — got: ${JSON.stringify(body)}`);
+
+      // Clean up — remove test row if newly inserted (duplicate means it was already there)
+      if (body.success === true && supabaseClient) {
+        await supabaseClient.from('waitlist').delete().eq('email', email.toLowerCase().trim());
+      }
+
+      return 'manual';
+    }
+  },
+
+  {
+    id: 145, category: 'Email',
+    title: '[MANUAL] waitlist-signup — correct email content in inbox (if success:true)',
+    purpose: 'Manual confirmation that the waitlist email arrived with correct content if test 144 returned success:true.',
+    prerequisites: 'Test 144 must have passed with success:true (not duplicate:true).',
+    description: 'Open the waitlist confirmation email and verify subject, content, and branding.',
+    input: 'Email inbox for logged-in user account',
+    expected: 'Email arrives with subject "You\'re on the JumpKit waitlist 🚀". Contains feature list and jumpkit.app link. If test 144 returned duplicate:true, skip this test and mark Pass.',
+    steps: '1. If test 144 returned duplicate:true — mark this test Pass (no email expected).\n2. Otherwise open your inbox.\n3. Find email with subject "You\'re on the JumpKit waitlist 🚀".\n4. Verify it contains the feature list and a link to jumpkit.app.\n5. Mark as Pass once confirmed.',
+    test: async () => 'manual'
+  },
+
+  // ══════════════════════════════════════════════════════════════════
   // EXPORT PDF
   // ══════════════════════════════════════════════════════════════════
 
