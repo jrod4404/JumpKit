@@ -2878,9 +2878,9 @@ const JK_TESTS = [
         body: JSON.stringify({
           ownerEmail: email,
           ownerName,
-          memberName: 'Jane Smith (Test 117)',
-          memberEmail: 'jane.smith.test117@example.com',
-          teamName: 'Test Team (Test 117)',
+          memberName: 'Jane Smith (Test 114)',
+          memberEmail: 'jane.smith.test114@example.com',
+          teamName: 'Test Team (Test 114)',
           totalMembers: 3,
           joinedAt: new Date().toISOString(),
         }),
@@ -2900,11 +2900,11 @@ const JK_TESTS = [
     id: 136, category: 'Email',
     title: '[MANUAL] send-member-joined — correct email content in inbox',
     purpose: 'Manual verification that the member-joined email arrived with correct branding, member name, team name, member count, and join timestamp.',
-    prerequisites: 'Test 117 must have passed first.',
-    description: 'Open the member-joined email sent by Test 117 and verify the content matches spec.',
+    prerequisites: 'Test 114 must have passed first.',
+    description: 'Open the member-joined email sent by Test 114 and verify the content matches spec.',
     input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with subject "Jane Smith (Test 117) just joined your team on JumpKit". Contains team name "Test Team (Test 117)", member email, total members = 3, and a join timestamp.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Jane Smith (Test 117) just joined your team on JumpKit".\n3. Verify member name "Jane Smith (Test 117)" and email jane.smith.test117@example.com are shown.\n4. Verify team name "Test Team (Test 117)" is highlighted in turquoise.\n5. Verify Total members shows 3.\n6. Verify a join timestamp is present.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.',
+    expected: 'Email arrives with subject "Jane Smith (Test 114) just joined your team on JumpKit". Contains team name "Test Team (Test 114)", member email, total members = 3, and a join timestamp.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Jane Smith (Test 114) just joined your team on JumpKit".\n3. Verify member name "Jane Smith (Test 114)" and email jane.smith.test114@example.com are shown.\n4. Verify team name "Test Team (Test 114)" is highlighted in turquoise.\n5. Verify Total members shows 3.\n6. Verify a join timestamp is present.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.',
     test: async () => 'manual'
   },
 
