@@ -3308,29 +3308,28 @@ const JK_TESTS = [
 
   {
     id: 121, category: 'Deployment',
-    title: '[AUTO+MANUAL] Export PDF — generates PDF file and opens for human verification',
-    purpose: 'Triggers a real PDF export with minimal valid HTML and confirms the IPC handler completes without error. Human then opens the saved file to verify it looks correct.',
-    prerequisites: 'Must be running in Electron. Test 133 must pass first.',
-    description: 'Calls electronAPI.exportPDF() with a small test HTML payload. Confirms it returns a result without crashing. Human verifies the saved file.',
-    input: 'electronAPI.exportPDF(testHTML)',
-    expected: 'exportPDF resolves without throwing. Human verifies the PDF opens correctly and content is readable.',
-    steps: 'Automatic trigger, then manual verification:\n1. Test fires exportPDF — a Save dialog may appear or file saves automatically.\n2. Open the saved PDF.\n3. Verify it contains readable text and is not corrupted.\n4. Mark as Pass once confirmed.',
+    title: '[AUTO+MANUAL] Export PDF — exports real statistics PDF and opens for human verification',
+    purpose: 'Calls exportStatsPDF() — the real app export function — to generate the actual ROI report PDF from live data. Human verifies the saved file looks correct.',
+    prerequisites: 'Must be running in Electron. Must be logged in with at least some jump data for a meaningful export.',
+    description: 'Navigates to Stats page, then calls exportStatsPDF() which builds the full ROI report HTML (personal stats, charts, top jumps, team ROI) and sends it to Electron for PDF generation.',
+    input: 'exportStatsPDF()',
+    expected: 'A Save dialog appears. After saving, the PDF contains real stats: launches, time saved, dollars saved, top jumps table, and charts. Human verifies content looks correct.',
+    steps: 'Automatic trigger, then manual verification:\n1. A Save dialog will appear — choose a location and save.\n2. Open the saved PDF.\n3. Verify it shows your real stats (launches, time saved, top jumps).\n4. Verify it is not a dummy/placeholder file.\n5. Mark as Pass once confirmed.',
     test: async () => {
-      if (!window.electronAPI?.exportPDF) throw new Error('electronAPI.exportPDF not available — run Test 133 first');
-      const testHTML = `<html><body style="font-family:sans-serif;padding:40px">
-        <h1 style="color:#1A4FD6">JumpKit PDF Export Test (Test 134)</h1>
-        <p>This is an automated test PDF generated on ${new Date().toLocaleString()}.</p>
-        <p>If you can read this, the PDF export is working correctly.</p>
-        <table border="1" cellpadding="8" style="border-collapse:collapse;width:100%;margin-top:20px">
-          <tr><th>Jump</th><th>URL</th><th>Launches</th></tr>
-          <tr><td>Google</td><td>https://google.com</td><td>42</td></tr>
-          <tr><td>GitHub</td><td>https://github.com</td><td>18</td></tr>
-        </table>
-      </body></html>`;
+      if (!window.electronAPI?.exportPDF) throw new Error('electronAPI.exportPDF not available — not running in Electron');
+      if (typeof exportStatsPDF !== 'function') throw new Error('exportStatsPDF is not defined — check app.js is loaded');
+      if (!currentUser) throw new Error('No user logged in');
+
+      // Navigate to stats page so charts are rendered before export
+      if (typeof renderStats === 'function') {
+        renderStats();
+        await new Promise(r => setTimeout(r, 800));
+      }
+
       try {
-        const result = await window.electronAPI.exportPDF(testHTML);
+        await exportStatsPDF();
       } catch(e) {
-        throw new Error('exportPDF threw an error: ' + e.message);
+        throw new Error('exportStatsPDF threw an error: ' + e.message);
       }
       return 'manual';
     }
