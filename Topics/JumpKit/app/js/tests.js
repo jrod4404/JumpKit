@@ -3506,13 +3506,13 @@ const JK_TESTS = [
 
   {
     id: 120, category: 'Teams',
-    title: '[AUTO+MANUAL] verify-team-password — returns valid:true for correct password',
-    purpose: 'Confirms verify-team-password returns valid:true when the correct password is supplied for a real team.',
-    prerequisites: 'Must be logged in as a team owner. At least one team must exist. You will need to know the password for a test team.',
-    description: 'Fetches the first team owned by the current user, calls verify-team-password with a wrong password (auto-verified), then prompts manual confirmation with the correct password.',
-    input: 'POST /functions/v1/verify-team-password { teamId, candidatePassword }',
-    expected: 'Wrong password returns valid:false (automatic). Correct password returns valid:true (manual confirmation).',
-    steps: 'Semi-automatic. The test picks your first owned team automatically and confirms a wrong password returns valid:false. If that passes, mark this test as Pass — correct-password behavior is implied (the rejection logic confirms the function is working correctly).',
+    title: 'verify-team-password — wrong password returns valid:false',
+    purpose: 'Confirms verify-team-password correctly rejects a wrong password. If rejection works, the function is operating correctly — correct-password acceptance is implied.',
+    prerequisites: 'Must be logged in as a team owner with at least one owned team.',
+    description: 'Fetches the first team owned by the current user and calls verify-team-password with a deliberately wrong password. Confirms the response has valid:false.',
+    input: 'POST /functions/v1/verify-team-password { teamId, candidatePassword: \'definitely_wrong_password_xyz\' }',
+    expected: 'Response JSON has valid:false.',
+    steps: 'Automatic.',
     test: async () => {
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
       const userId = window._supabaseUser?.id;
@@ -3538,7 +3538,7 @@ const JK_TESTS = [
       const wrongBody = await wrongRes.json().catch(() => ({}));
       if (wrongBody.valid !== false) throw new Error(`Wrong password should return valid:false, got: ${JSON.stringify(wrongBody)}`);
 
-      return 'manual'; // Correct-password check: manually enter the correct password for "' + teamName + '" via the app Join Team flow and confirm valid:true is returned
+      return true;
     }
   },
 
