@@ -2608,7 +2608,7 @@ const JK_TESTS = [
     steps: 'Automatic. After this test passes, check inbox for the downgrade alert email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      const profileId = window._supabaseProfile?.id;
+      const profileId = window._supabaseUser?.id;
       if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
@@ -2660,7 +2660,7 @@ const JK_TESTS = [
     steps: 'Automatic. After this test passes, check inbox for the 2-day warning email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      const profileId = window._supabaseProfile?.id;
+      const profileId = window._supabaseUser?.id;
       if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
@@ -3206,7 +3206,7 @@ const JK_TESTS = [
     steps: 'Automatic. After passing, check inbox for the invite email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      const profileId = window._supabaseProfile?.id;
+      const profileId = window._supabaseUser?.id;
       if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
