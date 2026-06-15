@@ -203,7 +203,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   const _ownedTier = window._supabaseProfile?.subscription_tier || 'free';
   const _ownedIsUnlimited = _ownedTier === 'core' || _ownedTier === 'teams_jet';
   const _ownedTierPill = _ownedIsUnlimited
-    ? `<span style="background:rgba(139,92,246,0.12);color:#8b5cf6;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(139,92,246,0.3)">Unlimited Team</span>`
+    ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
     : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
   let html = `<div class="acct-grid">`;
@@ -357,7 +357,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _joinedOwnerTier = ownerProf?.subscription_tier || 'free';
       const _joinedIsUnlimited = _joinedOwnerTier === 'core' || _joinedOwnerTier === 'teams_jet';
       const _joinedTierPill = _joinedIsUnlimited
-        ? `<span style="background:rgba(139,92,246,0.12);color:#8b5cf6;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(139,92,246,0.3)">Unlimited Team</span>`
+        ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
         : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
       const _isLockedFromTeam = _lockedTeamIds.has(team.id);
       const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
@@ -1832,7 +1832,37 @@ window.removeMember = window.confirmRemoveMember;
 window.doRemoveMember = async function(memberId, memberName) {
   Modal.close();
   try {
+    // Fetch member email + team name BEFORE deleting
+    let removedMemberEmail = '';
+    let teamNameForEmail = '';
+    try {
+      const { data: memberRow } = await supabaseClient
+        .from('team_members').select('user_id, team_id, profiles(email, first_name, last_name)').eq('id', memberId).single();
+      removedMemberEmail = memberRow?.profiles?.email || '';
+      if (memberRow?.team_id) {
+        const { data: teamRow } = await supabaseClient.from('teams').select('name').eq('id', memberRow.team_id).single();
+        teamNameForEmail = teamRow?.name || '';
+      }
+    } catch(_prefetch) { console.warn('[doRemoveMember] prefetch non-fatal:', _prefetch); }
+
     { const { error: _e5 } = await supabaseClient.from('team_members').delete().eq('id', memberId); if (_e5) throw new Error('Remove member failed: ' + _e5.message); }
+
+    // Email the removed member
+    if (removedMemberEmail && teamNameForEmail) {
+      try {
+        const ownerProf = window._supabaseProfile || {};
+        const ownerName = [ownerProf.first_name, ownerProf.last_name].filter(Boolean).join(' ') || '';
+        supabaseClient.functions.invoke('send-member-removed', {
+          body: {
+            memberEmail: removedMemberEmail,
+            memberName,
+            teamName: teamNameForEmail,
+            ownerName,
+          }
+        }).catch(e => console.warn('[send-member-removed]', e));
+      } catch(emailErr) { console.warn('[send-member-removed] non-fatal:', emailErr); }
+    }
+
     Toast.success(`${memberName} removed from team`);
     window.addNotification?.({ type: 'member-removed', message: `Removed member: ${memberName}`, ts: Date.now() });
     if (typeof updateNotifBadge === 'function') updateNotifBadge();
@@ -2116,6 +2146,31 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
     }
 
     Modal.close();
+
+    // Notify owner that a new member joined
+    try {
+      const { data: teamForEmail } = await supabaseClient.from('teams').select('owner_id, name').eq('id', teamId).single();
+      if (teamForEmail?.owner_id) {
+        const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', teamForEmail.owner_id).single();
+        const { count: newMemberCount } = await supabaseClient.from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', teamId);
+        const currentProf = window._supabaseProfile || {};
+        const memberFullName = [currentProf.first_name, currentProf.last_name].filter(Boolean).join(' ') || window._supabaseUser?.email || 'A new member';
+        const memberEmail = window._supabaseUser?.email || '';
+        if (ownerProf?.email) {
+          supabaseClient.functions.invoke('send-member-joined', {
+            body: {
+              ownerEmail: ownerProf.email,
+              ownerName: [ownerProf.first_name, ownerProf.last_name].filter(Boolean).join(' ') || '',
+              memberName: memberFullName,
+              memberEmail,
+              teamName: teamForEmail.name || teamName,
+              totalMembers: newMemberCount || null,
+              joinedAt: new Date().toISOString(),
+            }
+          }).catch(e => console.warn('[send-member-joined]', e));
+        }
+      }
+    } catch(emailErr) { console.warn('[send-member-joined] non-fatal:', emailErr); }
 
     // Notify user they joined a team
     window.addNotification?.({ type: 'team-joined', message: `You joined team: ${teamName}`, ts: Date.now() });

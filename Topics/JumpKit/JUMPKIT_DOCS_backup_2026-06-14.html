@@ -586,7 +586,7 @@
                 <p class="header-tagline">Stop searching. Start jumping.</p>
                 <h1>Developer and Marketing Documentation</h1>
                 <p class="header-subtext">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p class="header-updated">Last updated: 2026-06-14</p>
+                <p class="header-updated">Last updated: 2026-06-11</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -691,7 +691,7 @@
 <ul>
 <li>Jumps in columns marked &quot;shared with team&quot;</li>
 <li>Synced from the team owner&#39;s machine to Supabase</li>
-<li>Pulled down to all team members&#39; machines on login + every 2 minutes</li>
+<li>Pulled down to all team members&#39; machines on login + every 60 minutes</li>
 <li><strong>Hotkeys are local</strong>: Each user assigns their own hotkey to shared jumps; hotkeys never sync to the cloud</li>
 </ul>
 <p><strong>3. Cached (Supabase)</strong></p>
@@ -714,7 +714,7 @@ App data (columns, jumps, click_log) loaded into in-memory cache
            ↓
 App ready to render</code></pre>
 <ul>
-<li><strong>Email confirmation enabled</strong>: Supabase Auth sends a confirmation email on signup. Users must click the link before they can sign in. Redirect URL: <code>https://jumpkit.app/confirmed</code>. Auth.js handles the &ldquo;email not confirmed&rdquo; error and shows appropriate messaging.</li>
+<li><strong>No email confirmation</strong>: Currently disabled for faster onboarding (re-enable before public launch)</li>
 <li><strong>Profile auto-creation</strong>: Supabase trigger <code>on_auth_user_created</code> automatically inserts a row into the <code>profiles</code> table on signup</li>
 <li><strong>Roles</strong>: <code>org-owner</code>, <code>team-owner</code>, <code>team-member</code> - stored in profiles table, checked on Teams page</li>
 </ul>
@@ -978,7 +978,7 @@ DB.clearSession()</code></pre>
   notifications:      true,
   cloudBackup:        false,
   timePerClick:       10,                  // seconds
-  dollarsPerHour:     50,
+  dollarsPerHour:     150,
   showDescription:    false,
   showHotkey:         false,
   autoArchive:        'never',             // 'never', '1m', '6m', '1y'
@@ -1061,7 +1061,7 @@ unshareColumn(colId)            // unshare from team</code></pre>
 <li>Team member invites via email (team-owner)</li>
 <li>Join team flow (pending members enter team password)</li>
 <li>Display shared jumps + team member list</li>
-<li>Password hashing (PBKDF2, 100k iterations, SHA-256 — for team passwords)</li>
+<li>Password hashing (SHA-256 for team passwords)</li>
 </ul>
 <p><strong>Roles:</strong></p>
 <p><strong>org-owner</strong></p>
@@ -1091,24 +1091,18 @@ unshareColumn(colId)            // unshare from team</code></pre>
 <li>Team-owner enters email addresses</li>
 <li>Invite email sent via Resend (Edge Function <code>send-invite</code>)</li>
 <li>New user downloads app → clicks &quot;Join a Team&quot; → enters org name, team name, team password, personal password</li>
-<li>App verifies team password via <code>verify-team-password</code> Edge Function (PBKDF2 hash match) &rarr; inserts into <code>team_members</code></li>
+<li>App verifies team password (SHA-256 hash match) → inserts into <code>team_members</code></li>
 <li>On next sync, shared jumps pull down</li>
 </ol>
-<p><strong>Password Hashing (PBKDF2):</strong></p>
+<p><strong>Password Hashing:</strong></p>
 <pre><code>async function hashPassword(password) {
-  // PBKDF2: 100,000 iterations, SHA-256, fixed salt
   const encoder = new TextEncoder();
-  const salt = encoder.encode('jumpkit-team-salt-v1' + password.length);
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']
-  );
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' }, keyMaterial, 256
-  );
-  return Array.from(new Uint8Array(bits)).map(b =&gt; b.toString(16).padStart(2, '0')).join('');
-}
-// Significantly stronger than plain SHA-256. Server-side verification via
-// verify-team-password Edge Function (never compares hash client-side).</code></pre>
+  const data = encoder.encode(password);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash))
+    .map(b =&gt; b.toString(16).padStart(2, '0'))
+    .join('');
+}</code></pre>
 <h4 id="jssyncjs">2.2.8 js/sync.js - Sync Engine</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
@@ -1116,12 +1110,12 @@ unshareColumn(colId)            // unshare from team</code></pre>
 <li>Upsert into local SQLite</li>
 <li>Preserve user&#39;s local hotkey assignments</li>
 <li>Remove stale shared jumps no longer on cloud</li>
-<li>Schedule 2-minute interval sync</li>
+<li>Schedule 60-minute interval sync</li>
 </ul>
 <p><strong>When Sync Runs:</strong></p>
 <ul>
 <li>On login (in <code>initAuth()</code> → <code>initApp()</code>)</li>
-<li>Every 2 minutes (setInterval in module init — <code>2 * 60 * 1000</code>)</li>
+<li>Every 60 minutes (setInterval in module init)</li>
 </ul>
 <p><strong>Sync Algorithm:</strong></p>
 <ol>
@@ -1180,22 +1174,29 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <li>Time saved / dollars earned calculation</li>
 <li>Uses Chart.js for graphs</li>
 </ul>
-<h4 id="jstestsjs">2.2.11 js/tests.js - Unit Tests (141 tests)</h4>
+<h4 id="jstestsjs">2.2.11 js/tests.js - Unit Tests (45 tests)</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Comprehensive test suite for jump CRUD, columns, hotkeys, filtering</li>
 <li>Runs in-app (admin only) for quick verification</li>
 <li>Writes results to file (for CI/CD)</li>
 </ul>
-<p><strong>Test Categories (12):</strong> Auth, Navigation, Account, Admin, Onboarding, Settings, Jumps, Columns, Archive, Stats, Subscription, Paywall, Email, Teams, Shared Sync, Security, UI, Code Quality, Deployment, Maintenance, DB Schema</p>
-<p><strong>Key features:</strong></p>
+<p><strong>Test Categories:</strong></p>
 <ul>
-<li>Admin only &mdash; access gated by <code>window._supabaseProfile?.role !== 'admin'</code></li>
-<li>Tests sorted by category in UI (<code>_CATEGORY_ORDER</code> array); <code>[MANUAL]</code> and <code>[AUTO+MANUAL]</code> tags on titles</li>
-<li>Details button on every row &mdash; review prerequisites/steps before running</li>
-<li>Results persist across restarts via <code>DB.savePrefs(userId, { testResults: &hellip; })</code></li>
-<li>&ldquo;How to Run Tests&rdquo; strategy modal on the page header</li>
-<li>Run All Tests button or run individually; Reset clears saved state</li>
+<li>Jump creation, editing, deletion</li>
+<li>Column operations</li>
+<li>Hotkey parsing and validation</li>
+<li>Click tracking</li>
+<li>Team filtering</li>
+<li>Sync behavior</li>
+<li>Preference persistence</li>
+</ul>
+<p><strong>Run Tests:</strong></p>
+<ul>
+<li>Admin only (check email === jeffroder@gmail.com)</li>
+<li>Tests nav item appears in sidebar</li>
+<li>Click &quot;Tests&quot; → &quot;Run All Tests&quot; button</li>
+<li>Results displayed in modal + written to ~/JumpKit Appdata/test-results.txt</li>
 </ul>
 <h4 id="cssvarcss">2.2.12 css/vars.css - Design Tokens &amp; Theme Variables</h4>
 <p><strong>Responsibilities:</strong></p>
@@ -1300,7 +1301,7 @@ ts INTEGER NOT NULL                    -- timestamp</code></pre>
 <pre><code>userId TEXT PRIMARY KEY,
 startPage TEXT DEFAULT 'home',
 timePerClick REAL DEFAULT 10,
-dollarsPerHour REAL DEFAULT 50,
+dollarsPerHour REAL DEFAULT 150,
 showDescription INTEGER DEFAULT 0,
 showHotkey INTEGER DEFAULT 0,
 subscriptionStatus TEXT DEFAULT 'free',
@@ -1323,7 +1324,6 @@ subscription_status TEXT ('free', 'active', 'overdue', 'cancelled'),
 subscription_tier TEXT ('free', 'core', 'teams_jet'),
 trial_launches_used INTEGER DEFAULT 0,
 ls_customer_id TEXT,
-welcome_email_sent BOOLEAN DEFAULT FALSE, -- prevents duplicate welcome emails
 created_at TIMESTAMPTZ</code></pre>
 <h4 id="organizations">2.3.9 organizations</h4>
 <pre><code>id UUID PRIMARY KEY,
@@ -1335,7 +1335,8 @@ created_at TIMESTAMPTZ</code></pre>
 org_id UUID REFERENCES organizations(id),
 name TEXT NOT NULL,
 team_password_hash TEXT NOT NULL,      -- PBKDF2 hash (100k iterations, SHA-256, salt: jumpkit-team-salt-v1)
-                                       -- Verified server-side via verify-team-password Edge Function
+team_password_plain TEXT,              -- Plaintext password stored for use in invite emails (added 2026-05-13)
+                                       -- Security note: intentional - team password is a shared secret by design
 owner_id UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ</code></pre>
 <h4 id="team_members">2.3.11 team_members</h4>
@@ -1343,9 +1344,6 @@ created_at TIMESTAMPTZ</code></pre>
 team_id UUID REFERENCES teams(id),
 user_id UUID REFERENCES profiles(id),
 joined_at TIMESTAMPTZ,
-locked BOOLEAN DEFAULT FALSE,          -- true when member loses access after owner downgrade
-lock_at TIMESTAMPTZ,                   -- timestamp when lock should be applied
-lock_notified_2day BOOLEAN DEFAULT FALSE, -- true once 2-day warning email has been sent
 UNIQUE(team_id, user_id)</code></pre>
 <h4 id="team_invites">2.3.12 team_invites</h4>
 <pre><code>id UUID PRIMARY KEY,
@@ -1520,37 +1518,52 @@ shareColumnWithTeam(columnId, teamId);
 </ul>
 <p><strong>3. Invited user joins</strong></p>
 <ul>
-<li>Download JumpKit and create/sign in to their account</li>
-<li>Navigate to the <strong>Teams page</strong> in the app &mdash; pending invites appear automatically</li>
-<li>Click <strong>Join</strong> on their pending invite card</li>
-<li>Enter the <strong>team password</strong> in the modal (only field required)</li>
-<li>Click &ldquo;Join Team&rdquo;</li>
+<li>Download JumpKit</li>
+<li>In auth, click &quot;Join a Team&quot; tab</li>
+<li>Enter: org name, team name, team password, personal password</li>
+<li>Click &quot;Join&quot;</li>
 </ul>
-<p><strong>4. Join Logic (in teams.js &mdash; <code>doJoinTeam()</code>)</strong></p>
-<pre><code>// 1. Verify password server-side via Edge Function (never hash client-side)
-const { data } = await supabaseClient.functions.invoke('verify-team-password', {
-  body: { teamId, candidatePassword: pw }
+<p><strong>4. Join Logic (in teams.js)</strong></p>
+<pre><code>// User submits join form:
+const orgName = document.getElementById('joinOrgName').value;
+const teamName = document.getElementById('joinTeamName').value;
+const teamPass = document.getElementById('joinTeamPass').value;
+const personalPass = document.getElementById('joinPersonalPass').value;
+
+// 1. Verify team exists (query Supabase)
+const { data: team } = await supabaseClient
+  .from('teams')
+  .select('*')
+  .match({ name: teamName })
+  .single();
+
+// 2. Hash input password, compare with team_password_hash
+const inputHash = await hashPassword(teamPass);
+if (inputHash !== team.team_password_hash) {
+  showError('Incorrect team password');
+  return;
+}
+
+// 3. Create Supabase auth account
+const { data, error } = await supabaseClient.auth.signUp({
+  email: userEmail,
+  password: personalPass,
+  options: { data: { first_name: firstName } }
 });
-if (!data?.valid) { showError('Incorrect password'); return; }
 
-// 2. Verify pending invite exists for this user's email
-const { data: invite } = await supabaseClient.from('team_invites')
-  .select('id').eq('team_id', teamId).eq('email', userEmail).eq('status', 'pending')
-  .maybeSingle();
-if (!invite) { showError('Your email has not been invited to this team.'); return; }
-
-// 3. Enforce 5-member cap on free-tier teams
-// (checks owner subscription_tier before allowing join)
-
-// 4. Insert into team_members
+// 4. Insert into team_members (trigger by invite logic, or manually)
 await supabaseClient.from('team_members').insert({
-  team_id: teamId, user_id: currentUserId, joined_at: new Date().toISOString()
+  team_id: team.id,
+  user_id: authUser.id,
 });
 
 // 5. Mark invite as accepted
-await supabaseClient.from('team_invites').update({ status: 'accepted' }).eq('id', invite.id);
+await supabaseClient.from('team_invites').update({
+  status: 'accepted'
+}).match({ email: userEmail, team_id: team.id });
 
-// 6. Notify team owner via send-member-joined Edge Function (non-fatal)</code></pre>
+// 6. Redirect to app
+window.location.href = 'app.html';</code></pre>
 <p><strong>5. On Next Sync</strong></p>
 <ul>
 <li>sync.js fetches <code>team_members</code> for current user</li>
@@ -1581,7 +1594,7 @@ User sees shared jumps</code></pre>
 <p><strong>When Sync Runs:</strong></p>
 <ol>
 <li>On login (called from <code>initApp()</code>)</li>
-<li>Every 2 minutes (setInterval in <code>sync.js</code> — <code>2 * 60 * 1000</code>)</li>
+<li>Every 60 minutes (setInterval in <code>sync.js</code>)</li>
 </ol>
 <p><strong>What Gets Synced:</strong></p>
 <ul>
@@ -2268,7 +2281,7 @@ localStorage.setItem('notifications', '[]');</code></pre>
 <p>This prevents collisions with other apps on the same domain.</p>
 
 <h3 id="section-emails">2.10 Transactional Emails</h3>
-<p>All 14 transactional emails are stored as standalone HTML preview files in <code>app/emails/</code>. Each file mirrors the HTML embedded in the corresponding Supabase Edge Function. Edit the preview file, then copy the HTML back into the edge function's <code>buildHTML()</code> function to deploy.</p>
+<p>All 8 transactional emails are stored as standalone HTML preview files in <code>app/emails/</code>. Each file mirrors the HTML embedded in the corresponding Supabase Edge Function. Edit the preview file, then copy the HTML back into the edge function's <code>buildHTML()</code> function to deploy.</p>
 
 <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
   <thead>
@@ -2322,47 +2335,11 @@ localStorage.setItem('notifications', '[]');</code></pre>
       <td style="padding:10px 14px">Team owner deletes a team</td>
       <td style="padding:10px 14px">Emails all members &amp; pending invitees; lists removed shared columns; reassures personal jumps are safe</td>
     </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
+    <tr>
       <td style="padding:10px 14px"><code>waitlist-email.html</code></td>
       <td style="padding:10px 14px"><code>waitlist-signup</code></td>
       <td style="padding:10px 14px">Visitor submits waitlist form on landing page</td>
       <td style="padding:10px 14px">Confirms spot on waitlist; brief product teaser</td>
-    </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <td style="padding:10px 14px"><code>account-exists-email.html</code></td>
-      <td style="padding:10px 14px"><em>Supabase Auth (built-in)</em></td>
-      <td style="padding:10px 14px">Signup attempted with an already-registered email</td>
-      <td style="padding:10px 14px">Informs user their account already exists; offers sign-in or password reset. Does not expose sensitive data.</td>
-    </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <td style="padding:10px 14px"><code>pending-upgrade-email.html</code></td>
-      <td style="padding:10px 14px"><code>send-welcome-core</code></td>
-      <td style="padding:10px 14px"><code>subscription_created</code> (paid tier) before account exists</td>
-      <td style="padding:10px 14px">Sent when payment completes before account creation (e.g. checkout flow). 3-step guide: download app &rarr; create account with same email &rarr; log in. Subscription auto-applies on login.</td>
-    </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <td style="padding:10px 14px"><code>team-downgrade-alert-email.html</code></td>
-      <td style="padding:10px 14px"><code>send-team-lockout</code></td>
-      <td style="padding:10px 14px">Owner&rsquo;s subscription lapses; team exceeds free 5-member limit</td>
-      <td style="padding:10px 14px">Sent to team <strong>owner</strong>. Lists members who will lose access on <code>[LOCK_DATE]</code>. Includes Re-upgrade CTA. Members notified 2 days before lockout.</td>
-    </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <td style="padding:10px 14px"><code>team-lockout-warning-email.html</code></td>
-      <td style="padding:10px 14px"><code>send-team-lockout</code></td>
-      <td style="padding:10px 14px">2 days before team member access is removed</td>
-      <td style="padding:10px 14px">Two-audience email: (1) owner reminder listing affected members + Re-upgrade CTA; (2) member warning that owner downgraded + Upgrade to Unlimited CTA. Sent 2 days before <code>[LOCK_DATE]</code>.</td>
-    </tr>
-    <tr style="border-bottom:1px solid rgba(255,255,255,0.06)">
-      <td style="padding:10px 14px"><code>member-joined-email.html</code></td>
-      <td style="padding:10px 14px"><code>send-member-joined</code> <em>(not yet built)</em></td>
-      <td style="padding:10px 14px">Member successfully joins a team</td>
-      <td style="padding:10px 14px">Sent to the <strong>team owner</strong>. Confirms who joined, their email, total member count, and join timestamp. Owner can manage membership from the Teams page.</td>
-    </tr>
-    <tr>
-      <td style="padding:10px 14px"><code>member-removed-email.html</code></td>
-      <td style="padding:10px 14px"><code>send-member-removed</code> <em>(not yet built)</em></td>
-      <td style="padding:10px 14px">Owner removes a member from a team</td>
-      <td style="padding:10px 14px">Sent to the <strong>removed member</strong>. Lists what changed (shared access removed) vs. what&rsquo;s safe (personal jumps untouched). Includes help@jumpkit.app contact for disputes.</td>
     </tr>
   </tbody>
 </table>
@@ -2543,7 +2520,7 @@ python3 -m http.server 8899</code></pre>
 <h3 id="testing-overview">4.1 Overview</h3>
 <p>JumpKit includes a built-in unit test suite accessible from the <strong>Testing</strong> page in the app. Tests cover core app functionality, security, database integrity, deployment checks, and code quality. Tests are written in vanilla JS and run directly in the Electron renderer process - no external test runner required.</p>
 <p>To run tests: open the app → navigate to <strong>Testing</strong> in the sidebar → click <strong>Run All Tests</strong> or run individual tests by category.</p>
-<p><strong>Current total: 140 tests</strong> across 12 categories.</p>
+<p><strong>Current total: 93 tests</strong> across 9 categories.</p>
 
 <h3 id="testing-unit-tests">4.2 Unit Test Summary</h3>
 <table style="width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:12px">
@@ -2876,7 +2853,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h4 id="release-phase-1">Phase 1 - Code Freeze &amp; Testing</h4>
 <ul>
-  <li>Run the full unit test suite (Testing page in-app) - <strong>all 140 tests must pass or be manually verified</strong></li>
+  <li>Run the full unit test suite (Testing page in-app) - <strong>all 93 tests must pass or be manually verified</strong></li>
   <li>Manual smoke test: log in, create/edit/delete a jump, open a jump, archive a jump, visit every page</li>
   <li>Test on <strong>both platforms</strong> - macOS DMG and Windows EXE</li>
   <li>Complete Test 93 manually: verify Lemon Squeezy webhook → Supabase subscription upgrade end-to-end</li>
@@ -3118,7 +3095,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <h2 id="onboarding">8. User Onboarding</h2>
 
 <h3>8.1 Overview</h3>
-<p>New users are guided through a <strong>5-step inline onboarding modal</strong> (Welcome screen + 4 labeled steps) on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
+<p>New users are guided through a 4-step inline onboarding modal on their first login. The modal is shown automatically when <code>profiles.onboarding_completed = false</code>. Once they complete the final step, the flag is set to <code>true</code> server-side and the modal never appears again.</p>
 
 <h3>8.2 Trigger Logic</h3>
 <ul>
@@ -3131,15 +3108,14 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <h3>8.3 Step Flow</h3>
 <ol>
 <li><strong>Welcome to JumpKit</strong> - Greeting screen with JumpKit jumping man icon (turquoise SVG), welcome message, "Let's Go" button. No step label shown.</li>
-<li><strong>Set Up Your ROI (Step 1 of 4)</strong> - ROI defaults form: two numeric inputs — <em>Time saved per click (seconds)</em> (default: 10) and <em>Your hourly rate ($/hr)</em> (default: $50). Pre-filled from current prefs. Saves via <code>DB.savePrefs()</code> on "Save &amp; Continue". These values drive all personal and team ROI calculations.</li>
-<li><strong>Configure Your Columns (Step 2 of 4)</strong> - Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
-<li><strong>Add Your First Jump (Step 3 of 4)</strong> - Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
-<li><strong>Example Jumps (Step 4 of 4)</strong> - Shows the seed jumps as checkboxes (pre-checked). User unchecks any they don't want; clicking &ldquo;Finish&rdquo; deletes unchecked jumps via <code>DB.deleteJump()</code>. Directory paths show folder icon; web URLs show link icon.</li>
-<li><strong>Setup Complete</strong> - Success screen with turquoise checkmark icon, &ldquo;You&rsquo;re all set! 🎉&rdquo; heading, and &ldquo;Go to Your Jumps Page&rdquo; button that calls <code>navigateTo('jumps')</code> and closes the overlay.</li>
+<li><strong>Set Up Your ROI (Step 1 of 3)</strong> - ROI defaults form: two numeric inputs — <em>Time saved per click (seconds)</em> (default: 10) and <em>Your hourly rate ($/hr)</em> (default: $50). Pre-filled from current prefs. Saves via <code>DB.savePrefs()</code> on "Save &amp; Continue". These values drive all personal and team ROI calculations.</li>
+<li><strong>Configure Your Columns (Step 2 of 3)</strong> - Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
+<li><strong>Add Your First Jump (Step 3 of 3)</strong> - Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
+<li><strong>Setup Complete</strong> - Success screen with checkmark icon and "Go to Your Jumps Page" button that calls <code>navigateTo('jumps')</code> and closes the overlay.</li>
 </ol>
 
 <h3>8.4 Progress Indicator</h3>
-<p>A gradient progress bar at the top of the modal fills as the user advances: 20% (Welcome) &rarr; 40% (ROI Setup) &rarr; 60% (Columns) &rarr; 80% (Add Jump) &rarr; then Step 4 of 4 keeps 80% &rarr; 100% (completion). Values set in <code>setOnboardingProgress(step)</code>.</p>
+<p>A gradient progress bar at the top of the modal fills as the user advances: 25% → 50% → 75% → 100% (completion screen).</p>
 
 <h3>8.5 Key Implementation Details</h3>
 <ul>
@@ -3879,20 +3855,18 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
-<h3>2026-06-14 (morning &mdash; emails, tests &amp; test page overhaul)</h3>
+<h3>2026-06-10 (evening — Users page)</h3>
 <ul>
-  <li><strong>Two new transactional emails added:</strong> <code>member-joined-email.html</code> (notifies team owner when a member joins) and <code>member-removed-email.html</code> (notifies removed member). Both match existing brand styles. &ldquo;What changed&rdquo; card in member-removed uses red-tinted cancellation style. Total email count: 14.</li>
-  <li><strong>Two new Supabase Edge Functions built &amp; deployed:</strong> <code>send-member-joined</code> and <code>send-member-removed</code>. Both use the existing <code>RESEND_API_KEY</code> secret.</li>
-  <li><strong>App wiring (teams.js):</strong> <code>doJoinTeam()</code> now calls <code>send-member-joined</code> after a successful join. <code>doRemoveMember()</code> now calls <code>send-member-removed</code> before the delete. Both calls are non-fatal &mdash; email failure never blocks the core action.</li>
-  <li><strong>JUMPKIT_DOCS.html updates:</strong> Section 2.10 Transactional Emails updated to 14 emails. Changelog entries reordered newest &rarr; oldest. Jet AI Part 1 &amp; Part 2 added to Future Features section.</li>
-  <li><strong>Unit tests 117&ndash;141 added</strong> covering: member-joined/removed emails (117&ndash;120), account page tabs (121&ndash;123), ROI math (124&ndash;125), help page render (126), admin page guard (127), feedback modal + edge function (128&ndash;129), remaining email edge functions (130&ndash;132), export PDF (133&ndash;134), onboarding step progression (135&ndash;137), new team creation (138&ndash;139), team password change (140). Total: 141 tests.</li>
-  <li><strong>Test page: <code>[MANUAL]</code> and <code>[AUTO+MANUAL]</code> tags</strong> added to all test titles requiring human action. 17 fully manual; 10 auto-trigger + human verification.</li>
-  <li><strong>Test page: Onboarding category</strong> added to <code>_CATEGORY_COLORS</code> (purple) and <code>_CATEGORY_ORDER</code>. Tests 135&ndash;137 render in their own Onboarding section.</li>
-  <li><strong>Test page: duplicate IDs 53/54 fixed.</strong> Security tests renumbered to 46 and 141. All 141 IDs now unique.</li>
-  <li><strong>Test page: Details button</strong> added to every test row &mdash; always visible, opens full test info modal before or after running.</li>
-  <li><strong>Test page: &ldquo;How to Run Tests&rdquo; strategy button</strong> added to header bar with 4-phase run advice modal.</li>
-  <li><strong>Test page: result persistence.</strong> Pass/fail/manual results saved to SQLite via <code>DB.savePrefs(testResults)</code>. Progress survives app restarts. Reset clears saved state.</li>
-  <li><strong>Test page: console noise eliminated.</strong> 64 <code>console.info/warn</code> calls removed from test functions. Informational output now surfaces in the modal &ldquo;Outputs&rdquo; row via descriptive return values. Run All runner updated to accept descriptive strings as pass results.</li>
+  <li><strong>Admin page renamed to &ldquo;Users&rdquo;</strong> with <code>ti-users</code> icon. Page subtitle: &ldquo;User and app usage stats&rdquo;.</li>
+  <li><strong>Row 1 tiles (Total Users):</strong> 5 tiles &mdash; Total Users, Unlimited, Free, Cancelled, Admins. Each tile has category-colored number, matching label color, and subtle tinted background. Order: Total &rarr; Unlimited &rarr; Free &rarr; Cancelled &rarr; Admins. Section label: &ldquo;TOTAL USERS&rdquo;.</li>
+  <li><strong>Row 2 tiles (Incremental Users):</strong> Today / This Week / This Month / This Year. Each shows +total (green/gray/red based on value), Unlimited (green), Free (gray), Cancelled (red). Tile background: green tint if positive, gray tint if zero. Section label: &ldquo;INCREMENTAL USERS&rdquo;. Powered by new <code>get_admin_growth_stats()</code> Supabase RPC.</li>
+  <li><strong>Total Users line chart</strong> (last 90 days, cumulative). Chart.js lazy-loaded inline for the Users page independently of the Stats page.</li>
+  <li><strong>All Users table:</strong> Sortable on every column (&uarr;/&darr;/&updownarrow; indicators). Searchable via jump-search-styled input (&ldquo;Search users...&rdquo;). Subscription pills: Admin=turquoise, Unlimited=green, Free=gray, Cancelled=red. Email column added.</li>
+  <li><strong>Theme-aware charts:</strong> Theme toggle now re-renders the Users page (same as Stats page) so axis/legend colors update immediately in dark mode.</li>
+  <li><strong>Supabase RPC fixes:</strong> <code>get_admin_user_stats</code> updated to return <code>user_role</code> (avoids ambiguous column), use <code>core</code>/<code>teams_jet</code> tiers. <code>get_admin_summary</code> fixed to correctly exclude admins from all subscription buckets. <code>get_admin_growth_stats</code> added with cancelled breakdowns per period.</li>
+  <li><strong>support@jumpkit.app</strong> upgraded to <code>core/active</code> tier.</li>
+  <li><strong>Future analytics ideas</strong> added to Section 11 roadmap (conversion signals, churn signals, power user identification, MRR tracking).</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-10_20-58.tar.gz</code> saved to <code>app_backups/</code>.</li>
 </ul>
 
 <h3>2026-06-11 (afternoon — bug fixes &amp; onboarding)</h3>
@@ -3932,20 +3906,6 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   </li>
   <li><strong>CSP compliance:</strong> All home page click handlers converted from inline <code>onclick</code> to <code>data-jaction</code> event delegation to comply with Content Security Policy. New switch cases: <code>nav-stats</code>, <code>nav-teams</code>.</li>
   <li><strong>CSS additions:</strong> <code>.home-dash</code>, <code>.home-dash-section-label</code>, <code>.home-roi-grid</code>, <code>.home-teams-grid</code>, <code>.home-team-card</code>, <code>.teams-badge</code>/<code>.teams-badge-owner</code> (moved to global CSS for reuse). Consistent hover styles, 4-per-row responsive grids (breakpoints at &le;900px and &le;500px), uniform section spacing.</li>
-</ul>
-
-<h3>2026-06-10 (evening — Users page)</h3>
-<ul>
-  <li><strong>Admin page renamed to &ldquo;Users&rdquo;</strong> with <code>ti-users</code> icon. Page subtitle: &ldquo;User and app usage stats&rdquo;.</li>
-  <li><strong>Row 1 tiles (Total Users):</strong> 5 tiles &mdash; Total Users, Unlimited, Free, Cancelled, Admins. Each tile has category-colored number, matching label color, and subtle tinted background. Order: Total &rarr; Unlimited &rarr; Free &rarr; Cancelled &rarr; Admins. Section label: &ldquo;TOTAL USERS&rdquo;.</li>
-  <li><strong>Row 2 tiles (Incremental Users):</strong> Today / This Week / This Month / This Year. Each shows +total (green/gray/red based on value), Unlimited (green), Free (gray), Cancelled (red). Tile background: green tint if positive, gray tint if zero. Section label: &ldquo;INCREMENTAL USERS&rdquo;. Powered by new <code>get_admin_growth_stats()</code> Supabase RPC.</li>
-  <li><strong>Total Users line chart</strong> (last 90 days, cumulative). Chart.js lazy-loaded inline for the Users page independently of the Stats page.</li>
-  <li><strong>All Users table:</strong> Sortable on every column (&uarr;/&darr;/&updownarrow; indicators). Searchable via jump-search-styled input (&ldquo;Search users...&rdquo;). Subscription pills: Admin=turquoise, Unlimited=green, Free=gray, Cancelled=red. Email column added.</li>
-  <li><strong>Theme-aware charts:</strong> Theme toggle now re-renders the Users page (same as Stats page) so axis/legend colors update immediately in dark mode.</li>
-  <li><strong>Supabase RPC fixes:</strong> <code>get_admin_user_stats</code> updated to return <code>user_role</code> (avoids ambiguous column), use <code>core</code>/<code>teams_jet</code> tiers. <code>get_admin_summary</code> fixed to correctly exclude admins from all subscription buckets. <code>get_admin_growth_stats</code> added with cancelled breakdowns per period.</li>
-  <li><strong>support@jumpkit.app</strong> upgraded to <code>core/active</code> tier.</li>
-  <li><strong>Future analytics ideas</strong> added to Section 11 roadmap (conversion signals, churn signals, power user identification, MRR tracking).</li>
-  <li><strong>Backup:</strong> <code>app_backup_2026-06-10_20-58.tar.gz</code> saved to <code>app_backups/</code>.</li>
 </ul>
 
 <h3>2026-06-10</h3>

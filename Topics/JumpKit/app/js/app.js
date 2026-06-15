@@ -911,9 +911,8 @@ async function renderHome() {
 
       return `
         <div class="stat-card home-team-card" style="${cardBg}">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">${tierPill}${rolePill}</div>
           <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:12px;width:100%">${esc(team.name)}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
             <div>
               <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${members}</div>
               <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${members === 1 ? 'Member' : 'Members'}</div>
@@ -927,6 +926,7 @@ async function renderHome() {
               <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${jumpCount === 1 ? 'Jump' : 'Jumps'}</div>
             </div>
           </div>
+          <div style="display:flex;align-items:center;gap:6px">${tierPill}${rolePill}</div>
         </div>`;
     }).join('');
 
@@ -2830,13 +2830,14 @@ window.renderAdmin = async function renderAdmin() {
       const _adminPlanLabel = u.subscription_plan === 'annual' ? 'Annual' : u.subscription_plan === 'monthly' ? 'Monthly' : u.subscription_plan === 'annual-test' ? 'Annual (test)' : u.subscription_plan === 'monthly-test' ? 'Monthly (test)' : null;
       const _adminPlanIsTest = u.subscription_plan && u.subscription_plan.includes('test');
       const planBadge = _adminPlanLabel
-        ? `<span style="background:${_adminPlanIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(72,187,120,0.12)'};color:${_adminPlanIsTest ? '#d97706' : '#48BB78'};font-weight:600;font-size:0.7rem;padding:2px 7px;border-radius:20px;margin-left:5px;white-space:nowrap">${_adminPlanLabel}</span>`
+        ? `<span style="background:${_adminPlanIsTest ? 'rgba(245,158,11,0.12)' : 'rgba(72,187,120,0.12)'};color:${_adminPlanIsTest ? '#d97706' : '#48BB78'};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${_adminPlanLabel}</span>`
         : '';
       return `
         <tr style="border-bottom:1px solid var(--border)">
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted)">${esc(name)}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-dim)">${esc(u.email || '—')}</td>
-          <td style="padding:9px 12px;font-size:0.82rem"><span style="background:${pillBg};color:${pillColor};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${sub}</span>${planBadge}</td>
+          <td style="padding:9px 12px;font-size:0.82rem"><span style="background:${pillBg};color:${pillColor};font-weight:600;font-size:0.75rem;padding:3px 9px;border-radius:20px;white-space:nowrap">${sub}</span></td>
+          <td style="padding:9px 12px;font-size:0.82rem">${planBadge}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${fmtLaunches(u)}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_owned || 0}</td>
           <td style="padding:9px 12px;font-size:0.82rem;color:var(--text-muted);text-align:right">${u.teams_joined || 0}</td>
@@ -2902,7 +2903,8 @@ window.renderAdmin = async function renderAdmin() {
             <tr style="border-bottom:2px solid var(--border)">
               <th data-col="name" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">User<span class="sort-ind"> ↕</span></th>
               <th data-col="email" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Email<span class="sort-ind"> ↕</span></th>
-              <th data-col="sub" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Subscription<span class="sort-ind"> ↕</span></th>
+              <th data-col="sub" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Tier<span class="sort-ind"> ↕</span></th>
+              <th data-col="plan" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left">Subscription</th>
               <th data-col="personal_launches_total" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Launches<span class="sort-ind"> ↕</span></th>
               <th data-col="teams_owned" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Teams Owned<span class="sort-ind"> ↕</span></th>
               <th data-col="teams_joined" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:right;cursor:pointer;user-select:none">Teams Joined<span class="sort-ind"> ↕</span></th>

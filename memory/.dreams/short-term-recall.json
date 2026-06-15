@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-13T12:46:26.719Z",
+  "updatedAt": "2026-06-14T12:05:47.216Z",
   "entries": {
     "memory:memory/2026-03-01.md:73:82": {
       "key": "memory:memory/2026-03-01.md:73:82",
@@ -9,13 +9,13 @@
       "endLine": 82,
       "source": "memory",
       "snippet": "## JumpKit App — Tech Notes - Auth: localStorage-based (signup/login/forgot password) - DB: localStorage abstraction in db.js (easy swap to SQLite in Electron) - Styling: Tabler Icons throughout (grayscale), turquoise+royal blue accent, light/dark mode - Color palette: --royal #1A4FD6, --turq #00C2C7, --hover-accent #2B9ED8 - Text softened: dark --text #C8D6E8, light --text #2C3E52 - Pages: Home, Jumps (columns + context menus), Archive, Stats (placeholder), Help, Settings (placeholder), Account (placeholder) - User dropdown in topbar (Settings, My Account, Logout) - Drag-and-drop column reordering in configure columns modal",
-      "recallCount": 31,
+      "recallCount": 35,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 12.214307406544684,
+      "totalScore": 13.788373869657514,
       "maxScore": 0.45596020221710204,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
       "queryHashes": [
         "401b0ff2f490",
         "cd71ff1b4e59",
@@ -44,7 +44,11 @@
         "f0be698caf08",
         "797f0e4cec23",
         "6319bcef2e02",
-        "8d672aa6babe"
+        "8d672aa6babe",
+        "a0b3c2092751",
+        "f2e258799699",
+        "8bbfe3138dc2",
+        "1916a314209b"
       ],
       "recallDays": [
         "2026-05-20",
@@ -60,7 +64,9 @@
         "2026-06-08",
         "2026-06-10",
         "2026-06-11",
-        "2026-06-12"
+        "2026-06-12",
+        "2026-06-13",
+        "2026-06-14"
       ],
       "conceptTags": [
         "localstorage-based",
@@ -125,13 +131,13 @@
       "endLine": 34,
       "source": "memory",
       "snippet": "# 2026-05-03 — Session Notes ## Infrastructure - Supabase free tier had paused the JumpKit project over the weekend — Jeff resumed it manually, back online by ~7:55 AM - jumpkit.app DNS is correct (all 3 Vercel A records in GoDaddy), landing page renders via HTTP - Vercel still showing \"invalid configuration\" for SSL cert as of morning — Jeff hit Refresh, pending resolution - No vercel.json in landing repo (confirmed) ## JumpKit Landing Page — Major Updates Today ### Hero Section - Replaced both mock window HTML elements with real app screenshot - Dark mode: `assets/Jumpkit-hero.png` - Light mode: `assets/Jumpkit-hero-light.png` - CSS uses `[data-theme]` attribute to swap images automatic",
-      "recallCount": 7,
+      "recallCount": 9,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 2.702220100164413,
+      "totalScore": 3.42400614619255,
       "maxScore": 0.41001847982406614,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-10T18:53:16.854Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
       "queryHashes": [
         "401b0ff2f490",
         "0287dc4dc6d9",
@@ -139,7 +145,9 @@
         "44b45ad06b96",
         "13e14f23d88f",
         "f0be698caf08",
-        "797f0e4cec23"
+        "797f0e4cec23",
+        "8bbfe3138dc2",
+        "1916a314209b"
       ],
       "recallDays": [
         "2026-05-20",
@@ -148,7 +156,8 @@
         "2026-05-29",
         "2026-06-01",
         "2026-06-08",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-14"
       ],
       "conceptTags": [
         "jumpkit.app",
@@ -210,13 +219,13 @@
       "endLine": 61,
       "source": "memory",
       "snippet": "- [ ] Welcome to JumpKit Core — test with a real paid subscription event - [ ] Cancellation email — test - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer - [ ] Pagination on list queries ## Key Identifiers - New Edge Functions: `send-welcome` (deployed ✅), `send-welcome-core` (not yet deployed), `send-cancellation` (not yet deployed) - Onboarding file: `Topics/JumpKit/app/js/onboarding.js` - Git corruption: object `be1cf517c9cde53a9290fbe61a8472f56a4e8eb3` - Backups: `a",
-      "recallCount": 9,
+      "recallCount": 11,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 3.744951330336613,
+      "totalScore": 4.470231677803081,
       "maxScore": 0.6260774808254667,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
       "queryHashes": [
         "401b0ff2f490",
         "8fb8a0cac588",
@@ -226,7 +235,9 @@
         "a8f73330640f",
         "7917f319bb86",
         "de346ae63b5e",
-        "7539dcba99c1"
+        "7539dcba99c1",
+        "f2e258799699",
+        "1916a314209b"
       ],
       "recallDays": [
         "2026-05-20",
@@ -236,7 +247,8 @@
         "2026-06-05",
         "2026-06-06",
         "2026-06-08",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-14"
       ],
       "conceptTags": [
         "backup",
@@ -312,13 +324,13 @@
       "endLine": 65,
       "source": "memory",
       "snippet": "- [ ] Verify Vercel SSL cert resolved for jumpkit.app (was pending) - [ ] Audit tests 46–51 — team sharing Supabase + SQLite sync - [ ] Live invite email test end-to-end via Resend - [ ] Account + Teams page UI cleanup (consider merging) - [ ] Wire \"Get JumpKit Free Tier\" button → actual download or Lemon Squeezy - [ ] Security + vibe coding audit + backup - [ ] Once jumpkit.ai verified in Resend → swap from/to addresses in send-feedback edge function - [ ] Add Windows screenshot of JumpKit to hero section - [x] Add industry icons and cards to hero section - [x] Add two more cards to Features section",
-      "recallCount": 18,
+      "recallCount": 19,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 6.8498048067092885,
+      "totalScore": 7.259740632772445,
       "maxScore": 0.4440046966075897,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-13T11:20:14.665Z",
+      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -334,7 +346,8 @@
         "f3926a289e7c",
         "a8f73330640f",
         "7917f319bb86",
-        "de346ae63b5e"
+        "de346ae63b5e",
+        "ce55ef56be06"
       ],
       "recallDays": [
         "2026-05-20",
@@ -348,7 +361,8 @@
         "2026-06-05",
         "2026-06-06",
         "2026-06-08",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-14"
       ],
       "conceptTags": [
         "backup",
@@ -368,13 +382,13 @@
       "endLine": 28,
       "source": "memory",
       "snippet": "# 2026-03-29 — JumpKit Session Notes ## Session summary Long JumpKit dev session. Context grew to ~900k tokens — compacted to save costs. Haiku set as default model for new sessions. ## Features completed today ### Column config modal - Replaced native `<select>` with custom-select component for \"Share With\" dropdown - Grid updated to `28px 1fr 70px 240px`; labels (\"Column Name\", \"Visible\", \"Share With\") added above each control - Share dropdown height fixed to 30.4px matching inputs; drag handle padding tuned to 7px - Close handler scoped to modalBox element only (not document) to avoid interfering with other modals ### Add Jump modal - Column dropdown placeholder \"Select Column\" in mut",
-      "recallCount": 18,
+      "recallCount": 19,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 7.024143409729003,
+      "totalScore": 7.429697397351264,
       "maxScore": 0.4739838540554046,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-13T12:46:26.719Z",
+      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -390,7 +404,8 @@
         "f3926a289e7c",
         "f0be698caf08",
         "797f0e4cec23",
-        "1bf0b7afa8b5"
+        "1bf0b7afa8b5",
+        "ce55ef56be06"
       ],
       "recallDays": [
         "2026-05-20",
@@ -404,7 +419,8 @@
         "2026-06-05",
         "2026-06-08",
         "2026-06-10",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-14"
       ],
       "conceptTags": [
         "custom-select",
@@ -550,13 +566,13 @@
       "endLine": 67,
       "source": "memory",
       "snippet": "## JumpKit Current State - App entry: `Topics/JumpKit/app/index.html` → `app.html` - All data in localStorage (file-based DB attempt was reverted — broke the app) - Click logging: `DB.logClick()` called in `incrementClick()`, stored as `jk_clicks_${userId}` - Jump click handler: shows `alert()` placeholder + toast + increments count - Toast: success (green ✓) and danger (red !) — centered top, 3s auto-dismiss, defined in app.js as IIFE - Stats charts use bundled Chart.js (`js/chart.min.js`, 205KB) --- ## Session Continued (Thu Mar 5, afternoon/evening) ### JumpKit UI Polish #### Jumping Man Icon - Downloaded `jump-icon.svg` + `jump-icon.png` from Jeff's Downloads folder - Copied to `app/",
-      "recallCount": 10,
+      "recallCount": 11,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 3.988913393020629,
+      "totalScore": 4.342247143387794,
       "maxScore": 0.43472100198268887,
       "firstRecalledAt": "2026-05-21T11:22:34.882Z",
-      "lastRecalledAt": "2026-06-10T18:53:16.854Z",
+      "lastRecalledAt": "2026-06-14T12:05:43.996Z",
       "queryHashes": [
         "0287dc4dc6d9",
         "ad24dacfa0a4",
@@ -567,7 +583,8 @@
         "4b48ed79428a",
         "6ed9e6f9fb2f",
         "f0be698caf08",
-        "797f0e4cec23"
+        "797f0e4cec23",
+        "f2e258799699"
       ],
       "recallDays": [
         "2026-05-21",
@@ -578,7 +595,8 @@
         "2026-06-01",
         "2026-06-03",
         "2026-06-08",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-14"
       ],
       "conceptTags": [
         "topics/jumpkit/app/index.html",
@@ -676,26 +694,28 @@
       "endLine": 52,
       "source": "memory",
       "snippet": "- ✅ Spinner on Finish Setup (1.4s rotation), then Setup Complete screen - ✅ \"Go to Your Jumps Page\" button calls `navigateTo('jumps')` - ✅ Progress bar at top of modal (33% → 67% → 100%) - ✅ Tracked server-side via `profiles.onboarding_completed` - ✅ Loaded via `<script src=\"js/onboarding.js\">` in `app.html` ### Auth/Login - ✅ Welcome email fires on first sign-in (not signup); `auth.js` calls `send-welcome` with `userId`, `email`, `firstName` ### Docs & Backup - ✅ `JUMPKIT_DOCS.html` — Section 9 (Onboarding), 2026-05-17 changelog, last updated date - ✅ `app_backup_2026-05-17` — morning backup - ✅ `app_backup_2026-05-17b` — afternoon backup ### Git Fix - ✅ `node_modules/` added to `.gitign",
-      "recallCount": 5,
+      "recallCount": 6,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 2.314471173631002,
+      "totalScore": 2.7185398135054606,
       "maxScore": 0.5858461802188105,
       "firstRecalledAt": "2026-05-21T22:27:29.641Z",
-      "lastRecalledAt": "2026-06-06T01:29:58.434Z",
+      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
       "queryHashes": [
         "330bafa1e201",
         "c9788a011d93",
         "f78d385d5509",
         "4b48ed79428a",
-        "3371fbb38341"
+        "3371fbb38341",
+        "ce55ef56be06"
       ],
       "recallDays": [
         "2026-05-21",
         "2026-05-28",
         "2026-05-31",
         "2026-06-01",
-        "2026-06-05"
+        "2026-06-05",
+        "2026-06-14"
       ],
       "conceptTags": [
         "backup",
@@ -750,13 +770,13 @@
       "endLine": 99,
       "source": "memory",
       "snippet": "- Test users: jeffroder@gmail.com / KickAss11!! (org owner), jeff.roder@us.bosch.com / KickAss22@@ (member), support@jumpkit.ai / TestUser1! (Test User 1) - Test teams: JeffTestOrg-Team1/JeffTestOrg-Team1!, JeffTestOrg-Team2/JeffTestOrg-Team2@, E2E-Test-Team/TestPass123! - Lemon Squeezy checkout: https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb - send-invite Edge Function: `Topics/JumpKit/app/supabase/functions/send-invite/index.ts` - Vercel deploy: `cd Topics/JumpKit/landing && vercel --prod` - Edge Function deploy: `cd Topics/JumpKit/app && npx supabase functions deploy send-invite` - Git commits (2026-05-13): ae8b365 (invite modal password field), 4f4232e",
-      "recallCount": 9,
+      "recallCount": 10,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 3.638199124641026,
+      "totalScore": 4.003210378594006,
       "maxScore": 0.6401916721530808,
       "firstRecalledAt": "2026-05-23T12:57:51.834Z",
-      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
       "queryHashes": [
         "c9d5194a7fb5",
         "86bd0f4206c7",
@@ -766,7 +786,8 @@
         "a8f73330640f",
         "66cd7cfa2560",
         "bbfcde8fe8d9",
-        "095836eeb37a"
+        "095836eeb37a",
+        "1916a314209b"
       ],
       "recallDays": [
         "2026-05-23",
@@ -776,7 +797,8 @@
         "2026-06-06",
         "2026-06-07",
         "2026-06-11",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-14"
       ],
       "conceptTags": [
         "gmail.com",
@@ -866,13 +888,13 @@
       "endLine": 79,
       "source": "memory",
       "snippet": "- **Blocker**: Apple Developer Account ($99/yr) not yet enrolled — required for macOS code signing + notarization + auto-update to work. Without it Gatekeeper blocks the update install. - **TODO added** to TODO.md and documented in JUMPKIT_DOCS.html Section 6 --- ## Docs Updates - JUMPKIT_DOCS.html changelog updated with all 2026-05-21 changes - Section 6 (Paid Services) updated: GitHub Releases and Apple Developer Program rows added # 2026-05-21 ## JumpKit localStorage Security Audit & Cleanup Full audit of all localStorage keys. Identified 10 keys total. ### Decisions made: - **Items 1-3** (jk_theme, jk_sidebar_collapsed, jk_teams_collapsed): Keep in localStorage — UI state only, har",
-      "recallCount": 14,
+      "recallCount": 15,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 6.077037569367088,
+      "totalScore": 6.443067663394608,
       "maxScore": 0.6623080711326179,
       "firstRecalledAt": "2026-05-25T23:32:48.884Z",
-      "lastRecalledAt": "2026-06-11T12:09:46.408Z",
+      "lastRecalledAt": "2026-06-14T12:05:43.996Z",
       "queryHashes": [
         "73b44f91d11d",
         "0ca3bfbb147b",
@@ -887,7 +909,8 @@
         "7dacacef797c",
         "9041d32837c9",
         "797f0e4cec23",
-        "6319bcef2e02"
+        "6319bcef2e02",
+        "f2e258799699"
       ],
       "recallDays": [
         "2026-05-25",
@@ -898,7 +921,8 @@
         "2026-06-01",
         "2026-06-02",
         "2026-06-10",
-        "2026-06-11"
+        "2026-06-11",
+        "2026-06-14"
       ],
       "conceptTags": [
         "99/yr",
@@ -1806,20 +1830,22 @@
       "endLine": 30,
       "source": "memory",
       "snippet": "## JumpKit Session — 2026-05-23 Morning ### Edge Function: send-team-deleted - Deployed to Supabase dashboard for first time (was never deployed before) - Fixed null → [] bug (`data = [] default` doesn't catch null, added `|| []` fallback) - Verified working: returns `{ ok: true, notified: 0 }` on test invoke ### Delete Team — All Edge Cases Now Complete ✅ Email to members + pending invitees (send-team-deleted edge function) ✅ Owner local SQLite cleanup (shared cols → personal) ✅ localStorage jk_teams_expanded purge ✅ In-app modal for members on next sync (sync.js `_promptStaleTeamRecovery`) ✅ Paid user \"Keep as My Jumps\" restore option in modal ### New: Column Unshared by Owner (same tr",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.8426425337791442,
+      "totalScore": 1.252730733156204,
       "maxScore": 0.44887202680110927,
       "firstRecalledAt": "2026-06-09T16:38:11.176Z",
-      "lastRecalledAt": "2026-06-10T18:53:21.946Z",
+      "lastRecalledAt": "2026-06-13T19:54:57.460Z",
       "queryHashes": [
         "b750ece5f092",
-        "563b36c52816"
+        "563b36c52816",
+        "a0b3c2092751"
       ],
       "recallDays": [
         "2026-06-09",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-13"
       ],
       "conceptTags": [
         "send-team-deleted",
@@ -1870,20 +1896,22 @@
       "endLine": 25,
       "source": "memory",
       "snippet": "## JumpKit Installer Hosting (2026-06-01) - Created public GitHub repo: `jrod4404/jumpkit-releases` for hosting installer assets - Private codebase stays at `jrod4404/JumpKit` (private) - Public releases repo has zero bandwidth limits - Uploaded today's builds (Jun 1) to `v1.0.0` release: - `JumpKit-1.0.0-universal.dmg` (203MB) — Mac Intel + Apple Silicon - `JumpKit.Setup.1.0.0.exe` (101MB) — Windows - Updated landing page free tier card download buttons to new URLs - Pushed to git, Vercel auto-deployed — Jeff confirmed buttons working ✅ - GitHub PAT stored: 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 (jrod4404 account) ## App Bug Fixes (2026-06-01) ### Bug 1: Owner's shared cols re",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.8462645709514618,
+      "totalScore": 1.2098126530647277,
       "maxScore": 0.46763443052768705,
       "firstRecalledAt": "2026-06-09T16:38:11.176Z",
-      "lastRecalledAt": "2026-06-10T18:53:21.946Z",
+      "lastRecalledAt": "2026-06-14T12:05:43.996Z",
       "queryHashes": [
         "b750ece5f092",
-        "563b36c52816"
+        "563b36c52816",
+        "f2e258799699"
       ],
       "recallDays": [
         "2026-06-09",
-        "2026-06-10"
+        "2026-06-10",
+        "2026-06-14"
       ],
       "conceptTags": [
         "jrod4404/jumpkit-releases",
@@ -2027,18 +2055,21 @@
       "endLine": 85,
       "source": "memory",
       "snippet": "1. Killed stale notarytool (PID 42652) + npm build (PID 15910) 2. Stapled accepted Apple ticket to .app — Gatekeeper: source=Notarized Developer ID, origin=Developer ID Application: Jeff Roder (ZDJSH728ND) ✅ 3. Built JumpKit-1.0.0-universal-signed.dmg (228 MB) 4. Uploaded to GitHub Releases (jrod4404/jumpkit-releases), removed old unsigned DMG 5. Updated landing/index.html Mac download button → new signed file 6. Deployed to Vercel — live Mac users now get signed/notarized installer from jumpkit.app — no more \"unidentified developer\" warning. ## JumpKit LLC — Filed 2026-06-06 - Entity: JumpKit LLC (Michigan Domestic LLC, CD-700) - Filed: 2026-06-06, pending state processing - EIN: 42-3009",
-      "recallCount": 1,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.37538405060768126,
-      "maxScore": 0.37538405060768126,
+      "totalScore": 1.1384635984897613,
+      "maxScore": 0.4096971273422241,
       "firstRecalledAt": "2026-06-12T13:16:57.078Z",
-      "lastRecalledAt": "2026-06-12T13:16:57.078Z",
+      "lastRecalledAt": "2026-06-14T12:05:43.996Z",
       "queryHashes": [
-        "8d672aa6babe"
+        "8d672aa6babe",
+        "ce55ef56be06",
+        "f2e258799699"
       ],
       "recallDays": [
-        "2026-06-12"
+        "2026-06-12",
+        "2026-06-14"
       ],
       "conceptTags": [
         "jrod4404/jumpkit-releases",
@@ -2267,6 +2298,254 @@
         "purchase",
         "cert",
         "under"
+      ]
+    },
+    "memory:memory/2026-06-11.md:82:111": {
+      "key": "memory:memory/2026-06-11.md:82:111",
+      "path": "memory/2026-06-11.md",
+      "startLine": 82,
+      "endLine": 111,
+      "source": "memory",
+      "snippet": "5. **HELP AND FEEDBACK** — Help & Documentation card (static, non-clickable) + Send Feedback card (opens `openFeedbackModal()`) ### Key Technical Decisions - All home page click handlers use `data-jaction` attribute routing (CSP-compliant, no inline `onclick`) - Switch cases added: `nav-stats`, `nav-teams`, `nav-account`, `nav-help`, `open-feedback-modal` - Teams section: no `org_id` dependency — uses `supabaseClient.auth.getSession()` directly, queries by `owner_id`; RLS handles access - Team member counts: batched Supabase queries, not N+1 - Home page grids: `repeat(4, 1fr)` default, breakpoints at ≤900px (2 col) and ≤500px (1 col) - Consistent hover: `translateY(-2px)` + box-shadow on al",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.6539322639942371,
+      "maxScore": 0.6539322639942371,
+      "firstRecalledAt": "2026-06-13T19:54:57.460Z",
+      "lastRecalledAt": "2026-06-13T19:54:57.460Z",
+      "queryHashes": [
+        "a0b3c2092751"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "non-clickable",
+        "data-jaction",
+        "csp-compliant",
+        "nav-stats",
+        "nav-teams",
+        "nav-account",
+        "nav-help",
+        "open-feedback-modal"
+      ]
+    },
+    "memory:memory/2026-06-11.md:1:24": {
+      "key": "memory:memory/2026-06-11.md:1:24",
+      "path": "memory/2026-06-11.md",
+      "startLine": 1,
+      "endLine": 24,
+      "source": "memory",
+      "snippet": "# Memory — 2026-06-11 ## JumpKit Session — Home Page Dashboard Overhaul ### Jet AI Cleanup - Removed all user-visible \"Jet\" / \"Jet AI\" references from app.js - Removed: route `jet`, page title/icon/description entries, `renderJet()` function entirely - Fixed tier label `teams_jet` → `'JumpKit Unlimited'` in 3 places (account page, upgrade modal, tier features modal) - Landing page and nav button were already commented out — no change needed there - `teams_jet` backend DB identifier preserved (not user-facing) ### Account Type Labels - All CTA buttons across entire app standardized: icon = `ti-lock`, text = `\"Upgrade to Unlimited\"` - Exception: cancelled-subscription modal keeps `\"Reactiva",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4551143050193786,
+      "maxScore": 0.4551143050193786,
+      "firstRecalledAt": "2026-06-13T19:54:57.460Z",
+      "lastRecalledAt": "2026-06-13T19:54:57.460Z",
+      "queryHashes": [
+        "a0b3c2092751"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "user-visible",
+        "app.js",
+        "title/icon/description",
+        "teams-jet",
+        "user-facing",
+        "ti-lock",
+        "cancelled-subscription",
+        "jumpkit"
+      ]
+    },
+    "memory:memory/2026-06-11.md:65:86": {
+      "key": "memory:memory/2026-06-11.md:65:86",
+      "path": "memory/2026-06-11.md",
+      "startLine": 65,
+      "endLine": 86,
+      "source": "memory",
+      "snippet": "- Fixed tier label `teams_jet` → `'JumpKit Unlimited'` in 3 places (account page, upgrade modal, tier features modal) - Landing page and nav button were already commented out — no change needed there - `teams_jet` backend DB identifier preserved (not user-facing) ### Account Type Labels - All CTA buttons across entire app standardized: icon = `ti-lock`, text = `\"Upgrade to Unlimited\"` - Exception: cancelled-subscription modal keeps `\"Reactivate JumpKit Unlimited\"` (intentional) - Account type display locked to: `\"JumpKit Free\"` or `\"JumpKit Unlimited\"` only ### Home Page — Rebuilt as Dashboard (renderHome in app.js) Sections in order: 1. **YOUR ACCOUNT** — 3 cards: Account Type (+ upgrade",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4256790727376938,
+      "maxScore": 0.4256790727376938,
+      "firstRecalledAt": "2026-06-13T19:54:57.460Z",
+      "lastRecalledAt": "2026-06-13T19:54:57.460Z",
+      "queryHashes": [
+        "a0b3c2092751"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "teams-jet",
+        "user-facing",
+        "ti-lock",
+        "cancelled-subscription",
+        "app.js",
+        "fixed",
+        "tier",
+        "label"
+      ]
+    },
+    "memory:memory/2026-06-07.md:1:42": {
+      "key": "memory:memory/2026-06-07.md:1:42",
+      "path": "memory/2026-06-07.md",
+      "startLine": 1,
+      "endLine": 42,
+      "source": "memory",
+      "snippet": "# Memory — 2026-06-07 (Sunday) ## JumpKit Landing Page Work ### Pricing Cards — Final State (as of ~11 AM) **Free card (7 bullets):** 1. Web links & local folders 2. 250 jump launches 3. 2 teams · 5 members · 10 jumps / team 4. Personal ROI dashboard 5. Hotkey launcher 6. Filters & search 7. Windows & Mac **Unlimited card (7 bullets):** 1. Everything in JumpKit Free 2. Unlimited jump launches 3. Unlimited teams, members & jumps 4. Personal & team ROI dashboard 5. Auto-archive 6. Auto-backup 7. Early access to new features ### Landing Page Technical Notes - Cards are 385px wide with mobile font-size overrides (0.78rem on 3rd bullet, 0.82rem rest) - 🚀 rocket icon added to \"Get JumpKit Un",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4111033260822296,
+      "maxScore": 0.4111033260822296,
+      "firstRecalledAt": "2026-06-13T19:54:57.460Z",
+      "lastRecalledAt": "2026-06-13T19:54:57.460Z",
+      "queryHashes": [
+        "a0b3c2092751"
+      ],
+      "recallDays": [
+        "2026-06-13"
+      ],
+      "conceptTags": [
+        "backup",
+        "auto-archive",
+        "auto-backup",
+        "font-size",
+        "0.78rem",
+        "0.82rem",
+        "sunday",
+        "jumpkit"
+      ]
+    },
+    "memory:memory/2026-06-13.md:1:29": {
+      "key": "memory:memory/2026-06-13.md:1:29",
+      "path": "memory/2026-06-13.md",
+      "startLine": 1,
+      "endLine": 29,
+      "source": "memory",
+      "snippet": "--- ## JumpKit Session — 2026-06-13 Morning ### Pending Upgrade Flow (Pay Before Account) — FULLY TESTED ✅ - `pending_upgrades` table stores tier + ls_customer_id when webhook fires with no matching profile - `ls-webhook` redeployed with `--no-verify-jwt` (was returning 401 to LS) - `apply-pending-upgrade` edge function: applies tier on login, deletes row, fires send-welcome-core - **Bug fixed:** was fire-and-forget; changed to `await` in auth.js so upgrade applies before redirect to app.html - **Bug fixed:** modal not showing on re-test — used `sessionStorage.setItem('jk_pending_upgrade_applied', '1')` in auth.js, checked in app.js to reliably show modal regardless of `last_known_tier`",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4170006781816482,
+      "maxScore": 0.4170006781816482,
+      "firstRecalledAt": "2026-06-14T11:23:32.409Z",
+      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
+      "queryHashes": [
+        "ce55ef56be06"
+      ],
+      "recallDays": [
+        "2026-06-14"
+      ],
+      "conceptTags": [
+        "pending-upgrades",
+        "ls-customer-id",
+        "ls-webhook",
+        "no-verify-jwt",
+        "apply-pending-upgrade",
+        "send-welcome-core",
+        "fire-and-forget",
+        "auth.js"
+      ]
+    },
+    "memory:memory/2026-06-13.md:197:225": {
+      "key": "memory:memory/2026-06-13.md:197:225",
+      "path": "memory/2026-06-13.md",
+      "startLine": 197,
+      "endLine": 225,
+      "source": "memory",
+      "snippet": "(Details in earlier session entry above) --- ## JumpKit Session — 2026-06-13 Morning ### Pending Upgrade Flow (Pay Before Account) — FULLY TESTED ✅ - `pending_upgrades` table stores tier + ls_customer_id when webhook fires with no matching profile - `ls-webhook` redeployed with `--no-verify-jwt` (was returning 401 to LS) - `apply-pending-upgrade` edge function: applies tier on login, deletes row, fires send-welcome-core - **Bug fixed:** was fire-and-forget; changed to `await` in auth.js so upgrade applies before redirect to app.html - **Bug fixed:** modal not showing on re-test — used `sessionStorage.setItem('jk_pending_upgrade_applied', '1')` in auth.js, checked in app.js to reliably show",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.40916085839271543,
+      "maxScore": 0.40916085839271543,
+      "firstRecalledAt": "2026-06-14T11:23:32.409Z",
+      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
+      "queryHashes": [
+        "ce55ef56be06"
+      ],
+      "recallDays": [
+        "2026-06-14"
+      ],
+      "conceptTags": [
+        "pending-upgrades",
+        "ls-customer-id",
+        "ls-webhook",
+        "no-verify-jwt",
+        "apply-pending-upgrade",
+        "send-welcome-core",
+        "fire-and-forget",
+        "auth.js"
+      ]
+    },
+    "memory:memory/2026-06-13.md:267:296": {
+      "key": "memory:memory/2026-06-13.md:267:296",
+      "path": "memory/2026-06-13.md",
+      "startLine": 267,
+      "endLine": 296,
+      "source": "memory",
+      "snippet": "- Step 4 (columns) button now consistently says \"Save & Continue\" - Final \"You're all set\" screen: fixed progress bar to show 100% (was passing step 4 → 80%) - Reverted skip-onboarding sessionStorage logic — onboarding now handles all first-login cases ### Home Page Fixes - Margin between no-teams card and \"APP FEATURES\" label now consistent (20px) - Large value text in YOUR ACCOUNT and YOUR STATISTICS cards now use `var(--text-card-title)` color ### Statistics Page Fixes - Export PDF button hidden when click log is empty (nothing to export) - Empty state message improved: \"No launch data yet.\" + helpful subtext pointing to Jumps page ### Welcome to JumpKit Unlimited Modal (polish) - Repl",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.366868793964386,
+      "maxScore": 0.366868793964386,
+      "firstRecalledAt": "2026-06-14T12:05:47.216Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
+      "queryHashes": [
+        "1916a314209b"
+      ],
+      "recallDays": [
+        "2026-06-14"
+      ],
+      "conceptTags": [
+        "skip-onboarding",
+        "first-login",
+        "no-teams",
+        "text-card-title",
+        "step",
+        "columns",
+        "button",
+        "now"
+      ]
+    },
+    "memory:memory/2026-06-13.md:71:100": {
+      "key": "memory:memory/2026-06-13.md:71:100",
+      "path": "memory/2026-06-13.md",
+      "startLine": 71,
+      "endLine": 100,
+      "source": "memory",
+      "snippet": "- Step 4 (columns) button now consistently says \"Save & Continue\" - Final \"You're all set\" screen: fixed progress bar to show 100% (was passing step 4 → 80%) - Reverted skip-onboarding sessionStorage logic — onboarding now handles all first-login cases ### Home Page Fixes - Margin between no-teams card and \"APP FEATURES\" label now consistent (20px) - Large value text in YOUR ACCOUNT and YOUR STATISTICS cards now use `var(--text-card-title)` color ### Statistics Page Fixes - Export PDF button hidden when click log is empty (nothing to export) - Empty state message improved: \"No launch data yet.\" + helpful subtext pointing to Jumps page ### Welcome to JumpKit Unlimited Modal (polish) - Repl",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.366868793964386,
+      "maxScore": 0.366868793964386,
+      "firstRecalledAt": "2026-06-14T12:05:47.216Z",
+      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
+      "queryHashes": [
+        "1916a314209b"
+      ],
+      "recallDays": [
+        "2026-06-14"
+      ],
+      "conceptTags": [
+        "skip-onboarding",
+        "first-login",
+        "no-teams",
+        "text-card-title",
+        "step",
+        "columns",
+        "button",
+        "now"
       ]
     }
   }
