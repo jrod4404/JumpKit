@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Release testing file helpers
   showReleaseTestingDialog: (version) => ipcRenderer.invoke('show-release-testing-dialog', version),
+  openFileDialog: (opts) => ipcRenderer.invoke('open-file-dialog', opts),
   readFile:        (filePath)          => ipcRenderer.invoke('read-file', filePath),
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
   getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),

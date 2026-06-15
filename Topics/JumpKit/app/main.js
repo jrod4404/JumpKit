@@ -745,6 +745,18 @@ ipcMain.handle('show-release-testing-dialog', async (_e, version) => {
   return { filePath };
 });
 
+ipcMain.handle('open-file-dialog', async (_e, opts) => {
+  const { dialog } = require('electron');
+  const { canceled, filePaths } = await dialog.showOpenDialog({
+    title:       opts?.title || 'Open File',
+    defaultPath: opts?.defaultPath || require('os').homedir(),
+    filters:     opts?.filters || [{ name: 'All Files', extensions: ['*'] }],
+    properties:  ['openFile'],
+  });
+  if (canceled || !filePaths?.length) return { canceled: true };
+  return { filePath: filePaths[0] };
+});
+
 ipcMain.handle('read-file', (_e, filePath) => {
   const fs = require('fs');
   try {

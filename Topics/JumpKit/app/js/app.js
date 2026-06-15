@@ -1194,8 +1194,12 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
-              <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all data to a local JSON file</span></div>
+              <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all personal jumps &amp; columns to a local JSON file</span></div>
               <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
+            </div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>Import Jumps from Backup</span><span class="acct-row-hint">Restore jumps from a previously exported JSON backup file</span></div>
+              <button class="btn btn-subtle" data-jaction="import-jumps"><svg class="ti ti-upload"><use href="img/tabler-sprite.svg#tabler-upload"/></svg> Import</button>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
@@ -2532,6 +2536,105 @@ window.forceBackup = async function forceBackup() {
   }
 };
 
+// ── Import Jumps from Backup ─────────────────────────────────────────
+window.importJumps = async function importJumps() {
+  if (!window.electronAPI?.openFileDialog) {
+    Toast.danger('Import not available in browser mode');
+    return;
+  }
+
+  // 1. Open file picker
+  const picked = await window.electronAPI.openFileDialog({
+    title: 'Select JumpKit Backup File',
+    filters: [{ name: 'JumpKit Backup', extensions: ['json'] }, { name: 'All Files', extensions: ['*'] }],
+  });
+  if (picked?.canceled) return;
+
+  // 2. Read file
+  const fileResult = await window.electronAPI.readFile(picked.filePath);
+  if (!fileResult?.ok || !fileResult.content) {
+    Toast.danger('Could not read file');
+    return;
+  }
+
+  // 3. Parse
+  let backup;
+  try { backup = JSON.parse(fileResult.content); } catch (_) {
+    Toast.danger('Invalid backup file — could not parse JSON');
+    return;
+  }
+  if (!Array.isArray(backup?.jumps) || !Array.isArray(backup?.columns)) {
+    Toast.danger('Invalid backup file — missing jumps or columns');
+    return;
+  }
+
+  // 4. Build column map: backup columnId → local columnId
+  //    Match by name first; create column if not found
+  const existingCols = DB.getColumns(currentUser.id);
+  const colIdMap = {}; // backup col id → local col id
+
+  for (const bCol of backup.columns) {
+    if (!bCol.name) continue;
+    const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
+    if (existing) {
+      colIdMap[bCol.id] = existing.id;
+    } else {
+      // Create new column at end
+      const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
+      const newCol = DB.createColumn(currentUser.id, bCol.name, maxOrder + 1);
+      existingCols.push(newCol);
+      colIdMap[bCol.id] = newCol.id;
+    }
+  }
+
+  // 5. Import jumps — skip shared, skip duplicates (same URL in same mapped column)
+  const existingJumps = DB.getJumps(currentUser.id);
+  let imported = 0, skipped = 0;
+
+  for (const bJump of backup.jumps) {
+    // Skip shared jumps — they sync from Supabase automatically
+    if (bJump.isShared || bJump.teamId) { skipped++; continue; }
+
+    const mappedColId = colIdMap[bJump.columnId];
+    if (!mappedColId) { skipped++; continue; } // column had no name, skip
+
+    // Duplicate check: same URL in same column
+    const isDupe = existingJumps.some(j =>
+      j.columnId === mappedColId &&
+      (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
+    );
+    if (isDupe) { skipped++; continue; }
+
+    // Create jump with fresh ID
+    const newJump = DB.createJump(currentUser.id, {
+      name:        bJump.name || 'Imported Jump',
+      url:         bJump.url || '',
+      description: bJump.description || '',
+      reason:      bJump.reason || '',
+      columnId:    mappedColId,
+      hotkey:      bJump.hotkey || '',
+      favorite:    bJump.favorite || false,
+    });
+    existingJumps.push(newJump);
+    imported++;
+  }
+
+  // 6. Refresh UI and show summary
+  if (imported > 0) {
+    if (typeof renderJumps === 'function') renderJumps();
+    else if (typeof _buildPage === 'function') _buildPage('jumps');
+  }
+
+  Modal.open(
+    `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Import Complete`,
+    `<div style="text-align:center;padding:8px 0">
+      <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:8px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
+      ${skipped > 0 ? `<p style="color:var(--text-muted);font-size:0.88rem">${skipped} skipped (duplicates, shared jumps, or unmapped columns)</p>` : ''}
+    </div>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`
+  );
+};
+
 window.runCloudBackup = async function runCloudBackup() {
   const _backupTier = window._supabaseProfile?.subscription_tier || 'free';
   if (_backupTier === 'free') return; // auto-backup is Unlimited only
@@ -3064,6 +3167,7 @@ document.addEventListener('click', e => {
     case 'nav-stats':           navigateTo('stats'); break;
     case 'nav-teams':           navigateTo('teams'); break;
     case 'force-backup':       forceBackup(); break;
+    case 'import-jumps':       importJumps(); break;
     case 'save-account-prefs': saveAccountPrefs(); break;
     case 'submit-feedback':    submitFeedback(); break;
     case 'nav-teams-close':    navigateTo('teams'); Modal.close(); break;
