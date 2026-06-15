@@ -2497,10 +2497,37 @@ window.runCloudBackup = async function runCloudBackup() {
   };
 
   if (window.electronAPI?.saveBackup) {
+    // Show confirmation modal before opening OS save dialog
+    const confirmed = await new Promise(resolve => {
+      const overlay = document.createElement('div');
+      overlay.id = 'backupConfirmOverlay';
+      overlay.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center';
+      overlay.innerHTML = `
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.4)">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+            <svg class="ti ti-database-export" style="font-size:1.6rem;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-database-export"/></svg>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:var(--text)">Auto-Backup Ready</h3>
+          </div>
+          <p style="margin:0 0 24px;font-size:0.9rem;color:var(--text-muted);line-height:1.6">Your JumpKit data is ready to back up. Save a copy to your chosen location now?</p>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button id="backupSkipBtn" class="btn btn-subtle" style="min-width:80px">Skip</button>
+            <button id="backupSaveBtn" class="btn btn-primary" style="min-width:120px">Save Backup</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#backupSaveBtn').onclick = () => { overlay.remove(); resolve(true); };
+      overlay.querySelector('#backupSkipBtn').onclick = () => { overlay.remove(); resolve(false); };
+    });
+
+    if (!confirmed) {
+      Toast.info('Auto-backup skipped.');
+      return;
+    }
+
     const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
     if (result?.ok) {
       addNotification({ type: 'backup', message: `Backup saved to: ${result.path}`, ts: Date.now() });
-    } else {
+    } else if (!result?.canceled) {
       addNotification({ type: 'backup-failed', message: `Auto-backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
     }
   }
