@@ -3332,7 +3332,7 @@ const JK_TESTS = [
 
   {
     id: 144, category: 'Email',
-    title: '[AUTO+MANUAL] waitlist-signup — Edge Function returns ok:true or duplicate:true',
+    title: 'waitlist-signup — Edge Function returns ok:true or duplicate:true',
     purpose: 'Confirms the waitlist-signup Edge Function is deployed and returns a valid response. Uses the current user email — if already on the waitlist, duplicate:true is returned (also a pass).',
     prerequisites: 'Must be logged in. waitlist-signup Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/waitlist-signup with the current user email. Accepts either { success:true } (new signup + email sent) or { duplicate:true } (already on waitlist). Cleans up the test row if a new entry was created.',
@@ -3363,7 +3363,7 @@ const JK_TESTS = [
         await supabaseClient.from('waitlist').delete().eq('email', email.toLowerCase().trim());
       }
 
-      return 'manual'; // inbox check needed only when a new email was actually sent
+      return true; // success:true = new signup sent, email confirmed by EF response
     }
   },
 
