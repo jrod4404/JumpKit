@@ -33,4 +33,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isElectron: true,
   isPackaged: () => ipcRenderer.invoke('is-packaged'),
   exportPDF:  (html) => ipcRenderer.invoke('export-pdf', html),
+
+  // Release testing file helpers
+  showReleaseTestingDialog: (version) => ipcRenderer.invoke('show-release-testing-dialog', version),
+  readFile:        (filePath)          => ipcRenderer.invoke('read-file', filePath),
+  writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
+  getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),
 });

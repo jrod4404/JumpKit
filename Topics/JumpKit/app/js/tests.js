@@ -3685,6 +3685,9 @@ function renderTests() {
           <div id="summaryManFail" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0</div>
         </div>
 
+        <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px;background:rgba(0,194,199,0.08);border-color:rgba(0,194,199,0.3);color:var(--turq)">
+          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing
+        </button>
         <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
@@ -3716,6 +3719,10 @@ function renderTests() {
   document.getElementById('btnResetAutoManualTests').addEventListener('click', () => _resetSection('auto-manual'));
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
+  document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
+  document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
+  document.getElementById('btnSaveAMResults').addEventListener('click', () => _saveReleaseSection('auto-manual'));
+  document.getElementById('btnSaveManualResults').addEventListener('click', () => _saveReleaseSection('manual'));
 
   // Delegated handler — registered once at module scope so re-renders don't stack duplicates.
   // removeEventListener before addEventListener guarantees exactly one live registration.
@@ -3818,6 +3825,228 @@ function _clearSavedTestResults() {
 
 function _esc(str) {
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════════════════
+// RELEASE TESTING FILE
+// ══════════════════════════════════════════════════════════════════
+const _RT_KEY = 'jk_release_testing';
+
+function _getReleaseState() {
+  try { return JSON.parse(localStorage.getItem(_RT_KEY) || 'null'); } catch(_) { return null; }
+}
+function _setReleaseState(state) {
+  localStorage.setItem(_RT_KEY, JSON.stringify(state));
+}
+
+async function _openReleaseTestingModal() {
+  const existing = _getReleaseState();
+  let chosenPath = existing?.filePath || '';
+  let appVersion = '1.0.0';
+  try {
+    if (window.electronAPI?.getAppVersion) appVersion = await window.electronAPI.getAppVersion();
+  } catch(_) {}
+
+  const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none';
+  const labelStyle = 'display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em';
+
+  const body = `
+    <div style="margin-bottom:18px">
+      <label style="${labelStyle}">Version Number</label>
+      <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${existing?.version || appVersion}" style="${inputStyle}" />
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">File will be saved as <code>JumpKit_ReleaseTesting_v[version].html</code></p>
+    </div>
+    <div>
+      <label style="${labelStyle}">File Location</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="rtFilePath" type="text" placeholder="Click Choose to pick a location…" value="${_esc(chosenPath)}" readonly style="${inputStyle};flex:1;cursor:default;color:var(--text-muted);font-size:0.8rem" />
+        <button id="rtChooseBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+      </div>
+      ${existing ? `<p style="margin:5px 0 0;font-size:0.78rem;color:#3fbe71">&#10003; Existing file configured — clicking Create will update the config.</p>` : ''}
+    </div>`;
+
+  const footer = `
+    <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
+    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:120px">Create</button>`;
+
+  Modal.open(
+    '<svg class="ti ti-file-certificate" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing',
+    body, footer, 'md'
+  );
+
+  // Choose file location
+  document.getElementById('rtChooseBtn').onclick = async () => {
+    if (!window.electronAPI?.showReleaseTestingDialog) {
+      alert('File picker not available — not running in Electron'); return;
+    }
+    const version = document.getElementById('rtVersion').value.trim() || appVersion;
+    const result = await window.electronAPI.showReleaseTestingDialog(version);
+    if (!result?.canceled && result?.filePath) {
+      chosenPath = result.filePath;
+      document.getElementById('rtFilePath').value = chosenPath;
+    }
+  };
+
+  // Create / save config
+  document.getElementById('rtCreateBtn').onclick = () => {
+    const version = document.getElementById('rtVersion').value.trim();
+    if (!version) { alert('Please enter a version number.'); return; }
+    if (!chosenPath) { alert('Please choose a file location first.'); return; }
+    _setReleaseState({ version, filePath: chosenPath });
+    Modal.close();
+    window.Toast?.success(`Release testing configured — v${version}`);
+  };
+}
+
+async function _saveReleaseSection(mode) {
+  const state = _getReleaseState();
+  if (!state?.filePath || !state?.version) {
+    alert('No release testing file configured. Click "Create Release Testing" first.');
+    return;
+  }
+
+  if (!window.electronAPI?.readFile || !window.electronAPI?.writeFileDirect) {
+    alert('File I/O not available — not running in Electron.');
+    return;
+  }
+
+  const { filePath, version } = state;
+
+  // Determine which tests belong to this section
+  const isAM = t => t.title.startsWith('[AUTO+MANUAL]');
+  const isM  = t => t.title.startsWith('[MANUAL]');
+  const sectionTests = mode === 'auto'
+    ? JK_TESTS.filter(t => !isAM(t) && !isM(t))
+    : mode === 'auto-manual'
+      ? JK_TESTS.filter(isAM)
+      : JK_TESTS.filter(isM);
+
+  const results = window._jkTestResults || {};
+  const displayMap = window._jkTestDisplayNumMap || {};
+  const now = new Date().toISOString();
+
+  // Build new result entries for this section
+  const newEntries = {};
+  sectionTests.forEach(t => {
+    const r = results[t.id];
+    newEntries[t.id] = {
+      id: t.id,
+      displayNum: displayMap[t.id] || t.id,
+      section: mode,
+      category: t.category,
+      title: t.title.replace(/^\[(AUTO\+MANUAL|MANUAL)\] /, ''),
+      input: t.input || '',
+      expected: t.expected || '',
+      state: r?.state || 'not-run',
+      details: r?.message || r?.received || '',
+      timestamp: r ? now : '',
+    };
+  });
+
+  // Read existing file and extract embedded JSON
+  let existingEntries = {};
+  const { content } = await window.electronAPI.readFile(filePath);
+  if (content) {
+    try {
+      const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
+      if (match) existingEntries = JSON.parse(match[1]);
+    } catch(_) {}
+  }
+
+  // Merge: overwrite matching IDs, append new
+  const merged = { ...existingEntries, ...newEntries };
+
+  // Build HTML
+  const html = _buildReleaseTestingHTML(merged, version, filePath);
+  const writeResult = await window.electronAPI.writeFileDirect(filePath, html);
+
+  if (writeResult?.ok) {
+    const sectionLabel = mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
+    window.Toast?.success(`${sectionLabel} results saved to file.`);
+  } else {
+    window.Toast?.success(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
+  }
+}
+
+function _buildReleaseTestingHTML(entries, version, filePath) {
+  const stateColor = s => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
+  const stateLabel = s => s === 'pass' ? '✅ Pass' : s === 'fail' ? '❌ Fail' : s === 'manual' ? '⚠️ Manual' : '— Not Run';
+  const sectionOrder = { auto: 0, 'auto-manual': 1, manual: 2 };
+  const sectionLabel = { auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
+
+  const sorted = Object.values(entries).sort((a, b) => {
+    const sd = (sectionOrder[a.section] ?? 9) - (sectionOrder[b.section] ?? 9);
+    return sd !== 0 ? sd : a.displayNum - b.displayNum;
+  });
+
+  const runDate = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const totalPass = sorted.filter(e => e.state === 'pass').length;
+  const totalFail = sorted.filter(e => e.state === 'fail').length;
+  const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
+
+  let lastSection = null;
+  const rows = sorted.map(e => {
+    let sectionHeader = '';
+    if (e.section !== lastSection) {
+      lastSection = e.section;
+      sectionHeader = `<tr><td colspan="8" style="padding:14px 12px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb">${sectionLabel[e.section] || e.section}</td></tr>`;
+    }
+    const stateC = stateColor(e.state);
+    return sectionHeader + `<tr style="border-bottom:1px solid #e5e7eb">
+      <td style="padding:7px 10px;font-size:12px;color:#9ca3af;white-space:nowrap">${e.displayNum}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280">${_esc(e.category)}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#374151;font-weight:500">${_esc(e.title)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:140px;word-break:break-word">${_esc(e.input)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.expected)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.details)}</td>
+      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};white-space:nowrap">${stateLabel(e.state)}</td>
+      <td style="padding:7px 10px;font-size:10px;color:#9ca3af;white-space:nowrap">${e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</td>
+    </tr>`;
+  }).join('');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>JumpKit Release Testing v${_esc(version)}</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f3f4f6; color:#1f2937; }
+  .wrap { max-width:1200px; margin:32px auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  .header { background:#0E1827; padding:28px 32px; }
+  .header h1 { color:#C8D6E8; font-size:1.4rem; font-weight:700; margin-bottom:4px; }
+  .header p { color:#4A6280; font-size:0.85rem; }
+  .stats { display:flex; gap:20px; padding:20px 32px; background:#f9fafb; border-bottom:1px solid #e5e7eb; }
+  .stat { text-align:center; }
+  .stat-val { font-size:1.5rem; font-weight:900; }
+  .stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; margin-top:2px; }
+  table { width:100%; border-collapse:collapse; }
+  th { padding:9px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; text-align:left; background:#f9fafb; border-bottom:2px solid #e5e7eb; }
+  @media print { body { background:#fff; } .wrap { box-shadow:none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <h1>JumpKit Release Testing — v${_esc(version)}</h1>
+    <p>Generated ${runDate} &middot; ${sorted.length} tests total</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-val" style="color:#3fbe71">${totalPass}</div><div class="stat-lbl">Passed</div></div>
+    <div class="stat"><div class="stat-val" style="color:#e15b59">${totalFail}</div><div class="stat-lbl">Failed</div></div>
+    <div class="stat"><div class="stat-val" style="color:#6b7280">${totalNotRun}</div><div class="stat-lbl">Not Run</div></div>
+    <div class="stat"><div class="stat-val" style="color:#374151">${sorted.length}</div><div class="stat-lbl">Total</div></div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>#</th><th>Category</th><th>Title</th><th>Input</th><th>Expected</th><th>Details</th><th>Result</th><th>Timestamp</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+</div>
+<!-- machine-readable data for merge -->
+<script type="application/json" id="jk-release-data">${JSON.stringify(entries)}<\/script>
+</body></html>`;
 }
 
 function _openTestStrategyModal() {
@@ -4005,17 +4234,21 @@ function _buildTestRows() {
   window._jkTestDisplayNumMap = {};
   _displayOrder.forEach((t, i) => { window._jkTestDisplayNumMap[t.id] = i + 1; });
 
-  const _secBtn = (id, icon, label) => `<button id="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;padding:5px 12px"><svg class="ti ti-${icon}" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>${label}</button>`;
+  const _secBtn = (id, icon, label, extra='') => `<button id="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;padding:5px 12px${extra}"><svg class="ti ti-${icon}" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>${label}</button>`;
+  const _saveBtn = (id) => _secBtn(id, 'file-download', 'Save Results', ';color:var(--turq);border-color:rgba(0,194,199,0.3);background:rgba(0,194,199,0.06)');
 
   wrap.innerHTML =
     _sectionBlock('Automatic Tests', 'player-play', autoTests, 1,
       _secBtn('btnRunAutoTests','player-play','Run') +
-      _secBtn('btnResetAutoTests','refresh','Reset')) +
+      _secBtn('btnResetAutoTests','refresh','Reset') +
+      _saveBtn('btnSaveAutoResults')) +
     _sectionBlock('Auto + Manual Tests', ['player-play','clipboard-list'], autoManual, autoTests.length + 1,
       _secBtn('btnRunAutoManualTests','player-play','Run') +
-      _secBtn('btnResetAutoManualTests','refresh','Reset')) +
+      _secBtn('btnResetAutoManualTests','refresh','Reset') +
+      _saveBtn('btnSaveAMResults')) +
     _sectionBlock('Manual Tests', 'clipboard-list', manualTests, autoTests.length + autoManual.length + 1,
-      _secBtn('btnResetManualTests','refresh','Reset'));
+      _secBtn('btnResetManualTests','refresh','Reset') +
+      _saveBtn('btnSaveManualResults'));
 }
 
 function _markManualResult(id, result) {

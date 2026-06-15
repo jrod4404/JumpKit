@@ -732,6 +732,41 @@ ipcMain.handle('export-pdf', async (_e, html) => {
   }
 });
 
+// ── IPC: release testing file helpers ───────────────────────────
+ipcMain.handle('show-release-testing-dialog', async (_e, version) => {
+  const { dialog } = require('electron');
+  const defaultName = `JumpKit_ReleaseTesting_v${version || '1.0.0'}.html`;
+  const { filePath, canceled } = await dialog.showSaveDialog({
+    title: 'Save Release Testing File',
+    defaultPath: require('path').join(require('os').homedir(), 'Desktop', defaultName),
+    filters: [{ name: 'HTML Files', extensions: ['html'] }],
+  });
+  if (canceled || !filePath) return { canceled: true };
+  return { filePath };
+});
+
+ipcMain.handle('read-file', (_e, filePath) => {
+  const fs = require('fs');
+  try {
+    if (!fs.existsSync(filePath)) return { ok: true, content: null };
+    return { ok: true, content: fs.readFileSync(filePath, 'utf8') };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
+ipcMain.handle('write-file-direct', (_e, filePath, content) => {
+  const fs = require('fs');
+  try {
+    fs.writeFileSync(filePath, content, 'utf8');
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
+ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
+
 // Single instance lock — prevent two processes opening the same SQLite db
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
