@@ -3355,12 +3355,15 @@ const JK_TESTS = [
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
       if (body.success !== true && body.duplicate !== true) throw new Error(`Unexpected response — got: ${JSON.stringify(body)}`);
 
-      // Clean up — remove test row if newly inserted (duplicate means it was already there)
+      // duplicate:true = already on waitlist, no email sent — auto-pass
+      if (body.duplicate === true) return true;
+
+      // success:true = new signup, email sent — clean up and ask for inbox check
       if (body.success === true && supabaseClient) {
         await supabaseClient.from('waitlist').delete().eq('email', email.toLowerCase().trim());
       }
 
-      return 'manual';
+      return 'manual'; // inbox check needed only when a new email was actually sent
     }
   },
 
