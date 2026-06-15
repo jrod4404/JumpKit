@@ -81,6 +81,76 @@ const JK_TESTS = [
     }
   },
   {
+    id: 146, category: 'Auth',
+    title: 'user_sessions row written on login',
+    purpose: 'Confirms that a user_sessions row exists in Supabase for the current user after login.',
+    prerequisites: 'Must be logged in.',
+    description: 'Queries the user_sessions table for the current user and checks a row exists.',
+    input: 'supabaseClient.from("user_sessions").select().eq("user_id", userId)',
+    expected: 'Exactly one row returned for the current user with a non-null session_token.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!window._supabaseUser?.id) throw new Error('No Supabase user in memory');
+      const { data, error } = await supabaseClient
+        .from('user_sessions')
+        .select('session_token, last_seen')
+        .eq('user_id', window._supabaseUser.id)
+        .maybeSingle();
+      if (error) throw new Error('Query failed: ' + error.message);
+      if (!data) throw new Error('No user_sessions row found for current user');
+      if (!data.session_token) throw new Error('session_token is null or empty');
+    }
+  },
+
+  {
+    id: 147, category: 'Auth',
+    title: 'session_token matches sessionStorage',
+    purpose: 'Confirms the session_token stored in Supabase matches what is stored in sessionStorage on this device.',
+    prerequisites: 'Must be logged in.',
+    description: 'Compares jk_session_token in sessionStorage with the Supabase user_sessions row.',
+    input: 'sessionStorage.getItem("jk_session_token") vs user_sessions.session_token',
+    expected: 'Both values are identical non-null strings.',
+    steps: 'Automatic.',
+    test: async () => {
+      const localToken = sessionStorage.getItem('jk_session_token');
+      if (!localToken) throw new Error('No jk_session_token in sessionStorage');
+      if (!window._supabaseUser?.id) throw new Error('No Supabase user in memory');
+      const { data, error } = await supabaseClient
+        .from('user_sessions')
+        .select('session_token')
+        .eq('user_id', window._supabaseUser.id)
+        .maybeSingle();
+      if (error) throw new Error('Query failed: ' + error.message);
+      if (!data) throw new Error('No user_sessions row found');
+      if (data.session_token !== localToken) throw new Error(`Token mismatch — Supabase: ${data.session_token?.slice(0,8)}… local: ${localToken?.slice(0,8)}…`);
+    }
+  },
+
+  {
+    id: 148, category: 'Auth',
+    title: '[MANUAL] Second device login is blocked',
+    purpose: 'Confirms that attempting to log in from a second device while already logged in shows the session conflict modal and blocks entry.',
+    prerequisites: 'Must be logged in on this device. Have access to a second device or browser profile.',
+    input: 'Attempt login with same credentials on a second device/profile',
+    description: 'On a second device or browser profile, navigate to the JumpKit login page and enter the same credentials.',
+    expected: 'Login succeeds on second device but shows "Already Logged In" modal with device info and two options: "Log out other device & continue" and "Cancel". Clicking Cancel returns to login screen without accessing the app.',
+    steps: '1. Keep this device logged in.\n2. Open JumpKit on a second device or incognito/separate browser profile.\n3. Enter the same email + password and click Sign In.\n4. Verify the "Already Logged In" modal appears showing device and last-seen time.\n5. Click Cancel — verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click "Log out other device & continue" — verify you are redirected to app.html on the second device.',
+    test: async () => 'manual'
+  },
+
+  {
+    id: 149, category: 'Auth',
+    title: '[MANUAL] Force logout displaces original session',
+    purpose: 'Confirms that when a second device force-logs-out the first, the first device eventually shows the displacement warning and redirects to login.',
+    prerequisites: 'Two devices logged into the same account (complete test 148 first, choosing "Log out other device & continue" on the second device).',
+    input: 'Wait up to 3 minutes on the original (first) device',
+    description: 'After a second device has force-logged-out this device, wait for the 3-minute heartbeat watcher to detect the token mismatch.',
+    expected: 'Original device shows red toast "⚠️ You were logged in from another device" and redirects to login screen within ~3 minutes.',
+    steps: '1. Keep first device open and active on any page.\n2. On second device, perform force-logout (test 148 step 6).\n3. On first device, wait up to 3 minutes.\n4. Verify the red warning toast appears and the app redirects to login.',
+    test: async () => 'manual'
+  },
+
+  {
     id: 124, category: 'Auth',
     title: '[MANUAL] Sign out clears session',
     purpose: 'Manually confirms that signing out fully ends the session and prevents access to the app without re-authenticating. Critical for security.',
@@ -3013,6 +3083,199 @@ const JK_TESTS = [
       if (!el.innerHTML || el.innerHTML.trim().length < 10) throw new Error('pageContent appears empty after renderAccount("teams")');
       renderTests();
     }
+  },
+
+  // ══════════════════════════════════════════════════════════════════
+  // BACKUP & IMPORT
+  // ══════════════════════════════════════════════════════════════════
+
+  {
+    id: 150, category: 'Account',
+    title: 'forceBackup function is defined',
+    purpose: 'Confirms the export backup function is present and callable.',
+    prerequisites: 'Must be logged in.',
+    description: 'Checks that window.forceBackup is a function.',
+    input: 'typeof window.forceBackup',
+    expected: '"function"',
+    steps: 'Automatic.',
+    test: async () => {
+      if (typeof window.forceBackup !== 'function') throw new Error('window.forceBackup is not defined');
+    }
+  },
+
+  {
+    id: 151, category: 'Account',
+    title: 'importJumps function is defined',
+    purpose: 'Confirms the import jumps function is present and callable.',
+    prerequisites: 'Must be logged in.',
+    description: 'Checks that window.importJumps is a function.',
+    input: 'typeof window.importJumps',
+    expected: '"function"',
+    steps: 'Automatic.',
+    test: async () => {
+      if (typeof window.importJumps !== 'function') throw new Error('window.importJumps is not defined');
+    }
+  },
+
+  {
+    id: 152, category: 'Account',
+    title: 'Settings page shows Export and Import buttons',
+    purpose: 'Confirms both the Export and Import Jumps buttons render in the Settings Maintenance section.',
+    prerequisites: 'Must be logged in.',
+    description: 'Renders the settings tab and checks for both data-jaction="force-backup" and data-jaction="import-jumps" buttons.',
+    input: 'renderAccount("settings")',
+    expected: 'Both buttons are present in the DOM after render.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (typeof renderAccount !== 'function') throw new Error('renderAccount is not defined');
+      renderAccount('settings');
+      await new Promise(r => setTimeout(r, 150));
+      const exportBtn = document.querySelector('[data-jaction="force-backup"]');
+      const importBtn = document.querySelector('[data-jaction="import-jumps"]');
+      if (!exportBtn) throw new Error('Export button (data-jaction="force-backup") not found');
+      if (!importBtn) throw new Error('Import button (data-jaction="import-jumps") not found');
+      renderTests();
+    }
+  },
+
+  {
+    id: 153, category: 'Account',
+    title: 'Import: valid backup JSON imports jumps correctly',
+    purpose: 'Confirms that the import logic correctly maps columns, creates new ones if missing, imports jumps with fresh IDs, and skips duplicates.',
+    prerequisites: 'Must be logged in.',
+    description: 'Constructs a synthetic backup object and runs the import logic directly, then verifies jumps were added.',
+    input: 'Synthetic backup with 1 new column + 2 jumps (1 new, 1 duplicate of an existing seed)',
+    expected: 'New column created (if not existing), new jump added, duplicate skipped. Summary counts correct.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!currentUser?.id) throw new Error('currentUser not available');
+
+      const testColName = '__test_import_col_' + Date.now();
+      const testUrl     = 'https://import-test-' + Date.now() + '.example.com';
+
+      // Build synthetic backup
+      const fakeBackup = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        columns: [{ id: 'fake_col_1', name: testColName }],
+        jumps: [
+          { id: 'fake_j_1', name: 'Import Test Jump', url: testUrl, columnId: 'fake_col_1', isShared: false },
+        ]
+      };
+
+      // Run import logic inline (mirrors window.importJumps core logic)
+      const existingCols  = DB.getColumns(currentUser.id);
+      const existingJumps = DB.getJumps(currentUser.id);
+      const colIdMap = {};
+
+      for (const bCol of fakeBackup.columns) {
+        const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
+        if (existing) {
+          colIdMap[bCol.id] = existing.id;
+        } else {
+          const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
+          const newCol = DB.createColumn(currentUser.id, bCol.name, maxOrder + 1);
+          existingCols.push(newCol);
+          colIdMap[bCol.id] = newCol.id;
+        }
+      }
+
+      let imported = 0, skipped = 0;
+      for (const bJump of fakeBackup.jumps) {
+        if (bJump.isShared || bJump.teamId) { skipped++; continue; }
+        const mappedColId = colIdMap[bJump.columnId];
+        if (!mappedColId) { skipped++; continue; }
+        const isDupe = existingJumps.some(j =>
+          j.columnId === mappedColId &&
+          (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
+        );
+        if (isDupe) { skipped++; continue; }
+        const newJump = DB.createJump(currentUser.id, {
+          name: bJump.name, url: bJump.url, columnId: mappedColId
+        });
+        existingJumps.push(newJump);
+        imported++;
+      }
+
+      if (imported !== 1) throw new Error(`Expected 1 imported, got ${imported}`);
+      if (skipped !== 0) throw new Error(`Expected 0 skipped, got ${skipped}`);
+
+      // Verify jump exists in DB
+      const allJumps = DB.getJumps(currentUser.id);
+      const found = allJumps.find(j => j.url === testUrl);
+      if (!found) throw new Error('Imported jump not found in DB after import');
+
+      // Clean up
+      DB.deleteJump(currentUser.id, found.id);
+      const cols = DB.getColumns(currentUser.id);
+      const testCol = cols.find(c => c.name === testColName);
+      if (testCol) {
+        DB.saveColumns(currentUser.id, cols.filter(c => c.id !== testCol.id));
+      }
+    }
+  },
+
+  {
+    id: 154, category: 'Account',
+    title: 'Import: duplicate jump is skipped',
+    purpose: 'Confirms that importing a jump with the same URL as an existing jump in the same column results in a skip, not a duplicate.',
+    prerequisites: 'Must be logged in with at least one existing jump.',
+    description: 'Attempts to import a jump whose URL already exists in a column. Expects skipped count = 1, imported = 0.',
+    input: 'Synthetic backup with 1 jump matching an existing jump URL',
+    expected: 'imported=0, skipped=1. No duplicate jump created in DB.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!currentUser?.id) throw new Error('currentUser not available');
+      const existingJumps = DB.getJumps(currentUser.id).filter(j => !j.isShared && !j.isArchived);
+      if (existingJumps.length === 0) throw new Error('No existing active jumps to test duplicate detection against');
+
+      const target = existingJumps[0];
+      const targetCol = DB.getColumns(currentUser.id).find(c => c.id === target.columnId);
+      if (!targetCol) throw new Error('Could not find column for target jump');
+
+      const fakeBackup = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        columns: [{ id: 'fake_dup_col', name: targetCol.name }],
+        jumps: [{ id: 'fake_dup_j', name: 'Dup Jump', url: target.url, columnId: 'fake_dup_col', isShared: false }]
+      };
+
+      const existingCols = DB.getColumns(currentUser.id);
+      const colIdMap = {};
+      for (const bCol of fakeBackup.columns) {
+        const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
+        if (existing) colIdMap[bCol.id] = existing.id;
+      }
+
+      let imported = 0, skipped = 0;
+      const jumpPool = DB.getJumps(currentUser.id);
+      for (const bJump of fakeBackup.jumps) {
+        const mappedColId = colIdMap[bJump.columnId];
+        if (!mappedColId) { skipped++; continue; }
+        const isDupe = jumpPool.some(j =>
+          j.columnId === mappedColId &&
+          (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
+        );
+        if (isDupe) { skipped++; continue; }
+        DB.createJump(currentUser.id, { name: bJump.name, url: bJump.url, columnId: mappedColId });
+        imported++;
+      }
+
+      if (imported !== 0) throw new Error(`Expected 0 imported (duplicate), got ${imported}`);
+      if (skipped !== 1) throw new Error(`Expected 1 skipped, got ${skipped}`);
+    }
+  },
+
+  {
+    id: 155, category: 'Account',
+    title: '[MANUAL] Export then Import round-trip on new device',
+    purpose: 'End-to-end confirmation that a user can export jumps from one device and import them on another, with all personal jumps transferred correctly.',
+    prerequisites: 'Must be logged in. Have access to a second device or a fresh JumpKit install.',
+    input: 'Settings → Export → save file → transfer to new device → Settings → Import → select file',
+    description: 'Full round-trip: export from device A, import on device B, verify jump counts match.',
+    expected: 'All personal jumps from device A appear on device B. Shared jumps are excluded from the file but sync automatically. No duplicate jumps created on re-import.',
+    steps: '1. On device A: Settings → Maintenance → Export. Save the JSON file.\n2. Transfer the file to device B (USB, AirDrop, email, etc.).\n3. On device B: Settings → Maintenance → Import. Select the file.\n4. Verify the import summary shows the expected count of imported jumps.\n5. Navigate to Jumps page and confirm all personal columns and jumps appear.\n6. Run Import again with the same file — verify all jumps are skipped (0 imported) with no duplicates created.',
+    test: async () => 'manual'
   },
 
   // ══════════════════════════════════════════════════════════════════

@@ -1717,6 +1717,37 @@ else renderTeamMemberView(...);</code></pre>
 // - teams + team_members rows LEFT DORMANT - not deleted
 // - Rationale: gives owner chance to reupgrade and restore team structure
 // - Planned cleanup: dormant teams older than 6 months may be purged in a future job</code></pre>
+<h4 id="backup-import">2.4.6 Backup &amp; Import — Data Portability</h4>
+<p>JumpKit's personal jumps are stored locally (SQLite, never in Supabase). Backup and Import provide the mechanism for data portability and device migration without requiring cloud infrastructure for personal data.</p>
+
+<h5>Export (Backup Jumps Manually)</h5>
+<ul>
+<li>Location: <strong>Settings → Maintenance → Backup Jumps Manually → Export</strong></li>
+<li>Triggers an Electron save dialog; user picks filename and destination</li>
+<li>Writes a JSON file via the <code>save-backup</code> IPC handler in <code>main.js</code></li>
+<li>File format: <code>{ version, exportedAt, userId, email, jumps[], columns[], prefs }</code></li>
+<li>Internal fields stripped before export: <code>userId</code>, <code>supabaseId</code>, <code>sharedTeams</code></li>
+<li>Shared jumps are included in the file but are skipped on import (they sync automatically via Supabase)</li>
+<li>Auto-Backup (Unlimited plan only): same format, runs automatically on login when preference is enabled</li>
+</ul>
+
+<h5>Import (Import Jumps from Backup)</h5>
+<ul>
+<li>Location: <strong>Settings → Maintenance → Import Jumps from Backup → Import</strong></li>
+<li>Triggers an Electron open-file dialog; user selects a previously exported <code>.json</code> backup file</li>
+<li>File is read via the <code>read-file</code> IPC handler in <code>main.js</code></li>
+</ul>
+<p><strong>Import logic:</strong></p>
+<ol>
+<li><strong>Column mapping</strong> — each backup column is matched to an existing column by name (case-insensitive). If no match is found, a new column is created at the end of the column list.</li>
+<li><strong>Duplicate detection</strong> — a jump is skipped if a jump with the same URL already exists in the same (mapped) column.</li>
+<li><strong>Shared jump skip</strong> — jumps with <code>isShared=true</code> or a <code>teamId</code> are skipped; they will sync from Supabase automatically.</li>
+<li><strong>Fresh ID assignment</strong> — all imported jumps receive new local IDs via <code>uid()</code>; backup IDs are never reused, preventing collisions.</li>
+<li><strong>Summary modal</strong> — after import, a modal reports: <em>"X jumps imported, Y skipped (duplicates, shared jumps, or unmapped columns)"</em>.</li>
+</ol>
+<p><strong>Idempotent</strong>: running the same import file twice results in 0 new jumps on the second run (all duplicates skipped).</p>
+<p><strong>Primary use case</strong>: migrating personal jumps to a new device after the single-session lock prevents dual-device use. User exports from old device, transfers file, imports on new device.</p>
+
 <h3 id="section-6">2.5 UI Components</h3>
 <h4 id="modal">2.4.1 Modal</h4>
 <p><strong>Usage:</strong></p>
