@@ -3509,24 +3509,27 @@ const JK_TESTS = [
     title: '[AUTO+MANUAL] verify-team-password — returns valid:true for correct password',
     purpose: 'Confirms verify-team-password returns valid:true when the correct password is supplied for a real team.',
     prerequisites: 'Must be logged in as a team owner. At least one team must exist. You will need to know the password for a test team.',
-    description: 'Fetches the first owned team, then calls verify-team-password with the known correct password for the E2E-Test-Team.',
+    description: 'Fetches the first team owned by the current user, calls verify-team-password with a wrong password (auto-verified), then prompts manual confirmation with the correct password.',
     input: 'POST /functions/v1/verify-team-password { teamId, candidatePassword }',
-    expected: 'Response JSON has valid:true for the correct password and valid:false for a wrong password.',
-    steps: 'Semi-automatic. Test uses E2E-Test-Team — ensure it exists with its known password before running.',
+    expected: 'Wrong password returns valid:false (automatic). Correct password returns valid:true (manual confirmation).',
+    steps: 'Semi-automatic. The test picks your first owned team automatically. After the wrong-password check passes, manually verify the correct password works via the app Join Team flow.',
     test: async () => {
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
+      const userId = window._supabaseUser?.id;
+      if (!userId) throw new Error('Not logged in — _supabaseUser not set');
 
-      // Fetch the E2E test team
+      // Fetch the first team owned by current user
       const { data: teams } = await supabaseClient
         .from('teams')
         .select('id, name')
-        .ilike('name', '%E2E-Test-Team%')
+        .eq('created_by', userId)
         .limit(1);
 
-      if (!teams || teams.length === 0) throw new Error('E2E-Test-Team not found — create it before running this test');
+      if (!teams || teams.length === 0) throw new Error('No owned teams found — create at least one team before running this test');
       const teamId = teams[0].id;
+      const teamName = teams[0].name;
 
-      // Test wrong password first
+      // Test wrong password first (automatic)
       const wrongRes = await fetch(`${SUPABASE_URL}/functions/v1/verify-team-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
@@ -3535,7 +3538,7 @@ const JK_TESTS = [
       const wrongBody = await wrongRes.json().catch(() => ({}));
       if (wrongBody.valid !== false) throw new Error(`Wrong password should return valid:false, got: ${JSON.stringify(wrongBody)}`);
 
-      return 'manual'; // Correct-password check requires knowing the E2E team password — mark manual pass after confirming wrong-password rejection works
+      return 'manual'; // Correct-password check: manually enter the correct password for "' + teamName + '" via the app Join Team flow and confirm valid:true is returned
     }
   },
 
