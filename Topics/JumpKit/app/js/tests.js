@@ -2671,8 +2671,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           ownerId: profileId,
-          teamId: 'test-team-107',
-          teamName: 'Test Team (Test 107)',
+          teamId: 'test-team-113',
+          teamName: 'Test Team (Test 113)',
           lockDate,
           affectedMembers: [{ email, name: 'Test Member' }],
           variant: 'warning',
@@ -2693,11 +2693,11 @@ const JK_TESTS = [
     id: 135, category: 'Email',
     title: '[MANUAL] send-team-downgrade-alert — correct warning email content in inbox',
     purpose: 'Manual verification that the 2-day warning email uses the correct subject, heading, and copy (distinct from the alert variant).',
-    prerequisites: 'Test 107 must have passed first.',
-    description: 'Open the warning email sent by Test 107 and verify it uses the warning-variant subject and copy.',
+    prerequisites: 'Test 113 must have passed first.',
+    description: 'Open the warning email sent by Test 113 and verify it uses the warning-variant subject and copy.',
     input: 'Email inbox for logged-in user account',
     expected: 'Email subject contains "Reminder: JumpKit team access ending in 2 days". Heading says "Reminder: team access ending in 2 days" (not the alert heading). Re-upgrade CTA present.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 107)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 113)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
     test: async () => 'manual'
   },
 
