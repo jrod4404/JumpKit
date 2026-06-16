@@ -3937,6 +3937,24 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-16 (test suite overhaul &mdash; exec order, 4-section layout, unified summary &amp; session lock fix)</h3>
+<ul>
+  <li><strong>Execution order added to all 146 tests.</strong> Test 139 runs first (npm audit pre-flight check), then all automatic, then auto+manual, then manual. Last 3 manual tests: 111 &rarr; 112 &rarr; 141. Exec # visible in every test row and detail modal.</li>
+  <li><strong>Test page restructured into 4 sections:</strong> Pre-Flight (test 139 only), Automatic (120 tests), Auto+Manual (10 tests), Manual (15 tests). Each section shows live inline stats pills (Pass/Fail/Manual) in its header, updating as tests run.</li>
+  <li><strong>EXEC&nbsp;#&nbsp;/&nbsp;ID column</strong> added to all section tables showing e.g. <code>#1&nbsp;&middot;&nbsp;139</code>. Replaces the bare test ID column.</li>
+  <li><strong>Unified total summary card</strong> (Passed / Failed / Manual / Not Run / Total across all 4 sections) replaces the previous 4 individual section cards.</li>
+  <li><strong>Test detail modal</strong> reordered: Exec Order shown first, then ID. Links row added (clickable URLs &mdash; e.g. test 111 GitHub releases API link).</li>
+  <li><strong>Copy buttons (tests page)</strong> converted from inline <code>onclick</code> to CSP-compliant <code>data-jaction=&quot;cmd-copy&quot;</code> delegated handler. Icon toggles to checkmark for 1.5s on copy.</li>
+  <li><strong>Test 139 upgraded:</strong> npm audit / npm audit fix copy-command buttons added; last clean audit date updated to 2026-06-16 (0 vulnerabilities after fixing form-data, js-yaml, qs, tar, tmp).</li>
+  <li><strong>Test 140 converted to fully automatic</strong> (env var format checks run without manual confirmation).</li>
+  <li><strong>Session lock poll interval:</strong> 3 min &rarr; 20 sec. Device 1 now kicked within ~20s of Device 2 claiming the session. Test 149 description updated to match.</li>
+  <li><strong>_runTests() fix:</strong> previously wiped ALL test results (including pre-flight manual marks) on every run. Now only clears results for tests in the current section being run.</li>
+  <li><strong>HTML release report (JumpKit_ReleaseTesting_v1.0.0.html) updated:</strong> 4-section layout matching app; EXEC&nbsp;#&nbsp;/&nbsp;ID column; section stats inline in headers; collapsed by default; orphaned test IDs 132&ndash;138 and 143 removed; total corrected from 154 &rarr; 146.</li>
+  <li><strong>Tests page summary card polish:</strong> Removed vertical separator lines between stat cells (Passed / Failed / Manual / Not Run / Total). Arrow icons on section headers given <code>margin-right: 10px</code> for better spacing.</li>
+  <li><strong>Release HTML card widened 15%:</strong> <code>max-width</code> increased from 1380&nbsp;px &rarr; 1587&nbsp;px for improved table readability on large screens.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-16.tar.gz</code> (1.2 GB) saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-14 (evening &mdash; test suite reliability, UI polish &amp; DB cleanup)</h3>
 <ul>
   <li><strong>Test suite: all 107 automatic tests now pass reliably on every full run.</strong> Root cause of recurring failures (tests 74, 75, 78, 79) identified and fixed: test 374 (cleanup) was positioned in the array before Shared Sync tests 78&ndash;84, wiping <code>_testTeamId</code> before those tests could use it. Moved cleanup to after test 84 in the array. Full auto suite now green from test 1 to 107 every time.</li>

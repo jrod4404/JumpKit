@@ -2,6 +2,22 @@
 
 ---
 
+## v1.0.0-rc2 — June 16, 2026 (Release Testing Improvements)
+
+### Testing / QA
+- **Execution-order column** — Tests page and release HTML report now show `EXEC # / ID` column across all four sections (Pre-Flight, Automatic, Auto + Manual, Manual).
+- **Four-section test layout** — Tests page reorganized into Pre-Flight (test 139), Automatic, Auto + Manual, and Manual sections; each section shows per-section summary stats inline in the header.
+- **Section summaries in release report** — `JumpKit_ReleaseTesting_v1.0.0.html` section headers now include inline stat pills (Pass/Fail/Manual/Not Run/Total) and per-section column headers; footers removed.
+- **Default-collapsed sections** — All four sections in the release HTML default to collapsed (▶) for easier navigation.
+- **Removed orphaned test cases** — IDs 132–138 and 143 (deleted tests) removed from release HTML; total corrected from 154 → 146.
+- **Vertical dividers removed** — Summary card on the Tests page no longer shows vertical separator lines between stat cells.
+- **Release HTML card width** — Overall card widened 15% (1380 → 1587 px) for better table readability on larger screens.
+- **Arrow icon spacing** — Added `margin-right: 10px` to collapse/expand arrows in all section headers.
+- **Test 140 auto-converted** — Test 140 (session watchdog interval) converted from manual to automatic; returns pass/fail details without human interaction.
+- **Test 139 preserved across auto runs** — Pre-flight test 139 result persists when automatic test suite is re-run.
+
+---
+
 ## v1.0.0 — June 7, 2026
 
 ### New Features
