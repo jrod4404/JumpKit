@@ -3846,9 +3846,9 @@ function renderTests() {
       <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
         <!-- Unified summary card -->
         <div id="testSummary" style="padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
-          <div id="summaryPass" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
-          <div id="summaryFail" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
-          <div id="summaryManual" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
+          <div id="summaryPass" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
+          <div id="summaryFail" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#e15b59">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
+          <div id="summaryManual" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#f59e0b">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
           <div id="summaryNotRun" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Not Run</div></div>
           <div id="summaryTotal" style="text-align:center;padding:4px 16px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
           <span id="summaryTime" style="color:var(--text-muted);font-size:0.78rem;padding-left:16px;"></span>
@@ -4258,7 +4258,7 @@ async function _saveReleaseSection(mode) {
 }
 
 function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
-  const stateColor = (s, m) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
+  const stateColor = (s) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
   const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Not Run';
   const sectionOrder = { preflight: 0, auto: 1, 'auto-manual': 2, manual: 3 };
   const sectionLabel = { preflight: 'Pre-Flight (Run First)', auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
@@ -4272,40 +4272,46 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   });
 
   const runDate = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const totalPass    = sorted.filter(e => e.state === 'pass').length;
-  const totalFail    = sorted.filter(e => e.state === 'fail').length;
-  const totalManual  = sorted.filter(e => e.state === 'manual').length;
-  const totalNotRun  = sorted.filter(e => e.state === 'not-run').length;
+  const totalPass   = sorted.filter(e => e.state === 'pass').length;
+  const totalFail   = sorted.filter(e => e.state === 'fail').length;
+  const totalManual = sorted.filter(e => e.state === 'manual').length;
+  const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
 
-  // Per-section stats helper
-  const secStats = sec => {
+  // Inline pill helper — only renders non-zero values; matches app section header style
+  const _pill = (val, label, color) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${val} ${label}</span>`
+    : '';
+
+  const secPills = sec => {
     const es = sorted.filter(e => e.section === sec);
-    return {
-      total:   es.length,
-      pass:    es.filter(e => e.state === 'pass').length,
-      fail:    es.filter(e => e.state === 'fail').length,
-      manual:  es.filter(e => e.state === 'manual').length,
-      notRun:  es.filter(e => e.state === 'not-run').length,
-    };
-  };
-  const summaryBar = sec => {
-    const s = secStats(sec);
-    const item = (val, lbl, color) => `<div style="text-align:center;padding:8px 16px"><div style="font-size:1.1rem;font-weight:900;color:${color}">${val}</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-top:1px">${lbl}</div></div>`;
-    return `<tr><td colspan="8" style="padding:20px 12px 0"></td></tr>
-    <tr><td colspan="8" style="padding:0 12px 20px">
-      <div style="display:inline-flex;align-items:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;gap:0">
-        ${item(s.pass,'Passed','#3fbe71')}${item(s.fail,'Failed','#e15b59')}${item(s.manual,'Manual','#f59e0b')}${item(s.notRun,'Not Run','#6b7280')}${item(s.total,'Total','#374151')}
-      </div>
-    </td></tr>
-    <tr><td colspan="8" style="padding:10px 0"></td></tr>`;
+    const pass   = es.filter(e => e.state === 'pass').length;
+    const fail   = es.filter(e => e.state === 'fail').length;
+    const manual = es.filter(e => e.state === 'manual').length;
+    return `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
+      + _pill(pass,   'Pass',   '#3fbe71')
+      + _pill(fail,   'Fail',   '#e15b59')
+      + _pill(manual, 'Manual', '#f59e0b')
+      + `</span>`;
   };
 
-  // Build rows grouped by section with summary bars between sections
-  const sectionOrder2 = ['preflight', 'auto', 'auto-manual', 'manual'];
-  const dataRow = e => {
-    const stateC = stateColor(e.state, e.manuallyMarked);
-    return `<tr style="border-bottom:1px solid #e5e7eb">
-      <td style="padding:7px 10px;font-size:12px;color:#9ca3af;white-space:nowrap">${e.execOrder != null ? e.execOrder : e.displayNum}</td>
+  // Column header row — placed inside each section tbody
+  const colHdrRow = `<tr style="background:#f9fafb;border-bottom:1px solid #e5e7eb">
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left;white-space:nowrap">Exec # / ID</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Category</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Title &amp; Purpose</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Input</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Expected</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Details</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Result</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Timestamp</th>
+    </tr>`;
+
+  // Data row — first col shows #execOrder · testId; isLast omits the bottom border
+  const dataRow = (e, isLast = false) => {
+    const stateC = stateColor(e.state);
+    const execNum = e.execOrder != null ? e.execOrder : e.displayNum;
+    return `<tr${isLast ? '' : ' style="border-bottom:1px solid #e5e7eb"'}>
+      <td style="padding:7px 10px;font-size:12px;white-space:nowrap"><span style="font-weight:700;color:#374151">#${execNum}</span> <span style="color:#9ca3af;font-size:11px;font-weight:400">&middot; ${e.id}</span></td>
       <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
       <td style="padding:7px 10px;font-size:12px;color:#374151;max-width:540px;word-break:break-word"><div style="font-weight:700">${_esc(e.title)}</div>${e.purpose ? `<div style="font-size:11px;color:#6b7280;font-weight:400;margin-top:3px;line-height:1.4">${_esc(e.purpose)}</div>` : ''}</td>
       <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:147px;word-break:break-word">${_esc(e.input)}</td>
@@ -4315,25 +4321,27 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
       <td style="padding:7px 10px;font-size:10px;color:#9ca3af;white-space:nowrap">${e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</td>
     </tr>`;
   };
-  // Build collapsible sections with summary at top + bottom
+
+  // Build collapsible sections — default collapsed (▸ / display:none)
+  const sectionOrder2 = ['preflight', 'auto', 'auto-manual', 'manual'];
   const sections_html = sectionOrder2.map((sec, idx) => {
     const es = sorted.filter(e => e.section === sec);
     if (!es.length) return '';
     const secName = sectionLabel[sec] || sec;
     const tbodyId = `sec-tbody-${sec}`;
     const btnId   = `sec-btn-${sec}`;
-    const spacerTop = idx > 0 ? `<tr><td colspan="8" style="padding:16px 0"></td></tr>` : '';
-    const header = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
+    const spacer  = idx > 0 ? `<tr><td colspan="8" style="padding:16px 0"></td></tr>` : '';
+    const header  = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
       <td colspan="8" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
-        <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▾</span>${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${es.length} test${es.length !== 1 ? 's' : ''})</span>
-        <span style="font-size:10px;color:#9ca3af;margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0">click to collapse</span>
+        <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▸</span>${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${es.length} test${es.length !== 1 ? 's' : ''})</span>
+        <span style="font-size:10px;color:#9ca3af;margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0">click to expand</span>
+        ${secPills(sec)}
       </td>
     </tr>`;
-    const inlineSummary = summaryBar(sec);
-    const dataRows = es.map(dataRow).join('');
-    return `${spacerTop}${header}<tbody id="${tbodyId}">${inlineSummary}${dataRows}${inlineSummary}</tbody>`;
+    const rows = es.map((e, i) => dataRow(e, i === es.length - 1)).join('');
+    // tbody default hidden; column headers first row inside tbody
+    return `${spacer}${header}<tbody id="${tbodyId}" style="display:none">${colHdrRow}${rows}</tbody>`;
   }).join('');
-  const rows = sections_html;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -4352,7 +4360,6 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   .stat-val { font-size:1.5rem; font-weight:900; }
   .stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; margin-top:2px; }
   table { width:100%; border-collapse:collapse; }
-  th { padding:9px 10px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; text-align:left; background:#f9fafb; border-bottom:2px solid #e5e7eb; }
   @media print { body { background:#fff; } .wrap { box-shadow:none; } }
 </style>
 </head>
@@ -4360,9 +4367,8 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
 <div class="wrap">
   <div class="header">
     <h1>JumpKit ${testEnv.os || 'Mac'} Release Testing — v${_esc(version)}</h1>
-    <p style="margin-bottom:14px">Generated ${runDate} &middot; ${sorted.length} tests total</p>
+    <p style="margin-bottom:${testEnv.email ? '14px' : '0'}">${runDate} &middot; ${sorted.length} tests total</p>
     ${testEnv.email ? (() => {
-      const lbl = `color:#4A6280;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:0.7rem;margin-bottom:6px`;
       const sec = `color:#3A566E;font-weight:700;font-size:0.72rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:5px;margin-bottom:8px`;
       const row = (l, v) => `<div style="margin-bottom:2px"><span style="color:#4A6280">${l}:</span> ${_esc(String(v))}</div>`;
       return `<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:32px;font-size:0.8rem;color:#6B7E94">
@@ -4419,17 +4425,13 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
     <div class="stat"><div class="stat-val" style="color:#374151">${sorted.length}</div><div class="stat-lbl">Total</div></div>
   </div>
   <table>
-    <thead><tr>
-      <th>Exec #</th><th>Category</th><th>Title &amp; Purpose</th><th>Input</th><th>Expected</th><th>Details</th><th>Result</th><th>Timestamp</th>
-    </tr></thead>
-    ${rows}
+    ${sections_html}
   </table>
 </div>
 <!-- machine-readable data for merge -->
 <script type="application/json" id="jk-release-data">${JSON.stringify(entries).replace(/<\/script>/gi, '<\\u002fscript>')}<\/script>
 </body></html>`;
 }
-
 function _openTestStrategyModal() {
   const s = `padding:6px 0;color:var(--text-muted);font-size:0.88rem;line-height:1.7`;
   const h = `font-size:0.95rem;font-weight:700;color:var(--text);margin:18px 0 6px`;
@@ -4913,7 +4915,7 @@ function _refreshSummary() {
     const el = document.getElementById(id);
     if (!el) return;
     const numEl = el.querySelector('div:first-child');
-    if (numEl) { numEl.textContent = val; numEl.style.color = val > 0 ? color : 'var(--text-muted)'; }
+    if (numEl) { numEl.textContent = val; numEl.style.color = color; }
   };
   _cell('summaryPass',   passed, '#3fbe71');
   _cell('summaryFail',   failed, '#e15b59');
