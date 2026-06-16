@@ -66,14 +66,19 @@ if (window.electronAPI?.onUpdateReady) {
 
 // ── Session lock ─────────────────────────────────────────────────────
 function _initSessionLock(userId) {
-  const myToken = sessionStorage.getItem('jk_session_token');
-  if (!myToken) return; // no token — logged in before lock was added, skip
+  let myToken = sessionStorage.getItem('jk_session_token');
+  if (!myToken) {
+    // No token yet — generate one and claim this session (handles resumed sessions
+    // that pre-date the single-session lock feature, or cleared sessionStorage)
+    myToken = crypto.randomUUID();
+    sessionStorage.setItem('jk_session_token', myToken);
+  }
 
   // Write / refresh our token on load
-  const _writeSession = () => supabaseClient.from('user_sessions').upsert(
+  const _writeSession = () => Promise.resolve(supabaseClient.from('user_sessions').upsert(
     { user_id: userId, session_token: myToken, device_hint: navigator.platform || 'Unknown', last_seen: new Date().toISOString() },
     { onConflict: 'user_id' }
-  ).catch(() => {});
+  )).catch(() => {});
 
   _writeSession();
 

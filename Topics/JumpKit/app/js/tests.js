@@ -2386,7 +2386,7 @@ const JK_TESTS = [
     id: 123, category: 'Maintenance',
     title: '[AUTO+MANUAL] Auto-backup fires correctly and creates notification',
     purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the auto-backup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal — it goes silently to the notification bell.',
-    prerequisites: 'Must be logged in as an Unlimited user. Auto-backup must be enabled in Settings.',
+    prerequisites: '⚠️ Auto-backup must be ON in Settings before running this test (Settings → Auto-backup → enable). Must be logged in as an Unlimited user. If auto-backup is off the test will fail with no notification found.',
     description: 'Temporarily ensures auto-backup pref is true, calls runCloudBackup(), and checks that a backup notification (type=backup or type=backup-failed) was created in the notification store. Cleans up the test notification.',
     input: 'DB.updatePrefs(userId, { cloudBackup: true }), then await runCloudBackup()',
     expected: 'A notification with type=backup or type=backup-failed is created. No modal is shown. Free tier returns early silently.',
@@ -2424,16 +2424,12 @@ const JK_TESTS = [
       );
       if (!backupNotif) throw new Error('No backup notification found after runCloudBackup() — notification may not have been created.');
 
-      if (backupNotif.type === 'backup') {
-      } else {
-      }
-
       // 8. Cleanup — remove test notification
       if (typeof saveNotifications === 'function') {
         saveNotifications(notifsAfter.filter(n => n !== backupNotif));
         if (typeof updateNotifBadge === 'function') updateNotifBadge();
       }
-      return true;
+      return 'manual';
     }
   },
 
@@ -2446,6 +2442,7 @@ const JK_TESTS = [
     description: 'POSTs to /functions/v1/send-account-exists with the current user email, checks the response is { ok: true }.',
     input: 'POST /functions/v1/send-account-exists { email: currentUser.email }',
     expected: 'Response JSON has ok === true. Then manually verify the account-exists email arrives in your inbox.',
+    emailSubject: 'Sign in to your JumpKit account',
     steps: 'After this test passes automatically, check your inbox for the "You already have a JumpKit account" email to confirm delivery end-to-end.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
@@ -2534,6 +2531,7 @@ const JK_TESTS = [
     description: 'POSTs to /functions/v1/send-pending-upgrade with current user email and checks response is { ok:true }.',
     input: 'POST /functions/v1/send-pending-upgrade { email }',
     expected: 'Response JSON has ok:true. Check inbox to confirm the onboarding email arrives.',
+    emailSubject: 'Your JumpKit Unlimited subscription is confirmed 🎉',
     steps: 'After this test passes automatically, check inbox for the "Your JumpKit Unlimited subscription is confirmed" email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
@@ -2665,6 +2663,7 @@ const JK_TESTS = [
 
   {
     id: 116, category: 'Email',
+    emailSubject: "Owner: 'Important: your JumpKit team members may lose access' | Member: 'Your team access may be changing'",
     title: '[AUTO+MANUAL] send-team-downgrade-alert — Edge Function returns ok:true (alert variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"alert" and a test member list, confirming the function is deployed and returns { ok:true }. This fires when a subscription is cancelled.',
     prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
@@ -2685,8 +2684,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           ownerId: profileId,
-          teamId: 'test-team-112',
-          teamName: 'Test Team (Test 112)',
+          teamId: 'test-team-116',
+          teamName: 'Test Team (Test 116)',
           lockDate,
           affectedMembers: [{ email, name: 'Test Member' }],
           variant: 'alert',
@@ -2707,23 +2706,24 @@ const JK_TESTS = [
     id: 134, category: 'Email',
     title: '[MANUAL] send-team-downgrade-alert — correct alert email content in inbox',
     purpose: 'Manual verification that the downgrade alert email arrived with correct branding, member list, lock date, and re-upgrade CTA.',
-    prerequisites: 'Test 112 must have passed first.',
-    description: 'Open the two downgrade alert emails sent by Test 112 and verify content matches spec.',
+    prerequisites: 'Test 116 must have passed first.',
+    description: 'Open the two downgrade alert emails sent by Test 116 and verify content matches spec.',
     input: 'Email inbox for logged-in user account',
     expected: 'Two emails arrive: (1) owner email with subject "Important: your JumpKit team members may lose access" (heading: \'Team member access changing\'), and (2) member email with subject "Your team access may be changing". Both reference team name, lock date, and member list.',
-    steps: '1. Open your inbox.\n2. Find the owner email with subject "Important: your JumpKit team members may lose access".\n3. Verify the heading reads \'Team member access changing\' and contains the team name "Test Team (Test 112)".\n4. Verify it lists \'Test Member\' in the affected members section with a lock date (14 days from today) shown in red.\n5. Verify the \'Re-upgrade to Unlimited\' CTA button is present and links to jumpkit.app/#pricing.\n6. Find the member email with subject \'Your team access may be changing\'.\n7. Verify it references the same team and lock date.\n8. Mark as Pass once both emails are confirmed.',
+    steps: '1. Open your inbox.\n2. Find the owner email with subject "Important: your JumpKit team members may lose access".\n3. Verify the heading reads \'Team member access changing\' and contains the team name "Test Team (Test 116)".\n4. Verify it lists \'Test Member\' in the affected members section with a lock date (14 days from today) shown in red.\n5. Verify the \'Re-upgrade to Unlimited\' CTA button is present and links to jumpkit.app/#pricing.\n6. Find the member email with subject \'Your team access may be changing\'.\n7. Verify it references the same team and lock date.\n8. Mark as Pass once both emails are confirmed.',
     test: async () => 'manual'
   },
 
   {
     id: 117, category: 'Email',
+    emailSubject: "2 emails: Owner: 'Reminder: JumpKit team access ending in 2 days — Test Team (Test 117)' | Member: 'Your access to Test Team (Test 117) ends in 2 days'",
     title: '[AUTO+MANUAL] send-team-downgrade-alert — Edge Function returns ok:true (warning variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"warning", confirming the 2-day warning email path works. This is the variant fired by check-member-lockouts 2 days before lock_at.',
     prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-team-downgrade-alert with variant:"warning" and verifies ok:true is returned.',
     input: 'POST /functions/v1/send-team-downgrade-alert { ownerId, teamName, lockDate, affectedMembers, variant:"warning" }',
     expected: 'Response JSON has ok:true. A warning-variant email should be sent to the logged-in user\'s address.',
-    steps: 'Automatic. After this test passes, check inbox for the 2-day warning email.',
+    steps: 'Automatic. After this test passes, check inbox for 2 emails — one sent to the team owner and one to each affected member (both go to your address in this test). Look for team name "Test Team (Test 117)". See Email Subject above for both subjects.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const profileId = window._supabaseUser?.id;
@@ -2737,8 +2737,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           ownerId: profileId,
-          teamId: 'test-team-113',
-          teamName: 'Test Team (Test 113)',
+          teamId: 'test-team-117',
+          teamName: 'Test Team (Test 117)',
           lockDate,
           affectedMembers: [{ email, name: 'Test Member' }],
           variant: 'warning',
@@ -2759,11 +2759,11 @@ const JK_TESTS = [
     id: 135, category: 'Email',
     title: '[MANUAL] send-team-downgrade-alert — correct warning email content in inbox',
     purpose: 'Manual verification that the 2-day warning email uses the correct subject, heading, and copy (distinct from the alert variant).',
-    prerequisites: 'Test 113 must have passed first.',
-    description: 'Open the warning email sent by Test 113 and verify it uses the warning-variant subject and copy.',
+    prerequisites: 'Test 117 must have passed first.',
+    description: 'Open the warning email sent by Test 117 and verify it uses the warning-variant subject and copy.',
     input: 'Email inbox for logged-in user account',
     expected: 'Email subject contains "Reminder: JumpKit team access ending in 2 days". Heading says "Reminder: team access ending in 2 days" (not the alert heading). Re-upgrade CTA present.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 113)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 117)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
     test: async () => 'manual'
   },
 
@@ -2924,6 +2924,7 @@ const JK_TESTS = [
 
   {
     id: 118, category: 'Email',
+    emailSubject: 'Jane Smith (Test 118) just joined your team on JumpKit',
     title: '[AUTO+MANUAL] send-member-joined — Edge Function returns ok:true',
     purpose: 'Calls send-member-joined with the logged-in user as the team owner (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
     prerequisites: 'Must be logged in. send-member-joined Edge Function must be deployed.',
@@ -2944,9 +2945,9 @@ const JK_TESTS = [
         body: JSON.stringify({
           ownerEmail: email,
           ownerName,
-          memberName: 'Jane Smith (Test 114)',
-          memberEmail: 'jane.smith.test114@example.com',
-          teamName: 'Test Team (Test 114)',
+          memberName: 'Jane Smith (Test 118)',
+          memberEmail: 'jane.smith.test118@example.com',
+          teamName: 'Test Team (Test 118)',
           totalMembers: 3,
           joinedAt: new Date().toISOString(),
         }),
@@ -2966,16 +2967,17 @@ const JK_TESTS = [
     id: 136, category: 'Email',
     title: '[MANUAL] send-member-joined — correct email content in inbox',
     purpose: 'Manual verification that the member-joined email arrived with correct branding, member name, team name, member count, and join timestamp.',
-    prerequisites: 'Test 114 must have passed first.',
-    description: 'Open the member-joined email sent by Test 114 and verify the content matches spec.',
+    prerequisites: 'Test 118 must have passed first.',
+    description: 'Open the member-joined email sent by Test 118 and verify the content matches spec.',
     input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with subject "Jane Smith (Test 114) just joined your team on JumpKit". Contains team name "Test Team (Test 114)", member email, total members = 3, and a join timestamp.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Jane Smith (Test 114) just joined your team on JumpKit".\n3. Verify member name "Jane Smith (Test 114)" and email jane.smith.test114@example.com are shown.\n4. Verify team name "Test Team (Test 114)" is highlighted in turquoise.\n5. Verify Total members shows 3.\n6. Verify a join timestamp is present.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.',
+    expected: 'Email arrives with subject "Jane Smith (Test 118) just joined your team on JumpKit". Contains team name "Test Team (Test 118)", member email, total members = 3, and a join timestamp.',
+    steps: '1. Open your inbox.\n2. Find the email with subject "Jane Smith (Test 118) just joined your team on JumpKit".\n3. Verify member name "Jane Smith (Test 118)" and email jane.smith.test118@example.com are shown.\n4. Verify team name "Test Team (Test 118)" is highlighted in turquoise.\n5. Verify Total members shows 3.\n6. Verify a join timestamp is present.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.',
     test: async () => 'manual'
   },
 
   {
     id: 119, category: 'Email',
+    emailSubject: "You've been removed from Test Team (Test 119) on JumpKit",
     title: '[AUTO+MANUAL] send-member-removed — Edge Function returns ok:true',
     purpose: 'Calls send-member-removed with the logged-in user as the removed member (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
     prerequisites: 'Must be logged in. send-member-removed Edge Function must be deployed.',
@@ -2993,8 +2995,8 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           memberEmail: email,
-          memberName: 'Test User (Test 115)',
-          teamName: 'Test Team (Test 115)',
+          memberName: 'Test User (Test 119)',
+          teamName: 'Test Team (Test 119)',
           ownerName: 'Jane Owner',
         }),
       });
@@ -3013,11 +3015,11 @@ const JK_TESTS = [
     id: 137, category: 'Email',
     title: '[MANUAL] send-member-removed — correct email content in inbox',
     purpose: "Manual verification that the member-removed email arrived with correct branding, red-tinted What changed card, turquoise What's safe card, and help contact.",
-    prerequisites: 'Test 115 must have passed first.',
-    description: 'Open the member-removed email sent by Test 115 and verify content and styling match spec.',
+    prerequisites: 'Test 119 must have passed first.',
+    description: 'Open the member-removed email sent by Test 119 and verify content and styling match spec.',
     input: 'Email inbox for logged-in user account',
-    expected: "Email arrives with subject \"You've been removed from Test Team (Test 115) on JumpKit\". Red-tinted card with bold red X items, turquoise check card with safe items, and help@jumpkit.app link.",
-    steps: "1. Open your inbox.\n2. Find email with subject \"You've been removed from Test Team (Test 115) on JumpKit\".\n3. Verify greeting says \"Hi Test User\".\n4. Verify \"What changed\" card has red background tint and bold red X icons.\n5. Verify \"Your personal jumps are not affected\" card has turquoise check icons.\n6. Verify turquoise info box links to help@jumpkit.app.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.",
+    expected: "Email arrives with subject \"You've been removed from Test Team (Test 119) on JumpKit\". Red-tinted card with bold red X items, turquoise check card with safe items, and help@jumpkit.app link.",
+    steps: "1. Open your inbox.\n2. Find email with subject \"You've been removed from Test Team (Test 119) on JumpKit\".\n3. Verify greeting says \"Hi Test User\".\n4. Verify \"What changed\" card has red background tint and bold red X icons.\n5. Verify \"Your personal jumps are not affected\" card has turquoise check icons.\n6. Verify turquoise info box links to help@jumpkit.app.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.",
     test: async () => 'manual'
   },
 
@@ -3229,8 +3231,11 @@ const JK_TESTS = [
       const existingJumps = DB.getJumps(currentUser.id).filter(j => !j.isShared && !j.isArchived);
       if (existingJumps.length === 0) throw new Error('No existing active jumps to test duplicate detection against');
 
-      const target = existingJumps[0];
-      const targetCol = DB.getColumns(currentUser.id).find(c => c.id === target.columnId);
+      const cols = DB.getColumns(currentUser.id);
+      const colIds = new Set(cols.map(c => c.id));
+      const target = existingJumps.find(j => colIds.has(j.columnId));
+      if (!target) throw new Error('No existing jump with a valid column found — check for orphaned jumps');
+      const targetCol = cols.find(c => c.id === target.columnId);
       if (!targetCol) throw new Error('Could not find column for target jump');
 
       const fakeBackup = {
@@ -3439,7 +3444,7 @@ const JK_TESTS = [
           name: 'Test User (Test 129)',
           email,
           category: 'Bug Report',
-          message: 'This is an automated test message from Test 129. Please ignore.',
+          message: 'This is an automated test message from Test 129. Please ignore (feedback test).',
         }),
       });
       let body;
@@ -3462,6 +3467,7 @@ const JK_TESTS = [
     description: 'POSTs to /functions/v1/send-invite with a test email, teamId, and invitedBy (current user id).',
     input: 'POST /functions/v1/send-invite { email, teamId, invitedBy, teamName }',
     expected: 'Response JSON has ok:true. A test invite email should be sent to the logged-in user.',
+    emailSubject: "You've been invited to join Test Team (Test 64) on JumpKit",
     steps: 'Automatic. After passing, check inbox for the invite email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
@@ -3474,9 +3480,9 @@ const JK_TESTS = [
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
         body: JSON.stringify({
           email,
-          teamId: 'test-team-130',
+          teamId: 'test-team-64',
           invitedBy: profileId,
-          teamName: 'Test Team (Test 130)',
+          teamName: 'Test Team (Test 64)',
           orgName: 'Test Org',
           teamPassword: 'testpass',
         }),
@@ -3486,6 +3492,7 @@ const JK_TESTS = [
       if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
       if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      return 'manual';
     }
   },
 
@@ -3526,6 +3533,7 @@ const JK_TESTS = [
     description: 'POSTs to /functions/v1/send-cancellation with the current user email and firstName.',
     input: 'POST /functions/v1/send-cancellation { email, firstName }',
     expected: 'Response JSON has ok:true. A cancellation email should be sent to the logged-in user.',
+    emailSubject: 'Your JumpKit Core subscription has ended',
     steps: 'Automatic. After passing, check inbox for the cancellation email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
@@ -3543,6 +3551,7 @@ const JK_TESTS = [
       if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
       if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      return 'manual';
     }
   },
 
@@ -4207,6 +4216,20 @@ async function _saveReleaseSection(mode) {
   const newEntries = {};
   sectionTests.forEach(t => {
     const r = results[t.id];
+    const isManualTest = t.title.startsWith('[MANUAL]') || t.title.startsWith('[AUTO+MANUAL]');
+    const manualSteps = t.steps || t.expected || '';
+    let detailsText = '';
+    const state = r?.state || 'not-run';
+    if (state === 'fail') {
+      detailsText = r.message || 'Test failed.';
+    } else if (state === 'pass') {
+      detailsText = isManualTest ? manualSteps : 'Test passed successfully.';
+    } else if (state === 'manual') {
+      detailsText = manualSteps;
+    } else {
+      detailsText = isManualTest ? manualSteps : '';
+    }
+    const manuallyMarked = state === 'pass' && r?.received === 'Manually marked as passed';
     newEntries[t.id] = {
       id: t.id,
       displayNum: displayMap[t.id] || t.id,
@@ -4215,8 +4238,9 @@ async function _saveReleaseSection(mode) {
       title: t.title.replace(/^\[(AUTO\+MANUAL|MANUAL)\] /, ''),
       input: t.input || '',
       expected: t.expected || '',
-      state: r?.state || 'not-run',
-      details: r?.message || r?.received || '',
+      state,
+      manuallyMarked,
+      details: detailsText,
       timestamp: r ? now : '',
     };
   });
@@ -4253,10 +4277,12 @@ async function _saveReleaseSection(mode) {
 }
 
 function _buildReleaseTestingHTML(entries, version, filePath) {
-  const stateColor = s => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
-  const stateLabel = s => s === 'pass' ? '✅ Pass' : s === 'fail' ? '❌ Fail' : s === 'manual' ? '⚠️ Manual' : '— Not Run';
+  const stateColor = (s, m) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
+  const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Not Run';
   const sectionOrder = { auto: 0, 'auto-manual': 1, manual: 2 };
   const sectionLabel = { auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
+  const catColors = { Auth:'#3b82f6', Navigation:'#8b5cf6', Jumps:'#06b6d4', Columns:'#10b981', Archive:'#f59e0b', Stats:'#ec4899', Account:'#6366f1', Subscription:'#f97316', Teams:'#14b8a6', UI:'#84cc16', Security:'#e05555', Database:'#0ea5e9', 'DB Schema':'#7c3aed', 'Shared Sync':'#a855f7', 'Code Quality':'#78716c', Settings:'#64748b', Deployment:'#f43f5e', Paywall:'#d97706', Maintenance:'#22d3ee', Email:'#fb923c', Notifications:'#0d9488', Admin:'#dc2626', Onboarding:'#a78bfa' };
+  const catPill = cat => { const c = catColors[cat] || '#6b7280'; return `<span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;background:${c}22;color:${c};white-space:nowrap">${cat}</span>`; };
 
   const sorted = Object.values(entries).sort((a, b) => {
     const sd = (sectionOrder[a.section] ?? 9) - (sectionOrder[b.section] ?? 9);
@@ -4268,22 +4294,28 @@ function _buildReleaseTestingHTML(entries, version, filePath) {
   const totalFail = sorted.filter(e => e.state === 'fail').length;
   const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
 
+  // Pre-compute per-section counts
+  const sectionCounts = {};
+  sorted.forEach(e => { sectionCounts[e.section] = (sectionCounts[e.section] || 0) + 1; });
+
   let lastSection = null;
   const rows = sorted.map(e => {
     let sectionHeader = '';
     if (e.section !== lastSection) {
       lastSection = e.section;
-      sectionHeader = `<tr><td colspan="8" style="padding:14px 12px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb">${sectionLabel[e.section] || e.section}</td></tr>`;
+      const secName = sectionLabel[e.section] || e.section;
+      const secCount = sectionCounts[e.section] || 0;
+      sectionHeader = `<tr><td colspan="8" style="padding:14px 12px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb">${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${secCount} test${secCount !== 1 ? 's' : ''})</span></td></tr>`;
     }
-    const stateC = stateColor(e.state);
+    const stateC = stateColor(e.state, e.manuallyMarked);
     return sectionHeader + `<tr style="border-bottom:1px solid #e5e7eb">
       <td style="padding:7px 10px;font-size:12px;color:#9ca3af;white-space:nowrap">${e.displayNum}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280">${_esc(e.category)}</td>
+      <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
       <td style="padding:7px 10px;font-size:12px;color:#374151;font-weight:500">${_esc(e.title)}</td>
       <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:140px;word-break:break-word">${_esc(e.input)}</td>
       <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.expected)}</td>
       <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.details)}</td>
-      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};white-space:nowrap">${stateLabel(e.state)}</td>
+      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};white-space:nowrap">${stateLabel(e.state, e.manuallyMarked)}</td>
       <td style="padding:7px 10px;font-size:10px;color:#9ca3af;white-space:nowrap">${e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</td>
     </tr>`;
   }).join('');
@@ -4329,7 +4361,7 @@ function _buildReleaseTestingHTML(entries, version, filePath) {
   </table>
 </div>
 <!-- machine-readable data for merge -->
-<script type="application/json" id="jk-release-data">${JSON.stringify(entries)}<\/script>
+<script type="application/json" id="jk-release-data">${JSON.stringify(entries).replace(/<\/script>/gi, '<\\u002fscript>')}<\/script>
 </body></html>`;
 }
 
@@ -4451,7 +4483,7 @@ const _COL_HEADERS = `
   </thead>`;
 
 function _sectionBlock(label, icon, tests, startNum, actionBtns) {
-  const rows = tests.map((t, i) => _testRow(t, startNum + i)).join('');
+  const rows = tests.map((t) => _testRow(t, t.id)).join('');
   const sectionId = 'section-body-' + label.replace(/\s+/g, '-').toLowerCase();
   const btns = actionBtns ? `<div style="display:flex;gap:8px;margin-top:6px;margin-bottom:8px">${actionBtns}</div>` : '';
   return `
@@ -4516,7 +4548,7 @@ function _buildTestRows() {
   const _displayOrder = [...autoTests, ...autoManual, ...manualTests];
   window._jkTestDisplayOrder = _displayOrder;
   window._jkTestDisplayNumMap = {};
-  _displayOrder.forEach((t, i) => { window._jkTestDisplayNumMap[t.id] = i + 1; });
+  _displayOrder.forEach((t) => { window._jkTestDisplayNumMap[t.id] = t.id; });
 
   const _secBtn = (id, icon, label, extra='') => `<button id="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;padding:5px 12px${extra}"><svg class="ti ti-${icon}" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>${label}</button>`;
   const _saveBtn = (id) => _secBtn(id, 'file-download', 'Save Results');
@@ -4617,6 +4649,10 @@ function _buildTestDetailContent(id) {
       <td style="${tdLabel}">Expected</td>
       <td style="${tdValueMuted}">${_esc(testDef.expected)}</td>
     </tr>
+    ${testDef.emailSubject ? `<tr>
+      <td style="${tdLabel}">Email Subject</td>
+      <td style="padding:8px 0"><code style="${codeStyle};color:var(--turq);background:rgba(0,194,199,0.08);border:1px solid rgba(0,194,199,0.2)">📧 ${_esc(testDef.emailSubject)}</code></td>
+    </tr>` : ''}
     <tr>
       <td style="${tdLabel}">Outputs</td>
       <td style="${tdValue}"><code style="${codeStyle};color:${receivedColor}">${_esc(receivedText)}</code></td>
@@ -4851,9 +4887,9 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
 
   for (let i = 0; i < testsToRun.length; i++) {
     const t = testsToRun[i];
-    if (progress) progress.textContent = `Running ${i + 1} / ${testsToRun.length}…`;
+    if (progress) progress.textContent = `Running ${i + 1} / ${testsToRun.length} (#${t.id})…`;
     const overlayStatus = document.getElementById('overlayStatus');
-    if (overlayStatus) overlayStatus.innerHTML = `<div style='text-align:center'>Running test ${i + 1} / ${testsToRun.length}</div><div style='text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:6px;font-weight:400'>${t.title}</div>`;
+    if (overlayStatus) overlayStatus.innerHTML = `<div style='text-align:center'>Running ${i + 1} / ${testsToRun.length} &nbsp;<span style='font-size:0.75rem;font-weight:400;color:var(--text-muted)'>(#${t.id})</span></div><div style='text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:6px;font-weight:400'>${t.title}</div>`;
 
     // Skip any residual skipInRunAll flags
     if (t.skipInRunAll) {
