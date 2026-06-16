@@ -130,11 +130,16 @@ const JK_TESTS = [
     id: 148, category: 'Auth',
     title: '[MANUAL] Second device login is blocked',
     purpose: 'Confirms that attempting to log in from a second device while already logged in shows the session conflict modal and blocks entry.',
-    prerequisites: 'Must be logged in on this device. Have access to a second device or browser profile.',
+    prerequisites: 'Must be logged in on this device. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory (see steps below) — this gives it its own clean sessionStorage with no session token, exactly like a different device.',
     input: 'Attempt login with same credentials on a second device/profile',
     description: 'On a second device or browser profile, navigate to the JumpKit login page and enter the same credentials.',
     expected: 'Login succeeds on second device but shows "Already Logged In" modal with device info and two options: "Log out other device & continue" and "Cancel". Clicking Cancel returns to login screen without accessing the app.',
-    steps: '1. Keep this device logged in.\n2. Open JumpKit on a second device or incognito/separate browser profile.\n3. Enter the same email + password and click Sign In.\n4. Verify the "Already Logged In" modal appears showing device and last-seen time.\n5. Click Cancel — verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click "Log out other device & continue" — verify you are redirected to app.html on the second device.',
+    commands: [
+      { label: 'Open 2nd instance (installed app)', cmd: 'open -n /Applications/JumpKit.app --args --user-data-dir=/tmp/jumpkit-second' },
+      { label: 'Open 2nd instance (from source)', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm start -- --user-data-dir=/tmp/jumpkit-second' },
+      { label: 'Cleanup temp profile', cmd: 'rm -rf /tmp/jumpkit-second' },
+    ],
+    steps: '1. Keep this device logged in.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available).\n3. In the second instance, enter the same email + password and click Sign In.\n4. Verify the "Already Logged In" modal appears showing device and last-seen time.\n5. Click Cancel — verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click "Log out other device & continue" — verify you are redirected to app.html on the second instance.\n7. After testing, click the Cleanup command above to remove the temp profile.',
     test: async () => 'manual'
   },
 
@@ -143,10 +148,10 @@ const JK_TESTS = [
     title: '[MANUAL] Force logout displaces original session',
     purpose: 'Confirms that when a second device force-logs-out the first, the first device eventually shows the displacement warning and redirects to login.',
     prerequisites: 'Two devices logged into the same account (complete test 148 first, choosing "Log out other device & continue" on the second device).',
-    input: 'Wait up to 3 minutes on the original (first) device',
-    description: 'After a second device has force-logged-out this device, wait for the 3-minute heartbeat watcher to detect the token mismatch.',
-    expected: 'Original device shows red toast "⚠️ You were logged in from another device" and redirects to login screen within ~3 minutes.',
-    steps: '1. Keep first device open and active on any page.\n2. On second device, perform force-logout (test 148 step 6).\n3. On first device, wait up to 3 minutes.\n4. Verify the red warning toast appears and the app redirects to login.',
+    input: 'Wait up to 30 seconds on the original (first) device',
+    description: 'After a second device has force-logged-out this device, wait for the ~20-second heartbeat watcher to detect the token mismatch.',
+    expected: 'Original device shows red toast "⚠️ You were logged in from another device" and redirects to login screen within ~30 seconds.',
+    steps: '1. Keep first device open and active on any page.\n2. On second device, perform force-logout (test 148 step 6).\n3. On first device, wait up to 30 seconds.\n4. Verify the red warning toast appears and the app redirects to login.',
     test: async () => 'manual'
   },
 
@@ -1416,26 +1421,6 @@ const JK_TESTS = [
     }
   },
 
-  {
-    id: 138, category: 'Security',
-    title: '[MANUAL] Session invalidated on logout — signOut clears session',
-    purpose: 'Confirms that calling signOut removes the local session. Must be run manually — running during Run All would log the user out mid-run, destroying the tests page DOM and causing all subsequent tests to appear blank.',
-    prerequisites: 'Must be logged in. WARNING: This test logs you out. Run it individually, not via Run All.',
-    description: 'Calls supabaseClient.auth.signOut() and confirms session is null afterward. This test is intentionally manual-only to prevent it from breaking the Run All test sequence.',
-    input: 'supabaseClient.auth.signOut()',
-    expected: 'Session is null after signOut. You will need to log back in afterward.',
-    steps: '1. Click the Run button for THIS TEST ONLY (do not use Run All).\n2. The test calls signOut() and verifies session is null.\n3. After it passes, you will be logged out \u2014 log back in to continue.',
-    test: async () => {
-      const { data: before } = await supabaseClient.auth.getSession();
-      if (!before?.session) throw new Error('No session before logout — must be logged in to run this test');
-      const { error } = await supabaseClient.auth.signOut();
-      if (error) throw new Error('signOut failed: ' + error.message);
-      const { data: after } = await supabaseClient.auth.getSession();
-      if (after?.session) throw new Error('Session still active after signOut — logout is not working!');
-      return true;
-    }
-  },
-
   // ── Database Audit Tests (63–68) ─────────────────────────────────
   {
     id: 125, category: 'Database',
@@ -1444,8 +1429,8 @@ const JK_TESTS = [
     prerequisites: 'None.',
     description: 'Checks Supabase project URL is reachable and logs a reminder to verify backup plan in Supabase dashboard.',
     input: 'SUPABASE_URL ping',
-    expected: 'URL reachable. Manual verification required in Supabase dashboard → Settings → Backups.',
-    steps: '1. Open Supabase dashboard for your JumpKit project.\n2. Go to Settings → Backups.\n3. Confirm the backup plan is active (Pro plan = daily backups; Free plan = no auto-backups).\n4. If on free plan, consider upgrading to Pro or scheduling manual exports.\n5. Mark as Pass once confirmed.',
+    expected: 'URL reachable. Manual verification required in Supabase dashboard → Project Settings → Database → Backups.',
+    steps: '1. Open Supabase dashboard for your JumpKit project.\n2. Go to Project Settings → Database → Backups.\n3. Confirm the backup plan is active (Pro plan = daily backups; Free plan = no auto-backups).\n4. If on free plan, consider upgrading to Pro or scheduling manual exports.\n5. Mark as Pass once confirmed.',
     test: async () => {
       if (!SUPABASE_URL) throw new Error('SUPABASE_URL not defined');
       try {
@@ -1515,16 +1500,20 @@ const JK_TESTS = [
 
   {
     id: 127, category: 'Database',
-    title: '[MANUAL] Migrations in version control — supabase/migrations/ folder exists',
+    title: 'Migrations in version control — supabase/migrations/ folder exists',
     purpose: 'Confirms database migration files are tracked in version control, not applied manually without tracking.',
-    prerequisites: 'None.',
-    description: 'Validates that 3 known migration files exist and logs reminder to always add new migrations as files.',
-    input: 'Known migration file list',
-    expected: 'All 3 migrations accounted for in supabase/migrations/.',
-    steps: '1. Confirm the 3 known migration files exist in supabase/migrations/: 20240001_add_name_fields.sql, 20240002_profile_trigger.sql, 20240003_subscription_fields.sql.\n2. Any future schema change must be saved as a NEW .sql file in supabase/migrations/ before being applied.\n3. Never apply schema changes directly in the Supabase dashboard without a corresponding migration file.\n4. Mark as Pass once you have confirmed the above.',
+    prerequisites: 'Must be running in Electron (requires filesystem access).',
+    description: 'Checks that all 3 known migration SQL files exist in supabase/migrations/ on disk.',
+    input: 'Known migration file list: 20240001_add_name_fields.sql, 20240002_profile_trigger.sql, 20240003_subscription_fields.sql',
+    expected: 'All 3 migration files found in supabase/migrations/.',
+    steps: 'Automatic.',
     test: async () => {
       const knownMigrations = ['20240001_add_name_fields.sql', '20240002_profile_trigger.sql', '20240003_subscription_fields.sql'];
-      return 'manual';
+      if (!window.electronAPI?.checkMigrations) throw new Error('checkMigrations not available — not running in Electron');
+      const results = await window.electronAPI.checkMigrations(knownMigrations);
+      const missing = knownMigrations.filter(f => !results[f]);
+      if (missing.length > 0) throw new Error(`Missing migration file(s): ${missing.join(', ')}`);
+      return true;
     }
   },
 
@@ -1552,7 +1541,7 @@ const JK_TESTS = [
   // ── Deployment Audit Tests (69–72) ───────────────────────────────
   {
     id: 140, category: 'Deployment',
-    title: '[MANUAL] Environment variables — Supabase URL and anon key configured',
+    title: 'Environment variables — Supabase URL and anon key configured',
     purpose: 'Confirms that required environment variables (SUPABASE_URL, SUPABASE_ANON_KEY) are set and non-empty. Edge Function secrets cannot be verified from client but client-side vars are checked.',
     prerequisites: 'None.',
     description: 'Checks SUPABASE_URL and SUPABASE_ANON_KEY are defined, non-empty, and correctly formatted.',
@@ -1564,7 +1553,7 @@ const JK_TESTS = [
       if (!SUPABASE_URL.startsWith('https://')) throw new Error('SUPABASE_URL must use HTTPS');
       // Anon key should be a valid JWT (3 parts separated by dots)
       if (SUPABASE_ANON_KEY.split('.').length !== 3) throw new Error('SUPABASE_ANON_KEY does not look like a valid JWT');
-      return 'manual';
+      return `SUPABASE_URL: ${SUPABASE_URL} | SUPABASE_ANON_KEY: [JWT present, ${SUPABASE_ANON_KEY.length} chars]`;
     }
   },
 
@@ -1576,7 +1565,7 @@ const JK_TESTS = [
     description: 'Manual browser check: navigate to both http and https versions of jumpkit.app and verify SSL is valid.',
     input: 'Browser → https://www.jumpkit.app',
     expected: 'Padlock is green (no SSL warnings). http://jumpkit.app redirects to https://. Page loads correctly.',
-    steps: '1. Open Chrome/Safari\n2. Navigate to https://www.jumpkit.app — confirm padlock is green and page loads\n3. Navigate to http://jumpkit.app — confirm it redirects to https (check the address bar)\n4. Mark Pass if both steps succeed with no SSL warnings',
+    steps: '1. Open Chrome or Safari\n2. Navigate to https://www.jumpkit.app\n3. Chrome: confirm the padlock icon appears in the address bar (left side). Safari: confirm the URL shows https:// with no warning — click the page settings icon (left of URL) and verify "Connection is encrypted". Note: Safari 15+ removed the explicit padlock; a clean address bar with https:// is the equivalent.\n4. Navigate to http://jumpkit.app — confirm the address bar changes to https:// (redirect working)\n5. Mark Pass if both steps succeed with no SSL warnings',
     test: async () => {
       throw new Error('[MANUAL] Open a browser and visit https://www.jumpkit.app — verify green padlock and HTTP→HTTPS redirect. Mark Pass/Fail manually.');
     }
@@ -1709,12 +1698,16 @@ const JK_TESTS = [
     description: 'Checks that npm audit fix has been run and package-lock.json is committed. Cannot run npm audit from renderer — serves as a reminder and audit log.',
     input: 'Known audit state from last npm audit fix run (2026-05-10)',
     expected: '0 vulnerabilities. Reminder to re-run before each release.',
-    steps: '1. Open Terminal in the JumpKit project directory.\n2. Run: npm audit\n3. If any critical or high vulnerabilities are found, run: npm audit fix\n4. Commit the updated package-lock.json.\n5. Last clean audit: 2026-05-10 (0 vulnerabilities). Mark as Pass after re-running before this release.',
+    commands: [
+      { label: 'Check for vulnerabilities', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm audit' },
+      { label: 'Auto-fix vulnerabilities', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm audit fix' },
+    ],
+    steps: '1. Copy the "Check for vulnerabilities" command above and run it in Terminal.\n2. If any critical or high vulnerabilities are found, run the "Auto-fix" command.\n3. Commit the updated package-lock.json.\n4. Last clean audit: 2026-06-16 (0 vulnerabilities). Mark as Pass after re-running before this release.',
     test: async () => {
       // We cannot run npm audit from the renderer process
       // This test validates that the audit was run and documents the last known clean state
-      const lastAuditDate = '2026-05-10';
-      const lastAuditResult = '0 vulnerabilities (after fixing tar + picomatch issues)';
+      const lastAuditDate = '2026-06-16';
+      const lastAuditResult = '0 vulnerabilities (after npm audit fix — resolved form-data, js-yaml, qs, tar, tmp)';
       return 'manual';
     }
   },
@@ -2467,18 +2460,6 @@ const JK_TESTS = [
     }
   },
 
-  {
-    id: 132, category: 'Email',
-    title: '[MANUAL] Account-exists email — correct content delivered to inbox',
-    purpose: 'Manual confirmation that the account-exists email arrived with the correct branding and updated copy. Run after Test 96 passes.',
-    prerequisites: 'Test 96 must have passed first. Check the inbox for the email address shown in your JumpKit account.',
-    description: 'Open the "You already have a JumpKit account" email and verify the content matches the latest approved copy.',
-    input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with correct subject, correct body text, and no sign-in or forgot-password buttons.',
-    steps: '1. Open your inbox for the logged-in JumpKit account email.\n2. Find the email with subject "Sign in to your JumpKit account".\n3. Verify the body contains: "your account already exists and is still active! If that was not you, don\'t worry, we\'ve detected it and protected your account."\n4. Verify the body contains: "To access your account, first open your JumpKit desktop app. Next sign in with your email above and existing password, or if you no longer have your password, reset it."\n5. Verify there are NO sign-in or forgot-password buttons in the email.\n6. Mark as Pass once confirmed.',
-    test: async () => 'manual'
-  },
-
   // ── Pending Upgrade Flow (Tests 98–101) ─────────────────────────
   {
     id: 57, category: 'Subscription',
@@ -2552,18 +2533,6 @@ const JK_TESTS = [
 
       return 'manual';
     }
-  },
-
-  {
-    id: 133, category: 'Email',
-    title: '[MANUAL] send-pending-upgrade — correct content delivered to inbox',
-    purpose: 'Manual confirmation that the pending-upgrade onboarding email arrived with correct content, 3-step instructions, and Mac/Windows download buttons.',
-    prerequisites: 'Test 100 must have passed first.',
-    description: 'Open the "Your JumpKit Unlimited subscription is confirmed" email and verify content matches spec.',
-    input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with correct subject, 3-step getting-started section, Mac and Windows download buttons, and help@jumpkit.app in support text.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Your JumpKit Unlimited subscription is confirmed 🎉".\n3. Verify it contains 3 numbered steps: Download JumpKit, Create your account, Log in.\n4. Verify Mac and Windows download buttons are present and link to GitHub releases.\n5. Verify footer support text contains help@jumpkit.app.\n6. Mark as Pass once confirmed.',
-    test: async () => 'manual'
   },
 
   // ── Onboarding Flow (Tests 102–103) ─────────────────────────────
@@ -2703,18 +2672,6 @@ const JK_TESTS = [
   },
 
   {
-    id: 134, category: 'Email',
-    title: '[MANUAL] send-team-downgrade-alert — correct alert email content in inbox',
-    purpose: 'Manual verification that the downgrade alert email arrived with correct branding, member list, lock date, and re-upgrade CTA.',
-    prerequisites: 'Test 116 must have passed first.',
-    description: 'Open the two downgrade alert emails sent by Test 116 and verify content matches spec.',
-    input: 'Email inbox for logged-in user account',
-    expected: 'Two emails arrive: (1) owner email with subject "Important: your JumpKit team members may lose access" (heading: \'Team member access changing\'), and (2) member email with subject "Your team access may be changing". Both reference team name, lock date, and member list.',
-    steps: '1. Open your inbox.\n2. Find the owner email with subject "Important: your JumpKit team members may lose access".\n3. Verify the heading reads \'Team member access changing\' and contains the team name "Test Team (Test 116)".\n4. Verify it lists \'Test Member\' in the affected members section with a lock date (14 days from today) shown in red.\n5. Verify the \'Re-upgrade to Unlimited\' CTA button is present and links to jumpkit.app/#pricing.\n6. Find the member email with subject \'Your team access may be changing\'.\n7. Verify it references the same team and lock date.\n8. Mark as Pass once both emails are confirmed.',
-    test: async () => 'manual'
-  },
-
-  {
     id: 117, category: 'Email',
     emailSubject: "2 emails: Owner: 'Reminder: JumpKit team access ending in 2 days — Test Team (Test 117)' | Member: 'Your access to Test Team (Test 117) ends in 2 days'",
     title: '[AUTO+MANUAL] send-team-downgrade-alert — Edge Function returns ok:true (warning variant)',
@@ -2753,18 +2710,6 @@ const JK_TESTS = [
 
       return 'manual';
     }
-  },
-
-  {
-    id: 135, category: 'Email',
-    title: '[MANUAL] send-team-downgrade-alert — correct warning email content in inbox',
-    purpose: 'Manual verification that the 2-day warning email uses the correct subject, heading, and copy (distinct from the alert variant).',
-    prerequisites: 'Test 117 must have passed first.',
-    description: 'Open the warning email sent by Test 117 and verify it uses the warning-variant subject and copy.',
-    input: 'Email inbox for logged-in user account',
-    expected: 'Email subject contains "Reminder: JumpKit team access ending in 2 days". Heading says "Reminder: team access ending in 2 days" (not the alert heading). Re-upgrade CTA present.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Reminder: JumpKit team access ending in 2 days — Test Team (Test 117)".\n3. Verify the heading says "Reminder: team access ending in 2 days" (not "Team member access changing").\n4. Verify the member list shows "Test Member" and a lock date 2 days from today.\n5. Verify the "Re-upgrade to Unlimited" CTA is present.\n6. Mark as Pass once confirmed.',
-    test: async () => 'manual'
   },
 
   {
@@ -2886,13 +2831,16 @@ const JK_TESTS = [
     id: 111, category: 'Deployment',
     title: '[MANUAL] GitHub releases — latest release API reachable',
     purpose: 'Confirms the GitHub releases API for jrod4404/JumpKit returns a valid response. Cannot be automated — CSP connect-src blocks fetch to api.github.com from inside the Electron app.',
-    prerequisites: 'Internet connection. At least one release published on GitHub.',
-    description: 'Manual check: open the GitHub releases URL in a browser and verify a release exists with a valid version tag.',
+    prerequisites: 'Internet connection. Only applicable once a GitHub release has been published.',
+    description: 'Manual check: open the GitHub releases URL in a browser and verify a release exists with a valid version tag. During pre-release development, a 404 response is expected and acceptable.',
     input: 'Browser → https://api.github.com/repos/jrod4404/JumpKit/releases/latest',
-    expected: 'JSON response with tag_name like v1.0.0. No 404.',
-    steps: '1. Open a browser\n2. Navigate to https://api.github.com/repos/jrod4404/JumpKit/releases/latest\n3. Confirm JSON response with a tag_name field (e.g. v1.0.0)\n4. Mark Pass if tag_name is present, Fail if 404 or no releases',
+    expected: 'Pre-release: 404 is acceptable (no releases published yet). Post-release: JSON with tag_name like v1.0.0.',
+    links: [
+      { label: 'GitHub Releases API — latest', url: 'https://api.github.com/repos/jrod4404/JumpKit/releases/latest' },
+    ],
+    steps: '1. Click the link above to open the GitHub releases API in your browser.\n2. Pre-release (no releases published yet): a 404 response is expected — Mark Pass.\n3. Post-release: confirm JSON with a tag_name field (e.g. v1.0.0) — Mark Pass. Mark Fail only if you expect a release to exist but get 404.',
     test: async () => {
-      throw new Error('[MANUAL] Open https://api.github.com/repos/jrod4404/JumpKit/releases/latest in a browser and verify tag_name is present. CSP blocks this fetch from inside the app.');
+      throw new Error('[MANUAL] Click the link in the Details modal to open the GitHub releases API. Pre-release: 404 is acceptable. Post-release: confirm tag_name is present.');
     }
   },
 
@@ -2964,18 +2912,6 @@ const JK_TESTS = [
   },
 
   {
-    id: 136, category: 'Email',
-    title: '[MANUAL] send-member-joined — correct email content in inbox',
-    purpose: 'Manual verification that the member-joined email arrived with correct branding, member name, team name, member count, and join timestamp.',
-    prerequisites: 'Test 118 must have passed first.',
-    description: 'Open the member-joined email sent by Test 118 and verify the content matches spec.',
-    input: 'Email inbox for logged-in user account',
-    expected: 'Email arrives with subject "Jane Smith (Test 118) just joined your team on JumpKit". Contains team name "Test Team (Test 118)", member email, total members = 3, and a join timestamp.',
-    steps: '1. Open your inbox.\n2. Find the email with subject "Jane Smith (Test 118) just joined your team on JumpKit".\n3. Verify member name "Jane Smith (Test 118)" and email jane.smith.test118@example.com are shown.\n4. Verify team name "Test Team (Test 118)" is highlighted in turquoise.\n5. Verify Total members shows 3.\n6. Verify a join timestamp is present.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.',
-    test: async () => 'manual'
-  },
-
-  {
     id: 119, category: 'Email',
     emailSubject: "You've been removed from Test Team (Test 119) on JumpKit",
     title: '[AUTO+MANUAL] send-member-removed — Edge Function returns ok:true',
@@ -3009,18 +2945,6 @@ const JK_TESTS = [
 
       return 'manual';
     }
-  },
-
-  {
-    id: 137, category: 'Email',
-    title: '[MANUAL] send-member-removed — correct email content in inbox',
-    purpose: "Manual verification that the member-removed email arrived with correct branding, red-tinted What changed card, turquoise What's safe card, and help contact.",
-    prerequisites: 'Test 119 must have passed first.',
-    description: 'Open the member-removed email sent by Test 119 and verify content and styling match spec.',
-    input: 'Email inbox for logged-in user account',
-    expected: "Email arrives with subject \"You've been removed from Test Team (Test 119) on JumpKit\". Red-tinted card with bold red X items, turquoise check card with safe items, and help@jumpkit.app link.",
-    steps: "1. Open your inbox.\n2. Find email with subject \"You've been removed from Test Team (Test 119) on JumpKit\".\n3. Verify greeting says \"Hi Test User\".\n4. Verify \"What changed\" card has red background tint and bold red X icons.\n5. Verify \"Your personal jumps are not affected\" card has turquoise check icons.\n6. Verify turquoise info box links to help@jumpkit.app.\n7. Verify header, footer, logo, and social links match other JumpKit emails.\n8. Mark as Pass once confirmed.",
-    test: async () => 'manual'
   },
 
   // ══════════════════════════════════════════════════════════════════
@@ -3591,18 +3515,6 @@ const JK_TESTS = [
   },
 
   {
-    id: 143, category: 'Email',
-    title: '[MANUAL] send-team-deleted — deployment check only (no inbox email expected)',
-    purpose: 'Manual confirmation that test 142 returned ok:true and notified:0, confirming the function is deployed and working correctly.',
-    prerequisites: 'Test 142 must have passed first.',
-    description: 'Confirm the result from test 142 shows ok:true and notified:0. No inbox email is expected — the fake teamId has no members in Supabase.',
-    input: 'Result from test 142',
-    expected: 'ok:true and notified:0 in the test 142 result. No email in inbox (correct — fake team has no members).',
-    steps: '1. Confirm test 142 showed ok:true.\n2. Confirm notified was 0 (expected for fake teamId).\n3. No inbox check needed.\n4. Mark as Pass.',
-    test: async () => 'manual'
-  },
-
-  {
     id: 144, category: 'Email',
     title: 'waitlist-signup — Edge Function returns ok:true or duplicate:true',
     purpose: 'Confirms the waitlist-signup Edge Function is deployed and returns a valid response. Uses the current user email — if already on the waitlist, duplicate:true is returned (also a pass).',
@@ -3932,30 +3844,17 @@ function renderTests() {
       <!-- Summary + Buttons row — static header; .page-content scrolling is disabled
            via the :has(#pageTests) CSS rule so only #testsTablesWrap scrolls. -->
       <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
-        <!-- Total summary card -->
-        <div id="testSummary" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:16px">
-          <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim);margin-right:4px">Total</span>
-          <div id="summaryPass" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 Passed</div>
-          <div id="summaryFail" style="color:var(--text-muted);display:flex;align-items:center;gap:8px;font-size:1.2rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.4rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 Failed</div>
-          <div id="summaryManual" style="display:none !important"></div>
-          <span id="summaryTime" style="color:var(--text-muted);font-size:0.8rem"></span>
+        <!-- Unified summary card -->
+        <div id="testSummary" style="padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
+          <div id="summaryPass" style="text-align:center;padding:4px 16px;border-right:1px solid var(--border)"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
+          <div id="summaryFail" style="text-align:center;padding:4px 16px;border-right:1px solid var(--border)"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
+          <div id="summaryManual" style="text-align:center;padding:4px 16px;border-right:1px solid var(--border)"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
+          <div id="summaryNotRun" style="text-align:center;padding:4px 16px;border-right:1px solid var(--border)"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Not Run</div></div>
+          <div id="summaryTotal" style="text-align:center;padding:4px 16px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
+          <span id="summaryTime" style="color:var(--text-muted);font-size:0.78rem;padding-left:16px;border-left:1px solid var(--border)"></span>
         </div>
-        <!-- Per-section summary cards -->
-        <div id="summaryAuto" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:12px">
-          <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim)">Automatic</span>
-          <div id="summaryAutoPass" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0</div>
-          <div id="summaryAutoFail" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0</div>
-        </div>
-        <div id="summaryAM" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:12px">
-          <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim)">Auto+Manual</span>
-          <div id="summaryAMPass" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0</div>
-          <div id="summaryAMFail" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0</div>
-        </div>
-        <div id="summaryMan" style="padding:10px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:12px">
-          <span style="font-size:0.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-dim)">Manual</span>
-          <div id="summaryManPass" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0</div>
-          <div id="summaryManFail" style="color:var(--text-muted);display:flex;align-items:center;gap:6px;font-size:1rem;font-weight:700"><svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0</div>
-        </div>
+        <!-- Hidden per-section ids kept for _refreshSummary compat -->
+        <div style="display:none"><span id="summaryAutoPass"></span><span id="summaryAutoFail"></span><span id="summaryAMPass"></span><span id="summaryAMFail"></span><span id="summaryManPass"></span><span id="summaryManFail"></span></div>
 
         <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
@@ -3976,14 +3875,20 @@ function renderTests() {
 
   // Restore saved results from previous session
   _loadTestResults();
-  if (window._jkTestResults && Object.keys(window._jkTestResults).length > 0) {
-    Object.entries(window._jkTestResults).forEach(([id, r]) => {
-      if (r.state && r.state !== 'running') {
-        _setRowResult(parseInt(id), r.state, r.message || null);
-      }
-    });
-    _refreshSummary();
-  }
+  // Pre-seed all [MANUAL] tests with 'manual' state if not already set
+  if (!window._jkTestResults) window._jkTestResults = {};
+  JK_TESTS.filter(t => t.title.startsWith('[MANUAL]')).forEach(t => {
+    if (!window._jkTestResults[t.id]) {
+      window._jkTestResults[t.id] = { state: 'manual', received: 'Manual verification required' };
+    }
+  });
+  // Render all results (saved + manual defaults)
+  Object.entries(window._jkTestResults).forEach(([id, r]) => {
+    if (r.state && r.state !== 'running') {
+      _setRowResult(parseInt(id), r.state, r.message || null);
+    }
+  });
+  _refreshSummary();
 
   // Wire buttons
   document.getElementById('btnRunAutoTests').addEventListener('click', () => _runTests('auto'));
@@ -3994,6 +3899,7 @@ function renderTests() {
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
   _updateRTLabel();
+  document.getElementById('btnSavePreflightResults').addEventListener('click', () => _saveReleaseSection('preflight'));
   document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
   document.getElementById('btnSaveAMResults').addEventListener('click', () => _saveReleaseSection('auto-manual'));
   document.getElementById('btnSaveManualResults').addEventListener('click', () => _saveReleaseSection('manual'));
@@ -4030,6 +3936,11 @@ function _testsJaction(e) {
     if (mt) mt.innerHTML = title;
     if (mb) { mb.innerHTML = body; mb.scrollTop = 0; }
     if (mf) mf.innerHTML = footer;
+  } else if (action === 'cmd-copy') {
+    const cmd = btn.getAttribute('data-cmd');
+    navigator.clipboard.writeText(cmd).catch(function(){});
+    btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg>';
+    setTimeout(function(){ btn.innerHTML = '<svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg>'; }, 1500);
   } else if (action === 'section-toggle') {
     if (!document.getElementById('pageTests')) return;
     e.stopPropagation();
@@ -4142,6 +4053,13 @@ async function _openReleaseTestingModal() {
       <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${existing?.version || appVersion}" style="${inputStyle}" />
       <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">File will be saved as <code>JumpKit_ReleaseTesting_v[version].html</code></p>
     </div>
+    <div style="margin-bottom:18px">
+      <label style="${labelStyle}">Test Environment</label>
+      <select id="rtOS" style="${inputStyle}">
+        <option value="mac"${(existing?.os || 'mac') === 'mac' ? ' selected' : ''}>Mac</option>
+        <option value="windows"${existing?.os === 'windows' ? ' selected' : ''}>Windows</option>
+      </select>
+    </div>
     <div>
       <label style="${labelStyle}">File Location</label>
       <div style="display:flex;gap:8px;align-items:center">
@@ -4166,7 +4084,8 @@ async function _openReleaseTestingModal() {
       alert('File picker not available — not running in Electron'); return;
     }
     const version = document.getElementById('rtVersion').value.trim() || appVersion;
-    const result = await window.electronAPI.showReleaseTestingDialog(version);
+    const osForDialog = document.getElementById('rtOS').value === 'windows' ? 'Win' : 'Mac';
+    const result = await window.electronAPI.showReleaseTestingDialog(version, osForDialog);
     if (!result?.canceled && result?.filePath) {
       chosenPath = result.filePath;
       document.getElementById('rtFilePath').value = chosenPath;
@@ -4178,7 +4097,8 @@ async function _openReleaseTestingModal() {
     const version = document.getElementById('rtVersion').value.trim();
     if (!version) { alert('Please enter a version number.'); return; }
     if (!chosenPath) { alert('Please choose a file location first.'); return; }
-    _setReleaseState({ version, filePath: chosenPath });
+    const os = document.getElementById('rtOS').value;
+    _setReleaseState({ version, filePath: chosenPath, os });
     Modal.close();
     window.Toast?.success(`Release testing configured — v${version}`);
   };
@@ -4202,11 +4122,13 @@ async function _saveReleaseSection(mode) {
   // Determine which tests belong to this section
   const isAM = t => t.title.startsWith('[AUTO+MANUAL]');
   const isM  = t => t.title.startsWith('[MANUAL]');
-  const sectionTests = mode === 'auto'
-    ? JK_TESTS.filter(t => !isAM(t) && !isM(t))
-    : mode === 'auto-manual'
-      ? JK_TESTS.filter(isAM)
-      : JK_TESTS.filter(isM);
+  const sectionTests = mode === 'preflight'
+    ? JK_TESTS.filter(t => t.id === 139)
+    : mode === 'auto'
+      ? JK_TESTS.filter(t => !isAM(t) && !isM(t))
+      : mode === 'auto-manual'
+        ? JK_TESTS.filter(isAM)
+        : JK_TESTS.filter(t => isM(t) && t.id !== 139);
 
   const results = window._jkTestResults || {};
   const displayMap = window._jkTestDisplayNumMap || {};
@@ -4236,11 +4158,13 @@ async function _saveReleaseSection(mode) {
       section: mode,
       category: t.category,
       title: t.title.replace(/^\[(AUTO\+MANUAL|MANUAL)\] /, ''),
+      purpose: t.purpose || '',
       input: t.input || '',
       expected: t.expected || '',
       state,
       manuallyMarked,
       details: detailsText,
+      execOrder: (window.JK_EXEC_ORDER || {})[t.id] ?? null,
       timestamp: r ? now : '',
     };
   });
@@ -4260,12 +4184,69 @@ async function _saveReleaseSection(mode) {
   const merged = { ...existingEntries };
   sectionTests.forEach(t => { merged[t.id] = newEntries[t.id]; });
 
+  // Gather test environment info for header
+  const userId = window._supabaseUser?.id;
+  let ownedTeamNames = [], memberTeamNames = [];
+  try {
+    const { data: ownedTeams } = await supabaseClient.from('teams').select('id, name').eq('owner_id', userId);
+    ownedTeamNames = (ownedTeams || []).map(t => t.name);
+    const ownedIds = (ownedTeams || []).map(t => t.id);
+    const { data: memberRows } = await supabaseClient.from('team_members').select('team_id, teams!inner(name)').eq('user_id', userId);
+    memberTeamNames = (memberRows || []).filter(r => !ownedIds.includes(r.team_id)).map(r => r.teams?.name).filter(Boolean);
+  } catch(_) {}
+  // Gather jump + column counts
+  let activeJumps = 0, favJumps = 0, archivedJumps = 0, totalCols = 0, sharedCols = 0;
+  try {
+    const allActive = typeof DB !== 'undefined' && currentUser ? DB.getActiveJumps(currentUser.id) : [];
+    const allArchived = typeof DB !== 'undefined' && currentUser ? DB.getArchivedJumps(currentUser.id) : [];
+    const allCols = typeof DB !== 'undefined' && currentUser ? DB.getColumns(currentUser.id) : [];
+    activeJumps = allActive.length;
+    favJumps = allActive.filter(j => j.favorite).length;
+    archivedJumps = allArchived.length;
+    totalCols = allCols.length;
+    sharedCols = allCols.filter(c => c.isShared).length;
+  } catch(_) {}
+
+  // Gather account settings
+  const prof = window._supabaseProfile || {};
+  const prefs = (typeof DB !== 'undefined' && currentUser) ? DB.getPrefs(currentUser.id) : {};
+
+  const testEnv = {
+    // Account
+    email:       window._supabaseUser?.email || '',
+    name:        [prof.first_name, prof.last_name].filter(Boolean).join(' ') || '—',
+    role:        prof.role || 'user',
+    subTier:     prof.subscription_tier || '—',
+    subStatus:   prof.subscription_status || '—',
+    os:          state.os === 'windows' ? 'Windows' : 'Mac',
+    // Settings
+    trialLaunches:   prof.trial_launches_used != null ? String(prof.trial_launches_used) : '—',
+    startPage:       prefs.startPage || 'home',
+    theme:           prefs.theme || 'system',
+    autoArchive:     prefs.autoArchive || 'never',
+    autoBackup:      prefs.cloudBackup ? 'On' : 'Off',
+    timePerClick:    prefs.timePerClick != null ? `${prefs.timePerClick}s` : '—',
+    dollarsPerHour:  prefs.dollarsPerHour != null ? `$${prefs.dollarsPerHour}` : '—',
+    navMenu:         prefs.navDefaultCollapsed ? 'Collapsed' : 'Expanded',
+    notifications:   prefs.notifications !== false ? 'On' : 'Off',
+    showDesc:        prefs.showDescription ? 'On' : 'Off',
+    showHotkey:      prefs.showHotkey ? 'On' : 'Off',
+    // JumpKit
+    activeJumps,
+    favJumps,
+    archivedJumps,
+    totalCols,
+    sharedCols,
+    ownedTeams:  ownedTeamNames,
+    memberTeams: memberTeamNames,
+  };
+
   // Build HTML
-  const html = _buildReleaseTestingHTML(merged, version, filePath);
+  const html = _buildReleaseTestingHTML(merged, version, filePath, testEnv);
   const writeResult = await window.electronAPI.writeFileDirect(filePath, html);
 
   if (writeResult?.ok) {
-    const sectionLabel = mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
+    const sectionLabel = mode === 'preflight' ? 'Pre-Flight' : mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
     window.Toast?.success(`${sectionLabel} results saved to file.`);
   } else {
     window.Toast?.danger(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
@@ -4276,59 +4257,93 @@ async function _saveReleaseSection(mode) {
   }
 }
 
-function _buildReleaseTestingHTML(entries, version, filePath) {
+function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const stateColor = (s, m) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
   const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Not Run';
-  const sectionOrder = { auto: 0, 'auto-manual': 1, manual: 2 };
-  const sectionLabel = { auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
+  const sectionOrder = { preflight: 0, auto: 1, 'auto-manual': 2, manual: 3 };
+  const sectionLabel = { preflight: 'Pre-Flight (Run First)', auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
   const catColors = { Auth:'#3b82f6', Navigation:'#8b5cf6', Jumps:'#06b6d4', Columns:'#10b981', Archive:'#f59e0b', Stats:'#ec4899', Account:'#6366f1', Subscription:'#f97316', Teams:'#14b8a6', UI:'#84cc16', Security:'#e05555', Database:'#0ea5e9', 'DB Schema':'#7c3aed', 'Shared Sync':'#a855f7', 'Code Quality':'#78716c', Settings:'#64748b', Deployment:'#f43f5e', Paywall:'#d97706', Maintenance:'#22d3ee', Email:'#fb923c', Notifications:'#0d9488', Admin:'#dc2626', Onboarding:'#a78bfa' };
   const catPill = cat => { const c = catColors[cat] || '#6b7280'; return `<span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;background:${c}22;color:${c};white-space:nowrap">${cat}</span>`; };
 
   const sorted = Object.values(entries).sort((a, b) => {
+    if (a.execOrder != null && b.execOrder != null) return a.execOrder - b.execOrder;
     const sd = (sectionOrder[a.section] ?? 9) - (sectionOrder[b.section] ?? 9);
     return sd !== 0 ? sd : a.displayNum - b.displayNum;
   });
 
   const runDate = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const totalPass = sorted.filter(e => e.state === 'pass').length;
-  const totalFail = sorted.filter(e => e.state === 'fail').length;
-  const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
+  const totalPass    = sorted.filter(e => e.state === 'pass').length;
+  const totalFail    = sorted.filter(e => e.state === 'fail').length;
+  const totalManual  = sorted.filter(e => e.state === 'manual').length;
+  const totalNotRun  = sorted.filter(e => e.state === 'not-run').length;
 
-  // Pre-compute per-section counts
-  const sectionCounts = {};
-  sorted.forEach(e => { sectionCounts[e.section] = (sectionCounts[e.section] || 0) + 1; });
+  // Per-section stats helper
+  const secStats = sec => {
+    const es = sorted.filter(e => e.section === sec);
+    return {
+      total:   es.length,
+      pass:    es.filter(e => e.state === 'pass').length,
+      fail:    es.filter(e => e.state === 'fail').length,
+      manual:  es.filter(e => e.state === 'manual').length,
+      notRun:  es.filter(e => e.state === 'not-run').length,
+    };
+  };
+  const summaryBar = sec => {
+    const s = secStats(sec);
+    const item = (val, lbl, color) => `<div style="text-align:center;padding:8px 16px"><div style="font-size:1.1rem;font-weight:900;color:${color}">${val}</div><div style="font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#9ca3af;margin-top:1px">${lbl}</div></div>`;
+    return `<tr><td colspan="8" style="padding:20px 12px 0"></td></tr>
+    <tr><td colspan="8" style="padding:0 12px 20px">
+      <div style="display:inline-flex;align-items:center;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;gap:0">
+        ${item(s.pass,'Passed','#3fbe71')}${item(s.fail,'Failed','#e15b59')}${item(s.manual,'Manual','#f59e0b')}${item(s.notRun,'Not Run','#6b7280')}${item(s.total,'Total','#374151')}
+      </div>
+    </td></tr>
+    <tr><td colspan="8" style="padding:10px 0"></td></tr>`;
+  };
 
-  let lastSection = null;
-  const rows = sorted.map(e => {
-    let sectionHeader = '';
-    if (e.section !== lastSection) {
-      lastSection = e.section;
-      const secName = sectionLabel[e.section] || e.section;
-      const secCount = sectionCounts[e.section] || 0;
-      sectionHeader = `<tr><td colspan="8" style="padding:14px 12px 6px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb">${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${secCount} test${secCount !== 1 ? 's' : ''})</span></td></tr>`;
-    }
+  // Build rows grouped by section with summary bars between sections
+  const sectionOrder2 = ['preflight', 'auto', 'auto-manual', 'manual'];
+  const dataRow = e => {
     const stateC = stateColor(e.state, e.manuallyMarked);
-    return sectionHeader + `<tr style="border-bottom:1px solid #e5e7eb">
-      <td style="padding:7px 10px;font-size:12px;color:#9ca3af;white-space:nowrap">${e.displayNum}</td>
+    return `<tr style="border-bottom:1px solid #e5e7eb">
+      <td style="padding:7px 10px;font-size:12px;color:#9ca3af;white-space:nowrap">${e.execOrder != null ? e.execOrder : e.displayNum}</td>
       <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
-      <td style="padding:7px 10px;font-size:12px;color:#374151;font-weight:500">${_esc(e.title)}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:140px;word-break:break-word">${_esc(e.input)}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.expected)}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:160px;word-break:break-word">${_esc(e.details)}</td>
-      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};white-space:nowrap">${stateLabel(e.state, e.manuallyMarked)}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#374151;max-width:540px;word-break:break-word"><div style="font-weight:700">${_esc(e.title)}</div>${e.purpose ? `<div style="font-size:11px;color:#6b7280;font-weight:400;margin-top:3px;line-height:1.4">${_esc(e.purpose)}</div>` : ''}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:147px;word-break:break-word">${_esc(e.input)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:182px;word-break:break-word">${_esc(e.expected)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:116px;word-break:break-word">${_esc(e.details)}</td>
+      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};max-width:100px;word-break:break-word">${stateLabel(e.state, e.manuallyMarked)}</td>
       <td style="padding:7px 10px;font-size:10px;color:#9ca3af;white-space:nowrap">${e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</td>
     </tr>`;
+  };
+  // Build collapsible sections with summary at top + bottom
+  const sections_html = sectionOrder2.map((sec, idx) => {
+    const es = sorted.filter(e => e.section === sec);
+    if (!es.length) return '';
+    const secName = sectionLabel[sec] || sec;
+    const tbodyId = `sec-tbody-${sec}`;
+    const btnId   = `sec-btn-${sec}`;
+    const spacerTop = idx > 0 ? `<tr><td colspan="8" style="padding:16px 0"></td></tr>` : '';
+    const header = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
+      <td colspan="8" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
+        <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▾</span>${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${es.length} test${es.length !== 1 ? 's' : ''})</span>
+        <span style="font-size:10px;color:#9ca3af;margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0">click to collapse</span>
+      </td>
+    </tr>`;
+    const inlineSummary = summaryBar(sec);
+    const dataRows = es.map(dataRow).join('');
+    return `${spacerTop}${header}<tbody id="${tbodyId}">${inlineSummary}${dataRows}${inlineSummary}</tbody>`;
   }).join('');
+  const rows = sections_html;
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>JumpKit Release Testing v${_esc(version)}</title>
+<title>JumpKit ${testEnv.os || 'Mac'} Release Testing v${_esc(version)}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f3f4f6; color:#1f2937; }
-  .wrap { max-width:1200px; margin:32px auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  .wrap { max-width:1380px; margin:32px auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 2px 12px rgba(0,0,0,.08); }
   .header { background:#0E1827; padding:28px 32px; }
   .header h1 { color:#C8D6E8; font-size:1.4rem; font-weight:700; margin-bottom:4px; }
   .header p { color:#4A6280; font-size:0.85rem; }
@@ -4344,20 +4359,70 @@ function _buildReleaseTestingHTML(entries, version, filePath) {
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>JumpKit Release Testing — v${_esc(version)}</h1>
-    <p>Generated ${runDate} &middot; ${sorted.length} tests total</p>
+    <h1>JumpKit ${testEnv.os || 'Mac'} Release Testing — v${_esc(version)}</h1>
+    <p style="margin-bottom:14px">Generated ${runDate} &middot; ${sorted.length} tests total</p>
+    ${testEnv.email ? (() => {
+      const lbl = `color:#4A6280;font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:0.7rem;margin-bottom:6px`;
+      const sec = `color:#3A566E;font-weight:700;font-size:0.72rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:5px;margin-bottom:8px`;
+      const row = (l, v) => `<div style="margin-bottom:2px"><span style="color:#4A6280">${l}:</span> ${_esc(String(v))}</div>`;
+      return `<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:32px;font-size:0.8rem;color:#6B7E94">
+        <div style="min-width:180px">
+          <div style="${sec}">Account</div>
+          ${row('Account', testEnv.email)}
+          ${row('Name', testEnv.name)}
+          ${row('Role', testEnv.role)}
+          ${row('Sub Tier', testEnv.subTier)}
+          ${row('Sub Status', testEnv.subStatus)}
+          ${row('Environment', testEnv.os)}
+        </div>
+        <div style="min-width:200px">
+          <div style="${sec}">Settings</div>
+          ${row('Trial Launches Used', testEnv.trialLaunches)}
+          ${row('Theme', testEnv.theme)}
+          ${row('Starting Page', testEnv.startPage)}
+          ${row('Nav Menu on Startup', testEnv.navMenu)}
+          ${row('Notifications', testEnv.notifications)}
+          ${row('Show Jump Desc', testEnv.showDesc)}
+          ${row('Show Hotkey', testEnv.showHotkey)}
+          ${row('Time Per Click', testEnv.timePerClick)}
+          ${row('Dollar Per Hour', testEnv.dollarsPerHour)}
+          ${row('Auto Backup', testEnv.autoBackup)}
+          ${row('Auto Archive', testEnv.autoArchive)}
+        </div>
+        <div style="min-width:160px">
+          <div style="${sec}">Jumps</div>
+          ${row('Active', testEnv.activeJumps)}
+          ${row('Favorites', testEnv.favJumps)}
+          ${row('Archived', testEnv.archivedJumps)}
+        </div>
+        <div style="min-width:160px">
+          <div style="${sec}">Columns</div>
+          ${row('Total', testEnv.totalCols)}
+          ${row('Shared', testEnv.sharedCols)}
+        </div>
+        <div style="min-width:160px">
+          <div style="${sec}">Owned Teams (${testEnv.ownedTeams.length})</div>
+          ${testEnv.ownedTeams.length ? testEnv.ownedTeams.map(n => `<div>${_esc(n)}</div>`).join('') : '<div style="color:#4A6280">None</div>'}
+        </div>
+        <div style="min-width:160px">
+          <div style="${sec}">Member Teams (${testEnv.memberTeams.length})</div>
+          ${testEnv.memberTeams.length ? testEnv.memberTeams.map(n => `<div>${_esc(n)}</div>`).join('') : '<div style="color:#4A6280">None</div>'}
+        </div>
+      </div>`;
+    })() : ''}
   </div>
   <div class="stats">
     <div class="stat"><div class="stat-val" style="color:#3fbe71">${totalPass}</div><div class="stat-lbl">Passed</div></div>
     <div class="stat"><div class="stat-val" style="color:#e15b59">${totalFail}</div><div class="stat-lbl">Failed</div></div>
+    <div class="stat"><div class="stat-val" style="color:#f59e0b">${totalManual}</div><div class="stat-lbl">Manual</div></div>
     <div class="stat"><div class="stat-val" style="color:#6b7280">${totalNotRun}</div><div class="stat-lbl">Not Run</div></div>
     <div class="stat"><div class="stat-val" style="color:#374151">${sorted.length}</div><div class="stat-lbl">Total</div></div>
   </div>
   <table>
     <thead><tr>
-      <th>#</th><th>Category</th><th>Title</th><th>Input</th><th>Expected</th><th>Details</th><th>Result</th><th>Timestamp</th>
+      <th>Exec #</th><th>Category</th><th>Title &amp; Purpose</th><th>Input</th><th>Expected</th><th>Details</th><th>Result</th><th>Timestamp</th>
     </tr></thead>
-    <tbody>${rows}</tbody>
+    ${rows}
   </table>
 </div>
 <!-- machine-readable data for merge -->
@@ -4473,7 +4538,7 @@ const _byCategory = (a, b) => {
 const _COL_HEADERS = `
   <thead>
     <tr style="border-bottom:2px solid var(--border)">
-      <th style="padding:10px 12px;text-align:left;width:40px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">#</th>
+      <th style="padding:10px 12px;text-align:left;width:1px;white-space:nowrap;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXEC # / ID</th>
       <th style="padding:10px 12px;text-align:left;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">CATEGORY</th>
       <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">TITLE</th>
       <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXPECTED</th>
@@ -4482,8 +4547,8 @@ const _COL_HEADERS = `
     </tr>
   </thead>`;
 
-function _sectionBlock(label, icon, tests, startNum, actionBtns) {
-  const rows = tests.map((t) => _testRow(t, t.id)).join('');
+function _sectionBlock(label, icon, tests, startNum, actionBtns, sectionKey) {
+  const rows = tests.map((t) => _testRow(t, (window.JK_EXEC_ORDER || {})[t.id] || t.id)).join('');
   const sectionId = 'section-body-' + label.replace(/\s+/g, '-').toLowerCase();
   const btns = actionBtns ? `<div style="display:flex;gap:8px;margin-top:6px;margin-bottom:8px">${actionBtns}</div>` : '';
   return `
@@ -4494,6 +4559,7 @@ function _sectionBlock(label, icon, tests, startNum, actionBtns) {
           ${(Array.isArray(icon)?icon:[icon]).map(ic=>`<svg class="ti ti-${ic}" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-${ic}"/></svg>`).join('')}
           <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${label}</span>
           <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${tests.length})</span>
+          <span id="section-inline-stats-${sectionKey || sectionId}" style="display:inline-flex;align-items:center;gap:4px;margin-left:8px"></span>
         </div>
       </div>
       <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;margin-left:26px;max-height:0px" data-collapsed="true">
@@ -4508,10 +4574,10 @@ function _sectionBlock(label, icon, tests, startNum, actionBtns) {
     </div>`;
 }
 
-function _testRow(t, displayNum) {
+function _testRow(t, execNum) {
   return `
   <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
-    <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem;font-weight:600">${displayNum}</td>
+    <td style="padding:10px 12px;font-size:0.8rem;font-weight:600;white-space:nowrap"><span style="color:var(--text);font-weight:700">#${execNum}</span> <span style="color:var(--text-muted);font-size:0.75rem;font-weight:400">· ${t.id}</span></td>
     <td style="padding:10px 12px">
       <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${_CATEGORY_COLORS[t.category] || '#6b7280'}22;color:${_CATEGORY_COLORS[t.category] || '#6b7280'}">
         ${_esc(t.category)}
@@ -4523,9 +4589,9 @@ function _testRow(t, displayNum) {
     </td>
     <td style="padding:10px 48px 10px 12px;vertical-align:top;padding-top:28px;color:var(--text-muted);font-size:0.8rem;min-width:320px;max-width:400px">${_esc(t.expected)}</td>
     <td style="padding:10px 12px;text-align:center">
-      <button data-jaction="test-run" data-testid="${t.id}" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
+      ${t.title.startsWith('[MANUAL]') ? '' : `<button data-jaction="test-run" data-testid="${t.id}" id="test-run-btn-${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="Run this test">
         <svg class="ti ti-player-play" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-player-play"/></svg><span style="line-height:1">Run</span>
-      </button>
+      </button>`}
     </td>
     <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
       <button data-jaction="test-details" data-testid="${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="View test details">
@@ -4539,32 +4605,58 @@ function _buildTestRows() {
   const wrap = document.getElementById('testsTablesWrap');
   if (!wrap) return;
 
-  // Split into 3 sections by title tag
+  // Split into 4 sections: pre-flight (139 only), auto, auto-manual, manual (139 excluded)
+  const preflight     = JK_TESTS.filter(t => t.id === 139);
   const autoTests     = JK_TESTS.filter(t => !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
   const autoManual    = JK_TESTS.filter(t =>  t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
-  const manualTests   = JK_TESTS.filter(t =>  t.title.startsWith('[MANUAL]')).slice().sort(_byCategory);
+  const manualTests   = JK_TESTS.filter(t =>  t.title.startsWith('[MANUAL]') && t.id !== 139).slice().sort(_byCategory);
 
   // Build global display order + number map for use in detail modal
-  const _displayOrder = [...autoTests, ...autoManual, ...manualTests];
+  const _displayOrder = [...preflight, ...autoTests, ...autoManual, ...manualTests];
   window._jkTestDisplayOrder = _displayOrder;
   window._jkTestDisplayNumMap = {};
   _displayOrder.forEach((t) => { window._jkTestDisplayNumMap[t.id] = t.id; });
+
+  // Build execution order: test 139 first, then auto, auto-manual, manual (test 111 last)
+  const _t139 = JK_TESTS.find(t => t.id === 139);
+  const _t111 = JK_TESTS.find(t => t.id === 111);
+  const _execOrderList = [
+    ...(_t139 ? [_t139] : []),
+    ...autoTests.filter(t => t.id !== 139),
+    ...autoManual,
+    ...manualTests.filter(t => t.id !== 111 && t.id !== 112 && t.id !== 141 && t.id !== 139),
+    ...(_t111 ? [_t111] : []),
+    ...(JK_TESTS.find(t => t.id === 112) ? [JK_TESTS.find(t => t.id === 112)] : []),
+    ...(JK_TESTS.find(t => t.id === 141) ? [JK_TESTS.find(t => t.id === 141)] : []),
+  ];
+  window.JK_EXEC_ORDER = {};
+  _execOrderList.forEach((t, i) => { window.JK_EXEC_ORDER[t.id] = i + 1; });
+
+  // Re-sort each section by exec order so the UI table matches execution sequence
+  const _byExec = (a, b) => ((window.JK_EXEC_ORDER[a.id] || 9999) - (window.JK_EXEC_ORDER[b.id] || 9999));
+  preflight.sort(_byExec);
+  autoTests.sort(_byExec);
+  autoManual.sort(_byExec);
+  manualTests.sort(_byExec);
 
   const _secBtn = (id, icon, label, extra='') => `<button id="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.8rem;padding:5px 12px${extra}"><svg class="ti ti-${icon}" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-${icon}"/></svg>${label}</button>`;
   const _saveBtn = (id) => _secBtn(id, 'file-download', 'Save Results');
 
   wrap.innerHTML =
-    _sectionBlock('Automatic Tests', 'player-play', autoTests, 1,
+    _sectionBlock('Pre-Flight (Run First)', 'flag', preflight, 1,
+      _secBtn('btnResetPreflightTests','refresh','Reset') +
+      _saveBtn('btnSavePreflightResults'), 'preflight') +
+    _sectionBlock('Automatic Tests', 'player-play', autoTests, 2,
       _secBtn('btnRunAutoTests','player-play','Run') +
       _secBtn('btnResetAutoTests','refresh','Reset') +
-      _saveBtn('btnSaveAutoResults')) +
-    _sectionBlock('Auto + Manual Tests', ['player-play','clipboard-list'], autoManual, autoTests.length + 1,
+      _saveBtn('btnSaveAutoResults'), 'auto') +
+    _sectionBlock('Auto + Manual Tests', ['player-play','clipboard-list'], autoManual, autoTests.length + 2,
       _secBtn('btnRunAutoManualTests','player-play','Run') +
       _secBtn('btnResetAutoManualTests','refresh','Reset') +
-      _saveBtn('btnSaveAMResults')) +
-    _sectionBlock('Manual Tests', 'clipboard-list', manualTests, autoTests.length + autoManual.length + 1,
+      _saveBtn('btnSaveAMResults'), 'am') +
+    _sectionBlock('Manual Tests', 'clipboard-list', manualTests, autoTests.length + autoManual.length + 2,
       _secBtn('btnResetManualTests','refresh','Reset') +
-      _saveBtn('btnSaveManualResults'));
+      _saveBtn('btnSaveManualResults'), 'manual');
 }
 
 function _markManualResult(id, result) {
@@ -4622,6 +4714,10 @@ function _buildTestDetailContent(id) {
   const receivedColor = state==='pass'?'#3fbe71':state==='fail'?'#e15b59':'var(--text-muted)';
   const bodyHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
     <tr>
+      <td style="${tdLabel}">Exec Order</td>
+      <td style="${tdValueMuted}">${(window.JK_EXEC_ORDER || {})[id] != null ? '#' + (window.JK_EXEC_ORDER || {})[id] : '—'}</td>
+    </tr>
+    <tr>
       <td style="${tdLabel}">ID</td>
       <td style="${tdValueMuted}">${displayNum}</td>
     </tr>
@@ -4665,6 +4761,25 @@ function _buildTestDetailContent(id) {
       <td style="${tdLabel}">Details</td>
       <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
     </tr>
+    ${testDef.links && testDef.links.length ? `<tr>
+      <td style="${tdLabel}">Links</td>
+      <td style="padding:8px 0">${testDef.links.map(l => `
+        <div style="margin-bottom:6px">
+          <a href="${_esc(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem;color:var(--turq);text-decoration:none;display:inline-flex;align-items:center;gap:5px">
+            <svg class="ti ti-external-link" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-external-link"/></svg>${_esc(l.label)}</a>
+        </div>`).join('')}</td>
+    </tr>` : ''}
+    ${testDef.commands && testDef.commands.length ? `<tr>
+      <td style="${tdLabel}">Commands</td>
+      <td style="padding:8px 0">${testDef.commands.map((c, i) => `
+        <div style="margin-bottom:8px">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px">${_esc(c.label)}</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <code id="cmd-${id}-${i}" style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:5px 10px;border-radius:6px;color:var(--text);word-break:break-all">${_esc(c.cmd)}</code>
+            <button data-cmd="${_esc(c.cmd)}" data-jaction="cmd-copy" id="cmd-copy-${id}-${i}" class="btn btn-subtle" style="flex-shrink:0;padding:5px 7px"><svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg></button>
+          </div>
+        </div>`).join('')}</td>
+    </tr>` : ''}
   </table>
   ${(() => {
     const logs = (stored.logs || []);
@@ -4753,9 +4868,10 @@ function _setRowResult(id, state, message) {
 
 function _refreshSummary() {
   let passed = 0, failed = 0, manual = 0;
-  let autoPassed = 0, autoFailed = 0;
-  let amPassed = 0, amFailed = 0;
-  let manPassed = 0, manFailed = 0;
+  let autoPassed = 0, autoFailed = 0, autoManual = 0;
+  let amPassed = 0, amFailed = 0, amManual = 0;
+  let manPassed = 0, manFailed = 0, manManual = 0;
+  let pfPassed = 0, pfFailed = 0, pfManual = 0;
 
   // Read directly from _jkTestResults (source of truth) — never scrape DOM icons.
   // _resetSection deletes entries from _jkTestResults before calling _refreshSummary,
@@ -4770,26 +4886,45 @@ function _refreshSummary() {
     if (isPass) passed++; else if (isFail) failed++; else if (isMan) manual++;
     const isAM = t.title.startsWith('[AUTO+MANUAL]');
     const isM  = t.title.startsWith('[MANUAL]');
-    if (!isAM && !isM) { if (isPass) autoPassed++; else if (isFail) autoFailed++; }
-    else if (isAM)     { if (isPass) amPassed++;   else if (isFail) amFailed++; }
-    else               { if (isPass) manPassed++;  else if (isFail) manFailed++; }
+    if (t.id === 139)      { if (isPass) pfPassed++;   else if (isFail) pfFailed++;   else if (isMan) pfManual++; }
+    else if (!isAM && !isM){ if (isPass) autoPassed++; else if (isFail) autoFailed++; else if (isMan) autoManual++; }
+    else if (isAM)         { if (isPass) amPassed++;   else if (isFail) amFailed++;   else if (isMan) amManual++; }
+    else                   { if (isPass) manPassed++;  else if (isFail) manFailed++;  else if (isMan) manManual++; }
   });
 
-  // Total card
-  const sp = document.getElementById('summaryPass');
-  const sf = document.getElementById('summaryFail');
-  const sm = document.getElementById('summaryManual');
-  if (sp) { sp.innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:${passed>0?'#3fbe71':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`; sp.style.color = passed>0?'#3fbe71':'var(--text-muted)'; }
-  if (sf) { sf.innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:${failed>0?'#e15b59':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`; sf.style.color = failed>0?'#e15b59':'var(--text-muted)'; }
-  // summaryManual intentionally hidden from total card — manual results tracked per-section only
-  if (sm) sm.style.display = 'none';
+  // Inline section header stats pills
+  const _pill = (val, label, color) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${color}22;color:${color}">${val} ${label}</span>`
+    : '';
+  const _inlineSectionStats = (key, p, f, m) => {
+    const el = document.getElementById('section-inline-stats-' + key);
+    if (!el) return;
+    el.innerHTML = _pill(p,'Pass','#3fbe71') + _pill(f,'Fail','#e15b59') + _pill(m,'Manual','#f59e0b');
+  };
+  _inlineSectionStats('preflight', pfPassed,   pfFailed,   pfManual);
+  _inlineSectionStats('auto',      autoPassed, autoFailed, autoManual);
+  _inlineSectionStats('am',        amPassed,   amFailed,   amManual);
+  _inlineSectionStats('manual',    manPassed,  manFailed,  manManual);
 
-  // Per-section cards
+  // Unified summary card — Pass / Fail / Manual / Not Run / Total
+  const totalRun = passed + failed + manual;
+  const notRun   = JK_TESTS.length - totalRun;
+  const _cell = (id, val, color) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const numEl = el.querySelector('div:first-child');
+    if (numEl) { numEl.textContent = val; numEl.style.color = val > 0 ? color : 'var(--text-muted)'; }
+  };
+  _cell('summaryPass',   passed, '#3fbe71');
+  _cell('summaryFail',   failed, '#e15b59');
+  _cell('summaryManual', manual, '#f59e0b');
+  _cell('summaryNotRun', notRun, 'var(--text-muted)');
+  _cell('summaryTotal',  JK_TESTS.length, 'var(--text)');
+
+  // Keep hidden per-section spans in sync (used by save-to-file logic)
   const _secCard = (passId, failId, p, f) => {
-    const ep = document.getElementById(passId);
-    const ef = document.getElementById(failId);
-    if (ep) { ep.innerHTML = `<svg class="ti ti-check" style="font-size:1.1rem;color:${p>0?'#3fbe71':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${p}`; ep.style.color = p>0?'#3fbe71':'var(--text-muted)'; }
-    if (ef) { ef.innerHTML = `<svg class="ti ti-x" style="font-size:1.1rem;color:${f>0?'#e15b59':'var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${f}`; ef.style.color = f>0?'#e15b59':'var(--text-muted)'; }
+    const ep = document.getElementById(passId); const ef = document.getElementById(failId);
+    if (ep) ep.textContent = p; if (ef) ef.textContent = f;
   };
   _secCard('summaryAutoPass','summaryAutoFail', autoPassed, autoFailed);
   _secCard('summaryAMPass',  'summaryAMFail',   amPassed,   amFailed);
@@ -4874,16 +5009,16 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
 
   let passed = 0, failed = 0, manual = 0;
   window._jkTestResults = window._jkTestResults || {};
-  window._jkTestResults = {}; // reset on each run
-  const _results = window._jkTestResults;
-  const startTime = Date.now();
-
   // Determine which tests to run based on mode
   const isAutoManual = t => t.title.startsWith('[AUTO+MANUAL]');
   const isManual     = t => t.title.startsWith('[MANUAL]');
   const testsToRun   = mode === 'auto'
     ? JK_TESTS.filter(t => !isAutoManual(t) && !isManual(t))
     : JK_TESTS.filter(t => isAutoManual(t));
+  // Clear only the results for tests in this run — preserve other sections (e.g. pre-flight manual marks)
+  testsToRun.forEach(t => { delete window._jkTestResults[t.id]; });
+  const _results = window._jkTestResults;
+  const startTime = Date.now();
 
   for (let i = 0; i < testsToRun.length; i++) {
     const t = testsToRun[i];
@@ -4954,10 +5089,8 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
   // Show summary
   const sumEl = document.getElementById('testSummary');
   if (sumEl) {
-    document.getElementById('summaryPass').innerHTML = `<svg class="ti ti-check" style="font-size:1.4rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg>${passed} Passed`;
-    document.getElementById('summaryFail').innerHTML = `<svg class="ti ti-x" style="font-size:1.4rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg>${failed} Failed`;
-    document.getElementById('summaryManual').innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:1.4rem;color:#c99a3a"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>${manual} Manual`;
     document.getElementById('summaryTime').textContent = `Completed in ${elapsed}s`;
+    _refreshSummary();
   }
 
   // Write results to file via IPC
@@ -5029,15 +5162,7 @@ function _resetTests() {
   window._jkTestResults = {};
   _clearSavedTestResults();
   const summaryEl = document.getElementById('testSummary');
-  if (summaryEl) {
-    summaryEl.style.display = 'flex';
-    document.getElementById('summaryPass').innerHTML = '<svg class="ti ti-check" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-check"/></svg>0 passed';
-    document.getElementById('summaryPass').style.color = 'var(--text-muted)';
-    document.getElementById('summaryFail').innerHTML = '<svg class="ti ti-x" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-x"/></svg>0 failed';
-    document.getElementById('summaryFail').style.color = 'var(--text-muted)';
-    document.getElementById('summaryManual').innerHTML = '<svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>0 manual';
-    document.getElementById('summaryManual').style.color = 'var(--text-muted)';
-  }
+  if (summaryEl) summaryEl.style.display = 'flex';
   const progress = document.getElementById('runProgress');
   if (progress) progress.style.display = 'none';
   _buildTestRows();

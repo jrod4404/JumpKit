@@ -82,7 +82,7 @@ function _initSessionLock(userId) {
 
   _writeSession();
 
-  // Poll every 3 minutes — if our token was replaced, force logout
+  // Poll every 20 seconds — if our token was replaced, force logout
   const _interval = setInterval(async () => {
     try {
       const { data } = await supabaseClient
@@ -108,7 +108,7 @@ function _initSessionLock(userId) {
         _writeSession();
       }
     } catch (_) {}
-  }, 3 * 60 * 1000);
+  }, 20 * 1000);
 }
 
 async function initApp() {
@@ -791,7 +791,11 @@ async function renderHome() {
       <!-- ── Teams Section ───────────────────────────────────────── -->
       <div class="home-dash-section-label">YOUR TEAMS</div>
       <div id="homeTeamsSummary">
-        <div style="color:var(--text-dim);font-size:0.85rem;padding:4px 0">Loading teams…</div>
+        <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.85rem;padding:4px 0">
+          <svg class="ti ti-loader" style="font-size:1.1rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
+          Loading teams…
+        </div>
+        <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
       </div>
 
       <!-- ── App Features Section ────────────────────────────────── -->
