@@ -5079,7 +5079,8 @@ function _buildTestDetailContent(id) {
   }
 
   const displayNum = (window._jkTestDisplayNumMap || {})[id] || id;
-  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> Unit Test ${displayNum} — ${_esc(testDef.title)}`;
+  const execOrder  = (window.JK_EXEC_ORDER || {})[id];
+  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> #${id} — ${_esc(testDef.title)}`;
   const catColor = _CATEGORY_COLORS[testDef.category] || '#6b7280';
   const catPill = `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${catColor}22;color:${catColor}">${_esc(testDef.category)}</span>`;
   const stored = (window._jkTestResults || {})[id] || {};
@@ -5092,11 +5093,11 @@ function _buildTestDetailContent(id) {
   const bodyHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
     <tr>
       <td style="${tdLabel}">Exec Order</td>
-      <td style="${tdValueMuted}">${(window.JK_EXEC_ORDER || {})[id] != null ? '#' + (window.JK_EXEC_ORDER || {})[id] : '—'}</td>
+      <td style="${tdValueMuted}">${execOrder != null ? execOrder : '—'}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">ID</td>
-      <td style="${tdValueMuted}">${displayNum}</td>
+      <td style="${tdValueMuted}">#${id}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">Category</td>
