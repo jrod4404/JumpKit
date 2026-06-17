@@ -948,25 +948,25 @@ async function getUserRole(userId) {
 function _makeColConfigRow(c, i, jumpCount) {
   // Build sharing status label (read-only)
   let statusHTML = '';
-  if (c.name && !c._new) {
+  if (!c.isShared) {
+    // Always show Personal for personal cols (including new blank rows)
+    statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
+  } else if (c.name && !c._new) {
+    // Shared col — show team badge(s)
     const allEntries = [];
     if (c.sharedTeams && c.sharedTeams.length > 0) {
       c.sharedTeams.forEach(st => allEntries.push(st.teamId));
-    } else if (c.teamId && c.isShared) {
+    } else if (c.teamId) {
       allEntries.push(c.teamId);
     }
-    if (!c.isShared || allEntries.length === 0) {
-      statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
-    } else {
-      statusHTML = allEntries.map(tid => {
-        const teamName = _colConfigTeamNames[tid] || 'Team';
-        if (_colConfigOwnedTeamIds.has(tid)) {
-          return `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
-        } else {
-          return `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
-        }
-      }).join('');
-    }
+    statusHTML = allEntries.length > 0
+      ? allEntries.map(tid => {
+          const teamName = _colConfigTeamNames[tid] || 'Team';
+          return _colConfigOwnedTeamIds.has(tid)
+            ? `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`
+            : `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+        }).join('')
+      : `<span class="col-status-badge col-status-personal">Personal</span>`;
   }
 
   const isSharedCol = c.isShared;
