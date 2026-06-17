@@ -4019,7 +4019,7 @@ function _clearSavedTestResults() {
 async function _loadResultsFromHTMLFile() {
   const state = _getReleaseState();
   if (!state?.filePath) {
-    alert('No release testing file configured. Click "Create New Release Testing" first to set the file path.');
+    alert('No results file configured. Click "Start, Stop & Manage Testing" to create or load one.');
     return;
   }
   if (!window.electronAPI?.readFile) {
@@ -4153,9 +4153,9 @@ function _updateRTLabel() {
   const s = _getReleaseState();
   if (s?.version && s?.filePath) {
     const fname = s.filePath.split(/[\/\\]/).pop();
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Saving to: <strong style="color:var(--text)">${fname}</strong></span>`;
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Results file active: <strong style="color:var(--text)">${fname}</strong></span>`;
   } else {
-    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No release testing file configured</span>`;
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No results file — click <strong>Start, Stop &amp; Manage Testing</strong> to create or load one</span>`;
   }
 }
 
@@ -4283,7 +4283,13 @@ async function _saveReleaseSection(mode) {
   try {
   const state = _getReleaseState();
   if (!state?.filePath || !state?.version) {
-    alert('No release testing file configured. Click "Create Release Testing" first.');
+    Modal.open(
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Results File Configured',
+      `<p style="margin:0 0 12px">No test results file has been created or loaded. Results cannot be saved without one.</p>
+       <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Start, Stop &amp; Manage Testing</strong> to create a new results file or load an existing one, then try saving again.</p>`,
+      `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
+      'sm'
+    );
     return;
   }
 
