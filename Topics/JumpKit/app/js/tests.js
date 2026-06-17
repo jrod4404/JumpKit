@@ -5126,10 +5126,10 @@ function _buildTestDetailContent(id) {
       <td style="${tdLabel}">Email Subject</td>
       <td style="padding:8px 0"><code style="${codeStyle};color:var(--turq);background:rgba(0,194,199,0.08);border:1px solid rgba(0,194,199,0.2)">📧 ${_esc(testDef.emailSubject)}</code></td>
     </tr>` : ''}
-    <tr>
+    ${isManualTest ? '' : `<tr>
       <td style="${tdLabel}">Outputs</td>
       <td style="${tdValue}"><code style="${codeStyle};color:${receivedColor}">${_esc(receivedText)}</code></td>
-    </tr>
+    </tr>`}
     <tr>
       <td style="${tdLabel}">Result</td>
       <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<svg class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color};width:1.3rem;height:1.3rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
