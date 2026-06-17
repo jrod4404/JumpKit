@@ -1076,6 +1076,15 @@ function _wireRemoveBtn(btn) {
         }
       };
       row.querySelector('#btnRemoveConfirm').onclick = () => {
+        // Immediately delete from DB + orphaned jumps, then refresh UI
+        const colId = btn.dataset.colid;
+        if (colId && !colId.startsWith('new_')) {
+          const allCols  = DB.getColumns(currentUser.id);
+          const orphans  = window.JK.logic.orphanedJumps(DB.getJumps(currentUser.id), [colId]);
+          orphans.forEach(j => DB.deleteJump(currentUser.id, j.id));
+          DB.saveColumns(currentUser.id, allCols.filter(c => c.id !== colId));
+          renderColumns(); // refresh jumps page immediately
+        }
         row.remove();
         // Re-index remaining rows
         document.querySelectorAll('.col-config-item').forEach((el, i) => { el.dataset.idx = i; });
