@@ -2599,11 +2599,25 @@ window.importJumps = async function importJumps() {
   // 3. Parse
   let backup;
   try { backup = JSON.parse(fileResult.content); } catch (_) {
-    Toast.danger('Invalid backup file — could not parse JSON');
+    Modal.open(
+      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Invalid File',
+      `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">
+        <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">This file could not be read as a JumpKit backup.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:0">The file you selected is not valid JSON. Please choose a <strong>.json</strong> file exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>.</p>
+      </div>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`
+    );
     return;
   }
   if (!Array.isArray(backup?.jumps) || !Array.isArray(backup?.columns)) {
-    Toast.danger('Invalid backup file — missing jumps or columns');
+    Modal.open(
+      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Unrecognised File',
+      `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">
+        <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">This doesn’t look like a JumpKit backup file.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:0">The file is valid JSON but is missing the required <code>jumps</code> and <code>columns</code> data. Please select a <strong>.json</strong> file exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>.</p>
+      </div>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`
+    );
     return;
   }
 
