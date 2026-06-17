@@ -4671,7 +4671,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
 
   // Column header row — placed inside each section tbody
   const colHdrRow = `<tr style="background:#f9fafb;border-bottom:1px solid #e5e7eb">
-      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left;white-space:nowrap">Exec # / ID</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left;white-space:nowrap">Exec / #ID</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Category</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Title &amp; Purpose</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Input</th>
@@ -4686,7 +4686,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
     const stateC = stateColor(e.state);
     const execNum = e.execOrder != null ? e.execOrder : e.displayNum;
     return `<tr${isLast ? '' : ' style="border-bottom:1px solid #e5e7eb"'}>
-      <td style="padding:7px 10px;font-size:12px;white-space:nowrap"><span style="font-weight:700;color:#374151">#${execNum}</span> <span style="color:#9ca3af;font-size:11px;font-weight:400">&middot; ${e.id}</span></td>
+      <td style="padding:7px 10px;font-size:12px;white-space:nowrap"><span style="color:#9ca3af;font-size:11px;font-weight:400">${execNum} &middot;</span> <span style="font-weight:700;color:#374151">#${e.id}</span></td>
       <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
       <td style="padding:7px 10px;font-size:12px;color:#374151;max-width:540px;word-break:break-word"><div style="font-weight:700">${_esc(e.title)}</div>${e.purpose ? `<div style="font-size:11px;color:#6b7280;font-weight:400;margin-top:3px;line-height:1.4">${_esc(e.purpose)}</div>` : ''}</td>
       <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:147px;word-break:break-word">${_esc(e.input)}</td>
@@ -4915,7 +4915,7 @@ const _byCategory = (a, b) => {
 const _COL_HEADERS = `
   <thead>
     <tr style="border-bottom:2px solid var(--border)">
-      <th style="padding:10px 12px;text-align:left;width:1px;white-space:nowrap;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXEC # / ID</th>
+      <th style="padding:10px 12px;text-align:left;width:1px;white-space:nowrap;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXEC / #ID</th>
       <th style="padding:10px 12px;text-align:left;width:110px;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">CATEGORY</th>
       <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">TITLE</th>
       <th style="padding:10px 12px;text-align:left;color:var(--text-muted);font-size:0.75rem;font-weight:600;letter-spacing:.05em">EXPECTED</th>
@@ -4954,7 +4954,7 @@ function _sectionBlock(label, icon, tests, startNum, actionBtns, sectionKey) {
 function _testRow(t, execNum) {
   return `
   <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
-    <td style="padding:10px 12px;font-size:0.8rem;font-weight:600;white-space:nowrap"><span style="color:var(--text);font-weight:700">#${execNum}</span> <span style="color:var(--text-muted);font-size:0.75rem;font-weight:400">· ${t.id}</span></td>
+    <td style="padding:10px 12px;font-size:0.8rem;font-weight:600;white-space:nowrap"><span style="color:var(--text-muted);font-size:0.75rem;font-weight:400">${execNum} ·</span> <span style="color:var(--text);font-weight:700">#${t.id}</span></td>
     <td style="padding:10px 12px">
       <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${_CATEGORY_COLORS[t.category] || '#6b7280'}22;color:${_CATEGORY_COLORS[t.category] || '#6b7280'}">
         ${_esc(t.category)}
