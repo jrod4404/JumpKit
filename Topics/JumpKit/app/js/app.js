@@ -2738,8 +2738,10 @@ window.importJumps = async function importJumps() {
       }
     }
 
-    // 8. Refresh UI and show summary
-    if (imported > 0) {
+    // 8. Navigate to jumps page + refresh UI (always, so nav stays in sync)
+    if (typeof navigateTo === 'function') {
+      navigateTo('jumps');
+    } else if (imported > 0) {
       if (typeof renderJumps === 'function') renderJumps();
       else if (typeof _buildPage === 'function') _buildPage('jumps');
     }
