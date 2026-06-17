@@ -2756,7 +2756,7 @@ const JK_TESTS = [
       },
       {
         label: '2. Insert test lockout row (save the returned id)',
-        cmd: `INSERT INTO team_members (team_id, user_id, role, locked, lock_at, lock_notified_2day)\nVALUES (\n  '<your-team-id>',\n  (SELECT id FROM profiles WHERE email='your-email'),\n  'member', false, NOW() - INTERVAL '1 hour', false\n)\nRETURNING id;`
+        cmd: `INSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nVALUES (\n  '<your-team-id>',\n  (SELECT id FROM profiles WHERE email='your-email'),\n  false, NOW() - INTERVAL '1 hour', false\n)\nRETURNING id;`
       },
       {
         label: '4. Verify locked=true',
