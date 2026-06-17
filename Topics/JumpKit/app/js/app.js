@@ -2558,6 +2558,30 @@ window.importJumps = async function importJumps() {
     return;
   }
 
+  // 0. Intro modal — explain what to do before opening the file picker
+  const proceed = await new Promise(resolve => {
+    Modal.open(
+      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-import"/></svg> Import Jumps from Backup',
+      `<div style="display:flex;flex-direction:column;gap:14px;padding:4px 0">
+        <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">Choose a JumpKit backup file to import.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:0">Select a <strong>.json</strong> file previously exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>. You'll be able to choose which columns to import before anything is added.</p>
+        <ul style="color:var(--text-muted);font-size:0.82rem;margin:0;padding-left:18px;line-height:1.7">
+          <li>Only personal jumps and columns are imported — shared/team jumps are excluded.</li>
+          <li>Duplicate jumps (same URL in the same column) are automatically skipped.</li>
+          <li>Archived jumps are grouped as a separate selectable collection.</li>
+        </ul>
+      </div>`,
+      `<button class="btn btn-subtle" id="importIntroCancelBtn">Cancel</button>
+       <button class="btn btn-primary" id="importIntroPickBtn" style="min-width:140px">
+         <svg class="ti ti-folder-open" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-folder-open"/></svg> Choose File
+       </button>`,
+      'sm'
+    );
+    document.getElementById('importIntroCancelBtn').onclick = () => { Modal.close(); resolve(false); };
+    document.getElementById('importIntroPickBtn').onclick  = () => { Modal.close(); resolve(true);  };
+  });
+  if (!proceed) return;
+
   // 1. Open file picker
   const picked = await window.electronAPI.openFileDialog({
     title: 'Select JumpKit Backup File',
