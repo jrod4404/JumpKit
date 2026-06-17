@@ -4126,7 +4126,8 @@ function _testsJaction(e) {
     if (collapsed) {
       // Expand: animate from 0 → large value. scrollHeight returns 0 in Electron/WebKit
       // when maxHeight is 0, so use a fixed large ceiling instead.
-      body.style.maxHeight = '6000px';
+      // 60000px safely handles 700+ test rows (~85px each) with room to spare.
+      body.style.maxHeight = '60000px';
       body.dataset.collapsed = 'false';
       if (chevron) chevron.style.transform = 'rotate(0deg)';
     } else {
