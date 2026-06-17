@@ -2573,7 +2573,7 @@ window.importJumps = async function importJumps() {
       </div>`,
       `<button class="btn btn-subtle" id="importIntroCancelBtn">Cancel</button>
        <button class="btn btn-primary" id="importIntroPickBtn" style="min-width:140px">
-         <svg class="ti ti-folder-open" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-folder-open"/></svg> Choose File
+         <svg class="ti ti-folder-open" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-folder-open"/></svg> Choose File
        </button>`,
       'sm'
     );
