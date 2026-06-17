@@ -5,6 +5,7 @@
   "main": "main.js",
   "author": "Jeff",
   "scripts": {
+    "test": "node --test test/**/*.mjs",
     "start": "electron .",
     "build": "electron-builder --mac",
     "build:win": "electron-builder --win",
