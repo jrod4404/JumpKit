@@ -2749,25 +2749,24 @@ const JK_TESTS = [
     description: 'Insert a test team_members row with lock_at 1 hour ago, trigger check-member-lockouts, verify locked=true, then clean up.',
     input: 'Supabase SQL editor',
     expected: 'locked=true on the test row after running check-member-lockouts.',
-    commands: [
-      {
-        label: '1. Get your team_id',
-        cmd: `SELECT id, name FROM teams\nWHERE owner_id = (SELECT id FROM profiles WHERE email='your-email');`
-      },
-      {
-        label: '2. Insert test lockout row (save the returned id)',
-        cmd: `INSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nVALUES (\n  '<your-team-id>',\n  (SELECT id FROM profiles WHERE email='your-email'),\n  false, NOW() - INTERVAL '1 hour', false\n)\nRETURNING id;`
-      },
-      {
-        label: '4. Verify locked=true',
-        cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
-      },
-      {
-        label: '5. Clean up',
-        cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
-      },
-    ],
-    steps: '1. Run SQL from command 1 above — note your team_id.\n2. Run SQL from command 2 — save the returned row id.\n3. Run Test 109 (triggers check-member-lockouts).\n4. Run SQL from command 4 — confirm locked=true.\n5. Run SQL from command 5 to clean up.\n6. Mark Pass if locked=true was confirmed.',
+    commands: (user) => {
+      const email = user?.email || 'your-email@example.com';
+      return [
+        {
+          label: '1. Insert test lockout row (save the returned id)',
+          cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nRETURNING id;`
+        },
+        {
+          label: '3. Verify locked=true (replace <saved-id>)',
+          cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
+        },
+        {
+          label: '4. Clean up (replace <saved-id>)',
+          cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
+        },
+      ];
+    },
+    steps: '1. Run command 1 — save the returned row id.\n2. Run Test 109 (triggers check-member-lockouts).\n3. Run command 3 (replace <saved-id>) — confirm locked=true.\n4. Run command 4 (replace <saved-id>) to clean up.\n5. Mark Pass if locked=true was confirmed.',
     notes: 'lock_at is a team membership enforcement mechanism tied to subscription downgrades.\n\nHow it works:\n1. lock_at is set on a team_members row when a team owner\'s subscription is about to expire — it\'s a future timestamp (the date access should be cut off).\n2. 2 days before lock_at — check-member-lockouts detects rows where lock_at is within 48 hours and lock_notified_2day=false. It sends a warning email to both owner and member, then sets lock_notified_2day=true.\n3. When lock_at passes — check-member-lockouts finds rows where lock_at ≤ NOW() and locked=false, and sets locked=true.\n4. In the app — when the Teams page loads, it fetches team_members for the current user and builds _lockedTeamIds. Any team where locked=true shows the member as locked out — shared column access is blocked.\n\nIn short: owner\'s subscription lapses → members get a 2-day warning email → then get locked out of shared team columns automatically.',
     test: async () => 'manual'
   },
@@ -5146,7 +5145,10 @@ function _buildTestDetailContent(id) {
         </tr>`;
       }
       // Manual test — merge steps + commands into one Exec Steps section
-      const cmds = testDef.commands || [];
+      // Support commands as a function (receives currentUser) for dynamic content
+      const cmds = typeof testDef.commands === 'function'
+        ? testDef.commands(typeof currentUser !== 'undefined' ? currentUser : null)
+        : (testDef.commands || []);
       const cmdBlocksHTML = cmds.length ? cmds.map((c, i) => `
         <div style="margin-bottom:10px">
           <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px">${_esc(c.label)}</div>
