@@ -517,9 +517,17 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-config-item {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 14px;
-  display: grid; grid-template-columns: 28px 1fr 70px 1fr; gap: 10px; align-items: start;
+  display: grid; grid-template-columns: 28px 1fr 70px 1fr 36px; gap: 10px; align-items: start;
   cursor: grab; transition: background var(--transition), border-color var(--transition);
 }
+.btn-col-remove {
+  background: none; border: none; padding: 4px; cursor: pointer;
+  color: var(--text-dim); border-radius: 4px; display: flex; align-items: center; justify-content: center;
+  transition: color var(--transition), background var(--transition);
+  align-self: center; margin-top: 18px;
+}
+.btn-col-remove:hover:not([disabled]) { color: #e15b59; background: rgba(225,91,89,0.1); }
+.btn-col-remove[disabled] { cursor: not-allowed; }
 .col-config-field { display: flex; flex-direction: column; gap: 4px; }
 .col-config-label { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
 .col-status-field { justify-content: flex-start; }

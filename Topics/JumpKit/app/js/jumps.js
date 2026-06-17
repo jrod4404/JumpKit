@@ -907,7 +907,9 @@ let _colConfigOwnedTeamIds = new Set(); // teamIds owned by current user
 
 async function openConfigColumnsModal() {
   let cols = DB.getColumns(currentUser.id);
-  while (cols.length < 10) {
+  // Pad to 10 slots by default for new users; allow going beyond 10 via Add Column
+  const padTo = Math.max(10, cols.length);
+  while (cols.length < padTo) {
     cols.push({ id: 'new_' + cols.length, userId: currentUser.id, name: '', visible: false, order: cols.length + 1, _new: true });
   }
   cols.sort((a, b) => a.order - b.order);
@@ -943,65 +945,148 @@ async function getUserRole(userId) {
   } catch (_) { return 'team-member'; }
 }
 
-function renderColConfigModal(cols) {
-  const rows = cols.map((c, i) => {
-    // Build sharing status label (read-only)
-    let statusHTML = '';
-    if (c.name && !c._new) {
-      // Collect all team entries from both old (teamId) and new (sharedTeams) format
-      const allEntries = [];
-      if (c.sharedTeams && c.sharedTeams.length > 0) {
-        c.sharedTeams.forEach(st => allEntries.push(st.teamId));
-      } else if (c.teamId && c.isShared) {
-        allEntries.push(c.teamId);
-      }
-      if (!c.isShared || allEntries.length === 0) {
-        statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
-      } else {
-        statusHTML = allEntries.map(tid => {
-          const teamName = _colConfigTeamNames[tid] || 'Team';
-          if (_colConfigOwnedTeamIds.has(tid)) {
-            return `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
-          } else {
-            return `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
-          }
-        }).join('');
-      }
+function _makeColConfigRow(c, i, jumpCount) {
+  // Build sharing status label (read-only)
+  let statusHTML = '';
+  if (c.name && !c._new) {
+    const allEntries = [];
+    if (c.sharedTeams && c.sharedTeams.length > 0) {
+      c.sharedTeams.forEach(st => allEntries.push(st.teamId));
+    } else if (c.teamId && c.isShared) {
+      allEntries.push(c.teamId);
     }
-    return `
-    <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
-      <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.svg#tabler-grip-vertical"/></svg></span>
-      <div class="col-config-field">
-        <span class="col-config-label">Column Name</span>
-        <input class="form-input" placeholder="Column name" value="${esc(c.name)}" data-field="name" style="font-size:.85rem;padding:7px 10px"/>
+    if (!c.isShared || allEntries.length === 0) {
+      statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
+    } else {
+      statusHTML = allEntries.map(tid => {
+        const teamName = _colConfigTeamNames[tid] || 'Team';
+        if (_colConfigOwnedTeamIds.has(tid)) {
+          return `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`;
+        } else {
+          return `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+        }
+      }).join('');
+    }
+  }
+
+  const isSharedCol = c.isShared;
+  const removeBtn = isSharedCol
+    ? `<button type="button" class="btn-col-remove" disabled title="Team columns can only be hidden, not removed" style="opacity:.35;cursor:not-allowed"><svg class="ti ti-trash" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
+    : `<button type="button" class="btn-col-remove" data-colid="${esc(c.id || '')}" data-colname="${esc(c.name || '')}" data-jumpcount="${jumpCount}" title="Remove column"><svg class="ti ti-trash" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
+
+  return `
+  <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
+    <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.svg#tabler-grip-vertical"/></svg></span>
+    <div class="col-config-field">
+      <span class="col-config-label">Column Name</span>
+      <input class="form-input" placeholder="Column name" value="${esc(c.name)}" data-field="name" style="font-size:.85rem;padding:7px 10px"/>
+    </div>
+    <div class="col-config-field" style="align-items:center">
+      <span class="col-config-label" style="text-align:center">Visible</span>
+      <div class="toggle-wrap" style="justify-content:center">
+        <label class="toggle">
+          <input type="checkbox" data-field="visible" ${c.visible && c.name ? 'checked' : ''}/>
+          <span class="toggle-slider"></span>
+        </label>
       </div>
-      <div class="col-config-field" style="align-items:center">
-        <span class="col-config-label" style="text-align:center">Visible</span>
-        <div class="toggle-wrap" style="justify-content:center">
-          <label class="toggle">
-            <input type="checkbox" data-field="visible" ${c.visible && c.name ? 'checked' : ''}/>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-      <div class="col-config-field col-status-field">
-        <span class="col-config-label">Sharing</span>
-        ${statusHTML}
-      </div>
-    </div>`;
-  }).join('');
+    </div>
+    <div class="col-config-field col-status-field">
+      <span class="col-config-label">Sharing</span>
+      ${statusHTML}
+    </div>
+    <div class="col-config-field" style="align-items:center;min-width:36px;flex:0 0 36px">
+      ${removeBtn}
+    </div>
+  </div>`;
+}
+
+function renderColConfigModal(cols) {
+  // Build jump count map for remove confirmation
+  const jumpCounts = {};
+  DB.getJumps(currentUser.id).forEach(j => {
+    jumpCounts[j.columnId] = (jumpCounts[j.columnId] || 0) + 1;
+  });
+
+  const rows = cols.map((c, i) => _makeColConfigRow(c, i, jumpCounts[c.id] || 0)).join('');
 
   const body = `
     <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:16px">
-      Define up to 10 columns. Drag to reorder. To share columns with a team, go to <strong>Account → My Teams</strong>.
+      Drag to reorder. To share columns with a team, go to <strong>Account → My Teams</strong>.
     </p>
-    <div class="col-config-list" id="colConfigList">${rows}</div>`;
+    <div class="col-config-list" id="colConfigList">${rows}</div>
+    <button type="button" id="btnAddColRow" class="btn btn-subtle" style="margin-top:12px;display:flex;align-items:center;gap:6px;font-size:.85rem">
+      <svg class="ti ti-plus" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Column
+    </button>`;
 
   Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns', body,
     `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-save" id="btnSaveColumns" data-jaction="save-columns"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
+
   initColDragDrop();
+  _initColConfigActions();
 }
+
+function _initColConfigActions() {
+  // Add Column button
+  const addBtn = document.getElementById('btnAddColRow');
+  if (addBtn) {
+    addBtn.onclick = () => {
+      const list = document.getElementById('colConfigList');
+      if (!list) return;
+      const idx = list.querySelectorAll('.col-config-item').length;
+      const blankCol = { id: 'new_' + Date.now(), userId: currentUser.id, name: '', visible: false, order: idx + 1, _new: true };
+      list.insertAdjacentHTML('beforeend', _makeColConfigRow(blankCol, idx, 0));
+      // Wire remove on the new row
+      const newRow = list.lastElementChild;
+      const newRemoveBtn = newRow.querySelector('.btn-col-remove');
+      if (newRemoveBtn) _wireRemoveBtn(newRemoveBtn);
+      initColDragDrop();
+    };
+  }
+  // Wire existing remove buttons
+  document.querySelectorAll('.btn-col-remove').forEach(btn => _wireRemoveBtn(btn));
+}
+
+function _wireRemoveBtn(btn) {
+  if (btn.disabled) return;
+  btn.onclick = () => {
+    const row = btn.closest('.col-config-item');
+    if (!row) return;
+    const colName  = btn.dataset.colname || '';
+    const jumpCount = parseInt(btn.dataset.jumpcount || '0', 10);
+    if (jumpCount > 0) {
+      // Inline confirmation
+      row.innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px;padding:6px 4px;width:100%">
+          <svg class="ti ti-alert-triangle" style="width:1.1rem;height:1.1rem;color:#e15b59;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+          <span style="flex:1;font-size:.87rem;color:var(--text)">Delete <strong>${esc(colName)}</strong> and all <strong>${jumpCount}</strong> jump${jumpCount !== 1 ? 's' : ''} inside?</span>
+          <button type="button" class="btn btn-subtle" id="btnRemoveCancel" style="font-size:.8rem;padding:4px 10px">Cancel</button>
+          <button type="button" class="btn" id="btnRemoveConfirm" style="font-size:.8rem;padding:4px 10px;color:#e15b59;border-color:var(--border)">Yes, Delete</button>
+        </div>`;
+      row.querySelector('#btnRemoveCancel').onclick = () => {
+        // Re-render that row from DB
+        const existingCol = DB.getColumns(currentUser.id).find(c => c.id === btn.dataset.colid);
+        if (existingCol) {
+          const jc = DB.getJumps(currentUser.id).filter(j => j.columnId === existingCol.id).length;
+          row.outerHTML = _makeColConfigRow(existingCol, parseInt(row.dataset.idx || '0'), jc);
+          document.querySelectorAll('.btn-col-remove').forEach(b => _wireRemoveBtn(b));
+        } else {
+          row.remove();
+        }
+      };
+      row.querySelector('#btnRemoveConfirm').onclick = () => {
+        row.remove();
+        // Re-index remaining rows
+        document.querySelectorAll('.col-config-item').forEach((el, i) => { el.dataset.idx = i; });
+      };
+    } else {
+      row.remove();
+      document.querySelectorAll('.col-config-item').forEach((el, i) => { el.dataset.idx = i; });
+    }
+  };
+}
+
+
 
 function initColDragDrop() {
   const list = document.getElementById('colConfigList');
@@ -1062,7 +1147,17 @@ async function saveColumns() {
     }
   });
 
-  DB.saveColumns(currentUser.id, updated.filter(c => c.name));
+  const savedCols = updated.filter(c => c.name);
+  DB.saveColumns(currentUser.id, savedCols);
+
+  // Delete jumps that belong to personal columns which were removed
+  const savedColIds = new Set(savedCols.map(c => c.id));
+  const removedPersonalCols = existing.filter(c => !c.isShared && !savedColIds.has(c.id));
+  if (removedPersonalCols.length > 0) {
+    const removedColIdSet = new Set(removedPersonalCols.map(c => c.id));
+    const jumpsToDelete = DB.getJumps(currentUser.id).filter(j => removedColIdSet.has(j.columnId));
+    jumpsToDelete.forEach(j => DB.deleteJump(currentUser.id, j.id));
+  }
 
   // Sync name changes for owner's shared columns to Supabase
   for (const col of updated) {
