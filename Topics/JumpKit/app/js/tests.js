@@ -4203,9 +4203,10 @@ async function _openReleaseTestingModal() {
         <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
       <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;color:#e15b59">
-        <svg class="ti ti-flag-check" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude &amp; Reset
+        <svg class="ti ti-flag-check" style="font-size:1rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude &amp; Reset
       </button>
     </div>
+    <div style="margin-bottom:10px"></div>
     <p style="margin:8px 0 0;font-size:0.75rem;color:var(--text-muted)">
       <strong>Load Results from File</strong> — restores test states from the saved HTML (use after reopening the app).<br>
       <strong>Conclude &amp; Reset</strong> — ends this session and wipes all results so the next release cycle starts clean. The HTML file is kept on disk.
