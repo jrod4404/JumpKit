@@ -3212,6 +3212,168 @@ const JK_TESTS = [
     test: async () => 'manual'
   },
 
+
+  // ── Export / Import (new behaviour) ─────────────────────────────
+
+  {
+    id: 156, category: 'Account',
+    title: 'Export: only personal, non-empty columns included',
+    purpose: 'Confirms buildExportData excludes shared columns, team jumps, and empty personal columns.',
+    prerequisites: 'Must be logged in.',
+    description: 'Calls JK.logic.buildExportData with a synthetic dataset: personal-with-jumps col, personal-empty col, shared col, and mixed jumps.',
+    input: '3 cols (personal-with-jumps, personal-empty, shared), 3 jumps (personal, team, shared).',
+    expected: 'exportCols=[c1 only], exportJumps=[j1 only].',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!window.JK?.logic) throw new Error('JK.logic not available — logic.js not loaded');
+      const { buildExportData } = window.JK.logic;
+      const cols = [
+        { id: 'c1', name: 'Personal Col', isShared: false },
+        { id: 'c2', name: 'Empty Col',    isShared: false },
+        { id: 'c3', name: 'Shared Col',   isShared: true  },
+      ];
+      const jumps = [
+        { id: 'j1', columnId: 'c1', url: 'https://a.com', isShared: false, teamId: null,    isArchived: false },
+        { id: 'j2', columnId: 'c1', url: 'https://b.com', isShared: false, teamId: 'team1', isArchived: false },
+        { id: 'j3', columnId: 'c3', url: 'https://c.com', isShared: true,  teamId: null,    isArchived: false },
+      ];
+      const { exportCols, exportJumps } = buildExportData(jumps, cols);
+      if (exportCols.length !== 1)  throw new Error(`Expected 1 exportCol, got ${exportCols.length}`);
+      if (exportCols[0].id !== 'c1') throw new Error(`Expected c1, got ${exportCols[0].id}`);
+      if (exportJumps.length !== 1) throw new Error(`Expected 1 exportJump, got ${exportJumps.length}`);
+      if (exportJumps[0].id !== 'j1') throw new Error(`Expected j1, got ${exportJumps[0].id}`);
+    }
+  },
+
+  {
+    id: 157, category: 'Account',
+    title: 'Export: archived personal jumps are included',
+    purpose: 'Confirms archived personal jumps appear in export (so they survive a round-trip to a new device).',
+    prerequisites: 'Must be logged in.',
+    description: 'Calls buildExportData with one active and one archived personal jump in the same column.',
+    input: '1 personal col, 1 active jump, 1 archived jump.',
+    expected: 'exportJumps.length === 2.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!window.JK?.logic) throw new Error('JK.logic not available');
+      const { buildExportData } = window.JK.logic;
+      const cols  = [{ id: 'c1', name: 'My Col', isShared: false }];
+      const jumps = [
+        { id: 'j1', columnId: 'c1', url: 'https://a.com', isShared: false, teamId: null, isArchived: false },
+        { id: 'j2', columnId: 'c1', url: 'https://b.com', isShared: false, teamId: null, isArchived: true  },
+      ];
+      const { exportJumps } = buildExportData(jumps, cols);
+      if (exportJumps.length !== 2) throw new Error(`Expected 2 exportJumps (active+archived), got ${exportJumps.length}`);
+    }
+  },
+
+  {
+    id: 158, category: 'Account',
+    title: 'Import: partitionBackupJumps separates active, archived and col list',
+    purpose: 'Confirms the backup partitioning logic correctly splits active vs archived personal jumps and identifies columns with active jumps.',
+    prerequisites: 'Must be logged in.',
+    description: 'Calls JK.logic.partitionBackupJumps with a mixed backup. Verifies counts and colsWithJumps list.',
+    input: '2 cols; jumps: 1 active-personal, 1 archived-personal, 1 shared.',
+    expected: 'activeJumps=1, archivedJumps=1, colsWithJumps=[c1 only].',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!window.JK?.logic) throw new Error('JK.logic not available');
+      const { partitionBackupJumps } = window.JK.logic;
+      const cols  = [{ id: 'c1', name: 'Col1' }, { id: 'c2', name: 'Col2' }];
+      const jumps = [
+        { id: 'j1', columnId: 'c1', url: 'https://a.com', isShared: false, teamId: null, isArchived: false },
+        { id: 'j2', columnId: 'c1', url: 'https://b.com', isShared: false, teamId: null, isArchived: true  },
+        { id: 'j3', columnId: 'c2', url: 'https://c.com', isShared: true,  teamId: null, isArchived: false },
+      ];
+      const { activeJumps, archivedJumps, colsWithJumps } = partitionBackupJumps(jumps, cols);
+      if (activeJumps.length   !== 1) throw new Error(`Expected 1 activeJump, got ${activeJumps.length}`);
+      if (archivedJumps.length !== 1) throw new Error(`Expected 1 archivedJump, got ${archivedJumps.length}`);
+      if (colsWithJumps.length !== 1) throw new Error(`Expected 1 col with active jumps, got ${colsWithJumps.length}`);
+      if (colsWithJumps[0].id !== 'c1') throw new Error(`Expected c1 in colsWithJumps, got ${colsWithJumps[0].id}`);
+    }
+  },
+
+  // ── Column add / remove ──────────────────────────────────────────
+
+  {
+    id: 159, category: 'Columns',
+    title: 'Add column: DB.createColumn persists new personal column',
+    purpose: 'Confirms that creating a column via DB.createColumn persists it and it appears in DB.getColumns.',
+    prerequisites: 'Must be logged in.',
+    description: 'Calls DB.createColumn with a unique name, verifies it appears in DB.getColumns, then cleans up.',
+    input: 'DB.createColumn(userId, unique_name, order)',
+    expected: 'New column in DB.getColumns with correct name, isShared=false.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!currentUser?.id) throw new Error('currentUser not available');
+      const name   = '__test_add_col_' + Date.now();
+      const before = DB.getColumns(currentUser.id);
+      const newCol = DB.createColumn(currentUser.id, name, before.length + 1);
+      const after  = DB.getColumns(currentUser.id);
+      const found  = after.find(c => c.id === newCol.id);
+      if (!found) throw new Error('Newly created column not found in DB.getColumns');
+      if (found.name !== name) throw new Error(`Column name mismatch: expected "${name}", got "${found.name}"`);
+      if (found.isShared) throw new Error('New column should not be shared');
+      // Clean up
+      DB.saveColumns(currentUser.id, after.filter(c => c.id !== newCol.id));
+    }
+  },
+
+  {
+    id: 160, category: 'Columns',
+    title: 'Remove column: orphaned jumps are deleted on save',
+    purpose: 'Confirms that when a personal column is removed, its jumps are also deleted (no orphan data).',
+    prerequisites: 'Must be logged in.',
+    description: 'Creates a temp column + jump, identifies them as orphans via JK.logic, deletes them, and verifies both are gone from DB.',
+    input: 'DB.createColumn + DB.createJump, then removedPersonalColIds + orphanedJumps + deleteJump + saveColumns.',
+    expected: 'Both the jump and column are absent from DB after removal.',
+    steps: 'Automatic.',
+    test: async () => {
+      if (!currentUser?.id) throw new Error('currentUser not available');
+      if (!window.JK?.logic) throw new Error('JK.logic not available');
+      const { removedPersonalColIds, orphanedJumps } = window.JK.logic;
+
+      // 1. Create temp col + jump
+      const colName = '__test_remove_col_' + Date.now();
+      const url     = 'https://remove-col-test-' + Date.now() + '.example.com';
+      const before  = DB.getColumns(currentUser.id);
+      const tmpCol  = DB.createColumn(currentUser.id, colName, before.length + 1);
+      const tmpJump = DB.createJump(currentUser.id, { name: 'Temp Jump', url, columnId: tmpCol.id });
+
+      const setupJump = DB.getJumps(currentUser.id).find(j => j.id === tmpJump.id);
+      if (!setupJump) throw new Error('Setup failed: temp jump not found before removal');
+
+      // 2. Identify orphans via pure logic (savedIds = before, excludes tmpCol)
+      const savedIds   = new Set(before.map(c => c.id));
+      const removedIds = removedPersonalColIds(DB.getColumns(currentUser.id), savedIds);
+      if (!removedIds.includes(tmpCol.id)) throw new Error(`removedPersonalColIds missing tmpCol (${tmpCol.id})`);
+      const orphans = orphanedJumps(DB.getJumps(currentUser.id), removedIds);
+      if (!orphans.find(j => j.id === tmpJump.id)) throw new Error('orphanedJumps did not include tmpJump');
+
+      // 3. Execute removal (mirrors saveColumns behaviour)
+      orphans.forEach(j => DB.deleteJump(currentUser.id, j.id));
+      DB.saveColumns(currentUser.id, before);
+
+      // 4. Verify
+      if (DB.getJumps(currentUser.id).find(j => j.id === tmpJump.id))
+        throw new Error('Orphaned jump still exists in DB after column removal');
+      if (DB.getColumns(currentUser.id).find(c => c.id === tmpCol.id))
+        throw new Error('Removed column still exists in DB.getColumns');
+    }
+  },
+
+  {
+    id: 161, category: 'Columns',
+    title: '[MANUAL] Configure Columns — Add Column and Remove Column buttons',
+    purpose: 'Confirms the Add Column and Remove Column (trash icon) UI flows work correctly in the Configure Columns modal.',
+    prerequisites: 'Must be logged in as admin.',
+    description: 'Opens the Configure Columns modal, adds a new column via the button, saves, then reopens and removes it with the trash icon.',
+    input: 'Jumps page → Configure Columns → Add Column → name → Save → reopen → trash → confirm → Save.',
+    expected: 'New column appears after first save. Column (and its jumps) are gone after second save. Team columns have a disabled trash icon.',
+    steps: '1. Go to Jumps page → click "Configure Columns".\n2. Click "+ Add Column" at the bottom — a new blank row should appear.\n3. Enter a column name and toggle it visible.\n4. Click Save Columns. Verify the new column appears in the jump view.\n5. Reopen Configure Columns. Find the new row and click its trash icon.\n6. An inline confirmation row should appear ("Delete X and all N jumps?"). Click "Yes, Delete".\n7. Click Save Columns. Verify the column is gone.\n8. If shared/team columns are present, verify their trash icon is greyed out and non-clickable with tooltip "Team columns can only be hidden, not removed".',
+    test: async () => 'manual'
+  },
+
   // ══════════════════════════════════════════════════════════════════
   // ROI CALCULATION
   // ══════════════════════════════════════════════════════════════════
