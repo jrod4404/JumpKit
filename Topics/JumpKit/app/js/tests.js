@@ -3850,21 +3850,21 @@ function renderTests() {
            via the :has(#pageTests) CSS rule so only #testsTablesWrap scrolls. -->
       <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
         <!-- Unified summary card -->
-        <div id="testSummary" style="padding:10px 20px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
-          <div id="summaryPass" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
-          <div id="summaryFail" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#e15b59">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
-          <div id="summaryManual" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:#f59e0b">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
-          <div id="summaryNotRun" style="text-align:center;padding:4px 16px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Not Run</div></div>
-          <div id="summaryTotal" style="text-align:center;padding:4px 16px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
-          <span id="summaryTime" style="color:var(--text-muted);font-size:0.78rem;padding-left:16px;"></span>
+        <div id="testSummary" style="padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
+          <div id="summaryPass" style="text-align:center;padding:3px 13px;"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
+          <div id="summaryFail" style="text-align:center;padding:3px 13px;"><div style="font-size:1.3rem;font-weight:900;color:#e15b59">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
+          <div id="summaryManual" style="text-align:center;padding:3px 13px;"><div style="font-size:1.3rem;font-weight:900;color:#f59e0b">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
+          <div id="summaryNotRun" style="text-align:center;padding:3px 13px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Not Run</div></div>
+          <div id="summaryTotal" style="text-align:center;padding:3px 13px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
+          <span id="summaryTime" style="color:var(--text-muted);font-size:0.78rem;padding-left:13px;"></span>
         </div>
         <!-- Hidden per-section ids kept for _refreshSummary compat -->
         <div style="display:none"><span id="summaryAutoPass"></span><span id="summaryAutoFail"></span><span id="summaryAMPass"></span><span id="summaryAMFail"></span><span id="summaryManPass"></span><span id="summaryManFail"></span></div>
 
-        <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+        <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:8px 18px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
-        <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+        <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:8px 18px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing
         </button>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
