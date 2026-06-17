@@ -2754,7 +2754,7 @@ const JK_TESTS = [
       return [
         {
           label: '1. Insert test lockout row (save the returned id)',
-          cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nRETURNING id;`
+          cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nON CONFLICT (team_id, user_id) DO UPDATE\n  SET locked = false,\n      lock_at = NOW() - INTERVAL '1 hour',\n      lock_notified_2day = false\nRETURNING id;`
         },
         {
           label: '3. Verify locked=true (replace <saved-id>)',
