@@ -3199,11 +3199,16 @@ const JK_TESTS = [
     id: 155, category: 'Account',
     title: '[MANUAL] Export then Import round-trip on new device',
     purpose: 'End-to-end confirmation that a user can export jumps from one device and import them on another, with all personal jumps transferred correctly.',
-    prerequisites: 'Must be logged in. Have access to a second device or a fresh JumpKit install.',
-    input: 'Settings → Export → save file → transfer to new device → Settings → Import → select file',
-    description: 'Full round-trip: export from device A, import on device B, verify jump counts match.',
-    expected: 'All personal jumps from device A appear on device B. Shared jumps are excluded from the file but sync automatically. No duplicate jumps created on re-import.',
-    steps: '1. On device A: Settings → Maintenance → Export. Save the JSON file.\n2. Transfer the file to device B (USB, AirDrop, email, etc.).\n3. On device B: Settings → Maintenance → Import. Select the file.\n4. Verify the import summary shows the expected count of imported jumps.\n5. Navigate to Jumps page and confirm all personal columns and jumps appear.\n6. Run Import again with the same file — verify all jumps are skipped (0 imported) with no duplicates created.',
+    prerequisites: 'Must be logged in. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory using the shell command below — this gives it its own clean session with no existing data, exactly like a different device.',
+    input: 'Settings → Export → save file → open 2nd instance via shell command → Settings → Import → select file',
+    description: 'Full round-trip: export from device A (this instance), open a 2nd instance as device B using the shell command, import the file, verify jump counts match.',
+    expected: 'All personal jumps from device A appear on device B after import. Shared jumps are excluded from the file but sync automatically. No duplicate jumps created on re-import.',
+    commands: [
+      { label: 'Open 2nd instance (installed app)', cmd: 'open -n /Applications/JumpKit.app --args --user-data-dir=/tmp/jumpkit-second' },
+      { label: 'Open 2nd instance (from source)', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm start -- --user-data-dir=/tmp/jumpkit-second' },
+      { label: 'Cleanup temp profile', cmd: 'rm -rf /tmp/jumpkit-second' },
+    ],
+    steps: '1. On this instance (device A): Settings → Maintenance → Export. Save the JSON file.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available) — this is your simulated device B. ⚠️ Log in with a DIFFERENT account on the second instance (using the same account will trigger the double-login conflict modal — see test 148).\n3. Log in on the second instance with a different account.\n4. On device B: Settings → Maintenance → Import. Select the exported JSON file.\n5. Verify the import summary shows the expected count of imported jumps.\n6. Navigate to Jumps page and confirm all personal columns and jumps appear.\n7. Run Import again with the same file — verify all jumps are skipped (0 imported) with no duplicates created.\n8. After testing, click the Cleanup command above to remove the temp profile.',
     test: async () => 'manual'
   },
 
@@ -3862,6 +3867,12 @@ function renderTests() {
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
           <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create New Release Testing
         </button>
+        <button class="btn btn-subtle" id="btnLoadFromHTMLFile" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
+          <svg class="ti ti-file-upload" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
+        </button>
+        <button class="btn btn-subtle" id="btnConcludeTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px;border-color:#e15b59;color:#e15b59">
+          <svg class="ti ti-flag-check" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude Testing
+        </button>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
@@ -3898,6 +3909,8 @@ function renderTests() {
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
+  document.getElementById('btnLoadFromHTMLFile').addEventListener('click', _loadResultsFromHTMLFile);
+  document.getElementById('btnConcludeTesting').addEventListener('click', _openConcludeModal);
   _updateRTLabel();
   document.getElementById('btnSavePreflightResults').addEventListener('click', () => _saveReleaseSection('preflight'));
   document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
@@ -4006,6 +4019,124 @@ function _clearSavedTestResults() {
     if (!userId || typeof DB === 'undefined' || !DB.savePrefs) return;
     DB.savePrefs(userId, { testResults: {} });
   } catch(e) { console.warn('[tests] clearSavedTestResults failed:', e.message); }
+}
+
+// ── Load Results from HTML File ─────────────────────────────────
+// Reads the configured release testing HTML file, extracts the embedded
+// JSON state, and restores each test's result into the live test runner.
+async function _loadResultsFromHTMLFile() {
+  const state = _getReleaseState();
+  if (!state?.filePath) {
+    alert('No release testing file configured. Click "Create New Release Testing" first to set the file path.');
+    return;
+  }
+  if (!window.electronAPI?.readFile) {
+    alert('File I/O not available — not running in Electron.');
+    return;
+  }
+  try {
+    const { ok, content, reason } = await window.electronAPI.readFile(state.filePath);
+    if (!ok) { window.Toast?.danger(`Could not read file: ${reason}`); return; }
+    if (!content) { window.Toast?.danger('File is empty or does not exist yet.'); return; }
+
+    // Extract embedded JSON block
+    const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
+    if (!match) { window.Toast?.danger('No test data found in file — was it created by JumpKit?'); return; }
+
+    const entries = JSON.parse(match[1]);
+    if (!window._jkTestResults) window._jkTestResults = {};
+
+    let loaded = 0;
+    Object.values(entries).forEach(entry => {
+      const id = parseInt(entry.id);
+      if (!id || !entry.state || entry.state === 'not-run') return;
+      window._jkTestResults[id] = {
+        state: entry.state,
+        received: entry.manuallyMarked ? 'Manually marked as passed' : (entry.details || 'Loaded from file'),
+        ts: Date.now(),
+      };
+      loaded++;
+    });
+
+    // Persist to SQLite so results survive future restarts
+    _saveTestResults();
+
+    // Refresh UI
+    Object.entries(window._jkTestResults).forEach(([id, r]) => {
+      if (r.state && r.state !== 'running') _setRowResult(parseInt(id), r.state, r.message || null);
+    });
+    _refreshSummary();
+
+    const fname = state.filePath.split(/[\/\\]/).pop();
+    window.Toast?.success(`Loaded ${loaded} result${loaded !== 1 ? 's' : ''} from ${fname}`);
+  } catch (err) {
+    console.error('[LoadFromFile] Error:', err);
+    window.Toast?.danger(`Load failed: ${err.message}`);
+  }
+}
+
+// ── Conclude Testing ─────────────────────────────────────────────
+// Shows a confirmation modal, then resets all test state so the next
+// testing cycle starts from scratch. The HTML file on disk is kept
+// as the permanent record for this release.
+function _openConcludeModal() {
+  const results = window._jkTestResults || {};
+  const notRun = JK_TESTS.filter(t => {
+    const r = results[t.id];
+    return !r || r.state === 'not-run';
+  });
+  // Manual tests default to 'manual' state — treat those as incomplete too
+  const stillManual = JK_TESTS.filter(t => {
+    const r = results[t.id];
+    return r?.state === 'manual';
+  });
+
+  const warnLines = [];
+  if (notRun.length)    warnLines.push(`<li><strong>${notRun.length}</strong> test${notRun.length !== 1 ? 's' : ''} never run</li>`);
+  if (stillManual.length) warnLines.push(`<li><strong>${stillManual.length}</strong> manual test${stillManual.length !== 1 ? 's' : ''} not yet marked Pass/Fail</li>`);
+
+  const warnBlock = warnLines.length
+    ? `<div style="margin-bottom:14px;padding:10px 14px;border-radius:8px;background:#f59e0b22;border:1px solid #f59e0b55;color:#f59e0b;font-size:0.85rem">
+        <strong>⚠️ Heads up:</strong><ul style="margin:6px 0 0 16px;padding:0">${warnLines.join('')}</ul>
+       </div>`
+    : `<div style="margin-bottom:14px;padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;color:#3fbe71;font-size:0.85rem">✅ All tests have been run and marked.</div>`;
+
+  const rtState = _getReleaseState();
+  const fname = rtState?.filePath ? rtState.filePath.split(/[\/\\]/).pop() : null;
+  const fileNote = fname
+    ? `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">The results file <strong style="color:var(--text)">${fname}</strong> will be kept on disk as a permanent record. The test runner will reset to a clean state ready for the next release cycle.</p>`
+    : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file is configured. The test runner will reset to a clean state.</p>`;
+
+  const body = `
+    ${warnBlock}
+    <p style="margin:0 0 10px;font-weight:600">Conclude this testing session?</p>
+    ${fileNote}`;
+
+  const footer = `
+    <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
+    <button id="btnConfirmConclude" class="btn" style="background:#e15b59;color:#fff;border-color:#e15b59">Yes, Conclude &amp; Reset</button>`;
+
+  Modal.open(
+    '<svg class="ti ti-flag-check" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude Testing',
+    body, footer, 'md'
+  );
+
+  document.getElementById('btnConfirmConclude').onclick = () => {
+    Modal.close();
+    _concludeTesting();
+  };
+}
+
+function _concludeTesting() {
+  // 1. Wipe in-memory results
+  window._jkTestResults = {};
+  // 2. Wipe SQLite
+  _clearSavedTestResults();
+  // 3. Clear localStorage release config (file path / version)
+  try { localStorage.removeItem(_RT_KEY); } catch(_) {}
+  // 4. Full re-render so everything starts fresh
+  renderTests();
+  window.Toast?.success('Testing session concluded. Ready for next release cycle! 🎉');
 }
 
 function _esc(str) {
