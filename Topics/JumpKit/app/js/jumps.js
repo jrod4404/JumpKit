@@ -971,8 +971,8 @@ function _makeColConfigRow(c, i, jumpCount) {
 
   const isSharedCol = c.isShared;
   const removeBtn = isSharedCol
-    ? `<button type="button" class="btn-col-remove" disabled title="Team columns can only be hidden, not removed"><svg class="ti ti-trash" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
-    : `<button type="button" class="btn-col-remove" data-colid="${esc(c.id || '')}" data-colname="${esc(c.name || '')}" data-jumpcount="${jumpCount}" title="Remove column"><svg class="ti ti-trash" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
+    ? `<button type="button" class="btn-col-remove tooltip-left" disabled data-tooltip="Team columns can only be hidden, not removed"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
+    : `<button type="button" class="btn-col-remove tooltip-left" data-colid="${esc(c.id || '')}" data-colname="${esc(c.name || '')}" data-jumpcount="${jumpCount}" data-tooltip="Remove column"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
 
   return `
   <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
