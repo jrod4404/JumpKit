@@ -2744,12 +2744,30 @@ const JK_TESTS = [
   {
     id: 131, category: 'Subscription',
     title: '[MANUAL] check-member-lockouts — actually locks a member when lock_at has passed',
-    purpose: 'End-to-end manual test: insert a team_members row with lock_at in the past, run check-member-lockouts, confirm the row is now locked=true. Validates the core lock-apply logic.',
-    prerequisites: 'Must have a team in Supabase. Requires direct SQL access to insert a test row.',
-    description: 'Manually insert a team_members row with lock_at set to 1 hour ago, call check-member-lockouts (Test 109), then verify locked=true in Supabase.',
-    input: 'INSERT test row into team_members with lock_at=now()-1h → POST /functions/v1/check-member-lockouts → SELECT locked FROM team_members WHERE id=<id>',
-    expected: 'After running check-member-lockouts, the test row has locked=true.',
-    steps: '1. In Supabase SQL editor, get a real team_id you own:\n   SELECT id, name FROM teams WHERE owner_id = (SELECT id FROM profiles WHERE email=\'your-email\');\n\n2. Insert a test lockout row:\n   INSERT INTO team_members (team_id, user_id, role, locked, lock_at, lock_notified_2day)\n   VALUES (\'<your-team-id>\', (SELECT id FROM profiles WHERE email=\'your-email\'), \'member\', false, NOW() - INTERVAL \'1 hour\', false)\n   RETURNING id;\n   -- Save the returned id.\n\n3. Run Test 109 (auto-calls check-member-lockouts).\n\n4. Verify the row is now locked:\n   SELECT id, locked, lock_at FROM team_members WHERE id=\'<saved-id>\';\n   Expected: locked=true\n\n5. Clean up:\n   DELETE FROM team_members WHERE id=\'<saved-id>\';\n\n6. Mark as Pass if locked=true was confirmed.',
+    purpose: 'Confirms check-member-lockouts sets locked=true on rows where lock_at is in the past.',
+    prerequisites: 'Supabase access + a team you own.',
+    description: 'Insert a test team_members row with lock_at 1 hour ago, trigger check-member-lockouts, verify locked=true, then clean up.',
+    input: 'Supabase SQL editor',
+    expected: 'locked=true on the test row after running check-member-lockouts.',
+    commands: [
+      {
+        label: '1. Get your team_id',
+        cmd: `SELECT id, name FROM teams\nWHERE owner_id = (SELECT id FROM profiles WHERE email='your-email');`
+      },
+      {
+        label: '2. Insert test lockout row (save the returned id)',
+        cmd: `INSERT INTO team_members (team_id, user_id, role, locked, lock_at, lock_notified_2day)\nVALUES (\n  '<your-team-id>',\n  (SELECT id FROM profiles WHERE email='your-email'),\n  'member', false, NOW() - INTERVAL '1 hour', false\n)\nRETURNING id;`
+      },
+      {
+        label: '4. Verify locked=true',
+        cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
+      },
+      {
+        label: '5. Clean up',
+        cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
+      },
+    ],
+    steps: '1. Run SQL from command 1 above — note your team_id.\n2. Run SQL from command 2 — save the returned row id.\n3. Run Test 109 (triggers check-member-lockouts).\n4. Run SQL from command 4 — confirm locked=true.\n5. Run SQL from command 5 to clean up.\n6. Mark Pass if locked=true was confirmed.',
     test: async () => 'manual'
   },
 
