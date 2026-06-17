@@ -4470,8 +4470,9 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
 
   // Inline pill helper — only renders non-zero values; matches app section header style
-  const _pill = (val, label, color) => val > 0
-    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${val} ${label}</span>`
+  const _exportCheckIcon = `<svg style="width:10px;height:10px;flex-shrink:0;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const _pill = (val, label, color, allPass) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${allPass ? _exportCheckIcon : ''}${val} ${label}</span>`
     : '';
 
   const secPills = sec => {
@@ -4479,10 +4480,11 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
     const pass   = es.filter(e => e.state === 'pass').length;
     const fail   = es.filter(e => e.state === 'fail').length;
     const manual = es.filter(e => e.state === 'manual').length;
+    const allPass = es.length > 0 && pass === es.length;
     return `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
-      + _pill(pass,   'Pass',   '#3fbe71')
-      + _pill(fail,   'Fail',   '#e15b59')
-      + _pill(manual, 'Manual', '#f59e0b')
+      + _pill(pass,   'Pass',   '#3fbe71', allPass)
+      + _pill(fail,   'Fail',   '#e15b59', false)
+      + _pill(manual, 'Manual', '#f59e0b', false)
       + `</span>`;
   };
 
@@ -5066,6 +5068,11 @@ function _refreshSummary() {
   let amPassed = 0, amFailed = 0, amManual = 0;
   let manPassed = 0, manFailed = 0, manManual = 0;
   let pfPassed = 0, pfFailed = 0, pfManual = 0;
+  // Section totals (for 100% pass check)
+  const pfTotal   = JK_TESTS.filter(t => t.id === 139).length;
+  const autoTotal = JK_TESTS.filter(t => !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]') && t.id !== 139).length;
+  const amTotal   = JK_TESTS.filter(t => t.title.startsWith('[AUTO+MANUAL]')).length;
+  const manTotal  = JK_TESTS.filter(t => t.title.startsWith('[MANUAL]') && t.id !== 139).length;
 
   // Read directly from _jkTestResults (source of truth) — never scrape DOM icons.
   // _resetSection deletes entries from _jkTestResults before calling _refreshSummary,
@@ -5087,18 +5094,20 @@ function _refreshSummary() {
   });
 
   // Inline section header stats pills
-  const _pill = (val, label, color) => val > 0
-    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${color}22;color:${color}">${val} ${label}</span>`
+  const _checkIcon = `<svg style="width:10px;height:10px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const _pill = (val, label, color, allPass) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${color}22;color:${color}">${allPass ? _checkIcon : ''}${val} ${label}</span>`
     : '';
-  const _inlineSectionStats = (key, p, f, m) => {
+  const _inlineSectionStats = (key, p, f, m, total) => {
     const el = document.getElementById('section-inline-stats-' + key);
     if (!el) return;
-    el.innerHTML = _pill(p,'Pass','#3fbe71') + _pill(f,'Fail','#e15b59') + _pill(m,'Manual','#f59e0b');
+    const allPass = total > 0 && p === total;
+    el.innerHTML = _pill(p,'Pass','#3fbe71', allPass) + _pill(f,'Fail','#e15b59', false) + _pill(m,'Manual','#f59e0b', false);
   };
-  _inlineSectionStats('preflight', pfPassed,   pfFailed,   pfManual);
-  _inlineSectionStats('auto',      autoPassed, autoFailed, autoManual);
-  _inlineSectionStats('am',        amPassed,   amFailed,   amManual);
-  _inlineSectionStats('manual',    manPassed,  manFailed,  manManual);
+  _inlineSectionStats('preflight', pfPassed,   pfFailed,   pfManual,   pfTotal);
+  _inlineSectionStats('auto',      autoPassed, autoFailed, autoManual, autoTotal);
+  _inlineSectionStats('am',        amPassed,   amFailed,   amManual,   amTotal);
+  _inlineSectionStats('manual',    manPassed,  manFailed,  manManual,  manTotal);
 
   // Unified summary card — Pass / Fail / Manual / Not Run / Total
   const totalRun = passed + failed + manual;
