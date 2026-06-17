@@ -3878,10 +3878,17 @@ function renderTests() {
   // Build initial rows
   _buildTestRows();
 
-  // Restore saved results from previous session
-  _loadTestResults();
-  // Pre-seed all [MANUAL] tests with 'manual' state if not already set
+  // Only restore saved results if a release testing session is active.
+  // If no session is active, leave everything in the default clean state.
   if (!window._jkTestResults) window._jkTestResults = {};
+  const _activeSession = _getReleaseState();
+  if (_activeSession?.filePath) {
+    // Load from SQLite first (fast, synchronous) as a quick base
+    _loadTestResults();
+    // Then auto-load from the HTML file (authoritative record) silently
+    setTimeout(() => _loadResultsFromHTMLFile({ silent: true }), 0);
+  }
+  // Pre-seed all [MANUAL] tests with 'manual' state if not already set
   JK_TESTS.filter(t => t.title.startsWith('[MANUAL]')).forEach(t => {
     if (!window._jkTestResults[t.id]) {
       window._jkTestResults[t.id] = { state: 'manual', received: 'Manual verification required' };
@@ -4016,24 +4023,25 @@ function _clearSavedTestResults() {
 // ── Load Results from HTML File ─────────────────────────────────
 // Reads the configured release testing HTML file, extracts the embedded
 // JSON state, and restores each test's result into the live test runner.
-async function _loadResultsFromHTMLFile() {
+async function _loadResultsFromHTMLFile(opts = {}) {
+  const silent = opts?.silent === true;
   const state = _getReleaseState();
   if (!state?.filePath) {
-    alert('No results file configured. Click "Start, Stop & Manage Testing" to create or load one.');
+    if (!silent) alert('No results file configured. Click "Start, Stop & Manage Testing" to create or load one.');
     return;
   }
   if (!window.electronAPI?.readFile) {
-    alert('File I/O not available — not running in Electron.');
+    if (!silent) alert('File I/O not available — not running in Electron.');
     return;
   }
   try {
     const { ok, content, reason } = await window.electronAPI.readFile(state.filePath);
     if (!ok) { window.Toast?.danger(`Could not read file: ${reason}`); return; }
-    if (!content) { window.Toast?.danger('File is empty or does not exist yet.'); return; }
+    if (!content) { if (!silent) window.Toast?.danger('File is empty or does not exist yet.'); return; }
 
     // Extract embedded JSON block
     const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
-    if (!match) { window.Toast?.danger('No test data found in file — was it created by JumpKit?'); return; }
+    if (!match) { if (!silent) window.Toast?.danger('No test data found in file — was it created by JumpKit?'); return; }
 
     const entries = JSON.parse(match[1]);
     if (!window._jkTestResults) window._jkTestResults = {};
@@ -4059,11 +4067,13 @@ async function _loadResultsFromHTMLFile() {
     });
     _refreshSummary();
 
-    const fname = state.filePath.split(/[\/\\]/).pop();
-    window.Toast?.success(`Loaded ${loaded} result${loaded !== 1 ? 's' : ''} from ${fname}`);
+    if (!silent) {
+      const fname = state.filePath.split(/[\/\\]/).pop();
+      window.Toast?.success(`Loaded ${loaded} result${loaded !== 1 ? 's' : ''} from ${fname}`);
+    }
   } catch (err) {
     console.error('[LoadFromFile] Error:', err);
-    window.Toast?.danger(`Load failed: ${err.message}`);
+    if (!silent) window.Toast?.danger(`Load failed: ${err.message}`);
   }
 }
 
@@ -4192,7 +4202,7 @@ async function _openReleaseTestingModal() {
       <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px">
         <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
-      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;border-color:#e15b59;color:#e15b59">
+      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;color:#e15b59">
         <svg class="ti ti-flag-check" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude &amp; Reset
       </button>
     </div>
