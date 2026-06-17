@@ -1062,7 +1062,7 @@ function _wireRemoveBtn(btn) {
           <svg class="ti ti-alert-triangle" style="width:1.2rem;height:1.2rem;color:#e15b59;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
           <span style="flex:1;font-size:.88rem;color:var(--text);min-width:0">Delete <strong>${esc(colName)}</strong> and all <strong>${jumpCount}</strong> jump${jumpCount !== 1 ? 's' : ''} inside?</span>
           <button type="button" class="btn btn-subtle" id="btnRemoveCancel" style="font-size:.82rem;padding:5px 14px;flex-shrink:0">Cancel</button>
-          <button type="button" class="btn" id="btnRemoveConfirm" style="font-size:.82rem;padding:5px 14px;color:#e15b59;border-color:var(--border);flex-shrink:0">Yes, Delete</button>
+          <button type="button" class="btn btn-delete" id="btnRemoveConfirm" style="font-size:.82rem;padding:5px 14px;flex-shrink:0">Yes, Delete</button>
         </div>`;
       row.querySelector('#btnRemoveCancel').onclick = () => {
         // Re-render that row from DB
