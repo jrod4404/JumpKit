@@ -2757,16 +2757,16 @@ const JK_TESTS = [
           cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nON CONFLICT (team_id, user_id) DO UPDATE\n  SET locked = false,\n      lock_at = NOW() - INTERVAL '1 hour',\n      lock_notified_2day = false\nRETURNING id;`
         },
         {
-          label: '2. Verify locked=true (replace <saved-id>)',
+          label: '2. Verify locked=true — replace <saved-id> with the UUID returned by command 1',
           cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
         },
         {
-          label: '3. Clean up (replace <saved-id>)',
+          label: '3. Clean up — replace <saved-id> with the UUID returned by command 1',
           cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
         },
       ];
     },
-    steps: '1. Run command 1 in Supabase SQL editor — note the UUID returned in the id column.\n2. Run Test 109 on the tests page (triggers the check-member-lockouts Edge Function).\n3. Run command 2 — replace <saved-id> with the UUID from step 1. Confirm locked=true.\n4. Run command 3 — replace <saved-id> with the UUID from step 1. This cleans up the test row.\n5. Mark Pass if locked=true was confirmed in step 3.',
+    steps: '1. Run command 1 in Supabase SQL editor. The result will show a UUID in the id column — copy it (this is your <saved-id>).\n2. Run Test 109 on the tests page (triggers the check-member-lockouts Edge Function).\n3. Run command 2 — paste your <saved-id> UUID in place of <saved-id>. Confirm the result shows locked=true.\n4. Run command 3 — paste your <saved-id> UUID in place of <saved-id> to delete the test row.\n5. Mark Pass if locked=true was confirmed in step 3.',
     notes: 'lock_at is a team membership enforcement mechanism tied to subscription downgrades.\n\nHow it works:\n1. lock_at is set on a team_members row when a team owner\'s subscription is about to expire — it\'s a future timestamp (the date access should be cut off).\n2. 2 days before lock_at — check-member-lockouts detects rows where lock_at is within 48 hours and lock_notified_2day=false. It sends a warning email to both owner and member, then sets lock_notified_2day=true.\n3. When lock_at passes — check-member-lockouts finds rows where lock_at ≤ NOW() and locked=false, and sets locked=true.\n4. In the app — when the Teams page loads, it fetches team_members for the current user and builds _lockedTeamIds. Any team where locked=true shows the member as locked out — shared column access is blocked.\n\nIn short: owner\'s subscription lapses → members get a 2-day warning email → then get locked out of shared team columns automatically.',
     test: async () => 'manual'
   },
