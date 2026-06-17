@@ -214,8 +214,13 @@ ipcMain.handle('save-backup', async (_e, jsonStr) => {
   try {
     const fs = require('fs');
     const { dialog } = require('electron');
-    const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-    const defaultName = `jumpkit-backup-${ts}.json`;
+    const _now = new Date();
+    const _date = _now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    let _h = _now.getHours(), _m = _now.getMinutes();
+    const _ampm = _h >= 12 ? 'pm' : 'am';
+    _h = _h % 12 || 12;
+    const _mStr = String(_m).padStart(2, '0');
+    const defaultName = `jumpkit-backup-${_date}_${_h}-${_mStr}${_ampm}.json`;
 
     const { canceled, filePath } = await dialog.showSaveDialog({
       title: 'Export JumpKit Backup',
@@ -733,9 +738,10 @@ ipcMain.handle('export-pdf', async (_e, html) => {
 });
 
 // ── IPC: release testing file helpers ───────────────────────────
-ipcMain.handle('show-release-testing-dialog', async (_e, version) => {
+ipcMain.handle('show-release-testing-dialog', async (_e, version, osPart) => {
   const { dialog } = require('electron');
-  const defaultName = `JumpKit_ReleaseTesting_v${version || '1.0.0'}.html`;
+  const osTag = osPart === 'Win' ? 'Win' : 'Mac';
+  const defaultName = `JumpKit_${osTag}_ReleaseTesting_v${version || '1.0.0'}.html`;
   const { filePath, canceled } = await dialog.showSaveDialog({
     title: 'Save Release Testing File',
     defaultPath: require('path').join(require('os').homedir(), 'Desktop', defaultName),
@@ -755,6 +761,16 @@ ipcMain.handle('open-file-dialog', async (_e, opts) => {
   });
   if (canceled || !filePaths?.length) return { canceled: true };
   return { filePath: filePaths[0] };
+});
+
+ipcMain.handle('check-migrations', (_e, filenames) => {
+  const fs = require('fs');
+  const migrationsDir = path.join(__dirname, 'supabase', 'migrations');
+  const results = {};
+  (filenames || []).forEach(f => {
+    results[f] = fs.existsSync(path.join(migrationsDir, f));
+  });
+  return results;
 });
 
 ipcMain.handle('read-file', (_e, filePath) => {
