@@ -4244,7 +4244,7 @@ async function _openReleaseTestingModal() {
     </div>`;
 
   const footer = `
-    <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
+    <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
     <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Changes' : 'Start Session'}</button>`;
 
   Modal.open(
