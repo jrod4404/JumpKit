@@ -2513,14 +2513,11 @@ function _stripInternalFields(arr) {
 }
 
 window.forceBackup = async function forceBackup() {
-  // Only export personal jumps (active + archived); exclude shared cols/jumps and empty cols
-  const allPersonalJumps = DB.getJumps(currentUser.id).filter(j => !j.isShared && !j.teamId);
-  const allPersonalCols  = DB.getColumns(currentUser.id).filter(c => !c.isShared);
-  // Keep only cols that have at least one personal jump
-  const personalColIds   = new Set(allPersonalJumps.map(j => j.columnId));
-  const exportCols       = allPersonalCols.filter(c => personalColIds.has(c.id));
-  const exportColIdSet   = new Set(exportCols.map(c => c.id));
-  const exportJumps      = allPersonalJumps.filter(j => exportColIdSet.has(j.columnId));
+  // Delegate to JK.logic — same code path tested by tests 156-157
+  const { exportJumps, exportCols } = window.JK.logic.buildExportData(
+    DB.getJumps(currentUser.id),
+    DB.getColumns(currentUser.id)
+  );
   const backup = {
     version: 1,
     exportedAt: new Date().toISOString(),
@@ -2585,13 +2582,9 @@ window.importJumps = async function importJumps() {
     return;
   }
 
-  // 4. Separate active vs archived jumps and identify unique columns
-  const activeJumps   = backup.jumps.filter(j => !j.isShared && !j.teamId && !j.isArchived);
-  const archivedJumps = backup.jumps.filter(j => !j.isShared && !j.teamId &&  j.isArchived);
-
-  // Build list of columns that have at least one active jump in the backup
-  const colsWithJumps = backup.columns.filter(c =>
-    c.name && activeJumps.some(j => j.columnId === c.id)
+  // 4. Partition backup jumps — delegates to JK.logic (same code path tested by test 158)
+  const { activeJumps, archivedJumps, colsWithJumps } = window.JK.logic.partitionBackupJumps(
+    backup.jumps, backup.columns
   );
 
   // 5. Show column-selection modal so user can pick what to import

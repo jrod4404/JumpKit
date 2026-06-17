@@ -1150,14 +1150,11 @@ async function saveColumns() {
   const savedCols = updated.filter(c => c.name);
   DB.saveColumns(currentUser.id, savedCols);
 
-  // Delete jumps that belong to personal columns which were removed
-  const savedColIds = new Set(savedCols.map(c => c.id));
-  const removedPersonalCols = existing.filter(c => !c.isShared && !savedColIds.has(c.id));
-  if (removedPersonalCols.length > 0) {
-    const removedColIdSet = new Set(removedPersonalCols.map(c => c.id));
-    const jumpsToDelete = DB.getJumps(currentUser.id).filter(j => removedColIdSet.has(j.columnId));
-    jumpsToDelete.forEach(j => DB.deleteJump(currentUser.id, j.id));
-  }
+  // Delete orphaned jumps for removed personal cols — delegates to JK.logic (tested by test 160)
+  const savedColIds  = new Set(savedCols.map(c => c.id));
+  const removedIds   = window.JK.logic.removedPersonalColIds(existing, savedColIds);
+  const toDelete     = window.JK.logic.orphanedJumps(DB.getJumps(currentUser.id), removedIds);
+  toDelete.forEach(j => DB.deleteJump(currentUser.id, j.id));
 
   // Sync name changes for owner's shared columns to Supabase
   for (const col of updated) {
