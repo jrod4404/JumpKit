@@ -2616,9 +2616,10 @@ window.importJumps = async function importJumps() {
   const hasArchived = archivedJumps.length > 0;
 
   await new Promise(resolve => {
-    const rows = colsWithJumps.map(c => {
+    const rows = colsWithJumps.map((c, idx) => {
       const count = activeJumps.filter(j => j.columnId === c.id).length;
-      return `<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
+      const isLast = idx === colsWithJumps.length - 1 && !hasArchived;
+      return `<label style="display:flex;align-items:center;gap:10px;padding:8px 0;${isLast ? '' : 'border-bottom:1px solid var(--border);'}cursor:pointer">
         <input type="checkbox" data-col-id="${esc(c.id)}" checked style="width:16px;height:16px;accent-color:var(--turq);cursor:pointer">
         <span style="flex:1;font-size:0.92rem;color:var(--text)">${esc(c.name)}</span>
         <span style="font-size:0.8rem;color:var(--text-muted)">${count} jump${count !== 1 ? 's' : ''}</span>
@@ -2642,7 +2643,7 @@ window.importJumps = async function importJumps() {
     const footer = `
       <button class="btn btn-subtle" id="importCancelBtn">Cancel</button>
       <button class="btn btn-primary" id="importConfirmBtn" style="min-width:120px">
-        <svg class="ti ti-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Import Selected
+        <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Import Selected
       </button>`;
 
     Modal.open(
