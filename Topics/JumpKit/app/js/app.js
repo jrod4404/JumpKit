@@ -2700,14 +2700,18 @@ window.importJumps = async function importJumps() {
 
     // 7. Import selected jumps — skip duplicates
     const existingJumps = DB.getJumps(currentUser.id);
-    let imported = 0, skipped = 0;
+    let imported = 0;
+    const skippedJumps = []; // { name, url, reason }
 
     const doImport = (bJump, targetColId, archive) => {
       const isDupe = existingJumps.some(j =>
         j.columnId === targetColId &&
         (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
       );
-      if (isDupe) { skipped++; return; }
+      if (isDupe) {
+        skippedJumps.push({ name: bJump.name || 'Unnamed', url: bJump.url || '', reason: 'Duplicate' });
+        return;
+      }
       const newJump = DB.createJump(currentUser.id, {
         name:        bJump.name || 'Imported Jump',
         url:         bJump.url || '',
@@ -2724,7 +2728,7 @@ window.importJumps = async function importJumps() {
 
     for (const bJump of activeJumps) {
       const mappedColId = colIdMap[bJump.columnId];
-      if (!mappedColId) { skipped++; continue; }
+      if (!mappedColId) { skippedJumps.push({ name: bJump.name || 'Unnamed', url: bJump.url || '', reason: 'Unselected collection' }); continue; }
       doImport(bJump, mappedColId, false);
     }
 
@@ -2740,11 +2744,25 @@ window.importJumps = async function importJumps() {
       else if (typeof _buildPage === 'function') _buildPage('jumps');
     }
 
+    const skippedListHTML = skippedJumps.length > 0
+      ? `<div style="margin-top:14px;text-align:left">
+          <p style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px">Skipped (${skippedJumps.length})</p>
+          <div style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:6px">
+            ${skippedJumps.map((j, i) => `
+              <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;${i < skippedJumps.length - 1 ? 'border-bottom:1px solid var(--border);' : ''}">
+                <span style="flex:1;font-size:0.83rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(j.url)}">${esc(j.name)}</span>
+                <span style="font-size:0.75rem;color:var(--text-dim);flex-shrink:0">${esc(j.reason)}</span>
+              </div>`).join('')}
+          </div>
+        </div>`
+      : '';
+
     Modal.open(
       `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Import Complete`,
       `<div style="text-align:center;padding:8px 0">
-        <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:8px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
-        ${skipped > 0 ? `<p style="color:var(--text-muted);font-size:0.88rem">${skipped} skipped (duplicates or unselected collections)</p>` : ''}
+        <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:4px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
+        ${skippedJumps.length > 0 ? `<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0">${skippedJumps.length} skipped</p>` : ''}
+        ${skippedListHTML}
       </div>`,
       `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`
     );
