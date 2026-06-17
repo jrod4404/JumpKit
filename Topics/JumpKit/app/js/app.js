@@ -2533,7 +2533,8 @@ window.forceBackup = async function forceBackup() {
       addNotification({ type: 'backup', message: `Backup saved to: ${result.path}`, ts: Date.now() });
       Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Backup Saved',
         `<div style="text-align:center;padding:8px 0">
-          <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:16px">Your data has been exported successfully. All personal jumps and associated columns were exported. Empty columns and shared columns are by default excluded.</p>
+          <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin-bottom:6px">Your data has been exported successfully.</p>
+          <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:16px">All personal jumps and associated columns were exported. Empty columns and shared columns are by default excluded.</p>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.82rem;font-family:monospace;color:var(--text);word-break:break-all;text-align:left">${esc(result.path)}</div>
         </div>`,
         `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
