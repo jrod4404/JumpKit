@@ -2513,13 +2513,21 @@ function _stripInternalFields(arr) {
 }
 
 window.forceBackup = async function forceBackup() {
+  // Only export personal jumps (active + archived); exclude shared cols/jumps and empty cols
+  const allPersonalJumps = DB.getJumps(currentUser.id).filter(j => !j.isShared && !j.teamId);
+  const allPersonalCols  = DB.getColumns(currentUser.id).filter(c => !c.isShared);
+  // Keep only cols that have at least one personal jump
+  const personalColIds   = new Set(allPersonalJumps.map(j => j.columnId));
+  const exportCols       = allPersonalCols.filter(c => personalColIds.has(c.id));
+  const exportColIdSet   = new Set(exportCols.map(c => c.id));
+  const exportJumps      = allPersonalJumps.filter(j => exportColIdSet.has(j.columnId));
   const backup = {
     version: 1,
     exportedAt: new Date().toISOString(),
     userId: currentUser.id,
     email: currentUser.email,
-    jumps:   _stripInternalFields(DB.getJumps(currentUser.id)),
-    columns: _stripInternalFields(DB.getColumns(currentUser.id)),
+    jumps:   _stripInternalFields(exportJumps),
+    columns: _stripInternalFields(exportCols),
     prefs:   DB.getPrefs(currentUser.id),
   };
   if (window.electronAPI?.saveBackup) {
@@ -2577,71 +2585,151 @@ window.importJumps = async function importJumps() {
     return;
   }
 
-  // 4. Build column map: backup columnId → local columnId
-  //    Match by name first; create column if not found
-  const existingCols = DB.getColumns(currentUser.id);
-  const colIdMap = {}; // backup col id → local col id
+  // 4. Separate active vs archived jumps and identify unique columns
+  const activeJumps   = backup.jumps.filter(j => !j.isShared && !j.teamId && !j.isArchived);
+  const archivedJumps = backup.jumps.filter(j => !j.isShared && !j.teamId &&  j.isArchived);
 
-  for (const bCol of backup.columns) {
-    if (!bCol.name) continue;
-    const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
-    if (existing) {
-      colIdMap[bCol.id] = existing.id;
-    } else {
-      // Create new column at end
-      const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
-      const newCol = DB.createColumn(currentUser.id, bCol.name, maxOrder + 1);
-      existingCols.push(newCol);
-      colIdMap[bCol.id] = newCol.id;
-    }
-  }
-
-  // 5. Import jumps — skip shared, skip duplicates (same URL in same mapped column)
-  const existingJumps = DB.getJumps(currentUser.id);
-  let imported = 0, skipped = 0;
-
-  for (const bJump of backup.jumps) {
-    // Skip shared jumps — they sync from Supabase automatically
-    if (bJump.isShared || bJump.teamId) { skipped++; continue; }
-
-    const mappedColId = colIdMap[bJump.columnId];
-    if (!mappedColId) { skipped++; continue; } // column had no name, skip
-
-    // Duplicate check: same URL in same column
-    const isDupe = existingJumps.some(j =>
-      j.columnId === mappedColId &&
-      (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
-    );
-    if (isDupe) { skipped++; continue; }
-
-    // Create jump with fresh ID
-    const newJump = DB.createJump(currentUser.id, {
-      name:        bJump.name || 'Imported Jump',
-      url:         bJump.url || '',
-      description: bJump.description || '',
-      reason:      bJump.reason || '',
-      columnId:    mappedColId,
-      hotkey:      bJump.hotkey || '',
-      favorite:    bJump.favorite || false,
-    });
-    existingJumps.push(newJump);
-    imported++;
-  }
-
-  // 6. Refresh UI and show summary
-  if (imported > 0) {
-    if (typeof renderJumps === 'function') renderJumps();
-    else if (typeof _buildPage === 'function') _buildPage('jumps');
-  }
-
-  Modal.open(
-    `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Import Complete`,
-    `<div style="text-align:center;padding:8px 0">
-      <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:8px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
-      ${skipped > 0 ? `<p style="color:var(--text-muted);font-size:0.88rem">${skipped} skipped (duplicates, shared jumps, or unmapped columns)</p>` : ''}
-    </div>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`
+  // Build list of columns that have at least one active jump in the backup
+  const colsWithJumps = backup.columns.filter(c =>
+    c.name && activeJumps.some(j => j.columnId === c.id)
   );
+
+  // 5. Show column-selection modal so user can pick what to import
+  const hasArchived = archivedJumps.length > 0;
+
+  await new Promise(resolve => {
+    const rows = colsWithJumps.map(c => {
+      const count = activeJumps.filter(j => j.columnId === c.id).length;
+      return `<label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);cursor:pointer">
+        <input type="checkbox" data-col-id="${esc(c.id)}" checked style="width:16px;height:16px;accent-color:var(--turq);cursor:pointer">
+        <span style="flex:1;font-size:0.92rem;color:var(--text)">${esc(c.name)}</span>
+        <span style="font-size:0.8rem;color:var(--text-muted)">${count} jump${count !== 1 ? 's' : ''}</span>
+      </label>`;
+    }).join('');
+
+    const archivedRow = hasArchived
+      ? `<label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer">
+          <input type="checkbox" id="importArchivedCheck" checked style="width:16px;height:16px;accent-color:var(--turq);cursor:pointer">
+          <span style="flex:1;font-size:0.92rem;color:var(--text)">Archived Jumps</span>
+          <span style="font-size:0.8rem;color:var(--text-muted)">${archivedJumps.length} jump${archivedJumps.length !== 1 ? 's' : ''}</span>
+        </label>`
+      : '';
+
+    const body = `
+      <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:14px">Select the collections to import. Uncheck any you want to skip.</p>
+      <div style="max-height:300px;overflow-y:auto">
+        ${rows}${archivedRow}
+      </div>`;
+
+    const footer = `
+      <button class="btn btn-subtle" id="importCancelBtn">Cancel</button>
+      <button class="btn btn-primary" id="importConfirmBtn" style="min-width:120px">
+        <svg class="ti ti-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Import Selected
+      </button>`;
+
+    Modal.open(
+      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-import"/></svg> Select Collections to Import',
+      body, footer, 'sm'
+    );
+
+    document.getElementById('importCancelBtn').onclick = () => { Modal.close(); resolve(null); };
+    document.getElementById('importConfirmBtn').onclick = () => {
+      // Collect selected col ids
+      const selectedColIds = new Set(
+        [...document.querySelectorAll('input[data-col-id]:checked')].map(el => el.dataset.colId)
+      );
+      const includeArchived = hasArchived && document.getElementById('importArchivedCheck')?.checked;
+      Modal.close();
+      resolve({ selectedColIds, includeArchived });
+    };
+  }).then(async selection => {
+    if (!selection) return; // canceled
+
+    const { selectedColIds, includeArchived } = selection;
+
+    // 6. Build column map for selected cols: backup columnId → local columnId
+    const existingCols = DB.getColumns(currentUser.id);
+    const colIdMap = {};
+
+    for (const bCol of backup.columns) {
+      if (!bCol.name || !selectedColIds.has(bCol.id)) continue;
+      const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
+      if (existing) {
+        colIdMap[bCol.id] = existing.id;
+      } else {
+        const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
+        const newCol = DB.createColumn(currentUser.id, bCol.name, maxOrder + 1);
+        existingCols.push(newCol);
+        colIdMap[bCol.id] = newCol.id;
+      }
+    }
+
+    // For archived jumps we map into an "Archived" column (create if needed)
+    let archivedColId = null;
+    if (includeArchived && archivedJumps.length > 0) {
+      const archColName = 'Archived';
+      const existingArchCol = existingCols.find(c => c.name.trim().toLowerCase() === archColName.toLowerCase());
+      if (existingArchCol) {
+        archivedColId = existingArchCol.id;
+      } else {
+        const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
+        const newCol = DB.createColumn(currentUser.id, archColName, maxOrder + 1);
+        existingCols.push(newCol);
+        archivedColId = newCol.id;
+      }
+    }
+
+    // 7. Import selected jumps — skip duplicates
+    const existingJumps = DB.getJumps(currentUser.id);
+    let imported = 0, skipped = 0;
+
+    const doImport = (bJump, targetColId, archive) => {
+      const isDupe = existingJumps.some(j =>
+        j.columnId === targetColId &&
+        (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
+      );
+      if (isDupe) { skipped++; return; }
+      const newJump = DB.createJump(currentUser.id, {
+        name:        bJump.name || 'Imported Jump',
+        url:         bJump.url || '',
+        description: bJump.description || '',
+        reason:      bJump.reason || '',
+        columnId:    targetColId,
+        hotkey:      bJump.hotkey || '',
+        favorite:    bJump.favorite || false,
+      });
+      if (archive) DB.archiveJump(currentUser.id, newJump.id);
+      existingJumps.push(newJump);
+      imported++;
+    };
+
+    for (const bJump of activeJumps) {
+      const mappedColId = colIdMap[bJump.columnId];
+      if (!mappedColId) { skipped++; continue; }
+      doImport(bJump, mappedColId, false);
+    }
+
+    if (includeArchived && archivedColId) {
+      for (const bJump of archivedJumps) {
+        doImport(bJump, archivedColId, true);
+      }
+    }
+
+    // 8. Refresh UI and show summary
+    if (imported > 0) {
+      if (typeof renderJumps === 'function') renderJumps();
+      else if (typeof _buildPage === 'function') _buildPage('jumps');
+    }
+
+    Modal.open(
+      `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Import Complete`,
+      `<div style="text-align:center;padding:8px 0">
+        <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:8px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
+        ${skipped > 0 ? `<p style="color:var(--text-muted);font-size:0.88rem">${skipped} skipped (duplicates or unselected collections)</p>` : ''}
+      </div>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`
+    );
+  });
 };
 
 window.runCloudBackup = async function runCloudBackup() {
