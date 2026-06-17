@@ -5134,27 +5134,49 @@ function _buildTestDetailContent(id) {
       <td style="${tdLabel}">Result</td>
       <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<svg class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color};width:1.3rem;height:1.3rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
     </tr>
-    <tr>
-      <td style="${tdLabel}">Details</td>
-      <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
-    </tr>
+    ${(() => {
+      const hasSteps    = isManualTest && (testDef.steps || testDef.commands);
+      if (!hasSteps) {
+        // Auto test — just show Details row
+        return `<tr>
+          <td style="${tdLabel}">Details</td>
+          <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
+        </tr>`;
+      }
+      // Manual test — merge steps + commands into one Exec Steps section
+      const cmds = testDef.commands || [];
+      const cmdBlocksHTML = cmds.length ? cmds.map((c, i) => `
+        <div style="margin-bottom:10px">
+          <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px">${_esc(c.label)}</div>
+          <div style="display:flex;align-items:flex-start;gap:6px">
+            <code id="cmd-${id}-${i}" style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:6px 10px;border-radius:6px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.5">${_esc(c.cmd)}</code>
+            <button data-cmd="${_esc(c.cmd)}" data-jaction="cmd-copy" id="cmd-copy-${id}-${i}" class="btn btn-subtle" style="flex-shrink:0;padding:5px 7px;margin-top:1px" title="Copy"><svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg></button>
+          </div>
+        </div>`).join('') : '';
+      // Build <ol> from steps string (split on \n or numbered lines)
+      const rawSteps = testDef.steps || '';
+      const stepLines = rawSteps.split('\n').map(s => s.trim()).filter(Boolean);
+      const stepsHTML = stepLines.length
+        ? `<ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.85rem;line-height:1.8">${stepLines.map(s => {
+            // Strip leading "N. " if present (already numbered by <ol>)
+            const clean = s.replace(/^\d+\.\s*/, '');
+            return `<li>${_esc(clean)}</li>`;
+          }).join('')}</ol>`
+        : '';
+      return `<tr>
+        <td style="${tdLabel}">Exec Steps</td>
+        <td style="padding:8px 0">
+          ${cmdBlocksHTML}
+          ${stepsHTML}
+        </td>
+      </tr>`;
+    })()}
     ${testDef.links && testDef.links.length ? `<tr>
       <td style="${tdLabel}">Links</td>
       <td style="padding:8px 0">${testDef.links.map(l => `
         <div style="margin-bottom:6px">
           <a href="${_esc(l.url)}" target="_blank" rel="noopener noreferrer" style="font-size:0.82rem;color:var(--turq);text-decoration:none;display:inline-flex;align-items:center;gap:5px">
             <svg class="ti ti-external-link" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-external-link"/></svg>${_esc(l.label)}</a>
-        </div>`).join('')}</td>
-    </tr>` : ''}
-    ${testDef.commands && testDef.commands.length ? `<tr>
-      <td style="${tdLabel}">Commands</td>
-      <td style="padding:8px 0">${testDef.commands.map((c, i) => `
-        <div style="margin-bottom:8px">
-          <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);margin-bottom:4px">${_esc(c.label)}</div>
-          <div style="display:flex;align-items:center;gap:6px">
-            <code id="cmd-${id}-${i}" style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:5px 10px;border-radius:6px;color:var(--text);word-break:break-all">${_esc(c.cmd)}</code>
-            <button data-cmd="${_esc(c.cmd)}" data-jaction="cmd-copy" id="cmd-copy-${id}-${i}" class="btn btn-subtle" style="flex-shrink:0;padding:5px 7px"><svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg></button>
-          </div>
         </div>`).join('')}</td>
     </tr>` : ''}
   </table>
