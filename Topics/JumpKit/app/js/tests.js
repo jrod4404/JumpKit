@@ -3865,13 +3865,7 @@ function renderTests() {
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
-          <svg class="ti ti-file-certificate" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create New Release Testing
-        </button>
-        <button class="btn btn-subtle" id="btnLoadFromHTMLFile" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px">
-          <svg class="ti ti-file-upload" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
-        </button>
-        <button class="btn btn-subtle" id="btnConcludeTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:10px 22px;border-color:#e15b59;color:#e15b59">
-          <svg class="ti ti-flag-check" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude Testing
+          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing
         </button>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
@@ -3909,8 +3903,6 @@ function renderTests() {
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
-  document.getElementById('btnLoadFromHTMLFile').addEventListener('click', _loadResultsFromHTMLFile);
-  document.getElementById('btnConcludeTesting').addEventListener('click', _openConcludeModal);
   _updateRTLabel();
   document.getElementById('btnSavePreflightResults').addEventListener('click', () => _saveReleaseSection('preflight'));
   document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
@@ -4177,8 +4169,48 @@ async function _openReleaseTestingModal() {
 
   const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none';
   const labelStyle = 'display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em';
+  const divider = `<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">`;
+
+  // ── Section 1: Current session status ──────────────────────────
+  const fname = existing?.filePath ? existing.filePath.split(/[\/\\]/).pop() : null;
+  const statusBlock = existing
+    ? `<div style="padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;font-size:0.85rem;display:flex;align-items:center;gap:8px">
+        <svg class="ti ti-file-check" style="font-size:1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+        <span><strong style="color:#3fbe71">Active session — v${_esc(existing.version)}</strong><br>
+        <span style="color:var(--text-muted);font-size:0.78rem">${_esc(fname)}</span></span>
+       </div>`
+    : `<div style="padding:10px 14px;border-radius:8px;background:#f59e0b22;border:1px solid #f59e0b55;font-size:0.85rem;display:flex;align-items:center;gap:8px">
+        <svg class="ti ti-alert-triangle" style="font-size:1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+        <span style="color:#f59e0b">No active testing session configured.</span>
+       </div>`;
+
+  // ── Section 2: Manage active session (only when session exists) ─
+  const manageBlock = existing ? `
+    ${divider}
+    <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Manage Active Session</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px">
+        <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
+      </button>
+      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;border-color:#e15b59;color:#e15b59">
+        <svg class="ti ti-flag-check" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude &amp; Reset
+      </button>
+    </div>
+    <p style="margin:8px 0 0;font-size:0.75rem;color:var(--text-muted)">
+      <strong>Load Results from File</strong> — restores test states from the saved HTML (use after reopening the app).<br>
+      <strong>Conclude &amp; Reset</strong> — ends this session and wipes all results so the next release cycle starts clean. The HTML file is kept on disk.
+    </p>` : '';
+
+  // ── Section 3: Configure / start new session ────────────────────
+  const configTitle = existing
+    ? `<p style="margin:0 0 12px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Reconfigure Session</p>`
+    : `<p style="margin:0 0 12px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
 
   const body = `
+    ${statusBlock}
+    ${manageBlock}
+    ${divider}
+    ${configTitle}
     <div style="margin-bottom:18px">
       <label style="${labelStyle}">Version Number</label>
       <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${existing?.version || appVersion}" style="${inputStyle}" />
@@ -4197,17 +4229,29 @@ async function _openReleaseTestingModal() {
         <input id="rtFilePath" type="text" placeholder="Click Choose to pick a location…" value="${_esc(chosenPath)}" readonly style="${inputStyle};flex:1;cursor:default;color:var(--text-muted);font-size:0.8rem" />
         <button id="rtChooseBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
       </div>
-      ${existing ? `<p style="margin:5px 0 0;font-size:0.78rem;color:#3fbe71">&#10003; Existing file configured — clicking Create will update the config.</p>` : ''}
+      ${existing ? `<p style="margin:5px 0 0;font-size:0.78rem;color:#3fbe71">&#10003; Session already configured — Save will update the version/file.</p>` : ''}
     </div>`;
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
-    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:120px">Create</button>`;
+    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Changes' : 'Start Session'}</button>`;
 
   Modal.open(
-    '<svg class="ti ti-file-certificate" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-file-certificate"/></svg> Create Release Testing',
+    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing',
     body, footer, 'md'
   );
+
+  // Wire manage-session buttons (only rendered when session is active)
+  if (existing) {
+    document.getElementById('rtLoadFromFileBtn').onclick = () => {
+      Modal.close();
+      _loadResultsFromHTMLFile();
+    };
+    document.getElementById('rtConcludeBtn').onclick = () => {
+      Modal.close();
+      _openConcludeModal();
+    };
+  }
 
   // Choose file location
   document.getElementById('rtChooseBtn').onclick = async () => {
@@ -4223,7 +4267,7 @@ async function _openReleaseTestingModal() {
     }
   };
 
-  // Create / save config
+  // Save config
   document.getElementById('rtCreateBtn').onclick = () => {
     const version = document.getElementById('rtVersion').value.trim();
     if (!version) { alert('Please enter a version number.'); return; }
@@ -4231,7 +4275,7 @@ async function _openReleaseTestingModal() {
     const os = document.getElementById('rtOS').value;
     _setReleaseState({ version, filePath: chosenPath, os });
     Modal.close();
-    window.Toast?.success(`Release testing configured — v${version}`);
+    window.Toast?.success(existing ? `Release testing updated — v${version}` : `Testing session started — v${version}`);
   };
 }
 
