@@ -2513,6 +2513,30 @@ function _stripInternalFields(arr) {
 }
 
 window.forceBackup = async function forceBackup() {
+  // 0. Intro modal — explain what will be exported before opening the save dialog
+  const proceed = await new Promise(resolve => {
+    Modal.open(
+      '<svg class="ti ti-database-export" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-export"/></svg> Export Jumps Backup',
+      `<div style="display:flex;flex-direction:column;gap:14px;padding:4px 0">
+        <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">Save a backup of your personal jumps to a local file.</p>
+        <p style="color:var(--text-muted);font-size:0.85rem;margin:0">You’ll be prompted to choose where to save a <strong>.json</strong> backup file. This file can later be imported into any JumpKit account.</p>
+        <ul style="color:var(--text-muted);font-size:0.82rem;margin:0;padding-left:18px;line-height:1.7">
+          <li>Only personal jumps and their columns are exported.</li>
+          <li>Empty columns and shared/team columns are excluded.</li>
+          <li>Archived personal jumps are included.</li>
+        </ul>
+      </div>`,
+      `<button class="btn btn-subtle" id="exportIntroCancelBtn">Cancel</button>
+       <button class="btn btn-primary" id="exportIntroSaveBtn" style="min-width:140px">
+         <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Choose Save Location
+       </button>`,
+      'sm'
+    );
+    document.getElementById('exportIntroCancelBtn').onclick = () => { Modal.close(); resolve(false); };
+    document.getElementById('exportIntroSaveBtn').onclick  = () => { Modal.close(); resolve(true);  };
+  });
+  if (!proceed) return;
+
   // Delegate to JK.logic — same code path tested by tests 156-157
   const { exportJumps, exportCols } = window.JK.logic.buildExportData(
     DB.getJumps(currentUser.id),
