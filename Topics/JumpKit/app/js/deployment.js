@@ -109,9 +109,11 @@ window.renderDeployment = function renderDeployment() {
     const phaseTotal = phase.steps.length;
     const phaseDone  = phase.steps.filter(s => state[s.id] === 'completed').length;
 
-    const pillHTML = phaseDone > 0
-      ? `<span style="font-size:0.72rem;font-weight:700;padding:1px 8px;border-radius:99px;background:rgba(63,190,113,0.15);color:#3fbe71;margin-left:8px">${phaseDone}/${phaseTotal}</span>`
-      : `<span style="font-size:0.72rem;color:var(--text-dim);margin-left:8px">${phaseTotal} step${phaseTotal !== 1 ? 's' : ''}</span>`;
+    const pillHTML = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">${
+      phaseDone > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71"><svg style="width:.65rem;height:.65rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>${phaseDone}</span>` : ''
+    }${
+      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-input);color:var(--text-dim)">${phaseTotal - phaseDone} to do</span>` : ''
+    }</span>`;
 
     const stepsHTML = phase.steps.map((step, si) => {
       const isDone = state[step.id] === 'completed';
@@ -139,17 +141,22 @@ window.renderDeployment = function renderDeployment() {
     }).join('');
 
     return `
-      <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 12px;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
-          <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(0deg);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-          <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
-          <span style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${phase.color}">${phase.label}</span>
-          ${pillHTML}
+      <div style="margin-bottom:28px">
+        <div style="padding:14px 4px 0;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
+          <div style="display:flex;align-items:center;gap:8px">
+            <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(-90deg)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+            <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color}"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
+            <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${phase.label}</span>
+            <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${phaseTotal})</span>
+            ${pillHTML}
+          </div>
         </div>
-        <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;max-height:2000px">
-          <table style="width:100%;border-collapse:collapse;border-top:1px solid var(--border)">
-            ${stepsHTML}
-          </table>
+        <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;margin-left:26px;max-height:0px" data-collapsed="true">
+          <div class="card" style="overflow-x:auto;padding:0;border-radius:0 0 var(--radius-lg) var(--radius-lg);margin-top:6px">
+            <table style="width:100%;border-collapse:collapse">
+              ${stepsHTML}
+            </table>
+          </div>
         </div>
       </div>`;
   }).join('');
@@ -188,9 +195,16 @@ window.renderDeployment = function renderDeployment() {
       const sec    = document.getElementById(secId);
       const chev   = document.getElementById(secId.replace('deploy-section-', 'deploy-chevron-'));
       if (!sec) return;
-      const collapsed = sec.style.maxHeight === '0px';
-      sec.style.maxHeight  = collapsed ? '2000px' : '0px';
-      if (chev) chev.style.transform = collapsed ? 'rotate(0deg)' : 'rotate(-90deg)';
+      const isCollapsed = sec.dataset.collapsed === 'true';
+      if (isCollapsed) {
+        sec.style.maxHeight = '2000px';
+        sec.dataset.collapsed = 'false';
+        if (chev) chev.style.transform = 'rotate(0deg)';
+      } else {
+        sec.style.maxHeight = '0px';
+        sec.dataset.collapsed = 'true';
+        if (chev) chev.style.transform = 'rotate(-90deg)';
+      }
     });
   });
 
