@@ -4275,11 +4275,11 @@ function renderTests() {
         <!-- Hidden per-section ids kept for _refreshSummary compat -->
         <div style="display:none"><span id="summaryAutoPass"></span><span id="summaryAutoFail"></span><span id="summaryAMPass"></span><span id="summaryAMFail"></span><span id="summaryManPass"></span><span id="summaryManFail"></span></div>
 
-        <button class="btn btn-subtle" id="btnDeployChecklist" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px;border-color:#f97316;color:#f97316">
-          <svg class="ti ti-rocket" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Deploy Checklist
-        </button>
         <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
+        </button>
+        <button class="btn btn-subtle" id="btnDeployChecklist" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+          <svg class="ti ti-rocket" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Deploy Checklist
         </button>
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing
@@ -4501,11 +4501,6 @@ async function _loadResultsFromHTMLFile(opts = {}) {
 
 // ── Deploy Checklist ─────────────────────────────────────────────
 function _openDeployChecklistModal() {
-  const mt = document.getElementById('modalTitle');
-  const mb = document.getElementById('modalBody');
-  const mf = document.getElementById('modalFooter');
-  if (!mt || !mb || !mf) return;
-
   const phases = [
     { icon: 'ti-test-pipe', color: '#3b82f6', label: 'Testing', items: [
       'Run ALL unit tests on <strong>Mac</strong> \u2014 all auto tests pass, all manual tests verified.',
@@ -4567,10 +4562,11 @@ function _openDeployChecklistModal() {
       </ol>
     </div>`).join('<div style="border-top:1px solid var(--border);margin:4px 0 20px"></div>');
 
-  mt.innerHTML = '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Pre-Deploy Checklist';
-  mb.innerHTML = `<p style="margin:0 0 16px;font-size:0.87rem;color:var(--text-muted)">Complete every step below before shipping a new version. Work top to bottom \u2014 don&rsquo;t skip sections.</p>${phaseHTML}`;
-  mf.innerHTML = '<button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>';
-  document.getElementById('testModal').style.display = 'flex';
+  Modal.open(
+    '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Pre-Deploy Checklist',
+    `<p style="margin:0 0 16px;font-size:0.87rem;color:var(--text-muted)">Complete every step below before shipping a new version. Work top to bottom — don&rsquo;t skip sections.</p>${phaseHTML}`,
+    '<button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>'
+  );
 }
 
 // ── Conclude Testing ─────────────────────────────────────────────
