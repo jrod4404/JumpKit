@@ -4502,6 +4502,9 @@ async function _loadResultsFromHTMLFile(opts = {}) {
 // ── Deploy Checklist ─────────────────────────────────────────────
 function _openDeployChecklistModal() {
   const phases = [
+    { icon: 'ti-folder-plus', color: '#64748b', label: 'Pre-Deploy', items: [
+      'Create a deployment folder at <code>Topics/JumpKit/app/deploy/</code> with the folder name in the format <code>vx.y.z_yyyy-mm-dd</code> (e.g. <code>v1.0.0_2026-06-18</code>). This folder will hold the final installers and release artifacts for this version.',
+    ]},
     { icon: 'ti-test-pipe', color: '#3b82f6', label: 'Testing', items: [
       'Run ALL unit tests on <strong>Mac</strong> \u2014 all auto tests pass, all manual tests verified.',
       'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename.',
