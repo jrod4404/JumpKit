@@ -132,7 +132,7 @@ window.renderDeployment = function renderDeployment() {
               data-deploy-action="toggle"
               style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'background:#3fbe71;border-color:#3fbe71;color:#fff' : ''}">
               ${isDone
-                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Completed`
+                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Completed`
                 : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-clipboard-list"/></svg> To Do`
               }
             </button>
@@ -178,7 +178,8 @@ window.renderDeployment = function renderDeployment() {
 
   // Wire toggle buttons
   pageContent.querySelectorAll('[data-deploy-action="toggle"]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const id = btn.dataset.deployId;
       const state = _loadDeployState();
       const nowDone = state[id] !== 'completed';
