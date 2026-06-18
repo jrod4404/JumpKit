@@ -795,6 +795,18 @@ ipcMain.handle('write-file-direct', (_e, filePath, content) => {
 
 ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
 
+ipcMain.handle('get-latest-commit-id', async () => {
+  try {
+    const { execSync } = require('child_process');
+    const repoPath = path.join(__dirname, '..', '..', '..');
+    const out = execSync('git log --oneline -1', { cwd: repoPath, timeout: 5000 }).toString().trim();
+    const parts = out.split(' ');
+    return { commitId: parts[0], message: parts.slice(1).join(' ') };
+  } catch (err) {
+    return { error: err.message };
+  }
+});
+
 // Single instance lock — prevent two processes opening the same SQLite db
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {

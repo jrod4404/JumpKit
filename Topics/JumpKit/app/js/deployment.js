@@ -242,70 +242,175 @@ window.renderDeployment = function renderDeployment() {
 };
 
 // ── Manage Deployment Modal ───────────────────────────────────────
-function _openDeployManageModal() {
-  const cfg = _loadDeployConfig();
-  const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.88rem;outline:none;cursor:default';
+async function _openDeployManageModal() {
+  // Show loading state
+  Modal.open(
+    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+    '<div style="text-align:center;padding:24px;color:var(--text-muted)">Loading deployments…</div>',
+    '<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>',
+    'xl'
+  );
+
+  // Fetch deployments from Supabase
+  let deployments = [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('deployments')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    if (!error) deployments = data || [];
+  } catch(e) {
+    console.warn('[Deployments] Fetch failed:', e.message);
+  }
+
+  const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.88rem;outline:none';
   const labelStyle = 'display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-bottom:6px';
-  const rowStyle   = 'display:flex;gap:8px;align-items:center';
+  const selectStyle = inputStyle + ';cursor:pointer';
+
+  const selectedId = window._jkSelectedDeployment?.id || '';
+
+  const optionsHTML = deployments.length === 0
+    ? '<option value="">No deployments yet — finalize testing first</option>'
+    : deployments.map(d => {
+        const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+        const label = `v${d.version} — ${date} (${d.testing_account || 'unknown'}) [${d.status}]`;
+        return `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${label}</option>`;
+      }).join('');
+
+  const sel = deployments.find(d => d.id === selectedId) || deployments[0] || null;
 
   const body = `
     <div style="display:flex;flex-direction:column;gap:18px">
-      <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Set the version number and deployment folder in <strong style="color:var(--text)">Tests → Manage Testing</strong>. Link the saved test result files below.</p>
       <div>
-        <label style="${labelStyle}">Mac Testing Results File</label>
-        <div style="${rowStyle}">
-          <input id="dmMacFile" type="text" placeholder="Click Choose to pick the Mac test results HTML file…" value="${_esc(cfg.macFile || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
-          <button id="dmMacBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+        <label style="${labelStyle}">Testing Package</label>
+        <select id="dmDeploySelect" style="${selectStyle}">
+          ${optionsHTML}
+        </select>
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Select the finalized testing session for this deployment. Version and folder are auto-applied.</p>
+      </div>
+      ${sel ? `<div style="padding:10px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.82rem;color:var(--text-muted)">
+        <div style="display:flex;gap:24px;flex-wrap:wrap">
+          <span><strong style="color:var(--text)">Version:</strong> v${sel.version}</span>
+          <span><strong style="color:var(--text)">Tests:</strong> ${sel.tests_passed ?? '—'}✓ ${sel.tests_failed ?? '—'}✗ ${sel.tests_skipped ?? '—'} skipped</span>
+          <span><strong style="color:var(--text)">OS:</strong> ${sel.test_os || '—'}</span>
+          <span><strong style="color:var(--text)">Folder:</strong> ${sel.deployment_folder ? sel.deployment_folder.split('/').pop() : '—'}</span>
+          <span><strong style="color:var(--text)">Status:</strong> ${sel.status || '—'}</span>
         </div>
+      </div>` : ''}
+      <div>
+        <label style="${labelStyle}">Mac Installer Path (optional)</label>
+        <input id="dmMacFile" type="text" placeholder="Path to the .dmg installer file…" value="${_esc(sel?.mac_installer_path || '')}" style="${inputStyle}" />
       </div>
       <div>
-        <label style="${labelStyle}">Windows Testing Results File</label>
-        <div style="${rowStyle}">
-          <input id="dmWinFile" type="text" placeholder="Click Choose to pick the Windows test results HTML file…" value="${_esc(cfg.winFile || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
-          <button id="dmWinBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
-        </div>
+        <label style="${labelStyle}">Windows Installer Path (optional)</label>
+        <input id="dmWinFile" type="text" placeholder="Path to the .exe or .msi installer file…" value="${_esc(sel?.win_installer_path || '')}" style="${inputStyle}" />
+      </div>
+      <div>
+        <label style="${labelStyle}">Notes (optional)</label>
+        <textarea id="dmNotes" placeholder="Any release notes or deployment notes…" rows="3" style="${inputStyle};resize:vertical">${_esc(sel?.notes || '')}</textarea>
       </div>
     </div>`;
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-    <button id="dmSaveBtn" class="btn btn-primary" style="min-width:120px">Save</button>`;
+    <button id="dmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff;min-width:160px">
+      <svg class="ti ti-rocket" style="width:.9rem;height:.9rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Finalize Deployment
+    </button>
+    <button id="dmSaveBtn" class="btn btn-primary" style="min-width:100px">Save</button>`;
 
+  // Re-open modal with full content
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
     body, footer, 'xl'
   );
 
-  // File/folder pickers
-  async function _pick(inputId, opts) {
-    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron'); return; }
-    const result = await window.electronAPI.openFileDialog(opts);
-    if (!result?.canceled && result?.filePath) {
-      document.getElementById(inputId).value = result.filePath;
+  // On dropdown change, re-open modal with new selection
+  document.getElementById('dmDeploySelect')?.addEventListener('change', (e) => {
+    const chosen = deployments.find(d => d.id === e.target.value);
+    if (chosen) { window._jkSelectedDeployment = chosen; _openDeployManageModal(); }
+  });
+
+  // Set selected deployment on load
+  if (sel && !window._jkSelectedDeployment) window._jkSelectedDeployment = sel;
+
+  // Save (installer paths + notes)
+  document.getElementById('dmSaveBtn')?.onclick = async () => {
+    const selId = document.getElementById('dmDeploySelect')?.value;
+    if (!selId) return Modal.close();
+    const macFile = document.getElementById('dmMacFile').value.trim();
+    const winFile = document.getElementById('dmWinFile').value.trim();
+    const notes   = document.getElementById('dmNotes').value.trim();
+    await supabaseClient.from('deployments').update({ mac_installer_path: macFile, win_installer_path: winFile, notes }).eq('id', selId);
+    // Update local selected
+    if (window._jkSelectedDeployment?.id === selId) {
+      window._jkSelectedDeployment = { ...window._jkSelectedDeployment, mac_installer_path: macFile, win_installer_path: winFile, notes };
     }
-  }
-
-
-  document.getElementById('dmMacBtn').onclick = () => _pick('dmMacFile', {
-    title: 'Select Mac Test Results File',
-    filters: [{ name: 'HTML Files', extensions: ['html'] }, { name: 'All Files', extensions: ['*'] }],
-  });
-  document.getElementById('dmWinBtn').onclick = () => _pick('dmWinFile', {
-    title: 'Select Windows Test Results File',
-    filters: [{ name: 'HTML Files', extensions: ['html'] }, { name: 'All Files', extensions: ['*'] }],
-  });
-
-  // Save
-  document.getElementById('dmSaveBtn').onclick = () => {
-    const existing = _loadDeployConfig();
-    const cfg = {
-      version: existing.version || '',
-      folder:  existing.folder  || '',
-      macFile: document.getElementById('dmMacFile').value.trim(),
-      winFile: document.getElementById('dmWinFile').value.trim(),
-    };
-    _saveDeployConfig(cfg);
     Modal.close();
+    window.Toast?.success('Deployment info saved.');
+  };
+
+  // Finalize Deployment
+  document.getElementById('dmFinalizeBtn')?.onclick = async () => {
+    const selId = document.getElementById('dmDeploySelect')?.value;
+    if (!selId) { alert('Please select a testing package first.'); return; }
+
+    // Fetch latest commit ID
+    let commitId = '';
+    let commitMsg = '';
+    if (window.electronAPI?.getLatestCommitId) {
+      const result = await window.electronAPI.getLatestCommitId();
+      if (!result?.error) { commitId = result.commitId || ''; commitMsg = result.message || ''; }
+    }
+
+    const macFile = document.getElementById('dmMacFile').value.trim();
+    const winFile = document.getElementById('dmWinFile').value.trim();
+    const notes   = document.getElementById('dmNotes').value.trim();
+    const account = window._supabaseUser?.email || '';
+
+    // Show confirmation modal
+    Modal.open(
+      '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Finalize Deployment',
+      `<div style="display:flex;flex-direction:column;gap:14px">
+        <p style="margin:0;color:var(--text-muted);font-size:0.88rem">This will mark the deployment as <strong style="color:#f97316">Deployed</strong> in Supabase and record the following:</p>
+        <div style="padding:12px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.85rem;display:flex;flex-direction:column;gap:6px">
+          <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${commitId || '(not found)'}</code> ${commitMsg ? `— ${commitMsg}` : ''}</div>
+          <div><strong style="color:var(--text)">Deployed by:</strong> ${account}</div>
+          <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date().toLocaleString()}</div>
+          ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${macFile.split('/').pop()}</div>` : ''}
+          ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${winFile.split('/').pop()}</div>` : ''}
+        </div>
+        <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">This action cannot be undone. Confirm to finalize.</p>
+      </div>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
+       <button id="dmConfirmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff">Confirm Finalize Deployment</button>`,
+      'lg'
+    );
+
+    document.getElementById('dmConfirmFinalizeBtn')?.addEventListener('click', async () => {
+      const { error } = await supabaseClient.from('deployments').update({
+        commit_id:           commitId,
+        deployed_at:         new Date().toISOString(),
+        deploy_account:      account,
+        status:              'deployed',
+        mac_installer_path:  macFile,
+        win_installer_path:  winFile,
+        notes,
+        deploy_results_file: (window._jkSelectedDeployment?.deployment_folder
+          ? window._jkSelectedDeployment.deployment_folder.replace(/[/\\]$/, '') + '/' + `JumpKit_Deployment_v${window._jkSelectedDeployment?.version}.html`
+          : ''),
+      }).eq('id', selId);
+
+      if (error) {
+        window.Toast?.danger('Failed to finalize: ' + error.message);
+      } else {
+        if (window._jkSelectedDeployment?.id === selId) {
+          window._jkSelectedDeployment = { ...window._jkSelectedDeployment, status: 'deployed', commit_id: commitId };
+        }
+        Modal.close();
+        window.Toast?.success('Deployment finalized! 🚀');
+      }
+    });
   };
 }
 
@@ -313,9 +418,10 @@ function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&l
 
 // ── Save Deploy Results ───────────────────────────────────────────
 async function _saveDeployResults() {
+  const sel = window._jkSelectedDeployment;
   const cfg = _loadDeployConfig();
-  const version = cfg.version;
-  const folder  = cfg.folder;
+  const version = sel?.version || cfg.version;
+  const folder  = sel?.deployment_folder || cfg.folder;
 
   if (!version || !folder) {
     Modal.open(
@@ -384,7 +490,7 @@ async function _saveDeployResults() {
 <body>
 <div class="container">
   <h1>JumpKit Deployment v${_esc(version)}</h1>
-  <div class="meta">Saved ${dateStr} at ${timeStr}${cfg.macFile ? ' &nbsp;|&nbsp; Mac: ' + _esc(cfg.macFile.split('/').pop()) : ''}${cfg.winFile ? ' &nbsp;|&nbsp; Win: ' + _esc(cfg.winFile.split('/').pop()) : ''}</div>
+  <div class="meta">Saved ${dateStr} at ${timeStr}${(sel?.mac_results_file || cfg.macFile) ? ' &nbsp;|&nbsp; Mac: ' + _esc((sel?.mac_results_file || cfg.macFile).split('/').pop()) : ''}${(sel?.win_results_file || cfg.winFile) ? ' &nbsp;|&nbsp; Win: ' + _esc((sel?.win_results_file || cfg.winFile).split('/').pop()) : ''}</div>
   <div class="summary">
     <div class="stat"><div class="stat-val" style="color:#16a34a">${done}</div><div class="stat-lbl">Done</div></div>
     <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done}</div><div class="stat-lbl">To Do</div></div>

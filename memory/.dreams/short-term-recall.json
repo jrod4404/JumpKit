@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-16T11:23:28.003Z",
+  "updatedAt": "2026-06-18T11:21:00.346Z",
   "entries": {
     "memory:memory/2026-03-01.md:73:82": {
       "key": "memory:memory/2026-03-01.md:73:82",
@@ -9,17 +9,14 @@
       "endLine": 82,
       "source": "memory",
       "snippet": "## JumpKit App — Tech Notes - Auth: localStorage-based (signup/login/forgot password) - DB: localStorage abstraction in db.js (easy swap to SQLite in Electron) - Styling: Tabler Icons throughout (grayscale), turquoise+royal blue accent, light/dark mode - Color palette: --royal #1A4FD6, --turq #00C2C7, --hover-accent #2B9ED8 - Text softened: dark --text #C8D6E8, light --text #2C3E52 - Pages: Home, Jumps (columns + context menus), Archive, Stats (placeholder), Help, Settings (placeholder), Account (placeholder) - User dropdown in topbar (Settings, My Account, Logout) - Drag-and-drop column reordering in configure columns modal",
-      "recallCount": 38,
+      "recallCount": 41,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 14.993719339370726,
+      "totalScore": 16.130628558993337,
       "maxScore": 0.45596020221710204,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-16T11:23:28.003Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
       "queryHashes": [
-        "cd71ff1b4e59",
-        "84f72e652e71",
-        "0287dc4dc6d9",
         "8fb8a0cac588",
         "330bafa1e201",
         "4e728c4d2251",
@@ -48,11 +45,12 @@
         "f2e258799699",
         "8bbfe3138dc2",
         "1916a314209b",
-        "838e223785ec"
+        "838e223785ec",
+        "390539ee7587",
+        "7151ca52ed80",
+        "281a870f21b4"
       ],
       "recallDays": [
-        "2026-05-25",
-        "2026-05-28",
         "2026-05-30",
         "2026-05-31",
         "2026-06-01",
@@ -66,7 +64,9 @@
         "2026-06-13",
         "2026-06-14",
         "2026-06-15",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18"
       ],
       "conceptTags": [
         "localstorage-based",
@@ -221,13 +221,13 @@
       "endLine": 61,
       "source": "memory",
       "snippet": "- [ ] Welcome to JumpKit Core — test with a real paid subscription event - [ ] Cancellation email — test - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer - [ ] Pagination on list queries ## Key Identifiers - New Edge Functions: `send-welcome` (deployed ✅), `send-welcome-core` (not yet deployed), `send-cancellation` (not yet deployed) - Onboarding file: `Topics/JumpKit/app/js/onboarding.js` - Git corruption: object `be1cf517c9cde53a9290fbe61a8472f56a4e8eb3` - Backups: `a",
-      "recallCount": 11,
+      "recallCount": 14,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 4.470231677803081,
+      "totalScore": 5.628215728911442,
       "maxScore": 0.6260774808254667,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
       "queryHashes": [
         "401b0ff2f490",
         "8fb8a0cac588",
@@ -239,7 +239,10 @@
         "de346ae63b5e",
         "7539dcba99c1",
         "f2e258799699",
-        "1916a314209b"
+        "1916a314209b",
+        "390539ee7587",
+        "7151ca52ed80",
+        "281a870f21b4"
       ],
       "recallDays": [
         "2026-05-20",
@@ -250,7 +253,10 @@
         "2026-06-06",
         "2026-06-08",
         "2026-06-13",
-        "2026-06-14"
+        "2026-06-14",
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18"
       ],
       "conceptTags": [
         "backup",
@@ -776,13 +782,13 @@
       "endLine": 99,
       "source": "memory",
       "snippet": "- Test users: jeffroder@gmail.com / KickAss11!! (org owner), jeff.roder@us.bosch.com / KickAss22@@ (member), support@jumpkit.ai / TestUser1! (Test User 1) - Test teams: JeffTestOrg-Team1/JeffTestOrg-Team1!, JeffTestOrg-Team2/JeffTestOrg-Team2@, E2E-Test-Team/TestPass123! - Lemon Squeezy checkout: https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb - send-invite Edge Function: `Topics/JumpKit/app/supabase/functions/send-invite/index.ts` - Vercel deploy: `cd Topics/JumpKit/landing && vercel --prod` - Edge Function deploy: `cd Topics/JumpKit/app && npx supabase functions deploy send-invite` - Git commits (2026-05-13): ae8b365 (invite modal password field), 4f4232e",
-      "recallCount": 10,
+      "recallCount": 12,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 4.003210378594006,
+      "totalScore": 4.747196740812862,
       "maxScore": 0.6401916721530808,
       "firstRecalledAt": "2026-05-23T12:57:51.834Z",
-      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
+      "lastRecalledAt": "2026-06-17T19:51:50.048Z",
       "queryHashes": [
         "c9d5194a7fb5",
         "86bd0f4206c7",
@@ -793,7 +799,9 @@
         "66cd7cfa2560",
         "bbfcde8fe8d9",
         "095836eeb37a",
-        "1916a314209b"
+        "1916a314209b",
+        "390539ee7587",
+        "7151ca52ed80"
       ],
       "recallDays": [
         "2026-05-23",
@@ -804,7 +812,9 @@
         "2026-06-07",
         "2026-06-11",
         "2026-06-13",
-        "2026-06-14"
+        "2026-06-14",
+        "2026-06-16",
+        "2026-06-17"
       ],
       "conceptTags": [
         "gmail.com",
@@ -2566,6 +2576,171 @@
         "columns",
         "button",
         "now"
+      ]
+    },
+    "memory:memory/2026-06-14.md:165:187": {
+      "key": "memory:memory/2026-06-14.md:165:187",
+      "path": "memory/2026-06-14.md",
+      "startLine": 165,
+      "endLine": 187,
+      "source": "memory",
+      "snippet": "- JUMPKIT_DOCS.html path: `Topics/JumpKit/JUMPKIT_DOCS.html` (uppercase — always check this) - tests.js path: `Topics/JumpKit/app/js/tests.js` --- ## JumpKit Status (as of today) - Target: Feature-complete by end of June 2026 - Jump organizer: in progress - Jet AI (OpenClaw wrapper in Docker + Ollama): planned, documented in Future Features - 14 transactional emails implemented and documented - 141 unit tests defined (renumbered from 140) --- ## Tests.js Afternoon Fixes (continued) ### Bugs fixed - **Collapse/expand**: `scrollHeight=0` on Electron/WebKit when `maxHeight:0` → fixed with `void body.offsetHeight` reflow trick; removed `transitionend` listener that was causing phantom re-op",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.2141074985265732,
+      "maxScore": 0.40896033644676205,
+      "firstRecalledAt": "2026-06-16T14:45:21.321Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "queryHashes": [
+        "390539ee7587",
+        "7151ca52ed80",
+        "281a870f21b4"
+      ],
+      "recallDays": [
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18"
+      ],
+      "conceptTags": [
+        "jumpkit-docs.html",
+        "topics/jumpkit/jumpkit-docs.html",
+        "tests.js",
+        "topics/jumpkit/app/js/tests.js",
+        "feature-complete",
+        "collapse/expand",
+        "electron/webkit",
+        "body.offsetheight"
+      ]
+    },
+    "memory:memory/2026-06-14.md:146:174": {
+      "key": "memory:memory/2026-06-14.md:146:174",
+      "path": "memory/2026-06-14.md",
+      "startLine": 146,
+      "endLine": 174,
+      "source": "memory",
+      "snippet": "2. Test 138 (sign-out) — run last, have credentials ready 3. Email batch (IDs 114,115,116,117,118,119,64,66) — run together 4. Per-section cards are live scoreboard 5. Sections collapsible to reduce scroll - Phase intro line reads \"3 phases\" (fixed from \"4 phases\") ### Open TODOs - [ ] Jeff to provide section-by-section feedback after running updated test cases - [ ] Compare JUMPKIT_DOCS.html sections 1–8 with current app behavior; propose edits before updating - [ ] Full test suite run coming (including manual + SQL resets for data-mutating tests) - [ ] Pending: user message #10454 had a request about reorganizing \"Before You Start\" / \"run individually\" cards into per-phase \"Specia",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.1381902694702148,
+      "maxScore": 0.38427865505218506,
+      "firstRecalledAt": "2026-06-16T14:45:21.321Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "queryHashes": [
+        "390539ee7587",
+        "7151ca52ed80",
+        "281a870f21b4"
+      ],
+      "recallDays": [
+        "2026-06-16",
+        "2026-06-17",
+        "2026-06-18"
+      ],
+      "conceptTags": [
+        "sign-out",
+        "per-section",
+        "section-by-section",
+        "jumpkit-docs.html",
+        "data-mutating",
+        "per-phase",
+        "test",
+        "sign"
+      ]
+    },
+    "memory:memory/2026-06-14.md:289:320": {
+      "key": "memory:memory/2026-06-14.md:289:320",
+      "path": "memory/2026-06-14.md",
+      "startLine": 289,
+      "endLine": 320,
+      "source": "memory",
+      "snippet": "- Phase intro line reads \"3 phases\" (fixed from \"4 phases\") ### Open TODOs - [ ] Jeff to provide section-by-section feedback after running updated test cases - [ ] Compare JUMPKIT_DOCS.html sections 1–8 with current app behavior; propose edits before updating - [ ] Full test suite run coming (including manual + SQL resets for data-mutating tests) - [ ] Pending: user message #10454 had a request about reorganizing \"Before You Start\" / \"run individually\" cards into per-phase \"Special Test Cases\" cards — last assistant turn failed before producing content; needs to be picked up next session --- ## Technical Notes - Supabase CLI is outdated: current `v2.75.0`, latest `v2.106.0` — `brew upgrad",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3739451617002487,
+      "maxScore": 0.3739451617002487,
+      "firstRecalledAt": "2026-06-16T14:45:21.321Z",
+      "lastRecalledAt": "2026-06-16T14:45:21.321Z",
+      "queryHashes": [
+        "390539ee7587"
+      ],
+      "recallDays": [
+        "2026-06-16"
+      ],
+      "conceptTags": [
+        "section-by-section",
+        "jumpkit-docs.html",
+        "data-mutating",
+        "per-phase",
+        "v2.75.0",
+        "v2.106.0",
+        "phase",
+        "intro"
+      ]
+    },
+    "memory:memory/2026-06-16.md:1:31": {
+      "key": "memory:memory/2026-06-16.md:1:31",
+      "path": "memory/2026-06-16.md",
+      "startLine": 1,
+      "endLine": 31,
+      "source": "memory",
+      "snippet": "# 2026-06-16 — JumpKit Release Testing Overhaul ## Summary Full-day polish pass on the JumpKit v1.0.0 release testing system — tests page UI and HTML report brought to full parity. ## What Was Done ### App (tests.js) - Execution order (`#execOrder · testId`) surfaced in test row first column across all 4 sections - 4-section layout: Pre-Flight (139), Automatic (120), Auto+Manual (10), Manual (15) - Each section header: inline pill stats (Pass/Fail/Manual, only non-zero) - Unified total summary card (Passed/Failed/Manual/Not Run/Total) — no per-section cards - Summary card: Passed=green, Failed=red, Manual=orange — ALWAYS, even at 0 - Summary card: vertical divider lines removed - Arrow ic",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7772397309541701,
+      "maxScore": 0.3958634704351425,
+      "firstRecalledAt": "2026-06-17T19:51:50.048Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "queryHashes": [
+        "7151ca52ed80",
+        "281a870f21b4"
+      ],
+      "recallDays": [
+        "2026-06-17",
+        "2026-06-18"
+      ],
+      "conceptTags": [
+        "full-day",
+        "v1.0.0",
+        "tests.js",
+        "4-section",
+        "pre-flight",
+        "pass/fail/manual",
+        "non-zero",
+        "passed/failed/manual/not"
+      ]
+    },
+    "memory:memory/2026-06-16.md:26:48": {
+      "key": "memory:memory/2026-06-16.md:26:48",
+      "path": "memory/2026-06-16.md",
+      "startLine": 26,
+      "endLine": 48,
+      "source": "memory",
+      "snippet": "### JumpKit_ReleaseTesting_v1.0.0.html (on Desktop) - Orphaned test IDs 132-138, 143 removed; total corrected 154→146 - 4 sections: Pre-Flight, Automatic, Auto+Manual, Manual - Section headers: inline pill stats (Pass/Fail/Manual, rounded pill style, no Total) - Column headers inside each section (not global thead) - No stat blocks at top/bottom of sections - First col: #execOrder · testId - All 4 sections default collapsed (▸ / display:none) - Last row in each section: no border-bottom ### Commits - cf9814d — ui: tests page summary card vertical dividers removed; CHANGELOG entries - 0691278 — ui: tests page + release HTML — polish pass (summary card colors, Save Results layout parity) ###",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3734935492277145,
+      "maxScore": 0.3734935492277145,
+      "firstRecalledAt": "2026-06-18T11:21:00.346Z",
+      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "queryHashes": [
+        "281a870f21b4"
+      ],
+      "recallDays": [
+        "2026-06-18"
+      ],
+      "conceptTags": [
+        "132-138",
+        "pre-flight",
+        "pass/fail/manual",
+        "top/bottom",
+        "border-bottom",
+        "jumpkit-releasetesting-v1.0.0",
+        "html",
+        "desktop"
       ]
     }
   }

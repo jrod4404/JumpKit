@@ -4534,10 +4534,10 @@ function _openConcludeModal() {
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
-    <button id="btnConfirmConclude" class="btn" style="background:#e15b59;color:#fff;border-color:#e15b59">Yes, Conclude &amp; Reset</button>`;
+    <button id="btnConfirmConclude" class="btn" style="background:#1A4FD6;color:#fff;border-color:#1A4FD6">Finalize Testing &amp; Prepare Deployment</button>`;
 
   Modal.open(
-    '<svg class="ti ti-flag-check" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude Testing',
+    '<svg class="ti ti-flag-check" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize Testing',
     body, footer, 'md'
   );
 
@@ -4547,16 +4547,64 @@ function _openConcludeModal() {
   };
 }
 
-function _concludeTesting() {
-  // 1. Wipe in-memory results
+async function _concludeTesting() {
+  // 1. Capture test results snapshot before wiping
+  const results = window._jkTestResults || {};
+  const allTests = JK_TESTS;
+  let passed = 0, failed = 0, skipped = 0;
+  allTests.forEach(t => {
+    const r = results[t.id];
+    if (!r || !r.state || r.state === 'not-run') skipped++;
+    else if (r.state === 'pass') passed++;
+    else if (r.state === 'fail') failed++;
+    // manual counts as passed for this summary
+    else if (r.state === 'manual') passed++;
+  });
+  const total = allTests.length;
+
+  // 2. Read config
+  const releaseState = _getReleaseState();
+  let deployConfig = {};
+  try { deployConfig = JSON.parse(localStorage.getItem('jk_deploy_config') || '{}'); } catch(_) {}
+
+  const version = releaseState?.version || deployConfig.version || '';
+  const testOs  = releaseState?.os || 'mac';
+  const folder  = deployConfig.folder || '';
+  const macFile = deployConfig.macFile || '';
+  const winFile = deployConfig.winFile || '';
+  const account = window._supabaseUser?.email || currentUser?.email || '';
+
+  // 3. Insert to Supabase deployments table
+  if (version && SUPABASE_URL && SUPABASE_ANON_KEY) {
+    try {
+      await supabaseClient.from('deployments').insert({
+        version,
+        testing_account:      account,
+        testing_completed_at: new Date().toISOString(),
+        test_os:              testOs,
+        tests_total:          total,
+        tests_passed:         passed,
+        tests_failed:         failed,
+        tests_skipped:        skipped,
+        deployment_folder:    folder,
+        mac_results_file:     macFile,
+        win_results_file:     winFile,
+        status:               'testing_complete',
+      });
+    } catch(e) {
+      console.warn('[Deployments] Insert failed:', e.message);
+    }
+  }
+
+  // 4. Wipe in-memory results
   window._jkTestResults = {};
-  // 2. Wipe SQLite
+  // 5. Wipe SQLite
   _clearSavedTestResults();
-  // 3. Clear localStorage release config (file path / version)
+  // 6. Clear localStorage release config
   try { localStorage.removeItem(_RT_KEY); } catch(_) {}
-  // 4. Full re-render so everything starts fresh
+  // 7. Full re-render
   renderTests();
-  window.Toast?.success('Testing session concluded. Ready for next release cycle! 🎉');
+  window.Toast?.success('Testing finalized and saved to deployments. Ready for deployment! 🚀');
 }
 
 function _esc(str) {
@@ -4620,14 +4668,14 @@ async function _openReleaseTestingModal() {
       <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px">
         <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
-      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;color:#e15b59">
-        <svg class="ti ti-flag-check" style="font-size:1rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Conclude &amp; Reset
+      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;color:#1A4FD6">
+        <svg class="ti ti-flag-check" style="font-size:1rem;color:#1A4FD6"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize Testing &amp; Prepare Deployment
       </button>
     </div>
     <div style="margin-bottom:10px"></div>
     <p style="margin:8px 0 0;font-size:0.75rem;color:var(--text-muted)">
       <strong>Load Results from File</strong> — restores test states from the saved HTML (use after reopening the app).<br>
-      <strong>Conclude &amp; Reset</strong> — ends this session and wipes all results so the next release cycle starts clean. The HTML file is kept on disk.
+      <strong>Finalize Testing &amp; Prepare Deployment</strong> — saves test results to Supabase deployments, resets the runner, and prepares for the deployment phase.
     </p>` : '';
 
   // ── Section 3: Configure / start new session ────────────────────

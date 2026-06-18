@@ -35,9 +35,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportPDF:  (html) => ipcRenderer.invoke('export-pdf', html),
 
   // Release testing file helpers
-  showReleaseTestingDialog: (version) => ipcRenderer.invoke('show-release-testing-dialog', version),
+  showReleaseTestingDialog: (version, osPart) => ipcRenderer.invoke('show-release-testing-dialog', version, osPart),
   openFileDialog: (opts) => ipcRenderer.invoke('open-file-dialog', opts),
+  checkMigrations: (filenames)         => ipcRenderer.invoke('check-migrations', filenames),
   readFile:        (filePath)          => ipcRenderer.invoke('read-file', filePath),
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
   getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),
+  getLatestCommitId: () => ipcRenderer.invoke('get-latest-commit-id'),
 });
