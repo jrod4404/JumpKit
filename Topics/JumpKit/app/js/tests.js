@@ -4641,6 +4641,19 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${configTitle}
     <div style="margin-bottom:18px">
+      <label style="${labelStyle}">Version Number</label>
+      <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${_esc((typeof _loadDeployConfig === 'function' ? _loadDeployConfig().version : null) || existing?.version || appVersion)}" style="${inputStyle}" />
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the test results and deployment files.</p>
+    </div>
+    <div style="margin-bottom:18px">
+      <label style="${labelStyle}">Deployment Folder</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="rtDeployFolder" type="text" placeholder="Click Choose to pick the deployment folder…" value="${_esc((typeof _loadDeployConfig === 'function' ? _loadDeployConfig().folder : null) || '')}" readonly style="${inputStyle};flex:1;cursor:default;color:var(--text-muted);font-size:0.8rem" />
+        <button id="rtDeployFolderBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+      </div>
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Test results and deployment files will be auto-saved here.</p>
+    </div>
+    <div style="margin-bottom:18px">
       <label style="${labelStyle}">Test Environment</label>
       <select id="rtOS" style="${inputStyle}">
         <option value="mac"${(existing?.os || 'mac') === 'mac' ? ' selected' : ''}>Mac</option>
@@ -4692,14 +4705,27 @@ async function _openReleaseTestingModal() {
   };
 
   // Save config
+  // Wire deploy folder choose button
+  document.getElementById('rtDeployFolderBtn').onclick = async () => {
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron'); return; }
+    const result = await window.electronAPI.openFileDialog({ title: 'Select Deployment Folder', properties: ['openDirectory'] });
+    if (!result?.canceled && result?.filePath) document.getElementById('rtDeployFolder').value = result.filePath;
+  };
+
   document.getElementById('rtCreateBtn').onclick = () => {
-    const version = (typeof _loadDeployConfig === 'function' ? _loadDeployConfig().version : null) || appVersion;
-    if (!version) { alert('Please enter a version number in the Deployment page → Manage Deployment.'); return; }
+    const version = document.getElementById('rtVersion').value.trim() || appVersion;
+    if (!version) { alert('Please enter a version number.'); return; }
     if (!chosenPath) { alert('Please choose a file location first.'); return; }
     const os = document.getElementById('rtOS').value;
+    const deployFolder = document.getElementById('rtDeployFolder').value.trim();
+    // Persist version + deploy folder to shared deploy config
+    if (typeof _loadDeployConfig === 'function') {
+      const cfg = _loadDeployConfig();
+      _saveDeployConfig({ ...cfg, version, folder: deployFolder });
+    }
     _setReleaseState({ version, filePath: chosenPath, os });
     Modal.close();
-    window.Toast?.success(existing ? `Release testing updated — v${version}` : `Testing session started — v${version}`);
+    window.Toast?.success(existing ? `Testing updated — v${version}` : `Testing session started — v${version}`);
   };
 }
 
@@ -4853,6 +4879,14 @@ async function _saveReleaseSection(mode) {
   if (writeResult?.ok) {
     const sectionLabel = mode === 'preflight' ? 'Pre-Flight' : mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
     window.Toast?.success(`${sectionLabel} results saved to file.`);
+    // Also copy to deployment folder if configured
+    const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+    if (deployCfg.folder) {
+      const sep = deployCfg.folder.includes('\\') ? '\\' : '/';
+      const fname = filePath.split(/[\/]/).pop();
+      const deployPath = deployCfg.folder.replace(/[\/]$/, '') + sep + fname;
+      await window.electronAPI.writeFileDirect(deployPath, html).catch(() => {});
+    }
   } else {
     window.Toast?.danger(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
   }

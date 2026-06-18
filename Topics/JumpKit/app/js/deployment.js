@@ -250,18 +250,7 @@ function _openDeployManageModal() {
 
   const body = `
     <div style="display:flex;flex-direction:column;gap:18px">
-      <div>
-        <label style="${labelStyle}">Version Number</label>
-        <input id="dmVersion" type="text" placeholder="e.g. 1.0.0" value="${_esc(cfg.version || '')}" style="${inputStyle};cursor:text" />
-        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name installer files and the deployment folder.</p>
-      </div>
-      <div>
-        <label style="${labelStyle}">Deployment Folder</label>
-        <div style="${rowStyle}">
-          <input id="dmFolder" type="text" placeholder="Click Choose to pick the deployment folder…" value="${_esc(cfg.folder || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
-          <button id="dmFolderBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
-        </div>
-      </div>
+      <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Set the version number and deployment folder in <strong style="color:var(--text)">Tests → Manage Testing</strong>. Link the saved test result files below.</p>
       <div>
         <label style="${labelStyle}">Mac Testing Results File</label>
         <div style="${rowStyle}">
@@ -296,10 +285,7 @@ function _openDeployManageModal() {
     }
   }
 
-  document.getElementById('dmFolderBtn').onclick = () => _pick('dmFolder', {
-    title: 'Select Deployment Folder',
-    properties: ['openDirectory'],
-  });
+
   document.getElementById('dmMacBtn').onclick = () => _pick('dmMacFile', {
     title: 'Select Mac Test Results File',
     filters: [{ name: 'HTML Files', extensions: ['html'] }, { name: 'All Files', extensions: ['*'] }],
@@ -311,9 +297,10 @@ function _openDeployManageModal() {
 
   // Save
   document.getElementById('dmSaveBtn').onclick = () => {
+    const existing = _loadDeployConfig();
     const cfg = {
-      version: document.getElementById('dmVersion').value.trim(),
-      folder:  document.getElementById('dmFolder').value.trim(),
+      version: existing.version || '',
+      folder:  existing.folder  || '',
       macFile: document.getElementById('dmMacFile').value.trim(),
       winFile: document.getElementById('dmWinFile').value.trim(),
     };
