@@ -4641,11 +4641,6 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${configTitle}
     <div style="margin-bottom:18px">
-      <label style="${labelStyle}">Version Number</label>
-      <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${existing?.version || appVersion}" style="${inputStyle}" />
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">File will be saved as <code>JumpKit_ReleaseTesting_v[version].html</code></p>
-    </div>
-    <div style="margin-bottom:18px">
       <label style="${labelStyle}">Test Environment</label>
       <select id="rtOS" style="${inputStyle}">
         <option value="mac"${(existing?.os || 'mac') === 'mac' ? ' selected' : ''}>Mac</option>
@@ -4687,7 +4682,7 @@ async function _openReleaseTestingModal() {
     if (!window.electronAPI?.showReleaseTestingDialog) {
       alert('File picker not available — not running in Electron'); return;
     }
-    const version = document.getElementById('rtVersion').value.trim() || appVersion;
+    const version = (typeof _loadDeployConfig === 'function' ? _loadDeployConfig().version : null) || appVersion;
     const osForDialog = document.getElementById('rtOS').value === 'windows' ? 'Win' : 'Mac';
     const result = await window.electronAPI.showReleaseTestingDialog(version, osForDialog);
     if (!result?.canceled && result?.filePath) {
@@ -4698,8 +4693,8 @@ async function _openReleaseTestingModal() {
 
   // Save config
   document.getElementById('rtCreateBtn').onclick = () => {
-    const version = document.getElementById('rtVersion').value.trim();
-    if (!version) { alert('Please enter a version number.'); return; }
+    const version = (typeof _loadDeployConfig === 'function' ? _loadDeployConfig().version : null) || appVersion;
+    if (!version) { alert('Please enter a version number in the Deployment page → Manage Deployment.'); return; }
     if (!chosenPath) { alert('Please choose a file location first.'); return; }
     const os = document.getElementById('rtOS').value;
     _setReleaseState({ version, filePath: chosenPath, os });

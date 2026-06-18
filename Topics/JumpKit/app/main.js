@@ -757,7 +757,7 @@ ipcMain.handle('open-file-dialog', async (_e, opts) => {
     title:       opts?.title || 'Open File',
     defaultPath: opts?.defaultPath || require('os').homedir(),
     filters:     opts?.filters || [{ name: 'All Files', extensions: ['*'] }],
-    properties:  ['openFile'],
+    properties:  opts?.properties || ['openFile'],
   });
   if (canceled || !filePaths?.length) return { canceled: true };
   return { filePath: filePaths[0] };

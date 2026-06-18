@@ -12,21 +12,6 @@
 
 const DEPLOY_PHASES = [
   {
-    id: 'predeploy', label: 'Pre-Deploy', icon: 'ti-folder-plus', color: '#64748b',
-    steps: [
-      { id: 'pd-1', text: 'Create a deployment folder at <code>Topics/JumpKit/app/deploy/</code> with the folder name in the format <code>vx.y.z_yyyy-mm-dd</code> (e.g. <code>v1.0.0_2026-06-18</code>). This folder will hold the final installers and release artifacts for this version.' },
-    ]
-  },
-  {
-    id: 'testing', label: 'Testing', icon: 'ti-test-pipe', color: '#3b82f6',
-    steps: [
-      { id: 'test-1', text: 'Run ALL unit tests on <strong>Mac</strong> — all auto tests pass, all manual tests verified.' },
-      { id: 'test-2', text: 'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename. Save the Mac test file to the deployment folder.' },
-      { id: 'test-3', text: 'Run ALL unit tests on <strong>Windows</strong> — all Windows-applicable tests pass.' },
-      { id: 'test-4', text: 'Save Windows test results doc. Note the filename. Save the Windows test file to the deployment folder.' },
-    ]
-  },
-  {
     id: 'codeversion', label: 'Code & Version', icon: 'ti-git-commit', color: '#8b5cf6',
     steps: [
       { id: 'cv-1', text: 'Commit all outstanding changes with a clear release commit message.' },
@@ -79,7 +64,15 @@ const DEPLOY_PHASES = [
   },
 ];
 
-const DEPLOY_STATE_KEY = 'jk_deploy_state';
+const DEPLOY_STATE_KEY  = 'jk_deploy_state';
+const DEPLOY_CONFIG_KEY = 'jk_deploy_config';
+
+function _loadDeployConfig() {
+  try { return JSON.parse(localStorage.getItem(DEPLOY_CONFIG_KEY) || '{}'); } catch(_) { return {}; }
+}
+function _saveDeployConfig(cfg) {
+  try { localStorage.setItem(DEPLOY_CONFIG_KEY, JSON.stringify(cfg)); } catch(_) {}
+}
 
 function _loadDeployState() {
   try { return JSON.parse(localStorage.getItem(DEPLOY_STATE_KEY) || '{}'); } catch(_) { return {}; }
@@ -176,6 +169,9 @@ window.renderDeployment = function renderDeployment() {
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
+        <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment
+        </button>
         <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
         </button>
@@ -210,6 +206,9 @@ window.renderDeployment = function renderDeployment() {
     });
   });
 
+  // Wire manage button
+  document.getElementById('deployManageBtn')?.addEventListener('click', _openDeployManageModal);
+
   // Wire section collapse toggles
   pageContent.querySelectorAll('[data-deploy-toggle-section]').forEach(header => {
     header.addEventListener('click', () => {
@@ -237,3 +236,86 @@ window.renderDeployment = function renderDeployment() {
     renderDeployment();
   });
 };
+
+// ── Manage Deployment Modal ───────────────────────────────────────
+function _openDeployManageModal() {
+  const cfg = _loadDeployConfig();
+  const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.88rem;outline:none;cursor:default';
+  const labelStyle = 'display:block;font-size:0.8rem;font-weight:600;color:var(--text-muted);margin-bottom:6px';
+  const rowStyle   = 'display:flex;gap:8px;align-items:center';
+
+  const body = `
+    <div style="display:flex;flex-direction:column;gap:18px">
+      <div>
+        <label style="${labelStyle}">Version Number</label>
+        <input id="dmVersion" type="text" placeholder="e.g. 1.0.0" value="${_esc(cfg.version || '')}" style="${inputStyle};cursor:text" />
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name installer files and the deployment folder.</p>
+      </div>
+      <div>
+        <label style="${labelStyle}">Deployment Folder</label>
+        <div style="${rowStyle}">
+          <input id="dmFolder" type="text" placeholder="Click Choose to pick the deployment folder…" value="${_esc(cfg.folder || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
+          <button id="dmFolderBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+        </div>
+      </div>
+      <div>
+        <label style="${labelStyle}">Mac Testing Results File</label>
+        <div style="${rowStyle}">
+          <input id="dmMacFile" type="text" placeholder="Click Choose to pick the Mac test results HTML file…" value="${_esc(cfg.macFile || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
+          <button id="dmMacBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+        </div>
+      </div>
+      <div>
+        <label style="${labelStyle}">Windows Testing Results File</label>
+        <div style="${rowStyle}">
+          <input id="dmWinFile" type="text" placeholder="Click Choose to pick the Windows test results HTML file…" value="${_esc(cfg.winFile || '')}" readonly style="${inputStyle};flex:1;color:var(--text-muted);font-size:0.8rem" />
+          <button id="dmWinBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+        </div>
+      </div>
+    </div>`;
+
+  const footer = `
+    <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
+    <button id="dmSaveBtn" class="btn btn-primary" style="min-width:120px">Save</button>`;
+
+  Modal.open(
+    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+    body, footer, 'xl'
+  );
+
+  // File/folder pickers
+  async function _pick(inputId, opts) {
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron'); return; }
+    const result = await window.electronAPI.openFileDialog(opts);
+    if (!result?.canceled && result?.filePath) {
+      document.getElementById(inputId).value = result.filePath;
+    }
+  }
+
+  document.getElementById('dmFolderBtn').onclick = () => _pick('dmFolder', {
+    title: 'Select Deployment Folder',
+    properties: ['openDirectory'],
+  });
+  document.getElementById('dmMacBtn').onclick = () => _pick('dmMacFile', {
+    title: 'Select Mac Test Results File',
+    filters: [{ name: 'HTML Files', extensions: ['html'] }, { name: 'All Files', extensions: ['*'] }],
+  });
+  document.getElementById('dmWinBtn').onclick = () => _pick('dmWinFile', {
+    title: 'Select Windows Test Results File',
+    filters: [{ name: 'HTML Files', extensions: ['html'] }, { name: 'All Files', extensions: ['*'] }],
+  });
+
+  // Save
+  document.getElementById('dmSaveBtn').onclick = () => {
+    const cfg = {
+      version: document.getElementById('dmVersion').value.trim(),
+      folder:  document.getElementById('dmFolder').value.trim(),
+      macFile: document.getElementById('dmMacFile').value.trim(),
+      winFile: document.getElementById('dmWinFile').value.trim(),
+    };
+    _saveDeployConfig(cfg);
+    Modal.close();
+  };
+}
+
+function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
