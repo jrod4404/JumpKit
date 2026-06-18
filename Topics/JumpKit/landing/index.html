@@ -534,6 +534,33 @@
 
   <script src="script.js"></script>
   <script src="https://script.supademo.com/supademo.js"></script>
+  <script>
+    (function () {
+      const hash = window.location.hash.slice(1);
+      const params = new URLSearchParams(hash);
+      const error = params.get('error');
+      const errorCode = params.get('error_code');
+      if (!error) return;
+
+      const isExpired = errorCode === 'otp_expired';
+      const overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(14,24,39,0.96);display:flex;align-items:center;justify-content:center;z-index:99999;padding:20px';
+      overlay.innerHTML = [
+        '<div style="background:#111d2e;border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:44px 40px 36px;max-width:420px;width:100%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.4)">',
+          '<div style="width:64px;height:64px;background:rgba(225,91,89,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px">',
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#e15b59" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:32px;height:32px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          '</div>',
+          '<h2 style="font-size:1.5rem;font-weight:700;color:#C8D6E8;margin:0 0 12px">' + (isExpired ? 'Link Expired' : 'Confirmation Failed') + '</h2>',
+          '<p style="color:#7A93B4;font-size:0.92rem;line-height:1.7;margin:0 0 28px">' + (isExpired
+            ? 'This confirmation link has expired.<br><br>Open the <strong style="color:#C8D6E8">JumpKit app</strong>, sign in with your email, and use the <strong style="color:#C8D6E8">&ldquo;Click here to resend the confirmation email&rdquo;</strong> link to get a fresh one.'
+            : 'Something went wrong confirming your email. Please return to the JumpKit app and try signing in &mdash; you can request a new confirmation link from the login screen.'
+          ) + '</p>',
+          '<a href="https://jumpkit.app" onclick="this.closest(\'[style*=fixed]\').remove();history.replaceState(null,\'\',window.location.pathname);return false" style="display:inline-block;background:linear-gradient(135deg,#50CACC,#1A4FD6);color:white;font-weight:600;font-size:0.92rem;padding:11px 26px;border-radius:10px;text-decoration:none">Back to JumpKit</a>',
+        '</div>'
+      ].join('');
+      document.body.appendChild(overlay);
+    })();
+  </script>
 </body>
 </html>
 
