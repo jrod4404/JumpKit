@@ -237,6 +237,8 @@ async function initApp() {
   if (window._supabaseProfile?.role === 'admin') {
     const testNavBtn = document.querySelector('[data-page="tests"]');
     if (testNavBtn) testNavBtn.style.display = '';
+    const deployNavBtn = document.querySelector('[data-page="deployment"]');
+    if (deployNavBtn) deployNavBtn.style.display = '';
     const adminLabel = document.getElementById('adminNavLabel');
     if (adminLabel) adminLabel.style.display = '';
     const adminNavBtn = document.getElementById('adminNavBtn');
@@ -521,8 +523,9 @@ const pages = {
   help:     () => renderHelp(),
   account:  () => renderAccount('account'),
   teams:    () => renderAccount('teams'),
-  tests:    async () => { await loadScript('js/tests.js'); renderTests(); },
-  admin:    () => renderAdmin(),
+  tests:      async () => { await loadScript('js/tests.js'); renderTests(); },
+  deployment: async () => { await loadScript('js/deployment.js'); renderDeployment(); },
+  admin:      () => renderAdmin(),
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
