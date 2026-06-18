@@ -1805,6 +1805,56 @@ Return a full table of all keys found with APPROVED / UNAPPROVED / CONCERN statu
     test: async () => 'manual'
   },
 
+  {
+    id: 377, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[MANUAL] Pre-Flight — Code Quality Audit',
+    purpose: 'Ensures the app ships without debug artifacts, unhandled async errors, missing UI states, or unbounded list queries. Catches issues that automated tests miss.',
+    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    description: 'Paste the prompt below to Max. He will audit app/js/*.js (excluding chart.min.js) for each item and return a PASS/FAIL/N\/A verdict with file + line evidence. Mark this test Pass only when all items are PASS or N\/A.',
+    input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
+    expected: 'All items PASS or N/A. Any FAIL must be resolved before release.',
+    steps: [
+      {
+        text: 'Copy the audit prompt below and paste it to Max in a new message. Review his response and mark this test Pass when all items are resolved.',
+        cmd: `Max, please run a full code quality audit of the JumpKit app. Scan all files in app/js/*.js EXCLUDING chart.min.js (that is a bundled third-party library). For each item below give a clear PASS / FAIL / N\/A verdict with file + line number evidence for any FAIL.
+
+Console Logs
+[ ] No console.log() calls remain in production code — only console.warn() and console.error() are acceptable for genuine error/warning conditions. List every console.log found with file and line.
+[ ] No console.debug() calls remain (these were used during development and must be removed before release).
+[ ] No commented-out console.log blocks that suggest debug code was recently active.
+
+Backup / Junk Files
+[ ] No .bak, .bak-*, .tmp, or .orig files exist in app/js/ — these must be deleted before release. Check specifically for teams.js.bak-2026-05-25 and tests.js.bak.
+[ ] No TODO, FIXME, HACK, or XXX comments reference unfinished work that blocks release (advisory items are OK; flag blockers).
+
+Async Error Handling
+[ ] All async functions have try/catch blocks or .catch() handlers — no unhandled promise rejections possible in normal user flows.
+[ ] All fetch() calls check response.ok or response.status before using the response body — no silent failures on non-2xx responses.
+[ ] Supabase calls check the returned { data, error } object — no code silently ignores a non-null error.
+[ ] Edge Function calls handle network errors gracefully (timeout, fetch failure) with user-visible feedback.
+
+UI Loading & Error States
+[ ] Every async operation that updates the UI has a loading state (spinner, disabled button, or visual indicator) so users know something is happening.
+[ ] Every async operation that can fail shows a user-visible error message — no silent failures that leave the UI in a broken state.
+[ ] No UI element can get stuck in a permanent loading state if a network call fails (loading indicators must be cleared in catch/finally blocks).
+
+Pagination & Unbounded Queries
+[ ] All Supabase list queries that could return large datasets (jumps, columns, teams, notifications, shared_jumps, user_sessions) use .limit() or .range() — no unbounded SELECT * queries against user data tables.
+[ ] The app does not load all records into memory at once for tables that could grow unboundedly (e.g. click logs, notifications).
+
+General Code Hygiene
+[ ] No hardcoded test emails, user IDs, or UUIDs in production code paths (test data only in tests.js).
+[ ] No disabled or bypassed auth checks (e.g. if (false) { requireAuth() } or commented-out session guards).
+[ ] No eval(), innerHTML assignments using unsanitized user input, or other XSS vectors in dynamic HTML rendering.
+[ ] All event listeners added in page-load or render functions are either cleaned up on unmount/re-render, or are idempotent (safe to add multiple times).
+[ ] No infinite loop risks in recursive functions or polling timers — all have a clear exit condition or max-iteration guard.
+
+For each FAIL: show the file, line number, the problematic code snippet, and the recommended fix.`
+      }
+    ],
+    test: async () => 'manual'
+  },
+
   // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.
