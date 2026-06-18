@@ -4282,7 +4282,7 @@ function renderTests() {
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing
         </button>
         <button class="btn btn-subtle" id="btnDeployChecklist" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-rocket" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Deploy Checklist
+          <svg class="ti ti-world-upload" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg> Deploy Checklist
         </button>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
