@@ -101,7 +101,6 @@ window.renderDeployment = function renderDeployment() {
 
   const state = _loadDeployState();
   const { total, done } = _deployTotals(state);
-  const pct = total ? Math.round(done / total * 100) : 0;
 
   // Build section HTML
   const sectionsHTML = DEPLOY_PHASES.map((phase, pi) => {
@@ -157,21 +156,14 @@ window.renderDeployment = function renderDeployment() {
 
   pageContent.innerHTML = `
     <div style="padding:16px 24px 24px 24px;">
-      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:20px;gap:12px">
-        <div style="text-align:right">
-          <div style="font-size:1.4rem;font-weight:800;color:${done === total ? '#3fbe71' : 'var(--text)'}">${done}<span style="font-size:0.9rem;color:var(--text-muted);font-weight:500"> / ${total}</span></div>
-          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim)">Completed</div>
+      <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-bottom:20px">
+        <div style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
+          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Completed</div></div>
+          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
+          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
-        <div style="width:56px;height:56px;position:relative">
-          <svg viewBox="0 0 36 36" style="width:56px;height:56px;transform:rotate(-90deg)">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"/>
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="${done === total ? '#3fbe71' : 'var(--turq)'}" stroke-width="3"
-              stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="0" stroke-linecap="round"/>
-          </svg>
-          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--text)">${pct}%</div>
-        </div>
-        <button class="btn btn-subtle" id="deployResetBtn" style="font-size:0.8rem;padding:6px 12px">
-          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset
+        <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
         </button>
       </div>
       ${sectionsHTML}
