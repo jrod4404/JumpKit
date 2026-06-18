@@ -175,6 +175,9 @@ window.renderDeployment = function renderDeployment() {
         <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment
         </button>
+        <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+          <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
+        </button>
       </div>
       <div style="flex:1;overflow-y:auto;padding:16px 24px 24px 24px">
         ${sectionsHTML}
@@ -208,6 +211,7 @@ window.renderDeployment = function renderDeployment() {
 
   // Wire manage button
   document.getElementById('deployManageBtn')?.addEventListener('click', _openDeployManageModal);
+  document.getElementById('deploySaveBtn')?.addEventListener('click', _saveDeployResults);
 
   // Wire section collapse toggles
   pageContent.querySelectorAll('[data-deploy-toggle-section]').forEach(header => {
@@ -319,3 +323,100 @@ function _openDeployManageModal() {
 }
 
 function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Save Deploy Results ───────────────────────────────────────────
+async function _saveDeployResults() {
+  const cfg = _loadDeployConfig();
+  const version = cfg.version;
+  const folder  = cfg.folder;
+
+  if (!version || !folder) {
+    Modal.open(
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Not Configured',
+      `<p style="margin:0 0 10px">Please set a <strong>version number</strong> and <strong>deployment folder</strong> before saving.</p>
+       <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Manage Deployment</strong> to configure these.</p>`,
+      '<button class="btn btn-primary" data-jaction="modal-close">Got it</button>',
+      'sm'
+    );
+    return;
+  }
+
+  if (!window.electronAPI?.writeFileDirect) {
+    alert('File I/O not available — not running in Electron.');
+    return;
+  }
+
+  const state = _loadDeployState();
+  const now   = new Date();
+  const dateStr = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+  const total = DEPLOY_PHASES.reduce((n, p) => n + p.steps.length, 0);
+  const done  = Object.values(state).filter(v => v === 'completed').length;
+
+  const sectionsHtml = DEPLOY_PHASES.map((phase, pi) => {
+    const rows = phase.steps.map((step, si) => {
+      const isDone = state[step.id] === 'completed';
+      const bg    = isDone ? 'background:#f0fdf4' : '';
+      const color = isDone ? 'color:#16a34a' : 'color:#374151';
+      const status = isDone
+        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0">✓ Done</span>'
+        : '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">To Do</span>';
+      return `<tr style="border-bottom:1px solid #e5e7eb;${bg}">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#${pi+1}.${si+1}</td>
+        <td style="padding:8px 12px;font-size:0.85rem;${color};line-height:1.5">${step.text}</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap">${status}</td>
+      </tr>`;
+    }).join('');
+    const phaseDone = phase.steps.filter(s => state[s.id] === 'completed').length;
+    return `<div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">${_esc(phase.label)}</span>
+        <span style="font-size:0.72rem;color:#9ca3af">${phaseDone}/${phase.steps.length}</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse">${rows}</table>
+    </div>`;
+  }).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>JumpKit Deployment v${_esc(version)}</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;color:#111827;margin:0;padding:24px}
+    .container{max-width:860px;margin:0 auto;background:#fff;border-radius:12px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    h1{font-size:1.4rem;font-weight:800;margin:0 0 4px}
+    .meta{font-size:0.82rem;color:#6b7280;margin-bottom:24px}
+    .summary{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+    .stat{text-align:center;padding:10px 20px;border-radius:10px;border:1px solid #e5e7eb;min-width:80px}
+    .stat-val{font-size:1.4rem;font-weight:900}
+    .stat-lbl{font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-top:2px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>JumpKit Deployment v${_esc(version)}</h1>
+  <div class="meta">Saved ${dateStr} at ${timeStr}${cfg.macFile ? ' &nbsp;|&nbsp; Mac: ' + _esc(cfg.macFile.split('/').pop()) : ''}${cfg.winFile ? ' &nbsp;|&nbsp; Win: ' + _esc(cfg.winFile.split('/').pop()) : ''}</div>
+  <div class="summary">
+    <div class="stat"><div class="stat-val" style="color:#16a34a">${done}</div><div class="stat-lbl">Done</div></div>
+    <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done}</div><div class="stat-lbl">To Do</div></div>
+    <div class="stat"><div class="stat-val" style="color:#374151">${total}</div><div class="stat-lbl">Total</div></div>
+  </div>
+  ${sectionsHtml}
+</div>
+</body>
+</html>`;
+
+  const sep      = folder.includes('\\') ? '\\' : '/';
+  const fileName = `JumpKit_Deployment_v${version}.html`;
+  const filePath = folder.replace(/[/\\]$/, '') + sep + fileName;
+
+  try {
+    const result = await window.electronAPI.writeFileDirect(filePath, html);
+    if (result?.error) throw new Error(result.error);
+    window.Toast?.success(`Saved: ${fileName}`);
+  } catch (err) {
+    alert(`Failed to save deployment results:\n${err.message}`);
+  }
+}
