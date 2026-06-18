@@ -116,10 +116,12 @@ window.renderDeployment = function renderDeployment() {
 
     const stepsHTML = phase.steps.map((step, si) => {
       const isDone = state[step.id] === 'completed';
+      const isLast = si === phase.steps.length - 1;
       const rowBg  = isDone ? 'background:rgba(63,190,113,0.04)' : '';
       const textOp = isDone ? 'opacity:0.45' : '';
+      const rowBorder = isLast ? '' : 'border-bottom:1px solid var(--border);';
       return `
-        <tr id="deploy-row-${step.id}" style="border-bottom:1px solid var(--border);${rowBg}">
+        <tr id="deploy-row-${step.id}" style="${rowBorder}${rowBg}">
           <td style="padding:10px 12px;color:var(--text-dim);font-size:0.78rem;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">#${pi + 1}.${si + 1}</td>
           <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle;${textOp}" id="deploy-text-${step.id}">${step.text}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap;vertical-align:middle;width:130px">
@@ -139,11 +141,11 @@ window.renderDeployment = function renderDeployment() {
 
     return `
       <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 12px;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
+          <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(0deg);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
           <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
           <span style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${phase.color}">${phase.label}</span>
           ${pillHTML}
-          <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);margin-left:auto;transition:transform .2s;transform:rotate(0deg)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
         </div>
         <div id="${sectionId}" style="overflow:hidden;transition:max-height .25s ease;max-height:2000px">
           <table style="width:100%;border-collapse:collapse;border-top:1px solid var(--border)">
@@ -157,11 +159,10 @@ window.renderDeployment = function renderDeployment() {
     <div style="padding:16px 24px 24px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
         <div>
-          <h1 style="font-size:1.4rem;font-weight:800;color:var(--text);margin:0 0 4px">
+          <h1 style="font-size:1.4rem;font-weight:800;color:var(--text);margin:0">
             <svg class="ti ti-world-upload" style="vertical-align:middle;margin-right:8px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
-            Deployment Checklist
+            Deployment
           </h1>
-          <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Complete every step before shipping a new version.</p>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
           <div style="text-align:right">
@@ -181,6 +182,7 @@ window.renderDeployment = function renderDeployment() {
           </button>
         </div>
       </div>
+      <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin:0 0 20px">Complete every step before shipping a new version.</p>
       ${sectionsHTML}
     </div>`;
 
