@@ -1754,6 +1754,57 @@ For each FAIL, show the file + line number and suggest the fix.`
     test: async () => 'manual'
   },
 
+  {
+    id: 376, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[MANUAL] Pre-Flight — localStorage / sessionStorage Audit',
+    purpose: 'Ensures no new or unapproved keys have been written to localStorage or sessionStorage. Only the approved keys below should exist — any addition must be intentional and documented.',
+    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    description: 'Paste the prompt below to Max. He will scan every localStorage and sessionStorage usage in the codebase and flag anything outside the approved list. Mark this test Pass only when all usages are accounted for with no unapproved keys.',
+    input: 'Prompt copied to Max → Max scans the codebase → returns per-key verdict',
+    expected: 'All localStorage/sessionStorage writes match the approved key list. No sensitive data stored. No orphaned or debug keys.',
+    steps: [
+      {
+        text: 'Copy the audit prompt below and paste it to Max in a new message. Review his response and mark this test Pass when all keys are accounted for.',
+        cmd: `Max, please run a full localStorage and sessionStorage audit of the JumpKit app codebase (app/js/*.js and any HTML files). Scan every call to localStorage.setItem, localStorage.getItem, localStorage.removeItem, sessionStorage.setItem, sessionStorage.getItem, and sessionStorage.removeItem.
+
+The APPROVED localStorage keys are:
+  jk_users                    — user account records (auth is Supabase-managed, local fallback only)
+  jk_jumps_{userId}           — jump records per user (SQLite primary, localStorage fallback in browser/dev mode)
+  jk_cols_{userId}            — column records per user (SQLite primary, localStorage fallback)
+  jk_clicks_{userId}          — click log per user (SQLite primary, localStorage fallback)
+  jk_prefs_{userId}           — user preferences per user (SQLite primary, localStorage fallback)
+  jk_theme                    — light/dark theme preference
+  jk_sidebar_collapsed        — sidebar collapsed state
+  jk_teams_expanded           — teams panel expanded state
+  jk_backup_reminder_ts       — timestamp of last backup reminder notification
+  jk_license_notif_ts         — timestamp of last license notification
+  jk_trial_notif_milestone    — trial notification milestone tracker
+  jk_sync_fail_notif_ts       — timestamp of last sync failure notification
+  jk_notified_invite_ids      — list of invite IDs already notified (prevents duplicate notifications)
+
+The APPROVED sessionStorage keys are:
+  jk_session_token            — session token for single-session lock enforcement
+  jk_pending_upgrade_applied  — flag set after apply-pending-upgrade fires on login (prevents double-apply)
+
+For every localStorage/sessionStorage call found, report:
+  - The key name
+  - The file and line number
+  - Whether it is APPROVED or UNAPPROVED
+  - For any UNAPPROVED key: what data it stores and whether it should be removed, migrated to SQLite, or added to the approved list
+
+Also check for:
+[ ] Any key that stores sensitive data (passwords, tokens, API keys, full user PII) — these must never be in localStorage
+[ ] Any key used in only one place (setItem with no corresponding getItem, or vice versa) — likely orphaned/dead code
+[ ] Any key written during development/testing that was never cleaned up (debug flags, test overrides, etc.)
+[ ] Any direct localStorage access that bypasses the lsGet/lsSet helpers in db.js (outside of db.js itself)
+[ ] sessionStorage keys cleared correctly on logout (jk_session_token and jk_pending_upgrade_applied should not persist across sessions)
+
+Return a full table of all keys found with APPROVED / UNAPPROVED / CONCERN status, then a summary verdict.`
+      }
+    ],
+    test: async () => 'manual'
+  },
+
   // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.
