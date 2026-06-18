@@ -335,7 +335,7 @@ async function _openDeployManageModal() {
   if (sel && !window._jkSelectedDeployment) window._jkSelectedDeployment = sel;
 
   // Save (installer paths + notes)
-  document.getElementById('dmSaveBtn')?.onclick = async () => {
+  const _el_dmSaveBtn = document.getElementById('dmSaveBtn'); if (_el_dmSaveBtn) _el_dmSaveBtn.onclick = async () => {
     const selId = document.getElementById('dmDeploySelect')?.value;
     if (!selId) return Modal.close();
     const macFile = document.getElementById('dmMacFile').value.trim();
@@ -351,7 +351,7 @@ async function _openDeployManageModal() {
   };
 
   // Finalize Deployment
-  document.getElementById('dmFinalizeBtn')?.onclick = async () => {
+  const _el_dmFinalizeBtn = document.getElementById('dmFinalizeBtn'); if (_el_dmFinalizeBtn) _el_dmFinalizeBtn.onclick = async () => {
     const selId = document.getElementById('dmDeploySelect')?.value;
     if (!selId) { alert('Please select a testing package first.'); return; }
 
