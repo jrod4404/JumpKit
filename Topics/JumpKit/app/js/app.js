@@ -19,7 +19,7 @@ async function initAuth() {
         if (localUser) DB.seedNewUser(localUser.id);
       } else if (localUser.id !== supaId) {
         // ID mismatch - migrate SQLite data from old local ID to Supabase UUID
-        console.debug('[Auth] Migrating local user ID', localUser.id, '→', supaId);
+        // ID migration — silent in production
         try {
           await window.electronAPI.migrateUserId(localUser.id, supaId);
         } catch(e) {
