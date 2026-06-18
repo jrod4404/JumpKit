@@ -4512,7 +4512,6 @@ function _openDeployChecklistModal() {
       'Save Windows test results doc. Note the filename. Save the Windows test file to the deployment folder.',
     ]},
     { icon: 'ti-git-commit', color: '#8b5cf6', label: 'Code & Version', items: [
-      'Run <code>npm audit</code> in the app directory \u2014 confirm 0 critical/high vulnerabilities.',
       'Commit all outstanding changes with a clear release commit message.',
       'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.',
       'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).',
