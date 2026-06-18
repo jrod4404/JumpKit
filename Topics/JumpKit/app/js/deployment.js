@@ -127,12 +127,12 @@ window.renderDeployment = function renderDeployment() {
           <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle;${textOp}" id="deploy-text-${step.id}">${step.text}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap;vertical-align:middle;width:130px">
             <button
-              class="btn ${isDone ? '' : 'btn-subtle'}"
+              class="btn btn-subtle"
               data-deploy-id="${step.id}"
               data-deploy-action="toggle"
-              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'background:#3fbe71;border-color:#3fbe71;color:#fff' : ''}">
+              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3)' : ''}">
               ${isDone
-                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Completed`
+                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done`
                 : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-clipboard-list"/></svg> To Do`
               }
             </button>
