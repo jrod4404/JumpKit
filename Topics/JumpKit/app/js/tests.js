@@ -4275,6 +4275,9 @@ function renderTests() {
         <!-- Hidden per-section ids kept for _refreshSummary compat -->
         <div style="display:none"><span id="summaryAutoPass"></span><span id="summaryAutoFail"></span><span id="summaryAMPass"></span><span id="summaryAMFail"></span><span id="summaryManPass"></span><span id="summaryManFail"></span></div>
 
+        <button class="btn btn-subtle" id="btnDeployChecklist" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px;border-color:#f97316;color:#f97316">
+          <svg class="ti ti-rocket" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Deploy Checklist
+        </button>
         <button class="btn btn-subtle" id="btnTestStrategy" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
@@ -4322,6 +4325,7 @@ function renderTests() {
   document.getElementById('btnResetAutoTests').addEventListener('click', () => _resetSection('auto'));
   document.getElementById('btnResetAutoManualTests').addEventListener('click', () => _resetSection('auto-manual'));
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
+  document.getElementById('btnDeployChecklist').addEventListener('click', _openDeployChecklistModal);
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
   _updateRTLabel();
@@ -4492,6 +4496,81 @@ async function _loadResultsFromHTMLFile(opts = {}) {
     console.error('[LoadFromFile] Error:', err);
     if (!silent) window.Toast?.danger(`Load failed: ${err.message}`);
   }
+}
+
+
+// ── Deploy Checklist ─────────────────────────────────────────────
+function _openDeployChecklistModal() {
+  const mt = document.getElementById('modalTitle');
+  const mb = document.getElementById('modalBody');
+  const mf = document.getElementById('modalFooter');
+  if (!mt || !mb || !mf) return;
+
+  const phases = [
+    { icon: 'ti-test-pipe', color: '#3b82f6', label: 'Testing', items: [
+      'Run ALL unit tests on <strong>Mac</strong> \u2014 all auto tests pass, all manual tests verified.',
+      'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename.',
+      'Run ALL unit tests on <strong>Windows</strong> \u2014 all Windows-applicable tests pass.',
+      'Save Windows test results doc. Note the filename.',
+      'Confirm pre-flight audit tests 375\u2013378 all pass \u2014 DB, localStorage, code quality, security.',
+    ]},
+    { icon: 'ti-git-commit', color: '#8b5cf6', label: 'Code & Version', items: [
+      'Run <code>npm audit</code> in the app directory \u2014 confirm 0 critical/high vulnerabilities.',
+      'Commit all outstanding changes with a clear release commit message.',
+      'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.',
+      'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).',
+      'Update any version display in the app UI or About page.',
+      'Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html \u2014 all changes, fixes, new features.',
+      'Commit the version bump + changelog. Push to GitHub.',
+    ]},
+    { icon: 'ti-device-floppy', color: '#10b981', label: 'Backup', items: [
+      "Create a dated code backup: <code>tar -czf app_backups/app_backup_YYYY-MM-DD.tar.gz --exclude='./app/node_modules' ./app ./landing</code>",
+      'Confirm the backup saved correctly \u2014 spot-check a few files inside the archive.',
+      'Note the backup filename in the changelog / release notes.',
+    ]},
+    { icon: 'ti-package', color: '#f97316', label: 'Build Installers', items: [
+      'On Mac: run <code>npm run dist</code> to build the <code>.dmg</code> installer.',
+      'Confirm Mac build completes without errors and the <code>.dmg</code> is notarized by Apple.',
+      'Test Mac installer: install from the <code>.dmg</code> on a clean Mac, launch, log in, do a few jumps.',
+      'On Windows: run the Windows build command to produce the <code>.exe</code> / <code>.msi</code> installer.',
+      'Confirm Windows build completes without errors.',
+      'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps.',
+      'Note both installer filenames and file sizes.',
+    ]},
+    { icon: 'ti-world-upload', color: '#ec4899', label: 'Landing Page & Distribution', items: [
+      'Upload both installers to the hosting/storage location (Supabase Storage, S3, or GitHub Releases).',
+      'Update <strong>download links</strong> in <code>landing/index.html</code> to point to the new installers.',
+      'Update any version number or release date shown on the landing page.',
+      'Commit and push the landing page \u2014 confirm Vercel auto-deploys successfully.',
+      'Verify live <strong>Mac download link</strong> end-to-end: click \u2192 download \u2192 install \u2192 launch.',
+      'Verify live <strong>Windows download link</strong> end-to-end.',
+    ]},
+    { icon: 'ti-tag', color: '#f59e0b', label: 'Release & Post-Deploy', items: [
+      'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>',
+      'Create a <strong>GitHub Release</strong> from the tag \u2014 attach both installers, paste the changelog as release notes.',
+      'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription.',
+      'Confirm all Supabase Edge Functions are deployed and healthy (Supabase \u2192 Edge Functions).',
+      'Confirm Resend email delivery is working \u2014 trigger a test signup and verify the welcome email arrives.',
+      'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.',
+      'Commit the final docs update and push. \u2714\ufe0f Done \u2014 ship it.',
+    ]},
+  ];
+
+  const phaseHTML = phases.map(p => `
+    <div style="margin-bottom:20px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <svg class="ti ${p.icon}" style="width:1rem;height:1rem;color:${p.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${p.icon.slice(3)}"/></svg>
+        <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${p.color}">${p.label}</span>
+      </div>
+      <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+        ${p.items.map(item => `<li style="font-size:0.87rem;color:var(--text-muted);line-height:1.55">${item}</li>`).join('')}
+      </ol>
+    </div>`).join('<div style="border-top:1px solid var(--border);margin:4px 0 20px"></div>');
+
+  mt.innerHTML = '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Pre-Deploy Checklist';
+  mb.innerHTML = `<p style="margin:0 0 16px;font-size:0.87rem;color:var(--text-muted)">Complete every step below before shipping a new version. Work top to bottom \u2014 don&rsquo;t skip sections.</p>${phaseHTML}`;
+  mf.innerHTML = '<button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>';
+  document.getElementById('testModal').style.display = 'flex';
 }
 
 // ── Conclude Testing ─────────────────────────────────────────────
