@@ -524,7 +524,7 @@ const pages = {
   account:  () => renderAccount('account'),
   teams:    () => renderAccount('teams'),
   tests:      async () => { await loadScript('js/tests.js'); renderTests(); },
-  deployment: async () => { _loadedScripts.delete('js/deployment.js'); await loadScript('js/deployment.js'); renderDeployment(); },
+  deployment: async () => { _loadedScripts.delete('js/deployment.js'); await loadScript('js/deployment.js'); window.renderDeployment(); },
   admin:      () => renderAdmin(),
 };
 const pageTitles = {
