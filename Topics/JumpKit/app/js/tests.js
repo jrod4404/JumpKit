@@ -4509,8 +4509,7 @@ function _openDeployChecklistModal() {
       'Run ALL unit tests on <strong>Mac</strong> \u2014 all auto tests pass, all manual tests verified.',
       'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename. Save the Mac test file to the deployment folder.',
       'Run ALL unit tests on <strong>Windows</strong> \u2014 all Windows-applicable tests pass.',
-      'Save Windows test results doc. Note the filename.',
-      'Confirm pre-flight audit tests 375\u2013378 all pass \u2014 DB, localStorage, code quality, security.',
+      'Save Windows test results doc. Note the filename. Save the Windows test file to the deployment folder.',
     ]},
     { icon: 'ti-git-commit', color: '#8b5cf6', label: 'Code & Version', items: [
       'Run <code>npm audit</code> in the app directory \u2014 confirm 0 critical/high vulnerabilities.',
