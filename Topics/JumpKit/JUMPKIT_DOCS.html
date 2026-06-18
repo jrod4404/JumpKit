@@ -3937,6 +3937,19 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-18 (tests 93 &amp; 130 passed &mdash; auth confirmation flow fixes &amp; Vercel deploy fix)</h3>
+<ul>
+  <li><strong>Tests 93 &amp; 130 both passing.</strong> Ran full end-to-end LS test-mode checkout flows: test #93 (webhook upgrades existing account) and test #130 (apply-pending-upgrade for users who paid before creating an account). Both confirmed working including webhook trigger, Supabase profile upgrade, JumpKit Unlimited modal on first login, and cleanup SQL.</li>
+  <li><strong>Test step enhancements (tests #93 &amp; #130):</strong> Added clickable link support to inline step renderer (<code>link: {url, label}</code> property renders turquoise external-link icon inline). Step 1 now links directly to the LS test checkout URL with orange banner verification note. Step 2 added for Supabase profile pre-check. Step 3 and step 6 wording improved.</li>
+  <li><strong>LS checkout URL updated</strong> in tests #93 and #130 to full product buy link: <code>https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0</code>.</li>
+  <li><strong>Resend confirmation email link added to login page.</strong> When Supabase returns &ldquo;email not confirmed&rdquo;, the error alert now includes an inline &ldquo;Click here to resend the confirmation email&rdquo; link. Calls <code>supabaseClient.auth.resend()</code> with <code>emailRedirectTo: https://jumpkit.app/confirmed</code>. Shows success (green) or failure feedback. 429 rate-limit handled gracefully.</li>
+  <li><strong>Expired OTP error handling on landing page.</strong> <code>confirmed.html</code> detects <code>#error=otp_expired</code> hash and shows a red &ldquo;Link Expired&rdquo; card with instructions to resend from the app. <code>index.html</code> (landing root) also detects this hash and shows a modal overlay &mdash; needed because Supabase routes error conditions to the Site URL, not <code>/confirmed</code>.</li>
+  <li><strong>Auto-redirect on successful confirmation landing on root.</strong> <code>index.html</code> detects <code>#access_token + type=signup</code> hash and immediately redirects to <code>/confirmed</code> success page.</li>
+  <li><strong>Vercel root directory fixed.</strong> <code>jumpkit-landing</code> Vercel project Root Directory was misconfigured (pointing at repo root instead of <code>Topics/JumpKit/landing</code>). Set correctly &mdash; GitHub pushes now auto-deploy the landing page. Previously only manual CLI deploys would update the live site.</li>
+  <li><strong>Resend email suppression resolved.</strong> <code>help@jumpkit.app</code> was on Resend&rsquo;s suppression list due to a prior bounce. Removed via Resend dashboard &rarr; email &rarr; hover Suppressed &rarr; Remove.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-18.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-17 (tests page &mdash; modal UX polish, platform tagging &amp; Skipped state)</h3>
 <ul>
   <li><strong>Unified Exec Steps format (test #131):</strong> Replaced separate commands-list + steps-prose with a single inline numbered list. Steps that require SQL now show the code block (with copy button) directly beneath that step. Renderer updated to support <code>steps</code> as a function returning <code>[{text, cmd?}]</code> array; string and legacy <code>commands</code> format still supported for all other tests.</li>
