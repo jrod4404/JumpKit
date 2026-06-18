@@ -3937,6 +3937,15 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-18c (Deployments page polish &mdash; modal fixes, rename, console error fixes)</h3>
+<ul>
+  <li><strong>Console error fixed:</strong> <code>window.renderDeployment is not a function</code> was caused by invalid <code>?.onclick =</code> optional chaining on the left-hand side of assignment in deployment.js (syntax error prevented the script from fully executing). Fixed by replacing with proper null-check guards.</li>
+  <li><strong>Manage Deployment modal single-modal fix:</strong> Removed the initial &ldquo;Loading deployments&hellip;&rdquo; modal that was stacking behind the content modal due to the Modal queue. Now fetches first, then opens exactly one modal.</li>
+  <li><strong>Empty state improved:</strong> When no deployments exist in Supabase, the modal shows a helpful rocket icon, &ldquo;No deployments yet&rdquo; message, and clear instructions to go to Testing &rarr; Manage Testing and click &ldquo;Finalize Testing &amp; Prepare Deployment&rdquo;. Fetch error state also added.</li>
+  <li><strong>Renamed:</strong> Tests &rarr; &ldquo;Testing&rdquo; and Deployment &rarr; &ldquo;Deployments&rdquo; in sidebar nav labels and topbar titles.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-18c.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-18b (Deployment page, Deployments table, Finalize Testing flow)</h3>
 <ul>
   <li><strong>New Deployment page</strong> (admin-only, sidebar globe icon). Five collapsible phases: Code &amp; Version, Backup, Build Installers, Landing &amp; Distribution, Release &amp; Post-Deploy. Each step has a Done/To Do toggle button. Section headers match the tests page style. Fixed header bar with summary card (Done/To Do/Total) and border-bottom. Deploy step state persisted in <code>localStorage</code>.</li>
