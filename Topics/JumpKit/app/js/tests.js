@@ -4555,15 +4555,16 @@ function _openDeployChecklistModal() {
         <svg class="ti ${p.icon}" style="width:1rem;height:1rem;color:${p.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${p.icon.slice(3)}"/></svg>
         <span style="font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${p.color}">${p.label}</span>
       </div>
-      <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
-        ${p.items.map(item => `<li style="font-size:0.87rem;color:var(--text-muted);line-height:1.55">${item}</li>`).join('')}
+      <ol style="margin:0;padding-left:4px;list-style:none;display:flex;flex-direction:column;gap:6px">
+        ${p.items.map((item, idx) => { const cbId = `dc-${p.label.replace(/[^a-z]/gi,'')}-${idx}`; return `<li style="display:flex;align-items:flex-start;gap:8px;font-size:0.87rem;color:var(--text-muted);line-height:1.55"><input type="checkbox" id="${cbId}" style="flex-shrink:0;margin-top:3px;accent-color:var(--turq);cursor:pointer;width:14px;height:14px" onchange="this.closest('li').style.opacity=this.checked?'0.45':'1'"><label for="${cbId}" style="cursor:pointer">${item}</label></li>`; }).join('')}
       </ol>
     </div>`).join('<div style="border-top:1px solid var(--border);margin:4px 0 20px"></div>');
 
   Modal.open(
-    '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Pre-Deploy Checklist',
-    `<p style="margin:0 0 16px;font-size:0.87rem;color:var(--text-muted)">Complete every step below before shipping a new version. Work top to bottom — don&rsquo;t skip sections.</p>${phaseHTML}`,
-    '<button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>'
+    '<svg class="ti ti-world-upload" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg> Pre-Deploy Checklist',
+    `<p style="margin:0 0 16px;font-size:0.87rem;color:var(--text-muted)">Check off every step before shipping. Checked items dim automatically.</p>${phaseHTML}`,
+    '<button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>',
+    'xl'
   );
 }
 
@@ -4739,7 +4740,7 @@ async function _openReleaseTestingModal() {
 
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing',
-    body, footer, 'md'
+    body, footer, 'xl'
   );
 
   // Wire manage-session buttons (only rendered when session is active)
