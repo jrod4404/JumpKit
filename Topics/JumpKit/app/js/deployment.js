@@ -138,8 +138,8 @@ window.renderDeployment = function renderDeployment() {
     }).join('');
 
     return `
-      <div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
+      <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
           <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
           <span style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${phase.color}">${phase.label}</span>
           ${pillHTML}
@@ -154,7 +154,7 @@ window.renderDeployment = function renderDeployment() {
   }).join('');
 
   pageContent.innerHTML = `
-    <div style="padding:20px 24px;max-width:900px;margin:0 auto">
+    <div style="padding:16px 24px 24px 24px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
         <div>
           <h1 style="font-size:1.4rem;font-weight:800;color:var(--text);margin:0 0 4px">
@@ -176,7 +176,7 @@ window.renderDeployment = function renderDeployment() {
             </svg>
             <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--text)">${pct}%</div>
           </div>
-          <button class="btn btn-subtle" id="deployResetBtn" style="font-size:0.8rem;padding:6px 12px;color:#e15b59;border-color:rgba(225,91,89,0.3)">
+          <button class="btn btn-subtle" id="deployResetBtn" style="font-size:0.8rem;padding:6px 12px">
             <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset
           </button>
         </div>
