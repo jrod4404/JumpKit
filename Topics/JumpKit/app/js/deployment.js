@@ -1,4 +1,12 @@
 // ── JumpKit Deployment Checklist Page ────────────────────────────
+// Inject layout CSS so page-content becomes a flex column (same trick as tests page)
+(function injectDeployStyles() {
+  if (document.getElementById('jk-deploy-styles')) return;
+  const s = document.createElement('style');
+  s.id = 'jk-deploy-styles';
+  s.textContent = `.page-content:has(#pageDeployment){overflow:hidden!important;padding:0!important;display:flex!important;flex-direction:column!important;}`;
+  document.head.appendChild(s);
+})();
 // Admin-only page for tracking pre-deploy steps across 6 phases.
 // Step state (todo/completed) is persisted in localStorage under jk_deploy_state.
 
@@ -161,10 +169,10 @@ window.renderDeployment = function renderDeployment() {
   }).join('');
 
   pageContent.innerHTML = `
-    <div style="padding:16px 24px 24px 24px;">
-      <div style="display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;margin-bottom:20px">
+    <div id="pageDeployment" style="display:flex;flex-direction:column;height:100%">
+      <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
         <div style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
-          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Completed</div></div>
+          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Done</div></div>
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
@@ -172,7 +180,9 @@ window.renderDeployment = function renderDeployment() {
           <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
         </button>
       </div>
-      ${sectionsHTML}
+      <div style="flex:1;overflow-y:auto;padding:16px 24px 24px 24px">
+        ${sectionsHTML}
+      </div>
     </div>`;
 
   // Wire toggle buttons
