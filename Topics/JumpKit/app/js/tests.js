@@ -4507,7 +4507,7 @@ function _openDeployChecklistModal() {
     ]},
     { icon: 'ti-test-pipe', color: '#3b82f6', label: 'Testing', items: [
       'Run ALL unit tests on <strong>Mac</strong> \u2014 all auto tests pass, all manual tests verified.',
-      'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename.',
+      'Save Mac test results doc via <strong>Save Results</strong> in each section. Note the filename. Save the Mac test file to the deployment folder.',
       'Run ALL unit tests on <strong>Windows</strong> \u2014 all Windows-applicable tests pass.',
       'Save Windows test results doc. Note the filename.',
       'Confirm pre-flight audit tests 375\u2013378 all pass \u2014 DB, localStorage, code quality, security.',
