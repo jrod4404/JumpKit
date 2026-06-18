@@ -133,7 +133,7 @@ window.renderDeployment = function renderDeployment() {
               style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'background:#3fbe71;border-color:#3fbe71;color:#fff' : ''}">
               ${isDone
                 ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Completed`
-                : `<svg class="ti ti-circle" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-circle"/></svg> To Do`
+                : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-clipboard-list"/></svg> To Do`
               }
             </button>
           </td>
