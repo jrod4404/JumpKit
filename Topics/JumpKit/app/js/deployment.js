@@ -118,14 +118,12 @@ window.renderDeployment = function renderDeployment() {
     const stepsHTML = phase.steps.map((step, si) => {
       const isDone = state[step.id] === 'completed';
       const isLast = si === phase.steps.length - 1;
-      const rowBg     = isDone ? 'background:rgba(63,190,113,0.04)' : '';
-      const idColor   = isDone ? 'color:#3fbe71' : 'color:var(--text-dim)';
-      const textColor = isDone ? 'color:#3fbe71' : 'color:var(--text-muted)';
+      const rowBg    = isDone ? 'background:rgba(63,190,113,0.04)' : '';
       const rowBorder = isLast ? '' : 'border-bottom:1px solid var(--border);';
       return `
         <tr id="deploy-row-${step.id}" style="${rowBorder}${rowBg};transition:background .15s">
-          <td style="padding:10px 12px;font-size:0.78rem;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px;${idColor}">#${pi + 1}.${si + 1}</td>
-          <td style="padding:10px 12px;font-size:0.86rem;line-height:1.55;vertical-align:middle;${textColor}" id="deploy-text-${step.id}">${step.text}</td>
+          <td style="padding:10px 12px;color:var(--text-dim);font-size:0.78rem;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">#${pi + 1}.${si + 1}</td>
+          <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle" id="deploy-text-${step.id}">${step.text}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap;vertical-align:middle;width:130px">
             <button
               class="btn btn-subtle"
