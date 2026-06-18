@@ -4279,7 +4279,7 @@ function renderTests() {
           <svg class="ti ti-bulb" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests
         </button>
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing
+          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing
         </button>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
@@ -4444,7 +4444,7 @@ async function _loadResultsFromHTMLFile(opts = {}) {
   const silent = opts?.silent === true;
   const state = _getReleaseState();
   if (!state?.filePath) {
-    if (!silent) alert('No results file configured. Click "Start, Stop & Manage Testing" to create or load one.');
+    if (!silent) alert('No results file configured. Click "Manage Testing" to create or load one.');
     return;
   }
   if (!window.electronAPI?.readFile) {
@@ -4583,7 +4583,7 @@ function _updateRTLabel() {
     const fname = s.filePath.split(/[\/\\]/).pop();
     el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Results file active: <strong style="color:var(--text)">${fname}</strong></span>`;
   } else {
-    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No results file — click <strong>Start, Stop &amp; Manage Testing</strong> to create or load one</span>`;
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No results file — click <strong>Manage Testing</strong> to create or load one</span>`;
   }
 }
 
@@ -4661,7 +4661,7 @@ async function _openReleaseTestingModal() {
     <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Changes' : 'Start Session'}</button>`;
 
   Modal.open(
-    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Start, Stop &amp; Manage Testing',
+    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
     body, footer, 'xl'
   );
 
@@ -4710,7 +4710,7 @@ async function _saveReleaseSection(mode) {
     Modal.open(
       '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Results File Configured',
       `<p style="margin:0 0 12px">No test results file has been created or loaded. Results cannot be saved without one.</p>
-       <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Start, Stop &amp; Manage Testing</strong> to create a new results file or load an existing one, then try saving again.</p>`,
+       <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Manage Testing</strong> to create a new results file or load an existing one, then try saving again.</p>`,
       `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
       'sm'
     );
