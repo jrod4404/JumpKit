@@ -3937,6 +3937,19 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-18b (Deployment page, Deployments table, Finalize Testing flow)</h3>
+<ul>
+  <li><strong>New Deployment page</strong> (admin-only, sidebar globe icon). Five collapsible phases: Code &amp; Version, Backup, Build Installers, Landing &amp; Distribution, Release &amp; Post-Deploy. Each step has a Done/To Do toggle button. Section headers match the tests page style. Fixed header bar with summary card (Done/To Do/Total) and border-bottom. Deploy step state persisted in <code>localStorage</code>.</li>
+  <li><strong>Supabase <code>deployments</code> table created.</strong> Tracks each release cycle end-to-end. Testing phase fields: version, testing_account, testing_completed_at, test_os, tests_total/passed/failed/skipped, deployment_folder, mac_results_file, win_results_file. Deployment phase fields: status, commit_id, deployed_at, deploy_account, mac_installer_path, win_installer_path, deploy_results_file, notes. RLS: admin-only.</li>
+  <li><strong>Manage Testing modal enhanced.</strong> Added Version Number and Deployment Folder fields. On Save: writes to shared <code>jk_deploy_config</code>. Each Save Results now auto-copies test HTML to the deployment folder. <strong>&ldquo;Conclude &amp; Reset&rdquo; renamed to &ldquo;Finalize Testing &amp; Prepare Deployment&rdquo;</strong> (blue button). On click: inserts full test scorecard row into Supabase <code>deployments</code> table.</li>
+  <li><strong>Manage Deployment modal rebuilt.</strong> Dropdown populated from Supabase <code>deployments</code> rows (version, date, account). Selecting a row auto-applies version + deployment_folder to the Deployment page. Installer path + notes fields. <strong>&ldquo;Finalize Deployment&rdquo; button</strong>: auto-fetches latest git commit ID via Electron IPC, shows confirmation modal, updates the deployment row with commit_id, deploy_account, deployed_at, status=&lsquo;deployed&rsquo;.</li>
+  <li><strong>Electron IPC added:</strong> <code>getLatestCommitId</code> (runs <code>git log --oneline -1</code>) and <code>openFileDialog</code> now supports <code>properties:['openDirectory']</code>.</li>
+  <li><strong>Pre-flight audit tests 375&ndash;378 added:</strong> Database Security, localStorage/sessionStorage, Code Quality, and full Security audit — each with a copyable prompt to paste to Max during pre-flight.</li>
+  <li><strong>&ldquo;Start, Stop &amp; Manage Testing&rdquo; renamed to &ldquo;Manage Testing&rdquo;</strong> throughout the tests page.</li>
+  <li><strong>Vercel root directory fixed</strong> to <code>Topics/JumpKit/landing</code> so GitHub pushes auto-deploy the landing page.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-18b.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-18 (tests 93 &amp; 130 passed &mdash; auth confirmation flow fixes &amp; Vercel deploy fix)</h3>
 <ul>
   <li><strong>Tests 93 &amp; 130 both passing.</strong> Ran full end-to-end LS test-mode checkout flows: test #93 (webhook upgrades existing account) and test #130 (apply-pending-upgrade for users who paid before creating an account). Both confirmed working including webhook trigger, Supabase profile upgrade, JumpKit Unlimited modal on first login, and cleanup SQL.</li>
