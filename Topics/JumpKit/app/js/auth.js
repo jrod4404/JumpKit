@@ -163,7 +163,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
           ev.preventDefault();
           const resendLink = document.getElementById('resendConfirmLink');
           if (resendLink) resendLink.textContent = 'Sending…';
-          const { error: resendErr } = await supabaseClient.auth.resend({ type: 'signup', email });
+          const { error: resendErr } = await supabaseClient.auth.resend({ type: 'signup', email, options: { emailRedirectTo: 'https://jumpkit.app/confirmed' } });
           if (loginAlertEl) {
             if (resendErr) {
               loginAlertEl.innerHTML = 'Could not resend confirmation email. Please try again.';

@@ -540,6 +540,13 @@
       const params = new URLSearchParams(hash);
       const error = params.get('error');
       const errorCode = params.get('error_code');
+
+      // Successful confirmation landed here instead of /confirmed — redirect
+      if (!error && params.get('access_token') && params.get('type') === 'signup') {
+        window.location.replace('https://jumpkit.app/confirmed');
+        return;
+      }
+
       if (!error) return;
 
       const isExpired = errorCode === 'otp_expired';
