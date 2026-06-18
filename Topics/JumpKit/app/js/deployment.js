@@ -112,7 +112,7 @@ window.renderDeployment = function renderDeployment() {
     const pillHTML = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">${
       phaseDone > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71"><svg style="width:.65rem;height:.65rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>${phaseDone}</span>` : ''
     }${
-      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-input);color:var(--text-dim)">${phaseTotal - phaseDone} to do</span>` : ''
+      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:#6b728022;color:#6b7280">${phaseTotal - phaseDone} To Do</span>` : ''
     }</span>`;
 
     const stepsHTML = phase.steps.map((step, si) => {
