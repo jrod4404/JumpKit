@@ -145,7 +145,7 @@ window.renderDeployment = function renderDeployment() {
         <div style="padding:14px 4px 0;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
           <div style="display:flex;align-items:center;gap:8px">
             <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(-90deg)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-            <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color}"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
+            <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:${phase.color};flex-shrink:0"><use href="img/tabler-sprite.svg#${phase.icon.slice(3)}"/></svg>
             <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${phase.label}</span>
             <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${phaseTotal})</span>
             ${pillHTML}
