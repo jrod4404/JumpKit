@@ -253,15 +253,48 @@ async function _openDeployManageModal() {
 
   // Fetch deployments from Supabase
   let deployments = [];
+  let fetchError = null;
   try {
     const { data, error } = await supabaseClient
       .from('deployments')
       .select('*')
       .order('created_at', { ascending: false })
       .limit(20);
-    if (!error) deployments = data || [];
+    if (error) fetchError = error.message;
+    else deployments = data || [];
   } catch(e) {
+    fetchError = e.message;
     console.warn('[Deployments] Fetch failed:', e.message);
+  }
+
+  // If fetch failed, show error state and bail
+  if (fetchError) {
+    Modal.open(
+      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+      `<div style="text-align:center;padding:24px">
+        <svg class="ti ti-alert-circle" style="font-size:2rem;color:#e15b59;margin-bottom:12px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>
+        <p style="margin:0 0 8px;font-weight:600;color:var(--text)">Could not load deployments</p>
+        <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">${fetchError}</p>
+      </div>`,
+      '<button class="btn btn-subtle" data-jaction="modal-close">Close</button>',
+      'lg'
+    );
+    return;
+  }
+
+  // If no deployments yet, show helpful empty state
+  if (deployments.length === 0) {
+    Modal.open(
+      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+      `<div style="text-align:center;padding:32px 24px">
+        <svg class="ti ti-rocket" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
+        <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:var(--text)">No deployments yet</p>
+        <p style="margin:0;font-size:0.88rem;color:var(--text-muted);line-height:1.6">Finalize a testing session first to create a deployment record.<br>Go to <strong style="color:var(--text)">Testing &rarr; Manage Testing</strong> and click <strong style="color:var(--text)">Finalize Testing &amp; Prepare Deployment</strong>.</p>
+      </div>`,
+      '<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>',
+      'lg'
+    );
+    return;
   }
 
   const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input);color:var(--text);font-size:0.88rem;outline:none';
@@ -270,9 +303,7 @@ async function _openDeployManageModal() {
 
   const selectedId = window._jkSelectedDeployment?.id || '';
 
-  const optionsHTML = deployments.length === 0
-    ? '<option value="">No deployments yet — finalize testing first</option>'
-    : deployments.map(d => {
+  const optionsHTML = deployments.map(d => {
         const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
         const label = `v${d.version} — ${date} (${d.testing_account || 'unknown'}) [${d.status}]`;
         return `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${label}</option>`;
