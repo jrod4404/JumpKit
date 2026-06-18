@@ -4545,10 +4545,7 @@ function _openDeployChecklistModal() {
       'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>',
       'Create a <strong>GitHub Release</strong> from the tag \u2014 attach both installers, paste the changelog as release notes.',
       'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription.',
-      'Confirm all Supabase Edge Functions are deployed and healthy (Supabase \u2192 Edge Functions).',
-      'Confirm Resend email delivery is working \u2014 trigger a test signup and verify the welcome email arrives.',
       'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.',
-      'Commit the final docs update and push. \u2714\ufe0f Done \u2014 ship it.',
     ]},
   ];
 
