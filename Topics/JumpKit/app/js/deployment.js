@@ -185,7 +185,19 @@ window.renderDeployment = function renderDeployment() {
       const nowDone = state[id] !== 'completed';
       state[id] = nowDone ? 'completed' : 'todo';
       _saveDeployState(state);
-      renderDeployment(); // re-render to update pills + progress
+      // Capture which sections are expanded before re-render
+      const openSections = new Set();
+      pageContent.querySelectorAll('[id^="deploy-section-"]').forEach(sec => {
+        if (sec.dataset.collapsed !== 'true') openSections.add(sec.id);
+      });
+      renderDeployment();
+      // Restore expanded sections after re-render
+      openSections.forEach(secId => {
+        const sec  = document.getElementById(secId);
+        const chev = document.getElementById(secId.replace('deploy-section-', 'deploy-chevron-'));
+        if (sec)  { sec.style.maxHeight = '2000px'; sec.dataset.collapsed = 'false'; }
+        if (chev) chev.style.transform = 'rotate(0deg)';
+      });
     });
   });
 
