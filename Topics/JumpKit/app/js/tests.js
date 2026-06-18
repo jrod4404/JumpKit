@@ -1691,7 +1691,7 @@ const JK_TESTS = [
   },
 
   {
-    id: 139, category: 'Code Quality', platforms: ['mac'],
+    id: 139, preflight: true, category: 'Code Quality', platforms: ['mac'],
     title: '[MANUAL] npm audit — zero critical/high vulnerabilities',
     purpose: 'Confirms that no known high or critical npm package vulnerabilities exist in the dependency tree.',
     prerequisites: 'None (logic check — validates last known audit state).',
@@ -1710,6 +1710,48 @@ const JK_TESTS = [
       const lastAuditResult = '0 vulnerabilities (after npm audit fix — resolved form-data, js-yaml, qs, tar, tmp)';
       return 'manual';
     }
+  },
+
+  // ── Pre-Flight: Code Audit Tests (375–377) ──────────────────────────
+  {
+    id: 375, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[MANUAL] Pre-Flight — Database Security & Integrity Audit',
+    purpose: 'Ensures the app ships with no database security gaps, no raw SQL string concatenation, correct dev/prod separation, and all schema changes tracked in version control.',
+    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    description: 'Paste the prompt below to Max. He will audit the codebase and return a PASS/FAIL/N\/A for each item. Mark this test Pass only when all items are PASS or N\/A with no unresolved FAILs.',
+    input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
+    expected: 'All items PASS or N/A. Any FAIL must be resolved and re-audited before release.',
+    steps: [
+      {
+        text: 'Copy the audit prompt below and paste it to Max in a new message. Review his response and mark this test Pass when all items are PASS or N/A.',
+        cmd: `Max, please run a full database audit of the JumpKit codebase. JumpKit uses two databases: (1) a local SQLite DB abstracted through app/js/db.js and app/preload.js / Electron IPC, and (2) Supabase (PostgreSQL) for auth, profiles, subscriptions, and pending upgrades, accessed via app/supabase/ and Edge Functions in supabase/functions/. Check all of the following and give a clear PASS / FAIL / N\/A for each item with evidence (file + line where relevant):
+
+SQLite (Local DB)
+[ ] No raw SQL string concatenation — all queries use parameterized statements (e.g. ? placeholders in better-sqlite3)
+[ ] DB file stored in a stable, user-owned path (not a temp dir or app bundle path that gets wiped on update)
+[ ] Schema versioning/migrations in code — DB upgrades handled programmatically, not by manual schema edits
+[ ] No sensitive data (passwords, tokens, keys) stored unencrypted in SQLite
+[ ] DB operations are user-scoped — no query returns data across multiple user IDs
+
+Supabase (Cloud DB)
+[ ] Row Level Security (RLS) is enabled on all tables — no table is publicly readable/writable without a policy
+[ ] Service role key is NOT present anywhere in client-side code (app/js/, landing/, app/html/) — only anon key used on client
+[ ] Dev and production Supabase projects are separate (check supabase/config.js and any env references)
+[ ] Edge Functions use the service role key only server-side and never return it to the client
+[ ] No raw SQL string concatenation in Edge Functions — parameterized queries or Supabase client methods only
+[ ] Migrations tracked in supabase/migrations/ and not applied manually via the dashboard
+[ ] No debug/seed/test data hardcoded into production schema or Edge Functions
+
+General
+[ ] No database credentials, connection strings, or API keys hardcoded in committed source files (.env files not committed, config.js checked)
+[ ] Backups: confirm local SQLite auto-backup is implemented and the backup path is documented
+[ ] Connection to Supabase uses the anon key + RLS (not service role) for all end-user operations
+[ ] No console.log statements that print query results, user data, or tokens
+
+For each FAIL, show the file + line number and suggest the fix.`
+      }
+    ],
+    test: async () => 'manual'
   },
 
   // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
@@ -4519,12 +4561,12 @@ async function _saveReleaseSection(mode) {
   const isAM = t => t.title.startsWith('[AUTO+MANUAL]');
   const isM  = t => t.title.startsWith('[MANUAL]');
   const sectionTests = mode === 'preflight'
-    ? JK_TESTS.filter(t => t.id === 139)
+    ? JK_TESTS.filter(t => !!t.preflight)
     : mode === 'auto'
       ? JK_TESTS.filter(t => !isAM(t) && !isM(t))
       : mode === 'auto-manual'
         ? JK_TESTS.filter(isAM)
-        : JK_TESTS.filter(t => isM(t) && t.id !== 139);
+        : JK_TESTS.filter(t => isM(t) && !t.preflight);
 
   const results = window._jkTestResults || {};
   const displayMap = window._jkTestDisplayNumMap || {};
@@ -5005,11 +5047,11 @@ function _buildTestRows() {
   const wrap = document.getElementById('testsTablesWrap');
   if (!wrap) return;
 
-  // Split into 4 sections: pre-flight (139 only), auto, auto-manual, manual (139 excluded)
-  const preflight     = JK_TESTS.filter(t => t.id === 139);
-  const autoTests     = JK_TESTS.filter(t => !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
-  const autoManual    = JK_TESTS.filter(t =>  t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
-  const manualTests   = JK_TESTS.filter(t =>  t.title.startsWith('[MANUAL]') && t.id !== 139).slice().sort(_byCategory);
+  // Split into 4 sections: pre-flight (preflight:true), auto, auto-manual, manual
+  const preflight     = JK_TESTS.filter(t => !!t.preflight);
+  const autoTests     = JK_TESTS.filter(t => !t.preflight && !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
+  const autoManual    = JK_TESTS.filter(t => !t.preflight &&  t.title.startsWith('[AUTO+MANUAL]')).slice().sort(_byCategory);
+  const manualTests   = JK_TESTS.filter(t => !t.preflight &&  t.title.startsWith('[MANUAL]')).slice().sort(_byCategory);
 
   // Build global display order + number map for use in detail modal
   const _displayOrder = [...preflight, ...autoTests, ...autoManual, ...manualTests];
@@ -5018,13 +5060,13 @@ function _buildTestRows() {
   _displayOrder.forEach((t) => { window._jkTestDisplayNumMap[t.id] = t.id; });
 
   // Build execution order: test 139 first, then auto, auto-manual, manual (test 111 last)
-  const _t139 = JK_TESTS.find(t => t.id === 139);
+  const _t139 = JK_TESTS.find(t => t.id === 139); // keep exec-order anchor
   const _t111 = JK_TESTS.find(t => t.id === 111);
   const _execOrderList = [
     ...(_t139 ? [_t139] : []),
-    ...autoTests.filter(t => t.id !== 139),
+    ...autoTests.filter(t => !t.preflight),
     ...autoManual,
-    ...manualTests.filter(t => t.id !== 111 && t.id !== 112 && t.id !== 141 && t.id !== 139),
+    ...manualTests.filter(t => !t.preflight && t.id !== 111 && t.id !== 112 && t.id !== 141),
     ...(_t111 ? [_t111] : []),
     ...(JK_TESTS.find(t => t.id === 112) ? [JK_TESTS.find(t => t.id === 112)] : []),
     ...(JK_TESTS.find(t => t.id === 141) ? [JK_TESTS.find(t => t.id === 141)] : []),
@@ -5355,10 +5397,10 @@ function _refreshSummary() {
   let manPassed = 0, manFailed = 0, manManual = 0;
   let pfPassed = 0, pfFailed = 0, pfManual = 0;
   // Section totals (for 100% pass check)
-  const pfTotal   = JK_TESTS.filter(t => t.id === 139).length;
-  const autoTotal = JK_TESTS.filter(t => !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]') && t.id !== 139).length;
+  const pfTotal   = JK_TESTS.filter(t => !!t.preflight).length;
+  const autoTotal = JK_TESTS.filter(t => !t.preflight && !t.title.startsWith('[MANUAL]') && !t.title.startsWith('[AUTO+MANUAL]')).length;
   const amTotal   = JK_TESTS.filter(t => t.title.startsWith('[AUTO+MANUAL]')).length;
-  const manTotal  = JK_TESTS.filter(t => t.title.startsWith('[MANUAL]') && t.id !== 139).length;
+  const manTotal  = JK_TESTS.filter(t => !t.preflight && t.title.startsWith('[MANUAL]')).length;
 
   // Read directly from _jkTestResults (source of truth) — never scrape DOM icons.
   // _resetSection deletes entries from _jkTestResults before calling _refreshSummary,
@@ -5373,7 +5415,7 @@ function _refreshSummary() {
     if (isPass) passed++; else if (isFail) failed++; else if (isMan) manual++;
     const isAM = t.title.startsWith('[AUTO+MANUAL]');
     const isM  = t.title.startsWith('[MANUAL]');
-    if (t.id === 139)      { if (isPass) pfPassed++;   else if (isFail) pfFailed++;   else if (isMan) pfManual++; }
+    if (t.preflight)       { if (isPass) pfPassed++;   else if (isFail) pfFailed++;   else if (isMan) pfManual++; }
     else if (!isAM && !isM){ if (isPass) autoPassed++; else if (isFail) autoFailed++; else if (isMan) autoManual++; }
     else if (isAM)         { if (isPass) amPassed++;   else if (isFail) amFailed++;   else if (isMan) amManual++; }
     else                   { if (isPass) manPassed++;  else if (isFail) manFailed++;  else if (isMan) manManual++; }
