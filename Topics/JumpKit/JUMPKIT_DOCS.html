@@ -3937,6 +3937,18 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-17 (tests page &mdash; modal UX polish, platform tagging &amp; Skipped state)</h3>
+<ul>
+  <li><strong>Unified Exec Steps format (test #131):</strong> Replaced separate commands-list + steps-prose with a single inline numbered list. Steps that require SQL now show the code block (with copy button) directly beneath that step. Renderer updated to support <code>steps</code> as a function returning <code>[{text, cmd?}]</code> array; string and legacy <code>commands</code> format still supported for all other tests.</li>
+  <li><strong>Tests #93 &amp; #130 updated to LS test-mode checkout flow:</strong> Removed curl / raw SQL trigger steps. #93 (ls-webhook) now uses a real Lemon Squeezy test-mode checkout as the trigger. #130 (apply-pending-upgrade) documents the pending_upgrades path &mdash; requires a checkout email with no existing JumpKit profile so the webhook stores a pending row instead of updating the profile directly.</li>
+  <li><strong>&ldquo;Mark as Skipped&rdquo; button added to modal</strong> (Manual and AUTO+MANUAL tests only). Clicking it clears the result, resets the row to the default Details state, and updates the Skipped count in the summary card and section headers.</li>
+  <li><strong>&ldquo;Test On&rdquo; row added to modal</strong> (between ID and Category). Shows colored platform pills: macOS pill (gray, always present) and Windows pill (blue, shown unless <code>platforms: [&apos;mac&apos;]</code> is set on the test definition). All tests default to mac + windows.</li>
+  <li><strong>Platform tagging:</strong> Tests #93, #130, #139 tagged <code>platforms: [&apos;mac&apos;]</code> &mdash; these are server-side / audit-only tests that do not need to be re-run on Windows.</li>
+  <li><strong>&ldquo;Not Run&rdquo; &rarr; &ldquo;Skipped&rdquo;</strong> renamed throughout: summary card, modal state label, HTML report stat card, section header pills, and stateLabel helper.</li>
+  <li><strong>Skipped pill added to section header stats</strong> alongside Pass / Fail / Manual. Calculated as <code>total &minus; pass &minus; fail &minus; manual</code> per section; only renders when non-zero.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-17.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-16 (test suite overhaul &mdash; exec order, 4-section layout, unified summary &amp; session lock fix)</h3>
 <ul>
   <li><strong>Execution order added to all 146 tests.</strong> Test 139 runs first (npm audit pre-flight check), then all automatic, then auto+manual, then manual. Last 3 manual tests: 111 &rarr; 112 &rarr; 141. Exec # visible in every test row and detail modal.</li>
