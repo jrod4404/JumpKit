@@ -1691,7 +1691,7 @@ const JK_TESTS = [
   },
 
   {
-    id: 139, category: 'Code Quality',
+    id: 139, category: 'Code Quality', platforms: ['mac'],
     title: '[MANUAL] npm audit — zero critical/high vulnerabilities',
     purpose: 'Confirms that no known high or critical npm package vulnerabilities exist in the dependency tree.',
     prerequisites: 'None (logic check — validates last known audit state).',
@@ -2316,14 +2316,24 @@ const JK_TESTS = [
   },
 
   {
-    id: 93, category: 'Subscription',
+    id: 93, category: 'Subscription', platforms: ['mac'],
     title: '[MANUAL] Lemon Squeezy webhook upgrades subscription_status',
-    purpose: 'End-to-end validation that a Lemon Squeezy subscription_created webhook correctly sets subscription_status="active" in the Supabase profiles table. This is the core billing flow — failure means paid users are not upgraded.',
-    prerequisites: 'Requires the lemon-squeezy-webhook Edge Function to be deployed and a test user email accessible in Supabase. Run this manually via curl or the Lemon Squeezy test webhook panel.',
-    description: 'Manual: send a test webhook payload to the deployed edge function and verify the user\'s subscription_status in Supabase becomes "active".',
-    input: 'POST /functions/v1/lemon-squeezy-webhook with event=subscription_created, user_email=<your email>',
-    expected: 'Supabase profiles.subscription_status updates to "active" for the matching user.',
-    steps: '1. Open Lemon Squeezy dashboard → Store → Webhooks → your endpoint → click "Send test event" for subscription_created.\n2. Or run via curl:\n   curl -X POST "${SUPABASE_URL}/functions/v1/lemon-squeezy-webhook" \\\n     -H "Content-Type: application/json" \\\n     -H "X-Signature: <your-secret-hmac>" \\\n     -d \'{"meta":{"event_name":"subscription_created","custom_data":{"user_email":"<your-email>"}}, "data":{"attributes":{"status":"active","variant_id":"<your-variant-id>"}}}\'\n3. In Supabase Table Editor → profiles → find your user row → confirm subscription_status = "active".\n4. Re-open JumpKit → Account page → confirm account type shows "JumpKit Unlimited".',
+    purpose: 'End-to-end validation that a real Lemon Squeezy subscription_created webhook correctly sets subscription_status="active" and subscription_tier="core" in Supabase. This is the core billing flow — failure means paid users are not upgraded.',
+    prerequisites: 'LS store in Test mode. ls-webhook Edge Function deployed. Must be logged in as the user whose email you use for the checkout.',
+    description: 'Complete a LS test-mode checkout to fire the real webhook end-to-end and verify the profile is upgraded in Supabase and in the app.',
+    input: 'LS test-mode checkout with test card 4242 4242 4242 4242',
+    expected: 'profiles.subscription_status = "active" and subscription_tier = "core". Account page shows "JumpKit Unlimited".',
+    steps: (user) => {
+      const email = user?.email || 'your-email@example.com';
+      return [
+        { text: 'In Lemon Squeezy dashboard — confirm Test mode is active (look for the Test mode banner at the top of the dashboard).' },
+        { text: 'Open the test checkout URL and complete a purchase using test card 4242 4242 4242 4242, any future expiry, any CVC.' },
+        { text: 'Wait ~5 seconds — LS fires the real subscription_created webhook to your ls-webhook Edge Function.' },
+        { text: 'In Supabase Table Editor → profiles → confirm subscription_status = "active" and subscription_tier = "core" for your user.' },
+        { text: 'In JumpKit → Account page — confirm account type shows "JumpKit Unlimited".' },
+        { text: 'Reset your profile after testing.', cmd: `UPDATE profiles\nSET subscription_status='free', subscription_tier='free', subscription_plan=NULL, ls_customer_id=NULL\nWHERE email='${email}';` },
+      ];
+    },
     test: async () => 'manual'
   },
 
@@ -2493,14 +2503,22 @@ const JK_TESTS = [
   },
 
   {
-    id: 130, category: 'Subscription',
-    title: '[MANUAL] apply-pending-upgrade — returns applied:true when pending row exists',
-    purpose: 'Confirms apply-pending-upgrade applies the upgrade, deletes the pending row, and returns { ok:true, applied:true } when a pending_upgrades row exists for the user.',
-    prerequisites: 'Must be logged in. A pending_upgrades row must be manually inserted first in Supabase SQL. IMPORTANT: this test upgrades your profile to core — reset manually after.',
-    description: 'After inserting a test pending_upgrades row via Supabase SQL, call apply-pending-upgrade and verify applied:true is returned.',
-    input: 'INSERT INTO pending_upgrades (email,tier,ls_customer_id) VALUES (your-email,\'core\',\'test-99\') ON CONFLICT (email) DO UPDATE SET tier=\'core\'; then run this test.',
-    expected: 'Response has ok:true and applied:true. Row deleted from pending_upgrades.',
-    steps: '1. In Supabase SQL editor run:\n   INSERT INTO pending_upgrades (email, tier, ls_customer_id) VALUES (\'{your-email}\', \'core\', \'test-99\') ON CONFLICT (email) DO UPDATE SET tier=\'core\';\n2. Run this test — verify applied:true.\n3. Reset after: UPDATE profiles SET subscription_tier=\'free\', subscription_status=\'free\' WHERE email=\'{your-email}\';',
+    id: 130, category: 'Subscription', platforms: ['mac'],
+    title: '[MANUAL] apply-pending-upgrade — applies upgrade for user who paid before creating account',
+    purpose: 'Confirms apply-pending-upgrade applies the upgrade, deletes the pending row, and returns { ok:true, applied:true }. This flow handles the case where a user paid on LS before creating a JumpKit account — the webhook stores a pending row, and apply-pending-upgrade is called automatically on first login.',
+    prerequisites: 'LS store in Test mode. Use a test email that has NO existing JumpKit account — the ls-webhook only creates a pending_upgrades row when no profile exists for that email (otherwise it upgrades the profile directly, which is what test #93 covers).',
+    description: 'Complete a LS test checkout with a fresh test email to generate a pending_upgrades row via the real webhook, then create a JumpKit account and sign in to trigger apply-pending-upgrade automatically.',
+    input: 'LS test-mode checkout with a fresh email (no JumpKit account) + JumpKit sign-up + sign-in',
+    expected: 'pending_upgrades row created by webhook; on sign-in apply-pending-upgrade applies the upgrade (subscription_tier="core") and deletes the pending row.',
+    steps: [
+      { text: 'In Lemon Squeezy dashboard — confirm Test mode is active (Test mode banner at the top).' },
+      { text: 'Complete a LS test checkout using a fresh test email that has NO JumpKit account — e.g. a Gmail + alias like jeffroder+testpending@gmail.com. Use test card 4242 4242 4242 4242.' },
+      { text: 'Wait ~5 seconds, then confirm the pending_upgrades row was created by the webhook.', cmd: `SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
+      { text: 'Go to the JumpKit sign-up page and create an account with that same test email.' },
+      { text: 'Sign in with that email — apply-pending-upgrade fires automatically on login. Confirm the profile was upgraded.', cmd: `SELECT subscription_tier, subscription_status FROM profiles WHERE email='jeffroder+testpending@gmail.com';` },
+      { text: 'Confirm no pending row remains.', cmd: `SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
+      { text: 'Clean up — delete the test profile and any leftover pending row.', cmd: `DELETE FROM profiles WHERE email='jeffroder+testpending@gmail.com';\nDELETE FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
+    ],
     test: async () => 'manual'
   },
 
@@ -2749,24 +2767,26 @@ const JK_TESTS = [
     description: 'Insert a test team_members row with lock_at 1 hour ago, trigger check-member-lockouts, verify locked=true, then clean up.',
     input: 'Supabase SQL editor',
     expected: 'locked=true on the test row after running check-member-lockouts.',
-    commands: (user) => {
+    steps: (user) => {
       const email = user?.email || 'your-email@example.com';
       return [
+        { text: 'Run Test #59 to confirm check-member-lockouts is reachable and returns ok:true.' },
         {
-          label: '1. Insert test lockout row (save the returned id)',
+          text: 'In Supabase SQL editor, run this command — copy the UUID from the id column (this is your <saved-id>).',
           cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nON CONFLICT (team_id, user_id) DO UPDATE\n  SET locked = false,\n      lock_at = NOW() - INTERVAL '1 hour',\n      lock_notified_2day = false\nRETURNING id;`
         },
+        { text: 'Run Test #59 again — this triggers check-member-lockouts, locking any row where lock_at has passed.' },
         {
-          label: '2. Verify locked=true — replace <saved-id> with the UUID returned by command 1',
+          text: 'Run this command, replacing <saved-id> with your UUID — confirm locked=true.',
           cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
         },
         {
-          label: '3. Clean up — replace <saved-id> with the UUID returned by command 1',
+          text: 'Run this command, replacing <saved-id> with your UUID — deletes the test row.',
           cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
         },
+        { text: 'Mark Pass if locked=true was confirmed in step 4.' },
       ];
     },
-    steps: '1. Run Test #59 on the tests page to confirm the check-member-lockouts Edge Function is reachable and returns ok:true.\n2. Run command 1 in Supabase SQL editor. The result will show a UUID in the id column — copy it (this is your <saved-id>).\n3. Run Test #59 again — this triggers check-member-lockouts which will lock any rows where lock_at has passed.\n4. Run command 2 — paste your <saved-id> UUID in place of <saved-id>. Confirm the result shows locked=true.\n5. Run command 3 — paste your <saved-id> UUID in place of <saved-id> to delete the test row.\n6. Mark Pass if locked=true was confirmed in step 4.',
     notes: 'lock_at is a team membership enforcement mechanism tied to subscription downgrades.\n\nHow it works:\n1. lock_at is set on a team_members row when a team owner\'s subscription is about to expire — it\'s a future timestamp (the date access should be cut off).\n2. 2 days before lock_at — check-member-lockouts detects rows where lock_at is within 48 hours and lock_notified_2day=false. It sends a warning email to both owner and member, then sets lock_notified_2day=true.\n3. When lock_at passes — check-member-lockouts finds rows where lock_at ≤ NOW() and locked=false, and sets locked=true.\n4. In the app — when the Teams page loads, it fetches team_members for the current user and builds _lockedTeamIds. Any team where locked=true shows the member as locked out — shared column access is blocked.\n\nIn short: owner\'s subscription lapses → members get a 2-day warning email → then get locked out of shared team columns automatically.',
     test: async () => 'manual'
   },
@@ -4034,7 +4054,7 @@ function renderTests() {
           <div id="summaryPass" style="text-align:center;padding:2px 10px;"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Passed</div></div>
           <div id="summaryFail" style="text-align:center;padding:2px 10px;"><div style="font-size:1.3rem;font-weight:900;color:#e15b59">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Failed</div></div>
           <div id="summaryManual" style="text-align:center;padding:2px 10px;"><div style="font-size:1.3rem;font-weight:900;color:#f59e0b">0</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Manual</div></div>
-          <div id="summaryNotRun" style="text-align:center;padding:2px 10px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Not Run</div></div>
+          <div id="summaryNotRun" style="text-align:center;padding:2px 10px;"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Skipped</div></div>
           <div id="summaryTotal" style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${JK_TESTS.length}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
           <span id="summaryTime" style="color:var(--text-muted);font-size:0.78rem;padding-left:10px;"></span>
         </div>
@@ -4114,6 +4134,8 @@ function _testsJaction(e) {
     _markManualResult(parseInt(btn.dataset.testid), 'pass');
   } else if (action === 'test-mark-fail') {
     _markManualResult(parseInt(btn.dataset.testid), 'fail');
+  } else if (action === 'test-mark-skip') {
+    _markManualResult(parseInt(btn.dataset.testid), 'skip');
   } else if (action === 'test-details') {
     if (!document.getElementById('pageTests')) return;
     _openTestDetail(parseInt(btn.dataset.testid));
@@ -4275,7 +4297,7 @@ function _openConcludeModal() {
   });
 
   const warnLines = [];
-  if (notRun.length)    warnLines.push(`<li><strong>${notRun.length}</strong> test${notRun.length !== 1 ? 's' : ''} never run</li>`);
+  if (notRun.length)    warnLines.push(`<li><strong>${notRun.length}</strong> test${notRun.length !== 1 ? 's' : ''} not yet run</li>`);
   if (stillManual.length) warnLines.push(`<li><strong>${stillManual.length}</strong> manual test${stillManual.length !== 1 ? 's' : ''} not yet marked Pass/Fail</li>`);
 
   const warnBlock = warnLines.length
@@ -4632,7 +4654,7 @@ async function _saveReleaseSection(mode) {
 
 function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const stateColor = (s) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
-  const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Not Run';
+  const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Skipped';
   const sectionOrder = { preflight: 0, auto: 1, 'auto-manual': 2, manual: 3 };
   const sectionLabel = { preflight: 'Pre-Flight (Run First)', auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
   const catColors = { Auth:'#3b82f6', Navigation:'#8b5cf6', Jumps:'#06b6d4', Columns:'#10b981', Archive:'#f59e0b', Stats:'#ec4899', Account:'#6366f1', Subscription:'#f97316', Teams:'#14b8a6', UI:'#84cc16', Security:'#e05555', Database:'#0ea5e9', 'DB Schema':'#7c3aed', 'Shared Sync':'#a855f7', 'Code Quality':'#78716c', Settings:'#64748b', Deployment:'#f43f5e', Paywall:'#d97706', Maintenance:'#22d3ee', Email:'#fb923c', Notifications:'#0d9488', Admin:'#dc2626', Onboarding:'#a78bfa' };
@@ -4796,7 +4818,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
     <div class="stat"><div class="stat-val" style="color:#3fbe71">${totalPass}</div><div class="stat-lbl">Passed</div></div>
     <div class="stat"><div class="stat-val" style="color:#e15b59">${totalFail}</div><div class="stat-lbl">Failed</div></div>
     <div class="stat"><div class="stat-val" style="color:#f59e0b">${totalManual}</div><div class="stat-lbl">Manual</div></div>
-    <div class="stat"><div class="stat-val" style="color:#6b7280">${totalNotRun}</div><div class="stat-lbl">Not Run</div></div>
+    <div class="stat"><div class="stat-val" style="color:#6b7280">${totalNotRun}</div><div class="stat-lbl">Skipped</div></div>
     <div class="stat"><div class="stat-val" style="color:#374151">${sorted.length}</div><div class="stat-lbl">Total</div></div>
   </div>
   <table>
@@ -5038,6 +5060,19 @@ function _buildTestRows() {
 
 function _markManualResult(id, result) {
   if (!window._jkTestResults) window._jkTestResults = {};
+  if (result === 'skip') {
+    delete window._jkTestResults[id];
+    _setRowResult(id, 'not-run', null);
+    _refreshSummary();
+    const { title, body, footer } = _buildTestDetailContent(id);
+    const mt = document.getElementById('modalTitle');
+    const mb = document.getElementById('modalBody');
+    const mf = document.getElementById('modalFooter');
+    if (mt) mt.innerHTML = title;
+    if (mb) { mb.innerHTML = body; mb.scrollTop = 0; }
+    if (mf) mf.innerHTML = footer;
+    return;
+  }
   window._jkTestResults[id] = { state: result, received: result === 'pass' ? 'Manually marked as passed' : 'Manually marked as failed', message: result === 'fail' ? 'Manually marked as failed' : null };
   _setRowResult(id, result, result === 'fail' ? 'Manually marked as failed' : null);
   _refreshSummary();
@@ -5065,7 +5100,7 @@ function _buildTestDetailContent(id) {
   const isManualTest = testDef.title.startsWith('[MANUAL]') || testDef.title.startsWith('[AUTO+MANUAL]');
   const manualInstructions = testDef.steps || testDef.expected;
   if (!state || state === 'null') {
-    color = 'var(--text-muted)'; iconName = 'clock'; stateLabel = 'Not Run';
+    color = 'var(--text-muted)'; iconName = 'clock'; stateLabel = 'Skipped';
     detailsText = isManualTest ? manualInstructions : '—'; detailsColor = 'var(--text-muted)';
   } else if (state === 'pass') {
     color = '#3fbe71'; iconName = 'check'; stateLabel = 'Pass';
@@ -5098,6 +5133,16 @@ function _buildTestDetailContent(id) {
     <tr>
       <td style="${tdLabel}">ID</td>
       <td style="${tdValueMuted}">#${id}</td>
+    </tr>
+    <tr>
+      <td style="${tdLabel}">Test On</td>
+      <td style="padding:8px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${(() => {
+        const platforms = testDef.platforms;
+        const onWindows = !platforms || platforms.includes('windows');
+        const macPill = `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.25)"><svg class="ti ti-brand-apple" style="width:0.85rem;height:0.85rem"><use href="img/tabler-sprite.svg#tabler-brand-apple"/></svg>macOS</span>`;
+        const winPill  = onWindows ? `<span style="display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;background:rgba(14,165,233,0.12);color:#0ea5e9;border:1px solid rgba(14,165,233,0.25)"><svg class="ti ti-brand-windows" style="width:0.85rem;height:0.85rem;color:#0ea5e9"><use href="img/tabler-sprite.svg#tabler-brand-windows"/></svg>Windows</span>` : '';
+        return macPill + winPill;
+      })()}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">Category</td>
@@ -5145,7 +5190,27 @@ function _buildTestDetailContent(id) {
         </tr>`;
       }
       // Manual test — merge steps + commands into one Exec Steps section
-      // Support commands as a function (receives currentUser) for dynamic content
+      // steps can be: string (legacy) | [{text,cmd?}] | function returning array
+      const rawStepsVal = typeof testDef.steps === 'function'
+        ? testDef.steps(typeof currentUser !== 'undefined' ? currentUser : null)
+        : testDef.steps;
+      if (Array.isArray(rawStepsVal)) {
+        // Inline format: code blocks appear directly under the step that uses them
+        const stepItems = rawStepsVal.map((s, i) => {
+          if (typeof s === 'string') return `<li>${_esc(s)}</li>`;
+          const li = `<li style="margin-bottom:${s.cmd ? '10px' : '2px'}">${_esc(s.text)}`;
+          if (!s.cmd) return li + '</li>';
+          const cmdId = `cmd-${id}-${i}`;
+          return li + `<div style="margin-top:6px"><div style="display:flex;align-items:flex-start;gap:6px"><code id="${cmdId}" style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:6px 10px;border-radius:6px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.5">${_esc(s.cmd)}</code><button data-cmd="${_esc(s.cmd)}" data-jaction="cmd-copy" id="cmd-copy-${id}-${i}" class="btn btn-subtle" style="flex-shrink:0;padding:5px 7px;margin-top:1px" title="Copy"><svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg></button></div></div></li>`;
+        }).join('');
+        return `<tr>
+          <td style="${tdLabel}">Exec Steps</td>
+          <td style="padding:8px 0">
+            <ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.85rem;line-height:1.8">${stepItems}</ol>
+          </td>
+        </tr>`;
+      }
+      // Legacy format: separate commands blocks then steps text
       const cmds = typeof testDef.commands === 'function'
         ? testDef.commands(typeof currentUser !== 'undefined' ? currentUser : null)
         : (testDef.commands || []);
@@ -5158,7 +5223,7 @@ function _buildTestDetailContent(id) {
           </div>
         </div>`).join('') : '';
       // Build <ol> from steps string (split on \n or numbered lines)
-      const rawSteps = testDef.steps || '';
+      const rawSteps = typeof rawStepsVal === 'string' ? rawStepsVal : '';
       const stepLines = rawSteps.split('\n').map(s => s.trim()).filter(Boolean);
       const stepsHTML = stepLines.length
         ? `<ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.85rem;line-height:1.8">${stepLines.map(s => {
@@ -5216,6 +5281,7 @@ function _buildTestDetailContent(id) {
   const manualBtns = isManualTest ? `
       <button class="btn btn-subtle" data-jaction="test-mark-pass" data-testid="${id}" style="color:#3fbe71;border-color:rgba(63,190,113,0.3)"><svg class="ti ti-check" style="color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Mark as Pass</button>
       <button class="btn btn-subtle" data-jaction="test-mark-fail" data-testid="${id}" style="color:#e15b59;border-color:rgba(225,91,89,0.3)"><svg class="ti ti-x" style="color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Mark as Fail</button>` : '';
+  const skipBtn = isManualTest ? `<button class="btn btn-subtle" data-jaction="test-mark-skip" data-testid="${id}" style="color:#6b7280;border-color:rgba(107,114,128,0.3)"><svg class="ti ti-minus" style="color:#6b7280"><use href="img/tabler-sprite.svg#tabler-minus"/></svg> Mark as Skipped</button>` : '';
 
   const footerHTML = `
     <div style="display:flex;gap:8px;align-items:center;width:100%">
@@ -5226,6 +5292,7 @@ function _buildTestDetailContent(id) {
         Next <svg class="ti ti-chevron-right"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
       </button>
       ${manualBtns}
+      ${skipBtn}
       <button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
     </div>`;
 
@@ -5270,6 +5337,12 @@ function _setRowResult(id, state, message) {
     cell.onclick = null;
     if (row) row.style.background = 'rgba(245,158,11,0.04)';
     _saveTestResults();
+  } else if (state === 'not-run' || state === null) {
+    cell.innerHTML = `<button data-jaction="test-details" data-testid="${id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1" title="View test details"><svg class="ti ti-notes" style="font-size:0.85rem;line-height:1;display:flex;align-items:center"><use href="img/tabler-sprite.svg#tabler-notes"/></svg><span style="line-height:1">Details</span></button>`;
+    cell.style.cursor = '';
+    cell.onclick = null;
+    if (row) row.style.background = '';
+    _saveTestResults();
   }
 }
 
@@ -5313,7 +5386,8 @@ function _refreshSummary() {
     const el = document.getElementById('section-inline-stats-' + key);
     if (!el) return;
     const allPass = total > 0 && p === total;
-    el.innerHTML = _pill(p,'Pass','#3fbe71', allPass) + _pill(f,'Fail','#e15b59', false) + _pill(m,'Manual','#f59e0b', false);
+    const skipped = Math.max(0, total - p - f - m);
+    el.innerHTML = _pill(p,'Pass','#3fbe71', allPass) + _pill(f,'Fail','#e15b59', false) + _pill(m,'Manual','#f59e0b', false) + _pill(skipped,'Skipped','#6b7280', false);
   };
   _inlineSectionStats('preflight', pfPassed,   pfFailed,   pfManual,   pfTotal);
   _inlineSectionStats('auto',      autoPassed, autoFailed, autoManual, autoTotal);
