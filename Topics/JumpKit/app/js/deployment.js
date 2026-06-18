@@ -157,32 +157,23 @@ window.renderDeployment = function renderDeployment() {
 
   pageContent.innerHTML = `
     <div style="padding:16px 24px 24px 24px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
-        <div>
-          <h1 style="font-size:1.4rem;font-weight:800;color:var(--text);margin:0">
-            <svg class="ti ti-world-upload" style="vertical-align:middle;margin-right:8px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
-            Deployment
-          </h1>
+      <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:20px;gap:12px">
+        <div style="text-align:right">
+          <div style="font-size:1.4rem;font-weight:800;color:${done === total ? '#3fbe71' : 'var(--text)'}">${done}<span style="font-size:0.9rem;color:var(--text-muted);font-weight:500"> / ${total}</span></div>
+          <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim)">Completed</div>
         </div>
-        <div style="display:flex;align-items:center;gap:12px">
-          <div style="text-align:right">
-            <div style="font-size:1.4rem;font-weight:800;color:${done === total ? '#3fbe71' : 'var(--text)'}">${done}<span style="font-size:0.9rem;color:var(--text-muted);font-weight:500"> / ${total}</span></div>
-            <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim)">Completed</div>
-          </div>
-          <div style="width:56px;height:56px;position:relative">
-            <svg viewBox="0 0 36 36" style="width:56px;height:56px;transform:rotate(-90deg)">
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="${done === total ? '#3fbe71' : 'var(--turq)'}" stroke-width="3"
-                stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="0" stroke-linecap="round"/>
-            </svg>
-            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--text)">${pct}%</div>
-          </div>
-          <button class="btn btn-subtle" id="deployResetBtn" style="font-size:0.8rem;padding:6px 12px">
-            <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset
-          </button>
+        <div style="width:56px;height:56px;position:relative">
+          <svg viewBox="0 0 36 36" style="width:56px;height:56px;transform:rotate(-90deg)">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" stroke-width="3"/>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="${done === total ? '#3fbe71' : 'var(--turq)'}" stroke-width="3"
+              stroke-dasharray="${pct} ${100 - pct}" stroke-dashoffset="0" stroke-linecap="round"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;color:var(--text)">${pct}%</div>
         </div>
+        <button class="btn btn-subtle" id="deployResetBtn" style="font-size:0.8rem;padding:6px 12px">
+          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset
+        </button>
       </div>
-      <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin:0 0 20px">Complete every step before shipping a new version.</p>
       ${sectionsHTML}
     </div>`;
 

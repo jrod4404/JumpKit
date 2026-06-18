@@ -529,11 +529,11 @@ const pages = {
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Tests'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Tests', deployment:'Deployment'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-user-circle', admin:'ti-users', tests:'ti-test-pipe'
+  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-user-circle', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload'
 };
 let activePage = 'home';
 window.activePage = activePage;
@@ -561,7 +561,8 @@ window.navigateTo = function navigateTo(page) {
     help:     'Tips, features, and frequently asked questions',
     teams:    'Manage your teams and shared columns',
     admin:    'User and app usage stats',
-    tests:    'Core functionality verification - run before each deployment',
+    tests:      'Core functionality verification - run before each deployment',
+    deployment: 'Complete every step before shipping a new version',
     home:     '',
     jumps:    '',
   };
