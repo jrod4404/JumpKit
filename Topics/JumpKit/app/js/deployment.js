@@ -243,14 +243,6 @@ window.renderDeployment = function renderDeployment() {
 
 // ── Manage Deployment Modal ───────────────────────────────────────
 async function _openDeployManageModal() {
-  // Show loading state
-  Modal.open(
-    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
-    '<div style="text-align:center;padding:24px;color:var(--text-muted)">Loading deployments…</div>',
-    '<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>',
-    'xl'
-  );
-
   // Fetch deployments from Supabase
   let deployments = [];
   let fetchError = null;
