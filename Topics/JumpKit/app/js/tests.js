@@ -1855,6 +1855,76 @@ For each FAIL: show the file, line number, the problematic code snippet, and the
     test: async () => 'manual'
   },
 
+  {
+    id: 378, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[MANUAL] Pre-Flight — Security Audit',
+    purpose: 'Comprehensive security review to ensure the app cannot be hacked, exploited, or used to leak user data. Covers secrets, Electron hardening, XSS, authentication, API security, and supply chain.',
+    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    description: 'Paste the prompt below to Max. He will audit the codebase across all security domains and return a PASS/FAIL/N\/A for each item. Mark this test Pass only when all items are PASS or N\/A with no unresolved FAILs.',
+    input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
+    expected: 'All items PASS or N/A. Any FAIL is a release blocker.',
+    steps: [
+      {
+        text: 'Copy the audit prompt below and paste it to Max in a new message. Every FAIL is a release blocker — resolve all before shipping.',
+        cmd: `Max, please run a comprehensive security audit of the JumpKit codebase. JumpKit is an Electron desktop app. Scan app/js/*.js, app/main.js, app/preload.js, app/html/*.html, landing/*.html, and supabase/functions/**/*.ts. For each item below give a clear PASS / FAIL / N\/A verdict with file + line number evidence for any FAIL.
+
+Secrets & Credentials
+[ ] No API keys, tokens, passwords, or secrets are hardcoded in any committed source file — check app/supabase/config.js, app/.env, any .env files, and all JS files for patterns like apiKey=, password=, secret=, Bearer <hardcoded>
+[ ] app/.env (contains Apple notarization credentials) is listed in .gitignore and has never been committed to the repo — verify with: git log --all --full-history -- app/.env
+[ ] No .env files of any kind are tracked in the repo
+[ ] The Supabase ANON key is the only Supabase key present in client-side code — the SERVICE ROLE key must never appear in app/js/, landing/, or app/html/
+[ ] Supabase URL and anon key are the only credentials in app/supabase/config.js — no other secrets present
+
+Electron Security (main.js / preload.js)
+[ ] contextIsolation: true on all BrowserWindow instances — renderer cannot access Node APIs directly
+[ ] nodeIntegration: false on all BrowserWindow instances
+[ ] sandbox: true set where possible (or confirm contextIsolation+preload is sufficient mitigation)
+[ ] webSecurity is NOT disabled (no webSecurity: false anywhere)
+[ ] allowRunningInsecureContent is NOT set to true anywhere
+[ ] Content Security Policy (CSP) header is set in main.js and restricts script-src, object-src, and base-uri appropriately
+[ ] No use of shell.openExternal() with user-controlled or unvalidated URLs — all external URLs are validated against an allowlist before opening
+[ ] preload.js exposes only the minimum necessary APIs via contextBridge — no broad Node/Electron API surface exposed to renderer
+[ ] No eval(), new Function(), or executeJavaScript() called with user-supplied input in main process or preload
+
+XSS & Injection (renderer / app JS)
+[ ] All innerHTML assignments in app/js/*.js and app/html/*.html use only trusted, app-controlled strings — no user input (jump names, URLs, column names, user email, etc.) is inserted raw into innerHTML without sanitization
+[ ] All user-visible strings rendered into the DOM use textContent, innerText, or a safe escaping function — never raw string interpolation into innerHTML
+[ ] Jump URLs are validated before being passed to shell.openExternal() — only http://, https://, and local file paths are allowed; javascript: and data: URLs are blocked
+[ ] No SQL injection risk in SQLite queries — all better-sqlite3 queries use parameterized statements (? placeholders), never string concatenation
+[ ] No prototype pollution risk from JSON.parse() on untrusted data or from Object.assign() with user-supplied keys
+
+Authentication & Session Security
+[ ] Supabase auth tokens are never logged, written to localStorage in plain text, or exposed in URLs
+[ ] Session token (jk_session_token in sessionStorage) is cleared on logout
+[ ] Single-session lock logic (user_sessions table) cannot be bypassed by a client-side manipulation — session enforcement validated server-side or via Supabase RLS
+[ ] Password reset flow uses Supabase\'s secure token — no custom reset tokens implemented client-side
+[ ] No auth bypass: confirm there is no code path that grants app access without a valid Supabase session (e.g. offline mode that skips auth)
+
+API & Network Security
+[ ] All calls to Supabase Edge Functions use HTTPS (never HTTP)
+[ ] Edge Functions validate their input — no function blindly trusts the request body without checking required fields
+[ ] Edge Functions that perform privileged actions (apply-pending-upgrade, ls-webhook) verify the caller is authorized before acting — not callable by arbitrary users
+[ ] CORS is configured on Edge Functions — they do not accept requests from arbitrary origins
+[ ] The ls-webhook Edge Function validates the Lemon Squeezy webhook signature before processing any payload
+
+Supply Chain & Dependencies
+[ ] npm audit shows 0 critical or high vulnerabilities (run: cd app && npm audit)
+[ ] No dependencies with known malicious versions (check npm audit output)
+[ ] package-lock.json is committed and up to date — no floating version ranges that could pull in unexpected upgrades
+[ ] No unused or abandoned dependencies that expand the attack surface unnecessarily
+
+Data Privacy
+[ ] No user PII (email, name, subscription data) is logged to the console or written to local files in plain text
+[ ] Crash/error reports (if any) do not include sensitive user data
+[ ] Local SQLite database file is stored in the user\'s app data directory — not in a world-readable temp path
+[ ] No analytics or telemetry sends user data to third-party services without disclosure
+
+For each FAIL: show the file, line number, the problematic code, severity (Critical/High/Medium), and the recommended fix. Treat any Critical or High finding as a release blocker.`
+      }
+    ],
+    test: async () => 'manual'
+  },
+
   // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.
