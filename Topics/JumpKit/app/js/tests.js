@@ -4531,7 +4531,7 @@ function _openDeployChecklistModal() {
       'On Windows: run the Windows build command to produce the <code>.exe</code> / <code>.msi</code> installer.',
       'Confirm Windows build completes without errors.',
       'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps.',
-      'Note both installer filenames and file sizes.',
+      'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.',
     ]},
     { icon: 'ti-world-upload', color: '#ec4899', label: 'Landing Page & Distribution', items: [
       'Upload both installers to the hosting/storage location (Supabase Storage, S3, or GitHub Releases).',
