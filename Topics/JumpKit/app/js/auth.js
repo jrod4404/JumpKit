@@ -155,7 +155,25 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   } catch (err) {
     const msg = err.message || '';
     if (msg.toLowerCase().includes('email not confirmed')) {
-      showAlert('loginAlert', 'Please check your email and click the confirmation link before signing in.', 'error');
+      const loginAlertEl = document.getElementById('loginAlert');
+      if (loginAlertEl) {
+        loginAlertEl.className = 'auth-alert error';
+        loginAlertEl.innerHTML = 'Please check your email and click the confirmation link before signing in. <a href="#" id="resendConfirmLink" style="color:inherit;text-decoration:underline;white-space:nowrap">Click here to resend the confirmation email.</a>';
+        document.getElementById('resendConfirmLink')?.addEventListener('click', async (ev) => {
+          ev.preventDefault();
+          const resendLink = document.getElementById('resendConfirmLink');
+          if (resendLink) resendLink.textContent = 'Sending…';
+          const { error: resendErr } = await supabaseClient.auth.resend({ type: 'signup', email });
+          if (loginAlertEl) {
+            if (resendErr) {
+              loginAlertEl.innerHTML = 'Could not resend confirmation email. Please try again.';
+            } else {
+              loginAlertEl.className = 'auth-alert success';
+              loginAlertEl.textContent = 'Confirmation email resent — please check your inbox.';
+            }
+          }
+        });
+      }
     } else {
       showAlert('loginAlert', msg || 'Invalid email or password.', 'error');
     }

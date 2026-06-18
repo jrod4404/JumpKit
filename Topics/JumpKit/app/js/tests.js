@@ -2326,11 +2326,12 @@ const JK_TESTS = [
     steps: (user) => {
       const email = user?.email || 'your-email@example.com';
       return [
-        { text: 'In Lemon Squeezy dashboard — confirm Test mode is active (look for the Test mode banner at the top of the dashboard).' },
-        { text: 'Open the test checkout URL and complete a purchase using test card 4242 4242 4242 4242, any future expiry, any CVC.' },
+        { text: 'Open the LS checkout page — confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
+        { text: 'Go to Supabase → Table Editor → Profiles and confirm you have a test account already created in the free tier.' },
+        { text: 'Complete a purchase with the free account from step 2 using test card 4242 4242 4242 4242, any future expiry, any CVC.' },
         { text: 'Wait ~5 seconds — LS fires the real subscription_created webhook to your ls-webhook Edge Function.' },
         { text: 'In Supabase Table Editor → profiles → confirm subscription_status = "active" and subscription_tier = "core" for your user.' },
-        { text: 'In JumpKit → Account page — confirm account type shows "JumpKit Unlimited".' },
+        { text: 'Log in to JumpKit with the account from step 2, nav to the Account page, confirm account type shows "JumpKit Unlimited", confirm all CTA banners are removed, and confirm the JumpKit Unlimited modal renders after first login after upgrade.' },
         { text: 'Reset your profile after testing.', cmd: `UPDATE profiles\nSET subscription_status='free', subscription_tier='free', subscription_plan=NULL, ls_customer_id=NULL\nWHERE email='${email}';` },
       ];
     },
@@ -2511,7 +2512,7 @@ const JK_TESTS = [
     input: 'LS test-mode checkout with a fresh email (no JumpKit account) + JumpKit sign-up + sign-in',
     expected: 'pending_upgrades row created by webhook; on sign-in apply-pending-upgrade applies the upgrade (subscription_tier="core") and deletes the pending row.',
     steps: [
-      { text: 'In Lemon Squeezy dashboard — confirm Test mode is active (Test mode banner at the top).' },
+      { text: 'Open the LS checkout page — confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
       { text: 'Complete a LS test checkout using a fresh test email that has NO JumpKit account — e.g. a Gmail + alias like jeffroder+testpending@gmail.com. Use test card 4242 4242 4242 4242.' },
       { text: 'Wait ~5 seconds, then confirm the pending_upgrades row was created by the webhook.', cmd: `SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
       { text: 'Go to the JumpKit sign-up page and create an account with that same test email.' },
@@ -5198,7 +5199,8 @@ function _buildTestDetailContent(id) {
         // Inline format: code blocks appear directly under the step that uses them
         const stepItems = rawStepsVal.map((s, i) => {
           if (typeof s === 'string') return `<li>${_esc(s)}</li>`;
-          const li = `<li style="margin-bottom:${s.cmd ? '10px' : '2px'}">${_esc(s.text)}`;
+          const linkHTML = s.link ? `<a href="${_esc(s.link.url)}" target="_blank" rel="noopener noreferrer" style="color:var(--turq);text-decoration:none;display:inline-flex;align-items:center;gap:4px;font-size:0.82rem;margin-left:6px"><svg class="ti ti-external-link" style="width:.75rem;height:.75rem"><use href="img/tabler-sprite.svg#tabler-external-link"/></svg>${_esc(s.link.label)}</a>` : '';
+          const li = `<li style="margin-bottom:${s.cmd ? '10px' : '2px'}">${_esc(s.text)}${linkHTML}`;
           if (!s.cmd) return li + '</li>';
           const cmdId = `cmd-${id}-${i}`;
           return li + `<div style="margin-top:6px"><div style="display:flex;align-items:flex-start;gap:6px"><code id="${cmdId}" style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:6px 10px;border-radius:6px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.5">${_esc(s.cmd)}</code><button data-cmd="${_esc(s.cmd)}" data-jaction="cmd-copy" id="cmd-copy-${id}-${i}" class="btn btn-subtle" style="flex-shrink:0;padding:5px 7px;margin-top:1px" title="Copy"><svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg></button></div></div></li>`;

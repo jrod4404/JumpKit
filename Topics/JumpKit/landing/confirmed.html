@@ -83,6 +83,21 @@
       color: #4A6280;
       font-size: 0.8rem;
     }
+    .error-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(225,91,89,0.12);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .error-icon svg {
+      width: 32px;
+      height: 32px;
+      color: #e15b59;
+    }
   </style>
 </head>
 <body>
@@ -106,5 +121,33 @@
       <div style="margin-top:20px;font-size:0.85rem"><a href="https://jumpkit.app" style="color:#50CACC;text-decoration:none">← Back to jumpkit.app</a></div>
     </div>
   </div>
+  <script>
+    (function () {
+      const hash = window.location.hash.slice(1);
+      const params = new URLSearchParams(hash);
+      const error = params.get('error');
+      const errorCode = params.get('error_code');
+
+      if (!error) return; // no error — success state stays
+
+      const isExpired = errorCode === 'otp_expired';
+      const icon = document.querySelector('.confirmed-icon');
+      const h1   = document.querySelector('.confirmed-card h1');
+      const p    = document.querySelector('.confirmed-card p');
+
+      // Swap icon to error style
+      icon.className = 'error-icon';
+      icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+      // Update title
+      document.title = isExpired ? 'Link Expired — JumpKit' : 'Confirmation Failed — JumpKit';
+      h1.textContent = isExpired ? 'Link Expired' : 'Confirmation Failed';
+
+      // Update message
+      p.innerHTML = isExpired
+        ? 'This confirmation link has expired. Confirmation links are only valid for a limited time.<br /><br />Open the <strong>JumpKit app</strong>, sign in with your email, and use the <strong>&ldquo;Click here to resend the confirmation email&rdquo;</strong> link to get a fresh one.'
+        : 'Something went wrong confirming your email. Please return to the JumpKit app and try signing in — you can request a new confirmation link from the login screen.';
+    })();
+  </script>
 </body>
 </html>
