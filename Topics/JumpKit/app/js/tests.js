@@ -4467,10 +4467,12 @@ function _clearSavedTestResults() {
 // JSON state, and restores each test's result into the live test runner.
 async function _loadResultsFromHTMLFile(opts = {}) {
   const silent = opts?.silent === true;
+  // Accept filePath directly via opts (e.g. from resume handler before localStorage is confirmed written)
+  // Fallback to localStorage via _getReleaseState
   const cfg = _getReleaseState() || {};
-  const filePath = cfg?.resultsFilePath;
+  const filePath = opts?.filePath || cfg?.resultsFilePath;
   if (!filePath) {
-    if (!silent) alert('No results file configured. Click "Manage Testing" to create or load one.');
+    if (!silent) window.Toast?.danger('No results file configured — open Manage Testing to set one.');
     return;
   }
   if (!window.electronAPI?.readFile) {
@@ -4977,8 +4979,8 @@ async function _openReleaseTestingModal() {
       _saveDeployConfig({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
     }
 
-    // Load test results from the file
-    await _loadResultsFromHTMLFile();
+    // Load test results — pass filePath directly so we don't depend on _loadDeployConfig being loaded
+    await _loadResultsFromHTMLFile({ filePath: chosenPath });
 
     window.Toast?.success(`Session resumed — v${extractedVersion} · ${chosenPath.split(/[\/\\]/).pop()}`);
     Modal.close();
@@ -5080,7 +5082,7 @@ async function _openReleaseTestingModal() {
       }
 
       // Load test results from the file
-      await _loadResultsFromHTMLFile();
+      await _loadResultsFromHTMLFile({ filePath: chosenPath });
       window.Toast?.success(`Results loaded from ${chosenPath.split(/[\/\\]/).pop()}`);
       _updateRTLabel();
     });
