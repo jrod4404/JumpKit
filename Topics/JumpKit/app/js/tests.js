@@ -4779,8 +4779,11 @@ async function _openReleaseTestingModal() {
 
   // ── Section 2: Completion banner (both runs done) ─────────────────
   const completionBanner = bothDone
-    ? `<div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;font-size:0.88rem;color:#3fbe71;font-weight:600">
-        ✅ Testing complete! Head to the <strong>Deployment</strong> page to finalize your release.
+    ? `<div style="margin-top:12px;padding:12px 16px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+        <span style="font-size:0.88rem;color:#3fbe71;font-weight:700">✅ Testing complete! Both Mac and Win runs finalized.</span>
+        <button data-jaction="modal-close" id="rtGoToDeployBtn" class="btn" style="font-size:0.82rem;padding:5px 14px;background:#3fbe71;color:#fff;border-color:#3fbe71;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
+          <svg class="ti ti-rocket" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Go to Deployments
+        </button>
        </div>`
     : '';
 
@@ -4853,19 +4856,32 @@ async function _openReleaseTestingModal() {
   })();
 
 
-  const runsBlock = existing ? `
+  // Platform Testing cards — always visible; greyed/inactive when no session yet
+  const _inactiveRunCard = (platform) => {
+    const platformLabel = platform === 'mac' ? 'Mac Testing' : 'Win Testing';
+    return `<div style="display:flex;align-items:stretch;gap:10px;opacity:0.45;pointer-events:none">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1;min-height:44px">
+        <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
+        <span style="font-weight:700;font-size:0.88rem;color:var(--text)">${platformLabel}</span>
+        <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:var(--bg-hover);color:var(--text-dim);border:1px solid var(--border)">— Not started</span>
+      </div>
+    </div>`;
+  };
+
+  const runsBlock = `
     <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Testing</p>
     <div style="display:flex;flex-direction:column;gap:10px">
-      ${_runRow('mac', macDone)}
-      ${_runRow('windows', winDone)}
+      ${existing ? _runRow('mac', macDone) : _inactiveRunCard('mac')}
+      ${existing ? _runRow('windows', winDone) : _inactiveRunCard('windows')}
     </div>
+    ${existing ? `
     <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
         <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
       <span style="font-size:0.75rem;color:var(--text-muted)">Pick a previously saved results .html file to restore test states</span>
     </div>
-    <div style="margin-top:8px">${modalFileBlock}</div>` : '';
+    <div style="margin-top:8px">${modalFileBlock}</div>` : ''}`;
 
   // ── Section 4: Version field ──────────────────────────────────────
   // Version section: read-only for existing sessions, editable for new sessions
@@ -4898,6 +4914,14 @@ async function _openReleaseTestingModal() {
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
     body, footer, 'xl'
   );
+
+  // Wire Go to Deployments button (only rendered when both runs finalized)
+  document.getElementById('rtGoToDeployBtn')?.addEventListener('click', () => {
+    Modal.close();
+    // Navigate to deployment page
+    if (typeof loadPage === 'function') loadPage('deployment');
+    else document.querySelector('[data-page="deployment"]')?.click();
+  });
 
   // Wire run finalize buttons
   if (existing) {
