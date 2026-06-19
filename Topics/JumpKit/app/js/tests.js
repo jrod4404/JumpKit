@@ -4926,6 +4926,8 @@ async function _openReleaseTestingModal() {
        </div>`;
 
   // ── File section — same layout for both states ────────────────────
+  const _activeCfg = _getReleaseState() || {};
+  const _activeFilePath = _activeCfg?.resultsFilePath || null;
   // _storedFilePath derived from _activeCfg (already read above via _getReleaseState)
   const _storedFilePath = _activeFilePath;
   const _fileStatusHtml = _storedFilePath
@@ -4944,8 +4946,6 @@ async function _openReleaseTestingModal() {
     ${_fileStatusHtml}`;
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
-  const _activeCfg = _getReleaseState() || {};
-  const _activeFilePath = _activeCfg?.resultsFilePath || null;
 
   // Green session banner — shown at top when a session is active; includes Clear Session btn
   const fileBanner = _activeFilePath
