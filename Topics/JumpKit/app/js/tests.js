@@ -4712,11 +4712,13 @@ function _updateRTLabel() {
 
     const macState = _platformState('mac', s.macFinalized);
     const winState = _platformState('windows', s.winFinalized);
-    const fileLabel = resultsFile
-      ? `<span style="color:var(--text-dim);font-size:0.75rem">${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
-      : ``;
 
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}${fileLabel ? `&nbsp;<span style="color:var(--text-dim)">|</span>&nbsp;${fileLabel}` : ''}`;
+    // File indicator
+    const fileIndicator = resultsFile
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted)"><svg class="ti ti-file-text" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-text"/></svg>${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file — save results to create</span>`;
+
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
@@ -4848,10 +4850,35 @@ async function _openReleaseTestingModal() {
     ? ''
     : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
 
+  // File indicator block for modal
+  const modalFileBlock = (() => {
+    if (resultsFile) {
+      const fname = resultsFile.split(/[\/\\]/).pop();
+      const fdir  = resultsFile.split(/[\/\\]/).slice(0, -1).join('/');
+      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input)">
+        <svg class="ti ti-file-check" style="font-size:1.1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+        <div style="min-width:0">
+          <div style="font-size:0.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(fname)}</div>
+          <div style="font-size:0.72rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(fdir)}</div>
+        </div>
+      </div>`;
+    }
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #f59e0b55;background:#f59e0b0d">
+      <svg class="ti ti-file-off" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>
+      <div>
+        <div style="font-size:0.82rem;font-weight:700;color:#f59e0b">No results file yet</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">A file will be created the first time you click Save Results — you’ll be prompted to choose a folder.</div>
+      </div>
+    </div>`;
+  })();
+
   const body = `
     ${statusBlock}
     ${completionBanner}
     ${runsBlock}
+    ${divider}
+    <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Results File</p>
+    ${modalFileBlock}
     ${divider}
     ${configTitle}
     <div style="margin-bottom:6px">
