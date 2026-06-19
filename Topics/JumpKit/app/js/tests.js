@@ -5750,44 +5750,67 @@ function _openTestStrategyModal() {
     </div>`;
 
   const body = `
-    <p style="${s};margin-bottom:4px">${JK_TESTS.length} tests across 12 categories. Work through them in 3 phases to catch issues efficiently.</p>
-    <p style="${s};margin-bottom:0">The <strong>per-section pass/fail cards</strong> at the top of the page update live - use them as your scoreboard. Sections are <strong>collapsible</strong>; fold finished ones to reduce scroll.</p>
+    <p style="${s};margin-bottom:4px">${JK_TESTS.length} tests across 12 categories. Complete a full Mac run then a full Windows run for each release.</p>
+    <p style="${s};margin-bottom:0">The <strong>per-section pass/fail cards</strong> at the top of the page update live — use them as your scoreboard. Sections are <strong>collapsible</strong>; fold finished ones to reduce scroll.</p>
 
-    <div style="${h}">Phase 1 - Run All Automatics first</div>
-    <p style="${s}">Click <strong>Run Automatic Tests</strong> - runs all ${JK_TESTS.filter(t=>!t.title.startsWith('[AUTO+MANUAL]')&&!t.title.startsWith('[MANUAL]')).length} automatic tests. Expect ~100 green immediately. This gives you a full baseline.</p>
-    <p style="${s}">For any red failures - fix the code, then run just those tests individually. Don&rsquo;t re-run all until you&rsquo;re confident the fix is clean.</p>
-    ${specialCard('💡 Before You Start - App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
-      'Be logged in as an <strong>Unlimited</strong> user for full coverage (free-tier skips some Maintenance tests)',
-      '<strong>Auto-archive</strong> must be set to anything <em>other than Never</em> in Settings → otherwise test ${n(122)} (Auto-archive) will skip automatically',
-      '<strong>Auto-backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> - required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
-      'Click <strong>Details</strong> on any failed test to see its purpose, steps, and expected output before debugging',
-      'The <strong>Auth</strong> tests run first - if test #1 (session persists) fails, check your login state before continuing'
+    <div style="${h}">Step 0 — Start or Load a Testing Session</div>
+    <p style="${s}">Before running any tests, click <strong>Manage Testing</strong> in the header to set up your session.</p>
+    ${specialCard('📋 Session Setup — Manage Testing Modal','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
+      '<strong>Start New Session:</strong> enter a version number (e.g. <code>1.0.0</code>) and click <strong>Start New Session</strong>. A <code>JumpKit_ReleaseTestingSession_vX.Y.Z.html</code> results file is created automatically in your deployment folder.',
+      '<strong>Resume existing session:</strong> click <strong>Choose Release Testing Session File</strong> under <em>LOAD SESSION</em> and pick a previously saved <code>.html</code> results file — all test states and finalization status are restored.',
+      'The session status banner at the top of the modal shows green when active. The <strong>Platform Testing</strong> section shows Mac and Windows cards with their finalization state.',
+      '<strong>Mac must be fully finalized before Windows testing can begin.</strong> The Windows toggle is locked until Finalize Mac Testing is clicked.',
+      'Use <strong>Clear Session</strong> (beside the status banner) to reset the active session state. The HTML file and Supabase records on disk are never deleted — only the local session is cleared.'
     ])}
 
-    <div style="${h}">Phase 2 - AUTO+MANUAL tests by batch</div>
+    <div style="${h}">Phase 1 — Run Mac Tests</div>
+    <p style="${s}">Ensure the <strong>Mac</strong> toggle is active (teal, top-left of the test page). Click <strong>Run Automatic Tests</strong> to run all ${JK_TESTS.filter(t=>!t.title.startsWith('[AUTO+MANUAL]')&&!t.title.startsWith('[MANUAL]')).length} automatic tests. Expect ~100 green immediately.</p>
+    <p style="${s}">For any red failures — fix the code, then run just those tests individually. Don&rsquo;t re-run all until you&rsquo;re confident the fix is clean.</p>
+    ${specialCard('💡 Before You Start Mac Run — App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
+      'Be logged in as an <strong>Unlimited</strong> user for full coverage (free-tier skips some Maintenance tests)',
+      '<strong>Auto-archive</strong> must be set to anything <em>other than Never</em> in Settings — otherwise test ${n(122)} (Auto-archive) will skip automatically',
+      '<strong>Auto-backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> — required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
+      'Click <strong>Details</strong> on any failed test to see its purpose, steps, and expected output before debugging',
+      'The <strong>Auth</strong> tests run first — if test #1 (session persists) fails, check your login state before continuing'
+    ])}
+
+    <div style="${h}">Phase 2 — AUTO+MANUAL tests by batch</div>
     <p style="${s}">These fire code automatically, then need a quick human check. Do them in batches:</p>
     <ul style="margin:4px 0 0 16px;${s}">
-      <li><strong>Email batch</strong> - run all <code>[AUTO+MANUAL]</code> email tests together (${emailBatch}), then check your inbox once for all</li>
-      <li><strong>Export PDF</strong> (${n(121)}) - fires the export automatically, then open the saved file to verify it looks correct</li>
-      <li><strong>Team password</strong> (${n(120)}) - semi-auto, verifies wrong-password rejection; mark pass manually after confirming</li>
+      <li><strong>Email batch</strong> — run all <code>[AUTO+MANUAL]</code> email tests together (${emailBatch}), then check your inbox once for all</li>
+      <li><strong>Export PDF</strong> (${n(121)}) — fires the export automatically, then open the saved file to verify it looks correct</li>
+      <li><strong>Team password</strong> (${n(120)}) — semi-auto, verifies wrong-password rejection; mark pass manually after confirming</li>
     </ul>
     ${specialCard('⚠️ Phase 2 Special Cases','#f97316','rgba(249,115,22,0.06)','rgba(249,115,22,0.2)',[
-      '<strong>Email batch</strong> - run all 8 email tests first, then open your inbox <em>once</em> to verify all arrived rather than switching back and forth after each one',
-      `<strong>${n(121)} Export PDF</strong> - after the test passes, manually open the exported file to confirm layout and data look correct`,
-      `<strong>${n(120)} Team password</strong> - the test verifies wrong-password rejection automatically; mark Pass/Fail manually based on what you see`
+      '<strong>Email batch</strong> — run all 8 email tests first, then open your inbox <em>once</em> to verify all arrived rather than switching back and forth after each one',
+      `<strong>${n(121)} Export PDF</strong> — after the test passes, manually open the exported file to confirm layout and data look correct`,
+      `<strong>${n(120)} Team password</strong> — the test verifies wrong-password rejection automatically; mark Pass/Fail manually based on what you see`
     ])}
 
-    <div style="${h}">Phase 3 - MANUAL tests, easiest first</div>
+    <div style="${h}">Phase 3 — MANUAL tests, easiest first</div>
     <ul style="margin:4px 0 0 16px;${s}">
-      <li><strong>Quick visual checks</strong> - ${n(124)} Sign-out, ${n(128)} Jump click launches URL, ${n(125)} Supabase backups, ${n(127)} Migrations in version control, ${n(139)} npm audit</li>
-      <li><strong>Config checks</strong> - ${n(126)} Dev/prod DB separation</li>
-      <li><strong>Data-mutating tests last</strong> - ${n(129)} Lemon Squeezy webhook, ${n(130)} apply-pending-upgrade, ${n(131)} check-member-lockouts SQL - have reset SQL ready before running</li>
+      <li><strong>Quick visual checks</strong> — ${n(124)} Sign-out, ${n(128)} Jump click launches URL, ${n(125)} Supabase backups, ${n(127)} Migrations in version control, ${n(139)} npm audit</li>
+      <li><strong>Config checks</strong> — ${n(126)} Dev/prod DB separation</li>
+      <li><strong>Data-mutating tests last</strong> — ${n(129)} Lemon Squeezy webhook, ${n(130)} apply-pending-upgrade, ${n(131)} check-member-lockouts SQL — have reset SQL ready before running</li>
     </ul>
     ${specialCard('⚠️ Phase 3 Special Cases','#e15b59','rgba(225,91,89,0.06)','rgba(225,91,89,0.2)',[
-      `<strong>Open Supabase SQL editor before starting Phase 3</strong> - you will need it for ${n(129)} (Lemon Squeezy webhook), ${n(130)} (apply-pending-upgrade), and ${n(131)} (lockouts); all three mutate DB rows and require a manual reset SQL afterward`,
-      `<strong>${n(130)} apply-pending-upgrade</strong> - insert a pending_upgrades row first, run the test, then reset: <code>UPDATE profiles SET subscription_tier='free', subscription_status='free' WHERE email='{your-email}';</code>`,
-      `<strong>${n(138)} Sign-out test - run this LAST</strong> - it calls signOut() and logs you out of the app; have your credentials ready to log back in`
-    ])}`;
+      `<strong>Open Supabase SQL editor before starting Phase 3</strong> — you will need it for ${n(129)} (Lemon Squeezy webhook), ${n(130)} (apply-pending-upgrade), and ${n(131)} (lockouts); all three mutate DB rows and require a manual reset SQL afterward`,
+      `<strong>${n(130)} apply-pending-upgrade</strong> — insert a pending_upgrades row first, run the test, then reset: <code>UPDATE profiles SET subscription_tier='free', subscription_status='free' WHERE email='{your-email}';</code>`,
+      `<strong>${n(138)} Sign-out test — run this LAST</strong> — it calls signOut() and logs you out of the app; have your credentials ready to log back in`
+    ])}
+
+    <div style="${h}">Step 4 — Finalize Mac Testing &amp; Run Windows</div>
+    ${specialCard('🍎 → 🪟 Mac → Windows Handoff','#0d9488','rgba(13,148,136,0.06)','rgba(13,148,136,0.2)',[
+      'When all Mac tests are complete, open <strong>Manage Testing</strong> and click <strong>Finalize Mac Testing</strong>. Results are saved to Supabase and the HTML file is auto-saved.',
+      'The Windows toggle in the header unlocks. Click it to switch to the Windows run.',
+      'On your Windows machine, re-run all automatic tests and complete the manual checklist the same way as the Mac run. Mac-only tests appear greyed out and are not counted in Windows totals.',
+      'When Windows testing is complete, open <strong>Manage Testing</strong> and click <strong>Finalize Windows Testing</strong>. Status updates to <strong>Testing Complete</strong> in Supabase.',
+      'The combined <code>JumpKit_ReleaseTestingSession_vX.Y.Z.html</code> has Mac and Windows tabs — this is your permanent test record for the release.'
+    ])}
+
+    <div style="${h}">Step 5 — Head to Deployments</div>
+    <p style="${s}">Once both runs are finalized, navigate to the <strong>Deployments</strong> page. Work through the five checklist phases: Code &amp; Version → Backup → Build Installers → Landing Page &amp; Distribution → Release &amp; Post-Deploy.</p>
+    <p style="${s}">Use the <strong>All Deployments</strong> toggle to view the full deployment history table at any time.</p>`;
 
   Modal.open(
     '<svg class="ti ti-bulb" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-bulb"/></svg> How to Run Tests',

@@ -3937,6 +3937,46 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-19 (Dual-platform testing session overhaul + Deployments history table)</h3>
+<ul>
+  <li><strong>Single combined HTML results file.</strong> Renamed to <code>JumpKit_ReleaseTestingSession_vX.Y.Z.html</code>. Contains Mac and Windows tabs in one file. Created automatically on Start New Session; auto-saved after each finalization.</li>
+  <li><strong>Manage Testing modal — full redesign.</strong>
+    <ul>
+      <li>Session status banner (green/amber/grey) + Clear Session button in a flex row to the right of the banner.</li>
+      <li>Start New Session always visible (renders in both active and no-session states; help text adapts).</li>
+      <li>Confirm-overwrite modal when starting a new session while one is active.</li>
+      <li>LOAD SESSION section: renamed label and button to &ldquo;Choose Release Testing Session File&rdquo;.</li>
+      <li>Platform Testing cards (Mac + Windows) always visible; greyed out when no session active.</li>
+      <li>Mac must be finalized before Windows toggle unlocks (warning modal guards the Windows toggle).</li>
+      <li>Resume handler now uses <code>_setReleaseState</code> (localStorage fallback), fixing banner and pill not updating after load.</li>
+      <li>On resume, Supabase is checked for existing record to restore <code>macFinalized</code>/<code>winFinalized</code> state.</li>
+    </ul>
+  </li>
+  <li><strong>Auto-save after finalization.</strong> <code>_finalizePlatformRun</code> calls <code>_autoSaveAllSections()</code> — saves all test section results (not just the current section) to the HTML file before writing to Supabase.</li>
+  <li><strong>Testing Complete status.</strong> When both Mac and Windows are finalized, Supabase record status updates to <code>testing_complete</code>.</li>
+  <li><strong>Testing page header updates.</strong>
+    <ul>
+      <li>Mac/Windows active-run toggle: teal active state, icon colors match text, Mac must be finalized before Windows.</li>
+      <li>Results file pill: green pass-style (tabler-file-check, green bg/border) when a session is loaded.</li>
+      <li>&ldquo;No testing session&rdquo; text: uses <code>var(--text-muted)</code> to match the Manage Testing modal banner color.</li>
+      <li>Expanding a section with no active session shows a warning modal instead of silently failing.</li>
+    </ul>
+  </li>
+  <li><strong>Warning modals polished.</strong> Modal header icons inherit text color (no hardcoded amber). &ldquo;Got it&rdquo; buttons changed from <code>btn-primary</code> to <code>btn-subtle</code> on all warning/info modals (testing and deployment pages).</li>
+  <li><strong>Deployments page: Checklist / All Deployments toggle.</strong>
+    <ul>
+      <li>Pill-style toggle in the header bar matches the Mac/Windows toggle style on the testing page (teal active, 1.05rem icons, rounded pill, box-shadow).</li>
+      <li>Checklist tab icon: <code>ti-checklist</code>. All Deployments tab icon: <code>ti-world-upload</code> (matches sidebar nav).</li>
+      <li><strong>All Deployments view:</strong> card + sortable/searchable table in the same style as the admin &ldquo;All Users&rdquo; card. Columns: Version, Status pill, Mac Done, Mac Score, Win Done, Win Score, Started, Deployed, Notes.</li>
+      <li>Status pills: Deployed (green), Testing Complete (indigo), In Progress (amber).</li>
+    </ul>
+  </li>
+  <li><strong>Manage Deployment modal empty-state icon</strong> updated to <code>ti-world-upload</code> (matches sidebar nav).</li>
+  <li><strong>How to Run Tests modal</strong> updated to reflect the full dual-platform session flow: Step 0 (Start/Load Session), Phase 1 (Mac run), Phase 2 (AUTO+MANUAL batch), Phase 3 (MANUAL), Step 4 (Finalize Mac → Windows handoff), Step 5 (Deployments).</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-19.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
+
 <h3>2026-06-18d (Manage Testing modal &mdash; auto-generate release testing file)</h3>
 <ul>
   <li><strong>File Location picker removed</strong> from Manage Testing modal. No longer requires manually choosing a save path.</li>
