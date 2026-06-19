@@ -836,6 +836,44 @@ updated_at TIMESTAMPTZ
 - **teams** → **shared_columns** (one-to-many)
 - **shared_columns** → **shared_jumps** (one-to-many)
 - **organizations** ↔ **team_invites** (pending invites stored per team)
+- **deployments** — standalone admin record, one row per release version (no FK to other tables)
+
+---
+
+#### `deployments` _(admin-only, Supabase)_
+```sql
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+created_at TIMESTAMPTZ DEFAULT now(),
+version TEXT NOT NULL,                -- e.g. '1.2.3'
+status TEXT DEFAULT 'testing_in_progress',
+                                      -- 'testing_in_progress' | 'testing_complete' | 'deployed'
+-- Mac run
+mac_testing_account TEXT,             -- email of tester
+mac_tests_total INT,                  -- count of Mac-applicable tests
+mac_tests_passed INT,
+mac_tests_failed INT,
+mac_tests_skipped INT,
+mac_finalized_at TIMESTAMPTZ,         -- set when Mac run is finalized
+-- Windows run
+win_testing_account TEXT,
+win_tests_total INT,                  -- count of Win-applicable tests (excludes mac-only)
+win_tests_passed INT,
+win_tests_failed INT,
+win_tests_skipped INT,
+win_finalized_at TIMESTAMPTZ,         -- set when Windows run is finalized
+-- Shared / deployment
+testing_completed_at TIMESTAMPTZ,     -- set when BOTH runs finalized
+results_file TEXT,                    -- path to JumpKit_ReleaseTesting_vX.Y.Z.html
+deployment_folder TEXT,               -- chosen deployment output folder
+mac_installer_path TEXT,
+win_installer_path TEXT,
+commit_id TEXT,
+deployed_at TIMESTAMPTZ,
+deploy_account TEXT,
+deploy_results_file TEXT,
+notes TEXT
+```
+_RLS: admin role only (`profiles.role = 'admin'`)._
 
 ---
 
@@ -1170,6 +1208,129 @@ else renderTeamMemberView(...);
 // Updated by Lemon Squeezy webhook (ls-webhook edge function)
 // Triggers paywall if: status='overdue' || status='cancelled'
 // OR if free tier and trial_launches_used >= 250
+```
+
+---
+
+### 5f. Testing & Deployment Flow (Admin)
+
+JumpKit has a built-in release testing + deployment workflow accessible only to admins.
+All state is persisted in `localStorage` and Supabase `deployments` table.
+
+---
+
+#### localStorage Keys
+
+| Key | Contents |
+|-----|----------|
+| `jk_rel…ting` (`_RT_KEY`) | Active session state: `{ version, macFinalized, winFinalized, activeRun, deploymentRecordId }` |
+| `jk_deploy_config` | Shared config: `{ version, resultsFilePath, deploymentRecordId, folder }` |
+| `jk_deploy_state` | Deployment checklist step states (todo/completed) |
+
+---
+
+#### Testing Flow (js/tests.js)
+
+```
+1. Admin opens Testing page → clicks “Manage Testing”
+   └─ Enter version number → click “Start Session”
+   └─ _RT_KEY written: { version, macFinalized:false, winFinalized:false, activeRun:'mac' }
+
+2. Mac Run (activeRun = 'mac' by default)
+   └─ Header toggle shows: [Mac ■] [Windows] — Mac active
+   └─ All tests shown normally
+   └─ Run tests — auto + manual
+
+3. Save Results (any section: Pre-Flight / Auto / Auto+Manual / Manual)
+   └─ Check jk_deploy_config.resultsFilePath
+       └─ NOT set: OS folder picker → user picks folder
+             File created: JumpKit_ReleaseTesting_vX.Y.Z.html
+             Path saved to jk_deploy_config.resultsFilePath
+       └─ Already set: update that file
+   └─ HTML file = two tabs (Mac tab + Windows tab), self-contained
+   └─ Embedded JSON data block preserved for “Load Results from File”
+
+4. Finalize Mac Run → Manage Testing modal → “Finalize Mac Run” button
+   └─ Compute scorecard (all tests: pass/fail/skip counts)
+   └─ deploymentRecordId not set → INSERT to Supabase deployments:
+         { version, results_file, mac_tests_*, mac_finalized_at, status:'testing_in_progress' }
+         UUID returned → saved to jk_deploy_config.deploymentRecordId
+   └─ _RT_KEY.macFinalized = true
+   └─ Modal re-opens showing Mac: ✅ Finalized
+
+5. Switch to Windows Run
+   └─ Click [Windows] toggle in header
+   └─ _RT_KEY.activeRun = 'windows'
+   └─ Tests re-render:
+         Mac-only tests (platforms:['’mac']) → greyed out, “Mac Only” badge, Run disabled
+         Auto-pre-skipped in _jkTestResults if not already set
+   └─ Run Windows-applicable tests
+
+6. Save Results (Windows)
+   └─ Same file, both tabs updated
+   └─ Windows tab: Mac-only tests shown as N/A, not counted in totals
+
+7. Finalize Windows Run → Manage Testing modal → “Finalize Windows Run” button
+   └─ Compute scorecard (Windows-applicable tests only — excludes mac-only from total)
+   └─ deploymentRecordId exists → UPDATE Supabase deployments:
+         { win_tests_*, win_finalized_at, testing_completed_at, status:'testing_complete' }
+   └─ _RT_KEY.winFinalized = true
+   └─ Modal shows green banner: “✅ Testing complete! Head to Deployments.”
+```
+
+**HTML Output File format:**
+```
+JumpKit_ReleaseTesting_vX.Y.Z.html
+  ├─ Header (version, date, tester account info)
+  ├─ Tab buttons: [Mac Run (X/Y passed)] [Windows Run (X/Y passed)]
+  ├─ Mac tab: all tests, collapsible by section, pass/fail/skip per row
+  ├─ Windows tab: same tests, Mac-only rows shown as "N/A – Mac Only" (muted)
+  └─ <script type="application/json" id="jk-release-data"> — embedded JSON for reload
+```
+
+**Test platform field:**
+```javascript
+// Each test in JK_TESTS can have:
+platforms: ['mac']           // Mac-only — skipped/N/A on Windows run
+platforms: ['mac','windows'] // Both (or omit field = same)
+// No platforms field = applies to both
+```
+
+---
+
+#### Deployment Flow (js/deployment.js)
+
+```
+1. Admin opens Deployment page
+   └─ Checklist of 5 phases: Code & Version, Backup, Build Installers, Landing, Release
+   └─ Each step toggled Done / To Do, persisted in localStorage jk_deploy_state
+
+2. Manage Deployment modal
+   └─ Dropdown: select a finalized testing record from Supabase deployments
+   └─ Info block shows: Mac ✅/⏳, Win ✅/⏳, pass counts, status
+   └─ Deployment Folder: Choose… → directory picker
+         Saved to jk_deploy_config.folder + updates Supabase deployments.deployment_folder
+   └─ Mac / Win installer path fields
+   └─ Notes field
+   └─ Save — persists installer paths + notes to Supabase
+
+3. Save Results button (deploy page)
+   └─ Generates JumpKit_Deployment_vX.Y.Z.html in deployment folder
+   └─ Shows all checklist phase steps + Done/To Do status
+
+4. Finalize Deployment
+   └─ Fetches latest git commit ID via IPC (getLatestCommitId)
+   └─ Confirmation modal shows: commit ID, deployed by, timestamp, installer files
+   └─ On confirm: UPDATE deployments:
+         { commit_id, deployed_at, deploy_account, status:'deployed', mac/win installer paths }
+   └─ Toast: “Deployment finalized! 🚀”
+```
+
+**Status progression:**
+```
+testing_in_progress → (first run finalized)
+testing_complete    → (both runs finalized)
+deployed            → (Finalize Deployment clicked)
 ```
 
 ---
