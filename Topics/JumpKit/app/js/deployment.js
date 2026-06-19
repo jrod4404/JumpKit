@@ -33,13 +33,16 @@ const DEPLOY_PHASES = [
   {
     id: 'build', label: 'Build Installers', icon: 'ti-package', color: '#f97316',
     steps: [
-      { id: 'bl-1', text: 'On Mac: run <code>npm run dist</code> to build the <code>.dmg</code> installer.' },
+      { id: 'bl-0', text: '<strong>Verify admin file exclusions are correct</strong> before building — run pre-flight unit test <strong>#379</strong> from the Testing page. It reads <code>package.json</code> and confirms <code>!js/tests.js</code>, <code>!js/deployment.js</code>, and <code>!js/admin.js</code> are all in <code>build.files</code>. Do not build if #379 fails.' },
+      { id: 'bl-1', text: 'On Mac: run the production build command. Admin files are excluded automatically via <code>package.json</code>.', cmd: 'npm run build' },
       { id: 'bl-2', text: 'Confirm Mac build completes without errors and the <code>.dmg</code> is notarized by Apple.' },
-      { id: 'bl-3', text: 'Test Mac installer: install from the <code>.dmg</code> on a clean Mac, launch, log in, do a few jumps.' },
-      { id: 'bl-4', text: 'On Windows: run the Windows build command to produce the <code>.exe</code> / <code>.msi</code> installer.' },
+      { id: 'bl-3', text: 'Test Mac installer: install from the <code>.dmg</code> on a clean Mac, launch, log in, do a few jumps. Confirm the startup guard does <strong>not</strong> show an error dialog (would mean admin files leaked into the build).' },
+      { id: 'bl-4', text: 'On Windows: run the production Windows build command. Admin files are excluded automatically.', cmd: 'npm run build:win' },
       { id: 'bl-5', text: 'Confirm Windows build completes without errors.' },
-      { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps.' },
+      { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps. Confirm no admin error dialog on startup.' },
       { id: 'bl-7', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
+      { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build
+npm run build:test:win   # Windows test build' },
     ]
   },
   {
@@ -129,7 +132,15 @@ window.renderDeployment = function renderDeployment(view) {
       return `
         <tr id="deploy-row-${step.id}" style="${rowBorder}${rowBg};transition:background .15s">
           <td style="padding:10px 12px;color:var(--text-dim);font-size:0.78rem;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">#${pi + 1}.${si + 1}</td>
-          <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle" id="deploy-text-${step.id}">${step.text}</td>
+          <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle" id="deploy-text-${step.id}">
+              ${step.text}
+              ${step.cmd ? `<div style="margin-top:7px;display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;max-width:480px">
+                <code style="flex:1;padding:5px 10px;font-size:0.8rem;background:var(--bg-card);color:var(--text);white-space:pre;overflow-x:auto;line-height:1.5">${step.cmd}</code>
+                <button data-deploy-copy="${step.id}" title="Copy command" style="flex-shrink:0;border:none;border-left:1px solid var(--border);background:var(--bg-card);cursor:pointer;padding:0 10px;color:var(--text-muted);display:flex;align-items:center;transition:background .15s" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background='var(--bg-card)'">
+                  <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg>
+                </button>
+              </div>` : ''}
+            </td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap;vertical-align:middle;width:130px">
             <button
               class="btn btn-subtle"
@@ -231,6 +242,20 @@ window.renderDeployment = function renderDeployment(view) {
   // Wire view toggle tabs
   document.getElementById('deployTabChecklist')?.addEventListener('click', () => renderDeployment('checklist'));
   document.getElementById('deployTabHistory')?.addEventListener('click', () => renderDeployment('history'));
+
+  // Wire copy buttons on steps with commands
+  pageContent.querySelectorAll('[data-deploy-copy]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const stepId = btn.getAttribute('data-deploy-copy');
+      const step   = DEPLOY_PHASES.flatMap(p => p.steps).find(s => s.id === stepId);
+      if (!step?.cmd) return;
+      navigator.clipboard.writeText(step.cmd).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }).catch(() => {});
+    });
+  });
 
   // Wire section collapse toggles
   pageContent.querySelectorAll('[data-deploy-toggle-section]').forEach(header => {
