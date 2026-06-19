@@ -4716,7 +4716,7 @@ function _updateRTLabel() {
       ? `<span style="color:var(--text-dim);font-size:0.75rem">${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
       : ``;
 
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Windows Testing', winState)}${fileLabel ? `&nbsp;<span style="color:var(--text-dim)">|</span>&nbsp;${fileLabel}` : ''}`;
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}${fileLabel ? `&nbsp;<span style="color:var(--text-dim)">|</span>&nbsp;${fileLabel}` : ''}`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
@@ -4784,23 +4784,47 @@ async function _openReleaseTestingModal() {
     : '';
 
   // ── Section 3: Dual-run status rows (only when session exists) ────
+  // Shared pill renderer — same 3-state logic as header pills
+  const _statePill = (platformKey, finalized) => {
+    const results = window._jkTestResults || {};
+    let state;
+    if (finalized) {
+      state = 'passed';
+    } else {
+      const applicable = platformKey === 'windows'
+        ? JK_TESTS.filter(t => !t.platforms || t.platforms.includes('windows'))
+        : JK_TESTS;
+      const runCount = applicable.filter(t => {
+        const r = results[t.id]; return r && r.state && r.state !== 'not-run' && r.state !== 'skip';
+      }).length;
+      state = runCount > 0 ? 'started' : 'incomplete';
+    }
+    if (state === 'passed')  return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✓ Passed</span>`;
+    if (state === 'started') return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55">● Started</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ Incomplete</span>`;
+  };
+
   const _runRow = (platform, done) => {
-    const platformLabel = platform === 'mac' ? 'Mac Testing' : 'Windows Testing';
+    const platformLabel = platform === 'mac' ? 'Mac Testing' : 'Win Testing';
     const btnLabel = platform === 'mac' ? 'Finalize Mac Testing' : 'Finalize Win Testing';
     const btnId = platform === 'mac' ? 'rtFinalizeMacBtn' : 'rtFinalizeWinBtn';
-    const pill = done
-      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✅ Finalized</span>`
-      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ Not finalized</span>`;
-    // Button sized to match the card height (align-self:stretch + same border-radius)
+    // Finalized pill
+    const finalizedPill = done
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✅ Finalized</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ Not finalized</span>`;
+    // Progress pill (same 3-state as header)
+    const progressPill = _statePill(platform, done);
+    // Button sized to match the card height
     const finalizeBtn = done
       ? ''
       : `<button id="${btnId}" class="btn btn-subtle" style="font-size:0.8rem;padding:0 16px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;align-self:stretch;border-radius:8px"><svg class="ti ti-flag-check" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> ${btnLabel}</button>`;
     const doneCheck = done ? `<span style="font-size:0.82rem;color:#3fbe71;font-weight:700;padding:0 4px">✔ Done</span>` : '';
     return `<div style="display:flex;align-items:stretch;gap:10px">
-      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1;min-height:44px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1;min-height:44px;flex-wrap:wrap">
         <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
-        <span style="font-weight:700;font-size:0.88rem;color:var(--text)">${platformLabel}</span>
-        ${pill}
+        <span style="font-weight:700;font-size:0.88rem;color:var(--text);margin-right:2px">${platformLabel}</span>
+        ${progressPill}
+        ${finalizedPill}
       </div>
       ${done ? `<div style="display:flex;align-items:center">${doneCheck}</div>` : finalizeBtn}
     </div>`;
@@ -4821,7 +4845,7 @@ async function _openReleaseTestingModal() {
 
   // ── Section 4: Version field ──────────────────────────────────────
   const configTitle = existing
-    ? `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</p>`
+    ? ''
     : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
 
   const body = `
@@ -4831,9 +4855,8 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${configTitle}
     <div style="margin-bottom:6px">
-      <label style="${labelStyle}">Version Number</label>
       <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Version number — used to name the combined test results file.</p>
     </div>`;
 
   const footer = `
