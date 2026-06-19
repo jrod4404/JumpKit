@@ -4890,11 +4890,22 @@ async function _openReleaseTestingModal() {
     <div style="margin-top:8px">${modalFileBlock}</div>` : ''}`;
 
   // ── Section 4: Version field ──────────────────────────────────────
-  // Version section: read-only for existing sessions, editable for new sessions
+  // Version section: read-only pill + pencil edit for existing; input for new
   const versionSection = existing
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border)">
+    ? `<div id="rtVersionSection" style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border)">
         <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</span>
-        <span style="font-size:1rem;font-weight:700;color:var(--text)">v${_esc(currentVersion)}</span>
+        <span id="rtVersionDisplay" style="font-size:1rem;font-weight:700;color:var(--text)">v${_esc(currentVersion)}</span>
+        <button id="rtVersionEditBtn" class="btn btn-subtle" style="padding:2px 8px;font-size:0.75rem;display:inline-flex;align-items:center;gap:4px;margin-left:4px" title="Change version">
+          <svg class="ti ti-pencil" style="font-size:0.82rem"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit
+        </button>
+       </div>
+       <div id="rtVersionEditSection" style="display:none;margin-top:8px">
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="rtVersionEditInput" type="text" value="${_esc(currentVersion)}" style="${inputStyle};flex:1" />
+          <button id="rtVersionSaveBtn" class="btn btn-primary" style="white-space:nowrap;padding:6px 14px;font-size:0.85rem">Save</button>
+          <button id="rtVersionCancelBtn" class="btn btn-subtle" style="white-space:nowrap;padding:6px 14px;font-size:0.85rem">Cancel</button>
+        </div>
+        <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">⚠️ Changing the version updates localStorage only. The HTML file on disk and any finalized Supabase records are not renamed/updated.</p>
        </div>`
     : `<div>
         <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
@@ -4920,6 +4931,30 @@ async function _openReleaseTestingModal() {
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
     body, footer, 'xl'
   );
+
+  // Wire version pencil edit (existing sessions only)
+  document.getElementById('rtVersionEditBtn')?.addEventListener('click', () => {
+    document.getElementById('rtVersionEditSection').style.display = 'block';
+    document.getElementById('rtVersionEditBtn').style.display = 'none';
+    document.getElementById('rtVersionEditInput')?.focus();
+  });
+  document.getElementById('rtVersionCancelBtn')?.addEventListener('click', () => {
+    document.getElementById('rtVersionEditSection').style.display = 'none';
+    document.getElementById('rtVersionEditBtn').style.display = '';
+  });
+  document.getElementById('rtVersionSaveBtn')?.addEventListener('click', () => {
+    const newVer = document.getElementById('rtVersionEditInput')?.value.trim();
+    if (!newVer) return;
+    const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+    if (typeof _saveDeployConfig === 'function') _saveDeployConfig({ ...cfg, version: newVer });
+    // Update display pill in-place
+    const display = document.getElementById('rtVersionDisplay');
+    if (display) display.textContent = 'v' + newVer;
+    document.getElementById('rtVersionEditSection').style.display = 'none';
+    document.getElementById('rtVersionEditBtn').style.display = '';
+    _updateRTLabel();
+    window.Toast?.success(`Version updated to v${newVer}.`);
+  });
 
   // Wire Go to Deployments button (only rendered when both runs finalized)
   document.getElementById('rtGoToDeployBtn')?.addEventListener('click', () => {
