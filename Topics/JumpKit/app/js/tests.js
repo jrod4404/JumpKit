@@ -1781,6 +1781,8 @@ The APPROVED localStorage keys are:
   jk_trial_notif_milestone    - trial notification milestone tracker
   jk_sync_fail_notif_ts       - timestamp of last sync failure notification
   jk_notified_invite_ids      - list of invite IDs already notified (prevents duplicate notifications)
+  jk_deploy_config            - release testing + deployment session state: version, resultsFilePath, deploymentRecordId, macFinalized, winFinalized, activeRun, folder
+  jk_deploy_state             - deployment checklist step states (todo/completed per step ID)
 
 The APPROVED sessionStorage keys are:
   jk_session_token            - session token for single-session lock enforcement
