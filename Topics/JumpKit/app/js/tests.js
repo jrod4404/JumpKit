@@ -4912,6 +4912,12 @@ async function _openReleaseTestingModal() {
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+        <div style="margin-top:12px">
+          <button id="rtCreateBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
+            <svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg>
+            Start Session
+          </button>
+        </div>
         <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
           <hr style="flex:1;border:none;border-top:1px solid var(--border);margin:0"/>
           <span style="font-size:0.75rem;color:var(--text-dim);white-space:nowrap">or</span>
@@ -4933,11 +4939,8 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${versionSection}`;
 
-  // Existing session: Cancel only. New session: Cancel + Start Session.
-  const footer = existing
-    ? `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
-    : `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-       <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px;display:inline-flex;align-items:center;gap:6px"><svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg> Start Session</button>`;
+  // Footer: Close only for all states — Start Session is now in the modal body
+  const footer = `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`;
 
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
