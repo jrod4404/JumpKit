@@ -4285,11 +4285,11 @@ function renderTests() {
         </button>
         <div id="activeRunToggle" style="display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
           <button id="btnActiveRunMac" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:rgba(13,148,136,0.12);color:#0d9488;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:all .15s">
-            <svg class="ti ti-brand-apple" style="width:1.05rem;height:1.05rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-apple"/></svg>
+            <svg class="ti ti-brand-apple" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.svg#tabler-brand-apple"/></svg>
             Mac
           </button>
           <button id="btnActiveRunWin" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:all .15s">
-            <svg class="ti ti-brand-windows" style="width:1.05rem;height:1.05rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-windows"/></svg>
+            <svg class="ti ti-brand-windows" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-brand-windows"/></svg>
             Windows
           </button>
         </div>
@@ -4767,6 +4767,9 @@ function _setActiveRun(platform) {
     const inactiveStyle  = `display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:all .15s`;
     macBtn.style.cssText = platform === 'mac' ? macActiveStyle : inactiveStyle;
     winBtn.style.cssText = platform === 'windows' ? winActiveStyle : inactiveStyle;
+    // Keep icon color in sync with button text color
+    macBtn.querySelector('svg')?.setAttribute('style', `width:1.05rem;height:1.05rem;flex-shrink:0;color:${platform === 'mac' ? '#0d9488' : 'var(--text-muted)'}`);
+    winBtn.querySelector('svg')?.setAttribute('style', `width:1.05rem;height:1.05rem;flex-shrink:0;color:${platform === 'windows' ? '#0ea5e9' : 'var(--text-muted)'}`);
   }
 }
 
@@ -4917,11 +4920,13 @@ async function _openReleaseTestingModal() {
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
-        <div style="margin-top:12px">
+        <div style="margin-top:16px">
+          <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
           <button id="rtCreateBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
             <svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg>
             Start Session
           </button>
+          <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">Creates a new results file and initializes a fresh testing cycle from scratch.</p>
         </div>
        </div>`;
 
@@ -4938,11 +4943,12 @@ async function _openReleaseTestingModal() {
     : `<div id="rtResumeFileStatus" style="display:none"></div>`;
 
   const fileSection = `
+    <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">${existing ? 'Load Results' : 'Resume Testing Session'}</p>
     <button id="${existing ? 'rtLoadFromFileBtn' : 'rtResumeFromFileBtn'}" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
       <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
-      ${existing ? 'Load Results from File' : 'Resume from existing results file'}
+      ${existing ? 'Load Results from File' : 'Resume testing session from results file'}
     </button>
-    <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>`;
+    <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and continue where you left off.'}</p>`;
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
