@@ -4946,30 +4946,32 @@ async function _openReleaseTestingModal() {
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
-  // Session status banner — shown when session is active (no buttons inside)
+  // Session status banner — always shown; green/amber when active, grey when no session
+  const _clearBtn = `<button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.8rem;padding:5px 14px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
+        <svg class="ti ti-x" style="font-size:0.85rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
+      </button>`;
+
   const fileBanner = _activeFilePath
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:4px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:14px">
         <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
         <div style="min-width:0;flex:1">
           <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
           <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${_esc(_activeFilePath)}">${_esc(_activeFilePath)}</div>
         </div>
+        ${_clearBtn}
        </div>`
     : _activeCfg?.version
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:4px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:14px">
         <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
         <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
+        ${_clearBtn}
        </div>`
-    : '';
+    : `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);margin-bottom:14px">
+        <svg class="ti ti-info-circle" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg>
+        <div style="font-size:0.85rem;color:var(--text-muted)">No session loaded — start a new session below or load from an existing results file.</div>
+       </div>`;
 
-  // Clear Session button — shown below banner when session is active, same sizing as Finalize btns
-  const clearSessionBtn = _activeCfg?.version
-    ? `<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
-        <button id="rtClearSessionBtn" class="btn btn-subtle" style="font-size:0.8rem;padding:5px 16px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px">
-          <svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
-        </button>
-       </div>`
-    : '';
+  const clearSessionBtn = '';  // button now lives inside fileBanner
 
   const body = `
     ${fileBanner}
