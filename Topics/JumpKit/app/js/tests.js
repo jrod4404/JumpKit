@@ -4949,7 +4949,7 @@ async function _openReleaseTestingModal() {
 
   // Green session banner — shown at top when a session is active; includes Clear Session btn
   const fileBanner = _activeFilePath
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:2px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:14px">
         <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
         <div style="min-width:0;flex:1">
           <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
@@ -4960,7 +4960,7 @@ async function _openReleaseTestingModal() {
         </button>
        </div>`
     : _activeCfg?.version
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:2px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:14px">
         <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
         <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
         <button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
@@ -5136,11 +5136,9 @@ async function _openReleaseTestingModal() {
         return;
       }
 
-      // Save chosen path to deploy config
-      const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-      if (typeof _saveDeployConfig === 'function') {
-        _saveDeployConfig({ ...cfg, resultsFilePath: chosenPath });
-      }
+      // Save chosen path via _setReleaseState (handles fallback when deployment.js not loaded)
+      const cfg = _getReleaseState() || {};
+      _setReleaseState({ ...cfg, resultsFilePath: chosenPath });
 
       // Update the file indicator card in-place without closing the modal
       const fileCardEl = document.getElementById('rtModalFileCard');
@@ -5228,10 +5226,8 @@ async function _saveReleaseSection(mode) {
     const folder = folderResult.filePath.replace(/[\/\\]$/, '');
     const fileName = `JumpKit_ReleaseTesting_v${version}.html`;
     filePath = folder + '/' + fileName;
-    // Save to deploy config
-    if (typeof _saveDeployConfig === 'function') {
-      _saveDeployConfig({ ...deployCfg, resultsFilePath: filePath });
-    }
+    // Save via _setReleaseState so fallback kicks in when deployment.js not loaded
+    _setReleaseState({ ...deployCfg, resultsFilePath: filePath });
     window.Toast?.success(`Results file created: ${fileName}`);
   }
 
