@@ -4741,6 +4741,19 @@ function _updateRTLabel() {
 function _setActiveRun(platform) {
   const s = _getReleaseState();
   if (!s?.version) return; // no active session
+
+  // Guard: Windows run requires Mac to be finalized first
+  if (platform === 'windows' && !s.macFinalized) {
+    Modal.open(
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Mac Testing Not Finalized',
+      `<p style="margin:0 0 10px">You need to <strong>finalize the Mac testing run</strong> before switching to the Windows run.</p>
+       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Open <strong>Manage Testing</strong> and click <strong>Finalize Mac Testing</strong> once all Mac tests are complete, then switch to Windows.</p>`,
+      `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
+      'sm'
+    );
+    return;
+  }
+
   _setReleaseState({ ...s, activeRun: platform });
   // Pre-mark mac-only tests as skipped when switching to Windows run
   if (platform === 'windows') {
