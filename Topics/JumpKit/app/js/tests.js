@@ -4363,10 +4363,25 @@ function renderTests() {
 
 // Module-scope handler - must live outside renderTests() so the function reference
 // is stable across re-renders (needed for removeEventListener to work correctly).
+function _noSessionWarning() {
+  Modal.open(
+    '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Testing Session Active',
+    `<p style="margin:0 0 10px">You need to <strong>start or load a testing session</strong> before executing test cases.</p>
+     <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Click <strong>Manage Testing</strong> to start a new session or resume from an existing results file.</p>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>`,
+    'sm'
+  );
+}
+
 function _testsJaction(e) {
   const btn = e.target.closest('[data-jaction]');
   if (!btn) return;
   const action = btn.dataset.jaction;
+  // Guard: section expand and test-run require an active session
+  if ((action === 'section-toggle' || action === 'test-run') && !_getReleaseState()?.version) {
+    _noSessionWarning();
+    return;
+  }
   if (action === 'test-run') {
     _runSingleTest(parseInt(btn.dataset.testid));
   } else if (action === 'test-mark-pass') {
@@ -4934,7 +4949,7 @@ async function _openReleaseTestingModal() {
           <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
           <button id="rtCreateBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
             <svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg>
-            Start Session
+            Start New Session
           </button>
           <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Replaces the current session with a new one.' : 'Creates a new results file and initializes a fresh testing cycle from scratch.'}</p>
         </div>
