@@ -4307,11 +4307,10 @@ function renderTests() {
   if (!window._jkTestResults) window._jkTestResults = {};
   const _activeSession = _getReleaseState();
   const _deployConfigForLoad = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  if (_activeSession?.version && _deployConfigForLoad?.resultsFilePath) {
-    // Load from SQLite first (fast, synchronous) as a quick base
-    _loadTestResults();
-    // Then auto-load from the HTML file (authoritative record) silently
-    setTimeout(() => _loadResultsFromHTMLFile({ silent: true }), 0);
+  if (_deployConfigForLoad?.resultsFilePath) {
+    // Auto-load previous results on every relaunch when a results file is configured
+    _loadTestResults(); // SQLite fast base
+    setTimeout(() => _loadResultsFromHTMLFile({ silent: true }), 0); // HTML authoritative source
   }
   // Sync active run toggle visual state
   const _initActiveRun = _activeSession?.activeRun || 'mac';
@@ -4838,12 +4837,13 @@ async function _openReleaseTestingModal() {
       ${_runRow('mac', macDone)}
       ${_runRow('windows', winDone)}
     </div>
-    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
         <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
+      <span style="font-size:0.75rem;color:var(--text-muted)">Pick a previously saved results .html file to restore test states</span>
     </div>
-    <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)"><strong>Load Results from File</strong> — restores test states from saved HTML (use after reopening the app).</p>` : '';
+    <div style="margin-top:8px">${modalFileBlock}</div>` : '';
 
   // ── Section 4: Version field ──────────────────────────────────────
   const configTitle = existing
@@ -4877,13 +4877,11 @@ async function _openReleaseTestingModal() {
     ${completionBanner}
     ${runsBlock}
     ${divider}
-    <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Results File</p>
-    ${modalFileBlock}
-    ${divider}
     ${configTitle}
     <div style="margin-bottom:6px">
+      <label style="${labelStyle}">Version Number</label>
       <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Version number — used to name the combined test results file.</p>
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
     </div>`;
 
   const footer = `
@@ -4909,8 +4907,44 @@ async function _openReleaseTestingModal() {
         _openConcludeModal('windows');
       });
     }
-    document.getElementById('rtLoadFromFileBtn')?.addEventListener('click', () => {
+    document.getElementById('rtLoadFromFileBtn')?.addEventListener('click', async () => {
       Modal.close();
+      // Open file picker for .html files
+      if (!window.electronAPI?.openFileDialog) {
+        alert('File picker not available outside Electron.');
+        return;
+      }
+      const result = await window.electronAPI.openFileDialog({
+        title: 'Select JumpKit Release Testing Results File',
+        filters: [{ name: 'HTML Files', extensions: ['html'] }],
+        properties: ['openFile'],
+      });
+      if (result?.canceled || !result?.filePath) return;
+      const chosenPath = result.filePath;
+      // Validate it's a JumpKit testing file by checking for embedded JSON block
+      if (!window.electronAPI?.readFile) { alert('File I/O not available.'); return; }
+      const { ok, content } = await window.electronAPI.readFile(chosenPath);
+      if (!ok || !content) {
+        Modal.open(
+          '<svg class="ti ti-alert-circle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Invalid File',
+          '<p style="margin:0">Could not read the selected file. Make sure it exists and is accessible.</p>',
+          '<button class="btn btn-subtle" data-jaction="modal-close">OK</button>', 'sm'
+        );
+        return;
+      }
+      if (!content.includes('id="jk-release-data"')) {
+        Modal.open(
+          '<svg class="ti ti-alert-circle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Wrong File',
+          '<p style="margin:0 0 8px">The selected file doesn\'t appear to be a JumpKit release testing file.</p><p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Please select a file named <strong>JumpKit_ReleaseTesting_vX.Y.Z.html</strong> that was generated by this app.</p>',
+          '<button class="btn btn-subtle" data-jaction="modal-close">OK</button>', 'sm'
+        );
+        return;
+      }
+      // Save the chosen path and load results
+      const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+      if (typeof _saveDeployConfig === 'function') {
+        _saveDeployConfig({ ...cfg, resultsFilePath: chosenPath });
+      }
       _loadResultsFromHTMLFile();
     });
   }
