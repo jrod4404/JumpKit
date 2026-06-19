@@ -1,0 +1,10 @@
+{
+  "_comment": "Test build config — includes admin files (tests.js, deployment.js, admin.js). DO NOT use for shipping.",
+  "files": [
+    "**/*",
+    "!node_modules/.bin",
+    "!**/*.map",
+    "!server.js",
+    "!data/db.json"
+  ]
+}

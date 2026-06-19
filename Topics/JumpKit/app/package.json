@@ -9,7 +9,10 @@
     "start": "electron .",
     "build": "electron-builder --mac",
     "build:win": "electron-builder --win",
-    "build:all": "electron-builder --mac --win"
+    "build:all": "electron-builder --mac --win",
+    "build:test": "electron-builder --mac --config electron-builder.test.json",
+    "build:test:win": "electron-builder --win --config electron-builder.test.json",
+    "build:test:all": "electron-builder --mac --win --config electron-builder.test.json"
   },
   "build": {
     "appId": "com.jumpkit.app",
