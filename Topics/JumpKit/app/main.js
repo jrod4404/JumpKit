@@ -798,7 +798,7 @@ ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
 // ── IPC: admin build guard ───────────────────────────────────────
 // Admin-only JS files must NOT be present in packaged builds.
 // These files are excluded via package.json build.files exclusions.
-const ADMIN_FILES_EXPECTED_ABSENT = ['js/tests.js', 'js/deployment.js'];
+const ADMIN_FILES_EXPECTED_ABSENT = ['js/tests.js', 'js/deployment.js', 'js/admin.js'];
 
 function _checkAdminFilesExcluded() {
   const fs = require('fs');

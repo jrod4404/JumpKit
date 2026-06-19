@@ -1943,7 +1943,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       if (!window.electronAPI?.readBuildConfig) throw new Error('readBuildConfig IPC not available — update preload.js');
       const { ok, buildFiles, error } = await window.electronAPI.readBuildConfig();
       if (!ok) throw new Error('Failed to read package.json: ' + error);
-      const required = ['!js/tests.js', '!js/deployment.js'];
+      const required = ['!js/tests.js', '!js/deployment.js', '!js/admin.js'];
       const missing = required.filter(excl => !buildFiles.includes(excl));
       if (missing.length > 0) throw new Error(`Missing build exclusions in package.json: ${missing.join(', ')} — add them to build.files before shipping.`);
       return 'pass';
