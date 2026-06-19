@@ -4908,7 +4908,7 @@ async function _openReleaseTestingModal() {
   const footer = existing
     ? `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
     : `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-       <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">Start Session</button>`;
+       <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px;display:inline-flex;align-items:center;gap:6px"><svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg> Start Session</button>`;
 
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
