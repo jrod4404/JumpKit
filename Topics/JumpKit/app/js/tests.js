@@ -4686,13 +4686,14 @@ function _updateRTLabel() {
   const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
   const resultsFile = cfg?.resultsFilePath;
   if (s?.version) {
-    // Session is active — show green regardless of whether results file exists yet
-    const macDone = s.macFinalized ? '✅' : '⏳';
-    const winDone = s.winFinalized ? '✅' : '⏳';
+    // Session is active — show green/red pills for each platform
+    const _pill = (label, done) => done
+      ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✓ ${label}</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ ${label}</span>`;
     const fileLabel = resultsFile
       ? `<span style="color:var(--text-dim);font-size:0.75rem">${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
-      : `<span style="color:var(--text-dim);font-size:0.75rem">No file yet — save results to create</span>`;
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)"> &nbsp;·&nbsp; ${macDone} Mac &nbsp;${winDone} Win &nbsp;</span>${fileLabel}`;
+      : ``;
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', s.macFinalized)}&nbsp;${_pill('Win', s.winFinalized)}${fileLabel ? `&nbsp;<span style="color:var(--text-dim)">|</span>&nbsp;${fileLabel}` : ''}`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
@@ -4747,17 +4748,9 @@ async function _openReleaseTestingModal() {
   const winDone = existing?.winFinalized || false;
   const bothDone = macDone && winDone;
 
-  // ── Section 1: Session status block ──────────────────────────────
-  const resultsFileName = resultsFile ? resultsFile.split(/[\/\\]/).pop() : null;
-  const statusBlock = existing
-    ? `<div style="padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;font-size:0.85rem;display:flex;align-items:center;gap:8px">
-        <svg class="ti ti-file-check" style="font-size:1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
-        <span><strong style="color:#3fbe71">Active session — v${_esc(existing.version || currentVersion)}</strong>${resultsFileName ? `<br><span style="color:var(--text-muted);font-size:0.78rem">${_esc(resultsFileName)}</span>` : ''}</span>
-       </div>`
-    : `<div style="padding:10px 14px;border-radius:8px;background:#f59e0b22;border:1px solid #f59e0b55;font-size:0.85rem;display:flex;align-items:center;gap:8px">
-        <svg class="ti ti-alert-triangle" style="font-size:1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
-        <span style="color:#f59e0b">No active testing session. Set a version below and click Start Session.</span>
-       </div>`;
+
+  // ── Section 1: Status banner removed — shown in header rtActiveLabel instead ──
+  const statusBlock = '';
 
   // ── Section 2: Completion banner (both runs done) ─────────────────
   const completionBanner = bothDone
@@ -4776,7 +4769,7 @@ async function _openReleaseTestingModal() {
       : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ Not finalized</span>`;
     const finalizeBtn = done
       ? ''
-      : `<button id="${btnId}" class="btn" style="font-size:0.8rem;padding:5px 14px;background:#1A4FD6;color:#fff;border-color:#1A4FD6;display:inline-flex;align-items:center;gap:5px;white-space:nowrap"><svg class="ti ti-flag-check" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> ${btnLabel}</button>`;
+      : `<button id="${btnId}" class="btn btn-subtle" style="font-size:0.8rem;padding:5px 14px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap"><svg class="ti ti-flag-check" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> ${btnLabel}</button>`;
     const doneCheck = done ? `<span style="font-size:0.82rem;color:#3fbe71;font-weight:700">✔ Done</span>` : '';
     return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1">
