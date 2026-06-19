@@ -4672,15 +4672,26 @@ function _esc(str) {
 // ══════════════════════════════════════════════════════════════════
 // RELEASE TESTING FILE
 // ══════════════════════════════════════════════════════════════════
-// _RT_KEY eliminated — state now consolidated into jk_deploy_config via _loadDeployConfig/_saveDeployConfig
+// _RT_KEY eliminated — state consolidated into jk_deploy_config (deployment.js)
+// Direct localStorage fallback used when deployment.js hasn't loaded yet (e.g. user visits Tests first)
+const _JK_DEPLOY_CFG_KEY = 'jk_deploy_config';
 
 function _getReleaseState() {
-  // Thin wrapper — reads from jk_deploy_config; returns null if no session started yet
-  const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  return cfg?.version ? cfg : null;
+  try {
+    const cfg = typeof _loadDeployConfig === 'function'
+      ? _loadDeployConfig()
+      : JSON.parse(localStorage.getItem(_JK_DEPLOY_CFG_KEY) || '{}');
+    return cfg?.version ? cfg : null;
+  } catch(_) { return null; }
 }
 function _setReleaseState(state) {
-  if (typeof _saveDeployConfig === 'function') _saveDeployConfig(state);
+  try {
+    if (typeof _saveDeployConfig === 'function') {
+      _saveDeployConfig(state);
+    } else {
+      localStorage.setItem(_JK_DEPLOY_CFG_KEY, JSON.stringify(state));
+    }
+  } catch(_) {}
   _updateRTLabel();
 }
 function _updateRTLabel() {
@@ -4931,6 +4942,7 @@ async function _openReleaseTestingModal() {
             Resume from existing results file
           </button>
           <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.</p>
+          <div id="rtResumeFileStatus" style="${(() => { try { const _c = JSON.parse(localStorage.getItem('jk_deploy_config')||'{}'); return _c.resultsFilePath ? 'display:flex' : 'display:none'; } catch(_){return 'display:none';} })()};align-items:flex-start;gap:6px;margin-top:8px;padding:8px 10px;border-radius:7px;background:#3fbe7118;border:1px solid #3fbe7144;color:#3fbe71;font-size:0.75rem;font-weight:600;line-height:1.4;flex-direction:column">${(() => { try { const _c = JSON.parse(localStorage.getItem('jk_deploy_config')||'{}'); const _p = _c.resultsFilePath; return _p ? `<span style='display:flex;align-items:center;gap:5px'><svg class='ti ti-circle-check' style='font-size:0.85rem;flex-shrink:0'><use href='img/tabler-sprite.svg#tabler-circle-check'/></svg> Currently loaded: <strong>${_p.split(/[\/\\]/).pop()}</strong></span><span style='font-size:0.7rem;opacity:0.75;margin-left:19px'>${_p}</span>` : ''; } catch(_){ return ''; } })()}</div>
         </div>
        </div>`;
 
@@ -4982,11 +4994,19 @@ async function _openReleaseTestingModal() {
     // Load test results — pass filePath directly so we don't depend on _loadDeployConfig being loaded
     await _loadResultsFromHTMLFile({ filePath: chosenPath });
 
-    window.Toast?.success(`Session resumed — v${extractedVersion} · ${chosenPath.split(/[\/\\]/).pop()}`);
-    Modal.close();
+    // Update the file status indicator in-place before reopening
+    const statusEl = document.getElementById('rtResumeFileStatus');
+    if (statusEl) {
+      statusEl.innerHTML = `<svg class="ti ti-circle-check" style="font-size:0.85rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Currently loaded: <strong>${_esc(chosenPath.split(/[\/\\]/).pop())}</strong><br><span style="font-size:0.7rem;opacity:0.8">${_esc(chosenPath)}</span>`;
+      statusEl.style.display = 'flex';
+    }
+
     _updateRTLabel();
-    // Reopen modal to show active session state
-    setTimeout(() => _openReleaseTestingModal(), 150);
+    // Brief pause so user sees the green indicator, then reopen in active state
+    setTimeout(() => {
+      Modal.close();
+      setTimeout(() => _openReleaseTestingModal(), 80);
+    }, 600);
   });
 
   // Wire version pencil edit (existing sessions only)
