@@ -2208,6 +2208,87 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 <li>Verify no console errors</li>
 <li>Test on both platforms if distributing</li>
 </ul>
+<h4 id="build-matrix">2.8.7 Build Matrix — Production vs. Test Builds</h4>
+<p>JumpKit has two categories of build: <strong>production builds</strong> (for shipping to users) and <strong>test builds</strong> (for internal release testing on Windows and Mac before shipping). The key difference is whether admin-only pages are included in the bundle.</p>
+
+<h5 style="margin:14px 0 6px">Admin pages and the build exclusion system</h5>
+<p>Three JS files contain admin-only functionality and are excluded from all shipping builds via <code>package.json</code> build exclusions:</p>
+<ul>
+  <li><code>js/tests.js</code> — Testing page (unit test runner)</li>
+  <li><code>js/deployment.js</code> — Deployments checklist page</li>
+  <li><code>js/admin.js</code> — Users dashboard page</li>
+</ul>
+<p>All three are <strong>lazy-loaded</strong> in dev/test mode via <code>loadScript()</code> in <code>app.js</code>. In a production build where these files are absent, navigating to an admin page shows a clear <em>"Admin pages not available in this build — use dev mode"</em> message instead of crashing. The admin nav items are already hidden from non-admin users at runtime via role check.</p>
+
+<h5 style="margin:14px 0 6px">Build commands</h5>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
+  <thead>
+    <tr style="border-bottom:2px solid var(--border)">
+      <th style="padding:8px 12px;text-align:left">Command</th>
+      <th style="padding:8px 12px;text-align:left">Platform</th>
+      <th style="padding:8px 12px;text-align:left">Admin pages</th>
+      <th style="padding:8px 12px;text-align:left">Use for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px"><code>npm run build</code></td>
+      <td style="padding:8px 12px">Mac</td>
+      <td style="padding:8px 12px">❌ excluded</td>
+      <td style="padding:8px 12px">Production Mac <code>.dmg</code></td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px"><code>npm run build:win</code></td>
+      <td style="padding:8px 12px">Windows</td>
+      <td style="padding:8px 12px">❌ excluded</td>
+      <td style="padding:8px 12px">Production Windows <code>.exe</code></td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px"><code>npm run build:all</code></td>
+      <td style="padding:8px 12px">Mac + Windows</td>
+      <td style="padding:8px 12px">❌ excluded</td>
+      <td style="padding:8px 12px">Both platforms, production</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px"><code>npm run build:test</code></td>
+      <td style="padding:8px 12px">Mac</td>
+      <td style="padding:8px 12px">✅ included</td>
+      <td style="padding:8px 12px">Mac release testing build</td>
+    </tr>
+    <tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 12px"><code>npm run build:test:win</code></td>
+      <td style="padding:8px 12px">Windows</td>
+      <td style="padding:8px 12px">✅ included</td>
+      <td style="padding:8px 12px">Windows release testing build</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 12px"><code>npm run build:test:all</code></td>
+      <td style="padding:8px 12px">Mac + Windows</td>
+      <td style="padding:8px 12px">✅ included</td>
+      <td style="padding:8px 12px">Both platforms, testing</td>
+    </tr>
+  </tbody>
+</table>
+
+<h5 style="margin:14px 0 6px">How test builds work</h5>
+<p>Test builds use <code>electron-builder.test.json</code> as a config override (<code>--config electron-builder.test.json</code>). This file replaces only the <code>files</code> exclusion list — dropping the <code>!js/tests.js</code>, <code>!js/deployment.js</code>, and <code>!js/admin.js</code> entries. Everything else (code signing, notarization, icons, DMG/NSIS settings) is inherited from <code>package.json</code> unchanged.</p>
+
+<h5 style="margin:14px 0 6px">Release testing workflow</h5>
+<ol>
+  <li>Build the test installer: <code>npm run build:test</code> (Mac) or <code>npm run build:test:win</code> (Windows)</li>
+  <li>Install and run the test build — all three admin pages are accessible with an admin Supabase account</li>
+  <li>Run the full unit test suite from the Testing page, finalize Mac and Windows runs</li>
+  <li>Once both platforms pass, build the <strong>production installer</strong>: <code>npm run build</code> / <code>npm run build:win</code></li>
+  <li>The production build triggers the startup guard in <code>main.js</code> — if any admin file is accidentally present, an error dialog fires and blocks the app from opening</li>
+</ol>
+
+<h5 style="margin:14px 0 6px">Automated safeguards</h5>
+<ul>
+  <li><strong>Unit test #379</strong> — Auto, pre-flight: reads <code>package.json</code> via IPC, verifies all three <code>!js/*.js</code> exclusions are present. Release blocker if missing.</li>
+  <li><strong>Unit test #380</strong> — Auto, pre-flight: in a packaged build, checks the filesystem for admin file presence. Returns skip in dev mode. Release blocker if files found in packaged build.</li>
+  <li><strong>Startup guard (main.js)</strong> — Fires on every packaged app launch. If admin files are present (e.g. wrong build command used), shows a blocking error dialog: <em>"Do NOT ship this build."</em></li>
+</ul>
+
 <h3 id="section-10">2.9 Known Patterns &amp; Conventions</h3>
 <h4 id="global-functions-window">2.9.1 Global Functions (window.*)</h4>
 <p>All functions that are called from inline HTML <code>onclick</code> attributes <strong>must</strong> be exposed as <code>window.</code> globals:</p>
@@ -3936,6 +4017,23 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3>2026-06-19b (Admin build guard — all three admin pages excluded from shipping builds)</h3>
+<ul>
+  <li><strong>Admin pages extracted and excluded from production installers.</strong> <code>js/tests.js</code>, <code>js/deployment.js</code>, and the newly extracted <code>js/admin.js</code> are now excluded from all shipping builds via <code>package.json</code> <code>build.files</code> exclusions.</li>
+  <li><strong><code>js/admin.js</code> created.</strong> <code>renderAdmin()</code> (the Users dashboard) was extracted from <code>app.js</code> into its own lazy-loaded file, consistent with how tests.js and deployment.js are loaded. All three admin pages now use the same <code>loadScript()</code> lazy-load pattern in the router.</li>
+  <li><strong>Graceful fallback in packaged builds.</strong> If an admin navigates to a missing admin page in a production build, a clean &ldquo;use dev mode&rdquo; message is shown instead of a crash.</li>
+  <li><strong>Startup guard in <code>main.js</code>.</strong> On every packaged app launch, main process checks for admin file presence. If found (wrong build command used), a blocking error dialog fires: <em>"Do NOT ship this build."</em></li>
+  <li><strong>Two new automatic unit tests (pre-flight, Code Quality):</strong>
+    <ul>
+      <li><strong>#379</strong> — Reads <code>package.json</code> via IPC; verifies <code>!js/tests.js</code>, <code>!js/deployment.js</code>, <code>!js/admin.js</code> are all in <code>build.files</code>. Release blocker if any exclusion is missing.</li>
+      <li><strong>#380</strong> — In packaged mode: checks filesystem for admin file presence. In dev mode: skips gracefully. Release blocker if files found in packaged build.</li>
+    </ul>
+  </li>
+  <li><strong>Test build scripts added.</strong> <code>npm run build:test</code> / <code>npm run build:test:win</code> / <code>npm run build:test:all</code> use <code>electron-builder.test.json</code> as a config override that drops the admin exclusions — for use during internal release testing on both platforms. All other build settings (signing, notarization, icons) are unchanged. See Section 2.8.7 for the full build matrix.</li>
+  <li><strong>New IPC handlers:</strong> <code>check-admin-files-excluded</code> and <code>read-build-config</code> added to <code>main.js</code>; exposed in <code>preload.js</code> as <code>checkAdminFilesExcluded()</code> and <code>readBuildConfig()</code>.</li>
+  <li><strong>Section 2.8.7 added to JUMPKIT_DOCS.html</strong> — full build matrix table, admin exclusion explanation, release testing workflow, and automated safeguard summary.</li>
+</ul>
 
 <h3>2026-06-19 (Dual-platform testing session overhaul + Deployments history table)</h3>
 <ul>
