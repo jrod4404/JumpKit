@@ -189,7 +189,7 @@ window.renderDeployment = function renderDeployment(view) {
             Checklist
           </button>
           <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;font-size:0.78rem;letter-spacing:.02em;transition:all .15s;${_deployCurrentView==='history'?'background:rgba(13,148,136,0.12);color:#0d9488;font-weight:700':'background:transparent;color:var(--text-muted);font-weight:600'}">
-            <svg class="ti ti-history" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='history'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-history"/></svg>
+            <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='history'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
             All Deployments
           </button>
         </div>
@@ -291,7 +291,7 @@ async function _renderDeployHistory() {
           Checklist
         </button>
         <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:rgba(13,148,136,0.12);color:#0d9488;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:all .15s">
-          <svg class="ti ti-history" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.svg#tabler-history"/></svg>
+          <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
           All Deployments
         </button>
       </div>
