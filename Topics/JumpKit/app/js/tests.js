@@ -4912,6 +4912,18 @@ async function _openReleaseTestingModal() {
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
+          <hr style="flex:1;border:none;border-top:1px solid var(--border);margin:0"/>
+          <span style="font-size:0.75rem;color:var(--text-dim);white-space:nowrap">or</span>
+          <hr style="flex:1;border:none;border-top:1px solid var(--border);margin:0"/>
+        </div>
+        <div style="margin-top:12px">
+          <button id="rtResumeFromFileBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
+            <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
+            Resume from existing results file
+          </button>
+          <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.</p>
+        </div>
        </div>`;
 
   const body = `
@@ -4931,6 +4943,46 @@ async function _openReleaseTestingModal() {
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
     body, footer, 'xl'
   );
+
+  // Wire Resume from file (new-session path)
+  document.getElementById('rtResumeFromFileBtn')?.addEventListener('click', async () => {
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
+    const result = await window.electronAPI.openFileDialog({
+      title: 'Select JumpKit Release Testing Results File',
+      filters: [{ name: 'HTML Files', extensions: ['html'] }],
+      properties: ['openFile'],
+    });
+    if (result?.canceled || !result?.filePath) return;
+    const chosenPath = result.filePath;
+
+    if (!window.electronAPI?.readFile) { alert('File I/O not available.'); return; }
+    const { ok, content } = await window.electronAPI.readFile(chosenPath);
+    if (!ok || !content) { window.Toast?.danger('Could not read the selected file.'); return; }
+    if (!content.includes('id="jk-release-data"')) {
+      window.Toast?.danger('Wrong file — not a JumpKit release testing file.');
+      return;
+    }
+
+    // Extract version from <meta name="jk-version"> or fall back to title
+    let extractedVersion = content.match(/<meta name="jk-version" content="([^"]+)"/)?.[ 1]
+      || content.match(/<title>JumpKit Release Testing v([^<]+)<\/title>/)?.[1]
+      || 'unknown';
+
+    // Start session using extracted version + save file path
+    const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+    if (typeof _saveDeployConfig === 'function') {
+      _saveDeployConfig({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
+    }
+
+    // Load test results from the file
+    await _loadResultsFromHTMLFile();
+
+    window.Toast?.success(`Session resumed — v${extractedVersion} · ${chosenPath.split(/[\/\\]/).pop()}`);
+    Modal.close();
+    _updateRTLabel();
+    // Reopen modal to show active session state
+    setTimeout(() => _openReleaseTestingModal(), 150);
+  });
 
   // Wire version pencil edit (existing sessions only)
   document.getElementById('rtVersionEditBtn')?.addEventListener('click', () => {
@@ -5359,6 +5411,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
+<meta name="jk-version" content="${_esc(version)}"/>
 <title>JumpKit Release Testing v${_esc(version)}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
