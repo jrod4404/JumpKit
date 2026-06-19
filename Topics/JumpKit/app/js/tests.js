@@ -4595,7 +4595,78 @@ function _openConcludeModal(platform) {
   };
 }
 
+// Auto-saves all 4 test sections to the HTML results file in one pass.
+// Called before finalizing so the file always reflects the latest state.
+async function _autoSaveAllSections() {
+  const deployCfg = _getReleaseState() || {};
+  const version = deployCfg.version || '';
+  const filePath = deployCfg.resultsFilePath || '';
+  if (!version || !filePath || !window.electronAPI?.writeFileDirect) return;
+
+  const isAM = t => t.title.startsWith('[AUTO+MANUAL]');
+  const isM  = t => t.title.startsWith('[MANUAL]');
+  const sections = [
+    { mode: 'preflight',    tests: JK_TESTS.filter(t => !!t.preflight) },
+    { mode: 'auto',        tests: JK_TESTS.filter(t => !t.preflight && !isAM(t) && !isM(t)) },
+    { mode: 'auto-manual', tests: JK_TESTS.filter(isAM) },
+    { mode: 'manual',      tests: JK_TESTS.filter(t => isM(t) && !t.preflight) },
+  ];
+
+  const results = window._jkTestResults || {};
+  const displayMap = window._jkTestDisplayNumMap || {};
+  const now = new Date().toISOString();
+
+  // Build all entries across all sections
+  const allEntries = {};
+  sections.forEach(({ mode, tests }) => {
+    tests.forEach(t => {
+      const r = results[t.id];
+      const isManualTest = t.title.startsWith('[MANUAL]') || t.title.startsWith('[AUTO+MANUAL]');
+      const manualSteps = t.steps || t.expected || '';
+      const st = r?.state || 'not-run';
+      let detailsText = '';
+      if (st === 'fail')        detailsText = r.message || 'Test failed.';
+      else if (st === 'pass')  detailsText = isManualTest ? manualSteps : 'Test passed successfully.';
+      else if (st === 'manual') detailsText = manualSteps;
+      else                     detailsText = isManualTest ? manualSteps : '';
+      allEntries[t.id] = {
+        id: t.id,
+        displayNum: displayMap[t.id] || t.id,
+        section: mode,
+        category: t.category,
+        title: t.title.replace(/^\[(AUTO\+MANUAL|MANUAL)\] /, ''),
+        purpose: t.purpose || '',
+        input: t.input || '',
+        expected: t.expected || '',
+        state: st,
+        manuallyMarked: st === 'pass' && r?.received === 'Manually marked as passed',
+        details: detailsText,
+        execOrder: (window.JK_EXEC_ORDER || {})[t.id] ?? null,
+        timestamp: r ? now : '',
+      };
+    });
+  });
+
+  const prof = window._supabaseProfile || {};
+  const testEnv = {
+    email: window._supabaseUser?.email || '',
+    name: [prof.first_name, prof.last_name].filter(Boolean).join(' ') || '—',
+    role: prof.role || 'user',
+    subTier: prof.subscription_tier || '—',
+    subStatus: prof.subscription_status || '—',
+    activeRun: deployCfg.activeRun || 'mac',
+    ownedTeams: [], memberTeams: [],
+    activeJumps: 0, favJumps: 0, archivedJumps: 0, totalCols: 0, sharedCols: 0,
+  };
+
+  const html = _buildReleaseTestingHTML(allEntries, version, filePath, testEnv);
+  await window.electronAPI.writeFileDirect(filePath, html).catch(e => console.warn('[AutoSave] write failed:', e));
+}
+
 async function _finalizePlatformRun(platform) {
+  // Auto-save all sections to HTML file before recording scorecard
+  await _autoSaveAllSections();
+
   const results = window._jkTestResults || {};
   const deployConfig = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
   const version = deployConfig.version || '';
@@ -5052,9 +5123,26 @@ async function _openReleaseTestingModal() {
       || content.match(/<title>JumpKit Release Testing Session v([^<]+)<\/title>/)?.[1]
       || 'unknown';
 
+    // Check Supabase for an existing record matching this version to restore finalization state
+    let macFinalized = false, winFinalized = false, deploymentRecordId = null;
+    try {
+      const { data: existingRecord } = await supabaseClient
+        .from('deployments')
+        .select('id, mac_finalized_at, win_finalized_at')
+        .eq('version', extractedVersion)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+      if (existingRecord) {
+        macFinalized = !!existingRecord.mac_finalized_at;
+        winFinalized = !!existingRecord.win_finalized_at;
+        deploymentRecordId = existingRecord.id;
+      }
+    } catch(_) { /* no record found - fresh session */ }
+
     // Start session using extracted version + save file path via _setReleaseState (handles fallback)
     const cfg = _getReleaseState() || {};
-    _setReleaseState({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
+    _setReleaseState({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized, winFinalized, activeRun: macFinalized ? 'windows' : 'mac', deploymentRecordId });
 
     // Load test results — pass filePath directly so we don't depend on _loadDeployConfig being loaded
     await _loadResultsFromHTMLFile({ filePath: chosenPath });
@@ -5202,40 +5290,58 @@ async function _openReleaseTestingModal() {
     });
   }
 
-  // Start Session button — only rendered for new sessions
+  // Start New Session button — confirm overwrite if session already active
   document.getElementById('rtCreateBtn')?.addEventListener('click', async () => {
     const version = document.getElementById('rtVersion')?.value.trim() || appVersion;
     if (!version) { alert('Please enter a version number.'); return; }
 
-    // Prompt for folder to save results file
-    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
-    const folderResult = await window.electronAPI.openFileDialog({
-      title: 'Choose folder to save test results file',
-      properties: ['openDirectory'],
-    });
-    if (folderResult?.canceled || !folderResult?.filePath) return;
-
-    const folder = folderResult.filePath.replace(/[\/\\]$/, '');
-    const fileName = `JumpKit_ReleaseTestingSession_v${version}.html`;
-    const filePath = folder + '/' + fileName;
-
-    // Create placeholder HTML file immediately
-    if (window.electronAPI?.writeFileDirect) {
-      try {
-        const placeholder = _buildReleaseTestingHTML({}, version, filePath, {});
-        await window.electronAPI.writeFileDirect(filePath, placeholder);
-      } catch(e) { console.warn('Could not create results file:', e); }
+    // If a session is already active, confirm before overwriting
+    if (_getReleaseState()?.version) {
+      const existingVersion = _getReleaseState().version;
+      Modal.close();
+      setTimeout(() => {
+        Modal.open(
+          '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Replace Active Session?',
+          `<p style="margin:0 0 10px">An active testing session for <strong>v${_esc(existingVersion)}</strong> is already loaded.</p>
+           <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Starting a new session will clear it. The HTML file on disk and any Supabase records already saved are <strong>not deleted</strong>.</p>`,
+          `<button id="rtCancelNewSessionBtn" class="btn btn-subtle">Cancel</button>
+           <button id="rtConfirmNewSessionBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff">Yes, Start New Session</button>`,
+          'sm'
+        );
+        document.getElementById('rtCancelNewSessionBtn')?.addEventListener('click', () => { Modal.close(); setTimeout(() => _openReleaseTestingModal(), 80); });
+        document.getElementById('rtConfirmNewSessionBtn')?.addEventListener('click', () => { Modal.close(); setTimeout(() => _doStartNewSession(version), 80); });
+      }, 80);
+      return;
     }
-
-    // Initialize session state with file path
-    _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null, resultsFilePath: filePath, folder });
-    _updateRTLabel();
-
-    // Close and reopen modal in active state
-    Modal.close();
-    setTimeout(() => _openReleaseTestingModal(), 80);
+    _doStartNewSession(version);
   });
 }
+
+async function _doStartNewSession(version) {
+  if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
+  const folderResult = await window.electronAPI.openFileDialog({
+    title: 'Choose folder to save test results file',
+    properties: ['openDirectory'],
+  });
+  if (folderResult?.canceled || !folderResult?.filePath) return;
+
+  const folder = folderResult.filePath.replace(/[\/\\]$/, '');
+  const fileName = `JumpKit_ReleaseTestingSession_v${version}.html`;
+  const filePath = folder + '/' + fileName;
+
+  if (window.electronAPI?.writeFileDirect) {
+    try {
+      const placeholder = _buildReleaseTestingHTML({}, version, filePath, {});
+      await window.electronAPI.writeFileDirect(filePath, placeholder);
+    } catch(e) { console.warn('Could not create results file:', e); }
+  }
+
+  _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null, resultsFilePath: filePath, folder });
+  _updateRTLabel();
+  Modal.close();
+  setTimeout(() => _openReleaseTestingModal(), 80);
+}
+
 
 async function _saveReleaseSection(mode) {
   try {

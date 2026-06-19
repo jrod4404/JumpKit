@@ -250,6 +250,7 @@ async function _openDeployManageModal() {
     const { data, error } = await supabaseClient
       .from('deployments')
       .select('*')
+      .eq('status', 'testing_complete')
       .order('created_at', { ascending: false })
       .limit(20);
     if (error) fetchError = error.message;
@@ -281,7 +282,7 @@ async function _openDeployManageModal() {
       `<div style="text-align:center;padding:32px 24px">
         <svg class="ti ti-rocket" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
         <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:var(--text)">No deployments yet</p>
-        <p style="margin:0;font-size:0.88rem;color:var(--text-muted);line-height:1.6">Finalize a testing session first to create a deployment record.<br>Go to <strong style="color:var(--text)">Testing &rarr; Manage Testing</strong> and click <strong style="color:var(--text)">Finalize Testing &amp; Prepare Deployment</strong>.</p>
+        <p style="margin:0;font-size:0.88rem;color:var(--text-muted);line-height:1.6">No completed testing sessions found. Both Mac and Windows testing must be finalized before a deployment record appears here.<br>Go to <strong style="color:var(--text)">Testing &rarr; Manage Testing</strong> to finalize both platform runs.</p>
       </div>`,
       '<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>',
       'lg'
