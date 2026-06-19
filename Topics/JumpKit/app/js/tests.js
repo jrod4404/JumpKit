@@ -4887,23 +4887,15 @@ async function _openReleaseTestingModal() {
     </div>`;
   };
 
+  // Platform Testing cards — same structure for both states
   const runsBlock = `
     <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Testing</p>
     <div style="display:flex;flex-direction:column;gap:10px">
       ${existing ? _runRow('mac', macDone) : _inactiveRunCard('mac')}
       ${existing ? _runRow('windows', winDone) : _inactiveRunCard('windows')}
-    </div>
-    ${existing ? `
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
-        <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
-      </button>
-      <span style="font-size:0.75rem;color:var(--text-muted)">Pick a previously saved results .html file to restore test states</span>
-    </div>
-    <div style="margin-top:8px">${modalFileBlock}</div>` : ''}`;
+    </div>`;
 
-  // ── Section 4: Version field ──────────────────────────────────────
-  // Version section: read-only pill + pencil edit for existing; input for new
+  // ── Version section ──────────────────────────────────────────────
   const versionSection = existing
     ? `<div id="rtVersionSection" style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border)">
         <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</span>
@@ -4921,37 +4913,42 @@ async function _openReleaseTestingModal() {
         <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">⚠️ Changing the version updates localStorage only. The HTML file on disk and any finalized Supabase records are not renamed/updated.</p>
        </div>`
     : `<div>
-        <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
-        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
         <div style="margin-top:12px">
           <button id="rtCreateBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
             <svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg>
             Start Session
           </button>
         </div>
-        <div style="display:flex;align-items:center;gap:12px;margin-top:16px">
-          <hr style="flex:1;border:none;border-top:1px solid var(--border);margin:0"/>
-          <span style="font-size:0.75rem;color:var(--text-dim);white-space:nowrap">or</span>
-          <hr style="flex:1;border:none;border-top:1px solid var(--border);margin:0"/>
-        </div>
-        <div style="margin-top:12px">
-          <button id="rtResumeFromFileBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
-            <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
-            Resume from existing results file
-          </button>
-          <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.</p>
-          <div id="rtResumeFileStatus" style="${(() => { try { const _c = JSON.parse(localStorage.getItem('jk_deploy_config')||'{}'); return _c.resultsFilePath ? 'display:flex' : 'display:none'; } catch(_){return 'display:none';} })()};align-items:flex-start;gap:6px;margin-top:8px;padding:8px 10px;border-radius:7px;background:#3fbe7118;border:1px solid #3fbe7144;color:#3fbe71;font-size:0.75rem;font-weight:600;line-height:1.4;flex-direction:column">${(() => { try { const _c = JSON.parse(localStorage.getItem('jk_deploy_config')||'{}'); const _p = _c.resultsFilePath; return _p ? `<span style='display:flex;align-items:center;gap:5px'><svg class='ti ti-circle-check' style='font-size:0.85rem;flex-shrink:0'><use href='img/tabler-sprite.svg#tabler-circle-check'/></svg> Currently loaded: <strong>${_p.split(/[\/\\]/).pop()}</strong></span><span style='font-size:0.7rem;opacity:0.75;margin-left:19px'>${_p}</span>` : ''; } catch(_){ return ''; } })()}</div>
-        </div>
        </div>`;
+
+  // ── File section — same layout for both states ────────────────────
+  const _storedFilePath = (() => { try { return JSON.parse(localStorage.getItem(_JK_DEPLOY_CFG_KEY)||'{}').resultsFilePath || null; } catch(_){ return null; } })();
+  const _fileStatusHtml = _storedFilePath
+    ? `<div id="rtResumeFileStatus" style="display:flex;align-items:flex-start;gap:6px;margin-top:8px;padding:8px 10px;border-radius:7px;background:#3fbe7118;border:1px solid #3fbe7144;color:#3fbe71;font-size:0.75rem;font-weight:600;line-height:1.4;flex-direction:column">
+        <span style="display:flex;align-items:center;gap:5px"><svg class="ti ti-circle-check" style="font-size:0.85rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Currently loaded: <strong>${_esc(_storedFilePath.split(/[/\\]/).pop())}</strong></span>
+        <span style="font-size:0.7rem;opacity:0.75;margin-left:19px">${_esc(_storedFilePath)}</span>
+       </div>`
+    : `<div id="rtResumeFileStatus" style="display:none"></div>`;
+
+  const fileSection = `
+    <button id="${existing ? 'rtLoadFromFileBtn' : 'rtResumeFromFileBtn'}" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
+      <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
+      ${existing ? 'Load Results from File' : 'Resume from existing results file'}
+    </button>
+    <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>
+    ${_fileStatusHtml}`;
 
   const body = `
     ${statusBlock}
     ${completionBanner}
     ${runsBlock}
     ${divider}
-    ${versionSection}`;
+    ${versionSection}
+    ${divider}
+    ${fileSection}`;
 
   // Footer: Close only for all states — Start Session is now in the modal body
   const footer = `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`;
