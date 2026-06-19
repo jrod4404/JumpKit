@@ -1968,6 +1968,53 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     }
   },
 
+  {
+    id: 381, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[AUTO] Help page version matches package.json version',
+    purpose: 'Catches version drift: ensures the Help page “Version” display dynamically loads the correct version from Electron rather than a stale hardcoded string.',
+    prerequisites: 'Help page must be rendered. Runs in Electron (getAppVersion IPC required).',
+    description: 'Calls getAppVersion() IPC, navigates to the Help page, waits for the version span to populate, then compares the displayed version to the IPC value.',
+    input: 'window.electronAPI.getAppVersion() + document.getElementById(\'helpVersionStr\')',
+    expected: 'Help page shows exactly \'JumpKit v{version}\' where version matches package.json.',
+    test: async () => {
+      if (!window.electronAPI?.getAppVersion) throw new Error('getAppVersion IPC not available');
+      const version = await window.electronAPI.getAppVersion();
+      if (!version) throw new Error('getAppVersion returned empty string');
+      // Navigate to help page to trigger renderHelp()
+      const prevPage = window.activePage;
+      if (typeof navigateTo === 'function') navigateTo('help');
+      await new Promise(r => setTimeout(r, 300));
+      const el = document.getElementById('helpVersionStr');
+      if (!el) throw new Error('helpVersionStr element not found — help page may not have rendered');
+      const displayed = el.textContent.trim();
+      const expected = `JumpKit v${version}`;
+      if (displayed !== expected) throw new Error(`Version mismatch: help page shows "${displayed}" but package.json is v${version}`);
+      // Restore previous page
+      if (prevPage && typeof navigateTo === 'function') navigateTo(prevPage);
+      return 'pass';
+    }
+  },
+
+  {
+    id: 382, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[MANUAL] Pre-Flight — Windows-specific behaviour checklist',
+    purpose: 'Verifies Windows-specific behaviours that cannot be covered by the Mac test run: file paths, AppData storage, NSIS installer, Windows code signing, and auto-updater.',
+    prerequisites: 'Run on a physical Windows machine or VM with the test installer installed.',
+    description: 'Manual checklist for Windows-specific release validation. Complete on Windows during the Windows test run.',
+    input: 'Windows test installer (npm run build:test:win)',
+    expected: 'All items pass on Windows before finalizing the Windows test run.',
+    steps: [
+      { text: 'Install the test installer (<code>.exe</code>) and confirm the NSIS installer completes without errors and the app launches.' },
+      { text: 'Confirm the SQLite database is created at <code>%APPDATA%\\JumpKit\\jumpkit.db</code> (not a temp or app-bundle path).' },
+      { text: 'Confirm auto-backup writes to the user-selected folder on Windows (no path separator errors).' },
+      { text: 'Confirm jump URLs open correctly in the default Windows browser via <code>shell.openExternal()</code>.' },
+      { text: 'Confirm the folder-picker (deployment folder, file dialogs) works on Windows paths including spaces and Unicode characters.' },
+      { text: 'Confirm the Windows build is code-signed: right-click the <code>.exe</code> → Properties → Digital Signatures tab → should show a valid signature.' },
+      { text: 'Confirm the auto-updater can see the latest release: check that <code>latest.yml</code> is present in the GitHub release assets and the app detects the update banner within 30 seconds of launch.' },
+    ],
+    test: async () => 'manual'
+  },
+
   // ── Shared Jump Sync Tests (78-82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.

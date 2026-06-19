@@ -87,9 +87,23 @@ function renderHelp() {
         </div>
         <div class="faq-item">
           <div class="faq-q">Version</div>
-          <div class="faq-a">JumpKit v1.0.0 — Last updated June 7, 2026</div>
+          <div class="faq-a" id="helpVersionStr">JumpKit v… — loading…</div>
         </div>
       </div>
 
     </div>`;
+
+  // Fill in the live version from Electron — falls back gracefully if IPC unavailable
+  if (window.electronAPI?.getAppVersion) {
+    window.electronAPI.getAppVersion().then(v => {
+      const el = document.getElementById('helpVersionStr');
+      if (el) el.textContent = `JumpKit v${v}`;
+    }).catch(() => {
+      const el = document.getElementById('helpVersionStr');
+      if (el) el.textContent = 'JumpKit (version unavailable)';
+    });
+  } else {
+    const el = document.getElementById('helpVersionStr');
+    if (el) el.textContent = 'JumpKit (dev mode — version unavailable)';
+  }
 }

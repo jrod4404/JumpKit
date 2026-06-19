@@ -19,7 +19,8 @@ const DEPLOY_PHASES = [
       { id: 'cv-3', text: 'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).' },
       { id: 'cv-4', text: 'Update any version display in the app UI or About page.' },
       { id: 'cv-5', text: 'Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html — all changes, fixes, new features.' },
-      { id: 'cv-6', text: 'Commit the version bump + changelog. Push to GitHub.' },
+      { id: 'cv-6', text: 'Update <strong>landing page</strong>: bump the version number display and update both download URLs in <code>landing/index.html</code> to point to the new GitHub release assets. Verify the URLs follow the pattern <code>releases/download/vX.Y.Z/JumpKit-X.Y.Z-universal.dmg</code> and <code>releases/download/vX.Y.Z/JumpKit.Setup.X.Y.Z.exe</code>.' },
+      { id: 'cv-7', text: 'Commit the version bump + changelog. Push to GitHub.' },
     ]
   },
   {
@@ -35,12 +36,13 @@ const DEPLOY_PHASES = [
     steps: [
       { id: 'bl-0', text: '<strong>Verify admin file exclusions are correct</strong> before building — run pre-flight unit test <strong>#379</strong> from the Testing page. It reads <code>package.json</code> and confirms <code>!js/tests.js</code>, <code>!js/deployment.js</code>, and <code>!js/admin.js</code> are all in <code>build.files</code>. Do not build if #379 fails.' },
       { id: 'bl-1', text: 'On Mac: run the production build command. Admin files are excluded automatically via <code>package.json</code>.', cmd: 'npm run build' },
-      { id: 'bl-2', text: 'Confirm Mac build completes without errors and the <code>.dmg</code> is notarized by Apple.' },
+      { id: 'bl-2', text: 'Confirm Mac build completes without errors and the <code>.dmg</code> is notarized by Apple. Verify notarization with:', cmd: 'spctl -a -vvv -t install dist/JumpKit-*.dmg' },
       { id: 'bl-3', text: 'Test Mac installer: install from the <code>.dmg</code> on a clean Mac, launch, log in, do a few jumps. Confirm the startup guard does <strong>not</strong> show an error dialog (would mean admin files leaked into the build).' },
       { id: 'bl-4', text: 'On Windows: run the production Windows build command. Admin files are excluded automatically.', cmd: 'npm run build:win' },
       { id: 'bl-5', text: 'Confirm Windows build completes without errors.' },
       { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps. Confirm no admin error dialog on startup.' },
-      { id: 'bl-7', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
+      { id: 'bl-7', text: 'Check installer file sizes. Expected ranges: Mac <code>.dmg</code> ~80–120 MB, Windows <code>.exe</code> ~60–90 MB. A dramatically smaller file (e.g. under 20 MB) means files were accidentally excluded from the asar — do not ship.', cmd: 'ls -lh dist/*.dmg dist/*.exe 2>/dev/null || ls -lh dist/' },
+      { id: 'bl-9', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
       { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build
 npm run build:test:win   # Windows test build' },
     ]
@@ -61,8 +63,9 @@ npm run build:test:win   # Windows test build' },
     steps: [
       { id: 'rel-1', text: 'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>' },
       { id: 'rel-2', text: 'Create a <strong>GitHub Release</strong> from the tag — attach both installers, paste the changelog as release notes.' },
-      { id: 'rel-3', text: 'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription.' },
+      { id: 'rel-3', text: 'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
       { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.' },
+      { id: 'rel-5', text: '<strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert the landing page download URLs back to the previous version’s GitHub release assets and redeploy via Vercel. (2) Delete or unpublish the new GitHub Release so the auto-updater stops offering it. (3) Document the incident in JUMPKIT_DOCS.html changelog. (4) Fix the bug, re-run the full test cycle, and re-release.' },
     ]
   },
 ];

@@ -1207,7 +1207,7 @@ deleteForever(jumpId)          // hard delete (ask for confirmation)</code></pre
 <li>Time saved / dollars earned calculation</li>
 <li>Uses Chart.js for graphs</li>
 </ul>
-<h4 id="jstestsjs">2.2.11 js/tests.js - Unit Tests (141 tests)</h4>
+<h4 id="jstestsjs">2.2.11 js/tests.js - Unit Tests (160 tests)</h4>
 <p><strong>Responsibilities:</strong></p>
 <ul>
 <li>Comprehensive test suite for jump CRUD, columns, hotkeys, filtering</li>
@@ -2772,6 +2772,11 @@ python3 -m http.server 8899</code></pre>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">75</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">Loading and error states - Toast system functional</td><td style="padding:5px 10px;color:var(--text-muted)">Toast.success and Toast.danger callable; Modal.open/close callable</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">76</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">Pagination - list queries have reasonable limits</td><td style="padding:5px 10px;color:var(--text-muted)">Query executes; count returned. Warning logged if team count &gt; 100.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">77</td><td style="padding:5px 10px">Code Quality</td><td style="padding:5px 10px">npm audit - zero critical/high vulnerabilities</td><td style="padding:5px 10px;color:var(--text-muted)">0 vulnerabilities. Reminder to re-run before each release.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">375&ndash;378</td><td style="padding:5px 10px">Code Quality (pre-flight)</td><td style="padding:5px 10px">Manual audit prompts: DB Security, localStorage, Code Quality, Security</td><td style="padding:5px 10px;color:var(--text-muted)">Each generates a prompt to paste to Max. Max scans the codebase and returns PASS/FAIL/N/A per item. Release blockers if any FAIL.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">379</td><td style="padding:5px 10px">Code Quality (pre-flight)</td><td style="padding:5px 10px">[AUTO] Admin files excluded from build &mdash; package.json config check</td><td style="padding:5px 10px;color:var(--text-muted)">Reads package.json via IPC; verifies !js/tests.js, !js/deployment.js, !js/admin.js are in build.files. Release blocker if missing.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">380</td><td style="padding:5px 10px">Code Quality (pre-flight)</td><td style="padding:5px 10px">[AUTO] Admin files absent from packaged build &mdash; runtime file check</td><td style="padding:5px 10px;color:var(--text-muted)">In packaged mode: checks filesystem for admin file presence. Skips in dev mode. Release blocker if files found.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">381</td><td style="padding:5px 10px">Code Quality (pre-flight)</td><td style="padding:5px 10px">[AUTO] Help page version matches package.json version</td><td style="padding:5px 10px;color:var(--text-muted)">Calls getAppVersion() IPC, renders Help page, verifies displayed version matches. Catches version drift in the About/Version display.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">382</td><td style="padding:5px 10px">Code Quality (pre-flight)</td><td style="padding:5px 10px">[MANUAL] Windows-specific behaviour checklist</td><td style="padding:5px 10px;color:var(--text-muted)">Windows-only: NSIS install, AppData SQLite path, file picker on Windows paths, code signing, auto-updater latest.yml detection.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">78</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Add jump to shared column → appears in Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Test jump created, verified in Supabase, cleaned up. Self-cleaning.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">79</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Edit jump in shared column → Supabase shared_jumps updated</td><td style="padding:5px 10px;color:var(--text-muted)">Updated name reflected in Supabase. Self-cleaning.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:5px 10px">80</td><td style="padding:5px 10px">Shared Sync</td><td style="padding:5px 10px">Delete jump from shared column → removed from Supabase shared_jumps</td><td style="padding:5px 10px;color:var(--text-muted)">Jump no longer exists in Supabase after deletion. Self-cleaning.</td></tr>
@@ -4017,6 +4022,21 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3>2026-06-19c (Test coverage, deployment checklist, and traceability gap closes)</h3>
+<ul>
+  <li><strong>Help page version is now dynamic.</strong> The &ldquo;Version&rdquo; entry in the Help page is no longer a hardcoded string. It calls <code>getAppVersion()</code> IPC on render and injects the live version from <code>package.json</code>. No more stale version numbers in the About section after a release bump.</li>
+  <li><strong>Unit test #381 added (AUTO, pre-flight, Code Quality).</strong> Verifies the Help page version display matches <code>package.json</code> at runtime. Release blocker if they drift.</li>
+  <li><strong>Unit test #382 added (MANUAL, pre-flight, Code Quality).</strong> Windows-specific behaviour checklist: NSIS installer, AppData SQLite path, file picker on Windows paths, code signing verification, auto-updater <code>latest.yml</code> detection. Run on Windows during the Windows test run.</li>
+  <li><strong>Deployment checklist: new steps added.</strong>
+    <ul>
+      <li><strong>Code &amp; Version phase:</strong> explicit step to update landing page download URLs and version display before committing.</li>
+      <li><strong>Build phase:</strong> notarization verification command (<code>spctl -a -vvv -t install</code>) is now a copyable step. Installer size sanity check added with expected ranges (Mac ~80&ndash;120 MB, Windows ~60&ndash;90 MB) and copy command to list sizes.</li>
+      <li><strong>Release phase:</strong> rollback procedure documented as a checklist step &mdash; revert landing page URLs, unpublish GitHub Release, document incident, re-release after fix.</li>
+    </ul>
+  </li>
+  <li><strong>Section 2.2.11 test count updated:</strong> 141 &rarr; 160 tests. Pre-flight tests 375&ndash;382 added to the test summary table.</li>
+</ul>
 
 <h3>2026-06-19b (Admin build guard — all three admin pages excluded from shipping builds)</h3>
 <ul>
