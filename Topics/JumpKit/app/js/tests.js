@@ -4740,14 +4740,27 @@ function _updateRTLabel() {
 
 function _setActiveRun(platform) {
   const s = _getReleaseState();
-  if (!s?.version) return; // no active session
+
+  // No session active — always block Windows toggle
+  if (platform === 'windows' && !s?.version) {
+    Modal.open(
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Testing Session Active',
+      `<p style="margin:0 0 10px">You need to <strong>start a testing session</strong> before switching to the Windows run.</p>
+       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Open <strong>Manage Testing</strong> and start a new session or resume from an existing results file first.</p>`,
+      `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
+      'sm'
+    );
+    return;
+  }
+
+  if (!s?.version) return; // Mac toggle with no session — silent, nothing to do
 
   // Guard: Windows run requires Mac to be finalized first
   if (platform === 'windows' && !s.macFinalized) {
     Modal.open(
       '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Mac Testing Not Finalized',
       `<p style="margin:0 0 10px">You need to <strong>finalize the Mac testing run</strong> before switching to the Windows run.</p>
-       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Open <strong>Manage Testing</strong> and click <strong>Finalize Mac Testing</strong> once all Mac tests are complete, then switch to Windows.</p>`,
+       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Run all Mac tests, then open <strong>Manage Testing</strong> and click <strong>Finalize Mac Testing</strong>. You can then switch to the Windows run.</p>`,
       `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
       'sm'
     );
