@@ -4744,10 +4744,10 @@ function _setActiveRun(platform) {
   // No session active — always block Windows toggle
   if (platform === 'windows' && !s?.version) {
     Modal.open(
-      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Testing Session Active',
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Testing Session Active',
       `<p style="margin:0 0 10px">You need to <strong>start a testing session</strong> before switching to the Windows run.</p>
        <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Open <strong>Manage Testing</strong> and start a new session or resume from an existing results file first.</p>`,
-      `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>`,
       'sm'
     );
     return;
@@ -4758,10 +4758,10 @@ function _setActiveRun(platform) {
   // Guard: Windows run requires Mac to be finalized first
   if (platform === 'windows' && !s.macFinalized) {
     Modal.open(
-      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Mac Testing Not Finalized',
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Mac Testing Not Finalized',
       `<p style="margin:0 0 10px">You need to <strong>finalize the Mac testing run</strong> before switching to the Windows run.</p>
        <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Run all Mac tests, then open <strong>Manage Testing</strong> and click <strong>Finalize Mac Testing</strong>. You can then switch to the Windows run.</p>`,
-      `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>`,
       'sm'
     );
     return;
@@ -5013,7 +5013,7 @@ async function _openReleaseTestingModal() {
     ${versionSection}
     <div style="margin-top:16px"></div>
     ${fileSection}
-    ${divider}
+    <div style="margin-top:20px"></div>
     ${runsBlock}`;
 
   // Footer: Close only for all states — Start Session is now in the modal body
