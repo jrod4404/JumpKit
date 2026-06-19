@@ -4944,7 +4944,7 @@ async function _openReleaseTestingModal() {
   const versionSection = `<div>
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
-        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined results file (JumpKit_ReleaseTestingSession_vX.Y.Z.html).</p>
         <div style="margin-top:16px">
           <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
           <button id="rtCreateBtn" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
@@ -4973,7 +4973,7 @@ async function _openReleaseTestingModal() {
       <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
       ${existing ? 'Load Results from File' : 'Resume testing session from results file'}
     </button>
-    <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and continue where you left off.'}</p>`;
+    <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTestingSession_vX.Y.Z.html to restore all test states and continue where you left off.'}</p>`;
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
@@ -5032,7 +5032,7 @@ async function _openReleaseTestingModal() {
   document.getElementById('rtResumeFromFileBtn')?.addEventListener('click', async () => {
     if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
     const result = await window.electronAPI.openFileDialog({
-      title: 'Select JumpKit Release Testing Results File',
+      title: 'Select JumpKit Release Testing Session File',
       filters: [{ name: 'HTML Files', extensions: ['html'] }],
       properties: ['openFile'],
     });
@@ -5049,7 +5049,7 @@ async function _openReleaseTestingModal() {
 
     // Extract version from <meta name="jk-version"> or fall back to title
     let extractedVersion = content.match(/<meta name="jk-version" content="([^"]+)"/)?.[ 1]
-      || content.match(/<title>JumpKit Release Testing v([^<]+)<\/title>/)?.[1]
+      || content.match(/<title>JumpKit Release Testing Session v([^<]+)<\/title>/)?.[1]
       || 'unknown';
 
     // Start session using extracted version + save file path via _setReleaseState (handles fallback)
@@ -5153,7 +5153,7 @@ async function _openReleaseTestingModal() {
         return;
       }
       const result = await window.electronAPI.openFileDialog({
-        title: 'Select JumpKit Release Testing Results File',
+        title: 'Select JumpKit Release Testing Session File',
         filters: [{ name: 'HTML Files', extensions: ['html'] }],
         properties: ['openFile'],
       });
@@ -5168,7 +5168,7 @@ async function _openReleaseTestingModal() {
         return;
       }
       if (!content.includes('id="jk-release-data"')) {
-        window.Toast?.danger('Wrong file - not a JumpKit release testing file. Pick a JumpKit_ReleaseTesting_vX.Y.Z.html.');
+        window.Toast?.danger('Wrong file - not a JumpKit release testing file. Pick a JumpKit_ReleaseTestingSession_vX.Y.Z.html.');
         return;
       }
 
@@ -5216,7 +5216,7 @@ async function _openReleaseTestingModal() {
     if (folderResult?.canceled || !folderResult?.filePath) return;
 
     const folder = folderResult.filePath.replace(/[\/\\]$/, '');
-    const fileName = `JumpKit_ReleaseTesting_v${version}.html`;
+    const fileName = `JumpKit_ReleaseTestingSession_v${version}.html`;
     const filePath = folder + '/' + fileName;
 
     // Create placeholder HTML file immediately
@@ -5265,7 +5265,7 @@ async function _saveReleaseSection(mode) {
     const folderResult = await window.electronAPI.openFileDialog({ title: 'Choose folder for test results file', properties: ['openDirectory'] });
     if (folderResult?.canceled || !folderResult?.filePath) return;
     const folder = folderResult.filePath.replace(/[\/\\]$/, '');
-    const fileName = `JumpKit_ReleaseTesting_v${version}.html`;
+    const fileName = `JumpKit_ReleaseTestingSession_v${version}.html`;
     filePath = folder + '/' + fileName;
     // Save via _setReleaseState so fallback kicks in when deployment.js not loaded
     _setReleaseState({ ...deployCfg, resultsFilePath: filePath });
@@ -5552,7 +5552,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
 <head>
 <meta charset="UTF-8"/>
 <meta name="jk-version" content="${_esc(version)}"/>
-<title>JumpKit Release Testing v${_esc(version)}</title>
+<title>JumpKit Release Testing Session v${_esc(version)}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f3f4f6; color:#1f2937; }
@@ -5585,7 +5585,7 @@ function showTab(tab) {
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>JumpKit Release Testing - v${_esc(version)}</h1>
+    <h1>JumpKit Release Testing Session - v${_esc(version)}</h1>
     <p>${runDate}</p>
     ${envBlock}
   </div>
