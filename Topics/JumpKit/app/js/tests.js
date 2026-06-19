@@ -4859,12 +4859,16 @@ async function _openReleaseTestingModal() {
   // Platform Testing cards — always visible; greyed/inactive when no session yet
   const _inactiveRunCard = (platform) => {
     const platformLabel = platform === 'mac' ? 'Mac Testing' : 'Win Testing';
-    return `<div style="display:flex;align-items:stretch;gap:10px;opacity:0.45;pointer-events:none">
+    const btnLabel = platform === 'mac' ? 'Finalize Mac Testing' : 'Finalize Win Testing';
+    return `<div style="display:flex;align-items:stretch;gap:10px;opacity:0.4;pointer-events:none">
       <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1;min-height:44px">
         <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
         <span style="font-weight:700;font-size:0.88rem;color:var(--text)">${platformLabel}</span>
         <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:var(--bg-hover);color:var(--text-dim);border:1px solid var(--border)">— Not started</span>
       </div>
+      <button disabled class="btn btn-subtle" style="font-size:0.8rem;padding:0 16px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;align-self:stretch;border-radius:8px;cursor:not-allowed">
+        <svg class="ti ti-flag-check" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> ${btnLabel}
+      </button>
     </div>`;
   };
 
