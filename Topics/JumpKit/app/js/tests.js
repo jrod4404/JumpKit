@@ -5156,8 +5156,13 @@ async function _openReleaseTestingModal() {
 
       // Load test results from the file
       await _loadResultsFromHTMLFile({ filePath: chosenPath });
-      window.Toast?.success(`Results loaded from ${chosenPath.split(/[\/\\]/).pop()}`);
+
+      // Update header pill immediately
       _updateRTLabel();
+
+      // Close and reopen modal so the banner + all state re-renders with new file
+      Modal.close();
+      setTimeout(() => _openReleaseTestingModal(), 80);
     });
   }
 
