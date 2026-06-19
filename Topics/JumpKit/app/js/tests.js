@@ -4942,8 +4942,7 @@ async function _openReleaseTestingModal() {
       <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
       ${existing ? 'Load Results from File' : 'Resume from existing results file'}
     </button>
-    <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>
-    ${_fileStatusHtml}`;
+    <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>`;
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
@@ -4979,8 +4978,7 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${versionSection}
     ${divider}
-    ${fileSection}
-    ${newSessionReset}`;
+    ${fileSection}`;
 
   // Footer: Close only for all states — Start Session is now in the modal body
   const footer = `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`;
@@ -5049,16 +5047,9 @@ async function _openReleaseTestingModal() {
       'sm'
     );
     document.getElementById('rtConfirmResetBtn')?.addEventListener('click', () => {
-      // Clear all session state from jk_deploy_config, keep folder
-      const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-      const cleared = { folder: cfg.folder || null }; // keep deployment folder, wipe everything else
-      _setReleaseState(null); // triggers _updateRTLabel
-      if (typeof _saveDeployConfig === 'function') {
-        _saveDeployConfig(cleared);
-      } else {
-        try { localStorage.setItem(_JK_DEPLOY_CFG_KEY, JSON.stringify(cleared)); } catch(_) {}
-      }
-      _updateRTLabel();
+      // Single clean write: no version = no active session; keeps folder pref
+      const existingFolder = (_getReleaseState() || {}).folder || null;
+      _setReleaseState({ folder: existingFolder }); // no version field = _getReleaseState returns null
       Modal.close();
       setTimeout(() => _openReleaseTestingModal(), 80);
     });
