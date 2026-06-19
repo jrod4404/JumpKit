@@ -4686,10 +4686,11 @@ function _getReleaseState() {
 }
 function _setReleaseState(state) {
   try {
+    const payload = state || {}; // null clears to empty object
     if (typeof _saveDeployConfig === 'function') {
-      _saveDeployConfig(state);
+      _saveDeployConfig(payload);
     } else {
-      localStorage.setItem(_JK_DEPLOY_CFG_KEY, JSON.stringify(state));
+      localStorage.setItem(_JK_DEPLOY_CFG_KEY, JSON.stringify(payload));
     }
   } catch(_) {}
   _updateRTLabel();
@@ -4952,6 +4953,16 @@ async function _openReleaseTestingModal() {
        </div>`
     : '';
 
+  // "Start new session" reset option — only shown when a session is active
+  const newSessionReset = existing
+    ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:0.75rem;color:var(--text-dim)">Want to start a completely new testing session?</span>
+        <button id="rtResetSessionBtn" class="btn btn-subtle" style="font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px">
+          <svg class="ti ti-refresh" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Start New Session
+        </button>
+       </div>`
+    : '';
+
   const body = `
     ${fileBanner}
     ${statusBlock}
@@ -4960,7 +4971,8 @@ async function _openReleaseTestingModal() {
     ${divider}
     ${versionSection}
     ${divider}
-    ${fileSection}`;
+    ${fileSection}
+    ${newSessionReset}`;
 
   // Footer: Close only for all states — Start Session is now in the modal body
   const footer = `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`;
@@ -5016,6 +5028,32 @@ async function _openReleaseTestingModal() {
       Modal.close();
       setTimeout(() => _openReleaseTestingModal(), 80);
     }, 600);
+  });
+
+  // Wire Start New Session reset button (existing sessions only)
+  document.getElementById('rtResetSessionBtn')?.addEventListener('click', () => {
+    Modal.open(
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Start New Session?',
+      `<p style="margin:0 0 10px">This will clear the current testing session including version, results file path, and finalization state.</p>
+       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">The HTML results file on disk and any Supabase records already saved are <strong>not deleted</strong> — only the active session state is reset.</p>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
+       <button id="rtConfirmResetBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff">Yes, Start New Session</button>`,
+      'sm'
+    );
+    document.getElementById('rtConfirmResetBtn')?.addEventListener('click', () => {
+      // Clear all session state from jk_deploy_config, keep folder
+      const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+      const cleared = { folder: cfg.folder || null }; // keep deployment folder, wipe everything else
+      _setReleaseState(null); // triggers _updateRTLabel
+      if (typeof _saveDeployConfig === 'function') {
+        _saveDeployConfig(cleared);
+      } else {
+        try { localStorage.setItem(_JK_DEPLOY_CFG_KEY, JSON.stringify(cleared)); } catch(_) {}
+      }
+      _updateRTLabel();
+      Modal.close();
+      setTimeout(() => _openReleaseTestingModal(), 80);
+    });
   });
 
   // Wire version pencil edit (existing sessions only)
