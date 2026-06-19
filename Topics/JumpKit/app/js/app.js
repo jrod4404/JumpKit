@@ -523,8 +523,14 @@ const pages = {
   help:     () => renderHelp(),
   account:  () => renderAccount('account'),
   teams:    () => renderAccount('teams'),
-  tests:      async () => { await loadScript('js/tests.js'); renderTests(); },
-  deployment: async () => { _loadedScripts.delete('js/deployment.js'); await loadScript('js/deployment.js'); window.renderDeployment(); },
+  tests:      async () => {
+    try { await loadScript('js/tests.js'); renderTests(); }
+    catch { document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Admin pages are not available in this build.</strong><br>Use dev mode (<code>npm start</code>) to access Testing.</div>`; }
+  },
+  deployment: async () => {
+    try { _loadedScripts.delete('js/deployment.js'); await loadScript('js/deployment.js'); window.renderDeployment(); }
+    catch { document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Admin pages are not available in this build.</strong><br>Use dev mode (<code>npm start</code>) to access Deployments.</div>`; }
+  },
   admin:      () => renderAdmin(),
 };
 const pageTitles = {

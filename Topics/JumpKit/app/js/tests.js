@@ -1927,6 +1927,47 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => 'manual'
   },
 
+  // ── Admin Build Guard Tests (379-380) ─────────────────────────────
+  // Verify that admin-only JS files are excluded from the installer build.
+  // Test 379: validates package.json build config has the exclusions.
+  // Test 380: in packaged mode, confirms the files are actually absent.
+  {
+    id: 379, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[AUTO] Admin files excluded from build — package.json config check',
+    purpose: 'Verifies that package.json build.files contains exclusions for admin-only JS files (tests.js, deployment.js). If these exclusions are missing, those files will ship in the installer.',
+    prerequisites: 'None — reads package.json from main process.',
+    description: 'Reads the build.files array from package.json via IPC and checks for !js/tests.js and !js/deployment.js exclusions. A missing exclusion is a release blocker.',
+    input: 'package.json → build.files array',
+    expected: '"!js/tests.js" and "!js/deployment.js" both present in build.files.',
+    test: async () => {
+      if (!window.electronAPI?.readBuildConfig) throw new Error('readBuildConfig IPC not available — update preload.js');
+      const { ok, buildFiles, error } = await window.electronAPI.readBuildConfig();
+      if (!ok) throw new Error('Failed to read package.json: ' + error);
+      const required = ['!js/tests.js', '!js/deployment.js'];
+      const missing = required.filter(excl => !buildFiles.includes(excl));
+      if (missing.length > 0) throw new Error(`Missing build exclusions in package.json: ${missing.join(', ')} — add them to build.files before shipping.`);
+      return 'pass';
+    }
+  },
+
+  {
+    id: 380, preflight: true, category: 'Code Quality', platforms: ['mac'],
+    title: '[AUTO] Admin files absent from packaged build — runtime file check',
+    purpose: 'In a packaged installer, confirms that tests.js and deployment.js are not present in the app bundle. In dev mode, skips gracefully (files are expected to exist).',
+    prerequisites: 'Run in the packaged app to get a meaningful result. In dev mode (npm start) this test always skips.',
+    description: 'Calls check-admin-files-excluded IPC. In packaged mode, any file found = FAIL (release blocker). In dev mode = SKIP.',
+    input: 'app.isPackaged + fs.existsSync for each admin file path',
+    expected: 'In packaged mode: all admin files absent. In dev mode: skip (files present by design).',
+    test: async () => {
+      if (!window.electronAPI?.checkAdminFilesExcluded) throw new Error('checkAdminFilesExcluded IPC not available — update preload.js');
+      const { isPackaged, results } = await window.electronAPI.checkAdminFilesExcluded();
+      if (!isPackaged) return 'skip'; // Dev mode — admin files are present and expected
+      const found = results.filter(r => r.found).map(r => r.file);
+      if (found.length > 0) throw new Error(`Admin files found in packaged build — DO NOT SHIP: ${found.join(', ')}`);
+      return 'pass';
+    }
+  },
+
   // ── Shared Jump Sync Tests (78-82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.

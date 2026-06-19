@@ -795,6 +795,38 @@ ipcMain.handle('write-file-direct', (_e, filePath, content) => {
 
 ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
 
+// ── IPC: admin build guard ───────────────────────────────────────
+// Admin-only JS files must NOT be present in packaged builds.
+// These files are excluded via package.json build.files exclusions.
+const ADMIN_FILES_EXPECTED_ABSENT = ['js/tests.js', 'js/deployment.js'];
+
+function _checkAdminFilesExcluded() {
+  const fs = require('fs');
+  const results = ADMIN_FILES_EXPECTED_ABSENT.map(rel => {
+    const fullPath = path.join(__dirname, rel);
+    const found = fs.existsSync(fullPath);
+    return { file: rel, found };
+  });
+  return results;
+}
+
+ipcMain.handle('check-admin-files-excluded', () => {
+  const isPackaged = app.isPackaged;
+  const results = _checkAdminFilesExcluded();
+  return { isPackaged, results };
+});
+
+ipcMain.handle('read-build-config', () => {
+  try {
+    const fs = require('fs');
+    const pkgPath = path.join(__dirname, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    return { ok: true, buildFiles: pkg?.build?.files || [] };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
 ipcMain.handle('get-latest-commit-id', async () => {
   try {
     const { execSync } = require('child_process');
@@ -819,6 +851,19 @@ if (!gotSingleInstanceLock) {
 }
 
 app.whenReady().then(() => {
+  // ── Admin build guard: verify admin files are excluded in packaged builds ──
+  if (app.isPackaged) {
+    const adminCheck = _checkAdminFilesExcluded();
+    const leaked = adminCheck.filter(r => r.found).map(r => r.file);
+    if (leaked.length > 0) {
+      const { dialog } = require('electron');
+      dialog.showErrorBoxSync(
+        '⚠️ Build Error — Admin Code Leaked',
+        `This installer contains admin-only files that should have been excluded from the build:\n\n${leaked.map(f => '  • ' + f).join('\n')}\n\nDo NOT ship this build. Rebuild with the correct package.json exclusions.`
+      );
+    }
+  }
+
   initDB();
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer

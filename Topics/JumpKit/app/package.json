@@ -21,7 +21,10 @@
       "!node_modules/.bin",
       "!**/*.map",
       "!server.js",
-      "!data/db.json"
+      "!data/db.json",
+      "!js/tests.js",
+      "!js/tests.js.bak",
+      "!js/deployment.js"
     ],
     "afterSign": "./notarize.js",
     "mac": {

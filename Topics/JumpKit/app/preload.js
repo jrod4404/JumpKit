@@ -41,5 +41,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   readFile:        (filePath)          => ipcRenderer.invoke('read-file', filePath),
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
   getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),
-  getLatestCommitId: () => ipcRenderer.invoke('get-latest-commit-id'),
+  getLatestCommitId:          () => ipcRenderer.invoke('get-latest-commit-id'),
+  checkAdminFilesExcluded:    () => ipcRenderer.invoke('check-admin-files-excluded'),
+  readBuildConfig:            () => ipcRenderer.invoke('read-build-config'),
 });
