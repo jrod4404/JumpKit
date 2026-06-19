@@ -4946,32 +4946,34 @@ async function _openReleaseTestingModal() {
 
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
-  // Green session banner — shown at top when a session is active; includes Clear Session btn
+  // Session status banner — shown when session is active (no buttons inside)
   const fileBanner = _activeFilePath
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:14px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:4px">
         <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
         <div style="min-width:0;flex:1">
           <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
           <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${_esc(_activeFilePath)}">${_esc(_activeFilePath)}</div>
         </div>
-        <button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
-          <svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
-        </button>
        </div>`
     : _activeCfg?.version
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:14px">
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:4px">
         <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
         <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
-        <button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+       </div>`
+    : '';
+
+  // Clear Session button — shown below banner when session is active, same sizing as Finalize btns
+  const clearSessionBtn = _activeCfg?.version
+    ? `<div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+        <button id="rtClearSessionBtn" class="btn btn-subtle" style="font-size:0.8rem;padding:5px 16px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px">
           <svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
         </button>
        </div>`
     : '';
 
-  const newSessionReset = '';  // Moved into banner above
-
   const body = `
     ${fileBanner}
+    ${clearSessionBtn}
     ${statusBlock}
     ${completionBanner}
     ${runsBlock}
@@ -5036,23 +5038,26 @@ async function _openReleaseTestingModal() {
     }, 600);
   });
 
-  // Wire Clear Session button (shown in banner when session is active)
+  // Wire Clear Session button — close testing modal first, then show confirmation
+  // (must close first: Modal.open inside an open modal gets queued, button won't wire)
   document.getElementById('rtClearSessionBtn')?.addEventListener('click', () => {
-    Modal.open(
-      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Start New Session?',
-      `<p style="margin:0 0 10px">This will clear the current testing session including version, results file path, and finalization state.</p>
-       <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">The HTML results file on disk and any Supabase records already saved are <strong>not deleted</strong> — only the active session state is reset.</p>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-       <button id="rtConfirmResetBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff">Yes, Start New Session</button>`,
-      'sm'
-    );
-    document.getElementById('rtConfirmResetBtn')?.addEventListener('click', () => {
-      // Single clean write: no version = no active session; keeps folder pref
-      const existingFolder = (_getReleaseState() || {}).folder || null;
-      _setReleaseState({ folder: existingFolder }); // no version field = _getReleaseState returns null
-      Modal.close();
-      setTimeout(() => _openReleaseTestingModal(), 80);
-    });
+    Modal.close();
+    setTimeout(() => {
+      Modal.open(
+        '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Clear Session?',
+        `<p style="margin:0 0 10px">This will reset to <strong>no session loaded</strong>. You will need to start a new session or resume from an existing results file.</p>
+         <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">The HTML results file on disk and any Supabase records already saved are <strong>not deleted</strong> — only the active session state is cleared.</p>`,
+        `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
+         <button id="rtConfirmResetBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff;display:inline-flex;align-items:center;gap:5px"><svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Yes, Clear Session</button>`,
+        'sm'
+      );
+      document.getElementById('rtConfirmResetBtn')?.addEventListener('click', () => {
+        const existingFolder = (_getReleaseState() || {}).folder || null;
+        _setReleaseState({ folder: existingFolder }); // no version = _getReleaseState returns null
+        Modal.close();
+        setTimeout(() => _openReleaseTestingModal(), 80);
+      });
+    }, 80);
   });
 
   // Wire version pencil edit (existing sessions only)
