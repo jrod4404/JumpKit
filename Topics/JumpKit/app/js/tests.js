@@ -4926,23 +4926,7 @@ async function _openReleaseTestingModal() {
     </div>`;
 
   // ── Version section ──────────────────────────────────────────────
-  const versionSection = existing
-    ? `<div id="rtVersionSection" style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border)">
-        <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</span>
-        <span id="rtVersionDisplay" style="font-size:1rem;font-weight:700;color:var(--text)">v${_esc(currentVersion)}</span>
-        <button id="rtVersionEditBtn" class="btn btn-subtle" style="padding:2px 8px;font-size:0.75rem;display:inline-flex;align-items:center;gap:4px;margin-left:4px" title="Change version">
-          <svg class="ti ti-pencil" style="font-size:0.82rem"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit
-        </button>
-       </div>
-       <div id="rtVersionEditSection" style="display:none;margin-top:8px">
-        <div style="display:flex;gap:8px;align-items:center">
-          <input id="rtVersionEditInput" type="text" value="${_esc(currentVersion)}" style="${inputStyle};flex:1" />
-          <button id="rtVersionSaveBtn" class="btn btn-primary" style="white-space:nowrap;padding:6px 14px;font-size:0.85rem">Save</button>
-          <button id="rtVersionCancelBtn" class="btn btn-subtle" style="white-space:nowrap;padding:6px 14px;font-size:0.85rem">Cancel</button>
-        </div>
-        <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">⚠️ Changing the version updates localStorage only. The HTML file on disk and any finalized Supabase records are not renamed/updated.</p>
-       </div>`
-    : `<div>
+  const versionSection = `<div>
         <label style="${labelStyle}">Version Number</label>
         <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
@@ -4952,7 +4936,7 @@ async function _openReleaseTestingModal() {
             <svg class="ti ti-brand-google-play" style="font-size:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-brand-google-play"/></svg>
             Start Session
           </button>
-          <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">Creates a new results file and initializes a fresh testing cycle from scratch.</p>
+          <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Replaces the current session with a new one.' : 'Creates a new results file and initializes a fresh testing cycle from scratch.'}</p>
         </div>
        </div>`;
 
@@ -4979,23 +4963,28 @@ async function _openReleaseTestingModal() {
   // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
 
   // Session status banner — always shown; green/amber when active, grey when no session
-  const _clearBtn = `<button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.8rem;padding:5px 14px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
-        <svg class="ti ti-x" style="font-size:0.85rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
-      </button>`;
+  // Clear Session btn — same style as Finalize btns, positioned in a flex row beside the banner
+  const _clearBtn = `<button id="rtClearSessionBtn" class="btn btn-subtle" style="font-size:0.8rem;padding:0 16px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;align-self:stretch;border-radius:8px;color:#e15b59;border-color:#e15b5944">
+      <svg class="ti ti-x" style="font-size:0.85rem;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
+    </button>`;
 
   const fileBanner = _activeFilePath
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:14px">
-        <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
-        <div style="min-width:0;flex:1">
-          <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${_esc(_activeFilePath)}">${_esc(_activeFilePath)}</div>
+    ? `<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;flex:1;min-height:48px">
+          <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+          <div style="min-width:0;flex:1">
+            <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
+            <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${_esc(_activeFilePath)}">${_esc(_activeFilePath)}</div>
+          </div>
         </div>
         ${_clearBtn}
        </div>`
     : _activeCfg?.version
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:14px">
-        <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
-        <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
+    ? `<div style="display:flex;align-items:stretch;gap:10px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;flex:1;min-height:44px">
+          <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+          <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
+        </div>
         ${_clearBtn}
        </div>`
     : `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);margin-bottom:14px">
@@ -5003,7 +4992,7 @@ async function _openReleaseTestingModal() {
         <div style="font-size:0.85rem;color:var(--text-muted)">No session loaded — start a new session below or load from an existing results file.</div>
        </div>`;
 
-  const clearSessionBtn = '';  // button now lives inside fileBanner
+  const clearSessionBtn = '';
 
   const body = `
     ${fileBanner}
