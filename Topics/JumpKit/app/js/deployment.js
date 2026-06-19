@@ -87,7 +87,12 @@ function _deployTotals(state) {
   return { total, done };
 }
 
-window.renderDeployment = function renderDeployment() {
+// ── View state for checklist / all-deployments toggle ──────────
+let _deployCurrentView = 'checklist'; // 'checklist' | 'history'
+
+window.renderDeployment = function renderDeployment(view) {
+  if (view) _deployCurrentView = view;
+  if (_deployCurrentView === 'history') { _renderDeployHistory(); return; }
   const pageContent = document.getElementById('pageContent');
 
   if (window._supabaseProfile?.role !== 'admin') {
@@ -178,6 +183,14 @@ window.renderDeployment = function renderDeployment() {
         <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
         </button>
+        <div style="margin-left:auto;display:inline-flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">
+          <button id="deployTabChecklist" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;${_deployCurrentView==='checklist'?'background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600':'background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500'}">
+            <svg class="ti ti-checklist" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg> Checklist
+          </button>
+          <button id="deployTabHistory" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;${_deployCurrentView==='history'?'background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600':'background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500'}">
+            <svg class="ti ti-history" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-history"/></svg> All Deployments
+          </button>
+        </div>
       </div>
       <div style="flex:1;overflow-y:auto;padding:16px 24px 24px 24px">
         ${sectionsHTML}
@@ -213,6 +226,10 @@ window.renderDeployment = function renderDeployment() {
   document.getElementById('deployManageBtn')?.addEventListener('click', _openDeployManageModal);
   document.getElementById('deploySaveBtn')?.addEventListener('click', _saveDeployResults);
 
+  // Wire view toggle tabs
+  document.getElementById('deployTabChecklist')?.addEventListener('click', () => renderDeployment('checklist'));
+  document.getElementById('deployTabHistory')?.addEventListener('click', () => renderDeployment('history'));
+
   // Wire section collapse toggles
   pageContent.querySelectorAll('[data-deploy-toggle-section]').forEach(header => {
     header.addEventListener('click', () => {
@@ -240,6 +257,169 @@ window.renderDeployment = function renderDeployment() {
     renderDeployment();
   });
 };
+
+// ── All Deployments History View ─────────────────────────────────
+async function _renderDeployHistory() {
+  const pageContent = document.getElementById('pageContent');
+  if (!pageContent) return;
+
+  const state = _loadDeployState();
+  const { total, done } = _deployTotals(state);
+
+  // Shared header (same as checklist view)
+  const headerHTML = `
+    <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
+      <div style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
+        <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Done</div></div>
+        <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
+        <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
+      </div>
+      <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+        <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
+      </button>
+      <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+        <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment
+      </button>
+      <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
+        <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
+      </button>
+      <div style="margin-left:auto;display:inline-flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">
+        <button id="deployTabChecklist" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500">
+          <svg class="ti ti-checklist" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg> Checklist
+        </button>
+        <button id="deployTabHistory" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600">
+          <svg class="ti ti-history" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-history"/></svg> All Deployments
+        </button>
+      </div>
+    </div>`;
+
+  pageContent.innerHTML = `
+    <div id="pageDeployment" style="display:flex;flex-direction:column;height:100%">
+      ${headerHTML}
+      <div style="flex:1;overflow-y:auto;padding:20px 24px 32px 24px">
+        <div class="stats-chart-box" style="min-height:unset;overflow-x:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em">All Deployments</div>
+            <div class="jump-search-wrap">
+              <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
+              <input id="deployHistSearch" type="text" placeholder="Search deployments..." class="jump-search-input" style="width:210px" />
+            </div>
+          </div>
+          <div id="deployHistTableWrap">
+            <div style="padding:32px;text-align:center;color:var(--text-dim)">
+              <svg class="ti ti-loader-2" style="font-size:1.6rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>
+              <div style="margin-top:10px;font-size:0.85rem">Loading deployments…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Wire header buttons (same as checklist view)
+  document.getElementById('deployManageBtn')?.addEventListener('click', _openDeployManageModal);
+  document.getElementById('deploySaveBtn')?.addEventListener('click', _saveDeployResults);
+  document.getElementById('deployTabChecklist')?.addEventListener('click', () => renderDeployment('checklist'));
+  document.getElementById('deployTabHistory')?.addEventListener('click', () => renderDeployment('history'));
+  document.getElementById('deployResetBtn')?.addEventListener('click', () => {
+    if (!confirm('Reset all deployment steps to "To Do"?')) return;
+    _saveDeployState({});
+    renderDeployment();
+  });
+
+  // Fetch all deployments from Supabase
+  let deployments = [];
+  try {
+    const { data, error } = await supabaseClient
+      .from('deployments')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    deployments = data || [];
+  } catch (err) {
+    document.getElementById('deployHistTableWrap').innerHTML =
+      `<div style="padding:24px;text-align:center;color:var(--text-dim)">Failed to load deployments: ${err.message}</div>`;
+    return;
+  }
+
+  // Status pill helper
+  const _statusPill = (s) => {
+    if (s === 'deployed')            return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71">Deployed</span>`;
+    if (s === 'testing_complete')    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(99,102,241,0.15);color:#6366f1">Testing Complete</span>`;
+    if (s === 'testing_in_progress') return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b">In Progress</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-input);color:var(--text-dim)">${s || '—'}</span>`;
+  };
+
+  // Check helper
+  const _check = (v) => v ? `<svg class="ti ti-check" style="color:#3fbe71;font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg>` : `<span style="color:var(--text-dim)">—</span>`;
+  const _fmt = (v) => v ? new Date(v).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
+  const _score = (p, t) => (t > 0) ? `${p}/${t}` : '—';
+
+  const buildRow = (d) => `<tr style="border-bottom:1px solid var(--border)">
+    <td style="padding:10px 12px;font-size:0.86rem;font-weight:700;color:var(--text);white-space:nowrap">${d.version || '—'}</td>
+    <td style="padding:10px 12px">${_statusPill(d.status)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_check(d.mac_finalized_at)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_score(d.mac_tests_passed, d.mac_tests_total)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_check(d.win_finalized_at)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_score(d.win_tests_passed, d.win_tests_total)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.mac_finalized_at || d.win_finalized_at || d.created_at)}</td>
+    <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.deployed_at || d.testing_completed_at)}</td>
+    <td style="padding:10px 12px;font-size:0.78rem;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(d.notes||'').replace(/"/g,'&quot;')}">${d.notes || '—'}</td>
+  </tr>`;
+
+  const tableHTML = `
+    <table id="deployHistTable" style="width:100%;border-collapse:collapse;min-width:860px">
+      <thead>
+        <tr style="border-bottom:2px solid var(--border)">
+          <th data-col="version"          style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Version<span class="sort-ind"> ↕</span></th>
+          <th data-col="status"           style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Status<span class="sort-ind"> ↕</span></th>
+          <th data-col="mac_finalized_at" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center;cursor:pointer;user-select:none">Mac Done<span class="sort-ind"> ↕</span></th>
+          <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center">Mac Score</th>
+          <th data-col="win_finalized_at" style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center;cursor:pointer;user-select:none">Win Done<span class="sort-ind"> ↕</span></th>
+          <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center">Win Score</th>
+          <th data-col="created_at"       style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Started<span class="sort-ind"> ↕</span></th>
+          <th data-col="deployed_at"      style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Deployed<span class="sort-ind"> ↕</span></th>
+          <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left">Notes</th>
+        </tr>
+      </thead>
+      <tbody id="deployHistTbody">${deployments.map(buildRow).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No deployments found.</td></tr>`}</tbody>
+    </table>`;
+
+  document.getElementById('deployHistTableWrap').innerHTML = tableHTML;
+
+  // Sort + search
+  let _sortCol = 'created_at', _sortDir = -1, _searchQ = '';
+  const _getVal = (d, col) => {
+    if (col === 'version') return d.version || '';
+    if (col === 'status')  return d.status || '';
+    return d[col] ?? '';
+  };
+  const _rerender = () => {
+    let data = [...deployments];
+    if (_searchQ) {
+      const q = _searchQ.toLowerCase();
+      data = data.filter(d => ((d.version||'') + ' ' + (d.status||'') + ' ' + (d.notes||'')).toLowerCase().includes(q));
+    }
+    data.sort((a, b) => {
+      const va = _getVal(a, _sortCol), vb = _getVal(b, _sortCol);
+      return va < vb ? _sortDir : va > vb ? -_sortDir : 0;
+    });
+    const tbody = document.getElementById('deployHistTbody');
+    if (tbody) tbody.innerHTML = data.map(buildRow).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No matches.</td></tr>`;
+    document.querySelectorAll('#deployHistTable th[data-col]').forEach(th => {
+      const ind = th.querySelector('.sort-ind');
+      if (ind) ind.textContent = th.dataset.col === _sortCol ? (_sortDir === -1 ? ' ▼' : ' ▲') : ' ↕';
+    });
+  };
+  document.querySelectorAll('#deployHistTable th[data-col]').forEach(th => {
+    th.addEventListener('click', () => {
+      if (_sortCol === th.dataset.col) _sortDir *= -1;
+      else { _sortCol = th.dataset.col; _sortDir = -1; }
+      _rerender();
+    });
+  });
+  const searchEl = document.getElementById('deployHistSearch');
+  if (searchEl) searchEl.addEventListener('input', e => { _searchQ = e.target.value; _rerender(); });
+}
 
 // ── Manage Deployment Modal ───────────────────────────────────────
 async function _openDeployManageModal() {
