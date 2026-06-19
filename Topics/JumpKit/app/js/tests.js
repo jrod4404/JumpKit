@@ -4281,6 +4281,10 @@ function renderTests() {
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing
         </button>
+        <div id="activeRunToggle" style="display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0">
+          <button id="btnActiveRunMac" style="padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700">Mac</button>
+          <button id="btnActiveRunWin" style="padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600">Windows</button>
+        </div>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
       </div>
@@ -4296,11 +4300,24 @@ function renderTests() {
   // If no session is active, leave everything in the default clean state.
   if (!window._jkTestResults) window._jkTestResults = {};
   const _activeSession = _getReleaseState();
-  if (_activeSession?.filePath) {
+  const _deployConfigForLoad = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  if (_activeSession?.version && _deployConfigForLoad?.resultsFilePath) {
     // Load from SQLite first (fast, synchronous) as a quick base
     _loadTestResults();
     // Then auto-load from the HTML file (authoritative record) silently
     setTimeout(() => _loadResultsFromHTMLFile({ silent: true }), 0);
+  }
+  // Sync active run toggle visual state
+  const _initActiveRun = _activeSession?.activeRun || 'mac';
+  const _macBtn = document.getElementById('btnActiveRunMac');
+  const _winBtn = document.getElementById('btnActiveRunWin');
+  if (_macBtn && _winBtn) {
+    _macBtn.style.cssText = _initActiveRun === 'mac'
+      ? 'padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700'
+      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
+    _winBtn.style.cssText = _initActiveRun === 'windows'
+      ? 'padding:4px 12px;border:none;cursor:pointer;background:#0ea5e9;color:#fff;font-size:0.78rem;font-weight:700'
+      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
   }
   // Pre-seed all [MANUAL] tests with 'manual' state if not already set
   JK_TESTS.filter(t => t.title.startsWith('[MANUAL]')).forEach(t => {
@@ -4324,6 +4341,8 @@ function renderTests() {
   document.getElementById('btnResetManualTests').addEventListener('click', () => _resetSection('manual'));
   document.getElementById('btnTestStrategy').addEventListener('click', _openTestStrategyModal);
   document.getElementById('btnCreateReleaseTesting').addEventListener('click', _openReleaseTestingModal);
+  document.getElementById('btnActiveRunMac')?.addEventListener('click', () => _setActiveRun('mac'));
+  document.getElementById('btnActiveRunWin')?.addEventListener('click', () => _setActiveRun('windows'));
   _updateRTLabel();
   document.getElementById('btnSavePreflightResults').addEventListener('click', () => _saveReleaseSection('preflight'));
   document.getElementById('btnSaveAutoResults').addEventListener('click', () => _saveReleaseSection('auto'));
@@ -4443,7 +4462,9 @@ function _clearSavedTestResults() {
 async function _loadResultsFromHTMLFile(opts = {}) {
   const silent = opts?.silent === true;
   const state = _getReleaseState();
-  if (!state?.filePath) {
+  const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  const filePath = deployCfg?.resultsFilePath || state?.filePath; // fallback for legacy state
+  if (!filePath) {
     if (!silent) alert('No results file configured. Click "Manage Testing" to create or load one.');
     return;
   }
@@ -4452,7 +4473,7 @@ async function _loadResultsFromHTMLFile(opts = {}) {
     return;
   }
   try {
-    const { ok, content, reason } = await window.electronAPI.readFile(state.filePath);
+    const { ok, content, reason } = await window.electronAPI.readFile(filePath);
     if (!ok) { window.Toast?.danger(`Could not read file: ${reason}`); return; }
     if (!content) { if (!silent) window.Toast?.danger('File is empty or does not exist yet.'); return; }
 
@@ -4485,7 +4506,7 @@ async function _loadResultsFromHTMLFile(opts = {}) {
     _refreshSummary();
 
     if (!silent) {
-      const fname = state.filePath.split(/[\/\\]/).pop();
+      const fname = filePath.split(/[\/\\]/).pop();
       window.Toast?.success(`Loaded ${loaded} result${loaded !== 1 ? 's' : ''} from ${fname}`);
     }
   } catch (err) {
@@ -4499,14 +4520,18 @@ async function _loadResultsFromHTMLFile(opts = {}) {
 // Shows a confirmation modal, then resets all test state so the next
 // testing cycle starts from scratch. The HTML file on disk is kept
 // as the permanent record for this release.
-function _openConcludeModal() {
+function _openConcludeModal(platform) {
+  platform = platform || 'mac';
   const results = window._jkTestResults || {};
-  const notRun = JK_TESTS.filter(t => {
+  const platformTests = platform === 'windows'
+    ? JK_TESTS.filter(t => !t.platforms || t.platforms.includes('windows'))
+    : JK_TESTS;
+  const notRun = platformTests.filter(t => {
     const r = results[t.id];
     return !r || r.state === 'not-run';
   });
   // Manual tests default to 'manual' state — treat those as incomplete too
-  const stillManual = JK_TESTS.filter(t => {
+  const stillManual = platformTests.filter(t => {
     const r = results[t.id];
     return r?.state === 'manual';
   });
@@ -4521,90 +4546,117 @@ function _openConcludeModal() {
        </div>`
     : `<div style="margin-bottom:14px;padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;color:#3fbe71;font-size:0.85rem">✅ All tests have been run and marked.</div>`;
 
-  const rtState = _getReleaseState();
-  const fname = rtState?.filePath ? rtState.filePath.split(/[\/\\]/).pop() : null;
-  const fileNote = fname
-    ? `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">The results file <strong style="color:var(--text)">${fname}</strong> will be kept on disk as a permanent record. The test runner will reset to a clean state ready for the next release cycle.</p>`
-    : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file is configured. The test runner will reset to a clean state.</p>`;
+  const deployCfgForModal = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  const resultsFileForModal = deployCfgForModal?.resultsFilePath;
+  const fileNote = resultsFileForModal
+    ? `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">Results will be saved to <strong style="color:var(--text)">${_esc(resultsFileForModal.split(/[\/\\]/).pop())}</strong> and recorded in Supabase.</p>`
+    : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file yet — you will be prompted to choose a folder on first save.</p>`;
 
+  const platformLabel = platform === 'windows' ? 'Windows' : 'Mac';
   const body = `
     ${warnBlock}
-    <p style="margin:0 0 10px;font-weight:600">Conclude this testing session?</p>
-    ${fileNote}`;
+    <p style="margin:0 0 10px;font-weight:600">Finalize the <strong>${platformLabel}</strong> testing run?</p>
+    ${fileNote}
+    <p style="margin:8px 0 0;font-size:0.82rem;color:var(--text-muted)">This will record the scorecard in Supabase. The test runner stays active for the other platform’s run.</p>`;
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
-    <button id="btnConfirmConclude" class="btn" style="background:#1A4FD6;color:#fff;border-color:#1A4FD6">Finalize Testing &amp; Prepare Deployment</button>`;
+    <button id="btnConfirmConclude" class="btn" style="background:#1A4FD6;color:#fff;border-color:#1A4FD6">Finalize ${platformLabel} Run</button>`;
 
   Modal.open(
-    '<svg class="ti ti-flag-check" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize Testing',
+    `<svg class="ti ti-flag-check" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize ${platformLabel} Run`,
     body, footer, 'md'
   );
 
   document.getElementById('btnConfirmConclude').onclick = () => {
     Modal.close();
-    _concludeTesting();
+    _finalizePlatformRun(platform);
   };
 }
 
-async function _concludeTesting() {
-  // 1. Capture test results snapshot before wiping
+async function _finalizePlatformRun(platform) {
   const results = window._jkTestResults || {};
-  const allTests = JK_TESTS;
+  const releaseState = _getReleaseState();
+  const deployConfig = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  const version = releaseState?.version || deployConfig.version || '';
+  const account = window._supabaseUser?.email || (typeof currentUser !== 'undefined' && currentUser?.email) || '';
+  const resultsFilePath = deployConfig?.resultsFilePath || '';
+  const existingRecordId = deployConfig?.deploymentRecordId || null;
+
+  // Compute platform-specific test counts
+  const platformTests = platform === 'windows'
+    ? JK_TESTS.filter(t => !t.platforms || t.platforms.includes('windows'))
+    : JK_TESTS;
+
   let passed = 0, failed = 0, skipped = 0;
-  allTests.forEach(t => {
+  platformTests.forEach(t => {
     const r = results[t.id];
-    if (!r || !r.state || r.state === 'not-run') skipped++;
+    if (!r || !r.state || r.state === 'not-run' || r.state === 'skip') skipped++;
     else if (r.state === 'pass') passed++;
     else if (r.state === 'fail') failed++;
-    // manual counts as passed for this summary
-    else if (r.state === 'manual') passed++;
+    else if (r.state === 'manual') passed++; // manual = passed for scorecard
   });
-  const total = allTests.length;
+  const total = platformTests.length;
+  const now = new Date().toISOString();
 
-  // 2. Read config
-  const releaseState = _getReleaseState();
-  let deployConfig = {};
-  try { deployConfig = JSON.parse(localStorage.getItem('jk_deploy_config') || '{}'); } catch(_) {}
+  const prefix = platform === 'windows' ? 'win' : 'mac';
+  const platformData = {
+    [`${prefix}_testing_account`]: account,
+    [`${prefix}_tests_total`]:    total,
+    [`${prefix}_tests_passed`]:   passed,
+    [`${prefix}_tests_failed`]:   failed,
+    [`${prefix}_tests_skipped`]:  skipped,
+    [`${prefix}_finalized_at`]:   now,
+  };
 
-  const version = releaseState?.version || deployConfig.version || '';
-  const testOs  = releaseState?.os || 'mac';
-  const folder  = deployConfig.folder || '';
-  const macFile = deployConfig.macFile || '';
-  const winFile = deployConfig.winFile || '';
-  const account = window._supabaseUser?.email || currentUser?.email || '';
+  // Determine if both runs will be done after this finalization
+  const updatedState = { ...(releaseState || {}), [`${prefix}Finalized`]: true };
+  const bothDone = updatedState.macFinalized && updatedState.winFinalized;
 
-  // 3. Insert to Supabase deployments table
-  if (version && SUPABASE_URL && SUPABASE_ANON_KEY) {
-    try {
-      await supabaseClient.from('deployments').insert({
+  try {
+    let recordId = existingRecordId;
+    if (!recordId) {
+      // First finalization — INSERT new record
+      const { data, error } = await supabaseClient.from('deployments').insert({
         version,
-        testing_account:      account,
-        testing_completed_at: new Date().toISOString(),
-        test_os:              testOs,
-        tests_total:          total,
-        tests_passed:         passed,
-        tests_failed:         failed,
-        tests_skipped:        skipped,
-        deployment_folder:    folder,
-        mac_results_file:     macFile,
-        win_results_file:     winFile,
-        status:               'testing_complete',
-      });
-    } catch(e) {
-      console.warn('[Deployments] Insert failed:', e.message);
+        results_file: resultsFilePath,
+        status: bothDone ? 'testing_complete' : 'testing_in_progress',
+        ...(bothDone ? { testing_completed_at: now } : {}),
+        ...platformData,
+      }).select('id').single();
+      if (error) throw new Error(error.message);
+      recordId = data?.id;
+      // Save UUID to deploy config
+      if (typeof _saveDeployConfig === 'function') {
+        _saveDeployConfig({ ...deployConfig, deploymentRecordId: recordId });
+      }
+    } else {
+      // Second finalization — UPDATE existing record
+      const { error } = await supabaseClient.from('deployments').update({
+        status: 'testing_complete',
+        testing_completed_at: now,
+        ...platformData,
+      }).eq('id', recordId);
+      if (error) throw new Error(error.message);
     }
-  }
 
-  // 4. Wipe in-memory results
-  window._jkTestResults = {};
-  // 5. Wipe SQLite
-  _clearSavedTestResults();
-  // 6. Clear localStorage release config
-  try { localStorage.removeItem(_RT_KEY); } catch(_) {}
-  // 7. Full re-render
-  renderTests();
-  window.Toast?.success('Testing finalized and saved to deployments. Ready for deployment! 🚀');
+    // Update release state
+    _setReleaseState({ ...updatedState, version });
+
+    const platformLabel = platform === 'windows' ? 'Windows' : 'Mac';
+    if (bothDone) {
+      window.Toast?.success(`✅ Both runs finalized! Testing complete — head to Deployments. 🚀`);
+    } else {
+      window.Toast?.success(`✅ ${platformLabel} run finalized and saved to Supabase.`);
+    }
+
+    // Re-open Manage Testing modal so user sees updated state
+    setTimeout(() => _openReleaseTestingModal(), 150);
+
+  } catch(e) {
+    console.error('[FinalizePlatformRun] Error:', e);
+    window.Toast?.danger(`Failed to finalize: ${e.message}`);
+  }
 }
 
 function _esc(str) {
@@ -4627,16 +4679,54 @@ function _updateRTLabel() {
   const el = document.getElementById('rtActiveLabel');
   if (!el) return;
   const s = _getReleaseState();
-  if (s?.version && s?.filePath) {
-    const fname = s.filePath.split(/[\/\\]/).pop();
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>Results file active: <strong style="color:var(--text)">${fname}</strong></span>`;
+  const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  const resultsFile = cfg?.resultsFilePath;
+  if (s?.version && resultsFile) {
+    const fname = resultsFile.split(/[\/\\]/).pop();
+    const macDone = s.macFinalized ? '✅' : '⏳';
+    const winDone = s.winFinalized ? '✅' : '⏳';
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>v${_esc(s.version)} &nbsp;${macDone} Mac &nbsp;${winDone} Win &nbsp;<span style="color:var(--text-dim);font-size:0.75rem">${_esc(fname)}</span></span>`;
   } else {
-    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No results file — click <strong>Manage Testing</strong> to create or load one</span>`;
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
+  }
+}
+
+function _setActiveRun(platform) {
+  const s = _getReleaseState();
+  if (!s) return;
+  _setReleaseState({ ...s, activeRun: platform });
+  // Pre-mark mac-only tests as skipped when switching to Windows run
+  if (platform === 'windows') {
+    if (!window._jkTestResults) window._jkTestResults = {};
+    JK_TESTS.forEach(t => {
+      const isMacOnly = t.platforms && !t.platforms.includes('windows');
+      if (isMacOnly && !window._jkTestResults[t.id]) {
+        window._jkTestResults[t.id] = { state: 'skip', received: 'Mac Only — not required on Windows' };
+      }
+    });
+  }
+  _buildTestRows();
+  // Restore results into rows
+  Object.entries(window._jkTestResults || {}).forEach(([id, r]) => {
+    if (r.state && r.state !== 'running') _setRowResult(parseInt(id), r.state, r.message || null);
+  });
+  _refreshSummary();
+  // Update toggle button styles
+  const macBtn = document.getElementById('btnActiveRunMac');
+  const winBtn = document.getElementById('btnActiveRunWin');
+  if (macBtn && winBtn) {
+    macBtn.style.cssText = platform === 'mac'
+      ? 'padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700'
+      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
+    winBtn.style.cssText = platform === 'windows'
+      ? 'padding:4px 12px;border:none;cursor:pointer;background:#0ea5e9;color:#fff;font-size:0.78rem;font-weight:700'
+      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
   }
 }
 
 async function _openReleaseTestingModal() {
   const existing = _getReleaseState();
+  const deployConfig = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
   let appVersion = '1.0.0';
   try {
     if (window.electronAPI?.getAppVersion) appVersion = await window.electronAPI.getAppVersion();
@@ -4644,147 +4734,169 @@ async function _openReleaseTestingModal() {
 
   const inputStyle = 'width:100%;box-sizing:border-box;padding:8px 12px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:0.9rem;outline:none';
   const labelStyle = 'display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em';
-  const divider = `<hr style="border:none;border-top:1px solid var(--border);margin:20px 0">`;
+  const divider = `<hr style="border:none;border-top:1px solid var(--border);margin:18px 0">`;
 
-  // ── Section 1: Current session status ──────────────────────────
-  const fname = existing?.filePath ? existing.filePath.split(/[\/\\]/).pop() : null;
+  const currentVersion = deployConfig.version || existing?.version || appVersion;
+  const resultsFile = deployConfig?.resultsFilePath;
+  const macDone = existing?.macFinalized || false;
+  const winDone = existing?.winFinalized || false;
+  const bothDone = macDone && winDone;
+
+  // ── Section 1: Session status block ──────────────────────────────
+  const resultsFileName = resultsFile ? resultsFile.split(/[\/\\]/).pop() : null;
   const statusBlock = existing
     ? `<div style="padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;font-size:0.85rem;display:flex;align-items:center;gap:8px">
         <svg class="ti ti-file-check" style="font-size:1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
-        <span><strong style="color:#3fbe71">Active session — v${_esc(existing.version)}</strong><br>
-        <span style="color:var(--text-muted);font-size:0.78rem">${_esc(fname)}</span></span>
+        <span><strong style="color:#3fbe71">Active session — v${_esc(existing.version || currentVersion)}</strong>${resultsFileName ? `<br><span style="color:var(--text-muted);font-size:0.78rem">${_esc(resultsFileName)}</span>` : ''}</span>
        </div>`
     : `<div style="padding:10px 14px;border-radius:8px;background:#f59e0b22;border:1px solid #f59e0b55;font-size:0.85rem;display:flex;align-items:center;gap:8px">
         <svg class="ti ti-alert-triangle" style="font-size:1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
-        <span style="color:#f59e0b">No active testing session configured.</span>
+        <span style="color:#f59e0b">No active testing session. Set a version below and click Start Session.</span>
        </div>`;
 
-  // ── Section 2: Manage active session (only when session exists) ─
-  const manageBlock = existing ? `
+  // ── Section 2: Completion banner (both runs done) ─────────────────
+  const completionBanner = bothDone
+    ? `<div style="margin-top:12px;padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;font-size:0.88rem;color:#3fbe71;font-weight:600">
+        ✅ Testing complete! Head to the <strong>Deployment</strong> page to finalize your release.
+       </div>`
+    : '';
+
+  // ── Section 3: Dual-run status rows (only when session exists) ────
+  const _runRow = (platform, done) => {
+    const label = platform === 'mac' ? 'Mac Run' : 'Windows Run';
+    const pill = done
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✅ Finalized</span>`
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;background:#6b728022;color:#6b7280;border:1px solid #6b728044">⏳ Not finalized</span>`;
+    const btn = done
+      ? `<span style="font-size:0.78rem;color:#3fbe71;font-weight:600">✔ Done</span>`
+      : `<button id="rtFinalize${platform === 'mac' ? 'Mac' : 'Win'}Btn" class="btn btn-subtle" style="font-size:0.8rem;padding:4px 12px;color:#1A4FD6;border-color:#1A4FD6;display:inline-flex;align-items:center;gap:5px"><svg class="ti ti-flag-check" style="font-size:0.85rem;color:#1A4FD6"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize ${label}</button>`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
+        <span style="font-weight:600;font-size:0.88rem">${label}</span>
+        ${pill}
+      </div>
+      ${btn}
+    </div>`;
+  };
+
+  const runsBlock = existing ? `
     ${divider}
-    <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Manage Active Session</p>
-    <div style="display:flex;gap:10px;flex-wrap:wrap">
-      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px">
-        <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
-      </button>
-      <button id="rtConcludeBtn" class="btn btn-subtle" style="display:flex;align-items:center;gap:6px;flex:1;justify-content:center;padding:10px;color:#1A4FD6">
-        <svg class="ti ti-flag-check" style="font-size:1rem;color:#1A4FD6"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize Testing &amp; Prepare Deployment
+    <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Runs</p>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      ${_runRow('mac', macDone)}
+      ${_runRow('windows', winDone)}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
+        <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
       </button>
     </div>
-    <div style="margin-bottom:10px"></div>
-    <p style="margin:8px 0 0;font-size:0.75rem;color:var(--text-muted)">
-      <strong>Load Results from File</strong> — restores test states from the saved HTML (use after reopening the app).<br>
-      <strong>Finalize Testing &amp; Prepare Deployment</strong> — saves test results to Supabase deployments, resets the runner, and prepares for the deployment phase.
-    </p>` : '';
+    <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)"><strong>Load Results from File</strong> — restores test states from saved HTML (use after reopening the app).</p>` : '';
 
-  // ── Section 3: Configure / start new session ────────────────────
+  // ── Section 4: Version field ──────────────────────────────────────
   const configTitle = existing
-    ? `<p style="margin:0 0 12px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Reconfigure Session</p>`
-    : `<p style="margin:0 0 12px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
+    ? `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</p>`
+    : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
 
   const body = `
     ${statusBlock}
-    ${manageBlock}
+    ${completionBanner}
+    ${runsBlock}
     ${divider}
     ${configTitle}
-    <div style="margin-bottom:18px">
+    <div style="margin-bottom:6px">
       <label style="${labelStyle}">Version Number</label>
-      <input id="rtVersion" type="text" placeholder="e.g. ${appVersion}" value="${_esc((typeof _loadDeployConfig === 'function' ? _loadDeployConfig().version : null) || existing?.version || appVersion)}" style="${inputStyle}" />
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the test results and deployment files.</p>
-    </div>
-    <div style="margin-bottom:18px">
-      <label style="${labelStyle}">Deployment Folder</label>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input id="rtDeployFolder" type="text" placeholder="Click Choose to pick the deployment folder…" value="${_esc((typeof _loadDeployConfig === 'function' ? _loadDeployConfig().folder : null) || '')}" readonly style="${inputStyle};flex:1;cursor:default;color:var(--text-muted);font-size:0.8rem" />
-        <button id="rtDeployFolderBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
-      </div>
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Test results and deployment files will be auto-saved here.</p>
-    </div>
-    <div style="margin-bottom:18px">
-      <label style="${labelStyle}">Test Environment</label>
-      <select id="rtOS" style="${inputStyle}">
-        <option value="mac"${(existing?.os || 'mac') === 'mac' ? ' selected' : ''}>Mac</option>
-        <option value="windows"${existing?.os === 'windows' ? ' selected' : ''}>Windows</option>
-      </select>
-    </div>
-    ${existing ? `<p style="margin:5px 0 0;font-size:0.78rem;color:#3fbe71">&#10003; Session already configured — Save will update the version and file.</p>` : ''}`;
+      <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
+      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+    </div>`;
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Changes' : 'Start Session'}</button>`;
+    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Version' : 'Start Session'}</button>`;
 
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
     body, footer, 'xl'
   );
 
-  // Wire manage-session buttons (only rendered when session is active)
+  // Wire run finalize buttons
   if (existing) {
-    document.getElementById('rtLoadFromFileBtn').onclick = () => {
+    if (!macDone) {
+      document.getElementById('rtFinalizeMacBtn')?.addEventListener('click', () => {
+        Modal.close();
+        _openConcludeModal('mac');
+      });
+    }
+    if (!winDone) {
+      document.getElementById('rtFinalizeWinBtn')?.addEventListener('click', () => {
+        Modal.close();
+        _openConcludeModal('windows');
+      });
+    }
+    document.getElementById('rtLoadFromFileBtn')?.addEventListener('click', () => {
       Modal.close();
       _loadResultsFromHTMLFile();
-    };
-    document.getElementById('rtConcludeBtn').onclick = () => {
-      Modal.close();
-      _openConcludeModal();
-    };
+    });
   }
-
-  // Wire deploy folder choose button
-  document.getElementById('rtDeployFolderBtn').onclick = async () => {
-    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron'); return; }
-    const result = await window.electronAPI.openFileDialog({ title: 'Select Deployment Folder', properties: ['openDirectory'] });
-    if (!result?.canceled && result?.filePath) document.getElementById('rtDeployFolder').value = result.filePath;
-  };
 
   document.getElementById('rtCreateBtn').onclick = async () => {
     const version = document.getElementById('rtVersion').value.trim() || appVersion;
     if (!version) { alert('Please enter a version number.'); return; }
-    const os = document.getElementById('rtOS').value;
-    const deployFolder = document.getElementById('rtDeployFolder').value.trim();
-    if (!deployFolder) { alert('Please choose a deployment folder first.'); return; }
-    // Auto-generate filename from OS + version
-    const osLabel = os === 'windows' ? 'Win' : 'Mac';
-    const fileName = `JumpKit_${osLabel}_ReleaseTesting_v${version}.html`;
-    const autoPath = deployFolder.replace(/[\/\\]$/, '') + '/' + fileName;
-    // Create empty placeholder file in deployment folder
-    if (window.electronAPI?.writeFileDirect) {
-      try {
-        const emptyHtml = `<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><title>JumpKit ${osLabel} Release Testing v${version}</title></head>\n<body><p style="font-family:sans-serif;color:#888;padding:40px">No test results saved yet.</p></body></html>`;
-        await window.electronAPI.writeFileDirect(autoPath, emptyHtml);
-      } catch(e) { console.warn('Could not pre-create testing file:', e); }
+    const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+    if (typeof _saveDeployConfig === 'function') {
+      _saveDeployConfig({ ...cfg, version });
     }
-    // Persist version + deploy folder to shared deploy config
-    if (typeof _loadDeployConfig === 'function') {
-      const cfg = _loadDeployConfig();
-      _saveDeployConfig({ ...cfg, version, folder: deployFolder });
+    if (existing) {
+      _setReleaseState({ ...existing, version });
+      Modal.close();
+      window.Toast?.success(`Version updated to v${version}.`);
+    } else {
+      _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
+      Modal.close();
+      window.Toast?.success(`Testing session started — v${version}. Run Mac tests first, then switch to Windows.`);
     }
-    _setReleaseState({ version, filePath: autoPath, os });
-    Modal.close();
-    window.Toast?.success(existing ? `Testing updated — v${version} · ${fileName}` : `Testing session started — v${version} · ${fileName}`);
+    _updateRTLabel();
   };
 }
 
 async function _saveReleaseSection(mode) {
   try {
-  const state = _getReleaseState();
-  if (!state?.filePath || !state?.version) {
+  const rtState = _getReleaseState();
+  const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  const version = deployCfg.version || rtState?.version || '';
+
+  if (!version) {
     Modal.open(
-      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Results File Configured',
-      `<p style="margin:0 0 12px">No test results file has been created or loaded. Results cannot be saved without one.</p>
-       <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Manage Testing</strong> to create a new results file or load an existing one, then try saving again.</p>`,
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> No Testing Session',
+      `<p style="margin:0 0 12px">No testing version is set. Please open <strong>Manage Testing</strong> and start a session first.</p>`,
       `<button class="btn btn-primary" data-jaction="modal-close">Got it</button>`,
       'sm'
     );
     return;
   }
 
-  if (!window.electronAPI?.readFile || !window.electronAPI?.writeFileDirect) {
+  if (!window.electronAPI?.writeFileDirect) {
     alert('File I/O not available — not running in Electron.');
     return;
   }
 
-  const { filePath, version } = state;
+  // Resolve or create the results file path
+  let filePath = deployCfg?.resultsFilePath || '';
+  if (!filePath) {
+    // Prompt user to pick a folder
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
+    const folderResult = await window.electronAPI.openFileDialog({ title: 'Choose folder for test results file', properties: ['openDirectory'] });
+    if (folderResult?.canceled || !folderResult?.filePath) return;
+    const folder = folderResult.filePath.replace(/[\/\\]$/, '');
+    const fileName = `JumpKit_ReleaseTesting_v${version}.html`;
+    filePath = folder + '/' + fileName;
+    // Save to deploy config
+    if (typeof _saveDeployConfig === 'function') {
+      _saveDeployConfig({ ...deployCfg, resultsFilePath: filePath });
+    }
+    window.Toast?.success(`Results file created: ${fileName}`);
+  }
 
   // Determine which tests belong to this section
   const isAM = t => t.title.startsWith('[AUTO+MANUAL]');
@@ -4808,17 +4920,17 @@ async function _saveReleaseSection(mode) {
     const isManualTest = t.title.startsWith('[MANUAL]') || t.title.startsWith('[AUTO+MANUAL]');
     const manualSteps = t.steps || t.expected || '';
     let detailsText = '';
-    const state = r?.state || 'not-run';
-    if (state === 'fail') {
+    const st = r?.state || 'not-run';
+    if (st === 'fail') {
       detailsText = r.message || 'Test failed.';
-    } else if (state === 'pass') {
+    } else if (st === 'pass') {
       detailsText = isManualTest ? manualSteps : 'Test passed successfully.';
-    } else if (state === 'manual') {
+    } else if (st === 'manual') {
       detailsText = manualSteps;
     } else {
       detailsText = isManualTest ? manualSteps : '';
     }
-    const manuallyMarked = state === 'pass' && r?.received === 'Manually marked as passed';
+    const manuallyMarked = st === 'pass' && r?.received === 'Manually marked as passed';
     newEntries[t.id] = {
       id: t.id,
       displayNum: displayMap[t.id] || t.id,
@@ -4828,7 +4940,7 @@ async function _saveReleaseSection(mode) {
       purpose: t.purpose || '',
       input: t.input || '',
       expected: t.expected || '',
-      state,
+      state: st,
       manuallyMarked,
       details: detailsText,
       execOrder: (window.JK_EXEC_ORDER || {})[t.id] ?? null,
@@ -4838,20 +4950,21 @@ async function _saveReleaseSection(mode) {
 
   // Read existing file and extract embedded JSON
   let existingEntries = {};
-  const { content } = await window.electronAPI.readFile(filePath);
-  if (content) {
-    try {
-      const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
-      if (match) existingEntries = JSON.parse(match[1]);
-    } catch(_) {}
+  if (window.electronAPI?.readFile) {
+    const { content } = await window.electronAPI.readFile(filePath).catch(() => ({ content: '' }));
+    if (content) {
+      try {
+        const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
+        if (match) existingEntries = JSON.parse(match[1]);
+      } catch(_) {}
+    }
   }
 
-  // Merge: keep ALL existing entries untouched, only overwrite/append entries
-  // that belong to the section currently being saved. Other sections are never modified.
+  // Merge: keep ALL existing entries untouched, only overwrite/append section entries
   const merged = { ...existingEntries };
   sectionTests.forEach(t => { merged[t.id] = newEntries[t.id]; });
 
-  // Gather test environment info for header
+  // Gather test environment info
   const userId = window._supabaseUser?.id;
   let ownedTeamNames = [], memberTeamNames = [];
   try {
@@ -4861,7 +4974,6 @@ async function _saveReleaseSection(mode) {
     const { data: memberRows } = await supabaseClient.from('team_members').select('team_id, teams!inner(name)').eq('user_id', userId);
     memberTeamNames = (memberRows || []).filter(r => !ownedIds.includes(r.team_id)).map(r => r.teams?.name).filter(Boolean);
   } catch(_) {}
-  // Gather jump + column counts
   let activeJumps = 0, favJumps = 0, archivedJumps = 0, totalCols = 0, sharedCols = 0;
   try {
     const allActive = typeof DB !== 'undefined' && currentUser ? DB.getActiveJumps(currentUser.id) : [];
@@ -4874,19 +4986,17 @@ async function _saveReleaseSection(mode) {
     sharedCols = allCols.filter(c => c.isShared).length;
   } catch(_) {}
 
-  // Gather account settings
   const prof = window._supabaseProfile || {};
   const prefs = (typeof DB !== 'undefined' && currentUser) ? DB.getPrefs(currentUser.id) : {};
+  const activeRun = rtState?.activeRun || 'mac';
 
   const testEnv = {
-    // Account
     email:       window._supabaseUser?.email || '',
     name:        [prof.first_name, prof.last_name].filter(Boolean).join(' ') || '—',
     role:        prof.role || 'user',
     subTier:     prof.subscription_tier || '—',
     subStatus:   prof.subscription_status || '—',
-    os:          state.os === 'windows' ? 'Windows' : 'Mac',
-    // Settings
+    activeRun,
     trialLaunches:   prof.trial_launches_used != null ? String(prof.trial_launches_used) : '—',
     startPage:       prefs.startPage || 'home',
     theme:           prefs.theme || 'system',
@@ -4898,31 +5008,18 @@ async function _saveReleaseSection(mode) {
     notifications:   prefs.notifications !== false ? 'On' : 'Off',
     showDesc:        prefs.showDescription ? 'On' : 'Off',
     showHotkey:      prefs.showHotkey ? 'On' : 'Off',
-    // JumpKit
-    activeJumps,
-    favJumps,
-    archivedJumps,
-    totalCols,
-    sharedCols,
+    activeJumps, favJumps, archivedJumps, totalCols, sharedCols,
     ownedTeams:  ownedTeamNames,
     memberTeams: memberTeamNames,
   };
 
-  // Build HTML
+  // Build two-tab HTML and write
   const html = _buildReleaseTestingHTML(merged, version, filePath, testEnv);
   const writeResult = await window.electronAPI.writeFileDirect(filePath, html);
 
   if (writeResult?.ok) {
     const sectionLabel = mode === 'preflight' ? 'Pre-Flight' : mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
-    window.Toast?.success(`${sectionLabel} results saved to file.`);
-    // Also copy to deployment folder if configured
-    const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-    if (deployCfg.folder) {
-      const sep = deployCfg.folder.includes('\\') ? '\\' : '/';
-      const fname = filePath.split(/[\/]/).pop();
-      const deployPath = deployCfg.folder.replace(/[\/]$/, '') + sep + fname;
-      await window.electronAPI.writeFileDirect(deployPath, html).catch(() => {});
-    }
+    window.Toast?.success(`${sectionLabel} results saved.`);
   } else {
     window.Toast?.danger(`Failed to save: ${writeResult?.reason || 'unknown error'}`);
   }
@@ -4932,6 +5029,7 @@ async function _saveReleaseSection(mode) {
   }
 }
 
+
 function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const stateColor = (s) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
   const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Skipped';
@@ -4939,92 +5037,147 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const sectionLabel = { preflight: 'Pre-Flight (Run First)', auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
   const catColors = { Auth:'#3b82f6', Navigation:'#8b5cf6', Jumps:'#06b6d4', Columns:'#10b981', Archive:'#f59e0b', Stats:'#ec4899', Account:'#6366f1', Subscription:'#f97316', Teams:'#14b8a6', UI:'#84cc16', Security:'#e05555', Database:'#0ea5e9', 'DB Schema':'#7c3aed', 'Shared Sync':'#a855f7', 'Code Quality':'#78716c', Settings:'#64748b', Deployment:'#f43f5e', Paywall:'#d97706', Maintenance:'#22d3ee', Email:'#fb923c', Notifications:'#0d9488', Admin:'#dc2626', Onboarding:'#a78bfa' };
   const catPill = cat => { const c = catColors[cat] || '#6b7280'; return `<span style="display:inline-block;padding:2px 7px;border-radius:99px;font-size:10px;font-weight:700;background:${c}22;color:${c};white-space:nowrap">${cat}</span>`; };
+  const _exportCheckIcon = `<svg style="width:10px;height:10px;flex-shrink:0;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+  const _pill = (val, label, color, allPass) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${allPass ? _exportCheckIcon : ''}${val} ${label}</span>`
+    : '';
 
+  const runDate = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+
+  // Build sorted entries from dict
   const sorted = Object.values(entries).sort((a, b) => {
     if (a.execOrder != null && b.execOrder != null) return a.execOrder - b.execOrder;
     const sd = (sectionOrder[a.section] ?? 9) - (sectionOrder[b.section] ?? 9);
     return sd !== 0 ? sd : a.displayNum - b.displayNum;
   });
 
-  const runDate = new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const totalPass   = sorted.filter(e => e.state === 'pass').length;
-  const totalFail   = sorted.filter(e => e.state === 'fail').length;
-  const totalManual = sorted.filter(e => e.state === 'manual').length;
-  const totalNotRun = sorted.filter(e => e.state === 'not-run').length;
-
-  // Inline pill helper — only renders non-zero values; matches app section header style
-  const _exportCheckIcon = `<svg style="width:10px;height:10px;flex-shrink:0;display:inline-block;vertical-align:middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
-  const _pill = (val, label, color, allPass) => val > 0
-    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${allPass ? _exportCheckIcon : ''}${val} ${label}</span>`
-    : '';
-
-  const secPills = sec => {
-    const es = sorted.filter(e => e.section === sec);
-    const pass   = es.filter(e => e.state === 'pass').length;
-    const fail   = es.filter(e => e.state === 'fail').length;
-    const manual = es.filter(e => e.state === 'manual').length;
-    const allPass = es.length > 0 && pass === es.length;
-    return `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
-      + _pill(pass,   'Pass',   '#3fbe71', allPass)
-      + _pill(fail,   'Fail',   '#e15b59', false)
-      + _pill(manual, 'Manual', '#f59e0b', false)
-      + `</span>`;
+  // Look up platforms from JK_TESTS for each entry
+  const testPlatformMap = {};
+  (typeof JK_TESTS !== 'undefined' ? JK_TESTS : []).forEach(t => {
+    testPlatformMap[t.id] = t.platforms;
+  });
+  const isMacOnly = (id) => {
+    const plat = testPlatformMap[id];
+    return plat && !plat.includes('windows');
   };
 
-  // Column header row — placed inside each section tbody
+  // Compute Mac stats (all tests)
+  const macPass   = sorted.filter(e => e.state === 'pass').length;
+  const macFail   = sorted.filter(e => e.state === 'fail').length;
+  const macManual = sorted.filter(e => e.state === 'manual').length;
+  const macTotal  = sorted.length;
+
+  // Compute Windows stats (exclude mac-only)
+  const winSorted = sorted.filter(e => !isMacOnly(e.id));
+  const winPass   = winSorted.filter(e => e.state === 'pass').length;
+  const winFail   = winSorted.filter(e => e.state === 'fail').length;
+  const winManual = winSorted.filter(e => e.state === 'manual').length;
+  const winTotal  = winSorted.length;
+
+  // Column header row
   const colHdrRow = `<tr style="background:#f9fafb;border-bottom:1px solid #e5e7eb">
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left;white-space:nowrap">Exec / #ID</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Category</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Title &amp; Purpose</th>
-      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Input</th>
-      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Expected</th>
-      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Details</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Result</th>
+      <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Details</th>
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Timestamp</th>
     </tr>`;
 
-  // Data row — first col shows #execOrder · testId; isLast omits the bottom border
-  const dataRow = (e, isLast = false) => {
+  // Data row builder — winMode: render mac-only tests as N/A
+  const dataRow = (e, isLast, winMode) => {
+    const macOnly = isMacOnly(e.id);
+    if (winMode && macOnly) {
+      return `<tr${isLast ? '' : ' style="border-bottom:1px solid #e5e7eb"'} style="opacity:0.45">
+        <td style="padding:7px 10px;font-size:12px;white-space:nowrap;color:#9ca3af">#${e.id}</td>
+        <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
+        <td style="padding:7px 10px;font-size:12px;color:#9ca3af;max-width:540px;word-break:break-word"><div style="font-weight:600">${_esc(e.title)}</div></td>
+        <td style="padding:7px 12px;font-size:11px;color:#9ca3af;white-space:nowrap"><span style="padding:2px 8px;border-radius:99px;background:#e5e7eb;color:#9ca3af;font-size:10px;font-weight:700">N/A – Mac Only</span></td>
+        <td style="padding:7px 10px;font-size:11px;color:#9ca3af">—</td>
+        <td style="padding:7px 10px;font-size:10px;color:#9ca3af"></td>
+      </tr>`;
+    }
     const stateC = stateColor(e.state);
     const execNum = e.execOrder != null ? e.execOrder : e.displayNum;
     return `<tr${isLast ? '' : ' style="border-bottom:1px solid #e5e7eb"'}>
-      <td style="padding:7px 10px;font-size:12px;white-space:nowrap"><span style="color:#9ca3af;font-size:11px;font-weight:400">${execNum} &middot;</span> <span style="font-weight:700;color:#374151">#${e.id}</span></td>
+      <td style="padding:7px 10px;font-size:12px;white-space:nowrap"><span style="color:#9ca3af;font-size:11px">${execNum} &middot;</span> <span style="font-weight:700;color:#374151">#${e.id}</span></td>
       <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
-      <td style="padding:7px 10px;font-size:12px;color:#374151;max-width:540px;word-break:break-word"><div style="font-weight:700">${_esc(e.title)}</div>${e.purpose ? `<div style="font-size:11px;color:#6b7280;font-weight:400;margin-top:3px;line-height:1.4">${_esc(e.purpose)}</div>` : ''}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:147px;word-break:break-word">${_esc(e.input)}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:182px;word-break:break-word">${_esc(e.expected)}</td>
-      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:116px;word-break:break-word">${_esc(e.details)}</td>
-      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC};max-width:100px;word-break:break-word">${stateLabel(e.state, e.manuallyMarked)}</td>
+      <td style="padding:7px 10px;font-size:12px;color:#374151;max-width:540px;word-break:break-word"><div style="font-weight:700">${_esc(e.title)}</div>${e.purpose ? `<div style="font-size:11px;color:#6b7280;margin-top:3px">${_esc(e.purpose)}</div>` : ''}</td>
+      <td style="padding:7px 12px;font-size:12px;font-weight:700;color:${stateC}">${stateLabel(e.state, e.manuallyMarked)}</td>
+      <td style="padding:7px 10px;font-size:11px;color:#6b7280;max-width:180px;word-break:break-word">${_esc(e.details)}</td>
       <td style="padding:7px 10px;font-size:10px;color:#9ca3af;white-space:nowrap">${e.timestamp ? new Date(e.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</td>
     </tr>`;
   };
 
-  // Build collapsible sections — default collapsed (▸ / display:none)
-  const sectionOrder2 = ['preflight', 'auto', 'auto-manual', 'manual'];
-  const sections_html = sectionOrder2.map((sec, idx) => {
-    const es = sorted.filter(e => e.section === sec);
-    if (!es.length) return '';
-    const secName = sectionLabel[sec] || sec;
-    const tbodyId = `sec-tbody-${sec}`;
-    const btnId   = `sec-btn-${sec}`;
-    const spacer  = idx > 0 ? `<tr><td colspan="8" style="padding:16px 0"></td></tr>` : '';
-    const header  = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
-      <td colspan="8" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
-        <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▸</span>${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${es.length} test${es.length !== 1 ? 's' : ''})</span>
-        <span style="font-size:10px;color:#9ca3af;margin-left:8px;font-weight:400;text-transform:none;letter-spacing:0">click to expand</span>
-        ${secPills(sec)}
-      </td>
-    </tr>`;
-    const rows = es.map((e, i) => dataRow(e, i === es.length - 1)).join('');
-    // tbody default hidden; column headers first row inside tbody
-    return `${spacer}${header}<tbody id="${tbodyId}" style="display:none">${colHdrRow}${rows}</tbody>`;
-  }).join('');
+  // Build collapsible sections for a given tab
+  const buildSections = (winMode) => {
+    const sectionOrder2 = ['preflight', 'auto', 'auto-manual', 'manual'];
+    return sectionOrder2.map((sec, idx) => {
+      const es = sorted.filter(e => e.section === sec);
+      if (!es.length) return '';
+      const secName = sectionLabel[sec] || sec;
+      const tbodyId = `sec-tbody-${sec}-${winMode ? 'win' : 'mac'}`;
+      const btnId   = `sec-btn-${sec}-${winMode ? 'win' : 'mac'}`;
+      const spacer  = idx > 0 ? `<tr><td colspan="6" style="padding:14px 0"></td></tr>` : '';
+      // Section pills
+      const secEs = winMode ? es : es;
+      const secPass = (winMode ? es.filter(e => !isMacOnly(e.id)) : es).filter(e => e.state === 'pass').length;
+      const secFail = (winMode ? es.filter(e => !isMacOnly(e.id)) : es).filter(e => e.state === 'fail').length;
+      const secManual = (winMode ? es.filter(e => !isMacOnly(e.id)) : es).filter(e => e.state === 'manual').length;
+      const pillHtml = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
+        + _pill(secPass, 'Pass', '#3fbe71', false)
+        + _pill(secFail, 'Fail', '#e15b59', false)
+        + _pill(secManual, 'Manual', '#f59e0b', false)
+        + `</span>`;
+      const header = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
+        <td colspan="6" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
+          <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▸</span>${secName} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${es.length})</span>
+          ${pillHtml}
+        </td>
+      </tr>`;
+      const rows = es.map((e, i) => dataRow(e, i === es.length - 1, winMode)).join('');
+      return `${spacer}${header}<tbody id="${tbodyId}" style="display:none">${colHdrRow}${rows}</tbody>`;
+    }).join('');
+  };
+
+  // Test environment info block (shared header)
+  const envBlock = testEnv.email ? (() => {
+    const sec = `color:#3A566E;font-weight:700;font-size:0.72rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:5px;margin-bottom:8px`;
+    const row = (l, v) => `<div style="margin-bottom:2px"><span style="color:#4A6280">${l}:</span> ${_esc(String(v))}</div>`;
+    return `<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:32px;font-size:0.8rem;color:#6B7E94">
+      <div style="min-width:180px">
+        <div style="${sec}">Account</div>
+        ${row('Email', testEnv.email)}
+        ${row('Name', testEnv.name)}
+        ${row('Role', testEnv.role)}
+        ${row('Sub Tier', testEnv.subTier)}
+        ${row('Sub Status', testEnv.subStatus)}
+      </div>
+      <div style="min-width:200px">
+        <div style="${sec}">Settings</div>
+        ${row('Theme', testEnv.theme)}
+        ${row('Starting Page', testEnv.startPage)}
+        ${row('Auto Backup', testEnv.autoBackup)}
+        ${row('Auto Archive', testEnv.autoArchive)}
+        ${row('Time Per Click', testEnv.timePerClick)}
+        ${row('Dollar Per Hour', testEnv.dollarsPerHour)}
+      </div>
+      <div style="min-width:160px">
+        <div style="${sec}">Jumps &amp; Columns</div>
+        ${row('Active Jumps', testEnv.activeJumps)}
+        ${row('Favorites', testEnv.favJumps)}
+        ${row('Archived', testEnv.archivedJumps)}
+        ${row('Total Columns', testEnv.totalCols)}
+        ${row('Shared Columns', testEnv.sharedCols)}
+      </div>
+    </div>`;
+  })() : '';
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<title>JumpKit ${testEnv.os || 'Mac'} Release Testing v${_esc(version)}</title>
+<title>JumpKit Release Testing v${_esc(version)}</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f3f4f6; color:#1f2937; }
@@ -5032,83 +5185,72 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   .header { background:#0E1827; padding:28px 32px; }
   .header h1 { color:#C8D6E8; font-size:1.4rem; font-weight:700; margin-bottom:4px; }
   .header p { color:#4A6280; font-size:0.85rem; }
-  .stats { display:flex; gap:20px; padding:20px 32px; background:#f9fafb; border-bottom:1px solid #e5e7eb; }
-  .stat { text-align:center; }
-  .stat-val { font-size:1.5rem; font-weight:900; }
+  .tabs-bar { display:flex; gap:0; padding:0 32px; background:#f9fafb; border-bottom:2px solid #e5e7eb; }
+  .tab-btn { padding:12px 24px; font-size:0.85rem; font-weight:700; border:none; cursor:pointer; background:transparent; color:#6b7280; border-bottom:3px solid transparent; margin-bottom:-2px; transition:color .15s; }
+  .tab-btn.active { color:#0E1827; border-bottom-color:#1A4FD6; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+  .stats-bar { display:flex; gap:16px; padding:16px 32px; background:#f9fafb; border-bottom:1px solid #e5e7eb; flex-wrap:wrap; align-items:center; }
+  .stat { text-align:center; min-width:56px; }
+  .stat-val { font-size:1.4rem; font-weight:900; }
   .stat-lbl { font-size:10px; text-transform:uppercase; letter-spacing:.06em; color:#9ca3af; margin-top:2px; }
+  .plat-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:99px; font-size:0.78rem; font-weight:700; }
   table { width:100%; border-collapse:collapse; }
   @media print { body { background:#fff; } .wrap { box-shadow:none; } }
 </style>
+<script>
+function showTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tab-btn-' + tab).classList.add('active');
+}
+</script>
 </head>
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>JumpKit ${testEnv.os || 'Mac'} Release Testing — v${_esc(version)}</h1>
-    <p style="margin-bottom:${testEnv.email ? '14px' : '0'}">${runDate} &middot; ${sorted.length} tests total</p>
-    ${testEnv.email ? (() => {
-      const sec = `color:#3A566E;font-weight:700;font-size:0.72rem;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:5px;margin-bottom:8px`;
-      const row = (l, v) => `<div style="margin-bottom:2px"><span style="color:#4A6280">${l}:</span> ${_esc(String(v))}</div>`;
-      return `<div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:32px;font-size:0.8rem;color:#6B7E94">
-        <div style="min-width:180px">
-          <div style="${sec}">Account</div>
-          ${row('Account', testEnv.email)}
-          ${row('Name', testEnv.name)}
-          ${row('Role', testEnv.role)}
-          ${row('Sub Tier', testEnv.subTier)}
-          ${row('Sub Status', testEnv.subStatus)}
-          ${row('Environment', testEnv.os)}
-        </div>
-        <div style="min-width:200px">
-          <div style="${sec}">Settings</div>
-          ${row('Trial Launches Used', testEnv.trialLaunches)}
-          ${row('Theme', testEnv.theme)}
-          ${row('Starting Page', testEnv.startPage)}
-          ${row('Nav Menu on Startup', testEnv.navMenu)}
-          ${row('Notifications', testEnv.notifications)}
-          ${row('Show Jump Desc', testEnv.showDesc)}
-          ${row('Show Hotkey', testEnv.showHotkey)}
-          ${row('Time Per Click', testEnv.timePerClick)}
-          ${row('Dollar Per Hour', testEnv.dollarsPerHour)}
-          ${row('Auto Backup', testEnv.autoBackup)}
-          ${row('Auto Archive', testEnv.autoArchive)}
-        </div>
-        <div style="min-width:160px">
-          <div style="${sec}">Jumps</div>
-          ${row('Active', testEnv.activeJumps)}
-          ${row('Favorites', testEnv.favJumps)}
-          ${row('Archived', testEnv.archivedJumps)}
-        </div>
-        <div style="min-width:160px">
-          <div style="${sec}">Columns</div>
-          ${row('Total', testEnv.totalCols)}
-          ${row('Shared', testEnv.sharedCols)}
-        </div>
-        <div style="min-width:160px">
-          <div style="${sec}">Owned Teams (${testEnv.ownedTeams.length})</div>
-          ${testEnv.ownedTeams.length ? testEnv.ownedTeams.map(n => `<div>${_esc(n)}</div>`).join('') : '<div style="color:#4A6280">None</div>'}
-        </div>
-        <div style="min-width:160px">
-          <div style="${sec}">Member Teams (${testEnv.memberTeams.length})</div>
-          ${testEnv.memberTeams.length ? testEnv.memberTeams.map(n => `<div>${_esc(n)}</div>`).join('') : '<div style="color:#4A6280">None</div>'}
-        </div>
-      </div>`;
-    })() : ''}
+    <h1>JumpKit Release Testing — v${_esc(version)}</h1>
+    <p>${runDate}</p>
+    ${envBlock}
   </div>
-  <div class="stats">
-    <div class="stat"><div class="stat-val" style="color:#3fbe71">${totalPass}</div><div class="stat-lbl">Passed</div></div>
-    <div class="stat"><div class="stat-val" style="color:#e15b59">${totalFail}</div><div class="stat-lbl">Failed</div></div>
-    <div class="stat"><div class="stat-val" style="color:#f59e0b">${totalManual}</div><div class="stat-lbl">Manual</div></div>
-    <div class="stat"><div class="stat-val" style="color:#6b7280">${totalNotRun}</div><div class="stat-lbl">Skipped</div></div>
-    <div class="stat"><div class="stat-val" style="color:#374151">${sorted.length}</div><div class="stat-lbl">Total</div></div>
+
+  <!-- Tab buttons -->
+  <div class="tabs-bar">
+    <button class="tab-btn active" id="tab-btn-mac" onclick="showTab('mac')">🍎 Mac Run (${macPass}/${macTotal} passed)</button>
+    <button class="tab-btn" id="tab-btn-win" onclick="showTab('win')">🪟 Windows Run (${winPass}/${winTotal} passed)</button>
   </div>
-  <table>
-    ${sections_html}
-  </table>
+
+  <!-- Mac Tab -->
+  <div class="tab-content active" id="tab-mac">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val" style="color:#3fbe71">${macPass}</div><div class="stat-lbl">Passed</div></div>
+      <div class="stat"><div class="stat-val" style="color:#e15b59">${macFail}</div><div class="stat-lbl">Failed</div></div>
+      <div class="stat"><div class="stat-val" style="color:#f59e0b">${macManual}</div><div class="stat-lbl">Manual</div></div>
+      <div class="stat"><div class="stat-val" style="color:#6b7280">${macTotal - macPass - macFail - macManual}</div><div class="stat-lbl">Skipped</div></div>
+      <div class="stat"><div class="stat-val" style="color:#374151">${macTotal}</div><div class="stat-lbl">Total</div></div>
+    </div>
+    <table>${buildSections(false)}</table>
+  </div>
+
+  <!-- Windows Tab -->
+  <div class="tab-content" id="tab-win">
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val" style="color:#3fbe71">${winPass}</div><div class="stat-lbl">Passed</div></div>
+      <div class="stat"><div class="stat-val" style="color:#e15b59">${winFail}</div><div class="stat-lbl">Failed</div></div>
+      <div class="stat"><div class="stat-val" style="color:#f59e0b">${winManual}</div><div class="stat-lbl">Manual</div></div>
+      <div class="stat"><div class="stat-val" style="color:#6b7280">${winTotal - winPass - winFail - winManual}</div><div class="stat-lbl">Skipped</div></div>
+      <div class="stat"><div class="stat-val" style="color:#374151">${winTotal}</div><div class="stat-lbl">Required</div></div>
+      <div style="margin-left:8px;font-size:0.75rem;color:#9ca3af">Mac-only tests shown below but not counted in totals</div>
+    </div>
+    <table>${buildSections(true)}</table>
+  </div>
 </div>
 <!-- machine-readable data for merge -->
 <script type="application/json" id="jk-release-data">${JSON.stringify(entries).replace(/<\/script>/gi, '<\\u002fscript>')}<\/script>
 </body></html>`;
 }
+
 function _openTestStrategyModal() {
   const s = `padding:6px 0;color:var(--text-muted);font-size:0.88rem;line-height:1.7`;
   const h = `font-size:0.95rem;font-weight:700;color:var(--text);margin:18px 0 6px`;
@@ -5254,6 +5396,34 @@ function _sectionBlock(label, icon, tests, startNum, actionBtns, sectionKey) {
 }
 
 function _testRow(t, execNum) {
+  // Check if this test is Mac-only and the active run is Windows
+  const activeRun = _getReleaseState()?.activeRun || 'mac';
+  const isMacOnly = t.platforms && !t.platforms.includes('windows');
+  const isDisabled = activeRun === 'windows' && isMacOnly;
+
+  if (isDisabled) {
+    return `
+  <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);opacity:0.45;background:var(--bg-input)">
+    <td style="padding:10px 12px;font-size:0.8rem;font-weight:600;white-space:nowrap;color:var(--text-muted)"><span style="font-size:0.75rem;font-weight:400">${execNum} ·</span> #${t.id}</td>
+    <td style="padding:10px 12px">
+      <span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-hover);color:var(--text-dim)">${_esc(t.category)}</span>
+    </td>
+    <td style="padding:10px 12px">
+      <div style="font-weight:600;font-size:0.87rem;color:var(--text-muted)">${_esc(t.title)}</div>
+      <div style="font-size:0.78rem;color:var(--text-dim);margin-top:2px">${_esc(t.description)}</div>
+    </td>
+    <td style="padding:10px 12px;color:var(--text-dim);font-size:0.8rem"></td>
+    <td style="padding:10px 12px;text-align:center">
+      <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:0.72rem;font-weight:700;background:var(--bg-hover);color:var(--text-dim)">Mac Only</span>
+    </td>
+    <td style="padding:10px 12px;text-align:center" id="test-result-${t.id}">
+      <button data-jaction="test-details" data-testid="${t.id}" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;font-size:0.85rem;line-height:1;opacity:0.5" title="View test details">
+        <svg class="ti ti-notes" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-notes"/></svg><span style="line-height:1">Details</span>
+      </button>
+    </td>
+  </tr>`;
+  }
+
   return `
   <tr id="test-row-${t.id}" style="border-bottom:1px solid var(--border);transition:background .15s">
     <td style="padding:10px 12px;font-size:0.8rem;font-weight:600;white-space:nowrap"><span style="color:var(--text-muted);font-size:0.75rem;font-weight:400">${execNum} ·</span> <span style="color:var(--text);font-weight:700">#${t.id}</span></td>

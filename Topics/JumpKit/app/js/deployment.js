@@ -297,7 +297,7 @@ async function _openDeployManageModal() {
 
   const optionsHTML = deployments.map(d => {
         const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-        const label = `v${d.version} — ${date} (${d.testing_account || 'unknown'}) [${d.status}]`;
+        const label = `v${d.version} — ${date} [${d.status}]`;
         return `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${label}</option>`;
       }).join('');
 
@@ -313,14 +313,21 @@ async function _openDeployManageModal() {
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Select the finalized testing session for this deployment. Version and folder are auto-applied.</p>
       </div>
       ${sel ? `<div style="padding:10px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.82rem;color:var(--text-muted)">
-        <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;gap:20px;flex-wrap:wrap">
           <span><strong style="color:var(--text)">Version:</strong> v${sel.version}</span>
-          <span><strong style="color:var(--text)">Tests:</strong> ${sel.tests_passed ?? '—'}✓ ${sel.tests_failed ?? '—'}✗ ${sel.tests_skipped ?? '—'} skipped</span>
-          <span><strong style="color:var(--text)">OS:</strong> ${sel.test_os || '—'}</span>
-          <span><strong style="color:var(--text)">Folder:</strong> ${sel.deployment_folder ? sel.deployment_folder.split('/').pop() : '—'}</span>
+          <span><strong style="color:var(--text)">Mac:</strong> ${sel.mac_finalized_at ? '✅ Finalized' : '⏳ Pending'} ${sel.mac_tests_passed != null ? `(${sel.mac_tests_passed}/${sel.mac_tests_total} passed)` : ''}</span>
+          <span><strong style="color:var(--text)">Win:</strong> ${sel.win_finalized_at ? '✅ Finalized' : '⏳ Pending'} ${sel.win_tests_passed != null ? `(${sel.win_tests_passed}/${sel.win_tests_total} passed)` : ''}</span>
           <span><strong style="color:var(--text)">Status:</strong> ${sel.status || '—'}</span>
         </div>
       </div>` : ''}
+      <div>
+        <label style="${labelStyle}">Deployment Folder</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="dmDeployFolder" type="text" placeholder="Click Choose to pick the deployment folder…" value="${_esc((typeof _loadDeployConfig === 'function' ? _loadDeployConfig().folder : null) || sel?.deployment_folder || '')}" readonly style="${inputStyle};flex:1;cursor:default;color:var(--text-muted);font-size:0.82rem" />
+          <button id="dmDeployFolderBtn" class="btn btn-subtle" style="white-space:nowrap;flex-shrink:0">Choose…</button>
+        </div>
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Deployment files will be saved here and linked to this record.</p>
+      </div>
       <div>
         <label style="${labelStyle}">Mac Installer Path (optional)</label>
         <input id="dmMacFile" type="text" placeholder="Path to the .dmg installer file…" value="${_esc(sel?.mac_installer_path || '')}" style="${inputStyle}" />
@@ -356,6 +363,26 @@ async function _openDeployManageModal() {
 
   // Set selected deployment on load
   if (sel && !window._jkSelectedDeployment) window._jkSelectedDeployment = sel;
+
+  // Wire deployment folder picker
+  document.getElementById('dmDeployFolderBtn')?.addEventListener('click', async () => {
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
+    const result = await window.electronAPI.openFileDialog({ title: 'Select Deployment Folder', properties: ['openDirectory'] });
+    if (!result?.canceled && result?.filePath) {
+      const folder = result.filePath;
+      document.getElementById('dmDeployFolder').value = folder;
+      // Save to deploy config
+      if (typeof _loadDeployConfig === 'function') {
+        _saveDeployConfig({ ..._loadDeployConfig(), folder });
+      }
+      // Update Supabase record if one is selected
+      const selId = document.getElementById('dmDeploySelect')?.value;
+      if (selId) {
+        await supabaseClient.from('deployments').update({ deployment_folder: folder }).eq('id', selId).catch(() => {});
+      }
+      window.Toast?.success('Deployment folder saved.');
+    }
+  });
 
   // Save (installer paths + notes)
   const _el_dmSaveBtn = document.getElementById('dmSaveBtn'); if (_el_dmSaveBtn) _el_dmSaveBtn.onclick = async () => {
@@ -513,7 +540,7 @@ async function _saveDeployResults() {
 <body>
 <div class="container">
   <h1>JumpKit Deployment v${_esc(version)}</h1>
-  <div class="meta">Saved ${dateStr} at ${timeStr}${(sel?.mac_results_file || cfg.macFile) ? ' &nbsp;|&nbsp; Mac: ' + _esc((sel?.mac_results_file || cfg.macFile).split('/').pop()) : ''}${(sel?.win_results_file || cfg.winFile) ? ' &nbsp;|&nbsp; Win: ' + _esc((sel?.win_results_file || cfg.winFile).split('/').pop()) : ''}</div>
+  <div class="meta">Saved ${dateStr} at ${timeStr}${(sel?.results_file || cfg.resultsFilePath) ? ' &nbsp;|&nbsp; Results: ' + _esc((sel?.results_file || cfg.resultsFilePath || '').split('/').pop()) : ''}</div>
   <div class="summary">
     <div class="stat"><div class="stat-val" style="color:#16a34a">${done}</div><div class="stat-lbl">Done</div></div>
     <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done}</div><div class="stat-lbl">To Do</div></div>
