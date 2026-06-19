@@ -4968,10 +4968,10 @@ async function _openReleaseTestingModal() {
     : `<div id="rtResumeFileStatus" style="display:none"></div>`;
 
   const fileSection = `
-    <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">${existing ? 'Load Results' : ''}</p>
+    <p style="margin:0 0 8px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">${existing ? 'Load Session' : ''}</p>
     <button id="${existing ? 'rtLoadFromFileBtn' : 'rtResumeFromFileBtn'}" class="btn btn-subtle" style="width:100%;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 16px;font-size:0.85rem">
       <svg class="ti ti-file-upload" style="font-size:1rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg>
-      ${existing ? 'Load Results from File' : 'Resume testing session from results file'}
+      ${existing ? 'Choose Release Testing Session File' : 'Resume testing session from results file'}
     </button>
     <p style="margin:6px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTestingSession_vX.Y.Z.html to restore all test states and continue where you left off.'}</p>`;
 
