@@ -464,7 +464,7 @@ async function _openDeployManageModal() {
     Modal.open(
       '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
       `<div style="text-align:center;padding:32px 24px">
-        <svg class="ti ti-rocket" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
+        <svg class="ti ti-world-upload" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
         <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:var(--text)">No deployments yet</p>
         <p style="margin:0;font-size:0.88rem;color:var(--text-muted);line-height:1.6">No completed testing sessions found. Both Mac and Windows testing must be finalized before a deployment record appears here.<br>Go to <strong style="color:var(--text)">Testing &rarr; Manage Testing</strong> to finalize both platform runs.</p>
       </div>`,
