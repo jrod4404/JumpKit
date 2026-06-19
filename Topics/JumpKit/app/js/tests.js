@@ -4734,7 +4734,7 @@ function _updateRTLabel() {
 
     el.innerHTML = `${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
   } else {
-    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session - click <strong>Manage Testing</strong> to start</span>`;
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:var(--text-muted)">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
 }
 
@@ -5048,11 +5048,9 @@ async function _openReleaseTestingModal() {
       || content.match(/<title>JumpKit Release Testing v([^<]+)<\/title>/)?.[1]
       || 'unknown';
 
-    // Start session using extracted version + save file path
-    const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-    if (typeof _saveDeployConfig === 'function') {
-      _saveDeployConfig({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
-    }
+    // Start session using extracted version + save file path via _setReleaseState (handles fallback)
+    const cfg = _getReleaseState() || {};
+    _setReleaseState({ ...cfg, version: extractedVersion, resultsFilePath: chosenPath, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
 
     // Load test results — pass filePath directly so we don't depend on _loadDeployConfig being loaded
     await _loadResultsFromHTMLFile({ filePath: chosenPath });
