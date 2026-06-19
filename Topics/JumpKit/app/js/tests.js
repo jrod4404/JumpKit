@@ -4465,9 +4465,8 @@ function _clearSavedTestResults() {
 // JSON state, and restores each test's result into the live test runner.
 async function _loadResultsFromHTMLFile(opts = {}) {
   const silent = opts?.silent === true;
-  const state = _getReleaseState();
-  const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  const filePath = deployCfg?.resultsFilePath || state?.filePath; // fallback for legacy state
+  const cfg = _getReleaseState() || {};
+  const filePath = cfg?.resultsFilePath;
   if (!filePath) {
     if (!silent) alert('No results file configured. Click "Manage Testing" to create or load one.');
     return;
@@ -4550,8 +4549,7 @@ function _openConcludeModal(platform) {
        </div>`
     : `<div style="margin-bottom:14px;padding:10px 14px;border-radius:8px;background:#3fbe7122;border:1px solid #3fbe7155;color:#3fbe71;font-size:0.85rem">✅ All tests have been run and marked.</div>`;
 
-  const deployCfgForModal = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  const resultsFileForModal = deployCfgForModal?.resultsFilePath;
+  const resultsFileForModal = _getReleaseState()?.resultsFilePath;
   const fileNote = resultsFileForModal
     ? `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">Results will be saved to <strong style="color:var(--text)">${_esc(resultsFileForModal.split(/[\/\\]/).pop())}</strong> and recorded in Supabase.</p>`
     : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file yet - you will be prompted to choose a folder on first save.</p>`;
@@ -4580,9 +4578,8 @@ function _openConcludeModal(platform) {
 
 async function _finalizePlatformRun(platform) {
   const results = window._jkTestResults || {};
-  const releaseState = _getReleaseState();
   const deployConfig = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  const version = releaseState?.version || deployConfig.version || '';
+  const version = deployConfig.version || '';
   const account = window._supabaseUser?.email || (typeof currentUser !== 'undefined' && currentUser?.email) || '';
   const resultsFilePath = deployConfig?.resultsFilePath || '';
   const existingRecordId = deployConfig?.deploymentRecordId || null;
@@ -4614,7 +4611,7 @@ async function _finalizePlatformRun(platform) {
   };
 
   // Determine if both runs will be done after this finalization
-  const updatedState = { ...(releaseState || {}), [`${prefix}Finalized`]: true };
+  const updatedState = { ...deployConfig, [`${prefix}Finalized`]: true };
   const bothDone = updatedState.macFinalized && updatedState.winFinalized;
 
   try {
@@ -4632,7 +4629,7 @@ async function _finalizePlatformRun(platform) {
       recordId = data?.id;
       // Save UUID to deploy config
       if (typeof _saveDeployConfig === 'function') {
-        _saveDeployConfig({ ...deployConfig, deploymentRecordId: recordId });
+        _saveDeployConfig({ ...deployConfig, deploymentRecordId: recordId, ...updatedState, version });
       }
     } else {
       // Second finalization - UPDATE existing record
@@ -4642,10 +4639,11 @@ async function _finalizePlatformRun(platform) {
         ...platformData,
       }).eq('id', recordId);
       if (error) throw new Error(error.message);
+      // Persist finalized state to deploy config
+      if (typeof _saveDeployConfig === 'function') {
+        _saveDeployConfig({ ...deployConfig, ...updatedState, version });
+      }
     }
-
-    // Update release state
-    _setReleaseState({ ...updatedState, version });
 
     const platformLabel = platform === 'windows' ? 'Windows' : 'Mac';
     if (bothDone) {
@@ -4670,21 +4668,22 @@ function _esc(str) {
 // ══════════════════════════════════════════════════════════════════
 // RELEASE TESTING FILE
 // ══════════════════════════════════════════════════════════════════
-const _RT_KEY = 'jk_release_testing';
+// _RT_KEY eliminated — state now consolidated into jk_deploy_config via _loadDeployConfig/_saveDeployConfig
 
 function _getReleaseState() {
-  try { return JSON.parse(localStorage.getItem(_RT_KEY) || 'null'); } catch(_) { return null; }
+  // Thin wrapper — reads from jk_deploy_config; returns null if no session started yet
+  const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  return cfg?.version ? cfg : null;
 }
 function _setReleaseState(state) {
-  localStorage.setItem(_RT_KEY, JSON.stringify(state));
+  if (typeof _saveDeployConfig === 'function') _saveDeployConfig(state);
   _updateRTLabel();
 }
 function _updateRTLabel() {
   const el = document.getElementById('rtActiveLabel');
   if (!el) return;
-  const s = _getReleaseState();
-  const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  const resultsFile = cfg?.resultsFilePath;
+  const s = _getReleaseState(); // s is now jk_deploy_config (same object)
+  const resultsFile = s?.resultsFilePath;
 
   if (s?.version) {
     const results = window._jkTestResults || {};
@@ -4725,7 +4724,7 @@ function _updateRTLabel() {
 
 function _setActiveRun(platform) {
   const s = _getReleaseState();
-  if (!s) return;
+  if (!s?.version) return; // no active session
   _setReleaseState({ ...s, activeRun: platform });
   // Pre-mark mac-only tests as skipped when switching to Windows run
   if (platform === 'windows') {
@@ -4756,8 +4755,9 @@ function _setActiveRun(platform) {
 }
 
 async function _openReleaseTestingModal() {
-  const existing = _getReleaseState();
-  const deployConfig = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
+  // existing === deployConfig (same object — no more RT_KEY split)
+  const existing = _getReleaseState(); // null when no session; has .version when active
+  const deployConfig = existing || {};
   let appVersion = '1.0.0';
   try {
     if (window.electronAPI?.getAppVersion) appVersion = await window.electronAPI.getAppVersion();
@@ -4767,10 +4767,10 @@ async function _openReleaseTestingModal() {
   const labelStyle = 'display:block;font-size:0.78rem;font-weight:600;color:var(--text-muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em';
   const divider = `<hr style="border:none;border-top:1px solid var(--border);margin:18px 0">`;
 
-  const currentVersion = deployConfig.version || existing?.version || appVersion;
+  const currentVersion = deployConfig.version || appVersion;
   const resultsFile = deployConfig?.resultsFilePath;
-  const macDone = existing?.macFinalized || false;
-  const winDone = existing?.winFinalized || false;
+  const macDone = deployConfig?.macFinalized || false;
+  const winDone = deployConfig?.winFinalized || false;
   const bothDone = macDone && winDone;
 
 
@@ -4868,26 +4868,31 @@ async function _openReleaseTestingModal() {
     <div style="margin-top:8px">${modalFileBlock}</div>` : '';
 
   // ── Section 4: Version field ──────────────────────────────────────
-  const configTitle = existing
-    ? ''
-    : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
+  // Version section: read-only for existing sessions, editable for new sessions
+  const versionSection = existing
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border)">
+        <span style="font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Version</span>
+        <span style="font-size:1rem;font-weight:700;color:var(--text)">v${_esc(currentVersion)}</span>
+       </div>`
+    : `<div>
+        <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>
+        <label style="${labelStyle}">Version Number</label>
+        <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
+        <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
+       </div>`;
 
-  // File indicator block for modal
   const body = `
     ${statusBlock}
     ${completionBanner}
     ${runsBlock}
     ${divider}
-    ${configTitle}
-    <div style="margin-bottom:6px">
-      <label style="${labelStyle}">Version Number</label>
-      <input id="rtVersion" type="text" placeholder="e.g. ${_esc(appVersion)}" value="${_esc(currentVersion)}" style="${inputStyle}" />
-      <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Used to name the combined test results file (JumpKit_ReleaseTesting_vX.Y.Z.html).</p>
-    </div>`;
+    ${versionSection}`;
 
-  const footer = `
-    <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-    <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">${existing ? 'Save Version' : 'Start Session'}</button>`;
+  // Existing session: Cancel only. New session: Cancel + Start Session.
+  const footer = existing
+    ? `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
+    : `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
+       <button id="rtCreateBtn" class="btn btn-primary" style="min-width:140px">Start Session</button>`;
 
   Modal.open(
     '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing',
@@ -4961,31 +4966,22 @@ async function _openReleaseTestingModal() {
     });
   }
 
-  document.getElementById('rtCreateBtn').onclick = async () => {
-    const version = document.getElementById('rtVersion').value.trim() || appVersion;
+  // Start Session button — only rendered for new sessions
+  document.getElementById('rtCreateBtn')?.addEventListener('click', async () => {
+    const version = document.getElementById('rtVersion')?.value.trim() || appVersion;
     if (!version) { alert('Please enter a version number.'); return; }
-    const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-    if (typeof _saveDeployConfig === 'function') {
-      _saveDeployConfig({ ...cfg, version });
-    }
-    if (existing) {
-      _setReleaseState({ ...existing, version });
-      Modal.close();
-      window.Toast?.success(`Version updated to v${version}.`);
-    } else {
-      _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
-      Modal.close();
-      window.Toast?.success(`Testing session started - v${version}. Run Mac tests first, then switch to Windows.`);
-    }
+    // Initialize session — all state in jk_deploy_config
+    _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null, resultsFilePath: null, folder: null });
+    Modal.close();
+    window.Toast?.success(`Testing session started — v${version}. Run Mac tests first, then switch to Windows.`);
     _updateRTLabel();
-  };
+  });
 }
 
 async function _saveReleaseSection(mode) {
   try {
-  const rtState = _getReleaseState();
   const deployCfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
-  const version = deployCfg.version || rtState?.version || '';
+  const version = deployCfg.version || '';
 
   if (!version) {
     Modal.open(
