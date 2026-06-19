@@ -4984,11 +4984,11 @@ async function _openReleaseTestingModal() {
     ${clearSessionBtn}
     ${statusBlock}
     ${completionBanner}
-    ${runsBlock}
-    ${divider}
     ${versionSection}
     ${divider}
-    ${fileSection}`;
+    ${fileSection}
+    ${divider}
+    ${runsBlock}`;
 
   // Footer: Close only for all states — Start Session is now in the modal body
   const footer = `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`;
