@@ -4281,9 +4281,15 @@ function renderTests() {
         <button class="btn btn-subtle" id="btnCreateReleaseTesting" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Testing
         </button>
-        <div id="activeRunToggle" style="display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden;flex-shrink:0">
-          <button id="btnActiveRunMac" style="padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700">Mac</button>
-          <button id="btnActiveRunWin" style="padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600">Windows</button>
+        <div id="activeRunToggle" style="display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <button id="btnActiveRunMac" style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:background .15s">
+            <svg style="width:0.82rem;height:0.82rem;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            Mac
+          </button>
+          <button id="btnActiveRunWin" style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:background .15s">
+            <svg style="width:0.82rem;height:0.82rem;flex-shrink:0" viewBox="0 0 24 24" fill="currentColor"><path d="M3 12V6.75l6-1.25V12H3zm0 .75h6V18.5l-6-1V12.75zM10 5.25 21 3.5V12h-11V5.25zm0 6.75h11v8.25L10 18.75V12z"/></svg>
+            Windows
+          </button>
         </div>
         <span id="rtActiveLabel" style="font-size:0.78rem;color:var(--text-muted);display:flex;align-items:center;gap:5px"></span>
         <span id="runProgress" style="font-size:0.8rem;color:var(--text-muted);display:none"></span>
@@ -4312,12 +4318,10 @@ function renderTests() {
   const _macBtn = document.getElementById('btnActiveRunMac');
   const _winBtn = document.getElementById('btnActiveRunWin');
   if (_macBtn && _winBtn) {
-    _macBtn.style.cssText = _initActiveRun === 'mac'
-      ? 'padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700'
-      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
-    _winBtn.style.cssText = _initActiveRun === 'windows'
-      ? 'padding:4px 12px;border:none;cursor:pointer;background:#0ea5e9;color:#fff;font-size:0.78rem;font-weight:700'
-      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
+    const _activeS = (c) => `display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:${c};color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:background .15s`;
+    const _inactiveS = `display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:background .15s`;
+    _macBtn.style.cssText = _initActiveRun === 'mac' ? _activeS('var(--turq,#14b8a6)') : _inactiveS;
+    _winBtn.style.cssText = _initActiveRun === 'windows' ? _activeS('#0ea5e9') : _inactiveS;
   }
   // Pre-seed all [MANUAL] tests with 'manual' state if not already set
   JK_TESTS.filter(t => t.title.startsWith('[MANUAL]')).forEach(t => {
@@ -4681,11 +4685,14 @@ function _updateRTLabel() {
   const s = _getReleaseState();
   const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
   const resultsFile = cfg?.resultsFilePath;
-  if (s?.version && resultsFile) {
-    const fname = resultsFile.split(/[\/\\]/).pop();
+  if (s?.version) {
+    // Session is active — show green regardless of whether results file exists yet
     const macDone = s.macFinalized ? '✅' : '⏳';
     const winDone = s.winFinalized ? '✅' : '⏳';
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span>v${_esc(s.version)} &nbsp;${macDone} Mac &nbsp;${winDone} Win &nbsp;<span style="color:var(--text-dim);font-size:0.75rem">${_esc(fname)}</span></span>`;
+    const fileLabel = resultsFile
+      ? `<span style="color:var(--text-dim);font-size:0.75rem">${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
+      : `<span style="color:var(--text-dim);font-size:0.75rem">No file yet — save results to create</span>`;
+    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)"> &nbsp;·&nbsp; ${macDone} Mac &nbsp;${winDone} Win &nbsp;</span>${fileLabel}`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
@@ -4715,12 +4722,10 @@ function _setActiveRun(platform) {
   const macBtn = document.getElementById('btnActiveRunMac');
   const winBtn = document.getElementById('btnActiveRunWin');
   if (macBtn && winBtn) {
-    macBtn.style.cssText = platform === 'mac'
-      ? 'padding:4px 12px;border:none;cursor:pointer;background:var(--turq,#14b8a6);color:#fff;font-size:0.78rem;font-weight:700'
-      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
-    winBtn.style.cssText = platform === 'windows'
-      ? 'padding:4px 12px;border:none;cursor:pointer;background:#0ea5e9;color:#fff;font-size:0.78rem;font-weight:700'
-      : 'padding:4px 12px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600';
+    const activeStyle = (color) => `display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:${color};color:#fff;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:background .15s`;
+    const inactiveStyle = `display:inline-flex;align-items:center;gap:5px;padding:5px 14px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:background .15s`;
+    macBtn.style.cssText = platform === 'mac' ? activeStyle('var(--turq,#14b8a6)') : inactiveStyle;
+    winBtn.style.cssText = platform === 'windows' ? activeStyle('#0ea5e9') : inactiveStyle;
   }
 }
 
@@ -4763,27 +4768,30 @@ async function _openReleaseTestingModal() {
 
   // ── Section 3: Dual-run status rows (only when session exists) ────
   const _runRow = (platform, done) => {
-    const label = platform === 'mac' ? 'Mac Run' : 'Windows Run';
+    const platformLabel = platform === 'mac' ? 'Mac Run' : 'Windows Run';
+    const btnLabel = platform === 'mac' ? 'Finalize Mac Testing' : 'Finalize Win Testing';
+    const btnId = platform === 'mac' ? 'rtFinalizeMacBtn' : 'rtFinalizeWinBtn';
     const pill = done
       ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✅ Finalized</span>`
-      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:600;background:#6b728022;color:#6b7280;border:1px solid #6b728044">⏳ Not finalized</span>`;
-    const btn = done
-      ? `<span style="font-size:0.78rem;color:#3fbe71;font-weight:600">✔ Done</span>`
-      : `<button id="rtFinalize${platform === 'mac' ? 'Mac' : 'Win'}Btn" class="btn btn-subtle" style="font-size:0.8rem;padding:4px 12px;color:#1A4FD6;border-color:#1A4FD6;display:inline-flex;align-items:center;gap:5px"><svg class="ti ti-flag-check" style="font-size:0.85rem;color:#1A4FD6"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> Finalize ${label}</button>`;
-    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card)">
-      <div style="display:flex;align-items:center;gap:10px">
-        <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
-        <span style="font-weight:600;font-size:0.88rem">${label}</span>
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#e15b5922;color:#e15b59;border:1px solid #e15b5955">✕ Not finalized</span>`;
+    const finalizeBtn = done
+      ? ''
+      : `<button id="${btnId}" class="btn" style="font-size:0.8rem;padding:5px 14px;background:#1A4FD6;color:#fff;border-color:#1A4FD6;display:inline-flex;align-items:center;gap:5px;white-space:nowrap"><svg class="ti ti-flag-check" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-flag-check"/></svg> ${btnLabel}</button>`;
+    const doneCheck = done ? `<span style="font-size:0.82rem;color:#3fbe71;font-weight:700">✔ Done</span>` : '';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-card);flex:1">
+        <svg class="ti ti-brand-${platform === 'mac' ? 'apple' : 'windows'}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-brand-${platform === 'mac' ? 'apple' : 'windows'}"/></svg>
+        <span style="font-weight:700;font-size:0.88rem;color:var(--text)">${platformLabel}</span>
         ${pill}
       </div>
-      ${btn}
+      <div style="flex-shrink:0">${done ? doneCheck : finalizeBtn}</div>
     </div>`;
   };
 
   const runsBlock = existing ? `
     ${divider}
     <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Runs</p>
-    <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;flex-direction:column;gap:10px">
       ${_runRow('mac', macDone)}
       ${_runRow('windows', winDone)}
     </div>
