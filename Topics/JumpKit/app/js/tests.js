@@ -1,4 +1,4 @@
-// ── JumpKit Unit Tests (admin only) — v3 ─────────────────────────
+// ── JumpKit Unit Tests (admin only) - v3 ─────────────────────────
 // Injected spin animation
 (function injectStyles() {
   if (document.getElementById('jk-test-styles')) return;
@@ -29,7 +29,7 @@ const JK_TESTS = [
     id: 1, category: 'Auth',
     title: 'Session persists after reload',
     purpose: 'Confirms the user remains authenticated after the app loads. If this fails, the login flow or session storage is broken.',
-    prerequisites: 'None — runs automatically on app load.',
+    prerequisites: 'None - runs automatically on app load.',
     description: 'window._supabaseUser is set after app load',
     input: 'window._supabaseUser',
     expected: 'window._supabaseUser is not null',
@@ -41,7 +41,7 @@ const JK_TESTS = [
   {
     id: 2, category: 'Auth',
     title: 'currentUser is set',
-    purpose: 'Verifies the local currentUser object is properly populated. This object drives nearly all DB reads/writes — if missing, the entire app will malfunction.',
+    purpose: 'Verifies the local currentUser object is properly populated. This object drives nearly all DB reads/writes - if missing, the entire app will malfunction.',
     prerequisites: 'Must be logged in. Test 1 (session persists) should pass first.',
     input: 'currentUser.id, currentUser.email',
     description: 'currentUser has .id and .email',
@@ -56,7 +56,7 @@ const JK_TESTS = [
   {
     id: 3, category: 'Auth',
     title: 'Supabase profile loaded',
-    purpose: 'Checks that the user\'s Supabase profile row was fetched on startup. Role, org_id, and subscription data all live here — missing profile breaks teams, billing, and settings.',
+    purpose: 'Checks that the user\'s Supabase profile row was fetched on startup. Role, org_id, and subscription data all live here - missing profile breaks teams, billing, and settings.',
     prerequisites: 'Must be logged in. A matching row must exist in the Supabase profiles table for this user.',
     input: 'window._supabaseProfile',
     description: 'window._supabaseProfile is set after initApp',
@@ -69,14 +69,14 @@ const JK_TESTS = [
   {
     id: 4, category: 'Auth',
     title: 'Subscription status in memory',
-    purpose: 'Ensures subscription_status is present on the in-memory Supabase profile object after login. This is the sole source of truth for feature gating — localStorage is intentionally not used to prevent client-side tampering.',
+    purpose: 'Ensures subscription_status is present on the in-memory Supabase profile object after login. This is the sole source of truth for feature gating - localStorage is intentionally not used to prevent client-side tampering.',
     prerequisites: 'Must be logged in. Supabase profile must have been fetched during initApp (Test 3 must pass).',
     input: 'window._supabaseProfile?.subscription_status',
     description: 'window._supabaseProfile.subscription_status is set',
     expected: 'window._supabaseProfile.subscription_status is not null/undefined',
     test: async () => {
       const val = window._supabaseProfile?.subscription_status;
-      if (val == null) throw new Error('window._supabaseProfile.subscription_status is not set — Supabase profile may not have loaded');
+      if (val == null) throw new Error('window._supabaseProfile.subscription_status is not set - Supabase profile may not have loaded');
       return true;
     }
   },
@@ -122,7 +122,7 @@ const JK_TESTS = [
         .maybeSingle();
       if (error) throw new Error('Query failed: ' + error.message);
       if (!data) throw new Error('No user_sessions row found');
-      if (data.session_token !== localToken) throw new Error(`Token mismatch — Supabase: ${data.session_token?.slice(0,8)}… local: ${localToken?.slice(0,8)}…`);
+      if (data.session_token !== localToken) throw new Error(`Token mismatch - Supabase: ${data.session_token?.slice(0,8)}... local: ${localToken?.slice(0,8)}...`);
     }
   },
 
@@ -130,7 +130,7 @@ const JK_TESTS = [
     id: 148, category: 'Auth',
     title: '[MANUAL] Second device login is blocked',
     purpose: 'Confirms that attempting to log in from a second device while already logged in shows the session conflict modal and blocks entry.',
-    prerequisites: 'Must be logged in on this device. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory (see steps below) — this gives it its own clean sessionStorage with no session token, exactly like a different device.',
+    prerequisites: 'Must be logged in on this device. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory (see steps below) - this gives it its own clean sessionStorage with no session token, exactly like a different device.',
     input: 'Attempt login with same credentials on a second device/profile',
     description: 'On a second device or browser profile, navigate to the JumpKit login page and enter the same credentials.',
     expected: 'Login succeeds on second device but shows "Already Logged In" modal with device info and two options: "Log out other device & continue" and "Cancel". Clicking Cancel returns to login screen without accessing the app.',
@@ -139,7 +139,7 @@ const JK_TESTS = [
       { label: 'Open 2nd instance (from source)', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm start -- --user-data-dir=/tmp/jumpkit-second' },
       { label: 'Cleanup temp profile', cmd: 'rm -rf /tmp/jumpkit-second' },
     ],
-    steps: '1. Keep this device logged in.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available).\n3. In the second instance, enter the same email + password and click Sign In.\n4. Verify the "Already Logged In" modal appears showing device and last-seen time.\n5. Click Cancel — verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click "Log out other device & continue" — verify you are redirected to app.html on the second instance.\n7. After testing, click the Cleanup command above to remove the temp profile.',
+    steps: '1. Keep this device logged in.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available).\n3. In the second instance, enter the same email + password and click Sign In.\n4. Verify the "Already Logged In" modal appears showing device and last-seen time.\n5. Click Cancel - verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click "Log out other device & continue" - verify you are redirected to app.html on the second instance.\n7. After testing, click the Cleanup command above to remove the temp profile.',
     test: async () => 'manual'
   },
 
@@ -172,7 +172,7 @@ const JK_TESTS = [
     id: 10, category: 'Navigation',
     title: 'Home page renders',
     purpose: 'Confirms the home page mounts correctly and the tips grid is present. A failure here indicates a rendering crash or missing DOM element on the default landing page.',
-    prerequisites: 'None — does not require any jumps or columns.',
+    prerequisites: 'None - does not require any jumps or columns.',
     input: 'navigateTo("home") → document.querySelector(".tips-grid")',
     description: 'Navigate to home page and check for tips-grid',
     expected: '.tips-grid exists after navigating to home',
@@ -189,7 +189,7 @@ const JK_TESTS = [
     id: 11, category: 'Navigation',
     title: 'Jumps page renders',
     purpose: 'Verifies the Jumps page loads and shows either jump columns or an empty-state placeholder. Catches rendering regressions in the core feature page.',
-    prerequisites: 'None — passes even with zero jumps (empty state counts).',
+    prerequisites: 'None - passes even with zero jumps (empty state counts).',
     input: 'navigateTo("jumps") → document.querySelector(".columns-area, .no-columns")',
     description: 'Navigate to jumps and check for jump content',
     expected: '.columns-area or .no-columns exists on jumps page',
@@ -206,7 +206,7 @@ const JK_TESTS = [
     id: 12, category: 'Navigation',
     title: 'Archive page renders',
     purpose: 'Confirms the Archive page mounts and its list container exists. Ensures users can always access their archived jumps.',
-    prerequisites: 'None — passes even with an empty archive.',
+    prerequisites: 'None - passes even with an empty archive.',
     input: 'navigateTo("archive") → document.querySelector("#archiveList")',
     description: 'Navigate to archive and check for archive content',
     expected: '#archiveList or .no-columns exists on archive page',
@@ -223,7 +223,7 @@ const JK_TESTS = [
     id: 13, category: 'Navigation',
     title: 'Stats page renders',
     purpose: 'Confirms the Stats page renders its wrapper without crashing. A failure suggests a chart library issue or broken renderStats() function.',
-    prerequisites: 'None — renders with zero data.',
+    prerequisites: 'None - renders with zero data.',
     input: 'navigateTo("stats") → document.querySelector(".stats-wrap")',
     description: 'Navigate to stats and check pageContent has content',
     expected: 'Stats page renders without error',
@@ -259,7 +259,7 @@ const JK_TESTS = [
     id: 31, category: 'Jumps',
     title: 'DB.getActiveJumps returns array',
     purpose: 'Isolates the core data accessor for jumps. If this returns a non-array, every jump render and loop in the app will crash.',
-    prerequisites: 'None — returns empty array if no jumps exist.',
+    prerequisites: 'None - returns empty array if no jumps exist.',
     description: 'Call DB.getActiveJumps(currentUser.id) and verify result is array',
     input: 'DB.getActiveJumps(currentUser.id)',
     expected: 'Returns an array (possibly empty)',
@@ -272,8 +272,8 @@ const JK_TESTS = [
   {
     id: 32, category: 'Jumps',
     title: 'DB.getColumns returns array',
-    purpose: 'Verifies the column data accessor works. Columns are required to display or add jumps — if this fails, the Jumps page will be empty or crash.',
-    prerequisites: 'None — returns empty array if no columns exist.',
+    purpose: 'Verifies the column data accessor works. Columns are required to display or add jumps - if this fails, the Jumps page will be empty or crash.',
+    prerequisites: 'None - returns empty array if no columns exist.',
     input: 'DB.getColumns(currentUser.id)',
     description: 'Call DB.getColumns(currentUser.id) and verify result is array',
     expected: 'Returns an array (possibly empty)',
@@ -287,7 +287,7 @@ const JK_TESTS = [
     id: 33, category: 'Jumps',
     title: 'Add jump saves to DB',
     purpose: 'Tests the full create→read→delete lifecycle for a jump. Confirms DB.createJump persists correctly and DB.deleteJump removes it cleanly.',
-    prerequisites: 'At least one column must exist. Test is self-cleaning — creates and deletes its own jump.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning - creates and deletes its own jump.',
     input: 'DB.createJump(currentUser.id, { name, url, columnId }) → DB.deleteJump(currentUser.id, id)',
     description: 'Create a test jump via DB.saveJump, verify it exists, then delete it',
     expected: 'Test jump appears in getActiveJumps after save, then removed after delete',
@@ -299,7 +299,7 @@ const JK_TESTS = [
         name: '__TEST JUMP (auto-cleanup)',
         url: 'https://example.com/test',
         columnId: cols[0].id,
-        description: 'Unit test jump — safe to delete',
+        description: 'Unit test jump - safe to delete',
         hotkey: '',
         favorite: false,
         isArchived: false,
@@ -320,7 +320,7 @@ const JK_TESTS = [
     id: 34, category: 'Jumps',
     title: 'Archive jump removes from active',
     purpose: 'Confirms that archiving a jump correctly removes it from the active list. Catches bugs where archive doesn\'t persist or the active filter doesn\'t exclude archived items.',
-    prerequisites: 'At least one column must exist. Test is self-cleaning — creates, archives, and deletes its own jump.',
+    prerequisites: 'At least one column must exist. Test is self-cleaning - creates, archives, and deletes its own jump.',
     input: 'DB.createJump() → DB.archiveJump(currentUser.id, id) → DB.getActiveJumps(currentUser.id)',
     description: 'Archive a temp jump, verify it is no longer in getActiveJumps',
     expected: 'Jump absent from active list after archiving, then cleaned up',
@@ -332,7 +332,7 @@ const JK_TESTS = [
         name: '__TEST ARCHIVE (auto-cleanup)',
         url: 'https://example.com/archive-test',
         columnId: cols[0].id,
-        description: 'Archive unit test — safe to delete',
+        description: 'Archive unit test - safe to delete',
         hotkey: '',
         favorite: false,
         isArchived: false,
@@ -351,7 +351,7 @@ const JK_TESTS = [
     id: 35, category: 'Jumps',
     title: 'Hotkey not duplicated',
     purpose: 'Ensures no two jumps share a hotkey, which would cause unpredictable behavior when that key is pressed. Catches data corruption from imports or manual edits.',
-    prerequisites: 'None — passes if no jumps exist or no hotkeys are set.',
+    prerequisites: 'None - passes if no jumps exist or no hotkeys are set.',
     input: 'DB.getActiveJumps(currentUser.id).map(j => j.hotkey)',
     description: 'Check no two active jumps share the same non-empty hotkey',
     expected: 'All non-empty hotkeys are unique across active jumps',
@@ -369,7 +369,7 @@ const JK_TESTS = [
   {
     id: 128, category: 'Jumps',
     title: '[MANUAL] Jump click launches URL',
-    purpose: 'Manually verifies the core user action — clicking a jump opens the correct URL or file path in the system browser or file explorer.',
+    purpose: 'Manually verifies the core user action - clicking a jump opens the correct URL or file path in the system browser or file explorer.',
     prerequisites: 'At least one jump with a valid URL must exist on the Jumps page.',
     input: 'Click on any jump card on the Jumps page',
     description: 'Click a jump in the app and verify it opens in browser',
@@ -383,7 +383,7 @@ const JK_TESTS = [
     id: 39, category: 'Columns',
     title: 'Columns have unique IDs',
     purpose: 'Guards against duplicate column IDs which would cause jumps to appear in wrong columns or be overwritten during saves.',
-    prerequisites: 'None — passes with zero columns.',
+    prerequisites: 'None - passes with zero columns.',
     input: 'DB.getColumns(currentUser.id).map(c => c.id)',
     description: 'All column IDs are unique',
     expected: 'No two columns share the same ID',
@@ -399,7 +399,7 @@ const JK_TESTS = [
     id: 40, category: 'Columns',
     title: 'Column order is sequential',
     purpose: 'Confirms column ordering is intact so the Jumps page renders columns in the correct left-to-right sequence. Catches issues after drag-reorder or bulk saves.',
-    prerequisites: 'None — passes with zero columns.',
+    prerequisites: 'None - passes with zero columns.',
     input: 'DB.getColumns(currentUser.id).sort((a,b) => a.order - b.order).map(c => c.order)',
     description: 'Column .order values are sequential integers starting from 0 or 1',
     expected: 'Columns sorted by .order have contiguous integer values',
@@ -423,7 +423,7 @@ const JK_TESTS = [
     expected: 'DB.getColumns(currentUser.id).length >= 1',
     test: async () => {
       const cols = DB.getColumns(currentUser.id);
-      if (cols.length < 1) throw new Error('No columns found — user has zero columns');
+      if (cols.length < 1) throw new Error('No columns found - user has zero columns');
       return true;
     }
   },
@@ -448,7 +448,7 @@ const JK_TESTS = [
     id: 45, category: 'Archive',
     title: 'DB.getArchivedJumps returns array',
     purpose: 'Verifies the archive data accessor is functional. A non-array return would crash the Archive page render loop.',
-    prerequisites: 'None — returns empty array if no archived jumps exist.',
+    prerequisites: 'None - returns empty array if no archived jumps exist.',
     input: 'DB.getArchivedJumps(currentUser.id)',
     description: 'Call DB.getArchivedJumps(currentUser.id) and verify result is array',
     expected: 'Returns an array (possibly empty)',
@@ -474,7 +474,7 @@ const JK_TESTS = [
         name: '__TEST UNARCHIVE (auto-cleanup)',
         url: 'https://example.com/unarchive-test',
         columnId: cols[0].id,
-        description: 'Unarchive unit test — safe to delete',
+        description: 'Unarchive unit test - safe to delete',
         hotkey: '',
         favorite: false,
         isArchived: false,
@@ -494,7 +494,7 @@ const JK_TESTS = [
     id: 47, category: 'Archive',
     title: 'Archive page renders archived list',
     purpose: 'Confirms the Archive page mounts its list container in the DOM. Catches render failures that would leave users with a blank archive page.',
-    prerequisites: 'None — passes even with an empty archive.',
+    prerequisites: 'None - passes even with an empty archive.',
     input: 'navigateTo("archive") → document.querySelector("#archiveList")',
     description: 'Navigate to archive page and verify DOM has content',
     expected: 'Archive page renders without error',
@@ -512,8 +512,8 @@ const JK_TESTS = [
   {
     id: 48, category: 'Stats',
     title: 'Click log is array',
-    purpose: 'Verifies the click log data accessor works. All stats charts depend on this — a non-array return would crash every chart on the Stats page.',
-    prerequisites: 'None — returns empty array if no clicks recorded.',
+    purpose: 'Verifies the click log data accessor works. All stats charts depend on this - a non-array return would crash every chart on the Stats page.',
+    prerequisites: 'None - returns empty array if no clicks recorded.',
     input: 'DB.getClickLog(currentUser.id)',
     description: 'DB.getClickLog(currentUser.id) returns an array',
     expected: 'Returns an array (possibly empty)',
@@ -526,7 +526,7 @@ const JK_TESTS = [
   {
     id: 49, category: 'Stats',
     title: 'Trial launches used is number',
-    purpose: 'Confirms the trial launch counter is a valid number. This value gates free-tier access — if it\'s null or NaN the paywall logic will behave unpredictably.',
+    purpose: 'Confirms the trial launch counter is a valid number. This value gates free-tier access - if it\'s null or NaN the paywall logic will behave unpredictably.',
     prerequisites: 'Supabase profile must be loaded (Test 3 must pass).',
     input: 'window._supabaseProfile.trial_launches_used',
     description: 'window._supabaseProfile.trial_launches_used is a number',
@@ -541,7 +541,7 @@ const JK_TESTS = [
     id: 50, category: 'Stats',
     title: 'Stats page renders charts',
     purpose: 'End-to-end check that the Stats page renders its full wrapper with chart content. Catches regressions in renderStats() or missing chart dependencies.',
-    prerequisites: 'None — renders with zero data.',
+    prerequisites: 'None - renders with zero data.',
     input: 'navigateTo("stats") → document.querySelector(".stats-wrap")',
     description: 'Navigate to stats, check page content is populated',
     expected: '.stats-wrap or chart-related elements exist after navigation',
@@ -596,7 +596,7 @@ const JK_TESTS = [
   {
     id: 18, category: 'Account',
     title: 'Subscription tier badge shows',
-    purpose: 'Verifies the subscription tier is visible on the Account page. Users rely on this to understand their plan — missing it suggests billing data isn\'t being read.',
+    purpose: 'Verifies the subscription tier is visible on the Account page. Users rely on this to understand their plan - missing it suggests billing data isn\'t being read.',
     prerequisites: 'Test 4 (subscription status cached) must pass.',
     input: 'navigateTo("account") → document.querySelectorAll(".acct-row") containing "account type" or tier label',
     description: 'Account page displays a subscription tier badge',
@@ -642,9 +642,9 @@ const JK_TESTS = [
     expected: 'Free tier users have trial_launches_used <= 250',
     test: async () => {
       const status = window._supabaseProfile?.subscription_status || 'free';
-      if (status !== 'free') return true; // paid — skip
+      if (status !== 'free') return true; // paid - skip
       const used = window._supabaseProfile?.trial_launches_used || 0;
-      if (used > 250) throw new Error(`Free user has ${used} launches used — exceeds 250 limit`);
+      if (used > 250) throw new Error(`Free user has ${used} launches used - exceeds 250 limit`);
       return true;
     }
   },
@@ -652,7 +652,7 @@ const JK_TESTS = [
     id: 55, category: 'Subscription',
     title: 'showPaywall function exists',
     purpose: 'Confirms the paywall function is globally accessible. If missing, free-tier users could use the app indefinitely without ever seeing the upgrade prompt.',
-    prerequisites: 'None — checks window scope only.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof window.showPaywall',
     description: 'window.showPaywall is a function',
     expected: 'typeof window.showPaywall === "function"',
@@ -676,7 +676,7 @@ const JK_TESTS = [
       if (status !== 'active') return true; // skip for non-active
       const overlay = document.getElementById('modalOverlay');
       if (overlay && overlay.style.display !== 'none' && overlay.style.display !== '') {
-        throw new Error('Modal overlay is visible — paywall may have fired for active subscriber');
+        throw new Error('Modal overlay is visible - paywall may have fired for active subscriber');
       }
       return true;
     }
@@ -703,8 +703,8 @@ const JK_TESTS = [
   {
     id: 68, category: 'Teams',
     title: 'supabaseClient accessible',
-    purpose: 'Confirms the Supabase client is initialized. Every team sharing, invite, and sync operation depends on this — if undefined, all cloud features fail silently.',
-    prerequisites: 'None — checks window scope only.',
+    purpose: 'Confirms the Supabase client is initialized. Every team sharing, invite, and sync operation depends on this - if undefined, all cloud features fail silently.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof supabaseClient',
     description: 'window.supabaseClient is defined',
     expected: 'typeof supabaseClient !== "undefined"',
@@ -718,14 +718,14 @@ const JK_TESTS = [
   {
     id: 169, category: 'Teams',
     title: 'Role present in memory',
-    purpose: 'Confirms the user\'s role is present on the in-memory Supabase profile object. Role gates org-owner vs team-member views — localStorage is intentionally not used to prevent client-side tampering.',
+    purpose: 'Confirms the user\'s role is present on the in-memory Supabase profile object. Role gates org-owner vs team-member views - localStorage is intentionally not used to prevent client-side tampering.',
     prerequisites: 'Must be logged in. Supabase profile must have been fetched during initApp (Test 3 must pass).',
     input: 'window._supabaseProfile?.role',
     description: 'window._supabaseProfile.role is set',
     expected: 'window._supabaseProfile.role is not null/undefined',
     test: async () => {
       const role = window._supabaseProfile?.role;
-      if (role == null) throw new Error('window._supabaseProfile.role is not set — Supabase profile may not have loaded');
+      if (role == null) throw new Error('window._supabaseProfile.role is not set - Supabase profile may not have loaded');
       return true;
     }
   },
@@ -742,7 +742,7 @@ const JK_TESTS = [
     test: async () => {
       const theme = document.documentElement.dataset.theme;
       if (theme !== 'dark' && theme !== 'light') {
-        throw new Error(`Unexpected theme: "${theme}" — expected "dark" or "light"`);
+        throw new Error(`Unexpected theme: "${theme}" - expected "dark" or "light"`);
       }
       return true;
     }
@@ -750,8 +750,8 @@ const JK_TESTS = [
   {
     id: 95, category: 'UI',
     title: 'Toast function accessible',
-    purpose: 'Verifies the Toast notification system is available. Save, delete, error, and feedback operations all call Toast — if missing, users get no feedback on their actions.',
-    prerequisites: 'None — checks window scope only.',
+    purpose: 'Verifies the Toast notification system is available. Save, delete, error, and feedback operations all call Toast - if missing, users get no feedback on their actions.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof Toast, typeof Toast.success, typeof Toast.danger',
     description: 'Toast is defined with .success and .danger methods',
     expected: 'typeof Toast !== "undefined" && typeof Toast.success === "function"',
@@ -765,8 +765,8 @@ const JK_TESTS = [
   {
     id: 96, category: 'UI',
     title: 'Modal function accessible',
-    purpose: 'Confirms the Modal system is available globally. Add Jump, Configure Columns, Feedback, and team actions all use Modal — a missing definition would silently break all of them.',
-    prerequisites: 'None — checks window scope only.',
+    purpose: 'Confirms the Modal system is available globally. Add Jump, Configure Columns, Feedback, and team actions all use Modal - a missing definition would silently break all of them.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof Modal, typeof Modal.open, typeof Modal.close',
     description: 'Modal is defined with .open and .close methods',
     expected: 'typeof Modal !== "undefined" && Modal.open/close are functions',
@@ -780,14 +780,14 @@ const JK_TESTS = [
   {
     id: 97, category: 'UI',
     title: 'Sidebar nav has items',
-    purpose: 'Ensures the sidebar navigation rendered all its buttons. Fewer than 5 nav items means a page is missing from the nav — users wouldn\'t be able to reach it.',
-    prerequisites: 'None — sidebar renders on app load.',
+    purpose: 'Ensures the sidebar navigation rendered all its buttons. Fewer than 5 nav items means a page is missing from the nav - users wouldn\'t be able to reach it.',
+    prerequisites: 'None - sidebar renders on app load.',
     input: 'document.querySelectorAll(".nav-item[data-page]").length',
     description: 'Sidebar has >= 5 nav buttons',
     expected: 'At least 5 .nav-item[data-page] buttons in sidebar',
     test: async () => {
       const btns = document.querySelectorAll('.nav-item[data-page]');
-      if (btns.length < 5) throw new Error(`Only ${btns.length} nav items found — expected >= 5`);
+      if (btns.length < 5) throw new Error(`Only ${btns.length} nav items found - expected >= 5`);
       return true;
     }
   },
@@ -796,8 +796,8 @@ const JK_TESTS = [
   {
     id: 98, category: 'UI',
     title: 'CtxMenu is accessible',
-    purpose: 'Confirms the context menu system is initialized. Right-clicking any jump relies on CtxMenu.show/hide — if missing, right-click actions (edit, archive, delete) are broken.',
-    prerequisites: 'None — checks window scope only.',
+    purpose: 'Confirms the context menu system is initialized. Right-clicking any jump relies on CtxMenu.show/hide - if missing, right-click actions (edit, archive, delete) are broken.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof window.CtxMenu, typeof window.CtxMenu.show, typeof window.CtxMenu.hide',
     description: 'window.CtxMenu and its show/hide methods are defined',
     expected: 'window.CtxMenu.show and window.CtxMenu.hide are functions',
@@ -822,7 +822,7 @@ const JK_TESTS = [
       const jumpItem = document.querySelector('.jump-item');
       if (!jumpItem) {
         navigateTo('tests');
-        throw new Error('No .jump-item found on jumps page — add at least one jump first');
+        throw new Error('No .jump-item found on jumps page - add at least one jump first');
       }
       // Trigger right-click
       jumpItem.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, clientX: 100, clientY: 100 }));
@@ -834,7 +834,7 @@ const JK_TESTS = [
       window.CtxMenu?.hide();
       navigateTo('tests');
       if (!visible) throw new Error('#ctxMenu did not appear after right-click');
-      if (items < 3) throw new Error(`Only ${items} ctx-items found — expected >= 3`);
+      if (items < 3) throw new Error(`Only ${items} ctx-items found - expected >= 3`);
       return true;
     }
   },
@@ -844,7 +844,7 @@ const JK_TESTS = [
     id: 27, category: 'Settings',
     title: 'saveAccountPrefs is accessible',
     purpose: 'Confirms the account preferences save function is globally accessible. Without it, any settings change on the Account page would silently fail.',
-    prerequisites: 'None — checks window scope only.',
+    prerequisites: 'None - checks window scope only.',
     input: 'typeof window.saveAccountPrefs',
     description: 'window.saveAccountPrefs is defined as a function',
     expected: 'typeof window.saveAccountPrefs === "function"',
@@ -857,7 +857,7 @@ const JK_TESTS = [
     id: 28, category: 'Settings',
     title: 'Prefs persist to SQLite',
     purpose: 'Writes a preference change to the local SQLite DB and reads it back. Confirms the IPC write path is working so user settings actually survive app restarts.',
-    prerequisites: 'Must be logged in with a valid currentUser. Test is self-restoring — original value is written back after the check.',
+    prerequisites: 'Must be logged in with a valid currentUser. Test is self-restoring - original value is written back after the check.',
     input: 'DB.savePrefs(currentUser.id, { timePerClick: testVal }) → DB.getPrefs(currentUser.id).timePerClick',
     description: 'Save a pref change via DB.savePrefs and verify it reads back correctly',
     expected: 'timePerClick value saved to SQLite reads back unchanged after DB.init would reload it',
@@ -877,8 +877,8 @@ const JK_TESTS = [
   {
     id: 29, category: 'Settings',
     title: 'startPage pref saves and reads back',
-    purpose: 'Specifically tests the startPage preference — the page the app opens to on launch. If this pref doesn\'t persist, the user\'s chosen start page resets every session.',
-    prerequisites: 'Must be logged in. Test is self-restoring — original startPage is written back after the check.',
+    purpose: 'Specifically tests the startPage preference - the page the app opens to on launch. If this pref doesn\'t persist, the user\'s chosen start page resets every session.',
+    prerequisites: 'Must be logged in. Test is self-restoring - original startPage is written back after the check.',
     input: 'DB.savePrefs(currentUser.id, { startPage: "stats" }) → DB.getPrefs(currentUser.id).startPage',
     description: 'Change startPage pref to "stats", verify it reads back, then restore',
     expected: 'startPage "stats" persists in DB cache after save',
@@ -898,8 +898,8 @@ const JK_TESTS = [
 
   {
     id: 69, category: 'Teams',
-    title: 'Test team setup — create temp team in Supabase',
-    purpose: 'Creates a temporary team in Supabase and stores its ID in window._testTeamId. Required setup step for the Team Sharing tests (70–74) which all depend on a real team existing.',
+    title: 'Test team setup - create temp team in Supabase',
+    purpose: 'Creates a temporary team in Supabase and stores its ID in window._testTeamId. Required setup step for the Team Sharing tests (70-74) which all depend on a real team existing.',
     prerequisites: 'Must be logged in. Supabase client must be accessible.',
     description: 'Inserts a test team row and auto-membership row directly via supabaseClient, stores team.id in window._testTeamId.',
     input: 'supabaseClient.from("teams").insert({ name, owner_id }) + team_members insert',
@@ -907,9 +907,9 @@ const JK_TESTS = [
     steps: 'Automatic.',
     test: async () => {
       const userId  = window._supabaseUser?.id;
-      if (!userId) throw new Error('Not logged in — window._supabaseUser not set');
+      if (!userId) throw new Error('Not logged in - window._supabaseUser not set');
 
-      // Resolve org_id — mirrors renderTeams() auto-org logic since org_id is NOT NULL
+      // Resolve org_id - mirrors renderTeams() auto-org logic since org_id is NOT NULL
       let orgId = window._supabaseProfile?.org_id || null;
       if (!orgId) {
         // Check if user already owns an org
@@ -923,7 +923,7 @@ const JK_TESTS = [
           if (orgErr) throw new Error('Failed to create org for test: ' + orgErr.message);
           orgId = newOrg.id;
         }
-        // Persist org_id back to profile — but NEVER overwrite 'admin' role
+        // Persist org_id back to profile - but NEVER overwrite 'admin' role
         const currentRole = window._supabaseProfile?.role;
         const profileUpdate = { org_id: orgId };
         if (currentRole !== 'admin') profileUpdate.role = 'org-owner';
@@ -977,7 +977,7 @@ const JK_TESTS = [
     expected: 'Row exists in shared_columns; all jumps in that column exist in shared_jumps',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
+      if (!teamId) throw new Error('No test team found - create a team manually or run the team creation test first');
 
       const userId = window._supabaseUser?.id;
       const cols   = DB.getColumns(userId).filter(c => !c.isShared);
@@ -986,7 +986,7 @@ const JK_TESTS = [
       const col   = cols[0];
       const jumps = DB.getActiveJumps(userId).filter(j => j.columnId === col.id);
 
-      // Generate a real UUID for shared_columns.id — local SQLite IDs are not UUIDs
+      // Generate a real UUID for shared_columns.id - local SQLite IDs are not UUIDs
       // and Supabase rejects non-UUID values for UUID columns.
       const sharedColUUID = crypto.randomUUID();
 
@@ -1010,7 +1010,7 @@ const JK_TESTS = [
         .single();
       if (scErr) throw new Error('shared_columns insert failed: ' + scErr.message);
 
-      // 2. Insert jumps into shared_jumps — also generate UUIDs for each jump row
+      // 2. Insert jumps into shared_jumps - also generate UUIDs for each jump row
       const jumpInserts = jumps.map((j, i) => ({
         id:               crypto.randomUUID(),
         team_id:          teamId,
@@ -1050,7 +1050,7 @@ const JK_TESTS = [
         }
       }
 
-      // Store UUID for downstream tests (71–74 cleanup)
+      // Store UUID for downstream tests (71-74 cleanup)
       window._testSharedColId = sharedColUUID;
       return true;
     }
@@ -1059,14 +1059,14 @@ const JK_TESTS = [
   {
     id: 71, category: 'Teams',
     title: 'Invite user to test team → pending status in Supabase',
-    purpose: 'Tests that the invite creation flow correctly writes a pending invite row to Supabase. An invite email is only useful if the DB row is correct — this catches mismatches.',
+    purpose: 'Tests that the invite creation flow correctly writes a pending invite row to Supabase. An invite email is only useful if the DB row is correct - this catches mismatches.',
     prerequisites: 'Tests 46 and 47 must have run successfully first (window._testTeamId must be set).',
     input: 'supabaseClient.from("team_invites").insert({ team_id, email, status: "pending" })',
     description: 'Inserts a pending invite for a test email into team_invites, then queries to verify status=pending',
     expected: 'team_invites row exists with status = "pending" for the test email',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
+      if (!teamId) throw new Error('No test team found - create a team manually or run the team creation test first');
 
       const invitedBy = window._supabaseUser?.id;
       const testEmail = 'unit-test-invite@jumpkit-test.invalid';
@@ -1140,7 +1140,7 @@ const JK_TESTS = [
     expected: 'team_members row no longer exists after delete',
     test: async () => {
       const teamId = window._testTeamId;
-      if (!teamId) throw new Error('No test team found — create a team manually or run the team creation test first');
+      if (!teamId) throw new Error('No test team found - create a team manually or run the team creation test first');
 
       const userId = window._supabaseUser?.id;
 
@@ -1150,7 +1150,7 @@ const JK_TESTS = [
       // We insert a second row with a temporary fake user_id that passes the FK check
       // by reusing the owner's userId with a different row id, then clean it up.
       //
-      // Strategy: insert a duplicate owner row — it will hit the UNIQUE(team_id,user_id)
+      // Strategy: insert a duplicate owner row - it will hit the UNIQUE(team_id,user_id)
       // constraint. We detect that, fetch the existing row id, verify it exists, then
       // re-insert a fresh row after deleting. This proves the delete path works without
       // permanently removing the owner's membership.
@@ -1194,15 +1194,15 @@ const JK_TESTS = [
 
   {
     id: 61, category: 'Paywall',
-    title: 'Teams page — free tier renders with limit messaging (not a full paywall)',
-    purpose: 'Confirms that a free-tier user can access the Teams page (no full-page paywall — free plan allows 1 owned + 1 joined team). Verifies the page renders without crashing and shows the free-plan limit indicators.',
+    title: 'Teams page - free tier renders with limit messaging (not a full paywall)',
+    purpose: 'Confirms that a free-tier user can access the Teams page (no full-page paywall - free plan allows 1 owned + 1 joined team). Verifies the page renders without crashing and shows the free-plan limit indicators.',
     prerequisites: 'User must be logged in. window._supabaseProfile must be set.',
     input: 'window._supabaseProfile.subscription_tier = "free", renderTeams()',
     description: 'Temporarily sets tier to free, calls renderTeams(), confirms the page renders non-empty content and contains free-plan limit text, then restores tier.',
     expected: 'pageContent is non-empty. Contains free-plan limit indicator ("Free plan" or "1 owned team" or upgrade prompt). No full-page lock screen.',
     test: async () => {
       const profile = window._supabaseProfile;
-      if (!profile) throw new Error('window._supabaseProfile not set — log in first');
+      if (!profile) throw new Error('window._supabaseProfile not set - log in first');
       const originalTier   = profile.subscription_tier;
       const originalStatus = profile.subscription_status;
 
@@ -1220,10 +1220,10 @@ const JK_TESTS = [
       if (!content || content.trim().length < 20) throw new Error('Teams page rendered empty for free user');
       // Free tier should show page content (teams grid), not a full-page lock screen
       const hasFullPagePaywall = content.includes('Upgrade to unlock Teams');
-      if (hasFullPagePaywall) throw new Error('Full-page paywall still shown — Teams should be accessible on free plan');
+      if (hasFullPagePaywall) throw new Error('Full-page paywall still shown - Teams should be accessible on free plan');
       // Free tier should show limit indicators somewhere on the page
       const hasLimitMsg = content.includes('1 owned team') || content.includes('Free Team') || content.includes('Free plan') || content.includes('show-upgrade-modal');
-      if (!hasLimitMsg) throw new Error('Free-plan limit messaging not found — upgrade prompts may be missing');
+      if (!hasLimitMsg) throw new Error('Free-plan limit messaging not found - upgrade prompts may be missing');
       return true;
     }
   },
@@ -1238,22 +1238,22 @@ const JK_TESTS = [
     input: 'window.electronAPI.isPackaged (via IPC) or checks main.js runtime flag',
     expected: 'In production: devtools are not open and cannot be opened. In dev: test is skipped.',
     test: async () => {
-      // If running in dev (npm start), app.isPackaged = false — skip with info
+      // If running in dev (npm start), app.isPackaged = false - skip with info
       const isPackaged = await window.electronAPI?.isPackaged?.();
       if (isPackaged === false || isPackaged === undefined) {
-        return true; // not a failure — expected in dev
+        return true; // not a failure - expected in dev
       }
 
       // In production: devtools should not be open
       if (window.outerWidth - window.innerWidth > 200 || window.outerHeight - window.innerHeight > 200) {
-        throw new Error('DevTools appear to be open in a production build — check main.js devtools-opened handler');
+        throw new Error('DevTools appear to be open in a production build - check main.js devtools-opened handler');
       }
 
       return true;
     }
   },
 
-  // ── Security Audit Tests (54–62) ──────────────────────────────────
+  // ── Security Audit Tests (54-62) ──────────────────────────────────
   {
     id: 129, category: 'Security',
     title: 'No secret API keys in frontend code',
@@ -1266,14 +1266,14 @@ const JK_TESTS = [
       // Service role key should never be in renderer scope
       const winKeys = Object.keys(window).join(' ');
       if (winKeys.includes('service_role') || winKeys.includes('SERVICE_ROLE')) {
-        throw new Error('Service role key found in window scope — security risk!');
+        throw new Error('Service role key found in window scope - security risk!');
       }
       // Anon key should be present (it is safe to expose)
       if (typeof SUPABASE_ANON_KEY === 'undefined' || !SUPABASE_ANON_KEY) {
-        throw new Error('SUPABASE_ANON_KEY not found — check supabase/config.js');
+        throw new Error('SUPABASE_ANON_KEY not found - check supabase/config.js');
       }
       if (SUPABASE_ANON_KEY.includes('service_role')) {
-        throw new Error('SUPABASE_ANON_KEY appears to be a service role key — replace with anon key!');
+        throw new Error('SUPABASE_ANON_KEY appears to be a service role key - replace with anon key!');
       }
       return true;
     }
@@ -1290,14 +1290,14 @@ const JK_TESTS = [
     test: async () => {
       const { data, error } = await supabaseClient.auth.getSession();
       if (error) throw new Error('Auth session error: ' + error.message);
-      if (!data?.session?.user?.id) throw new Error('No authenticated session — all routes require auth');
+      if (!data?.session?.user?.id) throw new Error('No authenticated session - all routes require auth');
       return true;
     }
   },
 
   {
     id: 87, category: 'Security',
-    title: 'HTTPS enforced — Supabase URL uses HTTPS',
+    title: 'HTTPS enforced - Supabase URL uses HTTPS',
     purpose: 'Confirms that all Supabase API communication uses HTTPS, not plain HTTP.',
     prerequisites: 'None.',
     description: 'Checks that SUPABASE_URL starts with https://',
@@ -1314,12 +1314,12 @@ const JK_TESTS = [
 
   {
     id: 88, category: 'Security',
-    title: 'CORS — Edge Functions not called with wildcard origin',
+    title: 'CORS - Edge Functions not called with wildcard origin',
     purpose: 'Confirms that the app does not rely on wildcard CORS. Edge functions should be locked to jumpkit.app.',
     prerequisites: 'None.',
     description: 'Verifies that requests to Edge Functions include the correct Origin header and do not expect wildcard CORS.',
     input: 'Fetch to send-feedback endpoint with non-jumpkit origin',
-    expected: 'No wildcard CORS in use — app always sends from correct origin.',
+    expected: 'No wildcard CORS in use - app always sends from correct origin.',
     test: async () => {
       // In Electron, window.location.origin is typically 'null' or 'file://'
       // The important check is that our Edge Functions are configured for jumpkit.app
@@ -1332,26 +1332,26 @@ const JK_TESTS = [
 
   {
     id: 89, category: 'Security',
-    title: 'Input sanitization — esc() used for user-generated content',
+    title: 'Input sanitization - esc() used for user-generated content',
     purpose: 'Confirms that user input rendered into the DOM is escaped to prevent XSS attacks.',
     prerequisites: 'None.',
     description: 'Tests that the esc() function correctly escapes HTML special characters.',
     input: 'esc("<script>alert(1)</script>")',
     expected: 'Returns escaped string with no executable HTML.',
     test: async () => {
-      if (typeof esc !== 'function') throw new Error('esc() function not defined — XSS protection missing');
+      if (typeof esc !== 'function') throw new Error('esc() function not defined - XSS protection missing');
       const dangerous = '<script>alert("xss")</script>';
       const escaped = esc(dangerous);
-      if (escaped.includes('<script>')) throw new Error('esc() failed to escape <script> tag — XSS risk!');
-      if (escaped.includes('</script>')) throw new Error('esc() failed to escape </script> tag — XSS risk!');
-      if (!escaped.includes('&lt;')) throw new Error('esc() did not produce HTML entities — check implementation');
+      if (escaped.includes('<script>')) throw new Error('esc() failed to escape <script> tag - XSS risk!');
+      if (escaped.includes('</script>')) throw new Error('esc() failed to escape </script> tag - XSS risk!');
+      if (!escaped.includes('&lt;')) throw new Error('esc() did not produce HTML entities - check implementation');
       return true;
     }
   },
 
   {
     id: 90, category: 'Security',
-    title: 'Rate limiting — 429 returned on excessive requests (Edge Function config check)',
+    title: 'Rate limiting - 429 returned on excessive requests (Edge Function config check)',
     purpose: 'Confirms that rate limiting is configured on Edge Functions. In-memory rate limiter returns 429 after threshold.',
     prerequisites: 'None (logic check only, does not hit live endpoint).',
     description: 'Simulates the rate limiter logic to confirm it blocks after maxRequests threshold.',
@@ -1371,14 +1371,14 @@ const JK_TESTS = [
       for (let i = 0; i < 5; i++) {
         if (checkLimit('test-ip')) throw new Error(`Rate limit triggered too early at request ${i + 1}`);
       }
-      if (!checkLimit('test-ip')) throw new Error('Rate limiter failed — 6th request should be blocked');
+      if (!checkLimit('test-ip')) throw new Error('Rate limiter failed - 6th request should be blocked');
       return true;
     }
   },
 
   {
     id: 91, category: 'Security',
-    title: 'Password hashing — PBKDF2 used (not plain SHA-256)',
+    title: 'Password hashing - PBKDF2 used (not plain SHA-256)',
     purpose: 'Confirms that team passwords are hashed with PBKDF2 (strong KDF) and not plain SHA-256.',
     prerequisites: 'None.',
     description: 'Hashes the same password twice and checks output is 64 hex chars. Also confirms two different passwords produce different hashes.',
@@ -1388,20 +1388,20 @@ const JK_TESTS = [
       if (typeof hashPassword !== 'function') throw new Error('hashPassword() not defined in teams.js');
       const hash1 = await hashPassword('testpassword123');
       const hash2 = await hashPassword('differentpassword');
-      if (hash1.length !== 64) throw new Error(`Hash length ${hash1.length} — expected 64 hex chars`);
+      if (hash1.length !== 64) throw new Error(`Hash length ${hash1.length} - expected 64 hex chars`);
       if (!/^[0-9a-f]+$/.test(hash1)) throw new Error('Hash is not valid hex');
-      if (hash1 === hash2) throw new Error('Different passwords produced same hash — hashing is broken!');
+      if (hash1 === hash2) throw new Error('Different passwords produced same hash - hashing is broken!');
       // Confirm it's NOT plain SHA-256 (PBKDF2 with 100k iterations will differ)
       const plainSha = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('testpassword123'));
       const plainHex = Array.from(new Uint8Array(plainSha)).map(b => b.toString(16).padStart(2, '0')).join('');
-      if (hash1 === plainHex) throw new Error('hashPassword() is using plain SHA-256 — should use PBKDF2!');
+      if (hash1 === plainHex) throw new Error('hashPassword() is using plain SHA-256 - should use PBKDF2!');
       return true;
     }
   },
 
   {
     id: 92, category: 'Security',
-    title: 'Auth tokens have expiry — JWT exp claim present',
+    title: 'Auth tokens have expiry - JWT exp claim present',
     purpose: 'Confirms that the Supabase JWT session token has an expiry claim (exp) and has not expired.',
     prerequisites: 'Must be logged in.',
     description: 'Decodes the JWT access token and checks the exp claim is set and in the future.',
@@ -1410,21 +1410,21 @@ const JK_TESTS = [
     test: async () => {
       const { data } = await supabaseClient.auth.getSession();
       const token = data?.session?.access_token;
-      if (!token) throw new Error('No access token — must be logged in');
+      if (!token) throw new Error('No access token - must be logged in');
       // Decode JWT payload (base64)
       const parts = token.split('.');
       if (parts.length !== 3) throw new Error('Invalid JWT format');
       const payload = JSON.parse(atob(parts[1]));
-      if (!payload.exp) throw new Error('JWT has no exp claim — tokens do not expire!');
+      if (!payload.exp) throw new Error('JWT has no exp claim - tokens do not expire!');
       if (payload.exp * 1000 < Date.now()) throw new Error('JWT token has already expired!');
       return true;
     }
   },
 
-  // ── Database Audit Tests (63–68) ─────────────────────────────────
+  // ── Database Audit Tests (63-68) ─────────────────────────────────
   {
     id: 125, category: 'Database',
-    title: '[MANUAL] Supabase backups — verify plan supports backups',
+    title: '[MANUAL] Supabase backups - verify plan supports backups',
     purpose: 'Reminds developer to verify that Supabase backups are configured. Free tier has no auto-backups; Pro tier includes daily backups.',
     prerequisites: 'None.',
     description: 'Checks Supabase project URL is reachable and logs a reminder to verify backup plan in Supabase dashboard.',
@@ -1443,7 +1443,7 @@ const JK_TESTS = [
 
   {
     id: 6, category: 'Database',
-    title: 'Parameterized queries — no raw SQL string concatenation',
+    title: 'Parameterized queries - no raw SQL string concatenation',
     purpose: 'Confirms all DB queries use Supabase JS client (parameterized) or SQLite prepared statements, preventing SQL injection.',
     prerequisites: 'Must be logged in.',
     description: 'Verifies supabaseClient uses builder pattern and DB layer uses IPC/prepared statements.',
@@ -1451,7 +1451,7 @@ const JK_TESTS = [
     expected: 'Builder pattern confirmed; parameterized query executes without error.',
     test: async () => {
       if (typeof supabaseClient?.from !== 'function') throw new Error('supabaseClient.from() not available');
-      if (typeof DB?.getJumps !== 'function') throw new Error('DB.getJumps() not found — DB layer missing');
+      if (typeof DB?.getJumps !== 'function') throw new Error('DB.getJumps() not found - DB layer missing');
       const userId = window._supabaseUser?.id;
       if (userId) {
         const { error } = await supabaseClient.from('profiles').select('id').eq('id', userId).single();
@@ -1463,26 +1463,26 @@ const JK_TESTS = [
 
   {
     id: 126, category: 'Database',
-    title: '[MANUAL] Dev/Prod database separation — single project warning',
+    title: '[MANUAL] Dev/Prod database separation - single project warning',
     purpose: 'Warns if dev and production share the same Supabase project, risking production data corruption during development.',
     prerequisites: 'None.',
     description: 'Checks if a separate dev Supabase URL is configured. If not, logs a warning.',
     input: 'SUPABASE_URL, DEV_SUPABASE_URL (if set)',
     expected: 'Two separate URLs configured, or warning shown.',
-    steps: '1. Create a separate Supabase project for development (free tier is fine).\n2. Add DEV_SUPABASE_URL to your supabase/config.js pointing to the dev project.\n3. Re-run this test — it will pass automatically once a separate URL is configured.',
+    steps: '1. Create a separate Supabase project for development (free tier is fine).\n2. Add DEV_SUPABASE_URL to your supabase/config.js pointing to the dev project.\n3. Re-run this test - it will pass automatically once a separate URL is configured.',
     test: async () => {
       const devUrl = typeof DEV_SUPABASE_URL !== 'undefined' ? DEV_SUPABASE_URL : null;
       if (!devUrl) {
         return 'manual';
       }
-      if (devUrl === SUPABASE_URL) throw new Error('DEV_SUPABASE_URL equals SUPABASE_URL — dev and prod are not separated!');
+      if (devUrl === SUPABASE_URL) throw new Error('DEV_SUPABASE_URL equals SUPABASE_URL - dev and prod are not separated!');
       return true;
     }
   },
 
   {
     id: 7, category: 'Database',
-    title: 'Connection pooling — Supabase REST API used (pooling automatic)',
+    title: 'Connection pooling - Supabase REST API used (pooling automatic)',
     purpose: 'Confirms app uses Supabase REST API (auto-pooled via PgBouncer) not a direct Postgres connection.',
     prerequisites: 'None.',
     description: 'Verifies SUPABASE_URL is an HTTPS REST endpoint, not a postgres:// connection string.',
@@ -1491,7 +1491,7 @@ const JK_TESTS = [
     test: async () => {
       if (!SUPABASE_URL) throw new Error('SUPABASE_URL not defined');
       if (SUPABASE_URL.startsWith('postgres://') || SUPABASE_URL.startsWith('postgresql://')) {
-        throw new Error('Direct Postgres connection detected — switch to Supabase REST API for automatic pooling');
+        throw new Error('Direct Postgres connection detected - switch to Supabase REST API for automatic pooling');
       }
       if (!SUPABASE_URL.includes('supabase.co')) throw new Error('SUPABASE_URL does not look like a Supabase REST endpoint: ' + SUPABASE_URL);
       return true;
@@ -1500,7 +1500,7 @@ const JK_TESTS = [
 
   {
     id: 127, category: 'Database',
-    title: 'Migrations in version control — supabase/migrations/ folder exists',
+    title: 'Migrations in version control - supabase/migrations/ folder exists',
     purpose: 'Confirms database migration files are tracked in version control, not applied manually without tracking.',
     prerequisites: 'Must be running in Electron (requires filesystem access).',
     description: 'Checks that all 3 known migration SQL files exist in supabase/migrations/ on disk.',
@@ -1509,7 +1509,7 @@ const JK_TESTS = [
     steps: 'Automatic.',
     test: async () => {
       const knownMigrations = ['20240001_add_name_fields.sql', '20240002_profile_trigger.sql', '20240003_subscription_fields.sql'];
-      if (!window.electronAPI?.checkMigrations) throw new Error('checkMigrations not available — not running in Electron');
+      if (!window.electronAPI?.checkMigrations) throw new Error('checkMigrations not available - not running in Electron');
       const results = await window.electronAPI.checkMigrations(knownMigrations);
       const missing = knownMigrations.filter(f => !results[f]);
       if (missing.length > 0) throw new Error(`Missing migration file(s): ${missing.join(', ')}`);
@@ -1519,7 +1519,7 @@ const JK_TESTS = [
 
   {
     id: 8, category: 'Database',
-    title: 'Non-root DB user — app uses authenticated role only',
+    title: 'Non-root DB user - app uses authenticated role only',
     purpose: 'Confirms the app never uses the postgres superuser or service_role. All queries go through authenticated role with RLS enforced.',
     prerequisites: 'Must be logged in.',
     description: 'Decodes the JWT role claim and verifies it is "authenticated", not "postgres" or "service_role".',
@@ -1528,20 +1528,20 @@ const JK_TESTS = [
     test: async () => {
       const { data } = await supabaseClient.auth.getSession();
       const token = data?.session?.access_token;
-      if (!token) throw new Error('No session — must be logged in');
+      if (!token) throw new Error('No session - must be logged in');
       const payload = JSON.parse(atob(token.split('.')[1]));
       const role = payload.role;
-      if (role === 'postgres') throw new Error('App is using postgres superuser — security risk!');
-      if (role === 'service_role') throw new Error('App is using service_role — should only be used in Edge Functions!');
-      if (role !== 'authenticated') throw new Error(`Unexpected role: ${role} — expected "authenticated"`);
+      if (role === 'postgres') throw new Error('App is using postgres superuser - security risk!');
+      if (role === 'service_role') throw new Error('App is using service_role - should only be used in Edge Functions!');
+      if (role !== 'authenticated') throw new Error(`Unexpected role: ${role} - expected "authenticated"`);
       return true;
     }
   },
 
-  // ── Deployment Audit Tests (69–72) ───────────────────────────────
+  // ── Deployment Audit Tests (69-72) ───────────────────────────────
   {
     id: 140, category: 'Deployment',
-    title: 'Environment variables — Supabase URL and anon key configured',
+    title: 'Environment variables - Supabase URL and anon key configured',
     purpose: 'Confirms that required environment variables (SUPABASE_URL, SUPABASE_ANON_KEY) are set and non-empty. Edge Function secrets cannot be verified from client but client-side vars are checked.',
     prerequisites: 'None.',
     description: 'Checks SUPABASE_URL and SUPABASE_ANON_KEY are defined, non-empty, and correctly formatted.',
@@ -1560,31 +1560,31 @@ const JK_TESTS = [
   {
     id: 105, category: 'Deployment',
     title: '[MANUAL] SSL certificate valid and HTTPS enforced',
-    purpose: 'Confirms that jumpkit.app has a valid SSL certificate and HTTPS is enforced. Cannot be automated from inside the Electron app — the CSP connect-src does not include jumpkit.app, so fetch() is blocked by the browser security policy.',
+    purpose: 'Confirms that jumpkit.app has a valid SSL certificate and HTTPS is enforced. Cannot be automated from inside the Electron app - the CSP connect-src does not include jumpkit.app, so fetch() is blocked by the browser security policy.',
     prerequisites: 'Internet connection. Open a regular browser (not the app).',
     description: 'Manual browser check: navigate to both http and https versions of jumpkit.app and verify SSL is valid.',
     input: 'Browser → https://www.jumpkit.app',
     expected: 'Padlock is green (no SSL warnings). http://jumpkit.app redirects to https://. Page loads correctly.',
-    steps: '1. Open Chrome or Safari\n2. Navigate to https://www.jumpkit.app\n3. Chrome: confirm the padlock icon appears in the address bar (left side). Safari: confirm the URL shows https:// with no warning — click the page settings icon (left of URL) and verify "Connection is encrypted". Note: Safari 15+ removed the explicit padlock; a clean address bar with https:// is the equivalent.\n4. Navigate to http://jumpkit.app — confirm the address bar changes to https:// (redirect working)\n5. Mark Pass if both steps succeed with no SSL warnings',
+    steps: '1. Open Chrome or Safari\n2. Navigate to https://www.jumpkit.app\n3. Chrome: confirm the padlock icon appears in the address bar (left side). Safari: confirm the URL shows https:// with no warning - click the page settings icon (left of URL) and verify "Connection is encrypted". Note: Safari 15+ removed the explicit padlock; a clean address bar with https:// is the equivalent.\n4. Navigate to http://jumpkit.app - confirm the address bar changes to https:// (redirect working)\n5. Mark Pass if both steps succeed with no SSL warnings',
     test: async () => {
-      throw new Error('[MANUAL] Open a browser and visit https://www.jumpkit.app — verify green padlock and HTTP→HTTPS redirect. Mark Pass/Fail manually.');
+      throw new Error('[MANUAL] Open a browser and visit https://www.jumpkit.app - verify green padlock and HTTP→HTTPS redirect. Mark Pass/Fail manually.');
     }
   },
 
   {
     id: 106, category: 'Deployment',
-    title: 'Firewall / infrastructure — Vercel and Supabase managed (no self-hosted server)',
+    title: 'Firewall / infrastructure - Vercel and Supabase managed (no self-hosted server)',
     purpose: 'Confirms JumpKit has no self-hosted server that requires manual firewall configuration. Vercel and Supabase handle all infrastructure.',
     prerequisites: 'None.',
-    description: 'Verifies the app is Electron-based with Vercel landing page and Supabase backend — no exposed ports or self-hosted processes.',
+    description: 'Verifies the app is Electron-based with Vercel landing page and Supabase backend - no exposed ports or self-hosted processes.',
     input: 'window.electronAPI.isElectron, SUPABASE_URL format',
     expected: 'Electron app confirmed; Supabase URL is hosted (not localhost); no self-hosted server.',
     test: async () => {
       // Confirm this is an Electron app (not a web server)
-      if (!window.electronAPI?.isElectron) throw new Error('Not running in Electron — unexpected environment');
+      if (!window.electronAPI?.isElectron) throw new Error('Not running in Electron - unexpected environment');
       // Confirm Supabase is not localhost (which would indicate self-hosted)
       if (SUPABASE_URL.includes('localhost') || SUPABASE_URL.includes('127.0.0.1')) {
-        throw new Error('SUPABASE_URL points to localhost — this looks like a self-hosted server that may need firewall configuration');
+        throw new Error('SUPABASE_URL points to localhost - this looks like a self-hosted server that may need firewall configuration');
       }
       return true;
     }
@@ -1592,26 +1592,26 @@ const JK_TESTS = [
 
   {
     id: 107, category: 'Deployment',
-    title: 'Process manager — N/A for Electron + Vercel + Supabase stack',
-    purpose: 'Confirms no unmanaged background processes are running. For this stack, process management is handled by Vercel/Supabase/OS — PM2 is not required.',
+    title: 'Process manager - N/A for Electron + Vercel + Supabase stack',
+    purpose: 'Confirms no unmanaged background processes are running. For this stack, process management is handled by Vercel/Supabase/OS - PM2 is not required.',
     prerequisites: 'None.',
     description: 'Verifies the deployment model (Electron desktop + Vercel + Supabase) has no self-hosted Node server needing PM2.',
     input: 'SUPABASE_URL, electronAPI.isElectron',
     expected: 'No self-hosted server detected. Process management is cloud-managed.',
     test: async () => {
-      if (!window.electronAPI?.isElectron) throw new Error('Not in Electron context — unexpected');
+      if (!window.electronAPI?.isElectron) throw new Error('Not in Electron context - unexpected');
       // If Supabase URL is remote (not localhost), no PM2 needed
       if (SUPABASE_URL.includes('localhost') || SUPABASE_URL.includes('127.0.0.1')) {
-        throw new Error('Self-hosted Supabase detected — ensure PM2 or systemd is managing the Supabase process');
+        throw new Error('Self-hosted Supabase detected - ensure PM2 or systemd is managing the Supabase process');
       }
       return true;
     }
   },
 
-  // ── Code Quality Tests (73–77) ───────────────────────────────────
+  // ── Code Quality Tests (73-77) ───────────────────────────────────
   {
     id: 101, category: 'Code Quality',
-    title: 'No console.log in production — using console.debug',
+    title: 'No console.log in production - using console.debug',
     purpose: 'Confirms that console.log calls have been replaced with console.debug so they are silent in production builds.',
     prerequisites: 'None.',
     description: 'Checks that window.console.log has not been monkey-patched or used for production logging. Validates debug output is used instead.',
@@ -1620,7 +1620,7 @@ const JK_TESTS = [
     test: async () => {
       // Verify console.log is native (not monkey-patched to send to a logger)
       if (console.log.toString().indexOf('native code') === -1 && console.log.toString().length > 100) {
-        console.warn('[Test 73] console.log appears to be monkey-patched — verify no production logging');
+        console.warn('[Test 73] console.log appears to be monkey-patched - verify no production logging');
       }
       // In packaged builds, check devtools are closed (already covered by test 53)
       // This test mainly serves as a reminder to keep console.log out of prod
@@ -1630,10 +1630,10 @@ const JK_TESTS = [
 
   {
     id: 102, category: 'Code Quality',
-    title: 'Error handling on async operations — Supabase calls check error object',
+    title: 'Error handling on async operations - Supabase calls check error object',
     purpose: 'Confirms that async Supabase calls check the returned error object rather than silently swallowing failures.',
     prerequisites: 'Must be logged in.',
-    description: 'Makes a known-safe Supabase query and confirms error handling works correctly — both success and error paths.',
+    description: 'Makes a known-safe Supabase query and confirms error handling works correctly - both success and error paths.',
     input: 'supabaseClient.from("profiles").select("id").eq("id", userId)',
     expected: 'Error object checked; no unhandled rejections.',
     test: async () => {
@@ -1646,7 +1646,7 @@ const JK_TESTS = [
       // This returns PGRST116 (no rows) without triggering an HTTP 400 in the console.
       const fakeId = '00000000-0000-0000-0000-000000000000';
       const { data: emptyData, error: notFoundErr } = await supabaseClient.from('profiles').select('id').eq('id', fakeId).maybeSingle();
-      // maybeSingle returns null data (not an error) when no rows found — confirms no-row handling works
+      // maybeSingle returns null data (not an error) when no rows found - confirms no-row handling works
       if (notFoundErr) throw new Error('Unexpected error on no-row query: ' + notFoundErr.message);
       if (emptyData !== null) throw new Error('Expected null for non-existent user, got: ' + JSON.stringify(emptyData));
       return true;
@@ -1655,17 +1655,17 @@ const JK_TESTS = [
 
   {
     id: 103, category: 'Code Quality',
-    title: 'Loading and error states in UI — Toast system functional',
+    title: 'Loading and error states in UI - Toast system functional',
     purpose: 'Confirms that the Toast notification system (used for loading/error/success states) is present and operational.',
     prerequisites: 'None.',
     description: 'Checks that Toast.success and Toast.danger are defined and callable without throwing.',
     input: 'Toast.success(), Toast.danger()',
     expected: 'Both methods callable; no exceptions thrown.',
     test: async () => {
-      if (typeof Toast === 'undefined') throw new Error('Toast is not defined — UI error/loading states broken');
+      if (typeof Toast === 'undefined') throw new Error('Toast is not defined - UI error/loading states broken');
       if (typeof Toast.success !== 'function') throw new Error('Toast.success() is not a function');
       if (typeof Toast.danger !== 'function') throw new Error('Toast.danger() is not a function');
-      if (typeof Modal === 'undefined') throw new Error('Modal is not defined — UI modal states broken');
+      if (typeof Modal === 'undefined') throw new Error('Modal is not defined - UI modal states broken');
       if (typeof Modal.open !== 'function') throw new Error('Modal.open() is not a function');
       return true;
     }
@@ -1673,7 +1673,7 @@ const JK_TESTS = [
 
   {
     id: 104, category: 'Code Quality',
-    title: 'Pagination — list queries have reasonable limits',
+    title: 'Pagination - list queries have reasonable limits',
     purpose: 'Warns if list queries fetch unbounded rows. At scale, unlimited queries can cause performance issues.',
     prerequisites: 'Must be logged in.',
     description: 'Fetches team list and checks that the count is within a reasonable range. Reminds to add pagination before scaling.',
@@ -1692,10 +1692,10 @@ const JK_TESTS = [
 
   {
     id: 139, preflight: true, category: 'Code Quality', platforms: ['mac'],
-    title: '[MANUAL] npm audit — zero critical/high vulnerabilities',
+    title: '[MANUAL] npm audit - zero critical/high vulnerabilities',
     purpose: 'Confirms that no known high or critical npm package vulnerabilities exist in the dependency tree.',
-    prerequisites: 'None (logic check — validates last known audit state).',
-    description: 'Checks that npm audit fix has been run and package-lock.json is committed. Cannot run npm audit from renderer — serves as a reminder and audit log.',
+    prerequisites: 'None (logic check - validates last known audit state).',
+    description: 'Checks that npm audit fix has been run and package-lock.json is committed. Cannot run npm audit from renderer - serves as a reminder and audit log.',
     input: 'Known audit state from last npm audit fix run (2026-05-10)',
     expected: '0 vulnerabilities. Reminder to re-run before each release.',
     commands: [
@@ -1707,17 +1707,17 @@ const JK_TESTS = [
       // We cannot run npm audit from the renderer process
       // This test validates that the audit was run and documents the last known clean state
       const lastAuditDate = '2026-06-16';
-      const lastAuditResult = '0 vulnerabilities (after npm audit fix — resolved form-data, js-yaml, qs, tar, tmp)';
+      const lastAuditResult = '0 vulnerabilities (after npm audit fix - resolved form-data, js-yaml, qs, tar, tmp)';
       return 'manual';
     }
   },
 
-  // ── Pre-Flight: Code Audit Tests (375–377) ──────────────────────────
+  // ── Pre-Flight: Code Audit Tests (375-377) ──────────────────────────
   {
     id: 375, preflight: true, category: 'Code Quality', platforms: ['mac'],
-    title: '[MANUAL] Pre-Flight — Database Security & Integrity Audit',
+    title: '[MANUAL] Pre-Flight - Database Security & Integrity Audit',
     purpose: 'Ensures the app ships with no database security gaps, no raw SQL string concatenation, correct dev/prod separation, and all schema changes tracked in version control.',
-    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    prerequisites: 'None - this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
     description: 'Paste the prompt below to Max. He will audit the codebase and return a PASS/FAIL/N\/A for each item. Mark this test Pass only when all items are PASS or N\/A with no unresolved FAILs.',
     input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
     expected: 'All items PASS or N/A. Any FAIL must be resolved and re-audited before release.',
@@ -1727,18 +1727,18 @@ const JK_TESTS = [
         cmd: `Max, please run a full database audit of the JumpKit codebase. JumpKit uses two databases: (1) a local SQLite DB abstracted through app/js/db.js and app/preload.js / Electron IPC, and (2) Supabase (PostgreSQL) for auth, profiles, subscriptions, and pending upgrades, accessed via app/supabase/ and Edge Functions in supabase/functions/. Check all of the following and give a clear PASS / FAIL / N\/A for each item with evidence (file + line where relevant):
 
 SQLite (Local DB)
-[ ] No raw SQL string concatenation — all queries use parameterized statements (e.g. ? placeholders in better-sqlite3)
+[ ] No raw SQL string concatenation - all queries use parameterized statements (e.g. ? placeholders in better-sqlite3)
 [ ] DB file stored in a stable, user-owned path (not a temp dir or app bundle path that gets wiped on update)
-[ ] Schema versioning/migrations in code — DB upgrades handled programmatically, not by manual schema edits
+[ ] Schema versioning/migrations in code - DB upgrades handled programmatically, not by manual schema edits
 [ ] No sensitive data (passwords, tokens, keys) stored unencrypted in SQLite
-[ ] DB operations are user-scoped — no query returns data across multiple user IDs
+[ ] DB operations are user-scoped - no query returns data across multiple user IDs
 
 Supabase (Cloud DB)
-[ ] Row Level Security (RLS) is enabled on all tables — no table is publicly readable/writable without a policy
-[ ] Service role key is NOT present anywhere in client-side code (app/js/, landing/, app/html/) — only anon key used on client
+[ ] Row Level Security (RLS) is enabled on all tables - no table is publicly readable/writable without a policy
+[ ] Service role key is NOT present anywhere in client-side code (app/js/, landing/, app/html/) - only anon key used on client
 [ ] Dev and production Supabase projects are separate (check supabase/config.js and any env references)
 [ ] Edge Functions use the service role key only server-side and never return it to the client
-[ ] No raw SQL string concatenation in Edge Functions — parameterized queries or Supabase client methods only
+[ ] No raw SQL string concatenation in Edge Functions - parameterized queries or Supabase client methods only
 [ ] Migrations tracked in supabase/migrations/ and not applied manually via the dashboard
 [ ] No debug/seed/test data hardcoded into production schema or Edge Functions
 
@@ -1756,9 +1756,9 @@ For each FAIL, show the file + line number and suggest the fix.`
 
   {
     id: 376, preflight: true, category: 'Code Quality', platforms: ['mac'],
-    title: '[MANUAL] Pre-Flight — localStorage / sessionStorage Audit',
-    purpose: 'Ensures no new or unapproved keys have been written to localStorage or sessionStorage. Only the approved keys below should exist — any addition must be intentional and documented.',
-    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    title: '[MANUAL] Pre-Flight - localStorage / sessionStorage Audit',
+    purpose: 'Ensures no new or unapproved keys have been written to localStorage or sessionStorage. Only the approved keys below should exist - any addition must be intentional and documented.',
+    prerequisites: 'None - this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
     description: 'Paste the prompt below to Max. He will scan every localStorage and sessionStorage usage in the codebase and flag anything outside the approved list. Mark this test Pass only when all usages are accounted for with no unapproved keys.',
     input: 'Prompt copied to Max → Max scans the codebase → returns per-key verdict',
     expected: 'All localStorage/sessionStorage writes match the approved key list. No sensitive data stored. No orphaned or debug keys.',
@@ -1768,23 +1768,23 @@ For each FAIL, show the file + line number and suggest the fix.`
         cmd: `Max, please run a full localStorage and sessionStorage audit of the JumpKit app codebase (app/js/*.js and any HTML files). Scan every call to localStorage.setItem, localStorage.getItem, localStorage.removeItem, sessionStorage.setItem, sessionStorage.getItem, and sessionStorage.removeItem.
 
 The APPROVED localStorage keys are:
-  jk_users                    — user account records (auth is Supabase-managed, local fallback only)
-  jk_jumps_{userId}           — jump records per user (SQLite primary, localStorage fallback in browser/dev mode)
-  jk_cols_{userId}            — column records per user (SQLite primary, localStorage fallback)
-  jk_clicks_{userId}          — click log per user (SQLite primary, localStorage fallback)
-  jk_prefs_{userId}           — user preferences per user (SQLite primary, localStorage fallback)
-  jk_theme                    — light/dark theme preference
-  jk_sidebar_collapsed        — sidebar collapsed state
-  jk_teams_expanded           — teams panel expanded state
-  jk_backup_reminder_ts       — timestamp of last backup reminder notification
-  jk_license_notif_ts         — timestamp of last license notification
-  jk_trial_notif_milestone    — trial notification milestone tracker
-  jk_sync_fail_notif_ts       — timestamp of last sync failure notification
-  jk_notified_invite_ids      — list of invite IDs already notified (prevents duplicate notifications)
+  jk_users                    - user account records (auth is Supabase-managed, local fallback only)
+  jk_jumps_{userId}           - jump records per user (SQLite primary, localStorage fallback in browser/dev mode)
+  jk_cols_{userId}            - column records per user (SQLite primary, localStorage fallback)
+  jk_clicks_{userId}          - click log per user (SQLite primary, localStorage fallback)
+  jk_prefs_{userId}           - user preferences per user (SQLite primary, localStorage fallback)
+  jk_theme                    - light/dark theme preference
+  jk_sidebar_collapsed        - sidebar collapsed state
+  jk_teams_expanded           - teams panel expanded state
+  jk_backup_reminder_ts       - timestamp of last backup reminder notification
+  jk_license_notif_ts         - timestamp of last license notification
+  jk_trial_notif_milestone    - trial notification milestone tracker
+  jk_sync_fail_notif_ts       - timestamp of last sync failure notification
+  jk_notified_invite_ids      - list of invite IDs already notified (prevents duplicate notifications)
 
 The APPROVED sessionStorage keys are:
-  jk_session_token            — session token for single-session lock enforcement
-  jk_pending_upgrade_applied  — flag set after apply-pending-upgrade fires on login (prevents double-apply)
+  jk_session_token            - session token for single-session lock enforcement
+  jk_pending_upgrade_applied  - flag set after apply-pending-upgrade fires on login (prevents double-apply)
 
 For every localStorage/sessionStorage call found, report:
   - The key name
@@ -1793,8 +1793,8 @@ For every localStorage/sessionStorage call found, report:
   - For any UNAPPROVED key: what data it stores and whether it should be removed, migrated to SQLite, or added to the approved list
 
 Also check for:
-[ ] Any key that stores sensitive data (passwords, tokens, API keys, full user PII) — these must never be in localStorage
-[ ] Any key used in only one place (setItem with no corresponding getItem, or vice versa) — likely orphaned/dead code
+[ ] Any key that stores sensitive data (passwords, tokens, API keys, full user PII) - these must never be in localStorage
+[ ] Any key used in only one place (setItem with no corresponding getItem, or vice versa) - likely orphaned/dead code
 [ ] Any key written during development/testing that was never cleaned up (debug flags, test overrides, etc.)
 [ ] Any direct localStorage access that bypasses the lsGet/lsSet helpers in db.js (outside of db.js itself)
 [ ] sessionStorage keys cleared correctly on logout (jk_session_token and jk_pending_upgrade_applied should not persist across sessions)
@@ -1807,9 +1807,9 @@ Return a full table of all keys found with APPROVED / UNAPPROVED / CONCERN statu
 
   {
     id: 377, preflight: true, category: 'Code Quality', platforms: ['mac'],
-    title: '[MANUAL] Pre-Flight — Code Quality Audit',
+    title: '[MANUAL] Pre-Flight - Code Quality Audit',
     purpose: 'Ensures the app ships without debug artifacts, unhandled async errors, missing UI states, or unbounded list queries. Catches issues that automated tests miss.',
-    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    prerequisites: 'None - this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
     description: 'Paste the prompt below to Max. He will audit app/js/*.js (excluding chart.min.js) for each item and return a PASS/FAIL/N\/A verdict with file + line evidence. Mark this test Pass only when all items are PASS or N\/A.',
     input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
     expected: 'All items PASS or N/A. Any FAIL must be resolved before release.',
@@ -1819,27 +1819,27 @@ Return a full table of all keys found with APPROVED / UNAPPROVED / CONCERN statu
         cmd: `Max, please run a full code quality audit of the JumpKit app. Scan all files in app/js/*.js EXCLUDING chart.min.js (that is a bundled third-party library). For each item below give a clear PASS / FAIL / N\/A verdict with file + line number evidence for any FAIL.
 
 Console Logs
-[ ] No console.log() calls remain in production code — only console.warn() and console.error() are acceptable for genuine error/warning conditions. List every console.log found with file and line.
+[ ] No console.log() calls remain in production code - only console.warn() and console.error() are acceptable for genuine error/warning conditions. List every console.log found with file and line.
 [ ] No console.debug() calls remain (these were used during development and must be removed before release).
 [ ] No commented-out console.log blocks that suggest debug code was recently active.
 
 Backup / Junk Files
-[ ] No .bak, .bak-*, .tmp, or .orig files exist in app/js/ — these must be deleted before release. Check specifically for teams.js.bak-2026-05-25 and tests.js.bak.
+[ ] No .bak, .bak-*, .tmp, or .orig files exist in app/js/ - these must be deleted before release. Check specifically for teams.js.bak-2026-05-25 and tests.js.bak.
 [ ] No TODO, FIXME, HACK, or XXX comments reference unfinished work that blocks release (advisory items are OK; flag blockers).
 
 Async Error Handling
-[ ] All async functions have try/catch blocks or .catch() handlers — no unhandled promise rejections possible in normal user flows.
-[ ] All fetch() calls check response.ok or response.status before using the response body — no silent failures on non-2xx responses.
-[ ] Supabase calls check the returned { data, error } object — no code silently ignores a non-null error.
+[ ] All async functions have try/catch blocks or .catch() handlers - no unhandled promise rejections possible in normal user flows.
+[ ] All fetch() calls check response.ok or response.status before using the response body - no silent failures on non-2xx responses.
+[ ] Supabase calls check the returned { data, error } object - no code silently ignores a non-null error.
 [ ] Edge Function calls handle network errors gracefully (timeout, fetch failure) with user-visible feedback.
 
 UI Loading & Error States
 [ ] Every async operation that updates the UI has a loading state (spinner, disabled button, or visual indicator) so users know something is happening.
-[ ] Every async operation that can fail shows a user-visible error message — no silent failures that leave the UI in a broken state.
+[ ] Every async operation that can fail shows a user-visible error message - no silent failures that leave the UI in a broken state.
 [ ] No UI element can get stuck in a permanent loading state if a network call fails (loading indicators must be cleared in catch/finally blocks).
 
 Pagination & Unbounded Queries
-[ ] All Supabase list queries that could return large datasets (jumps, columns, teams, notifications, shared_jumps, user_sessions) use .limit() or .range() — no unbounded SELECT * queries against user data tables.
+[ ] All Supabase list queries that could return large datasets (jumps, columns, teams, notifications, shared_jumps, user_sessions) use .limit() or .range() - no unbounded SELECT * queries against user data tables.
 [ ] The app does not load all records into memory at once for tables that could grow unboundedly (e.g. click logs, notifications).
 
 General Code Hygiene
@@ -1847,7 +1847,7 @@ General Code Hygiene
 [ ] No disabled or bypassed auth checks (e.g. if (false) { requireAuth() } or commented-out session guards).
 [ ] No eval(), innerHTML assignments using unsanitized user input, or other XSS vectors in dynamic HTML rendering.
 [ ] All event listeners added in page-load or render functions are either cleaned up on unmount/re-render, or are idempotent (safe to add multiple times).
-[ ] No infinite loop risks in recursive functions or polling timers — all have a clear exit condition or max-iteration guard.
+[ ] No infinite loop risks in recursive functions or polling timers - all have a clear exit condition or max-iteration guard.
 
 For each FAIL: show the file, line number, the problematic code snippet, and the recommended fix.`
       }
@@ -1857,66 +1857,66 @@ For each FAIL: show the file, line number, the problematic code snippet, and the
 
   {
     id: 378, preflight: true, category: 'Code Quality', platforms: ['mac'],
-    title: '[MANUAL] Pre-Flight — Security Audit',
+    title: '[MANUAL] Pre-Flight - Security Audit',
     purpose: 'Comprehensive security review to ensure the app cannot be hacked, exploited, or used to leak user data. Covers secrets, Electron hardening, XSS, authentication, API security, and supply chain.',
-    prerequisites: 'None — this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
+    prerequisites: 'None - this is a code review prompt. Copy the prompt below and paste it to Max in a new message.',
     description: 'Paste the prompt below to Max. He will audit the codebase across all security domains and return a PASS/FAIL/N\/A for each item. Mark this test Pass only when all items are PASS or N\/A with no unresolved FAILs.',
     input: 'Prompt copied to Max → Max scans the codebase → returns per-item verdict',
     expected: 'All items PASS or N/A. Any FAIL is a release blocker.',
     steps: [
       {
-        text: 'Copy the audit prompt below and paste it to Max in a new message. Every FAIL is a release blocker — resolve all before shipping.',
+        text: 'Copy the audit prompt below and paste it to Max in a new message. Every FAIL is a release blocker - resolve all before shipping.',
         cmd: `Max, please run a comprehensive security audit of the JumpKit codebase. JumpKit is an Electron desktop app. Scan app/js/*.js, app/main.js, app/preload.js, app/html/*.html, landing/*.html, and supabase/functions/**/*.ts. For each item below give a clear PASS / FAIL / N\/A verdict with file + line number evidence for any FAIL.
 
 Secrets & Credentials
-[ ] No API keys, tokens, passwords, or secrets are hardcoded in any committed source file — check app/supabase/config.js, app/.env, any .env files, and all JS files for patterns like apiKey=, password=, secret=, Bearer <hardcoded>
-[ ] app/.env (contains Apple notarization credentials) is listed in .gitignore and has never been committed to the repo — verify with: git log --all --full-history -- app/.env
+[ ] No API keys, tokens, passwords, or secrets are hardcoded in any committed source file - check app/supabase/config.js, app/.env, any .env files, and all JS files for patterns like apiKey=, password=, secret=, Bearer <hardcoded>
+[ ] app/.env (contains Apple notarization credentials) is listed in .gitignore and has never been committed to the repo - verify with: git log --all --full-history -- app/.env
 [ ] No .env files of any kind are tracked in the repo
-[ ] The Supabase ANON key is the only Supabase key present in client-side code — the SERVICE ROLE key must never appear in app/js/, landing/, or app/html/
-[ ] Supabase URL and anon key are the only credentials in app/supabase/config.js — no other secrets present
+[ ] The Supabase ANON key is the only Supabase key present in client-side code - the SERVICE ROLE key must never appear in app/js/, landing/, or app/html/
+[ ] Supabase URL and anon key are the only credentials in app/supabase/config.js - no other secrets present
 
 Electron Security (main.js / preload.js)
-[ ] contextIsolation: true on all BrowserWindow instances — renderer cannot access Node APIs directly
+[ ] contextIsolation: true on all BrowserWindow instances - renderer cannot access Node APIs directly
 [ ] nodeIntegration: false on all BrowserWindow instances
 [ ] sandbox: true set where possible (or confirm contextIsolation+preload is sufficient mitigation)
 [ ] webSecurity is NOT disabled (no webSecurity: false anywhere)
 [ ] allowRunningInsecureContent is NOT set to true anywhere
 [ ] Content Security Policy (CSP) header is set in main.js and restricts script-src, object-src, and base-uri appropriately
-[ ] No use of shell.openExternal() with user-controlled or unvalidated URLs — all external URLs are validated against an allowlist before opening
-[ ] preload.js exposes only the minimum necessary APIs via contextBridge — no broad Node/Electron API surface exposed to renderer
+[ ] No use of shell.openExternal() with user-controlled or unvalidated URLs - all external URLs are validated against an allowlist before opening
+[ ] preload.js exposes only the minimum necessary APIs via contextBridge - no broad Node/Electron API surface exposed to renderer
 [ ] No eval(), new Function(), or executeJavaScript() called with user-supplied input in main process or preload
 
 XSS & Injection (renderer / app JS)
-[ ] All innerHTML assignments in app/js/*.js and app/html/*.html use only trusted, app-controlled strings — no user input (jump names, URLs, column names, user email, etc.) is inserted raw into innerHTML without sanitization
-[ ] All user-visible strings rendered into the DOM use textContent, innerText, or a safe escaping function — never raw string interpolation into innerHTML
-[ ] Jump URLs are validated before being passed to shell.openExternal() — only http://, https://, and local file paths are allowed; javascript: and data: URLs are blocked
-[ ] No SQL injection risk in SQLite queries — all better-sqlite3 queries use parameterized statements (? placeholders), never string concatenation
+[ ] All innerHTML assignments in app/js/*.js and app/html/*.html use only trusted, app-controlled strings - no user input (jump names, URLs, column names, user email, etc.) is inserted raw into innerHTML without sanitization
+[ ] All user-visible strings rendered into the DOM use textContent, innerText, or a safe escaping function - never raw string interpolation into innerHTML
+[ ] Jump URLs are validated before being passed to shell.openExternal() - only http://, https://, and local file paths are allowed; javascript: and data: URLs are blocked
+[ ] No SQL injection risk in SQLite queries - all better-sqlite3 queries use parameterized statements (? placeholders), never string concatenation
 [ ] No prototype pollution risk from JSON.parse() on untrusted data or from Object.assign() with user-supplied keys
 
 Authentication & Session Security
 [ ] Supabase auth tokens are never logged, written to localStorage in plain text, or exposed in URLs
 [ ] Session token (jk_session_token in sessionStorage) is cleared on logout
-[ ] Single-session lock logic (user_sessions table) cannot be bypassed by a client-side manipulation — session enforcement validated server-side or via Supabase RLS
-[ ] Password reset flow uses Supabase\'s secure token — no custom reset tokens implemented client-side
+[ ] Single-session lock logic (user_sessions table) cannot be bypassed by a client-side manipulation - session enforcement validated server-side or via Supabase RLS
+[ ] Password reset flow uses Supabase\'s secure token - no custom reset tokens implemented client-side
 [ ] No auth bypass: confirm there is no code path that grants app access without a valid Supabase session (e.g. offline mode that skips auth)
 
 API & Network Security
 [ ] All calls to Supabase Edge Functions use HTTPS (never HTTP)
-[ ] Edge Functions validate their input — no function blindly trusts the request body without checking required fields
-[ ] Edge Functions that perform privileged actions (apply-pending-upgrade, ls-webhook) verify the caller is authorized before acting — not callable by arbitrary users
-[ ] CORS is configured on Edge Functions — they do not accept requests from arbitrary origins
+[ ] Edge Functions validate their input - no function blindly trusts the request body without checking required fields
+[ ] Edge Functions that perform privileged actions (apply-pending-upgrade, ls-webhook) verify the caller is authorized before acting - not callable by arbitrary users
+[ ] CORS is configured on Edge Functions - they do not accept requests from arbitrary origins
 [ ] The ls-webhook Edge Function validates the Lemon Squeezy webhook signature before processing any payload
 
 Supply Chain & Dependencies
 [ ] npm audit shows 0 critical or high vulnerabilities (run: cd app && npm audit)
 [ ] No dependencies with known malicious versions (check npm audit output)
-[ ] package-lock.json is committed and up to date — no floating version ranges that could pull in unexpected upgrades
+[ ] package-lock.json is committed and up to date - no floating version ranges that could pull in unexpected upgrades
 [ ] No unused or abandoned dependencies that expand the attack surface unnecessarily
 
 Data Privacy
 [ ] No user PII (email, name, subscription data) is logged to the console or written to local files in plain text
 [ ] Crash/error reports (if any) do not include sensitive user data
-[ ] Local SQLite database file is stored in the user\'s app data directory — not in a world-readable temp path
+[ ] Local SQLite database file is stored in the user\'s app data directory - not in a world-readable temp path
 [ ] No analytics or telemetry sends user data to third-party services without disclosure
 
 For each FAIL: show the file, line number, the problematic code, severity (Critical/High/Medium), and the recommended fix. Treat any Critical or High finding as a release blocker.`
@@ -1925,7 +1925,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => 'manual'
   },
 
-  // ── Shared Jump Sync Tests (78–82) ────────────────────────────────
+  // ── Shared Jump Sync Tests (78-82) ────────────────────────────────
   // These tests create real data in Supabase, verify it, then clean up.
   // They require: logged in as org-owner, at least one team with a shared column.
   {
@@ -1947,16 +1947,16 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       } else {
         sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
       }
-      if (!sharedCol) throw new Error('No shared column found — run tests 65+66 first (team setup chain) or share a column manually');
-      if (!_anyLocalCol) throw new Error('No local column found — need at least one column in the app');
+      if (!sharedCol) throw new Error('No shared column found - run tests 65+66 first (team setup chain) or share a column manually');
+      if (!_anyLocalCol) throw new Error('No local column found - need at least one column in the app');
 
       // Verify test team is still owned by this user in Supabase (catches stale _testTeamId)
       if (sharedCol.teamId) {
         const { data: teamOwnerCheck } = await supabaseClient
           .from('teams').select('id, owner_id').eq('id', sharedCol.teamId).single();
-        if (!teamOwnerCheck) throw new Error(`Test team ${sharedCol.teamId} not found in Supabase — relaunch and re-run test 65 to recreate it`);
+        if (!teamOwnerCheck) throw new Error(`Test team ${sharedCol.teamId} not found in Supabase - relaunch and re-run test 65 to recreate it`);
         const myId = window._supabaseUser?.id;
-        if (teamOwnerCheck.owner_id !== myId) throw new Error(`Team owner mismatch: team owned by ${teamOwnerCheck.owner_id}, logged in as ${myId} — RLS is_team_owner will fail`);
+        if (teamOwnerCheck.owner_id !== myId) throw new Error(`Team owner mismatch: team owned by ${teamOwnerCheck.owner_id}, logged in as ${myId} - RLS is_team_owner will fail`);
       }
 
       // Create test jump
@@ -1983,7 +1983,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       if (error || !data) throw new Error('Test jump not found in Supabase: ' + (error?.message || 'no data'));
       if (data.name !== testName) throw new Error(`Name mismatch: expected "${testName}", got "${data.name}"`);
 
-      // Cleanup — delete from Supabase and local
+      // Cleanup - delete from Supabase and local
       await supabaseClient.from('shared_jumps').delete().eq('id', supabaseId);
       DB.deleteJump(currentUser.id, newJump.id);
       return true;
@@ -2007,8 +2007,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       } else {
         sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
       }
-      if (!sharedCol) throw new Error('No shared column found — run tests 65+66 first (team setup chain) or share a column manually');
-      if (!_anyLocalCol) throw new Error('No local column found — need at least one column in the app');
+      if (!sharedCol) throw new Error('No shared column found - run tests 65+66 first (team setup chain) or share a column manually');
+      if (!_anyLocalCol) throw new Error('No local column found - need at least one column in the app');
 
       // Create initial jump
       const testName = `__TEST_EDIT_${Date.now()}__`;
@@ -2055,8 +2055,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       } else {
         sharedCol = DB.getColumns(currentUser.id).find(c => c.isShared && c.supabaseId);
       }
-      if (!sharedCol) throw new Error('No shared column found — run tests 65+66 first (team setup chain) or share a column manually');
-      if (!_anyLocalCol) throw new Error('No local column found — need at least one column in the app');
+      if (!sharedCol) throw new Error('No shared column found - run tests 65+66 first (team setup chain) or share a column manually');
+      if (!_anyLocalCol) throw new Error('No local column found - need at least one column in the app');
 
       // Create test jump
       const testName = `__TEST_DELETE_${Date.now()}__`;
@@ -2170,7 +2170,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: 'Read-back values match the updated name, url, and description exactly.',
     test: async () => {
       const cols = DB.getColumns(currentUser.id);
-      if (!cols.length) throw new Error('No columns available — cannot create test jump');
+      if (!cols.length) throw new Error('No columns available - cannot create test jump');
 
       const original = { id: '__test_update_' + Date.now(), name: '__ORIG_NAME__', url: 'https://before.test', description: 'original desc', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() };
       const saved = DB.createJump(currentUser.id, original);
@@ -2181,9 +2181,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       DB.deleteJump(currentUser.id, saved.id);
 
       if (!found) throw new Error('Jump not found after updateJump');
-      if (found.name !== '__UPDATED_NAME__') throw new Error(`name not updated — got: ${found.name}`);
-      if (found.url  !== 'https://after.test') throw new Error(`url not updated — got: ${found.url}`);
-      if (found.description !== 'updated desc') throw new Error(`description not updated — got: ${found.description}`);
+      if (found.name !== '__UPDATED_NAME__') throw new Error(`name not updated - got: ${found.name}`);
+      if (found.url  !== 'https://after.test') throw new Error(`url not updated - got: ${found.url}`);
+      if (found.description !== 'updated desc') throw new Error(`description not updated - got: ${found.description}`);
       return true;
     }
   },
@@ -2192,7 +2192,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     id: 43, category: 'Columns',
     title: 'Column create / delete lifecycle',
     purpose: 'Tests the full create → verify → delete cycle for a column via the DB layer. Regressions here would prevent users from adding or removing columns entirely.',
-    prerequisites: 'Must be logged in. Test is self-cleaning — no permanent side effects.',
+    prerequisites: 'Must be logged in. Test is self-cleaning - no permanent side effects.',
     description: 'Creates a test column via DB.createColumn, confirms it appears in getColumns, then removes it via saveColumns, and confirms it is gone.',
     input: 'DB.createColumn(userId, name, order) → DB.getColumns → DB.saveColumns (remove)',
     expected: 'Column present after create, absent after delete.',
@@ -2204,7 +2204,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const afterCreate = DB.getColumns(currentUser.id).find(c => c.id === newCol.id);
       if (!afterCreate) throw new Error('Column not found in getColumns after createColumn');
 
-      // Delete — remove from array and save
+      // Delete - remove from array and save
       const cleaned = DB.getColumns(currentUser.id).filter(c => c.id !== newCol.id);
       DB.saveColumns(currentUser.id, cleaned);
 
@@ -2218,7 +2218,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 37, category: 'Jumps',
     title: 'Jump favorite toggle persists',
-    purpose: 'Confirms that marking a jump as a favorite (and unmarking it) correctly updates the in-memory cache. Favorites power the quick-access section — silent failure here would silently break it.',
+    purpose: 'Confirms that marking a jump as a favorite (and unmarking it) correctly updates the in-memory cache. Favorites power the quick-access section - silent failure here would silently break it.',
     prerequisites: 'At least one column must exist. Test is self-cleaning.',
     description: 'Creates a test jump (favorite=false), sets favorite=true via updateJump, reads back, then sets false again, reads back, deletes.',
     input: 'DB.createJump → DB.updateJump({ favorite: true }) → DB.getActiveJumps → DB.updateJump({ favorite: false })',
@@ -2271,8 +2271,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 44, category: 'Columns',
     title: 'Column drag-reorder persists order values',
-    purpose: "Confirms that shuffling column .order values via saveColumns correctly persists the new order in cache. Drag-and-drop reordering relies entirely on this — failure means the user's column order resets on reload.",
-    prerequisites: 'At least two columns must exist. Test restores original order — no permanent side effects.',
+    purpose: "Confirms that shuffling column .order values via saveColumns correctly persists the new order in cache. Drag-and-drop reordering relies entirely on this - failure means the user's column order resets on reload.",
+    prerequisites: 'At least two columns must exist. Test restores original order - no permanent side effects.',
     description: 'Reads current columns, reverses their .order values, saves, reads back, verifies order changed, then restores originals.',
     input: 'DB.getColumns → shuffle order values → DB.saveColumns → DB.getColumns',
     expected: 'Columns reflect new .order values after saveColumns.',
@@ -2297,7 +2297,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         const orig = originals.find(o => o.id === c.id);
         return orig && orig.order !== c.order;
       });
-      if (!changed) throw new Error('No column order values changed after saveColumns — reorder did not persist');
+      if (!changed) throw new Error('No column order values changed after saveColumns - reorder did not persist');
       return true;
     }
   },
@@ -2306,14 +2306,14 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 83, category: 'Shared Sync',
     title: 'Shared column rename updates Supabase shared_columns.name',
-    purpose: "Verifies that when an owner renames a shared column, the new name is pushed to Supabase shared_columns so members see the correct name on their next sync. This was a known bug fix — this test guards against regression.",
+    purpose: "Verifies that when an owner renames a shared column, the new name is pushed to Supabase shared_columns so members see the correct name on their next sync. This was a known bug fix - this test guards against regression.",
     prerequisites: 'Must be logged in as org-owner with at least one active shared column that has a valid supabaseId.',
     description: "Renames a shared column locally, pushes to Supabase, reads back from Supabase, verifies name matches, then restores the original name.",
     input: 'DB.getColumns (shared) → DB.saveColumns (rename) → supabaseClient.from(shared_columns).update → select',
     expected: 'Supabase shared_columns.name matches the new local name after update.',
     test: async () => {
       const sharedCols = DB.getColumns(currentUser.id).filter(c => c.isShared && c.supabaseId);
-      if (!sharedCols.length) throw new Error('No shared columns with supabaseId found — must be logged in as an org-owner with at least one shared column');
+      if (!sharedCols.length) throw new Error('No shared columns with supabaseId found - must be logged in as an org-owner with at least one shared column');
 
       const col = sharedCols[0];
       const originalName = col.name;
@@ -2338,7 +2338,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         .eq('id', col.supabaseId)
         .single();
       if (readErr) throw new Error('Read-back from Supabase failed: ' + readErr.message);
-      if (data?.name !== testName) throw new Error(`Supabase name mismatch — expected "${testName}", got "${data?.name}"`);
+      if (data?.name !== testName) throw new Error(`Supabase name mismatch - expected "${testName}", got "${data?.name}"`);
 
       // Restore original name
       const restoredCols = DB.getColumns(currentUser.id).map(c => c.id === col.id ? { ...c, name: originalName } : c);
@@ -2353,12 +2353,12 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     id: 84, category: 'Shared Sync',
     title: 'syncSharedJumps runs without error',
     purpose: 'Validates that the core sync function completes without throwing, regardless of team membership state. A crash here would prevent all shared jump propagation.',
-    prerequisites: 'Must be logged in. Works regardless of team membership — sync gracefully no-ops if no shared teams.',
+    prerequisites: 'Must be logged in. Works regardless of team membership - sync gracefully no-ops if no shared teams.',
     description: 'Calls syncSharedJumps() and awaits completion. Verifies no exception is thrown.',
     input: 'syncSharedJumps()',
     expected: 'syncSharedJumps() resolves without throwing.',
     test: async () => {
-      if (typeof syncSharedJumps !== 'function') throw new Error('syncSharedJumps is not defined — sync.js may not be loaded');
+      if (typeof syncSharedJumps !== 'function') throw new Error('syncSharedJumps is not defined - sync.js may not be loaded');
       await syncSharedJumps();
       return true;
     }
@@ -2366,8 +2366,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 374, category: 'Shared Sync',
-    title: 'Cleanup — purge ALL test artifacts from Supabase',
-    purpose: 'Sweeps ALL stale test data from Supabase — not just the current run. Finds every team, shared_column, shared_jump, invite, and member row created by any previous test run using the __jk_test_* / __test_* naming convention, and deletes them. Also restores role elevated by test 69.',
+    title: 'Cleanup - purge ALL test artifacts from Supabase',
+    purpose: 'Sweeps ALL stale test data from Supabase - not just the current run. Finds every team, shared_column, shared_jump, invite, and member row created by any previous test run using the __jk_test_* / __test_* naming convention, and deletes them. Also restores role elevated by test 69.',
     prerequisites: 'Must be logged in. Safe to run even if no test data exists.',
     input: 'teams ILIKE "__%_test_%", shared_jumps name ILIKE "__TEST_%", plus _testTeamId chain cleanup',
     description: 'Queries Supabase for all test-named teams and orphaned shared_jumps, cascades deletes through team_invites → team_members → shared_jumps → shared_columns → teams.',
@@ -2437,7 +2437,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         window._testOriginalRole = null;
       }
 
-      // ── 5. Final verification — no test teams remain ───────────────
+      // ── 5. Final verification - no test teams remain ───────────────
       const { data: remaining } = await sc
         .from('teams')
         .select('id, name')
@@ -2453,7 +2453,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 75, category: 'Teams',
     title: 'Team join rejects wrong password',
-    purpose: 'Confirms the server-side password verification correctly rejects an invalid password. If this fails, team access control is broken — anyone could join any team.',
+    purpose: 'Confirms the server-side password verification correctly rejects an invalid password. If this fails, team access control is broken - anyone could join any team.',
     prerequisites: 'Must be logged in. Requires at least one team to exist in Supabase. The test intentionally uses a wrong password and verifies rejection.',
     description: 'Calls the verify-team-password edge function with a clearly wrong password and confirms the response is valid=false.',
     input: 'supabaseClient.functions.invoke("verify-team-password", { teamId, candidatePassword: "__WRONG__" })',
@@ -2465,7 +2465,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         .limit(1)
         .maybeSingle();
       if (teamsErr) throw new Error('Could not fetch teams: ' + teamsErr.message);
-      if (!team) throw new Error('No teams found in Supabase — create at least one team first');
+      if (!team) throw new Error('No teams found in Supabase - create at least one team first');
 
       const { data: verifyData, error: verifyErr } = await supabaseClient.functions.invoke('verify-team-password', {
         body: { teamId: team.id, candidatePassword: '__INTENTIONALLY_WRONG_PASSWORD__' },
@@ -2473,7 +2473,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
       // Either an error OR valid=false means the reject path works correctly
       if (!verifyErr && verifyData?.valid === true) {
-        throw new Error('Wrong password was accepted — password verification is broken!');
+        throw new Error('Wrong password was accepted - password verification is broken!');
       }
       return true;
     }
@@ -2483,7 +2483,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 30, category: 'Settings',
     title: 'Theme pref persists via DB.savePrefs / getPrefs',
-    purpose: "Verifies that saving a theme preference writes to cache and reading it back returns the correct value. Theme persists across sessions via this prefs layer — a failure means the user's theme choice resets every restart.",
+    purpose: "Verifies that saving a theme preference writes to cache and reading it back returns the correct value. Theme persists across sessions via this prefs layer - a failure means the user's theme choice resets every restart.",
     prerequisites: 'Must be logged in.',
     description: 'Reads the current theme pref, saves a new value ("dark"), reads back via getPrefs, verifies match, then restores the original.',
     input: 'DB.getPrefs(userId) → DB.savePrefs(userId, { theme: "dark" }) → DB.getPrefs(userId)',
@@ -2505,14 +2505,14 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 51, category: 'Stats',
     title: 'DB.logClick records entry in click log',
-    purpose: 'Confirms that logClick appends an entry to the in-memory click log for the correct user. Stats, charts, and the top-used jump list all derive from this log — silent failure here corrupts all usage analytics.',
+    purpose: 'Confirms that logClick appends an entry to the in-memory click log for the correct user. Stats, charts, and the top-used jump list all derive from this log - silent failure here corrupts all usage analytics.',
     prerequisites: 'At least one column must exist. Test creates and deletes its own jump.',
     description: 'Creates a test jump, calls DB.logClick with its id, reads the click log, confirms an entry exists for that jump, then deletes.',
     input: 'DB.createJump → DB.logClick(userId, jumpId) → DB.getClickLog(userId)',
     expected: 'getClickLog contains at least one entry with jumpId matching the test jump.',
     test: async () => {
       const cols = DB.getColumns(currentUser.id);
-      if (!cols.length) throw new Error('No columns available — cannot create test jump');
+      if (!cols.length) throw new Error('No columns available - cannot create test jump');
 
       const j = DB.createJump(currentUser.id, { id: '__test_log_' + Date.now(), name: '__LOG_TEST__', url: 'https://log.test', columnId: cols[0].id, favorite: false, isArchived: false, clickCount: 0, createdAt: Date.now() });
 
@@ -2531,7 +2531,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 93, category: 'Subscription', platforms: ['mac'],
     title: '[MANUAL] Lemon Squeezy webhook upgrades subscription_status',
-    purpose: 'End-to-end validation that a real Lemon Squeezy subscription_created webhook correctly sets subscription_status="active" and subscription_tier="core" in Supabase. This is the core billing flow — failure means paid users are not upgraded.',
+    purpose: 'End-to-end validation that a real Lemon Squeezy subscription_created webhook correctly sets subscription_status="active" and subscription_tier="core" in Supabase. This is the core billing flow - failure means paid users are not upgraded.',
     prerequisites: 'LS store in Test mode. ls-webhook Edge Function deployed. Must be logged in as the user whose email you use for the checkout.',
     description: 'Complete a LS test-mode checkout to fire the real webhook end-to-end and verify the profile is upgraded in Supabase and in the app.',
     input: 'LS test-mode checkout with test card 4242 4242 4242 4242',
@@ -2539,10 +2539,10 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: (user) => {
       const email = user?.email || 'your-email@example.com';
       return [
-        { text: 'Open the LS checkout page — confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
+        { text: 'Open the LS checkout page - confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
         { text: 'Go to Supabase → Table Editor → Profiles and confirm you have a test account already created in the free tier.' },
         { text: 'Complete a purchase with the free account from step 2 using test card 4242 4242 4242 4242, any future expiry, any CVC.' },
-        { text: 'Wait ~5 seconds — LS fires the real subscription_created webhook to your ls-webhook Edge Function.' },
+        { text: 'Wait ~5 seconds - LS fires the real subscription_created webhook to your ls-webhook Edge Function.' },
         { text: 'In Supabase Table Editor → profiles → confirm subscription_status = "active" and subscription_tier = "core" for your user.' },
         { text: 'Log in to JumpKit with the account from step 2, nav to the Account page, confirm account type shows "JumpKit Unlimited", confirm all CTA banners are removed, and confirm the JumpKit Unlimited modal renders after first login after upgrade.' },
         { text: 'Reset your profile after testing.', cmd: `UPDATE profiles\nSET subscription_status='free', subscription_tier='free', subscription_plan=NULL, ls_customer_id=NULL\nWHERE email='${email}';` },
@@ -2562,11 +2562,11 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => {
       // 1. Verify Unlimited tier
       const tier = window._supabaseProfile?.subscription_tier || 'free';
-      if (tier === 'free') throw new Error('Unlimited tier required — auto-archive is not available on free tier');
+      if (tier === 'free') throw new Error('Unlimited tier required - auto-archive is not available on free tier');
 
       // 2. Ensure autoArchive pref is set
       const prefs = DB.getPrefs(currentUser.id);
-      if (!prefs.autoArchive || prefs.autoArchive === 'never') throw new Error('Auto-archive is set to Never — go to Settings and set it to any other value before running this test');
+      if (!prefs.autoArchive || prefs.autoArchive === 'never') throw new Error('Auto-archive is set to Never - go to Settings and set it to any other value before running this test');
 
       // 3. Grab a test jump
       const active = DB.getActiveJumps(currentUser.id);
@@ -2582,14 +2582,14 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
       // 6. Verify jump is now archived
       const stillActive = DB.getActiveJumps(currentUser.id).find(j => j.id === testJump.id);
-      if (stillActive) throw new Error(`Jump "${testJump.name}" was NOT archived — runAutoArchive() may have failed.`);
+      if (stillActive) throw new Error(`Jump "${testJump.name}" was NOT archived - runAutoArchive() may have failed.`);
 
       // 7. Verify notification was created
       const notifsAfter = typeof getNotifications === 'function' ? getNotifications() : [];
       const archiveNotif = notifsAfter.find(n => n.type === 'auto-archive' && n.message.includes(testJump.name));
       if (!archiveNotif) throw new Error('Auto-archive notification was NOT created.');
 
-      // 8. Cleanup — restore jump and remove test notification
+      // 8. Cleanup - restore jump and remove test notification
       DB.updateJump(currentUser.id, testJump.id, { isArchived: false, lastUsed: originalLastUsed });
       if (typeof saveNotifications === 'function') {
         saveNotifications(notifsAfter.filter(n => n !== archiveNotif));
@@ -2602,7 +2602,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 123, category: 'Maintenance',
     title: '[AUTO+MANUAL] Auto-backup fires correctly and creates notification',
-    purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the auto-backup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal — it goes silently to the notification bell.',
+    purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the auto-backup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal - it goes silently to the notification bell.',
     prerequisites: '⚠️ Auto-backup must be ON in Settings before running this test (Settings → Auto-backup → enable). Must be logged in as an Unlimited user. If auto-backup is off the test will fail with no notification found.',
     description: 'Temporarily ensures auto-backup pref is true, calls runCloudBackup(), and checks that a backup notification (type=backup or type=backup-failed) was created in the notification store. Cleans up the test notification.',
     input: 'DB.updatePrefs(userId, { cloudBackup: true }), then await runCloudBackup()',
@@ -2639,9 +2639,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         (n.type === 'backup' || n.type === 'backup-failed') &&
         !notifsBefore.find(b => b.ts === n.ts)
       );
-      if (!backupNotif) throw new Error('No backup notification found after runCloudBackup() — notification may not have been created.');
+      if (!backupNotif) throw new Error('No backup notification found after runCloudBackup() - notification may not have been created.');
 
-      // 8. Cleanup — remove test notification
+      // 8. Cleanup - remove test notification
       if (typeof saveNotifications === 'function') {
         saveNotifications(notifsAfter.filter(n => n !== backupNotif));
         if (typeof updateNotifBadge === 'function') updateNotifBadge();
@@ -2650,11 +2650,11 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     }
   },
 
-  // ── Email Tests (96–97) ───────────────────────────────────────────
+  // ── Email Tests (96-97) ───────────────────────────────────────────
   {
     id: 114, category: 'Email',
-    title: '[AUTO+MANUAL] Account-exists email — Edge Function returns ok:true',
-    purpose: 'Automatically calls the send-account-exists Edge Function with the current user\'s email and confirms it returns { ok: true }. Verifies the function is deployed, reachable, and responds without error. Does NOT verify email delivery — check your inbox after running.',
+    title: '[AUTO+MANUAL] Account-exists email - Edge Function returns ok:true',
+    purpose: 'Automatically calls the send-account-exists Edge Function with the current user\'s email and confirms it returns { ok: true }. Verifies the function is deployed, reachable, and responds without error. Does NOT verify email delivery - check your inbox after running.',
     prerequisites: 'Must be logged in. The send-account-exists Edge Function must be deployed to Supabase.',
     description: 'POSTs to /functions/v1/send-account-exists with the current user email, checks the response is { ok: true }.',
     input: 'POST /functions/v1/send-account-exists { email: currentUser.email }',
@@ -2663,7 +2663,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'After this test passes automatically, check your inbox for the "You already have a JumpKit account" email to confirm delivery end-to-end.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email found — must be logged in');
+      if (!email) throw new Error('No user email found - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-account-exists`, {
@@ -2675,19 +2675,19 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
-      // Auto portion passed — remind tester to verify inbox
+      // Auto portion passed - remind tester to verify inbox
       return 'manual';
     }
   },
 
-  // ── Pending Upgrade Flow (Tests 98–101) ─────────────────────────
+  // ── Pending Upgrade Flow (Tests 98-101) ─────────────────────────
   {
     id: 57, category: 'Subscription',
-    title: 'apply-pending-upgrade — returns applied:false when no pending row',
+    title: 'apply-pending-upgrade - returns applied:false when no pending row',
     purpose: 'Confirms apply-pending-upgrade gracefully returns { ok:true, applied:false } for a normal user with no pending upgrade row. This is the common-case path hit on every login.',
     prerequisites: 'Must be logged in. No pending_upgrades row should exist for this user (normal state).',
     description: 'POSTs to /functions/v1/apply-pending-upgrade with current user email and verifies applied:false is returned.',
@@ -2696,7 +2696,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'Automatic.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
@@ -2707,7 +2707,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
       if (body.ok !== true) throw new Error(`Expected ok:true, got: ${JSON.stringify(body)}`);
       if (body.applied !== false) throw new Error(`Expected applied:false (no pending row), got applied:${body.applied}`);
@@ -2718,27 +2718,27 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 130, category: 'Subscription', platforms: ['mac'],
-    title: '[MANUAL] apply-pending-upgrade — applies upgrade for user who paid before creating account',
-    purpose: 'Confirms apply-pending-upgrade applies the upgrade, deletes the pending row, and returns { ok:true, applied:true }. This flow handles the case where a user paid on LS before creating a JumpKit account — the webhook stores a pending row, and apply-pending-upgrade is called automatically on first login.',
-    prerequisites: 'LS store in Test mode. Use a test email that has NO existing JumpKit account — the ls-webhook only creates a pending_upgrades row when no profile exists for that email (otherwise it upgrades the profile directly, which is what test #93 covers).',
+    title: '[MANUAL] apply-pending-upgrade - applies upgrade for user who paid before creating account',
+    purpose: 'Confirms apply-pending-upgrade applies the upgrade, deletes the pending row, and returns { ok:true, applied:true }. This flow handles the case where a user paid on LS before creating a JumpKit account - the webhook stores a pending row, and apply-pending-upgrade is called automatically on first login.',
+    prerequisites: 'LS store in Test mode. Use a test email that has NO existing JumpKit account - the ls-webhook only creates a pending_upgrades row when no profile exists for that email (otherwise it upgrades the profile directly, which is what test #93 covers).',
     description: 'Complete a LS test checkout with a fresh test email to generate a pending_upgrades row via the real webhook, then create a JumpKit account and sign in to trigger apply-pending-upgrade automatically.',
     input: 'LS test-mode checkout with a fresh email (no JumpKit account) + JumpKit sign-up + sign-in',
     expected: 'pending_upgrades row created by webhook; on sign-in apply-pending-upgrade applies the upgrade (subscription_tier="core") and deletes the pending row.',
     steps: [
-      { text: 'Open the LS checkout page — confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
-      { text: 'Complete a LS test checkout using a fresh test email that has NO JumpKit account — e.g. a Gmail + alias like jeffroder+testpending@gmail.com. Use test card 4242 4242 4242 4242.' },
+      { text: 'Open the LS checkout page - confirm Test mode is active by verifying the orange "Test mode" banner at the top of the page.', link: { url: 'https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0', label: 'LS Checkout' } },
+      { text: 'Complete a LS test checkout using a fresh test email that has NO JumpKit account - e.g. a Gmail + alias like jeffroder+testpending@gmail.com. Use test card 4242 4242 4242 4242.' },
       { text: 'Wait ~5 seconds, then confirm the pending_upgrades row was created by the webhook.', cmd: `SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
       { text: 'Go to the JumpKit sign-up page and create an account with that same test email.' },
-      { text: 'Sign in with that email — apply-pending-upgrade fires automatically on login. Confirm the profile was upgraded.', cmd: `SELECT subscription_tier, subscription_status FROM profiles WHERE email='jeffroder+testpending@gmail.com';` },
+      { text: 'Sign in with that email - apply-pending-upgrade fires automatically on login. Confirm the profile was upgraded.', cmd: `SELECT subscription_tier, subscription_status FROM profiles WHERE email='jeffroder+testpending@gmail.com';` },
       { text: 'Confirm no pending row remains.', cmd: `SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
-      { text: 'Clean up — delete the test profile and any leftover pending row.', cmd: `DELETE FROM profiles WHERE email='jeffroder+testpending@gmail.com';\nDELETE FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
+      { text: 'Clean up - delete the test profile and any leftover pending row.', cmd: `DELETE FROM profiles WHERE email='jeffroder+testpending@gmail.com';\nDELETE FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';` },
     ],
     test: async () => 'manual'
   },
 
   {
     id: 115, category: 'Email',
-    title: '[AUTO+MANUAL] send-pending-upgrade — Edge Function returns ok:true',
+    title: '[AUTO+MANUAL] send-pending-upgrade - Edge Function returns ok:true',
     purpose: 'Automatically calls the send-pending-upgrade Edge Function with the current user email and confirms it returns { ok:true }. Verifies the function is deployed and reachable.',
     prerequisites: 'Must be logged in. send-pending-upgrade Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-pending-upgrade with current user email and checks response is { ok:true }.',
@@ -2748,7 +2748,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'After this test passes automatically, check inbox for the "Your JumpKit Unlimited subscription is confirmed" email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-pending-upgrade`, {
@@ -2759,18 +2759,18 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return 'manual';
     }
   },
 
-  // ── Onboarding Flow (Tests 102–103) ─────────────────────────────
+  // ── Onboarding Flow (Tests 102-103) ─────────────────────────────
   {
     id: 5, category: 'Auth',
-    title: 'Onboarding — checkAndShowOnboarding gated by onboarding_completed',
+    title: 'Onboarding - checkAndShowOnboarding gated by onboarding_completed',
     purpose: 'Confirms checkAndShowOnboarding() exists and does NOT show the onboarding modal when onboarding_completed is already true. This is the normal state for existing users.',
     prerequisites: 'Must be logged in and have completed onboarding.',
     description: 'Calls checkAndShowOnboarding() and verifies no #onboardingOverlay element appears in the DOM.',
@@ -2778,7 +2778,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: 'Function is accessible. No onboarding overlay appears (onboarding already done).',
     steps: 'Automatic.',
     test: async () => {
-      if (typeof checkAndShowOnboarding !== 'function') throw new Error('checkAndShowOnboarding is not defined — check onboarding.js is loaded');
+      if (typeof checkAndShowOnboarding !== 'function') throw new Error('checkAndShowOnboarding is not defined - check onboarding.js is loaded');
 
       const before = document.getElementById('onboardingOverlay');
       if (before) before.remove();
@@ -2789,7 +2789,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const overlay = document.getElementById('onboardingOverlay');
       if (overlay) {
         overlay.remove();
-        throw new Error('Onboarding overlay appeared — onboarding_completed may be false for this user. Complete onboarding first and re-run.');
+        throw new Error('Onboarding overlay appeared - onboarding_completed may be false for this user. Complete onboarding first and re-run.');
       }
 
       return true;
@@ -2798,13 +2798,13 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 58, category: 'Subscription',
-    title: 'Upgrade modal — checkAndHandleUpgrade renders correctly',
+    title: 'Upgrade modal - checkAndHandleUpgrade renders correctly',
     purpose: 'Confirms checkAndHandleUpgrade() renders the Welcome to JumpKit Unlimited modal without errors. Validates title contains "Unlimited" and the CTA button is present.',
     prerequisites: 'Must be logged in.',
     description: 'Calls checkAndHandleUpgrade("core"), verifies the modal title and footer CTA, then closes the modal.',
     input: 'checkAndHandleUpgrade("core")',
     expected: 'Modal opens. Title contains "Unlimited". Footer has "Let\'s Go" button. Modal is closed after test.',
-    steps: 'Automatic — modal will briefly open and close.',
+    steps: 'Automatic - modal will briefly open and close.',
     test: async () => {
       if (typeof checkAndHandleUpgrade !== 'function') throw new Error('checkAndHandleUpgrade is not defined');
 
@@ -2818,7 +2818,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const footerEl = document.getElementById('modalFooter');
 
       if (!titleEl) throw new Error('modalTitle element not found');
-      if (!titleEl.textContent.includes('Unlimited')) throw new Error(`Modal title missing "Unlimited" — got: "${titleEl.textContent.trim()}"`);
+      if (!titleEl.textContent.includes('Unlimited')) throw new Error(`Modal title missing "Unlimited" - got: "${titleEl.textContent.trim()}"`);
       if (!footerEl || !footerEl.textContent.includes('Go')) throw new Error('Modal footer missing "Let\'s Go" button');
 
       if (typeof Modal !== 'undefined') Modal.close();
@@ -2826,10 +2826,10 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     }
   },
 
-  // ── Team Member Lockout System (Tests 104–110) ─────────────────
+  // ── Team Member Lockout System (Tests 104-110) ─────────────────
   {
     id: 9, category: 'DB Schema',
-    title: 'team_members — lockout columns exist in schema',
+    title: 'team_members - lockout columns exist in schema',
     purpose: 'Confirms the DB migration for the lockout system was applied. The columns locked, lock_at, and lock_notified_2day must exist on team_members or the entire lockout system silently fails.',
     prerequisites: 'Must be logged in with Supabase access.',
     description: 'Queries team_members via Supabase and inspects the returned row shape to confirm all 3 lockout columns are present.',
@@ -2846,7 +2846,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
       if (error) {
         if (error.message && error.message.includes('column')) {
-          throw new Error(`Migration not applied — column error: ${error.message}`);
+          throw new Error(`Migration not applied - column error: ${error.message}`);
         }
         throw new Error(`Supabase error: ${error.message}`);
       }
@@ -2865,7 +2865,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 116, category: 'Email',
     emailSubject: "Owner: 'Important: your JumpKit team members may lose access' | Member: 'Your team access may be changing'",
-    title: '[AUTO+MANUAL] send-team-downgrade-alert — Edge Function returns ok:true (alert variant)',
+    title: '[AUTO+MANUAL] send-team-downgrade-alert - Edge Function returns ok:true (alert variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"alert" and a test member list, confirming the function is deployed and returns { ok:true }. This fires when a subscription is cancelled.',
     prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-team-downgrade-alert with ownerId (current user), a dummy teamName, lockDate, and a 1-member affectedMembers list.',
@@ -2875,7 +2875,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const profileId = window._supabaseUser?.id;
-      if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
+      if (!email || !profileId) throw new Error('No user email/profileId - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const lockDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -2895,9 +2895,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return 'manual';
     }
@@ -2905,18 +2905,18 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 117, category: 'Email',
-    emailSubject: "2 emails: Owner: 'Reminder: JumpKit team access ending in 2 days — Test Team (Test 117)' | Member: 'Your access to Test Team (Test 117) ends in 2 days'",
-    title: '[AUTO+MANUAL] send-team-downgrade-alert — Edge Function returns ok:true (warning variant)',
+    emailSubject: "2 emails: Owner: 'Reminder: JumpKit team access ending in 2 days - Test Team (Test 117)' | Member: 'Your access to Test Team (Test 117) ends in 2 days'",
+    title: '[AUTO+MANUAL] send-team-downgrade-alert - Edge Function returns ok:true (warning variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"warning", confirming the 2-day warning email path works. This is the variant fired by check-member-lockouts 2 days before lock_at.',
     prerequisites: 'Must be logged in. send-team-downgrade-alert Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-team-downgrade-alert with variant:"warning" and verifies ok:true is returned.',
     input: 'POST /functions/v1/send-team-downgrade-alert { ownerId, teamName, lockDate, affectedMembers, variant:"warning" }',
     expected: 'Response JSON has ok:true. A warning-variant email should be sent to the logged-in user\'s address.',
-    steps: 'Automatic. After this test passes, check inbox for 2 emails — one sent to the team owner and one to each affected member (both go to your address in this test). Look for team name "Test Team (Test 117)". See Email Subject above for both subjects.',
+    steps: 'Automatic. After this test passes, check inbox for 2 emails - one sent to the team owner and one to each affected member (both go to your address in this test). Look for team name "Test Team (Test 117)". See Email Subject above for both subjects.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const profileId = window._supabaseUser?.id;
-      if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
+      if (!email || !profileId) throw new Error('No user email/profileId - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const lockDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
@@ -2936,9 +2936,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return 'manual';
     }
@@ -2946,7 +2946,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 59, category: 'Subscription',
-    title: 'check-member-lockouts — Edge Function reachable and returns ok:true',
+    title: 'check-member-lockouts - Edge Function reachable and returns ok:true',
     purpose: 'Confirms check-member-lockouts is deployed and responds with { ok:true, locked:N, warned:N }. This function runs daily to apply locks and send warnings.',
     prerequisites: 'check-member-lockouts Edge Function must be deployed with --no-verify-jwt.',
     description: 'POSTs to /functions/v1/check-member-lockouts and verifies ok:true is returned along with locked and warned counts.',
@@ -2965,9 +2965,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       try { body = await res.json(); } catch(_) { body = {}; }
 
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
-      if (typeof body.locked !== 'number') throw new Error(`Expected locked (number) in response — got: ${JSON.stringify(body)}`);
-      if (typeof body.warned !== 'number') throw new Error(`Expected warned (number) in response — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
+      if (typeof body.locked !== 'number') throw new Error(`Expected locked (number) in response - got: ${JSON.stringify(body)}`);
+      if (typeof body.warned !== 'number') throw new Error(`Expected warned (number) in response - got: ${JSON.stringify(body)}`);
 
       return true;
     }
@@ -2975,7 +2975,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 131, category: 'Subscription',
-    title: '[MANUAL] check-member-lockouts — actually locks a member when lock_at has passed',
+    title: '[MANUAL] check-member-lockouts - actually locks a member when lock_at has passed',
     purpose: 'Confirms check-member-lockouts sets locked=true on rows where lock_at is in the past.',
     prerequisites: 'Supabase access + a team you own.',
     description: 'Insert a test team_members row with lock_at 1 hour ago, trigger check-member-lockouts, verify locked=true, then clean up.',
@@ -2986,45 +2986,45 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       return [
         { text: 'Run Test #59 to confirm check-member-lockouts is reachable and returns ok:true.' },
         {
-          text: 'In Supabase SQL editor, run this command — copy the UUID from the id column (this is your <saved-id>).',
+          text: 'In Supabase SQL editor, run this command - copy the UUID from the id column (this is your <saved-id>).',
           cmd: `WITH my_team AS (\n  SELECT id FROM teams\n  WHERE owner_id = (SELECT id FROM profiles WHERE email='${email}')\n  ORDER BY created_at\n  LIMIT 1\n)\nINSERT INTO team_members (team_id, user_id, locked, lock_at, lock_notified_2day)\nSELECT my_team.id,\n  (SELECT id FROM profiles WHERE email='${email}'),\n  false, NOW() - INTERVAL '1 hour', false\nFROM my_team\nON CONFLICT (team_id, user_id) DO UPDATE\n  SET locked = false,\n      lock_at = NOW() - INTERVAL '1 hour',\n      lock_notified_2day = false\nRETURNING id;`
         },
-        { text: 'Run Test #59 again — this triggers check-member-lockouts, locking any row where lock_at has passed.' },
+        { text: 'Run Test #59 again - this triggers check-member-lockouts, locking any row where lock_at has passed.' },
         {
-          text: 'Run this command, replacing <saved-id> with your UUID — confirm locked=true.',
+          text: 'Run this command, replacing <saved-id> with your UUID - confirm locked=true.',
           cmd: `SELECT id, locked, lock_at FROM team_members WHERE id='<saved-id>';`
         },
         {
-          text: 'Run this command, replacing <saved-id> with your UUID — deletes the test row.',
+          text: 'Run this command, replacing <saved-id> with your UUID - deletes the test row.',
           cmd: `DELETE FROM team_members WHERE id='<saved-id>';`
         },
         { text: 'Mark Pass if locked=true was confirmed in step 4.' },
       ];
     },
-    notes: 'lock_at is a team membership enforcement mechanism tied to subscription downgrades.\n\nHow it works:\n1. lock_at is set on a team_members row when a team owner\'s subscription is about to expire — it\'s a future timestamp (the date access should be cut off).\n2. 2 days before lock_at — check-member-lockouts detects rows where lock_at is within 48 hours and lock_notified_2day=false. It sends a warning email to both owner and member, then sets lock_notified_2day=true.\n3. When lock_at passes — check-member-lockouts finds rows where lock_at ≤ NOW() and locked=false, and sets locked=true.\n4. In the app — when the Teams page loads, it fetches team_members for the current user and builds _lockedTeamIds. Any team where locked=true shows the member as locked out — shared column access is blocked.\n\nIn short: owner\'s subscription lapses → members get a 2-day warning email → then get locked out of shared team columns automatically.',
+    notes: 'lock_at is a team membership enforcement mechanism tied to subscription downgrades.\n\nHow it works:\n1. lock_at is set on a team_members row when a team owner\'s subscription is about to expire - it\'s a future timestamp (the date access should be cut off).\n2. 2 days before lock_at - check-member-lockouts detects rows where lock_at is within 48 hours and lock_notified_2day=false. It sends a warning email to both owner and member, then sets lock_notified_2day=true.\n3. When lock_at passes - check-member-lockouts finds rows where lock_at ≤ NOW() and locked=false, and sets locked=true.\n4. In the app - when the Teams page loads, it fetches team_members for the current user and builds _lockedTeamIds. Any team where locked=true shows the member as locked out - shared column access is blocked.\n\nIn short: owner\'s subscription lapses → members get a 2-day warning email → then get locked out of shared team columns automatically.',
     test: async () => 'manual'
   },
 
-  // ── Auto-Update / GitHub Releases (Tests 111–116) ─────────────────
+  // ── Auto-Update / GitHub Releases (Tests 111-116) ─────────────────
   {
     id: 108, category: 'Deployment',
-    title: 'Auto-update IPC — onUpdateReady and installUpdate exposed in preload',
+    title: 'Auto-update IPC - onUpdateReady and installUpdate exposed in preload',
     purpose: 'Confirms preload.js exposes both update IPC bridges. If either is missing, the update banner will never show or the restart button will throw.',
     prerequisites: 'None.',
     description: 'Checks window.electronAPI.onUpdateReady and window.electronAPI.installUpdate are functions.',
     input: 'window.electronAPI.onUpdateReady, window.electronAPI.installUpdate',
     expected: 'Both are functions.',
     test: async () => {
-      if (!window.electronAPI) throw new Error('window.electronAPI not available — not running in Electron');
-      if (typeof window.electronAPI.onUpdateReady !== 'function') throw new Error('electronAPI.onUpdateReady is not a function — check preload.js');
-      if (typeof window.electronAPI.installUpdate !== 'function') throw new Error('electronAPI.installUpdate is not a function — check preload.js');
+      if (!window.electronAPI) throw new Error('window.electronAPI not available - not running in Electron');
+      if (typeof window.electronAPI.onUpdateReady !== 'function') throw new Error('electronAPI.onUpdateReady is not a function - check preload.js');
+      if (typeof window.electronAPI.installUpdate !== 'function') throw new Error('electronAPI.installUpdate is not a function - check preload.js');
       return true;
     }
   },
 
   {
     id: 109, category: 'Deployment',
-    title: 'Auto-update banner — #updateBanner element exists in DOM and starts hidden',
+    title: 'Auto-update banner - #updateBanner element exists in DOM and starts hidden',
     purpose: 'Confirms the update banner HTML element exists in app.html and is initially hidden. If it is missing, no update notification will ever appear.',
     prerequisites: 'None.',
     description: 'Finds #updateBanner in the DOM and verifies its display is none on load.',
@@ -3032,23 +3032,23 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: '#updateBanner exists and has display:none on initial load.',
     test: async () => {
       const banner = document.getElementById('updateBanner');
-      if (!banner) throw new Error('#updateBanner element not found in DOM — check app.html');
+      if (!banner) throw new Error('#updateBanner element not found in DOM - check app.html');
       const display = banner.style.display;
       if (display === 'flex') {
-        // If it's already showing that means an update was already downloaded — that's actually fine
+        // If it's already showing that means an update was already downloaded - that's actually fine
       } else if (display !== 'none' && display !== '') {
-        throw new Error(`#updateBanner has unexpected display value: "${display}" — expected "none"`);
+        throw new Error(`#updateBanner has unexpected display value: "${display}" - expected "none"`);
       }
       // Verify it has a restart button
       const restartBtn = banner.querySelector('button');
-      if (!restartBtn) throw new Error('#updateBanner has no button — "Restart & Update" button missing from app.html');
+      if (!restartBtn) throw new Error('#updateBanner has no button - "Restart & Update" button missing from app.html');
       return true;
     }
   },
 
   {
     id: 110, category: 'Deployment',
-    title: 'Auto-update banner — shows when update-ready event fires',
+    title: 'Auto-update banner - shows when update-ready event fires',
     purpose: 'Confirms the app.js listener correctly shows #updateBanner when the update-ready IPC event fires. Tests the full renderer-side update notification path.',
     prerequisites: 'None.',
     description: 'Manually sets #updateBanner to display:flex (simulating the update-ready callback) and verifies it is visible. Then resets it.',
@@ -3056,7 +3056,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: '#updateBanner becomes visible when the callback fires. After test: hidden again.',
     test: async () => {
       const banner = document.getElementById('updateBanner');
-      if (!banner) throw new Error('#updateBanner element not found — run Test 112 first');
+      if (!banner) throw new Error('#updateBanner element not found - run Test 112 first');
 
       const orig = banner.style.display;
 
@@ -3070,7 +3070,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       // Verify "Restart & Update" button text is present
       const btnText = banner.textContent || '';
       if (!btnText.includes('Restart') && !btnText.includes('Update')) {
-        throw new Error('#updateBanner visible but missing "Restart & Update" text — check app.html');
+        throw new Error('#updateBanner visible but missing "Restart & Update" text - check app.html');
       }
 
       // Reset banner
@@ -3081,16 +3081,16 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 111, category: 'Deployment',
-    title: '[MANUAL] GitHub releases — latest release API reachable',
-    purpose: 'Confirms the GitHub releases API for jrod4404/JumpKit returns a valid response. Cannot be automated — CSP connect-src blocks fetch to api.github.com from inside the Electron app.',
+    title: '[MANUAL] GitHub releases - latest release API reachable',
+    purpose: 'Confirms the GitHub releases API for jrod4404/JumpKit returns a valid response. Cannot be automated - CSP connect-src blocks fetch to api.github.com from inside the Electron app.',
     prerequisites: 'Internet connection. Only applicable once a GitHub release has been published.',
     description: 'Manual check: open the GitHub releases URL in a browser and verify a release exists with a valid version tag. During pre-release development, a 404 response is expected and acceptable.',
     input: 'Browser → https://api.github.com/repos/jrod4404/JumpKit/releases/latest',
     expected: 'Pre-release: 404 is acceptable (no releases published yet). Post-release: JSON with tag_name like v1.0.0.',
     links: [
-      { label: 'GitHub Releases API — latest', url: 'https://api.github.com/repos/jrod4404/JumpKit/releases/latest' },
+      { label: 'GitHub Releases API - latest', url: 'https://api.github.com/repos/jrod4404/JumpKit/releases/latest' },
     ],
-    steps: '1. Click the link above to open the GitHub releases API in your browser.\n2. Pre-release (no releases published yet): a 404 response is expected — Mark Pass.\n3. Post-release: confirm JSON with a tag_name field (e.g. v1.0.0) — Mark Pass. Mark Fail only if you expect a release to exist but get 404.',
+    steps: '1. Click the link above to open the GitHub releases API in your browser.\n2. Pre-release (no releases published yet): a 404 response is expected - Mark Pass.\n3. Post-release: confirm JSON with a tag_name field (e.g. v1.0.0) - Mark Pass. Mark Fail only if you expect a release to exist but get 404.',
     test: async () => {
       throw new Error('[MANUAL] Click the link in the Details modal to open the GitHub releases API. Pre-release: 404 is acceptable. Post-release: confirm tag_name is present.');
     }
@@ -3098,8 +3098,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 112, category: 'Deployment',
-    title: '[MANUAL] Auto-update feed — latest-mac.yml present in GitHub release assets',
-    purpose: 'electron-updater requires a latest-mac.yml (Mac) or latest.yml (Windows) in the GitHub release assets. Cannot be automated — CSP connect-src blocks fetch to api.github.com from inside the Electron app.',
+    title: '[MANUAL] Auto-update feed - latest-mac.yml present in GitHub release assets',
+    purpose: 'electron-updater requires a latest-mac.yml (Mac) or latest.yml (Windows) in the GitHub release assets. Cannot be automated - CSP connect-src blocks fetch to api.github.com from inside the Electron app.',
     prerequisites: 'Internet connection. At least one release published via electron-builder.',
     description: 'Manual check: open the GitHub releases page and verify the assets list includes latest-mac.yml.',
     input: 'Browser → https://github.com/jrod4404/JumpKit/releases/latest',
@@ -3112,20 +3112,20 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 141, category: 'Deployment',
-    title: '[MANUAL] Auto-update — full E2E: new release triggers in-app banner and installs correctly',
+    title: '[MANUAL] Auto-update - full E2E: new release triggers in-app banner and installs correctly',
     purpose: 'End-to-end validation of the entire update lifecycle: publish a new version to GitHub → wait for electron-updater to detect it → confirm the update banner appears in-app → click Restart & Update → app restarts at new version.',
     prerequisites: 'Must have the packaged app running (not dev mode). A new version must have been published to GitHub releases via electron-builder.',
     description: 'Follows the full update release process manually and confirms each step works.',
     input: 'Packaged app + new GitHub release with latest-mac.yml and DMG/EXE assets',
     expected: 'Banner appears within ~30s of publishing. Clicking "Restart & Update" quits and reinstalls. App reopens at new version.',
-    steps: '1. Bump version in package.json (e.g. 1.0.0 → 1.1.0).\n2. Build and sign: npm run build (Mac) and/or npm run build:win (Windows).\n3. Publish to GitHub: electron-builder --publish always (or set GH_TOKEN and use --publish onTagOrDraft).\n4. Confirm latest-mac.yml and/or latest.yml appear in GitHub release assets (Test 115 checks this).\n5. Open the currently-installed production build (not npm start).\n6. Wait up to 30 seconds — the app checks for updates 3 seconds after launch.\n7. Verify the teal "A new version of JumpKit is available" banner appears at the top of the app.\n8. Click "Restart & Update".\n9. App quits and relaunches — verify version in About or package.json matches the new version.\n10. Mark as Pass once all steps complete successfully.',
+    steps: '1. Bump version in package.json (e.g. 1.0.0 → 1.1.0).\n2. Build and sign: npm run build (Mac) and/or npm run build:win (Windows).\n3. Publish to GitHub: electron-builder --publish always (or set GH_TOKEN and use --publish onTagOrDraft).\n4. Confirm latest-mac.yml and/or latest.yml appear in GitHub release assets (Test 115 checks this).\n5. Open the currently-installed production build (not npm start).\n6. Wait up to 30 seconds - the app checks for updates 3 seconds after launch.\n7. Verify the teal "A new version of JumpKit is available" banner appears at the top of the app.\n8. Click "Restart & Update".\n9. App quits and relaunches - verify version in About or package.json matches the new version.\n10. Mark as Pass once all steps complete successfully.',
     test: async () => 'manual'
   },
 
   {
     id: 118, category: 'Email',
     emailSubject: 'Jane Smith (Test 118) just joined your team on JumpKit',
-    title: '[AUTO+MANUAL] send-member-joined — Edge Function returns ok:true',
+    title: '[AUTO+MANUAL] send-member-joined - Edge Function returns ok:true',
     purpose: 'Calls send-member-joined with the logged-in user as the team owner (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
     prerequisites: 'Must be logged in. send-member-joined Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-member-joined with ownerEmail (current user), a dummy memberName, teamName, totalMembers, and joinedAt timestamp.',
@@ -3136,7 +3136,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const email = window._supabaseUser?.email || currentUser?.email;
       const prof = window._supabaseProfile || {};
       const ownerName = [prof.first_name, prof.last_name].filter(Boolean).join(' ') || 'Team Owner';
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-member-joined`, {
@@ -3155,9 +3155,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return 'manual';
     }
@@ -3166,7 +3166,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
   {
     id: 119, category: 'Email',
     emailSubject: "You've been removed from Test Team (Test 119) on JumpKit",
-    title: '[AUTO+MANUAL] send-member-removed — Edge Function returns ok:true',
+    title: '[AUTO+MANUAL] send-member-removed - Edge Function returns ok:true',
     purpose: 'Calls send-member-removed with the logged-in user as the removed member (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
     prerequisites: 'Must be logged in. send-member-removed Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-member-removed with memberEmail (current user), a dummy memberName, teamName, and ownerName.',
@@ -3175,7 +3175,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'Automatic. After this test passes, check inbox for the member-removed email.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-member-removed`, {
@@ -3191,9 +3191,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
 
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return 'manual';
     }
@@ -3205,7 +3205,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 20, category: 'Account',
-    title: 'Account page — renderAccount("account") renders without error',
+    title: 'Account page - renderAccount("account") renders without error',
     purpose: 'Confirms the Account tab of the unified Account page renders its DOM content without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls renderAccount("account") and confirms pageContent is non-empty after render.',
@@ -3225,7 +3225,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 21, category: 'Account',
-    title: 'Account page — renderAccount("settings") renders without error',
+    title: 'Account page - renderAccount("settings") renders without error',
     purpose: 'Confirms the Settings tab of the unified Account page renders without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls renderAccount("settings") and confirms pageContent is non-empty after render.',
@@ -3245,7 +3245,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 22, category: 'Account',
-    title: 'Account page — renderAccount("teams") renders without error',
+    title: 'Account page - renderAccount("teams") renders without error',
     purpose: 'Confirms the Teams tab of the unified Account page renders without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls renderAccount("teams") and confirms pageContent is non-empty after render.',
@@ -3410,7 +3410,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const cols = DB.getColumns(currentUser.id);
       const colIds = new Set(cols.map(c => c.id));
       const target = existingJumps.find(j => colIds.has(j.columnId));
-      if (!target) throw new Error('No existing jump with a valid column found — check for orphaned jumps');
+      if (!target) throw new Error('No existing jump with a valid column found - check for orphaned jumps');
       const targetCol = cols.find(c => c.id === target.columnId);
       if (!targetCol) throw new Error('Could not find column for target jump');
 
@@ -3451,7 +3451,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     id: 155, category: 'Account',
     title: '[MANUAL] Export then Import round-trip on new device',
     purpose: 'End-to-end confirmation that a user can export jumps from one device and import them on another, with all personal jumps transferred correctly.',
-    prerequisites: 'Must be logged in. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory using the shell command below — this gives it its own clean session with no existing data, exactly like a different device.',
+    prerequisites: 'Must be logged in. To simulate a second device on the same Mac, launch a second Electron instance with a separate user-data directory using the shell command below - this gives it its own clean session with no existing data, exactly like a different device.',
     input: 'Settings → Export → save file → open 2nd instance via shell command → Settings → Import → select file',
     description: 'Full round-trip: export from device A (this instance), open a 2nd instance as device B using the shell command, import the file, verify jump counts match.',
     expected: 'All personal jumps from device A appear on device B after import. Shared jumps are excluded from the file but sync automatically. No duplicate jumps created on re-import.',
@@ -3460,7 +3460,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       { label: 'Open 2nd instance (from source)', cmd: 'cd /Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app && npm start -- --user-data-dir=/tmp/jumpkit-second' },
       { label: 'Cleanup temp profile', cmd: 'rm -rf /tmp/jumpkit-second' },
     ],
-    steps: '1. On this instance (device A): Settings → Maintenance → Export. Save the JSON file.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available) — this is your simulated device B. ⚠️ Log in with a DIFFERENT account on the second instance (using the same account will trigger the double-login conflict modal — see test 148).\n3. Log in on the second instance with a different account.\n4. On device B: Settings → Maintenance → Import. Select the exported JSON file.\n5. Verify the import summary shows the expected count of imported jumps.\n6. Navigate to Jumps page and confirm all personal columns and jumps appear.\n7. Run Import again with the same file — verify all jumps are skipped (0 imported) with no duplicates created.\n8. After testing, click the Cleanup command above to remove the temp profile.',
+    steps: '1. On this instance (device A): Settings → Maintenance → Export. Save the JSON file.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available) - this is your simulated device B. ⚠️ Log in with a DIFFERENT account on the second instance (using the same account will trigger the double-login conflict modal - see test 148).\n3. Log in on the second instance with a different account.\n4. On device B: Settings → Maintenance → Import. Select the exported JSON file.\n5. Verify the import summary shows the expected count of imported jumps.\n6. Navigate to Jumps page and confirm all personal columns and jumps appear.\n7. Run Import again with the same file - verify all jumps are skipped (0 imported) with no duplicates created.\n8. After testing, click the Cleanup command above to remove the temp profile.',
     test: async () => 'manual'
   },
 
@@ -3477,7 +3477,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: 'exportCols=[c1 only], exportJumps=[j1 only].',
     steps: 'Automatic.',
     test: async () => {
-      if (!window.JK?.logic) throw new Error('JK.logic not available — logic.js not loaded');
+      if (!window.JK?.logic) throw new Error('JK.logic not available - logic.js not loaded');
       const { buildExportData } = window.JK.logic;
       const cols = [
         { id: 'c1', name: 'Personal Col', isShared: false },
@@ -3616,13 +3616,13 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 161, category: 'Columns',
-    title: '[MANUAL] Configure Columns — Add Column and Remove Column buttons',
+    title: '[MANUAL] Configure Columns - Add Column and Remove Column buttons',
     purpose: 'Confirms the Add Column and Remove Column (trash icon) UI flows work correctly in the Configure Columns modal.',
     prerequisites: 'Must be logged in as admin.',
     description: 'Opens the Configure Columns modal, adds a new column via the button, saves, then reopens and removes it with the trash icon.',
     input: 'Jumps page → Configure Columns → Add Column → name → Save → reopen → trash → confirm → Save.',
     expected: 'New column appears after first save. Column (and its jumps) are gone after second save. Team columns have a disabled trash icon.',
-    steps: '1. Go to Jumps page → click "Configure Columns".\n2. Click "+ Add Column" at the bottom — a new blank row should appear.\n3. Enter a column name and toggle it visible.\n4. Click Save Columns. Verify the new column appears in the jump view.\n5. Reopen Configure Columns. Find the new row and click its trash icon.\n6. An inline confirmation row should appear ("Delete X and all N jumps?"). Click "Yes, Delete".\n7. Click Save Columns. Verify the column is gone.\n8. If shared/team columns are present, verify their trash icon is greyed out and non-clickable with tooltip "Team columns can only be hidden, not removed".',
+    steps: '1. Go to Jumps page → click "Configure Columns".\n2. Click "+ Add Column" at the bottom - a new blank row should appear.\n3. Enter a column name and toggle it visible.\n4. Click Save Columns. Verify the new column appears in the jump view.\n5. Reopen Configure Columns. Find the new row and click its trash icon.\n6. An inline confirmation row should appear ("Delete X and all N jumps?"). Click "Yes, Delete".\n7. Click Save Columns. Verify the column is gone.\n8. If shared/team columns are present, verify their trash icon is greyed out and non-clickable with tooltip "Team columns can only be hidden, not removed".',
     test: async () => 'manual'
   },
 
@@ -3632,9 +3632,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 52, category: 'Stats',
-    title: 'ROI — hours saved calculation is correct',
+    title: 'ROI - hours saved calculation is correct',
     purpose: 'Validates the core ROI formula: lifetimeLaunches × timePerClick / 3600 = lifetimeHours (floor).',
-    prerequisites: 'None — pure math test using hardcoded values.',
+    prerequisites: 'None - pure math test using hardcoded values.',
     description: 'Runs the same formula used in app.js against known inputs and checks the result.',
     input: 'launches=720, timePerClick=10 → 720×10/3600 = 2h exactly',
     expected: 'lifetimeHours = 2, lifetimeMins = 0.',
@@ -3660,9 +3660,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 53, category: 'Stats',
-    title: 'ROI — dollar value calculation is correct',
+    title: 'ROI - dollar value calculation is correct',
     purpose: 'Validates the dollar formula: (lifetimeLaunches × timePerClick / 3600) × dollarsPerHour.',
-    prerequisites: 'None — pure math test.',
+    prerequisites: 'None - pure math test.',
     description: 'Runs the dollar ROI formula against known inputs and checks results to 2 decimal places.',
     input: 'launches=720, timePerClick=10, dollarsPerHour=50 → 2h × $50 = $100.00',
     expected: 'lifetimeDollars = 100.00. Secondary: launches=360, tpc=10, dph=100 → $100.00',
@@ -3690,7 +3690,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 15, category: 'Navigation',
-    title: 'Help page — renderHelp() renders without error',
+    title: 'Help page - renderHelp() renders without error',
     purpose: 'Confirms the Help page renders its DOM content without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls renderHelp() and confirms pageContent is non-empty.',
@@ -3698,7 +3698,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: '#pageContent has innerHTML after the call. No JS exception thrown.',
     steps: 'Automatic.',
     test: async () => {
-      if (typeof renderHelp !== 'function') throw new Error('renderHelp is not defined — check help.js is loaded');
+      if (typeof renderHelp !== 'function') throw new Error('renderHelp is not defined - check help.js is loaded');
       const el = document.getElementById('pageContent');
       if (!el) throw new Error('#pageContent element not found');
       renderHelp();
@@ -3715,7 +3715,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 23, category: 'Admin',
-    title: 'Admin page — renderAdmin() renders for admin, guards non-admins',
+    title: 'Admin page - renderAdmin() renders for admin, guards non-admins',
     purpose: 'Confirms renderAdmin() runs without throwing. For admin users, confirms content is rendered. For non-admins, confirms an access-denied guard is shown rather than crashing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls renderAdmin() and checks that #pageContent is non-empty regardless of role. Validates the role guard works.',
@@ -3733,7 +3733,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const isAdmin = window._supabaseProfile?.role === 'admin';
       if (!isAdmin) {
         const hasGuard = el.innerHTML.includes('ti-lock') || el.innerHTML.toLowerCase().includes('access') || el.innerHTML.toLowerCase().includes('admin');
-        if (!hasGuard) throw new Error('Non-admin user did not see access guard — potential security issue');
+        if (!hasGuard) throw new Error('Non-admin user did not see access guard - potential security issue');
       }
       // Restore tests page so the user lands back here after individual run
       renderTests();
@@ -3746,13 +3746,13 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 100, category: 'UI',
-    title: 'Feedback modal — openFeedbackModal() renders without error',
+    title: 'Feedback modal - openFeedbackModal() renders without error',
     purpose: 'Confirms the feedback modal opens and renders its form fields without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls openFeedbackModal() and checks that the modal is visible with expected form fields.',
     input: 'openFeedbackModal()',
     expected: 'Modal opens. Contains a textarea or input for message. No JS exception thrown.',
-    steps: 'Automatic. The modal will open briefly — it will be closed by the test.',
+    steps: 'Automatic. The modal will open briefly - it will be closed by the test.',
     test: async () => {
       if (typeof openFeedbackModal !== 'function') throw new Error('openFeedbackModal is not defined');
       openFeedbackModal();
@@ -3768,7 +3768,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 63, category: 'Email',
-    title: 'send-feedback — Edge Function returns ok:true',
+    title: 'send-feedback - Edge Function returns ok:true',
     purpose: 'Confirms the send-feedback Edge Function is deployed and returns ok:true for a valid payload.',
     prerequisites: 'Must be logged in. send-feedback Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-feedback with a test name, email, category, and message.',
@@ -3777,7 +3777,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'Automatic.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
@@ -3792,9 +3792,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
     }
   },
 
@@ -3804,7 +3804,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 64, category: 'Email',
-    title: '[AUTO+MANUAL] send-invite — Edge Function returns ok:true',
+    title: '[AUTO+MANUAL] send-invite - Edge Function returns ok:true',
     purpose: 'Confirms the send-invite Edge Function is deployed and returns ok:true for a valid payload.',
     prerequisites: 'Must be logged in. send-invite Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-invite with a test email, teamId, and invitedBy (current user id).',
@@ -3815,7 +3815,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const profileId = window._supabaseUser?.id;
-      if (!email || !profileId) throw new Error('No user email/profileId — must be logged in');
+      if (!email || !profileId) throw new Error('No user email/profileId - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-invite`, {
@@ -3832,17 +3832,17 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
       return 'manual';
     }
   },
 
   {
     id: 65, category: 'Email',
-    title: 'send-welcome — Edge Function returns ok:true',
-    purpose: 'Confirms the send-welcome Edge Function is deployed and returns ok:true. Note: the function skips sending if welcome_email_sent is already true for the user — ok:true with skipped:true is also a pass.',
+    title: 'send-welcome - Edge Function returns ok:true',
+    purpose: 'Confirms the send-welcome Edge Function is deployed and returns ok:true. Note: the function skips sending if welcome_email_sent is already true for the user - ok:true with skipped:true is also a pass.',
     prerequisites: 'Must be logged in. send-welcome Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-welcome with the current user email and userId.',
     input: 'POST /functions/v1/send-welcome { email, firstName, userId }',
@@ -3852,7 +3852,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       const email = window._supabaseUser?.email || currentUser?.email;
       const userId = window._supabaseUser?.id;
       const prof = window._supabaseProfile || {};
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-welcome`, {
@@ -3862,15 +3862,15 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
     }
   },
 
   {
     id: 66, category: 'Email',
-    title: '[AUTO+MANUAL] send-cancellation — Edge Function returns ok:true',
+    title: '[AUTO+MANUAL] send-cancellation - Edge Function returns ok:true',
     purpose: 'Confirms the send-cancellation Edge Function is deployed and returns ok:true for a valid payload.',
     prerequisites: 'Must be logged in. send-cancellation Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/send-cancellation with the current user email and firstName.',
@@ -3881,7 +3881,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const prof = window._supabaseProfile || {};
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-cancellation`, {
@@ -3891,31 +3891,31 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
       return 'manual';
     }
   },
 
   // ══════════════════════════════════════════════════════════════════
-  // EMAIL — TEAM DELETED + WAITLIST
+  // EMAIL - TEAM DELETED + WAITLIST
   // ══════════════════════════════════════════════════════════════════
 
   {
     id: 142, category: 'Email',
-    title: 'send-team-deleted — Edge Function returns ok:true',
-    purpose: 'Confirms the send-team-deleted Edge Function is deployed and returns ok:true. Uses a fake teamId so no real members are emailed — notified:0 is expected and correct for this test.',
+    title: 'send-team-deleted - Edge Function returns ok:true',
+    purpose: 'Confirms the send-team-deleted Edge Function is deployed and returns ok:true. Uses a fake teamId so no real members are emailed - notified:0 is expected and correct for this test.',
     prerequisites: 'Must be logged in. send-team-deleted Edge Function must be deployed.',
-    description: 'POSTs to /functions/v1/send-team-deleted with a fake teamId and the current user as ownerName. Verifies ok:true is returned. No inbox check needed — notified:0 means the function ran correctly but found no members for the test ID.',
+    description: 'POSTs to /functions/v1/send-team-deleted with a fake teamId and the current user as ownerName. Verifies ok:true is returned. No inbox check needed - notified:0 means the function ran correctly but found no members for the test ID.',
     input: 'POST /functions/v1/send-team-deleted { teamId: \'test-team-142\', teamName: \'Test Team (Test 142)\', ownerName }',
-    expected: 'Response JSON has ok:true. notified:0 is expected (fake teamId has no members). No inbox email will arrive — this is correct behavior for a deployment check.',
-    steps: 'Automatic. Confirm ok:true in the result. notified:0 is expected — mark Pass.',
+    expected: 'Response JSON has ok:true. notified:0 is expected (fake teamId has no members). No inbox email will arrive - this is correct behavior for a deployment check.',
+    steps: 'Automatic. Confirm ok:true in the result. notified:0 is expected - mark Pass.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
       const prof = window._supabaseProfile || {};
       const ownerName = [prof.first_name, prof.last_name].filter(Boolean).join(' ') || 'Test Owner';
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/send-team-deleted`, {
@@ -3925,9 +3925,9 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.ok !== true) throw new Error(`Response missing ok:true — got: ${JSON.stringify(body)}`);
+      if (body.ok !== true) throw new Error(`Response missing ok:true - got: ${JSON.stringify(body)}`);
 
       return true;
     }
@@ -3935,16 +3935,16 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 144, category: 'Email',
-    title: 'waitlist-signup — Edge Function returns ok:true or duplicate:true',
-    purpose: 'Confirms the waitlist-signup Edge Function is deployed and returns a valid response. Uses the current user email — if already on the waitlist, duplicate:true is returned (also a pass).',
+    title: 'waitlist-signup - Edge Function returns ok:true or duplicate:true',
+    purpose: 'Confirms the waitlist-signup Edge Function is deployed and returns a valid response. Uses the current user email - if already on the waitlist, duplicate:true is returned (also a pass).',
     prerequisites: 'Must be logged in. waitlist-signup Edge Function must be deployed.',
     description: 'POSTs to /functions/v1/waitlist-signup with the current user email. Accepts either { success:true } (new signup + email sent) or { duplicate:true } (already on waitlist). Cleans up the test row if a new entry was created.',
     input: 'POST /functions/v1/waitlist-signup { email }',
     expected: 'Response JSON has success:true (new signup, check inbox for waitlist email) or duplicate:true (already signed up, no email). Both are Pass.',
-    steps: 'Automatic. If success:true — check inbox for the waitlist confirmation email. If duplicate:true — no email, mark Pass.',
+    steps: 'Automatic. If success:true - check inbox for the waitlist confirmation email. If duplicate:true - no email, mark Pass.',
     test: async () => {
       const email = window._supabaseUser?.email || currentUser?.email;
-      if (!email) throw new Error('No user email — must be logged in');
+      if (!email) throw new Error('No user email - must be logged in');
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
 
       const res = await fetch(`${SUPABASE_URL}/functions/v1/waitlist-signup`, {
@@ -3954,14 +3954,14 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       });
       let body;
       try { body = await res.json(); } catch(_) { body = {}; }
-      if (res.status === 429) throw new Error('Rate limited — wait 60s and retry');
+      if (res.status === 429) throw new Error('Rate limited - wait 60s and retry');
       if (!res.ok) throw new Error(`Edge Function returned ${res.status}: ${JSON.stringify(body)}`);
-      if (body.success !== true && body.duplicate !== true) throw new Error(`Unexpected response — got: ${JSON.stringify(body)}`);
+      if (body.success !== true && body.duplicate !== true) throw new Error(`Unexpected response - got: ${JSON.stringify(body)}`);
 
-      // duplicate:true = already on waitlist, no email sent — auto-pass
+      // duplicate:true = already on waitlist, no email sent - auto-pass
       if (body.duplicate === true) return true;
 
-      // success:true = new signup, email sent — clean up and ask for inbox check
+      // success:true = new signup, email sent - clean up and ask for inbox check
       if (body.success === true && supabaseClient) {
         await supabaseClient.from('waitlist').delete().eq('email', email.toLowerCase().trim());
       }
@@ -3972,13 +3972,13 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 145, category: 'Email',
-    title: '[MANUAL] waitlist-signup — correct email content in inbox (if success:true)',
+    title: '[MANUAL] waitlist-signup - correct email content in inbox (if success:true)',
     purpose: 'Manual confirmation that the waitlist email arrived with correct content if test 144 returned success:true.',
     prerequisites: 'Test 144 must have passed with success:true (not duplicate:true).',
     description: 'Open the waitlist confirmation email and verify subject, content, and branding.',
     input: 'Email inbox for logged-in user account',
     expected: 'Email arrives with subject "You\'re on the JumpKit waitlist 🚀". Contains feature list and jumpkit.app link. If test 144 returned duplicate:true, skip this test and mark Pass.',
-    steps: '1. If test 144 returned duplicate:true — mark this test Pass (no email expected).\n2. Otherwise open your inbox.\n3. Find email with subject "You\'re on the JumpKit waitlist 🚀".\n4. Verify it contains the feature list and a link to jumpkit.app.\n5. Mark as Pass once confirmed.',
+    steps: '1. If test 144 returned duplicate:true - mark this test Pass (no email expected).\n2. Otherwise open your inbox.\n3. Find email with subject "You\'re on the JumpKit waitlist 🚀".\n4. Verify it contains the feature list and a link to jumpkit.app.\n5. Mark as Pass once confirmed.',
     test: async () => 'manual'
   },
 
@@ -3988,7 +3988,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 113, category: 'Deployment',
-    title: 'Export PDF — electronAPI.exportPDF is exposed in preload',
+    title: 'Export PDF - electronAPI.exportPDF is exposed in preload',
     purpose: 'Confirms the Electron preload correctly exposes electronAPI.exportPDF so the renderer can trigger PDF generation.',
     prerequisites: 'Must be running in the Electron app (not a browser).',
     description: 'Checks that window.electronAPI.exportPDF is a function.',
@@ -3996,23 +3996,23 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: '"function"',
     steps: 'Automatic.',
     test: async () => {
-      if (!window.electronAPI) throw new Error('window.electronAPI is not defined — is this running in Electron?');
+      if (!window.electronAPI) throw new Error('window.electronAPI is not defined - is this running in Electron?');
       if (typeof window.electronAPI.exportPDF !== 'function') throw new Error(`electronAPI.exportPDF is ${typeof window.electronAPI.exportPDF}, expected function`);
     }
   },
 
   {
     id: 121, category: 'Deployment',
-    title: '[AUTO+MANUAL] Export PDF — exports real statistics PDF and opens for human verification',
-    purpose: 'Calls exportStatsPDF() — the real app export function — to generate the actual ROI report PDF from live data. Human verifies the saved file looks correct.',
+    title: '[AUTO+MANUAL] Export PDF - exports real statistics PDF and opens for human verification',
+    purpose: 'Calls exportStatsPDF() - the real app export function - to generate the actual ROI report PDF from live data. Human verifies the saved file looks correct.',
     prerequisites: 'Must be running in Electron. Must be logged in with at least some jump data for a meaningful export.',
     description: 'Navigates to Stats page, then calls exportStatsPDF() which builds the full ROI report HTML (personal stats, charts, top jumps, team ROI) and sends it to Electron for PDF generation.',
     input: 'exportStatsPDF()',
     expected: 'A Save dialog appears. After saving, the PDF contains real stats: launches, time saved, dollars saved, top jumps table, and charts. Human verifies content looks correct.',
-    steps: 'Automatic trigger, then manual verification:\n1. A Save dialog will appear — choose a location and save.\n2. Open the saved PDF.\n3. Verify it shows your real stats (launches, time saved, top jumps).\n4. Verify it is not a dummy/placeholder file.\n5. Mark as Pass once confirmed.',
+    steps: 'Automatic trigger, then manual verification:\n1. A Save dialog will appear - choose a location and save.\n2. Open the saved PDF.\n3. Verify it shows your real stats (launches, time saved, top jumps).\n4. Verify it is not a dummy/placeholder file.\n5. Mark as Pass once confirmed.',
     test: async () => {
-      if (!window.electronAPI?.exportPDF) throw new Error('electronAPI.exportPDF not available — not running in Electron');
-      if (typeof exportStatsPDF !== 'function') throw new Error('exportStatsPDF is not defined — check app.js is loaded');
+      if (!window.electronAPI?.exportPDF) throw new Error('electronAPI.exportPDF not available - not running in Electron');
+      if (typeof exportStatsPDF !== 'function') throw new Error('exportStatsPDF is not defined - check app.js is loaded');
       if (!currentUser) throw new Error('No user logged in');
 
       // Navigate to stats page so charts are rendered before export
@@ -4040,15 +4040,15 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 24, category: 'Onboarding',
-    title: 'Onboarding — showOnboardingModal() and step 1 render without error',
+    title: 'Onboarding - showOnboardingModal() and step 1 render without error',
     purpose: 'Confirms the onboarding overlay is created and step 1 content renders into #onboardingContent without throwing.',
     prerequisites: 'Must be logged in. onboarding.js must be loaded.',
     description: 'Calls showOnboardingModal() and checks that the overlay and step 1 content are present in the DOM.',
     input: 'showOnboardingModal("Test")',
     expected: '#onboardingOverlay exists. #onboardingContent is non-empty. #onboardingProgress is present.',
-    steps: 'Automatic. The onboarding overlay will briefly appear — it is removed at test end.',
+    steps: 'Automatic. The onboarding overlay will briefly appear - it is removed at test end.',
     test: async () => {
-      if (typeof showOnboardingModal !== 'function') throw new Error('showOnboardingModal is not defined — check onboarding.js is loaded');
+      if (typeof showOnboardingModal !== 'function') throw new Error('showOnboardingModal is not defined - check onboarding.js is loaded');
       showOnboardingModal('Test', false);
       await new Promise(r => setTimeout(r, 100));
       const overlay = document.getElementById('onboardingOverlay');
@@ -4064,7 +4064,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 25, category: 'Onboarding',
-    title: 'Onboarding — steps 2, 3, 4 each render without error',
+    title: 'Onboarding - steps 2, 3, 4 each render without error',
     purpose: 'Confirms renderOnboardingStep(2), (3), and (4) each populate #onboardingContent without throwing, and the progress bar advances correctly.',
     prerequisites: 'Must be logged in. onboarding.js must be loaded.',
     description: 'Creates the onboarding overlay then calls renderOnboardingStep for steps 2, 3, 4 in sequence, validating content and progress each time.',
@@ -4097,7 +4097,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 26, category: 'Onboarding',
-    title: 'Onboarding — renderOnboardingComplete() shows "You\'re all set" and progress = 100%',
+    title: 'Onboarding - renderOnboardingComplete() shows "You\'re all set" and progress = 100%',
     purpose: 'Confirms the final onboarding screen renders the completion message and fills the progress bar to 100%.',
     prerequisites: 'Must be logged in. onboarding.js must be loaded.',
     description: 'Creates the overlay, calls renderOnboardingComplete(), and verifies the completion state.',
@@ -4127,7 +4127,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 76, category: 'Teams',
-    title: 'New team — openCreateTeamModal() renders without error',
+    title: 'New team - openCreateTeamModal() renders without error',
     purpose: 'Confirms the Create Team modal opens and renders its form fields without throwing.',
     prerequisites: 'Must be logged in.',
     description: 'Calls openCreateTeamModal() and checks the modal is visible with expected inputs.',
@@ -4135,7 +4135,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     expected: 'Modal opens. Contains team name, owner email, and password inputs. No JS exception.',
     steps: 'Automatic. Modal is closed by the test.',
     test: async () => {
-      if (typeof openCreateTeamModal !== 'function') throw new Error('openCreateTeamModal is not defined — check teams.js is loaded');
+      if (typeof openCreateTeamModal !== 'function') throw new Error('openCreateTeamModal is not defined - check teams.js is loaded');
       openCreateTeamModal('');
       await new Promise(r => setTimeout(r, 150));
       const nameInput = document.getElementById('ctTeamName');
@@ -4150,7 +4150,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 77, category: 'Teams',
-    title: 'New team — direct Supabase insert creates team row and cleans up',
+    title: 'New team - direct Supabase insert creates team row and cleans up',
     purpose: 'Validates the full round-trip: insert a team row directly into Supabase (bypassing UI), confirm it exists, then delete it. Tests DB write access and schema correctness.',
     prerequisites: 'Must be logged in as admin.',
     description: 'Inserts a test team row into the teams table, verifies it was created, then deletes it. Does not go through the UI.',
@@ -4159,18 +4159,18 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     steps: 'Automatic.',
     test: async () => {
       const userId = window._supabaseUser?.id;
-      if (!userId) throw new Error('No user id — must be logged in');
+      if (!userId) throw new Error('No user id - must be logged in');
 
       const testName = `__test_team_${Date.now()}`;
       const fakeHash = 'test_hash_' + Math.random().toString(36).slice(2);
 
-      // org_id is NOT NULL — resolve same way as renderTeams()
+      // org_id is NOT NULL - resolve same way as renderTeams()
       let orgId = window._supabaseProfile?.org_id || null;
       if (!orgId) {
         const { data: existingOrg } = await supabaseClient.from('organizations').select('id').eq('owner_id', userId).maybeSingle();
         orgId = existingOrg?.id || null;
       }
-      if (!orgId) throw new Error('No org_id found for user — run test 65 first to ensure org exists');
+      if (!orgId) throw new Error('No org_id found for user - run test 65 first to ensure org exists');
 
       // Insert
       const { data: team, error: insertErr } = await supabaseClient
@@ -4187,14 +4187,14 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
       if (selectErr || !found) throw new Error('Could not re-fetch team after insert: ' + (selectErr?.message || 'not found'));
       if (found.name !== testName) throw new Error(`Name mismatch: got "${found.name}", expected "${testName}"`);
 
-      // Cleanup — delete team_members first, then team
+      // Cleanup - delete team_members first, then team
       await supabaseClient.from('team_members').delete().eq('team_id', team.id);
       const { error: deleteErr } = await supabaseClient.from('teams').delete().eq('id', team.id);
       if (deleteErr) throw new Error('Cleanup delete failed: ' + deleteErr.message);
 
       // Confirm gone
       const { data: gone } = await supabaseClient.from('teams').select('id').eq('id', team.id).maybeSingle();
-      if (gone) throw new Error('Team row still exists after delete — cleanup failed');
+      if (gone) throw new Error('Team row still exists after delete - cleanup failed');
     }
   },
 
@@ -4204,8 +4204,8 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
 
   {
     id: 120, category: 'Teams',
-    title: 'verify-team-password — wrong password returns valid:false',
-    purpose: 'Confirms verify-team-password correctly rejects a wrong password. If rejection works, the function is operating correctly — correct-password acceptance is implied.',
+    title: 'verify-team-password - wrong password returns valid:false',
+    purpose: 'Confirms verify-team-password correctly rejects a wrong password. If rejection works, the function is operating correctly - correct-password acceptance is implied.',
     prerequisites: 'Must be logged in as a team owner with at least one owned team.',
     description: 'Fetches the first team owned by the current user and calls verify-team-password with a deliberately wrong password. Confirms the response has valid:false.',
     input: 'POST /functions/v1/verify-team-password { teamId, candidatePassword: \'definitely_wrong_password_xyz\' }',
@@ -4214,7 +4214,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
     test: async () => {
       if (!SUPABASE_URL || !SUPABASE_ANON_KEY) throw new Error('SUPABASE_URL or SUPABASE_ANON_KEY not configured');
       const userId = window._supabaseUser?.id;
-      if (!userId) throw new Error('Not logged in — _supabaseUser not set');
+      if (!userId) throw new Error('Not logged in - _supabaseUser not set');
 
       // Fetch the first team owned by current user
       const { data: teams } = await supabaseClient
@@ -4223,7 +4223,7 @@ For each FAIL: show the file, line number, the problematic code, severity (Criti
         .eq('owner_id', userId)
         .limit(1);
 
-      if (!teams || teams.length === 0) throw new Error('No owned teams found — create at least one team before running this test');
+      if (!teams || teams.length === 0) throw new Error('No owned teams found - create at least one team before running this test');
       const teamId = teams[0].id;
       const teamName = teams[0].name;
 
@@ -4251,7 +4251,7 @@ function renderTests() {
     pageContent.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px">
         <svg class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
-        <h2 style="font-size:1.4rem;font-weight:700;color:var(--text)">403 — Access Restricted</h2>
+        <h2 style="font-size:1.4rem;font-weight:700;color:var(--text)">403 - Access Restricted</h2>
         <p style="color:var(--text-muted);font-size:0.9rem">This page is only available to administrators.</p>
       </div>`;
     return;
@@ -4260,7 +4260,7 @@ function renderTests() {
   pageContent.innerHTML = `
     <div id="pageTests" style="display:flex;flex-direction:column;height:100%;">
 
-      <!-- Summary + Buttons row — static header; .page-content scrolling is disabled
+      <!-- Summary + Buttons row - static header; .page-content scrolling is disabled
            via the :has(#pageTests) CSS rule so only #testsTablesWrap scrolls. -->
       <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
         <!-- Unified summary card -->
@@ -4353,13 +4353,13 @@ function renderTests() {
   document.getElementById('btnSaveAMResults').addEventListener('click', () => _saveReleaseSection('auto-manual'));
   document.getElementById('btnSaveManualResults').addEventListener('click', () => _saveReleaseSection('manual'));
 
-  // Delegated handler — registered once at module scope so re-renders don't stack duplicates.
+  // Delegated handler - registered once at module scope so re-renders don't stack duplicates.
   // removeEventListener before addEventListener guarantees exactly one live registration.
   document.removeEventListener('click', _testsJaction);
   document.addEventListener('click', _testsJaction);
 }
 
-// Module-scope handler — must live outside renderTests() so the function reference
+// Module-scope handler - must live outside renderTests() so the function reference
 // is stable across re-renders (needed for removeEventListener to work correctly).
 function _testsJaction(e) {
   const btn = e.target.closest('[data-jaction]');
@@ -4379,7 +4379,7 @@ function _testsJaction(e) {
   } else if (action === 'test-nav') {
     if (!document.getElementById('pageTests')) return;
     const navId = parseInt(btn.dataset.navid);
-    // Update modal content in-place — no close/reopen, no flash
+    // Update modal content in-place - no close/reopen, no flash
     const { title, body, footer } = _buildTestDetailContent(navId);
     const mt = document.getElementById('modalTitle');
     const mb = document.getElementById('modalBody');
@@ -4412,7 +4412,7 @@ function _testsJaction(e) {
       // "commits" that value as the transition start point, then animate to 0.
       // Without the reflow, the browser batches both assignments and skips the animation.
       body.style.maxHeight = body.offsetHeight + 'px';
-      void body.offsetHeight; // force reflow — do not remove
+      void body.offsetHeight; // force reflow - do not remove
       body.style.maxHeight = '0px';
       body.dataset.collapsed = 'true';
       if (chevron) chevron.style.transform = 'rotate(-90deg)';
@@ -4422,13 +4422,13 @@ function _testsJaction(e) {
 
 // ── Test Result Persistence ─────────────────────────────────────
 // Saves/loads pass/fail/manual results to SQLite via DB.savePrefs so
-// progress survives app restarts. Only final states are persisted —
+// progress survives app restarts. Only final states are persisted -
 // 'running' is ephemeral and never written.
 function _saveTestResults() {
   try {
     const userId = window._supabaseUser?.id || (typeof currentUser !== 'undefined' && currentUser?.id);
     if (!userId || typeof DB === 'undefined' || !DB.savePrefs) return;
-    // Persist only state + received — skip logs (ephemeral, too large)
+    // Persist only state + received - skip logs (ephemeral, too large)
     const slim = {};
     Object.entries(window._jkTestResults || {}).forEach(([id, r]) => {
       if (r.state && r.state !== 'running') {
@@ -4473,7 +4473,7 @@ async function _loadResultsFromHTMLFile(opts = {}) {
     return;
   }
   if (!window.electronAPI?.readFile) {
-    if (!silent) alert('File I/O not available — not running in Electron.');
+    if (!silent) alert('File I/O not available - not running in Electron.');
     return;
   }
   try {
@@ -4483,7 +4483,7 @@ async function _loadResultsFromHTMLFile(opts = {}) {
 
     // Extract embedded JSON block
     const match = content.match(/<script type="application\/json" id="jk-release-data">([\s\S]*?)<\/script>/);
-    if (!match) { if (!silent) window.Toast?.danger('No test data found in file — was it created by JumpKit?'); return; }
+    if (!match) { if (!silent) window.Toast?.danger('No test data found in file - was it created by JumpKit?'); return; }
 
     const entries = JSON.parse(match[1]);
     if (!window._jkTestResults) window._jkTestResults = {};
@@ -4534,7 +4534,7 @@ function _openConcludeModal(platform) {
     const r = results[t.id];
     return !r || r.state === 'not-run';
   });
-  // Manual tests default to 'manual' state — treat those as incomplete too
+  // Manual tests default to 'manual' state - treat those as incomplete too
   const stillManual = platformTests.filter(t => {
     const r = results[t.id];
     return r?.state === 'manual';
@@ -4554,14 +4554,14 @@ function _openConcludeModal(platform) {
   const resultsFileForModal = deployCfgForModal?.resultsFilePath;
   const fileNote = resultsFileForModal
     ? `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">Results will be saved to <strong style="color:var(--text)">${_esc(resultsFileForModal.split(/[\/\\]/).pop())}</strong> and recorded in Supabase.</p>`
-    : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file yet — you will be prompted to choose a folder on first save.</p>`;
+    : `<p style="font-size:0.83rem;color:var(--text-muted);margin:0">No results file yet - you will be prompted to choose a folder on first save.</p>`;
 
   const platformLabel = platform === 'windows' ? 'Windows' : 'Mac';
   const body = `
     ${warnBlock}
     <p style="margin:0 0 10px;font-weight:600">Finalize the <strong>${platformLabel}</strong> testing run?</p>
     ${fileNote}
-    <p style="margin:8px 0 0;font-size:0.82rem;color:var(--text-muted)">This will record the scorecard in Supabase. The test runner stays active for the other platform’s run.</p>`;
+    <p style="margin:8px 0 0;font-size:0.82rem;color:var(--text-muted)">This will record the scorecard in Supabase. The test runner stays active for the other platform's run.</p>`;
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close" style="margin-right:auto">Cancel</button>
@@ -4620,7 +4620,7 @@ async function _finalizePlatformRun(platform) {
   try {
     let recordId = existingRecordId;
     if (!recordId) {
-      // First finalization — INSERT new record
+      // First finalization - INSERT new record
       const { data, error } = await supabaseClient.from('deployments').insert({
         version,
         results_file: resultsFilePath,
@@ -4635,7 +4635,7 @@ async function _finalizePlatformRun(platform) {
         _saveDeployConfig({ ...deployConfig, deploymentRecordId: recordId });
       }
     } else {
-      // Second finalization — UPDATE existing record
+      // Second finalization - UPDATE existing record
       const { error } = await supabaseClient.from('deployments').update({
         status: 'testing_complete',
         testing_completed_at: now,
@@ -4649,7 +4649,7 @@ async function _finalizePlatformRun(platform) {
 
     const platformLabel = platform === 'windows' ? 'Windows' : 'Mac';
     if (bothDone) {
-      window.Toast?.success(`✅ Both runs finalized! Testing complete — head to Deployments. 🚀`);
+      window.Toast?.success(`✅ Both runs finalized! Testing complete - head to Deployments. 🚀`);
     } else {
       window.Toast?.success(`✅ ${platformLabel} run finalized and saved to Supabase.`);
     }
@@ -4702,7 +4702,7 @@ function _updateRTLabel() {
       return runCount > 0 ? 'started' : 'incomplete';
     };
 
-    // Pill renderer: 3 states — passed (green), started (amber), incomplete (red)
+    // Pill renderer: 3 states - passed (green), started (amber), incomplete (red)
     const _pill = (shortLabel, fullLabel, state) => {
       if (state === 'passed')    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155">✓ ${shortLabel} Passed</span>`;
       if (state === 'started')   return `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#f59e0b22;color:#f59e0b;border:1px solid #f59e0b55">● ${shortLabel} Started</span>`;
@@ -4715,11 +4715,11 @@ function _updateRTLabel() {
     // File indicator
     const fileIndicator = resultsFile
       ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted)"><svg class="ti ti-file-text" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-text"/></svg>${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
-      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file — save results to create</span>`;
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file - save results to create</span>`;
 
     el.innerHTML = `${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
   } else {
-    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
+    el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session - click <strong>Manage Testing</strong> to start</span>`;
   }
 }
 
@@ -4733,7 +4733,7 @@ function _setActiveRun(platform) {
     JK_TESTS.forEach(t => {
       const isMacOnly = t.platforms && !t.platforms.includes('windows');
       if (isMacOnly && !window._jkTestResults[t.id]) {
-        window._jkTestResults[t.id] = { state: 'skip', received: 'Mac Only — not required on Windows' };
+        window._jkTestResults[t.id] = { state: 'skip', received: 'Mac Only - not required on Windows' };
       }
     });
   }
@@ -4774,7 +4774,7 @@ async function _openReleaseTestingModal() {
   const bothDone = macDone && winDone;
 
 
-  // ── Section 1: Status banner removed — shown in header rtActiveLabel instead ──
+  // ── Section 1: Status banner removed - shown in header rtActiveLabel instead ──
   const statusBlock = '';
 
   // ── Section 2: Completion banner (both runs done) ─────────────────
@@ -4785,7 +4785,7 @@ async function _openReleaseTestingModal() {
     : '';
 
   // ── Section 3: Dual-run status rows (only when session exists) ────
-  // Shared pill renderer — same 3-state logic as header pills
+  // Shared pill renderer - same 3-state logic as header pills
   const _statePill = (platformKey, finalized) => {
     const results = window._jkTestResults || {};
     let state;
@@ -4835,7 +4835,7 @@ async function _openReleaseTestingModal() {
     if (resultsFile) {
       const fname = resultsFile.split(/[\/\\]/).pop();
       const fdir  = resultsFile.split(/[\/\\]/).slice(0, -1).join('/');
-      return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input)">
+      return `<div id="rtModalFileCard" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input)">
         <svg class="ti ti-file-check" style="font-size:1.1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
         <div style="min-width:0">
           <div style="font-size:0.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(fname)}</div>
@@ -4843,11 +4843,11 @@ async function _openReleaseTestingModal() {
         </div>
       </div>`;
     }
-    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #f59e0b55;background:#f59e0b0d">
+    return `<div id="rtModalFileCard" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #f59e0b55;background:#f59e0b0d">
       <svg class="ti ti-file-off" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>
       <div>
         <div style="font-size:0.82rem;font-weight:700;color:#f59e0b">No results file yet</div>
-        <div style="font-size:0.72rem;color:var(--text-muted)">A file will be created the first time you click Save Results — you’ll be prompted to choose a folder.</div>
+        <div style="font-size:0.72rem;color:var(--text-muted)">A file will be created the first time you click Save Results — or pick an existing one above.</div>
       </div>
     </div>`;
   })();
@@ -4909,8 +4909,7 @@ async function _openReleaseTestingModal() {
       });
     }
     document.getElementById('rtLoadFromFileBtn')?.addEventListener('click', async () => {
-      Modal.close();
-      // Open file picker for .html files
+      // Do NOT close the modal - keep it open throughout
       if (!window.electronAPI?.openFileDialog) {
         alert('File picker not available outside Electron.');
         return;
@@ -4922,31 +4921,43 @@ async function _openReleaseTestingModal() {
       });
       if (result?.canceled || !result?.filePath) return;
       const chosenPath = result.filePath;
-      // Validate it's a JumpKit testing file by checking for embedded JSON block
+
+      // Validate - must contain jk-release-data block
       if (!window.electronAPI?.readFile) { alert('File I/O not available.'); return; }
       const { ok, content } = await window.electronAPI.readFile(chosenPath);
       if (!ok || !content) {
-        Modal.open(
-          '<svg class="ti ti-alert-circle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Invalid File',
-          '<p style="margin:0">Could not read the selected file. Make sure it exists and is accessible.</p>',
-          '<button class="btn btn-subtle" data-jaction="modal-close">OK</button>', 'sm'
-        );
+        window.Toast?.danger('Could not read the selected file.');
         return;
       }
       if (!content.includes('id="jk-release-data"')) {
-        Modal.open(
-          '<svg class="ti ti-alert-circle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Wrong File',
-          '<p style="margin:0 0 8px">The selected file doesn\'t appear to be a JumpKit release testing file.</p><p style="margin:0;font-size:0.85rem;color:var(--text-muted)">Please select a file named <strong>JumpKit_ReleaseTesting_vX.Y.Z.html</strong> that was generated by this app.</p>',
-          '<button class="btn btn-subtle" data-jaction="modal-close">OK</button>', 'sm'
-        );
+        window.Toast?.danger('Wrong file - not a JumpKit release testing file. Pick a JumpKit_ReleaseTesting_vX.Y.Z.html.');
         return;
       }
-      // Save the chosen path and load results
+
+      // Save chosen path to deploy config
       const cfg = (typeof _loadDeployConfig === 'function') ? _loadDeployConfig() : {};
       if (typeof _saveDeployConfig === 'function') {
         _saveDeployConfig({ ...cfg, resultsFilePath: chosenPath });
       }
-      _loadResultsFromHTMLFile();
+
+      // Update the file indicator card in-place without closing the modal
+      const fileCardEl = document.getElementById('rtModalFileCard');
+      if (fileCardEl) {
+        const fname = chosenPath.split(/[\/\\]/).pop();
+        const fdir  = chosenPath.split(/[\/\\]/).slice(0, -1).join('/');
+        fileCardEl.innerHTML = `
+          <svg class="ti ti-file-check" style="font-size:1.1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+          <div style="min-width:0">
+            <div style="font-size:0.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(fname)}</div>
+            <div style="font-size:0.72rem;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(fdir)}</div>
+          </div>`;
+        fileCardEl.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid var(--border);background:var(--bg-input)';
+      }
+
+      // Load test results from the file
+      await _loadResultsFromHTMLFile();
+      window.Toast?.success(`Results loaded from ${chosenPath.split(/[\/\\]/).pop()}`);
+      _updateRTLabel();
     });
   }
 
@@ -4964,7 +4975,7 @@ async function _openReleaseTestingModal() {
     } else {
       _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null });
       Modal.close();
-      window.Toast?.success(`Testing session started — v${version}. Run Mac tests first, then switch to Windows.`);
+      window.Toast?.success(`Testing session started - v${version}. Run Mac tests first, then switch to Windows.`);
     }
     _updateRTLabel();
   };
@@ -4987,7 +4998,7 @@ async function _saveReleaseSection(mode) {
   }
 
   if (!window.electronAPI?.writeFileDirect) {
-    alert('File I/O not available — not running in Electron.');
+    alert('File I/O not available - not running in Electron.');
     return;
   }
 
@@ -5102,18 +5113,18 @@ async function _saveReleaseSection(mode) {
 
   const testEnv = {
     email:       window._supabaseUser?.email || '',
-    name:        [prof.first_name, prof.last_name].filter(Boolean).join(' ') || '—',
+    name:        [prof.first_name, prof.last_name].filter(Boolean).join(' ') || '-',
     role:        prof.role || 'user',
-    subTier:     prof.subscription_tier || '—',
-    subStatus:   prof.subscription_status || '—',
+    subTier:     prof.subscription_tier || '-',
+    subStatus:   prof.subscription_status || '-',
     activeRun,
-    trialLaunches:   prof.trial_launches_used != null ? String(prof.trial_launches_used) : '—',
+    trialLaunches:   prof.trial_launches_used != null ? String(prof.trial_launches_used) : '-',
     startPage:       prefs.startPage || 'home',
     theme:           prefs.theme || 'system',
     autoArchive:     prefs.autoArchive || 'never',
     autoBackup:      prefs.cloudBackup ? 'On' : 'Off',
-    timePerClick:    prefs.timePerClick != null ? `${prefs.timePerClick}s` : '—',
-    dollarsPerHour:  prefs.dollarsPerHour != null ? `$${prefs.dollarsPerHour}` : '—',
+    timePerClick:    prefs.timePerClick != null ? `${prefs.timePerClick}s` : '-',
+    dollarsPerHour:  prefs.dollarsPerHour != null ? `$${prefs.dollarsPerHour}` : '-',
     navMenu:         prefs.navDefaultCollapsed ? 'Collapsed' : 'Expanded',
     notifications:   prefs.notifications !== false ? 'On' : 'Off',
     showDesc:        prefs.showDescription ? 'On' : 'Off',
@@ -5142,7 +5153,7 @@ async function _saveReleaseSection(mode) {
 
 function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
   const stateColor = (s) => s === 'pass' ? '#3fbe71' : s === 'fail' ? '#e15b59' : s === 'manual' ? '#f59e0b' : '#6b7280';
-  const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '— Skipped';
+  const stateLabel = (s, m) => s === 'pass' ? (m ? '✅ Pass (manually marked)' : '✅ Pass') : s === 'fail' ? (m ? '❌ Fail (manually marked)' : '❌ Fail') : s === 'manual' ? '⚠️ Manual' : '- Skipped';
   const sectionOrder = { preflight: 0, auto: 1, 'auto-manual': 2, manual: 3 };
   const sectionLabel = { preflight: 'Pre-Flight (Run First)', auto: 'Automatic', 'auto-manual': 'Auto + Manual', manual: 'Manual' };
   const catColors = { Auth:'#3b82f6', Navigation:'#8b5cf6', Jumps:'#06b6d4', Columns:'#10b981', Archive:'#f59e0b', Stats:'#ec4899', Account:'#6366f1', Subscription:'#f97316', Teams:'#14b8a6', UI:'#84cc16', Security:'#e05555', Database:'#0ea5e9', 'DB Schema':'#7c3aed', 'Shared Sync':'#a855f7', 'Code Quality':'#78716c', Settings:'#64748b', Deployment:'#f43f5e', Paywall:'#d97706', Maintenance:'#22d3ee', Email:'#fb923c', Notifications:'#0d9488', Admin:'#dc2626', Onboarding:'#a78bfa' };
@@ -5194,7 +5205,7 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
       <th style="padding:6px 10px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;text-align:left">Timestamp</th>
     </tr>`;
 
-  // Data row builder — winMode: render mac-only tests as N/A
+  // Data row builder - winMode: render mac-only tests as N/A
   const dataRow = (e, isLast, winMode) => {
     const macOnly = isMacOnly(e.id);
     if (winMode && macOnly) {
@@ -5202,8 +5213,8 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}) {
         <td style="padding:7px 10px;font-size:12px;white-space:nowrap;color:#9ca3af">#${e.id}</td>
         <td style="padding:7px 10px;font-size:11px">${catPill(e.category)}</td>
         <td style="padding:7px 10px;font-size:12px;color:#9ca3af;max-width:540px;word-break:break-word"><div style="font-weight:600">${_esc(e.title)}</div></td>
-        <td style="padding:7px 12px;font-size:11px;color:#9ca3af;white-space:nowrap"><span style="padding:2px 8px;border-radius:99px;background:#e5e7eb;color:#9ca3af;font-size:10px;font-weight:700">N/A – Mac Only</span></td>
-        <td style="padding:7px 10px;font-size:11px;color:#9ca3af">—</td>
+        <td style="padding:7px 12px;font-size:11px;color:#9ca3af;white-space:nowrap"><span style="padding:2px 8px;border-radius:99px;background:#e5e7eb;color:#9ca3af;font-size:10px;font-weight:700">N/A - Mac Only</span></td>
+        <td style="padding:7px 10px;font-size:11px;color:#9ca3af">-</td>
         <td style="padding:7px 10px;font-size:10px;color:#9ca3af"></td>
       </tr>`;
     }
@@ -5320,7 +5331,7 @@ function showTab(tab) {
 <body>
 <div class="wrap">
   <div class="header">
-    <h1>JumpKit Release Testing — v${_esc(version)}</h1>
+    <h1>JumpKit Release Testing - v${_esc(version)}</h1>
     <p>${runDate}</p>
     ${envBlock}
   </div>
@@ -5380,42 +5391,42 @@ function _openTestStrategyModal() {
 
   const body = `
     <p style="${s};margin-bottom:4px">${JK_TESTS.length} tests across 12 categories. Work through them in 3 phases to catch issues efficiently.</p>
-    <p style="${s};margin-bottom:0">The <strong>per-section pass/fail cards</strong> at the top of the page update live — use them as your scoreboard. Sections are <strong>collapsible</strong>; fold finished ones to reduce scroll.</p>
+    <p style="${s};margin-bottom:0">The <strong>per-section pass/fail cards</strong> at the top of the page update live - use them as your scoreboard. Sections are <strong>collapsible</strong>; fold finished ones to reduce scroll.</p>
 
-    <div style="${h}">Phase 1 — Run All Automatics first</div>
-    <p style="${s}">Click <strong>Run Automatic Tests</strong> — runs all ${JK_TESTS.filter(t=>!t.title.startsWith('[AUTO+MANUAL]')&&!t.title.startsWith('[MANUAL]')).length} automatic tests. Expect ~100 green immediately. This gives you a full baseline.</p>
-    <p style="${s}">For any red failures — fix the code, then run just those tests individually. Don&rsquo;t re-run all until you&rsquo;re confident the fix is clean.</p>
-    ${specialCard('💡 Before You Start — App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
+    <div style="${h}">Phase 1 - Run All Automatics first</div>
+    <p style="${s}">Click <strong>Run Automatic Tests</strong> - runs all ${JK_TESTS.filter(t=>!t.title.startsWith('[AUTO+MANUAL]')&&!t.title.startsWith('[MANUAL]')).length} automatic tests. Expect ~100 green immediately. This gives you a full baseline.</p>
+    <p style="${s}">For any red failures - fix the code, then run just those tests individually. Don&rsquo;t re-run all until you&rsquo;re confident the fix is clean.</p>
+    ${specialCard('💡 Before You Start - App State','#6366f1','rgba(99,102,241,0.06)','rgba(99,102,241,0.2)',[
       'Be logged in as an <strong>Unlimited</strong> user for full coverage (free-tier skips some Maintenance tests)',
       '<strong>Auto-archive</strong> must be set to anything <em>other than Never</em> in Settings → otherwise test ${n(122)} (Auto-archive) will skip automatically',
-      '<strong>Auto-backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> — required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
+      '<strong>Auto-backup</strong> must be enabled in Settings <strong>before starting the test cycle</strong> - required for test ${n(123)} (Auto-backup) to run; verify the backup JSON file was saved to disk after it completes',
       'Click <strong>Details</strong> on any failed test to see its purpose, steps, and expected output before debugging',
-      'The <strong>Auth</strong> tests run first — if test #1 (session persists) fails, check your login state before continuing'
+      'The <strong>Auth</strong> tests run first - if test #1 (session persists) fails, check your login state before continuing'
     ])}
 
-    <div style="${h}">Phase 2 — AUTO+MANUAL tests by batch</div>
+    <div style="${h}">Phase 2 - AUTO+MANUAL tests by batch</div>
     <p style="${s}">These fire code automatically, then need a quick human check. Do them in batches:</p>
     <ul style="margin:4px 0 0 16px;${s}">
-      <li><strong>Email batch</strong> — run all <code>[AUTO+MANUAL]</code> email tests together (${emailBatch}), then check your inbox once for all</li>
-      <li><strong>Export PDF</strong> (${n(121)}) — fires the export automatically, then open the saved file to verify it looks correct</li>
-      <li><strong>Team password</strong> (${n(120)}) — semi-auto, verifies wrong-password rejection; mark pass manually after confirming</li>
+      <li><strong>Email batch</strong> - run all <code>[AUTO+MANUAL]</code> email tests together (${emailBatch}), then check your inbox once for all</li>
+      <li><strong>Export PDF</strong> (${n(121)}) - fires the export automatically, then open the saved file to verify it looks correct</li>
+      <li><strong>Team password</strong> (${n(120)}) - semi-auto, verifies wrong-password rejection; mark pass manually after confirming</li>
     </ul>
     ${specialCard('⚠️ Phase 2 Special Cases','#f97316','rgba(249,115,22,0.06)','rgba(249,115,22,0.2)',[
-      '<strong>Email batch</strong> — run all 8 email tests first, then open your inbox <em>once</em> to verify all arrived rather than switching back and forth after each one',
-      `<strong>${n(121)} Export PDF</strong> — after the test passes, manually open the exported file to confirm layout and data look correct`,
-      `<strong>${n(120)} Team password</strong> — the test verifies wrong-password rejection automatically; mark Pass/Fail manually based on what you see`
+      '<strong>Email batch</strong> - run all 8 email tests first, then open your inbox <em>once</em> to verify all arrived rather than switching back and forth after each one',
+      `<strong>${n(121)} Export PDF</strong> - after the test passes, manually open the exported file to confirm layout and data look correct`,
+      `<strong>${n(120)} Team password</strong> - the test verifies wrong-password rejection automatically; mark Pass/Fail manually based on what you see`
     ])}
 
-    <div style="${h}">Phase 3 — MANUAL tests, easiest first</div>
+    <div style="${h}">Phase 3 - MANUAL tests, easiest first</div>
     <ul style="margin:4px 0 0 16px;${s}">
-      <li><strong>Quick visual checks</strong> — ${n(124)} Sign-out, ${n(128)} Jump click launches URL, ${n(125)} Supabase backups, ${n(127)} Migrations in version control, ${n(139)} npm audit</li>
-      <li><strong>Config checks</strong> — ${n(126)} Dev/prod DB separation</li>
-      <li><strong>Data-mutating tests last</strong> — ${n(129)} Lemon Squeezy webhook, ${n(130)} apply-pending-upgrade, ${n(131)} check-member-lockouts SQL — have reset SQL ready before running</li>
+      <li><strong>Quick visual checks</strong> - ${n(124)} Sign-out, ${n(128)} Jump click launches URL, ${n(125)} Supabase backups, ${n(127)} Migrations in version control, ${n(139)} npm audit</li>
+      <li><strong>Config checks</strong> - ${n(126)} Dev/prod DB separation</li>
+      <li><strong>Data-mutating tests last</strong> - ${n(129)} Lemon Squeezy webhook, ${n(130)} apply-pending-upgrade, ${n(131)} check-member-lockouts SQL - have reset SQL ready before running</li>
     </ul>
     ${specialCard('⚠️ Phase 3 Special Cases','#e15b59','rgba(225,91,89,0.06)','rgba(225,91,89,0.2)',[
-      `<strong>Open Supabase SQL editor before starting Phase 3</strong> — you will need it for ${n(129)} (Lemon Squeezy webhook), ${n(130)} (apply-pending-upgrade), and ${n(131)} (lockouts); all three mutate DB rows and require a manual reset SQL afterward`,
-      `<strong>${n(130)} apply-pending-upgrade</strong> — insert a pending_upgrades row first, run the test, then reset: <code>UPDATE profiles SET subscription_tier='free', subscription_status='free' WHERE email='{your-email}';</code>`,
-      `<strong>${n(138)} Sign-out test — run this LAST</strong> — it calls signOut() and logs you out of the app; have your credentials ready to log back in`
+      `<strong>Open Supabase SQL editor before starting Phase 3</strong> - you will need it for ${n(129)} (Lemon Squeezy webhook), ${n(130)} (apply-pending-upgrade), and ${n(131)} (lockouts); all three mutate DB rows and require a manual reset SQL afterward`,
+      `<strong>${n(130)} apply-pending-upgrade</strong> - insert a pending_upgrades row first, run the test, then reset: <code>UPDATE profiles SET subscription_tier='free', subscription_status='free' WHERE email='{your-email}';</code>`,
+      `<strong>${n(138)} Sign-out test - run this LAST</strong> - it calls signOut() and logs you out of the app; have your credentials ready to log back in`
     ])}`;
 
   Modal.open(
@@ -5636,7 +5647,7 @@ function _markManualResult(id, result) {
   window._jkTestResults[id] = { state: result, received: result === 'pass' ? 'Manually marked as passed' : 'Manually marked as failed', message: result === 'fail' ? 'Manually marked as failed' : null };
   _setRowResult(id, result, result === 'fail' ? 'Manually marked as failed' : null);
   _refreshSummary();
-  // Update the already-open modal in-place — do NOT call _openTestDetail / Modal.open here.
+  // Update the already-open modal in-place - do NOT call _openTestDetail / Modal.open here.
   // Modal.open is queued when a modal is already open, which causes a phantom second modal
   // that the user has to close separately.
   const { title, body, footer } = _buildTestDetailContent(id);
@@ -5656,12 +5667,12 @@ function _buildTestDetailContent(id) {
 
   let color, iconName, stateLabel, detailsText, detailsColor;
   // Only [MANUAL] and [AUTO+MANUAL] tests need manual pass/fail buttons.
-  // Automatic tests self-report — 'steps' exists on all tests so we key off the title tag.
+  // Automatic tests self-report - 'steps' exists on all tests so we key off the title tag.
   const isManualTest = testDef.title.startsWith('[MANUAL]') || testDef.title.startsWith('[AUTO+MANUAL]');
   const manualInstructions = testDef.steps || testDef.expected;
   if (!state || state === 'null') {
     color = 'var(--text-muted)'; iconName = 'clock'; stateLabel = 'Skipped';
-    detailsText = isManualTest ? manualInstructions : '—'; detailsColor = 'var(--text-muted)';
+    detailsText = isManualTest ? manualInstructions : '-'; detailsColor = 'var(--text-muted)';
   } else if (state === 'pass') {
     color = '#3fbe71'; iconName = 'check'; stateLabel = 'Pass';
     detailsText = isManualTest ? manualInstructions : 'Test passed successfully.'; detailsColor = 'var(--text-muted)';
@@ -5675,11 +5686,11 @@ function _buildTestDetailContent(id) {
 
   const displayNum = (window._jkTestDisplayNumMap || {})[id] || id;
   const execOrder  = (window.JK_EXEC_ORDER || {})[id];
-  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> #${id} — ${_esc(testDef.title)}`;
+  const modalTitle = `<svg class="ti ti-test-pipe"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg> #${id} - ${_esc(testDef.title)}`;
   const catColor = _CATEGORY_COLORS[testDef.category] || '#6b7280';
   const catPill = `<span style="display:inline-block;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:${catColor}22;color:${catColor}">${_esc(testDef.category)}</span>`;
   const stored = (window._jkTestResults || {})[id] || {};
-  const receivedText = stored.received || '—';
+  const receivedText = stored.received || '-';
   const tdLabel = `padding:8px 32px 8px 0;color:var(--text-muted);font-weight:600;width:100px;vertical-align:top;white-space:nowrap;font-size:0.88rem`;
   const tdValue     = `padding:8px 0;color:var(--text);line-height:1.6;font-size:0.88rem`;
   const tdValueMuted = `padding:8px 0;color:var(--text-muted);line-height:1.6;font-size:0.88rem`;
@@ -5688,7 +5699,7 @@ function _buildTestDetailContent(id) {
   const bodyHTML = `<table style="width:100%;border-collapse:collapse;font-size:0.88rem">
     <tr>
       <td style="${tdLabel}">Exec Order</td>
-      <td style="${tdValueMuted}">${execOrder != null ? execOrder : '—'}</td>
+      <td style="${tdValueMuted}">${execOrder != null ? execOrder : '-'}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">ID</td>
@@ -5722,7 +5733,7 @@ function _buildTestDetailContent(id) {
     </tr>
     <tr>
       <td style="${tdLabel}">Inputs</td>
-      <td style="${tdValueMuted}">${testDef.input ? `<code style="${codeStyle};color:var(--text-muted)">${_esc(testDef.input)}</code>` : '—'}</td>
+      <td style="${tdValueMuted}">${testDef.input ? `<code style="${codeStyle};color:var(--text-muted)">${_esc(testDef.input)}</code>` : '-'}</td>
     </tr>
     <tr>
       <td style="${tdLabel}">Expected</td>
@@ -5738,18 +5749,18 @@ function _buildTestDetailContent(id) {
     </tr>`}
     <tr>
       <td style="${tdLabel}">Result</td>
-      <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">—</span>` : `<svg class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color};width:1.3rem;height:1.3rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
+      <td style="padding:8px 0">${(!state || state === 'null') ? `<span style="color:var(--text-muted);font-size:0.88rem">-</span>` : `<svg class="ti ti-${iconName}" style="font-size:1.3rem;vertical-align:middle;color:${color};width:1.3rem;height:1.3rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg> <span style="color:${color};font-weight:700;font-size:0.88rem">${stateLabel}</span>`}</td>
     </tr>
     ${(() => {
       const hasSteps    = isManualTest && (testDef.steps || testDef.commands);
       if (!hasSteps) {
-        // Auto test — just show Details row
+        // Auto test - just show Details row
         return `<tr>
           <td style="${tdLabel}">Details</td>
           <td style="${tdValueMuted};color:${detailsColor}">${_esc(detailsText)}</td>
         </tr>`;
       }
-      // Manual test — merge steps + commands into one Exec Steps section
+      // Manual test - merge steps + commands into one Exec Steps section
       // steps can be: string (legacy) | [{text,cmd?}] | function returning array
       const rawStepsVal = typeof testDef.steps === 'function'
         ? testDef.steps(typeof currentUser !== 'undefined' ? currentUser : null)
@@ -5919,7 +5930,7 @@ function _refreshSummary() {
   const amTotal   = JK_TESTS.filter(t => t.title.startsWith('[AUTO+MANUAL]')).length;
   const manTotal  = JK_TESTS.filter(t => !t.preflight && t.title.startsWith('[MANUAL]')).length;
 
-  // Read directly from _jkTestResults (source of truth) — never scrape DOM icons.
+  // Read directly from _jkTestResults (source of truth) - never scrape DOM icons.
   // _resetSection deletes entries from _jkTestResults before calling _refreshSummary,
   // so this always reflects the current state with no DOM-class timing issues.
   const results = window._jkTestResults || {};
@@ -5955,7 +5966,7 @@ function _refreshSummary() {
   _inlineSectionStats('am',        amPassed,   amFailed,   amManual,   amTotal);
   _inlineSectionStats('manual',    manPassed,  manFailed,  manManual,  manTotal);
 
-  // Unified summary card — Pass / Fail / Manual / Not Run / Total
+  // Unified summary card - Pass / Fail / Manual / Not Run / Total
   const totalRun = passed + failed + manual;
   const notRun   = JK_TESTS.length - totalRun;
   const _cell = (id, val, color) => {
@@ -5991,7 +6002,7 @@ function _patchConsoleForTest(internalId, displayNum) {
     console[level] = function(...args) {
       const patched = args.map(a => typeof a === 'string' ? a.replace(TAG, NEW) : a);
       captured.push({ level, text: patched.map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ') });
-      // suppress forwarding to actual console — output goes to modal only
+      // suppress forwarding to actual console - output goes to modal only
     };
   });
   return {
@@ -6038,7 +6049,7 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
   const progress  = document.getElementById('runProgress');
   if (btnAuto) btnAuto.disabled = true;
   if (btnAM)   btnAM.disabled   = true;
-  if (activeBtn) activeBtn.innerHTML = '<svg class="ti ti-loader-2 jk-spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Running…';
+  if (activeBtn) activeBtn.innerHTML = '<svg class="ti ti-loader-2 jk-spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Running...';
   if (progress) { progress.style.display = 'inline'; progress.textContent = ''; }
 
   // Hide summary while running
@@ -6051,7 +6062,7 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
     overlay = document.createElement('div');
     overlay.id = 'testRunOverlay';
     overlay.style.cssText = 'position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;';
-    overlay.innerHTML = '<svg class="ti ti-test-pipe" style="font-size:2.5rem;color:var(--turq);display:block;text-align:center"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg><div style="font-size:1rem;font-weight:600;color:var(--text);text-align:center;margin-top:12px" id="overlayStatus">Running tests…</div>';
+    overlay.innerHTML = '<svg class="ti ti-test-pipe" style="font-size:2.5rem;color:var(--turq);display:block;text-align:center"><use href="img/tabler-sprite.svg#tabler-test-pipe"/></svg><div style="font-size:1rem;font-weight:600;color:var(--text);text-align:center;margin-top:12px" id="overlayStatus">Running tests...</div>';
     document.body.appendChild(overlay);
   }
   overlay.style.display = 'flex';
@@ -6064,24 +6075,24 @@ async function _runTests(mode /* 'auto' | 'auto-manual' */) {
   const testsToRun   = mode === 'auto'
     ? JK_TESTS.filter(t => !isAutoManual(t) && !isManual(t))
     : JK_TESTS.filter(t => isAutoManual(t));
-  // Clear only the results for tests in this run — preserve other sections (e.g. pre-flight manual marks)
+  // Clear only the results for tests in this run - preserve other sections (e.g. pre-flight manual marks)
   testsToRun.forEach(t => { delete window._jkTestResults[t.id]; });
   const _results = window._jkTestResults;
   const startTime = Date.now();
 
   for (let i = 0; i < testsToRun.length; i++) {
     const t = testsToRun[i];
-    if (progress) progress.textContent = `Running ${i + 1} / ${testsToRun.length} (#${t.id})…`;
+    if (progress) progress.textContent = `Running ${i + 1} / ${testsToRun.length} (#${t.id})...`;
     const overlayStatus = document.getElementById('overlayStatus');
     if (overlayStatus) overlayStatus.innerHTML = `<div style='text-align:center'>Running ${i + 1} / ${testsToRun.length} &nbsp;<span style='font-size:0.75rem;font-weight:400;color:var(--text-muted)'>(#${t.id})</span></div><div style='text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:6px;font-weight:400'>${t.title}</div>`;
 
     // Skip any residual skipInRunAll flags
     if (t.skipInRunAll) {
       const cell = document.getElementById(`test-result-${t.id}`);
-      if (cell) cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)" title="Skipped by Run All — manual tests must be run individually"><svg class="ti ti-ban" style="font-size:0.85rem;line-height:1;color:#6b7280"><use href="img/tabler-sprite.svg#tabler-ban"/></svg><span style="line-height:1">Skipped</span></span>`;
+      if (cell) cell.innerHTML = `<span style="display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:20px;font-size:0.85rem;font-weight:700;line-height:1;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)" title="Skipped by Run All - manual tests must be run individually"><svg class="ti ti-ban" style="font-size:0.85rem;line-height:1;color:#6b7280"><use href="img/tabler-sprite.svg#tabler-ban"/></svg><span style="line-height:1">Skipped</span></span>`;
       const row2 = document.getElementById(`test-row-${t.id}`);
       if (row2) row2.style.background = '';
-      if (progress) progress.textContent = `Skipped test ${i + 1} (run individually) — ${i + 1} / ${JK_TESTS.length}`;
+      if (progress) progress.textContent = `Skipped test ${i + 1} (run individually) - ${i + 1} / ${JK_TESTS.length}`;
       continue;
     }
 
@@ -6161,10 +6172,10 @@ async function _writeTestResults({ passed, failed, manual, elapsed }) {
     for (const t of JK_TESTS) {
       const row = document.getElementById(`test-row-${t.id}`);
       const resultCell = document.getElementById(`test-result-${t.id}`);
-      const resultText = resultCell?.textContent?.trim() || '—';
+      const resultText = resultCell?.textContent?.trim() || '-';
       const status = resultText.includes('PASS') ? 'PASS' :
                      resultText.includes('FAIL') ? 'FAIL' :
-                     resultText.includes('MANUAL') ? 'MANUAL' : '—';
+                     resultText.includes('MANUAL') ? 'MANUAL' : '-';
       // Get error message from the cell's second div if present
       const errDiv = resultCell?.querySelector('div:nth-child(2)');
       const errText = (status === 'FAIL' && errDiv) ? `  → ${errDiv.textContent.trim()}` : '';
