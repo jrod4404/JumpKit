@@ -663,7 +663,7 @@ async function _saveDeployResults() {
       '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Not Configured',
       `<p style="margin:0 0 10px">Please set a <strong>version number</strong> and <strong>deployment folder</strong> before saving.</p>
        <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Manage Deployment</strong> to configure these.</p>`,
-      '<button class="btn btn-primary" data-jaction="modal-close">Got it</button>',
+      '<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>',
       'sm'
     );
     return;
