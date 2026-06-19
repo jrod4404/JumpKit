@@ -4831,26 +4831,6 @@ async function _openReleaseTestingModal() {
     </div>`;
   };
 
-  const runsBlock = existing ? `
-    <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Testing</p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      ${_runRow('mac', macDone)}
-      ${_runRow('windows', winDone)}
-    </div>
-    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
-        <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
-      </button>
-      <span style="font-size:0.75rem;color:var(--text-muted)">Pick a previously saved results .html file to restore test states</span>
-    </div>
-    <div style="margin-top:8px">${modalFileBlock}</div>` : '';
-
-  // ── Section 4: Version field ──────────────────────────────────────
-  const configTitle = existing
-    ? ''
-    : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
-
-  // File indicator block for modal
   const modalFileBlock = (() => {
     if (resultsFile) {
       const fname = resultsFile.split(/[\/\\]/).pop();
@@ -4872,6 +4852,27 @@ async function _openReleaseTestingModal() {
     </div>`;
   })();
 
+
+  const runsBlock = existing ? `
+    <p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Platform Testing</p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${_runRow('mac', macDone)}
+      ${_runRow('windows', winDone)}
+    </div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button id="rtLoadFromFileBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:6px;font-size:0.82rem;padding:6px 12px">
+        <svg class="ti ti-file-upload" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-file-upload"/></svg> Load Results from File
+      </button>
+      <span style="font-size:0.75rem;color:var(--text-muted)">Pick a previously saved results .html file to restore test states</span>
+    </div>
+    <div style="margin-top:8px">${modalFileBlock}</div>` : '';
+
+  // ── Section 4: Version field ──────────────────────────────────────
+  const configTitle = existing
+    ? ''
+    : `<p style="margin:0 0 10px;font-size:0.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em">Start New Session</p>`;
+
+  // File indicator block for modal
   const body = `
     ${statusBlock}
     ${completionBanner}
