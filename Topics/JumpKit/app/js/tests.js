@@ -4941,7 +4941,19 @@ async function _openReleaseTestingModal() {
     <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>
     ${_fileStatusHtml}`;
 
+  // File banner — shown at top when a results file is configured
+  const fileBanner = _storedFilePath
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:2px">
+        <svg class="ti ti-file-check" style="font-size:1.1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+        <div style="min-width:0">
+          <div style="font-size:0.82rem;font-weight:700;color:#3fbe71">Results file active</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(_storedFilePath)}</div>
+        </div>
+       </div>`
+    : '';
+
   const body = `
+    ${fileBanner}
     ${statusBlock}
     ${completionBanner}
     ${runsBlock}
@@ -5109,11 +5121,34 @@ async function _openReleaseTestingModal() {
   document.getElementById('rtCreateBtn')?.addEventListener('click', async () => {
     const version = document.getElementById('rtVersion')?.value.trim() || appVersion;
     if (!version) { alert('Please enter a version number.'); return; }
-    // Initialize session — all state in jk_deploy_config
-    _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null, resultsFilePath: null, folder: null });
-    Modal.close();
-    window.Toast?.success(`Testing session started — v${version}. Run Mac tests first, then switch to Windows.`);
+
+    // Prompt for folder to save results file
+    if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
+    const folderResult = await window.electronAPI.openFileDialog({
+      title: 'Choose folder to save test results file',
+      properties: ['openDirectory'],
+    });
+    if (folderResult?.canceled || !folderResult?.filePath) return;
+
+    const folder = folderResult.filePath.replace(/[\/\\]$/, '');
+    const fileName = `JumpKit_ReleaseTesting_v${version}.html`;
+    const filePath = folder + '/' + fileName;
+
+    // Create placeholder HTML file immediately
+    if (window.electronAPI?.writeFileDirect) {
+      try {
+        const placeholder = _buildReleaseTestingHTML({}, version, filePath, {});
+        await window.electronAPI.writeFileDirect(filePath, placeholder);
+      } catch(e) { console.warn('Could not create results file:', e); }
+    }
+
+    // Initialize session state with file path
+    _setReleaseState({ version, macFinalized: false, winFinalized: false, activeRun: 'mac', deploymentRecordId: null, resultsFilePath: filePath, folder });
     _updateRTLabel();
+
+    // Close and reopen modal in active state
+    Modal.close();
+    setTimeout(() => _openReleaseTestingModal(), 80);
   });
 }
 
