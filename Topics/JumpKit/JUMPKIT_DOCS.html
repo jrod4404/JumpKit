@@ -3937,6 +3937,14 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 <h2 id="changelog">12. Changelog</h2>
 
+<h3>2026-06-18d (Manage Testing modal &mdash; auto-generate release testing file)</h3>
+<ul>
+  <li><strong>File Location picker removed</strong> from Manage Testing modal. No longer requires manually choosing a save path.</li>
+  <li><strong>Auto-generated filename:</strong> On &ldquo;Save Changes&rdquo; / &ldquo;Start Session&rdquo;, a file named <code>JumpKit_[Mac|Win]_ReleaseTesting_vX.Y.Z.html</code> is automatically created in the configured deployment folder. Platform label (<code>Mac</code> or <code>Win</code>) is derived from the selected Test Environment.</li>
+  <li><strong>Deployment folder now required</strong> (validation added) since it determines where the file is written.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-18d.tar.gz</code> saved to <code>app_backups/</code>.</li>
+</ul>
+
 <h3>2026-06-18c (Deployments page polish &mdash; modal fixes, rename, console error fixes)</h3>
 <ul>
   <li><strong>Console error fixed:</strong> <code>window.renderDeployment is not a function</code> was caused by invalid <code>?.onclick =</code> optional chaining on the left-hand side of assignment in deployment.js (syntax error prevented the script from fully executing). Fixed by replacing with proper null-check guards.</li>
