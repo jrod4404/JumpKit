@@ -4716,9 +4716,9 @@ function _updateRTLabel() {
     // File indicator
     const fileIndicator = resultsFile
       ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted)"><svg class="ti ti-file-text" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-text"/></svg>${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
-      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file — save results to create</span>`;
+      : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file — save results to create</span>`;
 
-    el.innerHTML = `<svg class="ti ti-file-check" style="font-size:0.9rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg><span style="color:#3fbe71;font-weight:600">v${_esc(s.version)}</span><span style="color:var(--text-muted)">&nbsp;·&nbsp;</span>${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
+    el.innerHTML = `${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
   } else {
     el.innerHTML = `<svg class="ti ti-alert-triangle" style="font-size:0.9rem;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg><span style="color:#f59e0b">No testing session — click <strong>Manage Testing</strong> to start</span>`;
   }
