@@ -4729,7 +4729,7 @@ function _updateRTLabel() {
 
     // File indicator
     const fileIndicator = resultsFile
-      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:var(--bg-input);border:1px solid var(--border);color:var(--text-muted)"><svg class="ti ti-file-text" style="font-size:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-text"/></svg>${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
+      ? `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:#3fbe7122;color:#3fbe71;border:1px solid #3fbe7155"><svg class="ti ti-file-check" style="font-size:0.8rem;flex-shrink:0;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>${_esc(resultsFile.split(/[\/\\]/).pop())}</span>`
       : `<span style="display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:6px;font-size:0.72rem;font-weight:600;background:#f59e0b18;border:1px solid #f59e0b44;color:#f59e0b"><svg class="ti ti-file-off" style="font-size:0.8rem;flex-shrink:0;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-file-off"/></svg>No results file - save results to create</span>`;
 
     el.innerHTML = `${_pill('Mac', 'Mac Testing', macState)}&nbsp;${_pill('Win', 'Win Testing', winState)}&nbsp;&nbsp;${fileIndicator}`;
@@ -5068,10 +5068,14 @@ async function _openReleaseTestingModal() {
         '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Clear Session?',
         `<p style="margin:0 0 10px">This will reset to <strong>no session loaded</strong>. You will need to start a new session or resume from an existing results file.</p>
          <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">The HTML results file on disk and any Supabase records already saved are <strong>not deleted</strong> — only the active session state is cleared.</p>`,
-        `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-         <button id="rtConfirmResetBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff;display:inline-flex;align-items:center;gap:5px"><svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Yes, Clear Session</button>`,
+        `<button id="rtCancelClearBtn" class="btn btn-subtle">Cancel</button>
+         <button id="rtConfirmResetBtn" class="btn" style="background:#e15b59;border-color:#e15b59;color:#fff;display:inline-flex;align-items:center;gap:5px"><svg class="ti ti-x" style="font-size:0.85rem;color:#fff"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Yes, Clear Session</button>`,
         'sm'
       );
+      document.getElementById('rtCancelClearBtn')?.addEventListener('click', () => {
+        Modal.close();
+        setTimeout(() => _openReleaseTestingModal(), 80);
+      });
       document.getElementById('rtConfirmResetBtn')?.addEventListener('click', () => {
         const existingFolder = (_getReleaseState() || {}).folder || null;
         _setReleaseState({ folder: existingFolder }); // no version = _getReleaseState returns null
