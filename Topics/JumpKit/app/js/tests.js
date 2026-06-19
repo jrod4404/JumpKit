@@ -4926,7 +4926,8 @@ async function _openReleaseTestingModal() {
        </div>`;
 
   // ── File section — same layout for both states ────────────────────
-  const _storedFilePath = (() => { try { return JSON.parse(localStorage.getItem(_JK_DEPLOY_CFG_KEY)||'{}').resultsFilePath || null; } catch(_){ return null; } })();
+  // _storedFilePath derived from _activeCfg (already read above via _getReleaseState)
+  const _storedFilePath = _activeFilePath;
   const _fileStatusHtml = _storedFilePath
     ? `<div id="rtResumeFileStatus" style="display:flex;align-items:flex-start;gap:6px;margin-top:8px;padding:8px 10px;border-radius:7px;background:#3fbe7118;border:1px solid #3fbe7144;color:#3fbe71;font-size:0.75rem;font-weight:600;line-height:1.4;flex-direction:column">
         <span style="display:flex;align-items:center;gap:5px"><svg class="ti ti-circle-check" style="font-size:0.85rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Currently loaded: <strong>${_esc(_storedFilePath.split(/[/\\]/).pop())}</strong></span>
@@ -4942,26 +4943,33 @@ async function _openReleaseTestingModal() {
     <p style="margin:5px 0 0;font-size:0.75rem;color:var(--text-muted)">${existing ? 'Restore test states from a saved .html results file.' : 'Pick a previously saved JumpKit_ReleaseTesting_vX.Y.Z.html to restore all test states and resume.'}</p>
     ${_fileStatusHtml}`;
 
-  // File banner — shown at top when a results file is configured
-  const fileBanner = _storedFilePath
-    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:2px">
-        <svg class="ti ti-file-check" style="font-size:1.1rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
-        <div style="min-width:0">
-          <div style="font-size:0.82rem;font-weight:700;color:#3fbe71">Results file active</div>
-          <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${_esc(_storedFilePath)}</div>
-        </div>
-       </div>`
-    : '';
+  // Use _getReleaseState() for reliable file path (avoids direct localStorage race)
+  const _activeCfg = _getReleaseState() || {};
+  const _activeFilePath = _activeCfg?.resultsFilePath || null;
 
-  // "Start new session" reset option — only shown when a session is active
-  const newSessionReset = existing
-    ? `<div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:0.75rem;color:var(--text-dim)">Want to start a completely new testing session?</span>
-        <button id="rtResetSessionBtn" class="btn btn-subtle" style="font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:5px">
-          <svg class="ti ti-refresh" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-refresh"/></svg> Start New Session
+  // Green session banner — shown at top when a session is active; includes Clear Session btn
+  const fileBanner = _activeFilePath
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:8px;background:#3fbe7118;border:1px solid #3fbe7144;margin-bottom:2px">
+        <svg class="ti ti-file-check" style="font-size:1.15rem;color:#3fbe71;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-file-check"/></svg>
+        <div style="min-width:0;flex:1">
+          <div style="font-size:0.85rem;font-weight:700;color:#3fbe71">Active testing session — v${_esc(_activeCfg.version || '?')}</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${_esc(_activeFilePath)}">${_esc(_activeFilePath)}</div>
+        </div>
+        <button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+          <svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
+        </button>
+       </div>`
+    : _activeCfg?.version
+    ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;background:#f59e0b18;border:1px solid #f59e0b44;margin-bottom:2px">
+        <svg class="ti ti-alert-triangle" style="font-size:1.1rem;color:#f59e0b;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+        <div style="flex:1"><div style="font-size:0.85rem;font-weight:700;color:#f59e0b">Session active — v${_esc(_activeCfg.version)} — no results file yet</div></div>
+        <button id="rtClearSessionBtn" class="btn btn-subtle" style="flex-shrink:0;font-size:0.78rem;padding:4px 12px;color:#e15b59;border-color:#e15b5944;display:inline-flex;align-items:center;gap:4px;white-space:nowrap">
+          <svg class="ti ti-x" style="font-size:0.85rem"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Clear Session
         </button>
        </div>`
     : '';
+
+  const newSessionReset = '';  // Moved into banner above
 
   const body = `
     ${fileBanner}
@@ -5030,8 +5038,8 @@ async function _openReleaseTestingModal() {
     }, 600);
   });
 
-  // Wire Start New Session reset button (existing sessions only)
-  document.getElementById('rtResetSessionBtn')?.addEventListener('click', () => {
+  // Wire Clear Session button (shown in banner when session is active)
+  document.getElementById('rtClearSessionBtn')?.addEventListener('click', () => {
     Modal.open(
       '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#e15b59"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Start New Session?',
       `<p style="margin:0 0 10px">This will clear the current testing session including version, results file path, and finalization state.</p>
