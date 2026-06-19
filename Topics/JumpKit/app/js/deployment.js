@@ -183,12 +183,14 @@ window.renderDeployment = function renderDeployment(view) {
         <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
         </button>
-        <div style="margin-left:auto;display:inline-flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">
-          <button id="deployTabChecklist" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;${_deployCurrentView==='checklist'?'background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600':'background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500'}">
-            <svg class="ti ti-checklist" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg> Checklist
+        <div id="activeRunToggle" style="margin-left:auto;display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+          <button id="deployTabChecklist" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;font-size:0.78rem;letter-spacing:.02em;transition:all .15s;${_deployCurrentView==='checklist'?'background:rgba(13,148,136,0.12);color:#0d9488;font-weight:700':'background:transparent;color:var(--text-muted);font-weight:600'}">
+            <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='checklist'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg>
+            Checklist
           </button>
-          <button id="deployTabHistory" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;${_deployCurrentView==='history'?'background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600':'background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500'}">
-            <svg class="ti ti-history" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-history"/></svg> All Deployments
+          <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;font-size:0.78rem;letter-spacing:.02em;transition:all .15s;${_deployCurrentView==='history'?'background:rgba(13,148,136,0.12);color:#0d9488;font-weight:700':'background:transparent;color:var(--text-muted);font-weight:600'}">
+            <svg class="ti ti-history" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='history'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-history"/></svg>
+            All Deployments
           </button>
         </div>
       </div>
@@ -283,12 +285,14 @@ async function _renderDeployHistory() {
       <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
         <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
       </button>
-      <div style="margin-left:auto;display:inline-flex;align-items:center;background:var(--bg-input);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px">
-        <button id="deployTabChecklist" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;background:transparent;border-color:transparent;color:var(--text-muted);font-weight:500">
-          <svg class="ti ti-checklist" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg> Checklist
+      <div id="activeRunToggle" style="margin-left:auto;display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
+        <button id="deployTabChecklist" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:all .15s">
+          <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg>
+          Checklist
         </button>
-        <button id="deployTabHistory" class="btn" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;border-radius:6px;background:var(--bg-card);border-color:var(--border);color:var(--text);font-weight:600">
-          <svg class="ti ti-history" style="font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-history"/></svg> All Deployments
+        <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:rgba(13,148,136,0.12);color:#0d9488;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:all .15s">
+          <svg class="ti ti-history" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.svg#tabler-history"/></svg>
+          All Deployments
         </button>
       </div>
     </div>`;
