@@ -14,6 +14,7 @@ const DEPLOY_PHASES = [
   {
     id: 'codeversion', label: 'Code & Version', icon: 'ti-git-commit', color: '#8b5cf6',
     steps: [
+      { id: 'cv-0', text: '<strong>Confirm LemonSqueezy is in live (non-test) mode.</strong> Log in to <a href="https://app.lemonsqueezy.com" target="_blank">app.lemonsqueezy.com</a> → Settings → Store → confirm the store is in <strong>Live</strong> mode (not Test mode). Also verify the webhook URL in LemonSqueezy points to the <strong>production</strong> Supabase edge function, not a dev/test endpoint. Do not ship while in test mode — subscriptions and payments will not work for real users.' },
       { id: 'cv-1', text: 'Commit all outstanding changes with a clear release commit message.' },
       { id: 'cv-2', text: 'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.' },
       { id: 'cv-3', text: 'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).' },
