@@ -44,8 +44,7 @@ const DEPLOY_PHASES = [
       { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps. Confirm no admin error dialog on startup.' },
       { id: 'bl-7', text: 'Check installer file sizes. Expected ranges: Mac <code>.dmg</code> ~80–120 MB, Windows <code>.exe</code> ~60–90 MB. A dramatically smaller file (e.g. under 20 MB) means files were accidentally excluded from the asar — do not ship.', cmd: 'ls -lh dist/*.dmg dist/*.exe 2>/dev/null || ls -lh dist/' },
       { id: 'bl-9', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
-      { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build
-npm run build:test:win   # Windows test build' },
+      { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build\nnpm run build:test:win   # Windows test build' },
     ]
   },
   {
@@ -55,6 +54,7 @@ npm run build:test:win   # Windows test build' },
       { id: 'lp-2', text: 'Update <strong>download links</strong> in <code>landing/index.html</code> to point to the new installers.' },
       { id: 'lp-3', text: 'Update any version number or release date shown on the landing page.' },
       { id: 'lp-4', text: 'Commit and push the landing page — confirm Vercel auto-deploys successfully.' },
+      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): open a browser and visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm the padlock is green and no SSL warnings. Then navigate to <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> and confirm it redirects to https://. Mark Fail if any SSL warning appears.' },
       { id: 'lp-5', text: 'Verify live <strong>Mac download link</strong> end-to-end: click → download → install → launch.' },
       { id: 'lp-6', text: 'Verify live <strong>Windows download link</strong> end-to-end.' },
     ]
@@ -64,8 +64,11 @@ npm run build:test:win   # Windows test build' },
     steps: [
       { id: 'rel-1', text: 'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>' },
       { id: 'rel-2', text: 'Create a <strong>GitHub Release</strong> from the tag — attach both installers, paste the changelog as release notes.' },
+      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111): open <a href="https://api.github.com/repos/jrod4404/JumpKit/releases/latest" target="_blank">api.github.com/repos/jrod4404/JumpKit/releases/latest</a> in a browser — confirm the JSON contains a <code>tag_name</code> matching the new version (e.g. <code>v1.0.0</code>).' },
+      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112): open <a href="https://github.com/jrod4404/JumpKit/releases/latest" target="_blank">github.com/jrod4404/JumpKit/releases/latest</a> — expand the Assets section and confirm both <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for electron-updater auto-updates).' },
       { id: 'rel-3', text: 'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
       { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.' },
+      { id: 'rel-4a', text: '<strong>Auto-update E2E</strong> (Test #141): with the new release published, open the <em>previously installed</em> production build (not <code>npm start</code>). Wait up to 30 seconds — the teal "A new version of JumpKit is available" banner should appear at the top. Click <strong>Restart &amp; Update</strong> and confirm the app relaunches at the new version. Mark Fail if the banner never appears or the update fails.' },
       { id: 'rel-5', text: '<strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert the landing page download URLs back to the previous version’s GitHub release assets and redeploy via Vercel. (2) Delete or unpublish the new GitHub Release so the auto-updater stops offering it. (3) Document the incident in JUMPKIT_DOCS.html changelog. (4) Fix the bug, re-run the full test cycle, and re-release.' },
     ]
   },
@@ -383,11 +386,11 @@ async function _renderDeployHistory() {
   };
 
   // Check helper
-  const _check = (v) => v ? `<svg class="ti ti-check" style="color:#3fbe71;font-size:0.9rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg>` : `<span style="color:var(--text-dim)">—</span>`;
+  const _check = (v) => v ? `<span style="display:inline-flex;align-items:center;justify-content:center;padding:2px 10px;border-radius:99px;background:#3fbe7133"><svg class="ti ti-check" style="color:#3fbe71;font-size:0.99rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg></span>` : `<span style="color:var(--text-dim)">—</span>`;
   const _fmt = (v) => v ? new Date(v).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
   const _score = (p, t) => (t > 0) ? `${p}/${t}` : '—';
 
-  const buildRow = (d) => `<tr style="border-bottom:1px solid var(--border)">
+  const buildRow = (d, isLast = false) => `<tr style="${isLast ? '' : 'border-bottom:1px solid var(--border)'}">
     <td style="padding:10px 12px;font-size:0.86rem;font-weight:700;color:var(--text);white-space:nowrap">${d.version || '—'}</td>
     <td style="padding:10px 12px">${_statusPill(d.status)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_check(d.mac_finalized_at)}</td>
@@ -414,7 +417,7 @@ async function _renderDeployHistory() {
           <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left">Notes</th>
         </tr>
       </thead>
-      <tbody id="deployHistTbody">${deployments.map(buildRow).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No deployments found.</td></tr>`}</tbody>
+      <tbody id="deployHistTbody">${deployments.map((d,i,a) => buildRow(d, i===a.length-1)).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No deployments found.</td></tr>`}</tbody>
     </table>`;
 
   document.getElementById('deployHistTableWrap').innerHTML = tableHTML;
@@ -437,7 +440,7 @@ async function _renderDeployHistory() {
       return va < vb ? _sortDir : va > vb ? -_sortDir : 0;
     });
     const tbody = document.getElementById('deployHistTbody');
-    if (tbody) tbody.innerHTML = data.map(buildRow).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No matches.</td></tr>`;
+    if (tbody) tbody.innerHTML = data.map((d,i,a) => buildRow(d, i===a.length-1)).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No matches.</td></tr>`;
     document.querySelectorAll('#deployHistTable th[data-col]').forEach(th => {
       const ind = th.querySelector('.sort-ind');
       if (ind) ind.textContent = th.dataset.col === _sortCol ? (_sortDir === -1 ? ' ▼' : ' ▲') : ' ↕';
