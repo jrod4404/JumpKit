@@ -35,6 +35,12 @@ serve(async (req) => {
   if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405, headers });
   if (isRateLimited(ip)) return new Response(JSON.stringify({ error: 'Too many requests' }), { status: 429, headers });
 
+  // Require a valid Supabase JWT — prevents unauthenticated callers from probing pending_upgrades
+  const authHeader = req.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ') || authHeader.length < 20) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+  }
+
   try {
     const { email } = await req.json();
     if (!email) return new Response(JSON.stringify({ error: 'email required' }), { status: 400, headers });

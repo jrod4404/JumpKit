@@ -149,19 +149,19 @@ function buildPendingUpgradeHTML(): string {
         <p style="margin:0 0 12px;font-size:14px;font-weight:600;color:#C8D6E8">What's included in JumpKit Unlimited:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Unlimited jump launches
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Unlimited jump launches
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Unlimited teams, members &amp; jumps
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Unlimited teams, members &amp; jumps
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Personal &amp; team ROI dashboard
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Personal &amp; team ROI dashboard
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Auto-archive &amp; auto-backup
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Auto-archive &amp; auto-backup
           </td></tr>
           <tr><td style="padding:4px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Early access to new features
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="&#10003;" /> Early access to new features
           </td></tr>
         </table>
       </div>

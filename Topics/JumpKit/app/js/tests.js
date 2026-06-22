@@ -1423,7 +1423,7 @@ const JK_TESTS = [
 
   // ── Database Audit Tests (63-68) ─────────────────────────────────
   {
-    id: 125, category: 'Database',
+    id: 125, category: 'Database', platforms: ['mac'],
     title: '[MANUAL] Supabase backups - verify plan supports backups',
     purpose: 'Reminds developer to verify that Supabase backups are configured. Free tier has no auto-backups; Pro tier includes daily backups.',
     prerequisites: 'None.',
@@ -1462,7 +1462,7 @@ const JK_TESTS = [
   },
 
   {
-    id: 126, category: 'Database',
+    id: 126, category: 'Database', platforms: ['mac'],
     title: '[MANUAL] Dev/Prod database separation - single project warning',
     purpose: 'Warns if dev and production share the same Supabase project, risking production data corruption during development.',
     prerequisites: 'None.',
@@ -1989,7 +1989,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 382, preflight: true, category: 'Code Quality', platforms: ['win'],
+    id: 382, preflight: true, category: 'Code Quality', platforms: ['windows'],
     title: '[MANUAL] Pre-Flight — Windows-specific behaviour checklist',
     purpose: 'Verifies Windows-specific behaviours that cannot be covered by the Mac test run: file paths, AppData storage, NSIS installer, Windows code signing, and auto-updater.',
     prerequisites: 'Run on a physical Windows machine or VM with the test installer installed.',
@@ -2683,7 +2683,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 123, category: 'Maintenance',
+    id: 123, category: 'Maintenance', platforms: ['mac'],
     title: '[AUTO+MANUAL] Auto-backup fires correctly and creates notification',
     purpose: 'Verifies that runCloudBackup() correctly blocks free-tier users, respects the auto-backup preference, saves a backup file via Electron IPC, and creates an in-app notification (success or failure). Also confirms the backup notification is NOT a modal - it goes silently to the notification bell.',
     prerequisites: '⚠️ Auto-backup must be ON in Settings before running this test (Settings → Auto-backup → enable). Must be logged in as an Unlimited user. If auto-backup is off the test will fail with no notification found.',
@@ -2735,7 +2735,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
 
   // ── Email Tests (96-97) ───────────────────────────────────────────
   {
-    id: 114, category: 'Email',
+    id: 114, category: 'Email', platforms: ['mac'],
     title: '[AUTO+MANUAL] Account-exists email - Edge Function returns ok:true',
     purpose: 'Automatically calls the send-account-exists Edge Function with the current user\'s email and confirms it returns { ok: true }. Verifies the function is deployed, reachable, and responds without error. Does NOT verify email delivery - check your inbox after running.',
     prerequisites: 'Must be logged in. The send-account-exists Edge Function must be deployed to Supabase.',
@@ -2820,7 +2820,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 115, category: 'Email',
+    id: 115, category: 'Email', platforms: ['mac'],
     title: '[AUTO+MANUAL] send-pending-upgrade - Edge Function returns ok:true',
     purpose: 'Automatically calls the send-pending-upgrade Edge Function with the current user email and confirms it returns { ok:true }. Verifies the function is deployed and reachable.',
     prerequisites: 'Must be logged in. send-pending-upgrade Edge Function must be deployed.',
@@ -2946,7 +2946,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 116, category: 'Email',
+    id: 116, category: 'Email', platforms: ['mac'],
     emailSubject: "Owner: 'Important: your JumpKit team members may lose access' | Member: 'Your team access may be changing'",
     title: '[AUTO+MANUAL] send-team-downgrade-alert - Edge Function returns ok:true (alert variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"alert" and a test member list, confirming the function is deployed and returns { ok:true }. This fires when a subscription is cancelled.',
@@ -2987,7 +2987,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 117, category: 'Email',
+    id: 117, category: 'Email', platforms: ['mac'],
     emailSubject: "2 emails: Owner: 'Reminder: JumpKit team access ending in 2 days - Test Team (Test 117)' | Member: 'Your access to Test Team (Test 117) ends in 2 days'",
     title: '[AUTO+MANUAL] send-team-downgrade-alert - Edge Function returns ok:true (warning variant)',
     purpose: 'Calls send-team-downgrade-alert with variant:"warning", confirming the 2-day warning email path works. This is the variant fired by check-member-lockouts 2 days before lock_at.',
@@ -3057,7 +3057,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 131, category: 'Subscription',
+    id: 131, category: 'Subscription', platforms: ['mac'],
     title: '[MANUAL] check-member-lockouts - actually locks a member when lock_at has passed',
     purpose: 'Confirms check-member-lockouts sets locked=true on rows where lock_at is in the past.',
     prerequisites: 'Supabase access + a team you own.',
@@ -3090,7 +3090,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
 
   // ── Auto-Update / GitHub Releases (Tests 111-116) ─────────────────
   {
-    id: 105, category: 'Deployment',
+    id: 105, category: 'Deployment', platforms: ['mac'],
     title: '[MANUAL] SSL certificate valid and HTTPS enforced',
     purpose: 'Confirms that jumpkit.app has a valid SSL certificate and HTTPS is enforced. Cannot be automated from inside the Electron app - the CSP connect-src does not include jumpkit.app, so fetch() is blocked by the browser security policy.',
     prerequisites: 'Internet connection. Open a regular browser (not the app).',
@@ -3181,7 +3181,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
 
 
   {
-    id: 118, category: 'Email',
+    id: 118, category: 'Email', platforms: ['mac'],
     emailSubject: 'Jane Smith (Test 118) just joined your team on JumpKit',
     title: '[AUTO+MANUAL] send-member-joined - Edge Function returns ok:true',
     purpose: 'Calls send-member-joined with the logged-in user as the team owner (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
@@ -3222,7 +3222,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 119, category: 'Email',
+    id: 119, category: 'Email', platforms: ['mac'],
     emailSubject: "You've been removed from Test Team (Test 119) on JumpKit",
     title: '[AUTO+MANUAL] send-member-removed - Edge Function returns ok:true',
     purpose: 'Calls send-member-removed with the logged-in user as the removed member (test scenario), confirming the function is deployed, accepts the payload, and returns { ok:true }.',
@@ -3888,7 +3888,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   // ══════════════════════════════════════════════════════════════════
 
   {
-    id: 64, category: 'Email',
+    id: 64, category: 'Email', platforms: ['mac'],
     title: '[AUTO+MANUAL] send-invite - Edge Function returns ok:true',
     purpose: 'Confirms the send-invite Edge Function is deployed and returns ok:true for a valid payload.',
     prerequisites: 'Must be logged in. send-invite Edge Function must be deployed.',
@@ -3954,7 +3954,7 @@ Please do not make any changes to code until the proposed changes are confirmed.
   },
 
   {
-    id: 66, category: 'Email',
+    id: 66, category: 'Email', platforms: ['mac'],
     title: '[AUTO+MANUAL] send-cancellation - Edge Function returns ok:true',
     purpose: 'Confirms the send-cancellation Edge Function is deployed and returns ok:true for a valid payload.',
     prerequisites: 'Must be logged in. send-cancellation Edge Function must be deployed.',
@@ -4636,17 +4636,13 @@ async function _loadResultsFromHTMLFile(opts = {}) {
     const parsedData = JSON.parse(match[1]);
     // Support both old flat format and new { mac:{}, win:{} } format
     const storedEntries = parsedData?.entries ?? parsedData;
-    let entries;
-    if (storedEntries?.mac !== undefined || storedEntries?.win !== undefined) {
-      // New format — load only the current platform's results
-      const _loadActiveRun = (_getReleaseState() || {}).activeRun || 'mac';
-      entries = _loadActiveRun === 'windows' ? (storedEntries.win || {}) : (storedEntries.mac || {});
-    } else {
-      // Legacy flat format
-      entries = storedEntries || {};
-    }
+    const hasDualFormat = storedEntries?.mac !== undefined || storedEntries?.win !== undefined;
+    const macEntries = hasDualFormat ? (storedEntries.mac || {}) : (storedEntries || {});
+    const winEntries = hasDualFormat ? (storedEntries.win || {}) : {};
+
     const restoredChangelog = Array.isArray(parsedData?.changelog) ? parsedData.changelog : null;
     if (!window._jkTestResults) window._jkTestResults = {};
+    if (!window._jkWinTestResults) window._jkWinTestResults = {};
 
     // Restore changelog into release state if present
     if (restoredChangelog) {
@@ -4656,30 +4652,54 @@ async function _loadResultsFromHTMLFile(opts = {}) {
       } catch(_) {}
     }
 
+    // Helper: load a set of entries into a target store
+    const _loadEntries = (entries, store) => {
+      let count = 0;
+      Object.values(entries).forEach(entry => {
+        const id = parseInt(entry.id);
+        if (!id || !entry.state || entry.state === 'not-run') return;
+        const fileTs = entry.timestamp ? new Date(entry.timestamp).getTime() : 0;
+        const existing = store[id];
+        if (existing && existing.ts && existing.ts > fileTs) return; // in-memory is newer
+        store[id] = {
+          state: entry.state,
+          received: entry.manuallyMarked ? 'Manually marked as passed' : (entry.details || 'Loaded from file'),
+          ts: fileTs || Date.now(),
+        };
+        count++;
+      });
+      return count;
+    };
+
+    // Always load both platforms into their respective stores
     let loaded = 0;
-    Object.values(entries).forEach(entry => {
-      const id = parseInt(entry.id);
-      if (!id || !entry.state || entry.state === 'not-run') return;
-      // Don't overwrite a result that was set more recently than the file entry.
-      // This prevents a re-render's background file-load from clobbering a test
-      // that just ran (e.g. test 23 passing then navigateTo triggering a reload).
-      const fileTs  = entry.timestamp ? new Date(entry.timestamp).getTime() : 0;
-      const existing = (window._jkTestResults || {})[id];
-      if (existing && existing.ts && existing.ts > fileTs) return; // in-memory is newer
-      window._jkTestResults[id] = {
-        state: entry.state,
-        received: entry.manuallyMarked ? 'Manually marked as passed' : (entry.details || 'Loaded from file'),
-        ts: fileTs || Date.now(),
-      };
-      loaded++;
-    });
+    loaded += _loadEntries(macEntries, window._jkTestResults);
+    loaded += _loadEntries(winEntries, window._jkWinTestResults);
+
+    // If loading into a Windows run, pre-mark mac-only tests as skip so they
+    // render correctly without needing _setActiveRun to be called first.
+    const _loadedActiveRun = (_getReleaseState() || {}).activeRun || 'mac';
+    if (_loadedActiveRun === 'windows') {
+      if (!window._jkWinTestResults) window._jkWinTestResults = {};
+      JK_TESTS.forEach(t => {
+        const isMacOnly = t.platforms && !t.platforms.includes('windows');
+        if (isMacOnly && !window._jkWinTestResults[t.id]) {
+          window._jkWinTestResults[t.id] = { state: 'skip', received: 'Mac Only - not required on Windows' };
+        }
+      });
+    }
 
     // Persist to SQLite so results survive future restarts
     _saveTestResults();
 
-    // Refresh UI
-    Object.entries(window._jkTestResults).forEach(([id, r]) => {
-      if (r.state && r.state !== 'running') _setRowResult(parseInt(id), r.state, r.message || null);
+    // Refresh UI — explicitly set EVERY test row to its correct state for the
+    // active run (or 'not-run' if absent). This clears any stale Mac results
+    // painted on Windows rows and ensures mac-only skips render correctly.
+    const _activeStore = _activeResults();
+    JK_TESTS.forEach(t => {
+      const r = _activeStore[t.id];
+      const state = (r?.state && r.state !== 'running') ? r.state : 'not-run';
+      _setRowResult(t.id, state, r?.message || null);
     });
     _refreshSummary();
 
@@ -5047,18 +5067,17 @@ function _updateRTLabel() {
   const resultsFile = s?.resultsFilePath;
 
   if (s?.version) {
-    const results = window._jkTestResults || {};
-
     // Determine 3-state status for a given platform
     const _platformState = (platform, finalized, macFinalized) => {
       if (finalized) return 'passed';
       // Windows is locked (not yet available) until Mac testing is finalized
       if (platform === 'windows' && !macFinalized) return 'locked';
+      const platformResults = platform === 'windows' ? (window._jkWinTestResults || {}) : (window._jkTestResults || {});
       const applicableTests = platform === 'windows'
         ? JK_TESTS.filter(t => !t.platforms || t.platforms.includes('windows'))
         : JK_TESTS;
       const runCount = applicableTests.filter(t => {
-        const r = results[t.id];
+        const r = platformResults[t.id];
         return r && r.state && r.state !== 'not-run' && r.state !== 'skip';
       }).length;
       return runCount > 0 ? 'started' : 'incomplete';
@@ -5127,9 +5146,12 @@ function _setActiveRun(platform) {
     });
   }
   _buildTestRows();
-  // Restore results into rows
-  Object.entries(window._jkTestResults || {}).forEach(([id, r]) => {
-    if (r.state && r.state !== 'running') _setRowResult(parseInt(id), r.state, r.message || null);
+  // Restore results into rows from the ACTIVE run's store — reset all others to not-run
+  const _activeStore = _activeResults();
+  JK_TESTS.forEach(t => {
+    const r = _activeStore[t.id];
+    const state = (r?.state && r.state !== 'running') ? r.state : 'not-run';
+    _setRowResult(t.id, state, r?.message || null);
   });
   _refreshSummary();
   // Update toggle button styles

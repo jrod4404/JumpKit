@@ -20,9 +20,37 @@ const MONTHLY_VARIANT_ID = '1754951'; // $10/mo
 const CORE_VARIANT_IDS = [ANNUAL_VARIANT_ID, MONTHLY_VARIANT_ID];
 const TEAMS_JET_VARIANT_IDS: string[] = []; // legacy, unused
 
+// Timing-safe string comparison to prevent timing attacks on signature check
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 serve(async (req) => {
   try {
     const body = await req.text();
+
+    // ── Lemon Squeezy signature verification ──────────────────────────────
+    const signingSecret = Deno.env.get('LEMON_SQUEEZY_SIGNING_SECRET') || '';
+    const signature = req.headers.get('x-signature') || '';
+    if (!signingSecret) {
+      console.error('ls-webhook: LEMON_SQUEEZY_SIGNING_SECRET not set');
+      return new Response('Server config error', { status: 500 });
+    }
+    const key = await crypto.subtle.importKey(
+      'raw', new TextEncoder().encode(signingSecret),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    );
+    const sigBytes = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(body));
+    const expected = Array.from(new Uint8Array(sigBytes)).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (!timingSafeEqual(signature, expected)) {
+      console.error('ls-webhook: invalid signature');
+      return new Response('Unauthorized', { status: 401 });
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     const payload = JSON.parse(body);
     const eventName = payload.meta?.event_name;
     const data = payload.data?.attributes;

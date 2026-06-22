@@ -585,6 +585,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
+      sandbox: true,
     },
   });
 
@@ -623,8 +624,9 @@ function createWindow() {
 
   // Prevent new BrowserWindows from being opened (e.g. via window.open or target=_blank)
   // Redirect to system browser instead — keeps preload out of uncontrolled windows
+  // Only allow http/https URLs; block javascript:, data:, file:, etc.
   win.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url);
     return { action: 'deny' };
   });
 
@@ -852,7 +854,8 @@ if (!gotSingleInstanceLock) {
 
 app.whenReady().then(() => {
   // ── Admin build guard: verify admin files are excluded in packaged builds ──
-  if (app.isPackaged) {
+  const _pkg = (() => { try { return require('./package.json'); } catch(_) { return {}; } })();
+  if (app.isPackaged && !_pkg.jkTestBuild) {
     const adminCheck = _checkAdminFilesExcluded();
     const leaked = adminCheck.filter(r => r.found).map(r => r.file);
     if (leaked.length > 0) {
@@ -873,7 +876,7 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in https://cdn.jsdelivr.net"
+          "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'"
         ]
       }
     });

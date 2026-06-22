@@ -224,7 +224,7 @@ function buildEmailHTML({ firstName, teamName, ownerName, columnNames, isPending
 function json(body: object, status = 200) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': 'https://jumpkit.app' },
   });
 }
 

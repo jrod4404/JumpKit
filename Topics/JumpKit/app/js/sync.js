@@ -185,7 +185,8 @@ async function syncSharedJumps() {
       .from('shared_jumps')
       .select('*')
       .in('team_id', teamIds)
-      .order('position');
+      .order('position')
+      .limit(1000);
     if (jumpErr) throw jumpErr;
 
     // 3. Upsert into local DB — preserve local hotkey if already set
@@ -240,7 +241,7 @@ async function syncSharedJumps() {
       });
     }
     if (duplicateOldFormatIds.size > 0) {
-      console.log(`[syncSharedJumps] Removing ${duplicateOldFormatIds.size} duplicate old-format shadow column(s)`);
+      console.warn(`[syncSharedJumps] Removing ${duplicateOldFormatIds.size} duplicate old-format shadow column(s)`);
       // Remove duplicate columns and their jumps from local DB
       const cleanedCols = existingCols.filter(c => !duplicateOldFormatIds.has(c.id));
       const cleanedJumps = DB.getJumps(localUserId).filter(j => !duplicateOldFormatIds.has(j.columnId));
@@ -506,7 +507,7 @@ async function syncSharedJumps() {
       }
     }
 
-    console.debug(`[JumpKit Sync] Synced ${remoteCols.length} columns, ${remoteJumps.length} jumps`);
+
     // Sync aggregate stats for Team ROI (unlimited users only)
     try { await syncMemberStats(); } catch (_) {}
     try { await syncPersonalStats(); } catch (_) {}
@@ -657,13 +658,13 @@ async function rebuildOwnerSharedTeams() {
           try {
             await supabaseClient.from('shared_columns')
               .update({ name: col.name }).eq('id', st.supabaseId);
-            console.log(`[rebuildOwnerSharedTeams] Updated Supabase name: "${remote.name}" → "${col.name}"`);
+            console.warn(`[rebuildOwnerSharedTeams] Updated Supabase name: "${remote.name}" → "${col.name}"`);
           } catch (e) { console.warn('[rebuildOwnerSharedTeams] name update failed:', e.message); }
         }
       }
     }
 
-    console.log('[rebuildOwnerSharedTeams] sharedTeams rebuilt and Supabase names synced.');
+
     if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) renderColumns();
   } catch (err) {
     console.warn('[rebuildOwnerSharedTeams] error:', err.message);

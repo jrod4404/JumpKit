@@ -1,10 +1,23 @@
 {
-  "_comment": "Test build config — includes admin files (tests.js, deployment.js, admin.js). DO NOT use for shipping.",
+  "productName": "JumpKit",
   "files": [
     "**/*",
     "!node_modules/.bin",
     "!**/*.map",
     "!server.js",
     "!data/db.json"
-  ]
+  ],
+  "extraMetadata": {
+    "jkTestBuild": true
+  },
+  "executableName": "jumpkit-test",
+  "win": {
+    "icon": "assets/icon.ico"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": false,
+    "deleteAppDataOnUninstall": false,
+    "include": "build/installer.nsh"
+  }
 }

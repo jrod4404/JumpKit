@@ -91,13 +91,13 @@ function buildCancellationHTML({ firstName }: { firstName: string }): string {
         <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">What you still have access to:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved jumps &amp; data retained
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> All your saved jumps &amp; data retained
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> 250 launches · 2 teams · 5 members · 10 jumps / team
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> 250 launches · 2 teams · 5 members · 10 jumps / team
           </td></tr>
           <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal ROI dashboard
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal ROI dashboard
           </td></tr>
         </table>
       </div>

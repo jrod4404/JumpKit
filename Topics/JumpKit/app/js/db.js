@@ -62,7 +62,7 @@ const DB = (() => {
     async init(userId) {
       // Deduplicate concurrent calls for the same userId
       if (_initInFlight.has(userId)) {
-        console.debug('[DB.init] Already in-flight for', userId, '— waiting on existing promise');
+
         return _initInFlight.get(userId);
       }
       const initPromise = this._doInit(userId);
@@ -130,7 +130,7 @@ const DB = (() => {
 
           if (personalCols.length === 0 && !alreadySeeded) {
             _seededThisSession.add(userId);
-            console.debug('[DB.init] No columns found — seeding default data for', userId);
+
             await window.electronAPI.seedNewUser(userId);
             // Mark seeded in Supabase (fire-and-forget)
             if (window.supabaseClient && window._supabaseUser) {
@@ -173,7 +173,7 @@ const DB = (() => {
     createUser(name, email, password, forceId = null) {
       const users = this.getUsers();
       if (this.findUserByEmail(email)) return null;
-      const user = { id: forceId || uid(), name, email, password, createdAt: Date.now() };
+      const user = { id: forceId || uid(), name, email, createdAt: Date.now() }; // password intentionally excluded — auth is Supabase-managed
       users.push(user);
       this.saveUsers(users);
       return user;

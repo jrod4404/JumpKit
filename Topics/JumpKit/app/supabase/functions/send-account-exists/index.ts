@@ -98,18 +98,18 @@ function buildAccountExistsHTML({ email }: { email: string }): string {
 
       <!-- Primary CTA: Sign In -->
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 16px">
-        <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <a href="https://jumpkit.app/auth.html" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Sign In to JumpKit
+        <tr><td align="center" width="260" style="width:260px;border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
+          <a href="https://jumpkit.app" style="display:block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px;text-align:center;white-space:nowrap">
+            <img src="https://jumpkit.app/email-icons/icon-login-white.png" width="25" height="25" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Sign In to JumpKit
           </a>
         </td></tr>
       </table>
 
       <!-- Secondary CTA: Reset Password -->
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 32px">
-        <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <a href="https://jumpkit.app/auth.html#forgot" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            <img src="https://jumpkit.app/email-icons/icon-reset-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Forgot Your Password?
+        <tr><td align="center" width="260" style="width:260px;border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
+          <a href="https://jumpkit.app/reset-password" style="display:block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px;text-align:center;white-space:nowrap">
+            <img src="https://jumpkit.app/email-icons/icon-reset-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="" />Reset Your Password
           </a>
         </td></tr>
       </table>
