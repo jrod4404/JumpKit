@@ -467,7 +467,7 @@ function renderSidebarCTA() {
     if (!cta) {
       cta = document.createElement('button');
       cta.className = 'sidebar-cta btn btn-primary unlock-btn';
-      cta.innerHTML = `<svg class="ti ti-lock" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span>Upgrade to Unlimited</span>`;
+      cta.innerHTML = `<svg class="ti ti-rocket" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg><span>Upgrade to Unlimited</span>`;
       cta.addEventListener('click', () => window.electronAPI?.openUrl(LS_CHECKOUT_URL));
       const toggleBtn = container.querySelector('.sidebar-toggle-btn');
       if (toggleBtn) container.insertBefore(cta, toggleBtn);
@@ -509,6 +509,7 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
     }
   } catch (_) {}
   try { await supabaseClient.auth.signOut(); } catch (_) {}
+  sessionStorage.removeItem('jk_session_token'); // clear session lock token on logout
   DB.clearSession();
   window.location.href = 'index.html';
 });
@@ -1461,7 +1462,6 @@ window.submitFeedback = async function submitFeedback() {
     `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending...</button>`;
 
   try {
-    console.debug('[Feedback] Calling edge function...');
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
       method: 'POST',
       headers: {
@@ -1476,7 +1476,6 @@ window.submitFeedback = async function submitFeedback() {
       }),
     });
     const data = await res.json().catch(() => ({}));
-    console.debug('[Feedback] HTTP status:', res.status, '| response:', JSON.stringify(data));
     if (!res.ok && !data.ok) throw new Error(data.error || 'Send failed');
   } catch (e) {
     console.warn('Feedback send error:', e);
@@ -1742,7 +1741,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#1f2937; background:#fff; padding:40px; }
-    .header { display:grid; grid-template-columns:1fr auto; row-gap:5px; margin-bottom:28px; padding-bottom:16px; border-bottom:2px solid #e5e7eb; align-items:center; }
+    .header { display:grid; grid-template-columns:1fr auto; row-gap:5px; margin-bottom:14px; padding-bottom:16px; border-bottom:2px solid #e5e7eb; align-items:center; }
     .header-right { text-align:right; }
     .section-title { font-size:11px; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:0.08em; margin:24px 0 12px; }
     .stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
@@ -1759,7 +1758,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
 </head>
 <body>
   <div class="header">
-    ${logoDataUrl ? `<img src="${logoDataUrl}" style="height:34px;width:auto" />` : '<div></div>'}
+    ${logoDataUrl ? `<img src="${logoDataUrl}" style="height:51px;width:auto" />` : '<div></div>'}
     <div class="header-right" style="font-size:18px;font-weight:800;color:#1f2937">ROI Summary</div>
     <div style="font-size:12px;color:#6b7280">Stop searching. Start jumping.</div>
     <div class="header-right" style="font-size:12px;color:#6b7280">${userName} &middot; All-time summary</div>
@@ -2177,7 +2176,7 @@ async function renderTeamROISection() {
                 Upgrade to see <strong style="color:var(--hover-accent)">real per-member stats</strong>.
               </div>
               <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:14px;font-size:0.8rem;padding:7px 16px">
-                <svg class="ti ti-lock" style="width:0.85rem;height:0.85rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+                <svg class="ti ti-rocket" style="width:0.85rem;height:0.85rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
                 Upgrade to Unlimited
               </a>
             </div>
@@ -2404,7 +2403,7 @@ function buildUnlockButton(label = 'Upgrade to Unlimited', opts = {}) {
   if (opts.width && opts.width !== 'auto') btnStyle += `width:${opts.width};`;
   if (opts.padding) btnStyle += `padding:${opts.padding};`;
   if (opts.fontSize) spanStyle += `font-size:${opts.fontSize};`;
-  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-lock"/></svg><span style="${spanStyle}">${label}</span></button>`;
+  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg><span style="${spanStyle}">${label}</span></button>`;
 }
 
 // ── Paywall event tracking ────────────────────────────────────────────────────────────────
@@ -2413,7 +2412,8 @@ window.trackPaywallEvent = async function trackPaywallEvent(type) {
     const res = await supabaseClient.auth.getSession();
     const userId = res?.data?.session?.user?.id;
     if (!userId) return;
-    await supabaseClient.from('paywall_events').insert({ user_id: userId, paywall_type: type });
+    const { error: _pwErr } = await supabaseClient.from('paywall_events').insert({ user_id: userId, paywall_type: type });
+    if (_pwErr) console.warn('[trackPaywallEvent] insert failed:', _pwErr.message);
   } catch (_) {}
 };
 
@@ -2425,7 +2425,7 @@ window.showUpgradeModal = function(title, message) {
       <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
     </button>
     <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-      <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Upgrade to Unlimited
+      <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Unlimited
     </button>`;
   Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
 };
@@ -2440,7 +2440,7 @@ window.showPaywall = function() {
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Upgrade to Unlimited
+          <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Unlimited
         </button>
         <button class="btn btn-ghost" data-jaction="modal-close" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
           Maybe later
@@ -2990,9 +2990,11 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
       const pruneTeams = ownedTeams.slice(1);
       for (const t of pruneTeams) {
         // Remove shared columns for this team from Supabase
-        await supabaseClient.from('shared_columns').delete().eq('team_id', t.id);
+        const { error: _scErr } = await supabaseClient.from('shared_columns').delete().eq('team_id', t.id);
+        if (_scErr) console.warn('[downgrade] shared_columns delete failed:', _scErr.message);
         // Remove shared jumps for this team from Supabase
-        await supabaseClient.from('shared_jumps').delete().eq('team_id', t.id);
+        const { error: _sjErr } = await supabaseClient.from('shared_jumps').delete().eq('team_id', t.id);
+        if (_sjErr) console.warn('[downgrade] shared_jumps delete failed:', _sjErr.message);
       }
       // Update local columns - unshare any belonging to pruned teams
       const pruneTeamIds = new Set(pruneTeams.map(t => t.id));
@@ -3068,7 +3070,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
     const upgradeBtn = `
       <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}">
-        <svg class="ti ti-lock" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+        <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
         Upgrade to Unlimited
       </button>`;
 

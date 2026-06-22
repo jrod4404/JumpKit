@@ -18,7 +18,7 @@
   flex-shrink: 0;
   position: relative;
 }
-.sidebar-logo-img { max-height: 36px; max-width: calc(var(--sidebar-w) - 64px); width: auto; object-fit: contain; display: block; }
+.sidebar-logo-img { max-height: 58px; max-width: calc(var(--sidebar-w) - 64px); width: auto; object-fit: contain; display: block; margin-top: 6px; }
 .sidebar-logo-circle { width: 30px; height: 30px; object-fit: contain; display: none; }
 #sidebarToggleIcon { transition: transform 0.25s ease; transform: rotate(180deg); }
 .sidebar.collapsed #sidebarToggleIcon { transform: rotate(0deg); }

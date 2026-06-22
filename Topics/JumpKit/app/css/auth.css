@@ -16,7 +16,7 @@
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  height: 792px;
+  height: 752px;
 }
 /* Fixed header: logo + tagline + tabs */
 .auth-header { flex-shrink: 0; }
@@ -26,17 +26,21 @@
   overflow-y: hidden;
   padding-right: 0;
 }
-.auth-logo-img { max-height: 72px; max-width: 360px; width: auto; object-fit: contain; display: block; margin: 0 auto; }
+.auth-logo-img { height: 103px; width: 283px; object-fit: contain; margin-left: 20px; filter: blur(0.3px) drop-shadow(0 0 0.5px rgba(0,0,0,0.18)) contrast(1.05); transform: translateZ(0); }
 .auth-logo {
   text-align: center;
   font-size: 1.6rem;
   font-weight: 900;
-  margin-bottom: 6px;
+  margin-bottom: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .auth-tagline {
   text-align: center;
   font-size: 1.05rem;
   color: var(--text-muted);
+  margin-top: -14px;
   margin-bottom: 32px;
 }
 .auth-title {

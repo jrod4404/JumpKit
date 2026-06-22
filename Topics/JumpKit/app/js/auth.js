@@ -5,7 +5,7 @@ document.documentElement.dataset.theme = savedTheme;
 function updateAuthTheme(t) {
   document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
   document.querySelectorAll('.auth-logo-img').forEach(img => {
-    img.src = t === 'dark' ? 'img/logo-dark-mode.png' : 'img/logo.png';
+    img.src = t === 'dark' ? 'img/logo-dark-mode-scaled.png' : 'img/logo-scaled.png';
   });
 }
 updateAuthTheme(savedTheme);
@@ -146,7 +146,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         body: JSON.stringify({ email })
       });
       const upgradeData = await upgradeRes.json().catch(() => ({}));
-      if (upgradeData.applied) {
+      if (upgradeRes.ok && upgradeData.applied) {
         sessionStorage.setItem('jk_pending_upgrade_applied', '1');
       }
     } catch (_) {}
@@ -217,7 +217,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
     if (error) throw error;
 
     // Also keep localStorage mock for local DB compatibility
-    DB.createUser(name, email, pass);
+    DB.createUser(name, email, '__supabase__'); // never store real password — Supabase owns auth
     const localUser = DB.findUserByEmail(email);
     if (localUser) {
       DB.setSession(localUser.id);
