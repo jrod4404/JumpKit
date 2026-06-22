@@ -130,6 +130,7 @@ img { max-width: 100%; }
   width: auto;
   object-fit: contain;
   margin-top: 12px;
+  transform: translateY(-1px);
 }
 .nav-right {
   display: flex;
@@ -149,6 +150,7 @@ img { max-width: 100%; }
   flex-direction: column;
   gap: 4px;
   transition: all 0.2s;
+  transform: translateY(2px);
 }
 .menu-toggle:hover { border-color: var(--turq); }
 .menu-toggle span {
