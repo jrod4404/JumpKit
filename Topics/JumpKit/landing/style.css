@@ -1141,8 +1141,8 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 }
 .footer-inner { max-width: 1200px; margin: 0 auto; text-align: center; }
 .footer .logo { margin-bottom: 8px; }
-.footer-logo-img { height: 63px !important; width: auto; display: block; margin: 0 auto; object-fit: contain; }
-.footer-tagline { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px; }
+.footer-logo-img { height: 63px !important; width: auto; display: block; margin: 16px auto 0; object-fit: contain; }
+.footer-tagline { color: var(--text-muted); font-size: 0.9rem; margin-top: -16px; margin-bottom: 12px; }
 .footer-social { display: flex; gap: 10px; justify-content: center; align-items: center; margin-bottom: 12px; }
 .footer-social-link {
   display: flex; align-items: center; justify-content: center;
