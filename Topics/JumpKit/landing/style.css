@@ -126,9 +126,10 @@ img { max-width: 100%; }
   align-items: center;
 }
 .nav-logo-img {
-  height: 54px;
+  height: 59px;
   width: auto;
   object-fit: contain;
+  margin-top: 12px;
 }
 .nav-right {
   display: flex;
