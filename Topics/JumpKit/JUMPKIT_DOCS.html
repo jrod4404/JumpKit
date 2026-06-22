@@ -109,18 +109,19 @@
         }
 
         .header img {
-            height: 58px;
+            height: 116px;
             display: block;
-            margin: 0 auto 14px;
+            margin: 0 auto;
+            transform: translateX(12px);
             filter: drop-shadow(0 6px 18px rgba(0,0,0,0.45));
         }
 
         .header-tagline {
-            margin: 0;
-            font-size: 0.9rem;
+            margin-top: -16px;
+            margin-bottom: 36px;
+            font-size: 1.08rem;
             color: rgba(200, 214, 232, 0.85);
             letter-spacing: 0.05em;
-            text-transform: uppercase;
         }
 
         .header h1 {
@@ -2271,7 +2272,19 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 </table>
 
 <h5 style="margin:14px 0 6px">How test builds work</h5>
-<p>Test builds use <code>electron-builder.test.json</code> as a config override (<code>--config electron-builder.test.json</code>). This file replaces only the <code>files</code> exclusion list — dropping the <code>!js/tests.js</code>, <code>!js/deployment.js</code>, and <code>!js/admin.js</code> entries. Everything else (code signing, notarization, icons, DMG/NSIS settings) is inherited from <code>package.json</code> unchanged.</p>
+<p>Test builds use <code>electron-builder.test.json</code> as a config override (<code>--config electron-builder.test.json</code>). This file includes the following settings discovered during v1.0.0 release testing (2026-06-21):</p>
+<table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin:10px 0 14px">
+  <thead><tr style="border-bottom:2px solid var(--border)"><th style="padding:6px 10px;text-align:left">Setting</th><th style="padding:6px 10px;text-align:left">Value</th><th style="padding:6px 10px;text-align:left">Why</th></tr></thead>
+  <tbody>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 10px"><code>productName</code></td><td style="padding:6px 10px"><code>&quot;JumpKit&quot;</code></td><td style="padding:6px 10px">Without this, NSIS installer header, shortcut, and Programs list show lowercase &ldquo;jumpkit&rdquo; (from npm <code>name</code> field)</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 10px"><code>executableName</code></td><td style="padding:6px 10px"><code>&quot;jumpkit-test&quot;</code></td><td style="padding:6px 10px">Avoids NSIS &ldquo;cannot be closed&rdquo; error on reinstall — NSIS checks for a running process by executable name; renaming it means no conflict with previous installs</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 10px"><code>extraMetadata.jkTestBuild</code></td><td style="padding:6px 10px"><code>true</code></td><td style="padding:6px 10px">Signals test build to <code>main.js</code> — skips the admin build guard that would otherwise show a blocking error dialog and prevent the app from opening</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 10px"><code>nsis.oneClick</code></td><td style="padding:6px 10px"><code>false</code></td><td style="padding:6px 10px">Wizard-style installer — avoids forced silent close of running processes</td></tr>
+    <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 10px"><code>nsis.include</code></td><td style="padding:6px 10px"><code>&quot;build/installer.nsh&quot;</code></td><td style="padding:6px 10px">NSIS hook that overrides <code>customCheckAppRunning</code> as a no-op, preventing &ldquo;cannot be closed&rdquo; errors entirely</td></tr>
+    <tr><td style="padding:6px 10px"><code>win.icon</code></td><td style="padding:6px 10px"><code>&quot;assets/icon.ico&quot;</code></td><td style="padding:6px 10px">Must be &ge;256&times;256px ICO. Original was 16&times;16 — regenerated from <code>icon_gradient_512.png</code> using Python/Pillow (multi-size: 16/32/48/64/128/256)</td></tr>
+  </tbody>
+</table>
+<p><strong>Production builds do NOT use <code>executableName</code> or <code>jkTestBuild</code></strong> — the production exe must remain <code>jumpkit.exe</code> for auto-updater compatibility, and the admin guard must stay active.</p>
 
 <h5 style="margin:14px 0 6px">Release testing workflow</h5>
 <ol>
@@ -4009,6 +4022,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
   <li><strong>Offline-first sync improvements</strong> - Better conflict resolution, selective cloud sync.</li>
   <li><strong>Password Manager</strong> - Store and share credentials (username/password/URL) as a special Jump type. Encrypted at rest, optional team sharing with role-based access. Eliminates the need for a separate password tool for small teams using JumpKit daily.</li>
   <li><strong>Task Manager (team-shareable)</strong> - Lightweight task/to-do list tied to teams. Members can create, assign, and complete tasks visible to the whole team. Shareable via the existing Teams infrastructure &mdash; tasks appear as a new section alongside shared columns and jumps.</li>
+  <li><strong>Risky-extension confirmation modal for personal jumps</strong> - Currently <code>RISKY_EXTENSIONS</code> is defined in <code>main.js</code> but never wired up for personal jumps (it only fires for shared team jumps). A one-click confirmation modal should appear when a personal jump points to an executable file type (<code>.app</code>, <code>.exe</code>, <code>.sh</code>, <code>.bat</code>, <code>.cmd</code>, <code>.pkg</code>, <code>.dmg</code>, <code>.scpt</code>) before launching it. Folders, documents, images, and web URLs would still open instantly. This adds a safety net for accidentally saved malicious paths without impacting normal jump workflows.</li>
 </ul>
 
 <h3 id="roadmap-recommendation">11.3 Recommendation</h3>
@@ -4022,6 +4036,41 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3>2026-06-22 (Landing page UI polish, logo updates, nav CTA refresh)</h3>
+<ul>
+  <li><strong>Logo updated sitewide.</strong> Header and footer logos on <code>jumpkit.app</code> updated to latest <code>logo-dark-mode.png</code> and <code>logo-light.png</code> from <code>app/img/</code>. Both header (<code>nav-logo-img</code>) and footer (<code>footer-logo-img</code>) enlarged 50% (36px&rarr;54px header, 42px&rarr;63px footer). Header logo further increased 10% to 59px with 12px top margin and 1px upward nudge.</li>
+  <li><strong>Nav CTA button updated.</strong> Text changed from &ldquo;Jump Free!&rdquo; &rarr; &ldquo;Start Jumping Free!&rdquo; with Tabler rocket icon. Offcanvas CTA synced to match; font reduced to 0.85rem with <code>white-space:nowrap</code> to prevent word wrap.</li>
+  <li><strong>Nav alignment fixes.</strong> Button &amp; dark/light toggle offset up 4px via <code>translateY(-4px)</code> on <code>.nav-right</code> to rebalance against taller logo. Hamburger menu button nudged down 2px.</li>
+  <li><strong>Footer tagline spacing.</strong> &ldquo;Stop searching. Start jumping.&rdquo; in footer given <code>margin-top: -16px</code>; footer logo given <code>margin-top: 16px</code>.</li>
+  <li><strong>Confirmed &amp; reset-password subpages polished.</strong> Logo enlarged 50% (56px&rarr;88px) then +5% (88px); centered with <code>translateX(12px)</code> nudge; bottom margin tuned per page. Icon element below logo given <code>margin-top: -15px</code>. Both subpages deployed to Vercel.</li>
+  <li><strong>JUMPKIT_DOCS.html header updated.</strong> Logo switched to latest <code>logo-dark-mode.png</code> and enlarged 100% (58px&rarr;116px). Tagline &ldquo;STOP SEARCHING. START JUMPING.&rdquo; de-capped (removed <code>text-transform:uppercase</code>), sized to 1.08rem, bottom margin 36px. Logo centered with 12px translate, zero bottom margin.</li>
+  <li><strong>Solution section title fix.</strong> &ldquo;Jumpkit&rdquo; &rarr; &ldquo;JumpKit&rdquo; in the demo/solution section heading.</li>
+  <li><strong>Vercel domain alias fix.</strong> Discovered <code>jumpkit.app</code> domain was pinned to a stale 2-day-old deployment. Domain alias updated manually after each push going forward.</li>
+  <li><strong>Backup:</strong> <code>app-2026-06-22.tar.gz</code> (1.3 GB), <code>landing-2026-06-22.tar.gz</code> (2.2 MB)</li>
+</ul>
+
+<h3>2026-06-21 (Testing &amp; Deployment UI polish — modal redesigns, per-run result split, bug fixes)</h3>
+<ul>
+  <li><strong>Manage Testing modal — button &amp; label renames.</strong> &ldquo;Start New Session&rdquo; &rarr; &ldquo;Start New Testing Session&rdquo;. &ldquo;Choose Release Testing Session File&rdquo; &rarr; &ldquo;Choose Existing Testing Session File&rdquo;. Green status card icon made 100% larger.</li>
+  <li><strong>Finalize Mac / Win Testing Session modal — full redesign.</strong>
+    <ul>
+      <li>Header and confirm button renamed to &ldquo;Finalize Mac/Win Testing Session&rdquo;.</li>
+      <li><code>rosette-discount-check</code> icon added to <code>tabler-sprite.svg</code> (was missing) and applied to header, confirm button, and Finalize Mac/Win buttons in the Manage Testing modal platform rows.</li>
+      <li>Old green/amber status card replaced with a neutral summary card matching the testing page header style: Total / Passed / Failed / Manual / Skipped / To Do cells. Label reads &ldquo;Summary &mdash; Mac/Win Testing Session&rdquo;.</li>
+      <li>Cancel and Finalize buttons now both return to the Manage Testing modal on close.</li>
+      <li>Finalize Win Testing button on Manage Testing modal is disabled (greyed, not-allowed cursor) until Mac testing is successfully finalized.</li>
+    </ul>
+  </li>
+  <li><strong>Per-run results split (<code>_jkWinTestResults</code>).</strong> Mac and Windows test results are now tracked in separate in-memory stores. <code>_activeResults()</code> helper routes reads and writes to the correct store based on <code>activeRun</code>. Section header pills, summary card, and Finalize modal stats all update correctly when toggling between Mac and Windows. Mac-only tests are pre-marked as <em>skip</em> in the Windows store on toggle. Fixes a bug where switching to the Windows run showed all 147 Mac-passing tests as passed in Windows stats.</li>
+  <li><strong>Testing page section pills toggle correctly.</strong> Flipping the Mac/Win toggle now re-calls <code>_refreshSummary()</code> which reads from the active run&rsquo;s results store, so section pills (Pass / Fail / Manual / Skipped / To Do) reflect the correct platform&rsquo;s state. Skipped pill background fixed (was using invalid CSS variable suffix).</li>
+  <li><strong>Header pill updated after Mac finalization.</strong> <code>_updateRTLabel()</code> is now called immediately inside <code>_finalizePlatformRun()</code> so the &ldquo;Mac Started&rdquo; pill flips to &ldquo;Mac Passed&rdquo; (green) on the testing page header as soon as finalization completes, without requiring a page reload.</li>
+  <li><strong>Finalized / Passed pills unified.</strong> Both green pills in the Mac/Win testing card on the Manage Testing modal now use identical styles: <code>ti-check</code> SVG icon at 0.72 rem, same green background, border, and font. &ldquo;Finalized&rdquo; pill replaces the previous emoji-based style.</li>
+  <li><strong>Toast messages cleaned up.</strong> &ldquo;&#x2705;&rdquo; and &ldquo;&#x1F680;&rdquo; emojis removed from finalization success toasts; the Toast component&rsquo;s own check icon remains.</li>
+  <li><strong>Deployments page syntax error fixed.</strong> A raw newline inside a single-quoted string in <code>deployment.js</code> step <code>bl-8</code> caused a JavaScript syntax error, making the entire page fail to load and show &ldquo;Admin pages are not available in this build&rdquo;. Fixed by escaping the newline as <code>\n</code>.</li>
+  <li><strong>Deployments history table polish.</strong> Mac Done / Win Done columns now render a green pill (<code>background:#3fbe7133</code>) around the check icon (no border). Last row of the table no longer has a bottom border. Icon sized up 10% to 0.99 rem.</li>
+  <li><strong>Backup:</strong> <code>app_backup_2026-06-21_testing-modal-polish.tar.gz</code> (4.2 MB)</li>
+</ul>
 
 <h3>2026-06-19c (Test coverage, deployment checklist, and traceability gap closes)</h3>
 <ul>
