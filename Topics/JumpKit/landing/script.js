@@ -25,7 +25,7 @@ function setTheme(t) {
   html.dataset.theme = t;
   if (themeSwitch) themeSwitch.checked = (t === 'dark');
   if (navThemeSwitch) navThemeSwitch.checked = (t === 'dark');
-  const logoSrc = t === 'dark' ? 'logo-dark.png' : 'logo-light.png';
+  const logoSrc = t === 'dark' ? 'logo-dark-mode.png' : 'logo-light.png';
   const navLogo = document.getElementById('navLogo');
   const footerLogo = document.getElementById('footerLogo');
   try { if (navLogo) navLogo.src = logoSrc; } catch(e){}
