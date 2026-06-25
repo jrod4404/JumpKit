@@ -62,9 +62,11 @@ serve(async (req) => {
     }
 
     const membersBulletHtml = affectedMembers.map((m: { email: string; name?: string }) =>
-      `<li style="padding:4px 0;font-size:14px;color:#7A93B4;line-height:1.5">${esc(m.name || m.email)}</li>`
+      `<li style="padding:4px 0;font-size:15px;color:#7A93B4;line-height:1.7">${esc(m.name || m.email)}</li>`
     ).join('');
-    const membersListHtml = `<ul style="margin:0 0 20px;padding-left:20px">${membersBulletHtml}</ul>`;
+    // padding-left:0 + list-style-position:inside puts the bullet inline with the email text
+    // so the bullets sit at the same x-baseline as the surrounding paragraph copy.
+    const membersListHtml = `<ul style="margin:0 0 20px;padding-left:0;list-style:disc inside;color:#7A93B4">${membersBulletHtml}</ul>`;
 
     const sentResults: string[] = [];
     const errors: string[] = [];
@@ -121,7 +123,7 @@ serve(async (req) => {
         sentResults.push(member.email);
       } else {
         const err = await memberRes.text();
-        console.error(`Resend member error (${member.email}):`, err);
+        console.error('Resend member error:', err?.message || err);
         errors.push(`${member.email}:${err}`);
       }
     }
@@ -141,8 +143,8 @@ function esc(s: string): string {
 const HEADER = `
     <!-- HEADER -->
     <tr><td style="background:linear-gradient(180deg,#060C15 0%,#0E1827 100%);padding:32px 40px;text-align:center">
-      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:50px;display:block;margin:0 auto 12px;opacity:0.9" /></a>
-      <p style="margin:0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
+      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:75px;display:block;margin:0 auto 12px;opacity:0.9;position:relative;left:6px" /></a>
+      <p style="margin:-15px 0 0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
     </td></tr>
     <!-- DIVIDER -->
     <tr><td style="height:1px;background:rgba(255,255,255,0.06);padding:0;font-size:0;line-height:0">&nbsp;</td></tr>`;
@@ -150,8 +152,8 @@ const HEADER = `
 const FOOTER = `
     <!-- FOOTER -->
     <tr><td style="padding:28px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);background:#0a0f1a">
-      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:36px;display:block;margin:0 auto 10px;opacity:0.8" /></a>
-      <p style="margin:0 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
+      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:54px;display:block;margin:0 auto 10px;opacity:0.8;position:relative;left:6px" /></a>
+      <p style="margin:-15px 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px"><tr>
         <td style="padding:0 6px"><a href="https://x.com/jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="display:block;margin-top:2px" alt="X" /></td></tr></table></a></td>
         <td style="padding:0 6px"><a href="https://youtube.com/@jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="display:block;margin-top:2px" alt="YouTube" /></td></tr></table></a></td>
@@ -176,8 +178,8 @@ ${FOOTER}
 const CTA_REUPGRADE = `
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px auto 0">
         <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <a href="https://jumpkit.app/#pricing" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            Re-upgrade to Unlimited
+          <a href="https://jumpkit.app/#pricing" style="display:inline-block;padding:10px 19px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
+            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="→" />Re-upgrade to Unlimited
           </a>
         </td></tr>
       </table>`;
@@ -185,8 +187,8 @@ const CTA_REUPGRADE = `
 const CTA_UPGRADE = `
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px auto 0">
         <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <a href="https://jumpkit.app/#pricing" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
-            Upgrade to Unlimited
+          <a href="https://jumpkit.app/#pricing" style="display:inline-block;padding:10px 19px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
+            <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="→" />Upgrade to Unlimited
           </a>
         </td></tr>
       </table>`;

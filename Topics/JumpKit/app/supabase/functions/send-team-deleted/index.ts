@@ -145,7 +145,7 @@ async function sendEmail({
 
   if (!res.ok) {
     const err = await res.text();
-    console.error(`[send-team-deleted] Resend error for ${to}:`, err);
+    console.error('[send-team-deleted] Resend error for recipient:', err?.message || err);
   }
 }
 
@@ -170,14 +170,14 @@ function buildEmailHTML({ firstName, teamName, ownerName, columnNames, isPending
 <html lang="en">
 <head><meta charset="UTF-8"/></head>
 <body style="margin:0;padding:0;background:#0f1117;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:40px auto;background:#0E1827;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.09)">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;margin:20px auto;background:#0E1827;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.09)">
 
     <!-- HEADER -->
     <tr><td style="background:linear-gradient(180deg,#060C15 0%,#0E1827 100%);padding:32px 40px;text-align:center">
       <a href="https://jumpkit.app" style="text-decoration:none">
-        <img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:50px;display:block;margin:0 auto 12px;opacity:0.9"/>
+        <img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:75px;display:block;margin:0 auto 12px;opacity:0.9;position:relative;left:6px"/>
       </a>
-      <p style="margin:0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
+      <p style="margin:-15px 0 0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
     </td></tr>
 
     <!-- DIVIDER -->
@@ -211,9 +211,9 @@ function buildEmailHTML({ firstName, teamName, ownerName, columnNames, isPending
     <!-- FOOTER -->
     <tr><td style="padding:28px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);background:#0a0f1a">
       <a href="https://jumpkit.app" style="text-decoration:none">
-        <img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:36px;display:block;margin:0 auto 10px;opacity:0.8"/>
+        <img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:54px;display:block;margin:0 auto 10px;opacity:0.8;position:relative;left:6px"/>
       </a>
-      <p style="margin:0 0 8px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
+      <p style="margin:-15px 0 8px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <p style="margin:0;font-size:11px;color:#2e3d52">© 2026 JumpKit. All rights reserved.</p>
     </td></tr>
 

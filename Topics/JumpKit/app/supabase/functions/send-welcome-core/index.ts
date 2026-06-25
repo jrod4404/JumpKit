@@ -50,7 +50,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'JumpKit <noreply@jumpkit.app>',
         to: email,
-        subject: 'Welcome to JumpKit Unlimited ⚡',
+        subject: 'Welcome to JumpKit Unlimited 🎉',
         html,
       }),
     });
@@ -76,8 +76,8 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
 
     <!-- HEADER -->
     <tr><td style="background:linear-gradient(180deg,#060C15 0%,#0E1827 100%);padding:32px 40px;text-align:center">
-      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:50px;display:block;margin:0 auto 12px;opacity:0.9" /></a>
-      <p style="margin:0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
+      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:75px;display:block;margin:0 auto 12px;opacity:0.9;position:relative;left:6px" /></a>
+      <p style="margin:-15px 0 0;font-size:14px;color:#C8D6E8;opacity:0.9">Stop searching. Start jumping.</p>
     </td></tr>
 
     <!-- DIVIDER -->
@@ -85,29 +85,29 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
 
     <!-- BODY -->
     <tr><td style="padding:36px 40px">
-      <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You're now on JumpKit Unlimited, ${esc(firstName)}! ⚡</h2>
+      <h2 style="margin:0 0 16px;font-size:20px;color:#C8D6E8;font-weight:600">You're now on JumpKit Unlimited, ${esc(firstName)}! 🎉</h2>
       <p style="margin:0 0 28px;font-size:15px;color:#7A93B4;line-height:1.7">
         Thank you for upgrading. Your Unlimited subscription is active and you've unlocked everything JumpKit has to offer.
       </p>
 
       <!-- What's unlocked -->
-      <div style="background:rgba(80,202,204,0.06);border-radius:10px;padding:20px 24px;border:1px solid rgba(80,202,204,0.15);margin-bottom:24px">
-        <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#50CACC">What's included in JumpKit Unlimited:</p>
+      <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:20px 24px;border:1px solid rgba(255,255,255,0.06);margin-bottom:24px">
+        <p style="margin:0 0 14px;font-size:14px;font-weight:600;color:#C8D6E8">What's included in JumpKit Unlimited:</p>
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited jump launches
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited jump launches
           </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited teams, members &amp; jumps
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Unlimited teams, members &amp; jumps
           </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal &amp; team ROI dashboard
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Personal &amp; team ROI dashboard
           </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Auto-archive &amp; auto-backup
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Auto-archive &amp; auto-backup
           </td></tr>
-          <tr><td style="padding:5px 0;font-size:13px;color:#C8D6E8;line-height:1.5">
-            <img src="https://jumpkit.app/email-icons/icon-check-white.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Early access to new features
+          <tr><td style="padding:5px 0;font-size:13px;color:#7A93B4;line-height:1.5">
+            <img src="https://jumpkit.app/email-icons/icon-check-turquoise.png" width="14" height="14" style="vertical-align:middle;margin-right:10px" alt="✓" /> Early access to new features
           </td></tr>
         </table>
       </div>
@@ -115,7 +115,7 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
       <!-- CTA Button -->
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 32px">
         <tr><td align="center" style="border-radius:10px;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <a href="https://jumpkit.app" style="display:inline-block;padding:14px 32px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
+          <a href="https://jumpkit.app" style="display:inline-block;padding:10px 19px;color:#ffffff;font-weight:700;font-size:1rem;text-decoration:none;border-radius:10px">
             <img src="https://jumpkit.app/email-icons/icon-jumpkit-white.png" width="18" height="18" style="vertical-align:middle;margin-right:8px;margin-bottom:2px" alt="→" />Open JumpKit
           </a>
         </td></tr>
@@ -126,8 +126,8 @@ function buildWelcomeCoreHTML({ firstName }: { firstName: string }): string {
 
     <!-- FOOTER -->
     <tr><td style="padding:28px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06);background:#0a0f1a">
-      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:36px;display:block;margin:0 auto 10px;opacity:0.8" /></a>
-      <p style="margin:0 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
+      <a href="https://jumpkit.app" style="text-decoration:none"><img src="https://jumpkit.app/logo-dark-mode.png" alt="JumpKit" style="height:54px;display:block;margin:0 auto 10px;opacity:0.8;position:relative;left:6px" /></a>
+      <p style="margin:-15px 0 12px;font-size:13px;color:#4A6280">Stop searching. Start jumping.</p>
       <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 auto 14px"><tr>
         <td style="padding:0 6px"><a href="https://x.com/jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-x.png" width="14" height="14" style="display:block;margin-top:2px" alt="X" /></td></tr></table></a></td>
         <td style="padding:0 6px"><a href="https://youtube.com/@jumpkitapp" style="text-decoration:none"><table role="presentation" cellpadding="0" cellspacing="0" style="width:32px;height:32px;background:rgba(255,255,255,0.06);border-radius:50%"><tr><td align="center" valign="middle"><img src="https://jumpkit.app/email-icons/icon-social-yt.png" width="17" height="17" style="display:block;margin-top:2px" alt="YouTube" /></td></tr></table></a></td>
