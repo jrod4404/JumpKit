@@ -3,10 +3,14 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electronAPI', {
   openUrl:           (url, isShared)   => ipcRenderer.invoke('open-url', url, isShared),
   syncJumps:         (payload)         => ipcRenderer.invoke('sync-jumps', payload),
-  getSyncState:      (key)             => ipcRenderer.invoke('get-sync-state', key),
+  getSyncState:      (userId, key)     => key === undefined
+    ? ipcRenderer.invoke('get-sync-state', userId)
+    : ipcRenderer.invoke('get-sync-state-scoped', userId, key),
   upsertSharedJumps: (jumps)           => ipcRenderer.invoke('upsert-shared-jumps', jumps),
-  deleteSharedJumps: (ids)             => ipcRenderer.invoke('delete-shared-jumps', ids),
-  updateSyncState:   (key, value)      => ipcRenderer.invoke('update-sync-state', key, value),
+  deleteSharedJumps: (userId, ids)     => ipcRenderer.invoke('delete-shared-jumps', userId, ids),
+  updateSyncState:   (userId, key, value) => value === undefined
+    ? ipcRenderer.invoke('update-sync-state', userId, key)
+    : ipcRenderer.invoke('update-sync-state', userId, key, value),
   writeTestResults:  (content)         => ipcRenderer.invoke('write-test-results', content),
   saveBackup:        (jsonStr)         => ipcRenderer.invoke('save-backup', jsonStr),
 
@@ -19,17 +23,23 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveColumn:        (userId, col)     => ipcRenderer.invoke('save-column', userId, col),
   getClickLog:       (userId)          => ipcRenderer.invoke('get-click-log', userId),
   logClick:          (userId, jumpId, ts, jumpName) => ipcRenderer.invoke('log-click', userId, jumpId, ts, jumpName),
-  logClickName:      (id, jumpName) => ipcRenderer.invoke('log-click-name', id, jumpName),
+  logClickName:      (userId, id, jumpName) => ipcRenderer.invoke('log-click-name', userId, id, jumpName),
   getPrefs:          (userId)          => ipcRenderer.invoke('get-prefs', userId),
   savePrefs:         (userId, prefs)   => ipcRenderer.invoke('save-prefs', userId, prefs),
+  saveRecoverySnapshot:   (userId, snapshot) => ipcRenderer.invoke('save-recovery-snapshot', userId, snapshot),
+  getRecoverySnapshot:    (userId)           => ipcRenderer.invoke('get-recovery-snapshot', userId),
+  deleteRecoverySnapshot: (userId)           => ipcRenderer.invoke('delete-recovery-snapshot', userId),
   seedNewUser:       (userId, platform) => ipcRenderer.invoke('seed-new-user', userId, platform),
   migrateUserId:     (oldId, newId)     => ipcRenderer.invoke('migrate-user-id', oldId, newId),
+
+  secureAuthGet:    (key)        => ipcRenderer.invoke('secure-auth-get', key),
+  secureAuthSet:    (key, value) => ipcRenderer.invoke('secure-auth-set', key, value),
+  secureAuthRemove: (key)        => ipcRenderer.invoke('secure-auth-remove', key),
 
   installUpdate: () => ipcRenderer.invoke('install-update'),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', cb),
 
   platform:   process.platform,
-  homeDir:    process.env.HOME || process.env.USERPROFILE || '~',
   isElectron: true,
   isPackaged: () => ipcRenderer.invoke('is-packaged'),
   exportPDF:  (html) => ipcRenderer.invoke('export-pdf', html),

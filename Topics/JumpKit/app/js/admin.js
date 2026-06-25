@@ -1,5 +1,9 @@
 // ── JumpKit Admin Dashboard ────────────────────────────────────────
 // ── Admin Dashboard ────────────────────────────────────────────────
+function adminEsc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 window.renderAdmin = async function renderAdmin() {
   const content = document.getElementById('pageContent');
   if (!content) return;
@@ -10,7 +14,13 @@ window.renderAdmin = async function renderAdmin() {
     return;
   }
 
-  content.innerHTML = `<div id="adminDash" style="color:var(--text-dim);font-size:0.9rem;padding:0">Loading…</div>`;
+  content.innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
+      <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg>
+      Loading users…
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    <div id="adminDash" style="display:none;color:var(--text-dim);font-size:0.9rem;padding:0"></div>`;
 
   try {
     // Ensure Chart.js is loaded
@@ -95,6 +105,8 @@ window.renderAdmin = async function renderAdmin() {
     const chartLabels = chartRows.map(r => r.day ? r.day.slice(5) : ''); // MM-DD
     const chartData   = chartRows.map(r => r.cumulative || 0);
 
+    const _dash = document.getElementById('adminDash');
+    if (_dash) { _dash.style.display = ''; const _spin = content.querySelector('.ti-loader')?.closest('div[style*="flex-direction"]'); if (_spin) _spin.remove(); }
     document.getElementById('adminDash').innerHTML = `
       <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px">Total Users</div>
       <div class="stats-cards" style="grid-template-columns:repeat(5,1fr);margin-bottom:24px">
@@ -119,7 +131,7 @@ window.renderAdmin = async function renderAdmin() {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em">All Users</div>
           <div class="jump-search-wrap">
-            <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
+            <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.min.svg#tabler-search"/></svg>
             <input id="adminSearch" type="text" placeholder="Search users..." class="jump-search-input" style="width:200px" />
           </div>
         </div>
@@ -186,6 +198,8 @@ window.renderAdmin = async function renderAdmin() {
 
   } catch (err) {
     const dash = document.getElementById('adminDash');
-    if (dash) dash.innerHTML = `<div style="color:var(--text-dim);padding:16px">Failed to load admin data: ${err.message}</div>`;
+    if (dash) { dash.style.display = ''; dash.innerHTML = `<div style="color:var(--text-dim);padding:16px">Failed to load admin data: ${adminEsc(err.message)}</div>`; }
+    const _spin = content.querySelector('[style*="flex-direction"]');
+    if (_spin && _spin.querySelector('.ti-loader')) _spin.remove();
   }
 };

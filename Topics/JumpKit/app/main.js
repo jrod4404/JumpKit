@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, safeStorage } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -69,43 +69,56 @@ function initDB() {
         autoArchive        TEXT DEFAULT 'never',
         navDefaultCollapsed INTEGER DEFAULT 0
       );
+
+      CREATE TABLE IF NOT EXISTS recovery_snapshots (
+        userId     TEXT PRIMARY KEY,
+        snapshot   TEXT NOT NULL,
+        savedAt    TEXT NOT NULL
+      );
     `);
 
-    // Safely migrate existing tables — add new columns if they don't exist
-    function addColumnIfMissing(table, col, def) {
+    // Safely migrate existing tables — add new columns if they don't exist.
+    // Keep migration SQL whitelisted/fixed; do not interpolate table or column names.
+    const sqliteMigrations = [
+      { tableInfo: 'table_info(jumps)',      column: 'isShared',            sql: 'ALTER TABLE jumps ADD COLUMN isShared INTEGER DEFAULT 0' },
+      { tableInfo: 'table_info(jumps)',      column: 'timeSaved',           sql: 'ALTER TABLE jumps ADD COLUMN timeSaved REAL DEFAULT NULL' },
+      { tableInfo: 'table_info(user_prefs)', column: 'navDefaultCollapsed', sql: 'ALTER TABLE user_prefs ADD COLUMN navDefaultCollapsed INTEGER DEFAULT 0' },
+      { tableInfo: 'table_info(jumps)',      column: 'timeSavedUnit',       sql: 'ALTER TABLE jumps ADD COLUMN timeSavedUnit TEXT DEFAULT NULL' },
+      { tableInfo: 'table_info(jumps)',      column: 'teamId',              sql: 'ALTER TABLE jumps ADD COLUMN teamId TEXT DEFAULT NULL' },
+      { tableInfo: 'table_info(columns)',    column: 'isShared',            sql: 'ALTER TABLE columns ADD COLUMN isShared INTEGER DEFAULT 0' },
+      { tableInfo: 'table_info(columns)',    column: 'teamId',              sql: 'ALTER TABLE columns ADD COLUMN teamId TEXT DEFAULT NULL' },
+      { tableInfo: 'table_info(columns)',    column: 'supabaseId',          sql: 'ALTER TABLE columns ADD COLUMN supabaseId TEXT DEFAULT NULL' },
+      { tableInfo: 'table_info(columns)',    column: 'sharedTeams',         sql: 'ALTER TABLE columns ADD COLUMN sharedTeams TEXT DEFAULT NULL' }, // JSON array: [{teamId, supabaseId}]
+      { tableInfo: 'table_info(jumps)',      column: 'supabaseId',          sql: 'ALTER TABLE jumps ADD COLUMN supabaseId TEXT DEFAULT NULL' },
+    ];
+    for (const migration of sqliteMigrations) {
       try {
-        const cols = db.pragma(`table_info(${table})`);
-        if (!cols.find(c => c.name === col)) {
-          db.exec(`ALTER TABLE ${table} ADD COLUMN ${col} ${def}`);
-        }
+        const cols = db.pragma(migration.tableInfo);
+        if (!cols.find(c => c.name === migration.column)) db.exec(migration.sql);
       } catch (e) { console.warn(`Migration warning: ${e.message}`); }
     }
 
-    addColumnIfMissing('jumps',   'isShared', 'INTEGER DEFAULT 0');
-    addColumnIfMissing('jumps',   'timeSaved', 'REAL DEFAULT NULL');
-    addColumnIfMissing('user_prefs', 'navDefaultCollapsed', 'INTEGER DEFAULT 0');
-    addColumnIfMissing('jumps',   'timeSavedUnit', 'TEXT DEFAULT NULL');
-    addColumnIfMissing('jumps',   'teamId',   'TEXT DEFAULT NULL');
-    addColumnIfMissing('columns', 'isShared',    'INTEGER DEFAULT 0');
-    addColumnIfMissing('columns', 'teamId',      'TEXT DEFAULT NULL');
-    addColumnIfMissing('columns', 'supabaseId',  'TEXT DEFAULT NULL');
-    addColumnIfMissing('columns', 'sharedTeams', 'TEXT DEFAULT NULL'); // JSON array: [{teamId, supabaseId}]
-    addColumnIfMissing('jumps',   'supabaseId',  'TEXT DEFAULT NULL');
-
     console.log('[JumpKit] SQLite DB initialized at', dbPath);
   } catch (e) {
-    // better-sqlite3 not available (dev mode without native module) — skip
-    console.warn('[JumpKit] SQLite not available:', e.message);
+    // better-sqlite3 not available or compiled for wrong ABI — all IPC handlers
+    // will return {ok:false} / empty arrays. App falls back to localStorage.
+    // Fix: run  npx @electron/rebuild -f -w better-sqlite3  from the app directory.
+    console.error('[JumpKit] SQLite UNAVAILABLE:', e.message, '\n>>> Run: npx @electron/rebuild -f -w better-sqlite3');
     db = null;
   }
 }
 
 // ── IPC: sync-jumps ────────────────────────────────────────────────
+function _scopedSyncKey(userId, key) {
+  return userId ? `${userId}:${key}` : key;
+}
+
 ipcMain.handle('sync-jumps', async (_e, payload) => {
   // The renderer passes the sync result; main process persists to SQLite
   if (!db || !payload) return { ok: false, reason: 'no db' };
   try {
     const { sharedColumns = [], sharedJumps = [] } = payload;
+    const userId = payload.userId || sharedJumps[0]?.userId || sharedColumns[0]?.userId || null;
     const upsertCol = db.prepare(`
       INSERT INTO columns (id, userId, name, visible, \`order\`, createdAt, isShared, teamId, supabaseId)
       VALUES (@id, @userId, @name, @visible, @order, @createdAt, 1, @teamId, @supabaseId)
@@ -128,7 +141,7 @@ ipcMain.handle('sync-jumps', async (_e, payload) => {
     });
     tx();
     // Update sync timestamp
-    db.prepare(`INSERT OR REPLACE INTO sync_state (key, value) VALUES ('lastSync', ?)`).run(Date.now().toString());
+    db.prepare('INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)').run(_scopedSyncKey(userId, 'lastSync'), Date.now().toString());
     return { ok: true };
   } catch (e) {
     return { ok: false, reason: e.message };
@@ -142,6 +155,15 @@ ipcMain.handle('get-sync-state', (_e, key) => {
   return row ? row.value : null;
 });
 
+ipcMain.handle('get-sync-state-scoped', (_e, userId, key) => {
+  if (!db) return null;
+  const row = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(_scopedSyncKey(userId, key));
+  if (row) return row.value;
+  // Backward-compatible read of legacy unscoped values.
+  const legacy = db.prepare('SELECT value FROM sync_state WHERE key = ?').get(key);
+  return legacy ? legacy.value : null;
+});
+
 // ── IPC: upsert-shared-jumps ───────────────────────────────────────
 // Takes array of jump objects, upserts into jumps table.
 // Preserves existing hotkey if the jump already exists locally.
@@ -149,18 +171,21 @@ ipcMain.handle('upsert-shared-jumps', (_e, jumps) => {
   if (!db || !Array.isArray(jumps)) return { ok: false, reason: 'no db or bad input' };
   try {
     const upsert = db.prepare(`
-      INSERT INTO jumps (id, userId, name, url, description, reason, columnId, hotkey, favorite, isArchived, clickCount, lastUsed, createdAt, updatedAt, isShared, teamId)
-      VALUES (@id, @userId, @name, @url, @description, @reason, @columnId, @hotkey, 0, 0, 0, NULL, @createdAt, @updatedAt, 1, @teamId)
+      INSERT INTO jumps (id, userId, name, url, description, reason, columnId, hotkey, favorite, isArchived, clickCount, lastUsed, createdAt, updatedAt, isShared, teamId, supabaseId)
+      VALUES (@id, @userId, @name, @url, @description, @reason, @columnId, @hotkey, 0, 0, 0, NULL, @createdAt, @updatedAt, 1, @teamId, @supabaseId)
       ON CONFLICT(id) DO UPDATE SET
         name=excluded.name, url=excluded.url, description=excluded.description,
         reason=excluded.reason, columnId=excluded.columnId,
-        updatedAt=excluded.updatedAt, isShared=1, teamId=excluded.teamId
+        updatedAt=excluded.updatedAt, isShared=1, teamId=excluded.teamId,
+        supabaseId=excluded.supabaseId
         -- hotkey NOT updated (preserve user's local hotkey assignment)
     `);
     // For each jump, pull existing hotkey first so we can pass it in for new rows
     const getHotkey = db.prepare('SELECT hotkey FROM jumps WHERE id = ?');
+    const hasColumn = db.prepare('SELECT 1 FROM columns WHERE id = ? AND userId = ? LIMIT 1');
     const tx = db.transaction(() => {
       for (const j of jumps) {
+        if (!j.userId || !j.columnId || !hasColumn.get(j.columnId, j.userId)) continue;
         const existing = getHotkey.get(j.id);
         upsert.run({
           ...j,
@@ -170,6 +195,7 @@ ipcMain.handle('upsert-shared-jumps', (_e, jumps) => {
           createdAt:   j.createdAt || Date.now(),
           updatedAt:   j.updatedAt || Date.now(),
           teamId:      j.teamId || null,
+          supabaseId:  j.supabaseId || j.id,
         });
       }
     });
@@ -181,12 +207,14 @@ ipcMain.handle('upsert-shared-jumps', (_e, jumps) => {
 });
 
 // ── IPC: delete-shared-jumps ───────────────────────────────────────
-// Takes array of jump IDs, deletes from jumps table where isShared=1
-ipcMain.handle('delete-shared-jumps', (_e, ids) => {
+// Takes array of jump IDs, deletes from jumps table where isShared=1 and userId matches.
+ipcMain.handle('delete-shared-jumps', (_e, userId, ids) => {
+  if (Array.isArray(userId) && ids === undefined) { ids = userId; userId = null; } // legacy compatibility
   if (!db || !Array.isArray(ids)) return { ok: false, reason: 'no db or bad input' };
+  if (!userId) return { ok: false, reason: 'missing userId' };
   try {
-    const del = db.prepare('DELETE FROM jumps WHERE id = ? AND isShared = 1');
-    const tx  = db.transaction(() => { for (const id of ids) del.run(id); });
+    const del = db.prepare('DELETE FROM jumps WHERE id = ? AND userId = ? AND isShared = 1');
+    const tx  = db.transaction(() => { for (const id of ids) del.run(id, userId); });
     tx();
     return { ok: true };
   } catch (e) {
@@ -238,11 +266,12 @@ ipcMain.handle('save-backup', async (_e, jsonStr) => {
 });
 
 // ── IPC: update-sync-state ─────────────────────────────────────────
-// Upserts a key/value pair into the sync_state table
-ipcMain.handle('update-sync-state', (_e, key, value) => {
+// Upserts a user-scoped key/value pair into the sync_state table
+ipcMain.handle('update-sync-state', (_e, userId, key, value) => {
+  if (value === undefined) { value = key; key = userId; userId = null; } // legacy compatibility
   if (!db) return { ok: false };
   try {
-    db.prepare(`INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)`).run(key, String(value));
+    db.prepare('INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)').run(_scopedSyncKey(userId, key), String(value));
     return { ok: true };
   } catch (e) {
     return { ok: false, reason: e.message };
@@ -384,7 +413,11 @@ ipcMain.handle('save-column', (_e, userId, col) => {
 // ── IPC: get-click-log ─────────────────────────────────────────────
 ipcMain.handle('get-click-log', (_e, userId) => {
   if (!db) return [];
-  return db.prepare('SELECT * FROM click_log WHERE userId = ? ORDER BY ts ASC').all(userId);
+  return db.prepare(`
+    SELECT * FROM (
+      SELECT * FROM click_log WHERE userId = ? ORDER BY ts DESC LIMIT 10000
+    ) ORDER BY ts ASC
+  `).all(userId);
 });
 
 // ── IPC: log-click ─────────────────────────────────────────────────
@@ -392,10 +425,12 @@ ipcMain.handle('get-click-log', (_e, userId) => {
 try { db && db.prepare('ALTER TABLE click_log ADD COLUMN jumpName TEXT').run(); } catch (_) {}
 
 // ── IPC: log-click-name (backfill jumpName by row id) ─────────────
-ipcMain.handle('log-click-name', (_e, id, jumpName) => {
+ipcMain.handle('log-click-name', (_e, userId, id, jumpName) => {
+  if (jumpName === undefined) { jumpName = id; id = userId; userId = null; } // legacy compatibility
   if (!db) return { ok: false };
+  if (!userId) return { ok: false, reason: 'missing userId' };
   try {
-    db.prepare('UPDATE click_log SET jumpName = ? WHERE id = ?').run(jumpName, id);
+    db.prepare('UPDATE click_log SET jumpName = ? WHERE id = ? AND userId = ?').run(jumpName, id, userId);
     return { ok: true };
   } catch (e) { return { ok: false }; }
 });
@@ -462,6 +497,98 @@ ipcMain.handle('save-prefs', (_e, userId, prefs) => {
   }
 });
 
+// ── IPC: recovery snapshots ───────────────────────────────────────
+ipcMain.handle('save-recovery-snapshot', (_e, userId, snapshot) => {
+  if (!db) return { ok: false, reason: 'no db' };
+  if (!userId || !snapshot) return { ok: false, reason: 'missing userId or snapshot' };
+  try {
+    db.prepare('INSERT OR REPLACE INTO recovery_snapshots (userId, snapshot, savedAt) VALUES (?, ?, ?)')
+      .run(userId, JSON.stringify(snapshot), new Date().toISOString());
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
+ipcMain.handle('get-recovery-snapshot', (_e, userId) => {
+  if (!db) return { ok: false, reason: 'no db', snapshot: null };
+  if (!userId) return { ok: false, reason: 'missing userId', snapshot: null };
+  try {
+    const row = db.prepare('SELECT snapshot FROM recovery_snapshots WHERE userId = ?').get(userId);
+    return { ok: true, snapshot: row?.snapshot ? JSON.parse(row.snapshot) : null };
+  } catch (e) {
+    return { ok: false, reason: e.message, snapshot: null };
+  }
+});
+
+ipcMain.handle('delete-recovery-snapshot', (_e, userId) => {
+  if (!db) return { ok: false, reason: 'no db' };
+  if (!userId) return { ok: false, reason: 'missing userId' };
+  try {
+    db.prepare('DELETE FROM recovery_snapshots WHERE userId = ?').run(userId);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
+// ── IPC: secure auth token storage ────────────────────────────────
+function _secureStorePath() {
+  return path.join(app.getPath('userData'), 'secure-auth-store.json');
+}
+
+function _allowedSecureAuthKey(key) {
+  return typeof key === 'string' && /^sb-[A-Za-z0-9_-]+-auth-token$/.test(key);
+}
+
+function _readSecureStore() {
+  const fs = require('fs');
+  try { return JSON.parse(fs.readFileSync(_secureStorePath(), 'utf8') || '{}'); }
+  catch (_) { return {}; }
+}
+
+function _writeSecureStore(store) {
+  const fs = require('fs');
+  fs.writeFileSync(_secureStorePath(), JSON.stringify(store), { encoding: 'utf8', mode: 0o600 });
+}
+
+ipcMain.handle('secure-auth-get', (_e, key) => {
+  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key', value: null };
+  if (!safeStorage.isEncryptionAvailable()) return { ok: false, reason: 'safeStorage unavailable', value: null };
+  try {
+    const enc = _readSecureStore()[key];
+    if (!enc) return { ok: true, value: null };
+    return { ok: true, value: safeStorage.decryptString(Buffer.from(enc, 'base64')) };
+  } catch (e) {
+    return { ok: false, reason: e.message, value: null };
+  }
+});
+
+ipcMain.handle('secure-auth-set', (_e, key, value) => {
+  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key' };
+  if (!safeStorage.isEncryptionAvailable()) return { ok: false, reason: 'safeStorage unavailable' };
+  try {
+    const store = _readSecureStore();
+    store[key] = safeStorage.encryptString(String(value || '')).toString('base64');
+    _writeSecureStore(store);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
+ipcMain.handle('secure-auth-remove', (_e, key) => {
+  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key' };
+  try {
+    const store = _readSecureStore();
+    delete store[key];
+    _writeSecureStore(store);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
 // ── IPC: seed-new-user ─────────────────────────────────────────────
 ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
   if (!db) return { ok: false };
@@ -473,7 +600,13 @@ ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
       // user_prefs has unique constraint — delete new if exists, then update old
       db.prepare('DELETE FROM user_prefs WHERE userId = ?').run(newId);
       db.prepare('UPDATE user_prefs SET userId = ? WHERE userId = ?').run(newId, oldId);
-      // sync_state has no userId column — skip
+      const rows = db.prepare('SELECT key, value FROM sync_state WHERE key LIKE ?').all(`${oldId}:%`);
+      const upsertSync = db.prepare('INSERT OR REPLACE INTO sync_state (key, value) VALUES (?, ?)');
+      const deleteSync = db.prepare('DELETE FROM sync_state WHERE key = ?');
+      for (const row of rows) {
+        upsertSync.run(row.key.replace(`${oldId}:`, `${newId}:`), row.value);
+        deleteSync.run(row.key);
+      }
     })();
     return { ok: true };
   } catch(e) {
@@ -644,41 +777,87 @@ function fireAndForget(cmd, args) {
 
 // Open URLs / local paths from renderer
 const RISKY_EXTENSIONS = /\.(app|exe|sh|bat|cmd|command|pkg|dmg|scpt)$/i;
+
+// Hard-blocked URL schemes — never passed to shell.openExternal or shell.openPath.
+// Includes web/script schemes, OS-level handlers that can trigger other apps,
+// and remote mount/connect schemes a malicious shared jump could abuse.
+const BLOCKED_URL_SCHEME = /^(javascript|data|vbscript|file|jar|view-source|smb|afp|nfs|cifs|vnc|ssh|telnet|ftp|sftp|gopher|x-apple\.systempreferences|prefs|ms-settings|shell|chrome|about):/i;
+
+// Scheme allow-list for non-http(s) URLs we explicitly permit (common app deep links).
+const ALLOWED_APP_SCHEMES = /^(mailto|tel|sms|facetime|zoommtg|zoomus|msteams|slack|obsidian|notion|raycast|things|fantastical|spotify|tower|github-mac|sourcetree|x-github-client|vscode|cursor):/i;
+
 ipcMain.handle('open-url', async (_e, url, isShared) => {
-  if (!url) return;
+  if (!url || typeof url !== 'string') return { ok: false, reason: 'invalid url' };
+  const trimmed = url.trim();
+  if (!trimmed) return { ok: false, reason: 'invalid url' };
+
+  // 1. Hard-reject dangerous schemes before any classification.
+  if (BLOCKED_URL_SCHEME.test(trimmed)) {
+    console.warn('[open-url] blocked scheme'); // do not log url contents
+    return { ok: false, reason: 'scheme blocked' };
+  }
+
+  // 2. Reject protocol-relative URLs (//evil.example).
+  if (/^\/\//.test(trimmed)) {
+    return { ok: false, reason: 'scheme blocked' };
+  }
 
   // Detect web URLs: explicit protocol/www, OR bare domain like "google.com", "site.app", etc.
-  const hasTld = /^[^/\\\s]+\.(com|net|org|io|ai|app|co|dev|gov|edu|info|biz|me|tv|us|uk|ca|de|fr|au|jp|cn|in|br|ru|nl|se|no|dk|fi|it|es|pt|mx|nz|sg|hk|za|ly|gg|cloud|tech|xyz|social|store|shop)(\/|$)/i.test(url);
-  const isWeb = /^(https?:\/\/|www\.)/i.test(url) || hasTld;
-  const fullUrl = isWeb && !/^https?:\/\//i.test(url) ? 'https://' + url : url;
+  const hasTld = /^[^/\\\s]+\.(com|net|org|io|ai|app|co|dev|gov|edu|info|biz|me|tv|us|uk|ca|de|fr|au|jp|cn|in|br|ru|nl|se|no|dk|fi|it|es|pt|mx|nz|sg|hk|za|ly|gg|cloud|tech|xyz|social|store|shop)(\/|$)/i.test(trimmed);
+  const isHttp = /^https?:\/\//i.test(trimmed);
+  const isWeb = isHttp || /^www\./i.test(trimmed) || hasTld;
+  const fullUrl = isWeb && !isHttp ? 'https://' + trimmed : trimmed;
+
+  // 3. Detect explicit non-http schemes (anything with `scheme:` not already classified as web).
+  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(trimmed) && !isHttp;
+  if (hasScheme && !ALLOWED_APP_SCHEMES.test(trimmed)) {
+    return { ok: false, reason: 'scheme blocked' };
+  }
 
   try {
     if (isWeb) {
       shell.openExternal(fullUrl);
-    } else {
-      // Expand ~ to actual home directory
-      const resolvedPath = url.startsWith('~')
-        ? url.replace('~', require('os').homedir())
-        : url;
-
-      // Shared team jumps pointing to local paths require user confirmation
-      if (isShared) {
-        const { dialog } = require('electron');
-        const { response } = await dialog.showMessageBox({
-          type: 'warning',
-          buttons: ['Cancel', 'Open'],
-          defaultId: 0,
-          cancelId: 0,
-          title: 'Shared Team Jump — Local Path',
-          message: 'Open this shared jump?',
-          detail: `This jump was shared by your team and points to a local path: ${url}. As a security precaution, is this the file you actually want to open?`,
-        });
-        if (response !== 1) return; // 0 = Cancel
-      }
-
-      shell.openPath(resolvedPath);
+      return { ok: true };
     }
-  } catch (_) {}
+
+    if (hasScheme && ALLOWED_APP_SCHEMES.test(trimmed)) {
+      // Allow known deep-link schemes (mailto:, slack:, zoommtg:, etc.).
+      shell.openExternal(trimmed);
+      return { ok: true };
+    }
+
+    // Treat anything left as a local path. Expand ~ to user home.
+    const path = require('path');
+    const os = require('os');
+    let resolvedPath = trimmed.startsWith('~')
+      ? trimmed.replace('~', os.homedir())
+      : trimmed;
+    // Normalize to an absolute path; reject anything that looks like a URL.
+    if (!path.isAbsolute(resolvedPath) && !/^[a-zA-Z]:[\\/]/.test(resolvedPath)) {
+      return { ok: false, reason: 'invalid path' };
+    }
+
+    // Shared team jumps pointing to local paths require user confirmation
+    if (isShared) {
+      const { dialog } = require('electron');
+      const { response } = await dialog.showMessageBox({
+        type: 'warning',
+        buttons: ['Cancel', 'Open'],
+        defaultId: 0,
+        cancelId: 0,
+        title: 'Shared Team Jump — Local Path',
+        message: 'Open this shared jump?',
+        detail: `This jump was shared by your team and points to a local path: ${resolvedPath}. As a security precaution, is this the file you actually want to open?`,
+      });
+      if (response !== 1) return { ok: false, reason: 'cancelled' };
+    }
+
+    shell.openPath(resolvedPath);
+    return { ok: true };
+  } catch (e) {
+    console.warn('[open-url] error:', e?.message || 'open failed');
+    return { ok: false, reason: 'open failed' };
+  }
 });
 
 // ── Auto-updater ──────────────────────────────────────────────────
@@ -716,7 +895,7 @@ ipcMain.handle('export-pdf', async (_e, html) => {
 
   const pdfWin = new BrowserWindow({
     show: false,
-    webPreferences: { nodeIntegration: false, contextIsolation: true },
+    webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true },
   });
   await pdfWin.loadFile(tmpHtml);
 

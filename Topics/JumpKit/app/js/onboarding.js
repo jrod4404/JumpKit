@@ -101,7 +101,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
           </div>
           <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 22px">Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.</p>
           <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6);border:none">
-            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
           </button>
         </div>`;
     } else {
@@ -136,7 +136,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
           </div>
           <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.6;margin:0 0 22px">Let's get you set up in under a minute. We'll walk you through four quick steps so JumpKit is ready to use right away.</p>
           <button id="obNext1" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
-            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Let's Go <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
           </button>
         </div>`;
     }
@@ -149,7 +149,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:52px;height:52px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg class="ti ti-clock-dollar" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-clock-dollar"/></svg>
+            <svg class="ti ti-clock-dollar" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.min.svg#tabler-clock-dollar"/></svg>
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Set Up Your ROI</h2>
@@ -186,10 +186,10 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
         <div id="obRoiErr" style="color:#f87171;font-size:0.82rem;margin-bottom:10px;display:none"></div>
         <div style="display:flex;gap:10px">
           <button id="obBack2" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
-            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obNextRoi" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -226,7 +226,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:52px;height:52px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg class="ti ti-layout-columns" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>
+            <svg class="ti ti-layout-columns" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg>
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Configure Your Columns</h2>
@@ -239,10 +239,10 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
         <div id="obColRows" style="max-height:260px;overflow-y:auto;padding-right:4px">${rows}</div>
         <div style="display:flex;gap:10px;margin-top:20px">
           <button id="obBackCols" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
-            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obNextCols" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Save & Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -299,7 +299,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
           <div class="custom-select" id="obColSelect" tabindex="0">
             <div class="custom-select-trigger" id="obColTrigger">
               <span id="obColLabel">${cols.length ? escHtml(cols[0].name) : ''}</span>
-              <svg class="ti ti-chevron-down" style="width:16px;height:16px;opacity:0.6"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+              <svg class="ti ti-chevron-down" style="width:16px;height:16px;opacity:0.6"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
             </div>
             <div class="custom-select-menu" id="obColMenu">
               ${cols.map(c => `<div class="custom-select-option" data-value="${escHtml(c.id)}">${escHtml(c.name)}</div>`).join('')}
@@ -310,10 +310,10 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
         <div id="obJumpErr" style="color:#f87171;font-size:0.82rem;margin-bottom:10px;display:none"></div>
         <div style="display:flex;gap:10px">
           <button id="obBack3" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
-            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinish" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            Save &amp; Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+            Save &amp; Continue <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
           </button>
         </div>
       </div>`;
@@ -405,7 +405,7 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
       <div>
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
           <div style="width:52px;height:52px;background:rgba(80,202,204,0.12);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg class="ti ti-list-check" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.svg#tabler-list-check"/></svg>
+            <svg class="ti ti-list-check" style="width:26px;height:26px;color:#50CACC"><use href="img/tabler-sprite.min.svg#tabler-list-check"/></svg>
           </div>
           <div>
             <h2 style="color:var(--text);font-size:1.15rem;font-weight:700;margin:0 0 2px">Example Jumps</h2>
@@ -420,17 +420,17 @@ function renderOnboardingStep(step, firstName, isUnlimited = false) {
             <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--bg-input);border-radius:8px;border:1px solid var(--border);cursor:pointer">
               <input type="checkbox" class="ob-seed-cb" data-jumpid="${escHtml(j.id)}" checked
                 style="width:16px;height:16px;accent-color:#50CACC;cursor:pointer;flex-shrink:0" />
-              <svg class="ti" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-${isDir ? 'folder' : 'link'}"/></svg>
+              <svg class="ti" style="width:15px;height:15px;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-${isDir ? 'folder' : 'link'}"/></svg>
               <span style="font-size:0.88rem;color:var(--text);font-weight:500;flex:1">${escHtml(j.name)}</span>
               <span style="font-size:0.78rem;color:var(--text-muted);opacity:0.65;white-space:nowrap">${escHtml(j.url)}</span>
             </label>`;}).join('')}
         </div>
         <div style="display:flex;gap:10px">
           <button id="obBack5" class="btn btn-subtle" style="flex:0 0 auto;padding:11px 18px">
-            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-arrow-left"/></svg>
+            <svg class="ti ti-arrow-left" style="vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-arrow-left"/></svg>
           </button>
           <button id="obFinishSeed" class="btn btn-primary" style="flex:1;padding:13px;font-size:0.95rem;font-weight:700">
-            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Finish
+            <svg class="ti ti-check" style="vertical-align:middle;margin-right:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Finish
           </button>
         </div>
       </div>`;
@@ -467,7 +467,7 @@ function renderOnboardingComplete() {
         Your columns are configured and your first jump is saved. Time to start jumping!
       </p>
       <button id="obGoToJumps" class="btn btn-primary" style="width:100%;padding:13px;font-size:0.95rem;font-weight:700">
-        Go to Your Jumps Page <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.svg#tabler-arrow-right"/></svg>
+        Go to Your Jumps Page <svg class="ti ti-arrow-right" style="vertical-align:middle;margin-left:6px;color:#fff;width:20px;height:20px;stroke-width:3"><use href="img/tabler-sprite.min.svg#tabler-arrow-right"/></svg>
       </button>
     </div>`;
 

@@ -11,10 +11,10 @@ window.showTeamsTipsModal = function() {
   overlay.innerHTML = `
     <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,0.5)">
       <div style="padding:20px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0">
-        <svg class="ti ti-users" style="width:1.15rem;height:1.15rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-users"/></svg>
+        <svg class="ti ti-users" style="width:1.15rem;height:1.15rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>
         <span style="font-size:1rem;font-weight:700;color:var(--text-muted);flex:1">Teams — Getting Started</span>
         <button data-jaction="teams-tips-close" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:4px;line-height:1;flex-shrink:0">
-          <svg class="ti ti-x" style="width:18px;height:18px"><use href="img/tabler-sprite.svg#tabler-x"/></svg>
+          <svg class="ti ti-x" style="width:18px;height:18px"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg>
         </button>
       </div>
       <div style="padding:20px 24px 24px;overflow-y:auto;flex:1">
@@ -36,7 +36,7 @@ window.showTeamsTipsModal = function() {
         <div style="margin-bottom:22px">
           <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">How to get started</div>
           <ol style="margin:0;padding-left:18px;color:var(--text-muted);font-size:0.87rem;line-height:1.9">
-            <li>Click <button class="btn btn-subtle" style="font-size:0.8rem;padding:2px 9px;pointer-events:none;opacity:0.85"><svg class="ti ti-plus" style="width:0.85em;height:0.85em;vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team</button> on the My Teams card</li>
+            <li>Click <button class="btn btn-subtle" style="font-size:0.8rem;padding:2px 9px;pointer-events:none;opacity:0.85"><svg class="ti ti-plus" style="width:0.85em;height:0.85em;vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Create Team</button> on the My Teams card</li>
             <li>Give your team a name and set a team password</li>
             <li>Invite members by email — they'll receive an invite link</li>
             <li>Share whole columns of Jumps with your team</li>
@@ -46,13 +46,13 @@ window.showTeamsTipsModal = function() {
           <div style="font-size:0.78rem;font-weight:700;color:var(--hover-accent);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px">Joining a team</div>
           <p style="font-size:0.87rem;color:var(--text-muted);line-height:1.7;margin:0">
             If someone has invited you, the team will appear under <strong style="color:var(--text)">Teams I've Joined</strong> with a
-            <button class="btn btn-primary" style="font-size:0.78rem;padding:3px 10px;pointer-events:none;vertical-align:middle;margin:0 2px"><svg class="ti ti-user-plus" style="width:0.85em;height:0.85em;vertical-align:middle;color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team</button>
+            <button class="btn btn-primary" style="font-size:0.78rem;padding:3px 10px;pointer-events:none;vertical-align:middle;margin:0 2px"><svg class="ti ti-user-plus" style="width:0.85em;height:0.85em;vertical-align:middle;color:white"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Join Team</button>
             button. If you're expecting an invite, ask the team owner to send it to your account email.
           </p>
         </div>
       </div>
       <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;flex-shrink:0">
-        <button class="btn btn-subtle" data-jaction="teams-tips-close"><svg class="ti ti-check" style="width:1em;height:1em;vertical-align:middle;margin-right:4px"><use href="img/tabler-sprite.svg#tabler-check"/></svg> OK</button>
+        <button class="btn btn-subtle" data-jaction="teams-tips-close"><svg class="ti ti-check" style="width:1em;height:1em;vertical-align:middle;margin-right:4px"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> OK</button>
       </div>
     </div>`;
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
@@ -84,7 +84,7 @@ async function renderTeams(containerEl) {
   const content = containerEl || document.getElementById('acctTabContent') || document.getElementById('pageContent');
 
   content.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:300px;text-align:center;color:var(--text-muted)">
-    <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
+    <svg class="ti ti-loader" style="font-size:2rem;display:block;margin-bottom:12px;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg>
     Loading teams...
   </div>
   <style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
@@ -98,7 +98,7 @@ async function renderTeams(containerEl) {
 
     if (!supaUser) {
       content.innerHTML = `<div class="no-columns">
-        <div class="big-icon"><svg class="ti ti-cloud-off"><use href="img/tabler-sprite.svg#tabler-cloud-off"/></svg></div>
+        <div class="big-icon"><svg class="ti ti-cloud-off"><use href="img/tabler-sprite.min.svg#tabler-cloud-off"/></svg></div>
         <h3>Not connected to Supabase</h3>
         <p>Teams require a Supabase connection. Fill in your credentials in <code>supabase/config.js</code> and restart.</p>
       </div>`;
@@ -108,7 +108,7 @@ async function renderTeams(containerEl) {
     await renderUnifiedTeamsView(content, supaUser);
   } catch (err) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg></div>
       <h3>Error loading teams</h3>
       <p style="color:var(--text-muted)">${esc(err.message)}</p>
     </div>`;
@@ -146,13 +146,15 @@ window.toggleTeam = function(teamId) {
 
 async function renderUnifiedTeamsView(content, supaUser) {
   // Auto-create org silently if user doesn't have one
-  let { data: profile } = await supabaseClient.from('profiles').select('*').eq('id', supaUser.id).single();
+  let { data: profile, error: profileErr } = await supabaseClient.from('profiles').select('id,email,first_name,last_name,role,org_id,subscription_tier,subscription_status').eq('id', supaUser.id).single();
+  if (profileErr) throw profileErr;
   if (!profile) throw new Error('Profile not found.');
 
   let orgId = profile.org_id;
   if (!orgId) {
     // Check if user already owns an org (safety check)
-    const { data: existingOrg } = await supabaseClient.from('organizations').select('id').eq('owner_id', supaUser.id).maybeSingle();
+    const { data: existingOrg, error: existingOrgErr } = await supabaseClient.from('organizations').select('id').eq('owner_id', supaUser.id).maybeSingle();
+    if (existingOrgErr) throw existingOrgErr;
     if (existingOrg) {
       orgId = existingOrg.id;
     } else {
@@ -163,7 +165,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
       orgId = newOrg.id;
     }
     // Update profile with org_id and org-owner role
-    await supabaseClient.from('profiles').update({ org_id: orgId, role: 'org-owner' }).eq('id', supaUser.id);
+    const { error: updateProfileErr } = await supabaseClient.from('profiles').update({ org_id: orgId, role: 'org-owner' }).eq('id', supaUser.id);
+    if (updateProfileErr) throw updateProfileErr;
     profile = { ...profile, org_id: orgId, role: 'org-owner' };
     if (window._supabaseProfile) { window._supabaseProfile.org_id = orgId; window._supabaseProfile.role = 'org-owner'; }
   }
@@ -172,10 +175,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
   selectedOrgId = orgId;
 
   // Fetch teams this user owns
-  const { data: ownedTeams = [] } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name');
+  const { data: ownedTeams = [], error: ownedTeamsErr } = await supabaseClient.from('teams').select('id, name, owner_id, org_id, created_at').eq('org_id', orgId).eq('owner_id', supaUser.id).order('name').limit(200);
+  if (ownedTeamsErr) throw ownedTeamsErr;
 
   // Fetch teams this user is a member of (but doesn't own)
-  const { data: memberRows = [] } = await supabaseClient.from('team_members').select('team_id, locked').eq('user_id', supaUser.id);
+  const { data: memberRows = [], error: memberRowsErr } = await supabaseClient.from('team_members').select('team_id, locked').eq('user_id', supaUser.id).limit(200);
+  if (memberRowsErr) throw memberRowsErr;
   const memberTeamIds = memberRows.map(r => r.team_id).filter(id => !ownedTeams.find(t => t.id === id));
   // Track locked status for joined teams
   const _lockedTeamIds = new Set(memberRows.filter(r => r.locked).map(r => r.team_id));
@@ -186,7 +191,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
   }
 
   // Fetch pending invites for this user
-  const { data: rawInvites = [] } = await supabaseClient.from('team_invites').select('*').eq('email', supaUser.email).eq('status', 'pending');
+  const { data: rawInvites = [], error: inviteErr } = await supabaseClient.from('team_invites').select('id,email,team_id,status,invited_at').eq('email', supaUser.email).eq('status', 'pending').limit(100);
+  if (inviteErr) throw inviteErr;
   const pendingInvites = [];
   for (const inv of rawInvites) {
     const { data: t } = await supabaseClient.from('teams').select('id, name, owner_id').eq('id', inv.team_id).single();
@@ -203,7 +209,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
   const _ownedTier = window._supabaseProfile?.subscription_tier || 'free';
   const _ownedIsUnlimited = _ownedTier === 'core' || _ownedTier === 'teams_jet';
   const _ownedTierPill = _ownedIsUnlimited
-    ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
+    ? `<span style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);background-clip:padding-box;overflow:hidden;-webkit-font-smoothing:antialiased">Unlimited Team</span>`
     : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
   let html = `<div class="acct-grid">`;
@@ -212,9 +218,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `
     <div class="acct-section">
       <div class="acct-section-title">
-        <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> My Teams
+        <svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> My Teams
         <button class="btn btn-subtle tooltip-below" style="margin-left:auto;font-size:0.75rem;padding:4px 10px" data-tooltip="Create a new team" data-jaction="open-add-team-modal">
-          <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Create Team
+          <svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Create Team
         </button>
       </div>`;
 
@@ -225,7 +231,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         No teams yet. Click <strong>Create Team</strong> to get started, or
         <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:var(--hover-accent);font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">see how teams work</button>.
         ${_isFree ? `<div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted);opacity:0.75;display:flex;align-items:center;justify-content:center;gap:5px">
-          <svg class="ti ti-lock" style="width:0.8rem;height:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+          <svg class="ti ti-lock" style="width:0.8rem;height:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg>
           Free plan is limited to 1 owned team.
           <button class="btn btn-subtle" style="font-size:0.72rem;padding:1px 7px" data-jaction="show-upgrade-modal" data-title="Unlimited Teams" data-msg="JumpKit Unlimited gives you unlimited owned teams, unlimited members, and full team ROI reporting.">Upgrade</button>
         </div>` : ''}
@@ -236,6 +242,19 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const { data: members = [] } = await supabaseClient.from('team_members').select('id, user_id, profiles(email, first_name, last_name)').eq('team_id', team.id);
       const { data: pendingTeamInvites = [] } = await supabaseClient.from('team_invites').select('id, email, invited_at').eq('team_id', team.id).eq('status', 'pending');
       const { data: teamSharedCols = [] } = await supabaseClient.from('shared_columns').select('id, name, created_by').eq('team_id', team.id).order('position');
+      // Pre-compute jump counts per shared column using local DB
+      const _colJumpCounts = {};
+      try {
+        const _uid = (typeof currentUser !== 'undefined' && currentUser?.id) || supaUser?.id || '';
+        if (_uid) {
+          const _lCols  = DB.getColumns(_uid);
+          const _lJumps = DB.getActiveJumps(_uid);
+          for (const sc of teamSharedCols) {
+            const lc = _lCols.find(c => c.supabaseId === sc.id || (c.teamId === team.id && c.name === sc.name));
+            _colJumpCounts[sc.id] = lc ? _lJumps.filter(j => j.columnId === lc.id).length : 0;
+          }
+        }
+      } catch (_e) {}
       // Batch-fetch sharer profiles for tooltips
       const _sharerIds = [...new Set(teamSharedCols.map(c => c.created_by).filter(Boolean))];
       const _sharerMap = {};
@@ -257,7 +276,17 @@ async function renderUnifiedTeamsView(content, supaUser) {
           const nameB = (b.profiles?.first_name || b.profiles?.email || '').toLowerCase();
           return nameA.localeCompare(nameB);
         });
-      const sortedMembers = [...ownerMembers, ...regularMembers];
+      // If the owner isn't in team_members, inject a synthetic row so they always appear
+      let syntheticOwnerRow = null;
+      if (ownerMembers.length === 0) {
+        try {
+          const { data: ownerProf } = await supabaseClient.from('profiles').select('email, first_name, last_name').eq('id', teamOwnerId).single();
+          if (ownerProf) {
+            syntheticOwnerRow = { id: null, user_id: teamOwnerId, profiles: ownerProf, _synthetic: true };
+          }
+        } catch (_) {}
+      }
+      const sortedMembers = [...(syntheticOwnerRow ? [syntheticOwnerRow] : ownerMembers), ...regularMembers];
 
       const sortedInvites = [...pendingTeamInvites].sort((a, b) =>
         (a.email || '').toLowerCase().localeCompare((b.email || '').toLowerCase())
@@ -271,9 +300,9 @@ async function renderUnifiedTeamsView(content, supaUser) {
         const pill = isOwner
           ? `<span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span>`
           : `<span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span>`;
-        const actionBtn = isOwner
+        const actionBtn = (isOwner || m._synthetic || !m.id)
           ? ''
-          : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(label)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
+          : `<button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Remove member" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(label)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>`;
         // Pill left of name + email on same row
         const nameEmail = `<div class="acct-name-email">${pill}<span class="acct-member-name">${esc(label)}</span>${email && name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}</div>`;
         return `<div class="acct-row acct-member-row"><div class="acct-row-label">${nameEmail}</div>${actionBtn ? `<div class="acct-member-actions">${actionBtn}</div>` : ''}</div>`;
@@ -285,8 +314,8 @@ async function renderUnifiedTeamsView(content, supaUser) {
             <div class="acct-name-email"><span class="teams-badge teams-badge-pending" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#a07010">Pending</span><span class="acct-member-name">${esc(inv.email)}</span><span class="acct-row-hint">Invited ${new Date(inv.invited_at).toLocaleDateString()}</span></div>
           </div>
           <div class="acct-member-actions">
-            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(team.id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg></button>
-            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(team.id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg></button>
+            <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>
           </div>
         </div>`).join('');
 
@@ -304,7 +333,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
                 <span style="display:flex;align-items:center;gap:6px">
@@ -314,20 +343,21 @@ async function renderUnifiedTeamsView(content, supaUser) {
               </div>
             </div>
             <div class="acct-team-actions">
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" data-jaction="t-invite-for-team" data-id="${esc(team.id)}"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite</button>
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" data-jaction="t-share-col-modal" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-share"><use href="img/tabler-sprite.svg#tabler-share"/></svg> Manage Sharing</button>
-              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" data-jaction="t-remove-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Invite team members" data-jaction="t-invite-for-team" data-id="${esc(team.id)}"><svg class="ti ti-user-plus"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Invite</button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Change team password" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg></button>
+              <button class="btn btn-subtle" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Manage shared cols" data-jaction="t-share-col-modal" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-share"><use href="img/tabler-sprite.min.svg#tabler-share"/></svg> Manage Sharing</button>
+              <button class="btn btn-delete" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Delete team" data-jaction="t-remove-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>
             </div>
           </div>
           <div class="acct-team-members">
+            <span class="acct-team-cols-label" style="margin-bottom:4px"><svg class="ti ti-users" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>Members</span>
             ${memberPills}
             ${sortedInvites.length > 0 ? invitePills : ''}
             <div class="acct-team-cols-section">
-              <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
+              <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
-                ${teamSharedCols.length > 0
-                  ? teamSharedCols.map(c => { const p = _sharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}<button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`; }).join('')
+${teamSharedCols.length > 0
+                  ? teamSharedCols.map(c => { const p = _sharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; const cnt = _colJumpCounts[c.id] ?? 0; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)} <span style="font-size:0.72rem;opacity:0.65">(${cnt})</span><button class="acct-col-chip-remove" data-tooltip="Unshare this column" data-jaction="t-confirm-unshare-col" data-team-id="${esc(team.id)}" data-team-name="${esc(team.name)}" data-col-id="${esc(c.id)}" data-col-name="${esc(c.name)}">×</button></span>`; }).join('')
                   : '<span class="acct-row-hint" style="font-size:0.8rem">None yet - click <strong>Manage Sharing</strong> above to add one</span>'}
               </div>
             </div>
@@ -338,14 +368,14 @@ async function renderUnifiedTeamsView(content, supaUser) {
   html += `</div>`; // end My Teams section
 
   // ── Teams I've Joined ──
-  html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
+  html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.min.svg#tabler-users-group"/></svg> Teams I've Joined</div>`;
   if (memberTeams.length === 0) {
     html += `
       <div class="acct-empty-state" style="padding:18px 4px;text-align:center">
         No teams joined yet. When a team owner invites you, it appears here —
         <button data-jaction="show-teams-tips" style="background:none;border:none;padding:0;color:var(--hover-accent);font-size:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px">learn how joining works</button>.
         ${_isFree ? `<div style="margin-top:10px;font-size:0.78rem;color:var(--text-muted);opacity:0.75;display:flex;align-items:center;justify-content:center;gap:5px">
-          <svg class="ti ti-lock" style="width:0.8rem;height:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+          <svg class="ti ti-lock" style="width:0.8rem;height:0.8rem;flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg>
           Free plan is limited to 1 joined team.
           <button class="btn btn-subtle" style="font-size:0.72rem;padding:1px 7px" data-jaction="show-upgrade-modal" data-title="Unlimited Teams" data-msg="JumpKit Unlimited gives you unlimited joined teams, unlimited members per team, and full team ROI reporting.">Upgrade</button>
         </div>` : ''}
@@ -357,15 +387,28 @@ async function renderUnifiedTeamsView(content, supaUser) {
       const _joinedOwnerTier = ownerProf?.subscription_tier || 'free';
       const _joinedIsUnlimited = _joinedOwnerTier === 'core' || _joinedOwnerTier === 'teams_jet';
       const _joinedTierPill = _joinedIsUnlimited
-        ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
+        ? `<span style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);background-clip:padding-box;overflow:hidden;-webkit-font-smoothing:antialiased">Unlimited Team</span>`
         : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
       const _isLockedFromTeam = _lockedTeamIds.has(team.id);
       const ownerName  = ownerProf?.first_name ? `${ownerProf.first_name} ${ownerProf.last_name || ''}`.trim() : '';
       const ownerEmail = ownerProf?.email || '';
       const ownerLabel = ownerName || ownerEmail || '-';
       // Fetch total member count for stats
-      const { count: memberCount = 0 } = await supabaseClient.from('team_members').select('*', {count:'exact', head:true}).eq('team_id', team.id);
-      const { data: joinedTeamCols = [] } = await supabaseClient.from('shared_columns').select('name, created_by').eq('team_id', team.id).order('position');
+      const { count: memberCount = 0 } = await supabaseClient.from('team_members').select('id', {count:'exact', head:true}).eq('team_id', team.id);
+      const { data: joinedTeamCols = [] } = await supabaseClient.from('shared_columns').select('id, name, created_by').eq('team_id', team.id).order('position');
+      // Pre-compute jump counts for joined-team shared columns
+      const _jColJumpCounts = {};
+      try {
+        const _jUid = (typeof currentUser !== 'undefined' && currentUser?.id) || supaUser?.id || '';
+        if (_jUid) {
+          const _jLCols  = DB.getColumns(_jUid);
+          const _jLJumps = DB.getActiveJumps(_jUid);
+          for (const sc of joinedTeamCols) {
+            const lc = _jLCols.find(c => c.supabaseId === sc.id || (c.teamId === team.id && c.name === sc.name));
+            _jColJumpCounts[sc.id] = lc ? _jLJumps.filter(j => j.columnId === lc.id).length : 0;
+          }
+        }
+      } catch (_e) {}
       // Batch-fetch sharer profiles for tooltips
       const _jSharerIds = [...new Set(joinedTeamCols.map(c => c.created_by).filter(Boolean))];
       const _jSharerMap = {};
@@ -388,7 +431,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
         <div class="acct-team-entry${isCollapsed ? ' acct-team-collapsed' : ''}" id="teamEntry_${team.id}">
           <div class="acct-team-header">
             <div class="acct-team-name-block">
-              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></button>
+              <button class="acct-team-chevron" data-jaction="t-toggle-team" data-id="${esc(team.id)}"><svg class="ti ti-chevron-down" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg></button>
               <div class="acct-team-name-text">
                 <span class="acct-team-name">${esc(team.name)}</span>
                 <span style="display:flex;align-items:center;gap:6px">
@@ -398,10 +441,11 @@ async function renderUnifiedTeamsView(content, supaUser) {
               </div>
             </div>
             <div class="acct-team-actions">
-              <button class="btn btn-delete tooltip-left" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+              <button class="btn btn-delete tooltip-left" style="font-size:0.75rem;padding:4px 10px" data-tooltip="Leave this team" data-jaction="t-confirm-leave-team" data-id="${esc(team.id)}" data-name="${esc(team.name)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>
             </div>
           </div>
           <div class="acct-team-members">
+            <span class="acct-team-cols-label" style="margin-bottom:4px"><svg class="ti ti-users" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>Members</span>
             <div class="acct-row acct-member-row">
               <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge teams-badge-owner" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#00a8ad">Owner</span><span class="acct-member-name">${esc(ownerLabel)}</span>${ownerName && ownerEmail ? `<span class="acct-row-hint">${esc(ownerEmail)}</span>` : ''}</div></div>
             </div>
@@ -409,12 +453,12 @@ async function renderUnifiedTeamsView(content, supaUser) {
               <div class="acct-row-label"><div class="acct-name-email"><span class="teams-badge" style="font-size:0.69rem;min-width:70px;padding:1px 7px;color:#178a3a">Member</span><span class="acct-member-name">${esc(meName)}</span>${meName !== meEmail ? `<span class="acct-row-hint">${esc(meEmail)}</span>` : ''}</div></div>
             </div>
             <div class="acct-team-cols-section">
-              <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>Shared Columns</span>
+              <span class="acct-team-cols-label"><svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;vertical-align:middle;margin-right:5px"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg>Shared Columns</span>
               <div class="acct-team-cols-list">
                 ${_isLockedFromTeam
                   ? `<div style="background:rgba(229,62,62,0.07);border:1px solid rgba(229,62,62,0.2);border-radius:8px;padding:16px;text-align:center;color:#e53e3e;font-size:0.875rem">Your access to <strong>${esc(team.name)}</strong> has been paused. Contact the team owner to restore access.</div>`
                   : (joinedTeamCols.length > 0
-                    ? joinedTeamCols.map(c => { const p = _jSharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)}</span>`; }).join('')
+                    ? joinedTeamCols.map(c => { const p = _jSharerMap[c.created_by]; const fullName = `${p?.first_name||''} ${p?.last_name||''}`.trim(); const sharer = fullName || p?.email || 'a team member'; const cnt = _jColJumpCounts[c.id] ?? 0; return `<span class="acct-team-col-chip" data-tooltip="Shared by ${esc(sharer)}">${esc(c.name)} <span style="font-size:0.72rem;opacity:0.65">(${cnt})</span></span>`; }).join('')
                     : '<span class="acct-row-hint" style="font-size:0.8rem">No shared columns</span>')}
               </div>
             </div>
@@ -426,7 +470,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
 
   // ── Pending Invitations ──
   if (pendingInvites.length > 0) {
-    html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invitations (${pendingInvites.length})</div>`;
+    html += `<div class="acct-section"><div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Pending Invitations (${pendingInvites.length})</div>`;
     for (const inv of pendingInvites) {
       html += `
         <div class="acct-row">
@@ -435,7 +479,7 @@ async function renderUnifiedTeamsView(content, supaUser) {
             <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel)}</span>
           </div>
           <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" data-jaction="t-join-team-modal" data-team-id="${esc(inv.teams?.id)}" data-team-name="${esc(inv.teams?.name || '')}" data-invite-id="${esc(inv.id)}">
-            <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
+            <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Join Team
           </button>
         </div>`;
     }
@@ -465,11 +509,12 @@ async function renderOrgOwnerView(content, supaUser, profile) {
   _orgOwnerSupaUser = supaUser;
 
   // Check if user owns any org (bypass org_id check - fetch directly)
-  const { data: ownedOrg } = await supabaseClient
+  const { data: ownedOrg, error: ownedOrgErr } = await supabaseClient
     .from('organizations')
-    .select('*')
+    .select('id,name,owner_id,created_at')
     .eq('owner_id', supaUser.id)
     .maybeSingle();
+  if (ownedOrgErr) throw ownedOrgErr;
 
   // Auto-patch profile if org exists but org_id not set on profile
   if (ownedOrg && !profile.org_id) {
@@ -484,14 +529,14 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     content.innerHTML = `
       <div class="acct-grid">
         <div class="acct-section">
-          <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Your Organization</div>
+          <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.min.svg#tabler-building"/></svg> Create Your Organization</div>
           <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:16px">You haven't set up an organization yet. Create one to start managing teams and sharing jumps.</p>
           <div class="form-group">
             <label class="form-label">Organization Name</label>
             <input class="form-input" id="newOrgName" placeholder="e.g. Acme Corp" style="max-width:320px"/>
           </div>
           <div style="margin-top:8px">
-            <button class="btn btn-primary" data-jaction="t-create-org"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Create Organization</button>
+            <button class="btn btn-primary" data-jaction="t-create-org"><svg class="ti ti-building"><use href="img/tabler-sprite.min.svg#tabler-building"/></svg> Create Organization</button>
           </div>
           <div id="createOrgMsg" style="margin-top:12px;font-size:0.85rem"></div>
         </div>
@@ -526,7 +571,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     if (!org) {
       const { data, error } = await supabaseClient
         .from('organizations')
-        .select('*')
+        .select('id,name,owner_id,created_at')
         .eq('id', profile.org_id)
         .single();
       if (error && error.code !== 'PGRST116') throw error;
@@ -534,7 +579,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
     }
   } catch (err) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-alert-circle"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg></div>
       <h3>Error loading organization</h3>
       <p style="color:var(--text-muted)">${esc(err.message)}</p>
     </div>`;
@@ -543,7 +588,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
 
   if (!org) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-building"><use href="img/tabler-sprite.min.svg#tabler-building"/></svg></div>
       <h3>No organization found</h3>
       <p>Your account is marked as org-owner but no organization was found. Try creating one.</p>
     </div>`;
@@ -570,7 +615,7 @@ async function renderOrgOwnerView(content, supaUser, profile) {
 
       <!-- Org row (full width, no selection needed) -->
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Your Organization</div>
+        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.min.svg#tabler-building"/></svg> Your Organization</div>
         <div class="acct-row" style="flex-wrap:wrap;gap:24px;border-bottom:none">
           <div style="text-align:center">
             <div style="font-size:0.88rem;font-weight:500;color:var(--text-muted)">${esc(org.name)}</div>
@@ -601,10 +646,10 @@ async function renderOrgOwnerView(content, supaUser, profile) {
         <!-- Teams panel -->
         <div class="acct-section">
           <div class="acct-section-title" style="display:flex;align-items:center">
-            <svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Your Teams
+            <svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Your Teams
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
                     data-jaction="open-add-team-modal" id="addTeamBtn">
-              <svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Team
+              <svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Team
             </button>
           </div>
           <div id="teamsPanel">
@@ -615,10 +660,10 @@ async function renderOrgOwnerView(content, supaUser, profile) {
         <!-- Members panel -->
         <div class="acct-section">
           <div class="acct-section-title" style="display:flex;align-items:center">
-            <svg class="ti ti-user-check"><use href="img/tabler-sprite.svg#tabler-user-check"/></svg> Members
+            <svg class="ti ti-user-check"><use href="img/tabler-sprite.min.svg#tabler-user-check"/></svg> Members
             <button class="btn btn-subtle" style="margin-left:auto;font-size:0.8rem;padding:3px 10px"
                     data-jaction="t-open-invite-members" id="inviteBtn" style="display:none">
-              <svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members
+              <svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Invite Members
             </button>
           </div>
           <div id="membersPanel">
@@ -703,9 +748,9 @@ window.selectOrg = async function(orgId) {
             <span class="acct-row-hint">Created ${created}</span>
           </div>
           <div style="display:flex;gap:6px;align-items:center">
-            <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.svg#tabler-chevron-right"/></svg>
-            <button class="btn btn-subtle" data-tooltip="Change team password" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-change-pw" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg></button>
-            <button class="btn btn-delete" data-tooltip="Delete team" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-remove-team" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>
+            <svg class="ti ti-chevron-right" style="color:var(--text-muted);font-size:0.8rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-right"/></svg>
+            <button class="btn btn-subtle" data-tooltip="Change team password" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-change-pw" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg></button>
+            <button class="btn btn-delete" data-tooltip="Delete team" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-remove-team" data-id="${esc(t.id)}" data-name="${esc(t.name)}" data-stop-prop="1"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>
           </div>
         </div>`;
       }).join('');
@@ -748,9 +793,10 @@ window.selectTeam = async function(teamId) {
     // Also fetch pending invites
     const { data: invites = [] } = await supabaseClient
       .from('team_invites')
-      .select('*')
+      .select('id,email,team_id,status,invited_at,created_at')
       .eq('team_id', teamId)
-      .eq('status', 'pending');
+      .eq('status', 'pending')
+      .limit(100);
 
     if (members.length === 0 && invites.length === 0) {
       membersPanel.innerHTML = `<p style="color:var(--text-dim);font-size:0.82rem;text-align:center;padding:24px 8px">No members yet.</p>`;
@@ -765,8 +811,8 @@ window.selectTeam = async function(teamId) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending" style="font-size:0.65rem;padding:1px 7px">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(teamName)}"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(teamName)}"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}` : '';
 
@@ -795,7 +841,7 @@ window.selectTeam = async function(teamId) {
               ${name ? `<span class="acct-row-hint">${esc(email)}</span>` : ''}
               <span class="acct-row-hint">Joined ${joined}</span>
             </div>
-            ${m.user_id === teamOwnerId ? '' : `<button class="btn btn-delete tooltip-left" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(name || email)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg></button>`}
+            ${m.user_id === teamOwnerId ? '' : `<button class="btn btn-delete tooltip-left" data-tooltip="Remove member" style="font-size:0.75rem;padding:3px 8px" data-jaction="t-confirm-remove-member" data-id="${esc(m.id)}" data-label="${esc(name || email)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.min.svg#tabler-user-minus"/></svg></button>`}
           </div>`;
       }).join('') + inviteRows;
     }
@@ -852,9 +898,9 @@ window.openAddTeamModal = async function() {
       <span class="form-error" id="atTeamPasswordConfirmErr">Passwords do not match.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Add Team', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="t-save-add-team"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
+  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Add Team', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-add-team"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
   // Wire eye toggles + live password rules
   setTimeout(() => {
@@ -925,7 +971,7 @@ window.saveAddTeam = async function() {
 
   // Spinner on save button - show for at least 1.5s
   const saveBtn = document.querySelector('[data-jaction="t-save-add-team"]');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving...'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving...'; }
   const _atSpinStart = Date.now();
 
   try {
@@ -954,7 +1000,7 @@ window.saveAddTeam = async function() {
       renderTeams();
     }, _atDelay);
   } catch (err) {
-    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save'; }
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save'; }
     Toast.danger('Failed to create team: ' + err.message);
   }
 };
@@ -974,9 +1020,9 @@ window.openInviteMembersModal = function() {
       <span class="form-error" id="orgInviteEmailsErr">At least one valid email required.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Invite Members', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="sendOrgInvitesBtn" data-jaction="t-send-org-invites"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+  Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Invite Members', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="sendOrgInvitesBtn" data-jaction="t-send-org-invites"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 };
 
 window.sendOrgInvites = async function() {
@@ -1049,7 +1095,7 @@ window.sendOrgInvites = async function() {
 
   // Show spinner on button
   const sendOrgBtn = document.getElementById('sendOrgInvitesBtn');
-  if (sendOrgBtn) { sendOrgBtn.disabled = true; sendOrgBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
+  if (sendOrgBtn) { sendOrgBtn.disabled = true; sendOrgBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     const invitedBy = _orgOwnerSupaUser?.id;
@@ -1064,15 +1110,13 @@ window.sendOrgInvites = async function() {
           status:     'pending',
         });
         if (insertErr) throw insertErr;
-        // Try to send invite email - non-fatal if Edge Function not yet deployed
-        try {
-          await supabaseClient.functions.invoke('send-invite', {
-            body: { email, teamId: selectedTeamId, invitedBy },
-          });
-        } catch (_) { /* email sending optional until Resend is configured */ }
+        const { error: inviteEmailErr } = await supabaseClient.functions.invoke('send-invite', {
+          body: { email, teamId: selectedTeamId, invitedBy },
+        });
+        if (inviteEmailErr) throw inviteEmailErr;
         sent++;
       } catch (e) {
-        console.warn('[sendOrgInvites] error for', email, e.message);
+        console.warn('[sendOrgInvites] error for invitee:', e.message);
         failed++;
       }
     }
@@ -1086,13 +1130,14 @@ window.sendOrgInvites = async function() {
     renderTeams();
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
+    if (sendOrgBtn) { sendOrgBtn.disabled = false; sendOrgBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Send Invites'; }
   }
 };
 
 window.resendInvite = async function(inviteId, email, teamId) {
   // Prompt owner to enter team password before resending
   Modal.open(
-    '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend Invite',
+    '<svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Resend Invite',
     `<p style="color:var(--text-muted);font-size:.88rem;margin-bottom:16px">
       Re-sending invite to <strong>${esc(email)}</strong>.<br>Enter the team password to verify and include it in the email.
     </p>
@@ -1104,8 +1149,8 @@ window.resendInvite = async function(inviteId, email, teamId) {
       </div>
       <span class="form-error" id="resendTeamPasswordErr">Incorrect team password.</span>
     </div>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="resendConfirmBtn" data-jaction="t-do-resend-invite" data-invite-id="${esc(inviteId)}" data-email="${esc(email)}" data-team-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="resendConfirmBtn" data-jaction="t-do-resend-invite" data-invite-id="${esc(inviteId)}" data-email="${esc(email)}" data-team-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Resend</button>`,
     'sm'
   );
   setTimeout(() => document.getElementById('resendTeamPassword')?.focus(), 100);
@@ -1122,7 +1167,7 @@ window.doResendInvite = async function(inviteId, email, teamId) {
   }
 
   const resendBtn = document.getElementById('resendConfirmBtn');
-  if (resendBtn) { resendBtn.disabled = true; resendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
+  if (resendBtn) { resendBtn.disabled = true; resendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     // Verify password server-side first
@@ -1131,7 +1176,7 @@ window.doResendInvite = async function(inviteId, email, teamId) {
     });
     if (verifyErr || !verifyData?.valid) {
       if (pwErrEl) { pwErrEl.textContent = 'Incorrect team password.'; pwErrEl.classList.add('show'); }
-      if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend'; }
+      if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Resend'; }
       return;
     }
 
@@ -1142,40 +1187,40 @@ window.doResendInvite = async function(inviteId, email, teamId) {
       .eq('id', inviteId);
     if (error) throw error;
 
-    // Re-send email (non-fatal)
-    try {
-      const invitedBy = _orgOwnerSupaUser?.id;
-      const { data: team } = await supabaseClient
-        .from('teams')
-        .select('name, org_id')
-        .eq('id', teamId)
-        .single();
-      let orgName = '';
-      if (team?.org_id) {
-        const { data: org } = await supabaseClient.from('organizations').select('name').eq('id', team.org_id).single();
-        orgName = org?.name || '';
-      }
-      await supabaseClient.functions.invoke('send-invite', {
-        body: { email, teamId, invitedBy, teamName: team?.name || '', orgName, teamPassword: candidatePassword },
-      });
-    } catch (_) { /* email sending optional */ }
+    const invitedBy = _orgOwnerSupaUser?.id;
+    const { data: team, error: teamErr } = await supabaseClient
+      .from('teams')
+      .select('name, org_id')
+      .eq('id', teamId)
+      .single();
+    if (teamErr) throw teamErr;
+    let orgName = '';
+    if (team?.org_id) {
+      const { data: org, error: orgErr } = await supabaseClient.from('organizations').select('name').eq('id', team.org_id).single();
+      if (orgErr) throw orgErr;
+      orgName = org?.name || '';
+    }
+    const { error: resendEmailErr } = await supabaseClient.functions.invoke('send-invite', {
+      body: { email, teamId, invitedBy, teamName: team?.name || '', orgName, teamPassword: candidatePassword },
+    });
+    if (resendEmailErr) throw resendEmailErr;
 
     Modal.close();
     Toast.success(`Invite resent to ${email}!`);
   } catch (e) {
     Toast.danger('Failed to resend invite: ' + e.message);
-    if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Resend'; }
+    if (resendBtn) { resendBtn.disabled = false; resendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Resend'; }
   }
 };
 
 window.cancelInvite = async function(inviteId, email, teamName) {
   Modal.open(
-    '<svg class="ti ti-mail-off" style="color:var(--danger)"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation',
+    '<svg class="ti ti-mail-off" style="color:var(--danger)"><use href="img/tabler-sprite.min.svg#tabler-mail-off"/></svg> Cancel Invitation',
     `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6">
       Are you sure you want to cancel the invitation for <strong style="color:var(--text-muted)">${esc(email)}</strong>? They will no longer be able to join <strong style="color:var(--text-muted)">${esc(teamName)}</strong> using this invite.
     </p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Keep Invite</button>
-     <button class="btn btn-delete" data-jaction="t-confirm-cancel-invite" data-id="${esc(inviteId)}"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Keep Invite</button>
+     <button class="btn btn-delete" data-jaction="t-confirm-cancel-invite" data-id="${esc(inviteId)}"><svg class="ti ti-mail-off"><use href="img/tabler-sprite.min.svg#tabler-mail-off"/></svg> Cancel Invitation</button>`,
     'sm'
   );
 };
@@ -1207,7 +1252,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
   if (!team) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg></div>
       <h3>No team assigned</h3>
       <p>You are a team owner but have not been assigned a team yet. Contact your org owner.</p>
     </div>`;
@@ -1217,15 +1262,17 @@ async function renderTeamOwnerView(content, supaUser, profile) {
   // Fetch members
   const { data: memberRows = [] } = await supabaseClient
     .from('team_members')
-    .select('*, profiles(email, role)')
-    .eq('team_id', team.id);
+    .select('id,user_id,team_id,joined_at,profiles(email, role)')
+    .eq('team_id', team.id)
+    .limit(200);
 
   // Fetch pending invites
   const { data: invites = [] } = await supabaseClient
     .from('team_invites')
-    .select('*')
+    .select('id,email,team_id,status,invited_at,created_at')
     .eq('team_id', team.id)
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .limit(100);
 
   // Fetch org name
   const { data: org } = await supabaseClient
@@ -1237,7 +1284,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
   content.innerHTML = `
     <div class="acct-grid">
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Your Team</div>
+        <div class="acct-section-title"><svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Your Team</div>
         <div class="acct-row"><div class="acct-row-label"><span>Team Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.name)}</span></div>
         <div class="acct-row"><div class="acct-row-label"><span>Organization</span></div>
@@ -1248,12 +1295,12 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
       <div class="acct-section">
         <div class="acct-section-title">
-          <svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Members (${memberRows.length})
+          <svg class="ti ti-users-group"><use href="img/tabler-sprite.min.svg#tabler-users-group"/></svg> Members (${memberRows.length})
           <button class="btn btn-subtle btn-sm" style="margin-left:auto" data-jaction="t-open-invite-modal" data-id="${esc(team.id)}">
-            <svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members
+            <svg class="ti ti-user-plus"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Invite Members
           </button>
           <button class="btn btn-subtle btn-sm" data-jaction="t-change-pw" data-id="${esc(team.id)}" data-name="${esc(team.name)}">
-            <svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Password
+            <svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg> Change Password
           </button>
         </div>
         ${memberRows.length === 0
@@ -1270,7 +1317,7 @@ async function renderTeamOwnerView(content, supaUser, profile) {
 
       ${invites.length > 0 ? `
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invites (${invites.length})</div>
+        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Pending Invites (${invites.length})</div>
         ${invites.map(inv => `
           <div class="acct-row">
             <div class="acct-row-label">
@@ -1279,8 +1326,8 @@ async function renderTeamOwnerView(content, supaUser, profile) {
             </div>
             <div style="display:flex;align-items:center;gap:6px">
               <span class="teams-badge teams-badge-pending">Pending</span>
-              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Invite Again</button>
-              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+              <button class="btn btn-subtle" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Resend invitation" data-jaction="t-resend-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-team="${esc(inv.team_id)}"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Invite Again</button>
+              <button class="btn btn-delete" style="font-size:0.72rem;padding:3px 9px" data-tooltip="Cancel invitation" data-jaction="t-cancel-invite" data-id="${esc(inv.id)}" data-email="${esc(inv.email)}" data-teamname="${esc(team.name)}"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
             </div>
           </div>`).join('')}
       </div>` : ''}
@@ -1294,9 +1341,10 @@ async function renderTeamMemberView(content, supaUser, profile) {
   // Check for pending invites for this user's email (flat query to avoid stack depth)
   const { data: rawInvites = [] } = await supabaseClient
     .from('team_invites')
-    .select('*')
+    .select('id,email,team_id,status,invited_at,created_at')
     .eq('email', supaUser.email)
-    .eq('status', 'pending');
+    .eq('status', 'pending')
+    .limit(100);
 
   // Fetch team details for each invite separately
   const pendingInvites = [];
@@ -1313,8 +1361,9 @@ async function renderTeamMemberView(content, supaUser, profile) {
   // Find membership (flat query to avoid stack depth)
   const { data: rawMemberRows = [] } = await supabaseClient
     .from('team_members')
-    .select('*')
-    .eq('user_id', supaUser.id);
+    .select('id,team_id,user_id,locked,joined_at')
+    .eq('user_id', supaUser.id)
+    .limit(200);
 
   // Fetch team details for each membership separately
   const memberRows = [];
@@ -1331,7 +1380,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
   // If no memberships and no pending invites, show empty state
   if (memberRows.length === 0 && pendingInvites.length === 0) {
     content.innerHTML = `<div class="no-columns">
-      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg></div>
       <h3>No team yet</h3>
       <p>Ask your team owner to invite you, or use <strong>Join a Team</strong> on the sign-in screen.</p>
     </div>`;
@@ -1345,7 +1394,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
   if (pendingInvites.length > 0) {
     html += `
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Pending Invitations</div>
+        <div class="acct-section-title"><svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Pending Invitations</div>
         ${pendingInvites.map(inv => `
           <div class="acct-row">
             <div class="acct-row-label">
@@ -1353,7 +1402,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
               <span class="acct-row-hint">Invited by ${esc(inv.ownerLabel || 'team owner')}</span>
             </div>
             <button class="btn btn-primary" style="font-size:0.82rem;padding:6px 14px" data-jaction="t-join-team-modal" data-team-id="${esc(inv.teams?.id)}" data-team-name="${esc(inv.teams?.name || '')}" data-invite-id="${esc(inv.id)}">
-              <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
+              <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Join Team
             </button>
           </div>`).join('')}
       </div>`;
@@ -1379,7 +1428,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
 
     html += `
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.svg#tabler-building"/></svg> Organization</div>
+        <div class="acct-section-title"><svg class="ti ti-building"><use href="img/tabler-sprite.min.svg#tabler-building"/></svg> Organization</div>
         <div class="acct-row"><div class="acct-row-label"><span>Org Name</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(team.organizations?.name || '-')}</span></div>
         <div class="acct-row" style="border-bottom:none"><div class="acct-row-label"><span>Team Name</span></div>
@@ -1387,7 +1436,7 @@ async function renderTeamMemberView(content, supaUser, profile) {
       </div>
 
       <div class="acct-section">
-        <div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.svg#tabler-users-group"/></svg> Team Members</div>
+        <div class="acct-section-title"><svg class="ti ti-users-group"><use href="img/tabler-sprite.min.svg#tabler-users-group"/></svg> Team Members</div>
         <div class="acct-row"><div class="acct-row-label"><span>Team Owner</span></div>
           <span style="color:var(--text-muted);font-size:.88rem">${esc(ownerProfile?.email || '-')}</span></div>
         ${allMembers.map(m => `
@@ -1423,9 +1472,9 @@ function openCreateTeamModal(orgId) {
       <span class="form-error" id="ctTeamPasswordErr">Team password is required.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create Team', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="t-save-new-team" data-org-id="${esc(orgId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Create Team</button>`, 'sm');
+  Modal.open('<svg class="ti ti-users"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Create Team', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-new-team" data-org-id="${esc(orgId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Create Team</button>`, 'sm');
 }
 
 async function saveNewTeam(orgId) {
@@ -1514,9 +1563,9 @@ async function openInviteModal(teamId) {
       <span class="form-error" id="inviteTeamPasswordErr">Incorrect team password.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Invite Members', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="sendInvitesBtn" data-jaction="t-send-invites" data-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
+  Modal.open('<svg class="ti ti-user-plus"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Invite Members', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="sendInvitesBtn" data-jaction="t-send-invites" data-id="${esc(teamId)}"><svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Send Invites</button>`, 'sm');
 }
 
 async function sendInvites(teamId) {
@@ -1632,7 +1681,7 @@ async function sendInvites(teamId) {
 
   // Show spinner on button
   const sendBtn = document.getElementById('sendInvitesBtn');
-  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Sending...'; }
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Sending...'; }
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
@@ -1661,23 +1710,21 @@ async function sendInvites(teamId) {
         });
         if (insertErr && !insertErr.message.includes('duplicate')) throw insertErr;
 
-        // Call Edge Function to send email - non-fatal if not configured
-        try {
-          await supabaseClient.functions.invoke('send-invite', {
-            body: {
-              email,
-              teamId,
-              invitedBy: invitedBy,
-              orgName: team?.organizations?.name || '',
-              teamName: team?.name || '',
-              teamPassword: candidatePassword,
-            },
-          });
-        } catch (_) { /* email sending optional */ }
+        const { error: inviteEmailErr } = await supabaseClient.functions.invoke('send-invite', {
+          body: {
+            email,
+            teamId,
+            invitedBy: invitedBy,
+            orgName: team?.organizations?.name || '',
+            teamName: team?.name || '',
+            teamPassword: candidatePassword,
+          },
+        });
+        if (inviteEmailErr) throw inviteEmailErr;
 
         sent++;
       } catch (e) {
-        console.warn('[sendInvites] failed for', email, e.message);
+        console.warn('[sendInvites] failed for invitee:', e.message);
         failed++;
       }
     }
@@ -1691,6 +1738,7 @@ async function sendInvites(teamId) {
     renderTeams();
   } catch (err) {
     Toast.danger('Failed to send invites: ' + err.message);
+    if (sendBtn) { sendBtn.disabled = false; sendBtn.innerHTML = '<svg class="ti ti-send"><use href="img/tabler-sprite.min.svg#tabler-send"/></svg> Send Invites'; }
   }
 }
 
@@ -1706,9 +1754,9 @@ function openPromoteUserModal(teamId) {
       <span class="form-error" id="promoteEmailErr">Valid email required.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-user-up"><use href="img/tabler-sprite.svg#tabler-user-up"/></svg> Promote to Team Owner', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="t-do-promote" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Promote</button>`, 'sm');
+  Modal.open('<svg class="ti ti-user-up"><use href="img/tabler-sprite.min.svg#tabler-user-up"/></svg> Promote to Team Owner', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-do-promote" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Promote</button>`, 'sm');
 }
 
 async function doPromote(teamId) {
@@ -1741,10 +1789,10 @@ async function doPromote(teamId) {
 // ── Teams CSS ─────────────────────────────────────────────────────
 
 window.removeTeam = function(teamId, teamName) {
-  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team',
-    `<p style="color:var(--text-muted);font-size:.95rem">Remove team <strong style="color:var(--text-card-title)">${teamName}</strong> and all its members? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" data-jaction="t-do-remove-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Team</button>`, 'sm');
+  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Remove Team',
+    `<p style="color:var(--text-muted);font-size:.95rem">Remove team <strong style="color:var(--text-card-title)">${esc(teamName)}</strong> and all its members? This cannot be undone.</p>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-remove-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Remove Team</button>`, 'sm');
 };
 window.doRemoveTeam = async function(teamId, teamName) {
   Modal.close();
@@ -1823,10 +1871,10 @@ window.doRemoveTeam = async function(teamId, teamName) {
 };
 
 window.confirmRemoveMember = function(memberId, memberName) {
-  Modal.open('<svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove Member',
-    `<p style="color:var(--text-muted);font-size:.95rem">Remove <strong style="color:var(--text-card-title)">${memberName}</strong> from this team? They will lose access to shared jumps.</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" data-jaction="t-do-remove-member" data-id="${esc(memberId)}" data-name="${esc(memberName)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.svg#tabler-user-minus"/></svg> Remove</button>`, 'sm');
+  Modal.open('<svg class="ti ti-user-minus"><use href="img/tabler-sprite.min.svg#tabler-user-minus"/></svg> Remove Member',
+    `<p style="color:var(--text-muted);font-size:.95rem">Remove <strong style="color:var(--text-card-title)">${esc(memberName)}</strong> from this team? They will lose access to shared jumps.</p>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-remove-member" data-id="${esc(memberId)}" data-name="${esc(memberName)}"><svg class="ti ti-user-minus"><use href="img/tabler-sprite.min.svg#tabler-user-minus"/></svg> Remove</button>`, 'sm');
 };
 window.removeMember = window.confirmRemoveMember;
 window.doRemoveMember = async function(memberId, memberName) {
@@ -1860,7 +1908,7 @@ window.doRemoveMember = async function(memberId, memberName) {
             ownerName,
           }
         }).catch(e => console.warn('[send-member-removed]', e));
-      } catch(emailErr) { console.warn('[send-member-removed] non-fatal:', emailErr); }
+      } catch(emailErr) { console.warn('[send-member-removed] non-fatal:', emailErr?.message || 'send failed'); }
     }
 
     Toast.success(`${memberName} removed from team`);
@@ -1873,10 +1921,10 @@ window.doRemoveMember = async function(memberId, memberName) {
 // ── Leave Team (member self-remove) ──────────────────────────────────
 window.confirmLeaveTeam = function(teamId, teamName) {
   Modal.open(
-    '<svg class="ti ti-door-exit"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave Team',
+    '<svg class="ti ti-door-exit"><use href="img/tabler-sprite.min.svg#tabler-door-exit"/></svg> Leave Team',
     `<p style="color:var(--text-muted);font-size:.95rem">Leave <strong style="color:var(--text-card-title)">${esc(teamName)}</strong>? You will lose access to all shared jumps from this team.</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" data-jaction="t-do-leave-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-door-exit"><use href="img/tabler-sprite.svg#tabler-door-exit"/></svg> Leave Team</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="t-do-leave-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-door-exit"><use href="img/tabler-sprite.min.svg#tabler-door-exit"/></svg> Leave Team</button>`, 'sm');
 };
 window.doLeaveTeam = async function(teamId, teamName) {
   Modal.close();
@@ -1927,9 +1975,9 @@ window.openChangeTeamPasswordModal = function(teamId, teamName) {
       <span class="form-error" id="ctpConfirmPasswordErr">Passwords do not match.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Change Team Password', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="t-do-change-pw" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
+  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg> Change Team Password', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-do-change-pw" data-id="${esc(teamId)}" data-name="${esc(teamName)}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save Password</button>`, 'sm');
 
   setTimeout(() => {
     const eyeOpen   = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1.1rem;height:1.1rem"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
@@ -1998,7 +2046,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
 
   // Spinner on save button - show for at least 1.5s
   const ctpSaveBtn = document.querySelector('[data-jaction="t-do-change-pw"]');
-  if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg> Saving...'; }
+  if (ctpSaveBtn) { ctpSaveBtn.disabled = true; ctpSaveBtn.innerHTML = '<svg class="ti ti-loader" style="animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving...'; }
   const _ctpSpinStart = Date.now();
 
   try {
@@ -2015,7 +2063,7 @@ window.doChangeTeamPassword = async function(teamId, teamName) {
       Toast.success(`Password updated for "${esc(teamName)}"`);
     }, _ctpDelay);
   } catch(e) {
-    if (ctpSaveBtn) { ctpSaveBtn.disabled = false; ctpSaveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Password'; }
+    if (ctpSaveBtn) { ctpSaveBtn.disabled = false; ctpSaveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save Password'; }
     Toast.danger('Failed to update password: ' + e.message);
   }
 };
@@ -2038,7 +2086,7 @@ window.openJoinTeamModal = async function(teamId, teamName, inviteId) {
       return;
     }
   }
-  Modal.open(`<svg class="ti ti-user-plus"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team`, `
+  Modal.open(`<svg class="ti ti-user-plus"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Join Team`, `
     <p style="color:var(--text-muted);font-size:.9rem;margin-bottom:16px">
       Enter the team password to join <strong>${esc(teamName)}</strong>. You can find this in your invitation email.
     </p>
@@ -2050,9 +2098,9 @@ window.openJoinTeamModal = async function(teamId, teamName, inviteId) {
       </div>
       <span class="form-error" id="joinTeamPasswordErr">Incorrect password.</span>
     </div>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-primary" data-jaction="t-do-join-team" data-id="${esc(teamId)}" data-name="${esc(teamName)}" data-invite="${esc(inviteId)}">
-       <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.svg#tabler-user-plus"/></svg> Join Team
+       <svg class="ti ti-user-plus" style="color:white"><use href="img/tabler-sprite.min.svg#tabler-user-plus"/></svg> Join Team
      </button>`, 'sm');
   // Wire eye toggle after modal renders
   setTimeout(() => {
@@ -2170,7 +2218,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
           }).catch(e => console.warn('[send-member-joined]', e));
         }
       }
-    } catch(emailErr) { console.warn('[send-member-joined] non-fatal:', emailErr); }
+    } catch(emailErr) { console.warn('[send-member-joined] non-fatal:', emailErr?.message || 'send failed'); }
 
     // Notify user they joined a team
     window.addNotification?.({ type: 'team-joined', message: `You joined team: ${teamName}`, ts: Date.now() });
@@ -2183,7 +2231,7 @@ window.doJoinTeam = async function(teamId, teamName, inviteId) {
 
     // Show success message
     setTimeout(() => {
-      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e;width:1.5em;height:1.5em;vertical-align:middle"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Team Joined!',
+      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e;width:1.5em;height:1.5em;vertical-align:middle"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg> Team Joined!',
         `<div style="text-align:center;padding:8px 0">
           <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:10px">Welcome to ${esc(teamName)}!</h3>
           <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.6">
@@ -2325,13 +2373,15 @@ let _shareColModalOriginal = {}; // { colId: wasSharedWithThisTeam }
 window.openShareColumnModal = async function(teamId, teamName) {
   const localUser = DB.getCurrentUser();
   if (!localUser) return;
-  const allCols = DB.getColumns(localUser.id).filter(c => c.name);
+  // Only personal columns can be shared out — exclude columns received by joining another team.
+  // A received-team column has a teamId pointing to the team that shared it; these cannot be re-shared.
+  const allCols = DB.getColumns(localUser.id).filter(c => c.name && !c.teamId);
 
   if (allCols.length === 0) {
     Modal.open(
-      '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns',
+      '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg> Manage Shared Columns',
       `<p style="color:var(--text-muted);font-size:.9rem">No columns yet. Add columns first via <strong>Configure Columns</strong> on the Jumps page.</p>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`,
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`,
       'sm'
     );
     return;
@@ -2363,11 +2413,11 @@ window.openShareColumnModal = async function(teamId, teamName) {
   }).join('');
 
   Modal.open(
-    '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Manage Shared Columns - ' + esc(teamName),
+    '<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg> Manage Shared Columns - ' + esc(teamName),
     `<p style="font-size:.85rem;color:var(--text-muted);margin-bottom:12px">Toggle which columns are shared with this team.</p>
      <div style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">${rows}</div>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="t-save-share-col" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="t-save-share-col" data-id="${esc(teamId)}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save</button>`,
     'sm'
   );
 };
@@ -2410,15 +2460,15 @@ window.saveShareColumnModal = async function(teamId) {
       window._pendingShareSave = { teamId, toShare, toUnshare };
       Modal.close();
       Modal.open(
-        '<svg class="ti ti-alert-triangle"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Unshare Column?',
+        '<svg class="ti ti-alert-triangle"><use href="img/tabler-sprite.min.svg#tabler-alert-triangle"/></svg> Unshare Column?',
         `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6;margin:0">
            Unsharing ${colList} will remove access for
            <strong style="color:var(--text-card-title)">${memberCount} ${memberWord}</strong>.
            They will be notified in the app on their next sync.
          </p>`,
-        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
          <button class="btn btn-delete" data-jaction="t-confirm-share-save">
-           <svg class="ti ti-share-off"><use href="img/tabler-sprite.svg#tabler-share-off"/></svg> Yes, Save Changes
+           <svg class="ti ti-share-off"><use href="img/tabler-sprite.min.svg#tabler-share-off"/></svg> Yes, Save Changes
          </button>`,
         { closeable: true }
       );
@@ -2499,15 +2549,15 @@ window.confirmUnshareColumnFromTeam = async function(teamId, teamName, colSupaba
 
   window._unshareColResolve = null;
   Modal.open(
-    '<svg class="ti ti-alert-triangle"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Unshare Column?',
+    '<svg class="ti ti-alert-triangle"><use href="img/tabler-sprite.min.svg#tabler-alert-triangle"/></svg> Unshare Column?',
     `<p style="color:var(--text-muted);font-size:0.92rem;line-height:1.6;margin:0 0 12px">
        Unsharing <strong>${esc(colName)}</strong> will remove access for
        <strong style="color:var(--text-card-title)">${memberCount} ${memberCount === 1 ? 'member' : 'members'}</strong>.
        They will be notified in the app on their next sync.
      </p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
      <button class="btn btn-delete" data-jaction="t-execute-unshare-col" data-team-id="${esc(teamId)}" data-col-id="${esc(colSupabaseId)}" data-col-name="${esc(colName)}">
-       <svg class="ti ti-share-off"><use href="img/tabler-sprite.svg#tabler-share-off"/></svg> Yes, Unshare
+       <svg class="ti ti-share-off"><use href="img/tabler-sprite.min.svg#tabler-share-off"/></svg> Yes, Unshare
      </button>`,
     { closeable: true }
   );

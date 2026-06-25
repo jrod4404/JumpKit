@@ -176,7 +176,7 @@ serve(async (req) => {
             .in('id', overCapIds);
 
           if (lockErr) {
-            console.error(`lockout update error for team ${team.id}:`, lockErr);
+            console.error('lockout update error for team:', lockErr?.message || lockErr);
             continue;
           }
 
@@ -227,7 +227,7 @@ serve(async (req) => {
             .or('locked.eq.true,lock_at.not.is.null');
 
           if (clearErr) console.error('Re-upgrade lock clear error:', clearErr);
-          else console.log(`Cleared locks for ${teamIds.length} teams owned by ${profileId}`);
+          else console.log(`Cleared locks for ${teamIds.length} owner team(s)`);
         }
       } catch (clearErr) {
         console.error('Re-upgrade lock clear error:', clearErr);

@@ -3,6 +3,22 @@ let currentJumpFilter = 'active';
 const JUMP_FILTERS = ['active','favorites','recent','most-used','archive'];
 const FILTER_LABELS = { active:'Active', favorites:'Favorites', recent:'Recent', 'most-used':'Most Used', archive:'Archive' };
 
+// { teamId → teamName } populated async when jumps page loads
+window._jumpTeamNames = window._jumpTeamNames || {};
+async function _fetchJumpTeamNames() {
+  try {
+    const cols = DB.getColumns(currentUser?.id || '');
+    const teamIds = [...new Set(cols.filter(c => c.teamId).map(c => c.teamId))];
+    if (!teamIds.length) return;
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) return;
+    const { data: teams = [], error } = await supabaseClient.from('teams').select('id, name').in('id', teamIds).limit(200);
+    if (error) throw error;
+    teams.forEach(t => { window._jumpTeamNames[t.id] = t.name; });
+    renderColumns(); // re-render with names now available
+  } catch (_) {}
+}
+
 function renderJumps() {
   const content = document.getElementById('pageContent');
   content.classList.add('jumps-page');
@@ -10,15 +26,15 @@ function renderJumps() {
   content.innerHTML = `
     <div class="page-stats-bar">
       <div class="jumps-toolbar">
-        <button class="btn btn-subtle btn-sm" id="btnAddJump"><svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump</button>
-        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns</button>
+        <button class="btn btn-subtle btn-sm" id="btnAddJump"><svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Jump</button>
+        <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg> Configure Columns</button>
       </div>
       <div class="jump-filter-bar" id="jumpFilterBar">
         <div class="jfb-slider" id="jfbSlider"></div>
         ${JUMP_FILTERS.map(f => `<button class="jfb-tab${f===currentJumpFilter?' active':''}" data-filter="${f}">${FILTER_LABELS[f]}</button>`).join('')}
       </div>
       <div class="jump-search-wrap">
-        <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
+        <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.min.svg#tabler-search"/></svg>
         <input class="jump-search-input" id="jumpSearch" type="text" placeholder="Search jumps…" autocomplete="off">
       </div>
     </div>
@@ -45,12 +61,13 @@ function renderJumps() {
     if (e.target.closest('.jump-item')) return;
     e.preventDefault();
     CtxMenu.show(e.clientX, e.clientY, [
-      { icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg>',     label: 'Add Jump',          action: openAddJumpModal },
-      { icon: '<svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg>',  label: 'Configure Columns', action: openConfigColumnsModal },
+      { icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg>',     label: 'Add Jump',          action: openAddJumpModal },
+      { icon: '<svg class="ti ti-settings"><use href="img/tabler-sprite.min.svg#tabler-settings"/></svg>',  label: 'Configure Columns', action: openConfigColumnsModal },
     ]);
   });
 
   applyJumpFilter();
+  _fetchJumpTeamNames(); // async: fetches team names then re-renders cols with subtitles
 }
 
 function positionFilterSlider() {
@@ -115,7 +132,7 @@ function renderArchivedInline() {
 
   if (filtered.length === 0) {
     area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%">
-      <div class="big-icon"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg></div>
+      <div class="big-icon"><svg class="ti ti-archive"><use href="img/tabler-sprite.min.svg#tabler-archive"/></svg></div>
       <p>${q ? 'No archived jumps match your search.' : 'Archive is empty.'}</p>
     </div>`;
     area.style.position = 'relative';
@@ -133,10 +150,10 @@ function renderArchivedInline() {
     <table style="width:100%;border-collapse:collapse;font-size:0.85rem">
       <thead>
         <tr style="border-bottom:2px solid var(--border)" id="archiveSortRow">
-          <th data-sort="name" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Name <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
-          <th data-sort="url" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">URL <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
-          <th data-sort="lastused" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Last Used <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
-          <th data-sort="updatedat" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Archived <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.svg#tabler-selector"/></svg></th>
+          <th data-sort="name" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Name <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.min.svg#tabler-selector"/></svg></th>
+          <th data-sort="url" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">URL <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.min.svg#tabler-selector"/></svg></th>
+          <th data-sort="lastused" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Last Used <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.min.svg#tabler-selector"/></svg></th>
+          <th data-sort="updatedat" style="padding:8px 12px;text-align:left;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;cursor:pointer;user-select:none">Archived <svg class="ti ti-selector" style="font-size:0.7rem;opacity:.5"><use href="img/tabler-sprite.min.svg#tabler-selector"/></svg></th>
           <th style="padding:8px 12px;text-align:right;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em">Actions</th>
         </tr>
       </thead>
@@ -149,8 +166,8 @@ function renderArchivedInline() {
           <td style="padding:10px 12px;color:var(--text-muted);white-space:nowrap">${fmtDate(j.updatedAt)}</td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap">
             <div style="display:flex;gap:6px;justify-content:flex-end">
-              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-unarchive" data-id="${esc(j.id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>
-              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-delete" data-id="${esc(j.id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>
+              <button class="btn btn-subtle" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-unarchive" data-id="${esc(j.id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.min.svg#tabler-restore"/></svg> Restore</button>
+              <button class="btn btn-delete" style="font-size:0.78rem;padding:4px 10px" data-jaction="confirm-delete" data-id="${esc(j.id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Delete</button>
             </div>
           </td>
         </tr>`).join('')}
@@ -192,11 +209,11 @@ function renderArchivedInline() {
       e.stopPropagation();
       const j = DB.getJumps(currentUser.id).find(j => j.id === jid);
       CtxMenu.show(e.clientX, e.clientY, [
-        { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { if (j) navigator.clipboard.writeText(j.url); } },
-        { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(jid) },
-        { icon: '<svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg>', label: 'Restore', action: () => confirmUnarchive(jid) },
+        { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.min.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { if (j) navigator.clipboard.writeText(j.url); } },
+        { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.min.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(jid) },
+        { icon: '<svg class="ti ti-restore"><use href="img/tabler-sprite.min.svg#tabler-restore"/></svg>', label: 'Restore', action: () => confirmUnarchive(jid) },
         'divider',
-        { icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete Permanently', action: () => confirmDelete(jid), danger: true },
+        { icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>', label: 'Delete Permanently', action: () => confirmDelete(jid), danger: true },
       ]);
     });
     row.addEventListener('mouseenter', () => row.style.background = 'var(--bg-hover)');
@@ -223,10 +240,10 @@ window.doUnarchive = function doUnarchive(id) {
 
 window.confirmUnarchive = function confirmUnarchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore Jump',
+  Modal.open('<svg class="ti ti-restore"><use href="img/tabler-sprite.min.svg#tabler-restore"/></svg> Restore Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Restore <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong> back to the active Jumps?</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-turq" data-jaction="do-unarchive" data-id="${esc(id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.svg#tabler-restore"/></svg> Restore</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" data-jaction="do-unarchive" data-id="${esc(id)}"><svg class="ti ti-restore"><use href="img/tabler-sprite.min.svg#tabler-restore"/></svg> Restore</button>`, 'sm');
 }
 
 function renderColumns() {
@@ -245,19 +262,22 @@ function renderColumns() {
   if (columns.length === 0) {
     area.innerHTML = `
       <div class="no-columns">
-        <div class="big-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></div>
+        <div class="big-icon"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg></div>
         <h3>No columns yet</h3>
         <p>Right-click here or click "Configure Columns" to create your first jump category.</p>
-        <button class="btn btn-subtle" data-jaction="open-config-columns"><svg class="ti ti-settings"><use href="img/tabler-sprite.svg#tabler-settings"/></svg> Configure Columns</button>
+        <button class="btn btn-subtle" data-jaction="open-config-columns"><svg class="ti ti-settings"><use href="img/tabler-sprite.min.svg#tabler-settings"/></svg> Configure Columns</button>
       </div>`;
     return;
   }
+
+  const _prefs = DB.getPrefs(currentUser.id);
+  const _showColTeamName = _prefs.showColTeamName !== false;
 
   // For non-active filters: same column structure, filtered jumps per column
   if (currentJumpFilter !== 'active') {
     const filteredIds = new Set(jumps.map(j => j.id));
     if (filteredIds.size === 0) {
-      area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%"><div class="big-icon"><svg class="ti ti-mood-empty"><use href="img/tabler-sprite.svg#tabler-mood-empty"/></svg></div><p>No jumps match this filter.</p></div>`;
+      area.innerHTML = `<div class="no-columns" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100%"><div class="big-icon"><svg class="ti ti-mood-empty"><use href="img/tabler-sprite.min.svg#tabler-mood-empty"/></svg></div><p>No jumps match this filter.</p></div>`;
       area.style.position = 'relative';
       return;
     }
@@ -270,9 +290,10 @@ function renderColumns() {
       const colEl = document.createElement('div');
       colEl.className = 'jump-column';
       colEl.innerHTML = `
-        <div class="col-header">
-          <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-          <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+        <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
+          <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
+          <span class="col-count">${(col.isShared && col.teamId) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+          ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(col.isShared && col.teamId) ? (window._jumpTeamNames[col.teamId] || 'Team') : 'Personal'}</span>` : ''}
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
       area.appendChild(colEl);
@@ -315,9 +336,10 @@ function renderColumns() {
     const colEl = document.createElement('div');
     colEl.className = 'jump-column';
     colEl.innerHTML = `
-      <div class="col-header">
-        <span class="col-header-title" title="${esc(col.name)}">${esc(col.name)}</span>
-        <span class="col-count">${col.isShared ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+      <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
+        <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
+        <span class="col-count">${(col.isShared && col.teamId) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+        ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(col.isShared && col.teamId) ? (window._jumpTeamNames[col.teamId] || 'Team') : 'Personal'}</span>` : ''}
       </div>
       <div class="col-items" id="col-${col.id}">
         ${colJumps.length === 0
@@ -390,7 +412,7 @@ function jumpItemHTML(j, colIndex) {
   const prefs = DB.getPrefs(currentUser.id);
   const isShared = j.isShared || j.teamId;
   return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
-    <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg></span>
+    <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg></span>
     <div class="jump-info">
       <div class="jump-name">
         ${esc(j.name)}
@@ -412,11 +434,11 @@ function refreshStatsBar() {
 }
 
 function getStatsText(filter) {
-  const allActive   = DB.getActiveJumps(currentUser.id);
+  const allActive   = DB.getRenderableActiveJumps ? DB.getRenderableActiveJumps(currentUser.id) : DB.getActiveJumps(currentUser.id);
   const allArchived = DB.getArchivedJumps(currentUser.id);
   const totalClicks = allActive.reduce((a, j) => a + (j.clickCount || 0), 0);
   const timeSaved   = (totalClicks / 6).toFixed(1);
-  if (!filter || filter === 'active')   return `${allActive.length} active &middot; ${totalClicks} clicks &middot; ${timeSaved} min saved`;
+  if (!filter || filter === 'active')   return `${allActive.length} active &middot; ${allArchived.length} archived &middot; ${totalClicks} launches &middot; ${timeSaved} min saved`;
   if (filter === 'favorites')           return `${allActive.filter(j=>j.favorite).length} favorites`;
   if (filter === 'recent') { const n = allActive.filter(j=>j.lastUsed && j.lastUsed >= Date.now()-30*24*60*60*1000).length; return `${n} used in last 30 days`; }
   if (filter === 'most-used')           return `top ${Math.max(1,Math.ceil(allActive.length*0.1))} most-used`;
@@ -460,28 +482,28 @@ function openJumpContextMenu(x, y, id) {
   const isShared = !!(jump.isShared || jump.teamId);
 
   const items = [
-    { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { navigator.clipboard.writeText(jump.url); } },
-    { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(id) },
+    { icon: '<svg class="ti ti-clipboard"><use href="img/tabler-sprite.min.svg#tabler-clipboard"/></svg>', label: 'Copy URL', action: () => { navigator.clipboard.writeText(jump.url); } },
+    { icon: '<svg class="ti ti-info-circle"><use href="img/tabler-sprite.min.svg#tabler-info-circle"/></svg>', label: 'Details', action: () => openJumpDetails(id) },
   ];
 
   if (isShared) {
     const isOwner = jump.userId === currentUser.id && !jump.supabaseId?.startsWith?.('ext');
     if (isOwner) {
       // Owner: full edit + archive/delete
-      items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
-      items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
+      items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.min.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
+      items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.min.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
       items.push('divider');
-      items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
+      items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
     } else {
       // Team member: hotkey + favorite only
-      items.push({ icon: '<svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg>', label: 'Set Hotkey', action: () => openHotkeyModal(id) });
-      items.push({ icon: '<svg class="ti ti-star"><use href="img/tabler-sprite.svg#tabler-star"/></svg>', label: jump.favorite ? 'Remove Favorite' : 'Add Favorite', action: () => { DB.updateJump(currentUser.id, id, { favorite: !jump.favorite }); renderColumns(); } });
+      items.push({ icon: '<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg>', label: 'Set Hotkey', action: () => openHotkeyModal(id) });
+      items.push({ icon: '<svg class="ti ti-star"><use href="img/tabler-sprite.min.svg#tabler-star"/></svg>', label: jump.favorite ? 'Remove Favorite' : 'Add Favorite', action: () => { DB.updateJump(currentUser.id, id, { favorite: !jump.favorite }); renderColumns(); } });
     }
   } else {
-    items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
-    items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
+    items.push({ icon: '<svg class="ti ti-pencil"><use href="img/tabler-sprite.min.svg#tabler-pencil"/></svg>', label: 'Edit', action: () => openEditJumpModal(id) });
+    items.push({ icon: '<svg class="ti ti-archive"><use href="img/tabler-sprite.min.svg#tabler-archive"/></svg>', label: 'Archive', action: () => confirmArchive(id) });
     items.push('divider');
-    items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
+    items.push({ icon: '<svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>', label: 'Delete', action: () => confirmDelete(id), danger: true });
   }
 
   CtxMenu.show(x, y, items);
@@ -497,9 +519,9 @@ function openHotkeyModal(id) {
       <input class="form-input" id="sharedHotkey" value="${esc(j.hotkey || '')}"
         placeholder="Click here then press combo…" autocomplete="off" style="cursor:pointer"/>
     </div>`;
-  Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg> Set Hotkey', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="save-shared-hotkey" data-id="${esc(id)}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save</button>`, 'sm');
+  Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Set Hotkey', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="save-shared-hotkey" data-id="${esc(id)}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save</button>`, 'sm');
 
   const inp = document.getElementById('sharedHotkey');
   if (inp) {
@@ -530,7 +552,7 @@ function openJumpFormModal(editId) {
   const jump = editId ? DB.getJumps(currentUser.id).find(j => j.id === editId) : null;
   const cols = DB.getColumns(currentUser.id);
   const colOptions = cols.length
-    ? cols.map(c => `<option value="${c.id}" ${jump?.columnId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')
+    ? cols.map(c => `<option value="${esc(c.id)}" ${jump?.columnId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')
     : '<option value="">— No columns configured —</option>';
 
   const body = `
@@ -549,8 +571,8 @@ function openJumpFormModal(editId) {
       <input type="hidden" id="jCol" value="${esc(jump?.columnId || '')}"/>
       <div class="custom-select" id="jColDrop">
         <div class="custom-select-trigger" id="jColTrigger" tabindex="3">
-          <span id="jColLabel" style="${jump?.columnId ? '' : 'color:var(--text-dim)'}">${ jump?.columnId ? (DB.getColumns(currentUser.id).find(c=>c.id===jump.columnId)?.name || 'Select Column') : 'Select Column'}</span>
-          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          <span id="jColLabel" style="${jump?.columnId ? '' : 'color:var(--text-dim)'}">${ jump?.columnId ? esc(DB.getColumns(currentUser.id).find(c=>c.id===jump.columnId)?.name || 'Select Column') : 'Select Column'}</span>
+          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="jColMenu">
           ${DB.getColumns(currentUser.id).filter(c=>c.visible).sort((a,b)=>a.order-b.order).map(c=>`
@@ -572,7 +594,7 @@ function openJumpFormModal(editId) {
         <input type="hidden" id="jHotkey" value="${esc(jump?.hotkey || '')}"/>
         <button type="button" id="btnPickHotkey" style="width:100%;text-align:left;display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:0.93rem;padding:10px 14px;border-radius:var(--radius);border:1.5px solid var(--border-input);background:var(--bg-input);color:var(--text);cursor:pointer;transition:border-color var(--transition)" title="Pick a hotkey">
           <span id="btnPickHotkeyLabel" style="color:${jump?.hotkey ? 'var(--text)' : 'var(--text-dim)'}">${jump?.hotkey ? esc(jump.hotkey) : 'Select a hotkey…'}</span>
-          <svg class="ti ti-chevron-down" style="width:1em;height:1em;flex-shrink:0;opacity:0.6"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          <svg class="ti ti-chevron-down" style="width:1em;height:1em;flex-shrink:0;opacity:0.6"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
         </button>
         <div id="hotkeyPicker" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:8px;margin-top:4px;max-height:180px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,0.3)"></div>
       </div>
@@ -607,10 +629,10 @@ function openJumpFormModal(editId) {
 `;
 
   const footer = `
-    <button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-    <button class="btn btn-save" id="btnSaveJump" data-jaction="save-jump" data-id="${esc(editId || '')}"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
+    <button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+    <button class="btn btn-save" id="btnSaveJump" data-jaction="save-jump" data-id="${esc(editId || '')}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
-  Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Jump', body, footer);
+  Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.min.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Jump', body, footer);
 
   // Time Saved unit slider
   (function() {
@@ -739,7 +761,7 @@ function saveJump(editId) {
 
   // Show spinner on save button
   const saveBtn = document.getElementById('btnSaveJump');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Saving…'; }
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg> Saving…'; }
 
   const data = {
     name, url,
@@ -843,7 +865,7 @@ function saveJump(editId) {
       renderColumns();
       Toast.success(editId ? 'Jump updated!' : 'Jump added!');
     } catch (err) {
-      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> ' + (editId ? 'Save Changes' : 'Add Jump'); }
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> ' + (editId ? 'Save Changes' : 'Add Jump'); }
       Toast.danger('Failed to save jump: ' + (err.message || 'Unknown error'));
     }
   }, 1000);
@@ -865,18 +887,18 @@ function openJumpDetails(id) {
     <div class="detail-row"><span class="detail-label">Clicks</span>     <span class="detail-value">${j.clickCount || 0}</span></div>
     <div class="detail-row"><span class="detail-label">Last Used</span>  <span class="detail-value">${j.lastUsed ? new Date(j.lastUsed).toLocaleString() : 'Never'}</span></div>
     <div class="detail-row"><span class="detail-label">Created</span>    <span class="detail-value">${new Date(j.createdAt).toLocaleString()}</span></div>`;
-  Modal.open('<svg class="ti ti-info-circle"><use href="img/tabler-sprite.svg#tabler-info-circle"/></svg> Jump Details', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>
-     <button class="btn btn-subtle" data-jaction="close-edit-jump" data-id="${esc(id)}"><svg class="ti ti-pencil"><use href="img/tabler-sprite.svg#tabler-pencil"/></svg> Edit</button>`, 'sm');
+  Modal.open('<svg class="ti ti-info-circle"><use href="img/tabler-sprite.min.svg#tabler-info-circle"/></svg> Jump Details', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>
+     <button class="btn btn-subtle" data-jaction="close-edit-jump" data-id="${esc(id)}"><svg class="ti ti-pencil"><use href="img/tabler-sprite.min.svg#tabler-pencil"/></svg> Edit</button>`, 'sm');
 }
 
 // ── Confirm Delete ─────────────────────────────────────────────────
 function confirmDelete(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete Jump',
+  Modal.open('<svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Delete Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Permanently delete <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? This cannot be undone.</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-delete" data-jaction="do-delete" data-id="${esc(id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-delete" data-jaction="do-delete" data-id="${esc(id)}"><svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Delete</button>`, 'sm');
 }
 function doDelete(id) {
   // If deleting a shared jump, remove from Supabase first
@@ -893,10 +915,10 @@ function doDelete(id) {
 // ── Confirm Archive ────────────────────────────────────────────────
 function confirmArchive(id) {
   const j = DB.getJumps(currentUser.id).find(j => j.id === id);
-  Modal.open('<svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive Jump',
+  Modal.open('<svg class="ti ti-archive"><use href="img/tabler-sprite.min.svg#tabler-archive"/></svg> Archive Jump',
     `<p style="color:var(--text-muted);font-size:.95rem">Archive <strong style="color:var(--text-card-title)">${esc(j?.name)}</strong>? It will be moved to the Archive tab and can be restored any time.</p>`,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-turq" data-jaction="do-archive" data-id="${esc(id)}"><svg class="ti ti-archive"><use href="img/tabler-sprite.svg#tabler-archive"/></svg> Archive</button>`, 'sm');
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-turq" data-jaction="do-archive" data-id="${esc(id)}"><svg class="ti ti-archive"><use href="img/tabler-sprite.min.svg#tabler-archive"/></svg> Archive</button>`, 'sm');
 }
 function doArchive(id) { DB.updateJump(currentUser.id, id, { isArchived: true }); Modal.close(); renderColumns(); }
 
@@ -949,8 +971,8 @@ function _makeColConfigRow(c, i, jumpCount) {
   // Build sharing status label (read-only)
   let statusHTML = '';
   if (!c.isShared) {
-    // Always show Personal for personal cols (including new blank rows)
-    statusHTML = `<span class="col-status-badge col-status-personal">Personal</span>`;
+    // Always show explicit read-only status for personal cols (including new blank rows)
+    statusHTML = `<span class="col-readonly-value col-status-personal">Not shared</span>`;
   } else if (c.name && !c._new) {
     // Shared col — show team badge(s)
     const allEntries = [];
@@ -963,20 +985,20 @@ function _makeColConfigRow(c, i, jumpCount) {
       ? allEntries.map(tid => {
           const teamName = _colConfigTeamNames[tid] || 'Team';
           return _colConfigOwnedTeamIds.has(tid)
-            ? `<span class="col-status-badge col-status-shared-out" style="margin-right:3px"><svg class="ti ti-users" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-users"/></svg>${esc(teamName)}</span>`
-            : `<span class="col-status-badge col-status-shared-from" style="margin-right:3px"><svg class="ti ti-arrow-down-circle" style="width:.8rem;height:.8rem;vertical-align:middle;margin-right:3px"><use href="img/tabler-sprite.svg#tabler-arrow-down-circle"/></svg>From ${esc(teamName)}</span>`;
+            ? `<span class="col-status-badge col-status-shared-out" style="margin-right:3px" title="You own this column and share it with ${esc(teamName)}"><span class="col-status-dir">Shared out</span><span class="col-status-arrow">→</span><span class="col-status-text">${esc(teamName)}</span></span>`
+            : `<span class="col-status-badge col-status-shared-from" style="margin-right:3px" title="This column is shared with you by ${esc(teamName)}"><span class="col-status-dir">Shared in</span><span class="col-status-arrow">←</span><span class="col-status-text">${esc(teamName)}</span></span>`;
         }).join('')
-      : `<span class="col-status-badge col-status-personal">Personal</span>`;
+      : `<span class="col-readonly-value col-status-personal">Not shared</span>`;
   }
 
   const isSharedCol = c.isShared;
   const removeBtn = isSharedCol
-    ? `<button type="button" class="btn-col-remove tooltip-left" disabled data-tooltip="Team columns can only be hidden, not removed"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`
-    : `<button type="button" class="btn-col-remove tooltip-left" data-colid="${esc(c.id || '')}" data-colname="${esc(c.name || '')}" data-jumpcount="${jumpCount}" data-tooltip="Remove column"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.svg#tabler-trash"/></svg></button>`;
+    ? `<button type="button" class="btn-col-remove tooltip-left" disabled data-tooltip="Team columns can only be hidden, not removed"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>`
+    : `<button type="button" class="btn-col-remove tooltip-left" data-colid="${esc(c.id || '')}" data-colname="${esc(c.name || '')}" data-jumpcount="${jumpCount}" data-tooltip="Remove column"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:inherit"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg></button>`;
 
   return `
   <div class="col-config-item" data-idx="${i}" data-colid="${c.id || ''}" draggable="true">
-    <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.svg#tabler-grip-vertical"/></svg></span>
+    <span class="col-drag-handle" title="Drag to reorder"><svg class="ti ti-grip-vertical"><use href="img/tabler-sprite.min.svg#tabler-grip-vertical"/></svg></span>
     <div class="col-config-field">
       <span class="col-config-label">Column Name</span>
       <input class="form-input" placeholder="Column name" value="${esc(c.name)}" data-field="name" style="font-size:.85rem;padding:7px 10px"/>
@@ -989,6 +1011,10 @@ function _makeColConfigRow(c, i, jumpCount) {
           <span class="toggle-slider"></span>
         </label>
       </div>
+    </div>
+    <div class="col-config-field" style="align-items:center">
+      <span class="col-config-label" style="text-align:center">Jumps</span>
+      <span class="col-jump-count" title="${jumpCount} jump${jumpCount !== 1 ? 's' : ''} in this column">${jumpCount}</span>
     </div>
     <div class="col-config-field col-status-field">
       <span class="col-config-label">Sharing</span>
@@ -1015,12 +1041,12 @@ function renderColConfigModal(cols) {
     </p>
     <div class="col-config-list" id="colConfigList">${rows}</div>
     <button type="button" id="btnAddColRow" class="btn btn-subtle" style="margin-top:12px;display:flex;align-items:center;gap:6px;font-size:.85rem">
-      <svg class="ti ti-plus" style="width:1rem;height:1rem"><use href="img/tabler-sprite.svg#tabler-plus"/></svg> Add Column
+      <svg class="ti ti-plus" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Column
     </button>`;
 
-  Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg> Configure Columns', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" id="btnSaveColumns" data-jaction="save-columns"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Save Columns</button>`, 'lg');
+  Modal.open('<svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg> Configure Columns', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" id="btnSaveColumns" data-jaction="save-columns"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save Columns</button>`, 'lg config-cols-modal');
 
   initColDragDrop();
   _initColConfigActions();
@@ -1059,7 +1085,7 @@ function _wireRemoveBtn(btn) {
       row.style.display = 'block';
       row.innerHTML = `
         <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;width:100%;box-sizing:border-box">
-          <svg class="ti ti-alert-triangle" style="width:1.2rem;height:1.2rem;color:#e15b59;flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+          <svg class="ti ti-alert-triangle" style="width:1.2rem;height:1.2rem;color:#e15b59;flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-alert-triangle"/></svg>
           <span style="flex:1;font-size:.88rem;color:var(--text);min-width:0">Delete <strong>${esc(colName)}</strong> and all <strong>${jumpCount}</strong> jump${jumpCount !== 1 ? 's' : ''} inside?</span>
           <button type="button" class="btn btn-subtle" id="btnRemoveCancel" style="font-size:.82rem;padding:5px 14px;flex-shrink:0">Cancel</button>
           <button type="button" class="btn btn-delete" id="btnRemoveConfirm" style="font-size:.82rem;padding:5px 14px;flex-shrink:0">Yes, Delete</button>
@@ -1129,9 +1155,11 @@ function initColDragDrop() {
 
 async function saveColumns() {
   const saveBtn = document.getElementById('btnSaveColumns');
-  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Saving…'; }
+  const originalBtnHTML = saveBtn?.innerHTML || '';
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg> Saving…'; }
 
-  await new Promise(r => setTimeout(r, 1000));
+  try {
+    await new Promise(r => setTimeout(r, 1000));
 
   const items    = document.querySelectorAll('.col-config-item');
   const existing = DB.getColumns(currentUser.id);
@@ -1175,21 +1203,27 @@ async function saveColumns() {
     for (const st of sharedTeams) {
       if (st.supabaseId && _colConfigOwnedTeamIds.has(st.teamId)) {
         try {
-          await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', st.supabaseId);
+          const { error } = await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', st.supabaseId);
+          if (error) throw error;
         } catch (err) { console.warn('Failed to sync column rename (sharedTeams):', err.message); }
       }
     }
     // Old format: single teamId
     if (col.isShared && col.teamId && col.supabaseId && _colConfigOwnedTeamIds.has(col.teamId)) {
       try {
-        await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', col.supabaseId);
+        const { error } = await supabaseClient.from('shared_columns').update({ name: col.name }).eq('id', col.supabaseId);
+        if (error) throw error;
       } catch (err) { console.warn('Failed to sync column rename:', err.message); }
     }
   }
 
-  Modal.close();
-  renderColumns();
-  Toast.success('Columns saved!');
+    Modal.close();
+    renderColumns();
+    Toast.success('Columns saved!');
+  } catch (err) {
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = originalBtnHTML || '<svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Save Columns'; }
+    Toast.danger('Failed to save columns: ' + (err.message || 'Unknown error'));
+  }
 }
 
 // syncColumnToSupabase(col, teamId)

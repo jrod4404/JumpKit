@@ -1,6 +1,23 @@
 // ── Guard (Supabase session) ───────────────────────────────────────
 let _supabaseUser = null;
 let currentUser = null;
+let _sessionLockInterval = null;
+
+function esc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function _clearSessionLockInterval() {
+  if (_sessionLockInterval) {
+    clearInterval(_sessionLockInterval);
+    _sessionLockInterval = null;
+  }
+}
 
 async function initAuth() {
   try {
@@ -16,17 +33,20 @@ async function initAuth() {
         // First Supabase login on this device - create local profile using Supabase UUID
         DB.createUser(_supabaseUser.email.split('@')[0], _supabaseUser.email, '__supabase__', supaId);
         localUser = DB.findUserByEmail(_supabaseUser.email);
-        if (localUser) DB.seedNewUser(localUser.id);
       } else if (localUser.id !== supaId) {
         // ID mismatch - migrate SQLite data from old local ID to Supabase UUID
         // ID migration — silent in production
+        const oldLocalId = localUser.id;
         try {
-          await window.electronAPI.migrateUserId(localUser.id, supaId);
+          await window.electronAPI.migrateUserId(oldLocalId, supaId);
         } catch(e) {
           console.warn('[Auth] migrateUserId failed:', e.message);
         }
+        // Also preserve legacy browser/localStorage data keyed by the pre-Supabase
+        // local id. This is a safety backup and matters in web/dev fallback mode.
+        try { DB.migrateLocalStorageUserId(oldLocalId, supaId); } catch (_) {}
         // Update localStorage user record to use Supabase UUID
-        const users = DB.getUsers().map(u => u.id === localUser.id ? { ...u, id: supaId } : u);
+        const users = DB.getUsers().map(u => u.id === oldLocalId ? { ...u, id: supaId } : u);
         DB.saveUsers(users);
         // Update the session immediately so DB.init uses the new ID
         DB.setSession(supaId);
@@ -75,24 +95,29 @@ function _initSessionLock(userId) {
   }
 
   // Write / refresh our token on load
-  const _writeSession = () => Promise.resolve(supabaseClient.from('user_sessions').upsert(
-    { user_id: userId, session_token: myToken, device_hint: navigator.platform || 'Unknown', last_seen: new Date().toISOString() },
-    { onConflict: 'user_id' }
-  )).catch(() => {});
+  const _writeSession = async () => {
+    const { error } = await supabaseClient.from('user_sessions').upsert(
+      { user_id: userId, session_token: myToken, device_hint: navigator.platform || 'Unknown', last_seen: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
+    if (error) throw error;
+  };
 
-  _writeSession();
+  _writeSession().catch(e => console.warn('[Session] Could not refresh session lock:', e.message));
 
   // Poll every 20 seconds — if our token was replaced, force logout
-  const _interval = setInterval(async () => {
+  _clearSessionLockInterval();
+  _sessionLockInterval = setInterval(async () => {
     try {
-      const { data } = await supabaseClient
+      const { data, error } = await supabaseClient
         .from('user_sessions')
         .select('session_token')
         .eq('user_id', userId)
         .maybeSingle();
+      if (error) throw error;
       if (!data) return; // row gone (logged out elsewhere)
       if (data.session_token !== myToken) {
-        clearInterval(_interval);
+        _clearSessionLockInterval();
         // Show notice then redirect
         const toast = document.createElement('div');
         toast.style.cssText = 'position:fixed;top:24px;left:50%;transform:translateX(-50%);background:#e53e3e;color:#fff;padding:12px 22px;border-radius:10px;font-size:0.9rem;font-weight:600;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,0.4)';
@@ -100,41 +125,46 @@ function _initSessionLock(userId) {
         document.body.appendChild(toast);
         setTimeout(async () => {
           toast.remove();
+          try { await DB.persistUserData(currentUser?.id); } catch (_) {}
+          try { await DB.saveRecoverySnapshot(currentUser?.id, 'forced-session-logout'); } catch (_) {}
           try { await supabaseClient.auth.signOut(); } catch (_) {}
+          sessionStorage.removeItem('jk_session_token');
+          sessionStorage.removeItem('jk_pending_upgrade_applied');
           window.location.href = 'index.html';
         }, 3000);
       } else {
         // Refresh last_seen
-        _writeSession();
+        _writeSession().catch(() => {});
       }
     } catch (_) {}
   }, 20 * 1000);
 }
 
+window.addEventListener('pagehide', _clearSessionLockInterval);
+window.addEventListener('beforeunload', _clearSessionLockInterval);
+
 async function initApp() {
   // Wire password toggles on boot
   requestAnimationFrame(() => { wirePasswordToggles(); patchModalForPwToggles(); });
-  // Clean up old localStorage app data keys (post-SQLite migration)
+  // Clean up old localStorage scalar keys. Do NOT remove jk_jumps_/jk_cols_/
+  // jk_clicks_/jk_prefs_ here: web/dev fallback still uses them as the primary
+  // data store, and Electron can use them as a legacy recovery source.
   try {
-    // Sweep prefixed keys from old localStorage-only era
-    const oldPrefixes = ['jk_jumps_', 'jk_cols_', 'jk_clicks_', 'jk_prefs_', 'jk_click_log_', 'jk_seeded_'];
-    Object.keys(localStorage)
-      .filter(k => oldPrefixes.some(prefix => k.startsWith(prefix)))
-      .forEach(k => localStorage.removeItem(k));
     // Remove legacy scalar keys - no longer written; stale values must not persist.
     // subscription/role: removed to prevent paywall tampering.
     // jk_current_user: Supabase session owns identity now.
     // jk_last_sync: was never read - dead code removed.
     // jk_teams_collapsed: renamed to jk_teams_expanded (new unambiguous format)
-    ['jk_role', 'jk_subscription_status', 'jk_subscription_tier', 'jk_current_user', 'jk_last_sync', 'jk_teams_collapsed'].forEach(k => localStorage.removeItem(k));
+    ['jk_role', 'jk_subscription_status', 'jk_subscription_tier', 'jk_current_user', 'jk_last_sync', 'jk_teams_collapsed', 'jk_seeded_'].forEach(k => localStorage.removeItem(k));
   } catch(_) {}
 
   // Fetch Supabase profile for name display
   if (_supabaseUser) {
     try {
-      const { data } = await supabaseClient.from('profiles')
+      const { data, error } = await supabaseClient.from('profiles')
         .select('first_name,last_name,role,subscription_status,subscription_tier,trial_launches_used,ls_customer_id,last_known_tier')
         .eq('id', _supabaseUser.id).single();
+      if (error) throw error;
       if (data) {
         window._supabaseProfile = data;
         // NOTE: role/subscription_status/subscription_tier are intentionally NOT written
@@ -298,7 +328,7 @@ function notifRelativeTime(ts) {
 }
 
 function notifIcon(id) {
-  return `<svg class="ti"><use href="img/tabler-sprite.svg#${id}"/></svg>`;
+  return `<svg class="ti"><use href="img/tabler-sprite.min.svg#${id}"/></svg>`;
 }
 
 window.dismissNotif = function dismissNotif(id) {
@@ -368,7 +398,7 @@ notifBtn.addEventListener('click', () => {
 });
 
 function updateThemeIcon(t) {
-  themeBtn.innerHTML = t === 'dark' ? '<svg class="ti ti-sun"><use href="img/tabler-sprite.svg#tabler-sun"/></svg>' : '<svg class="ti ti-moon"><use href="img/tabler-sprite.svg#tabler-moon"/></svg>';
+  themeBtn.innerHTML = t === 'dark' ? '<svg class="ti ti-sun"><use href="img/tabler-sprite.min.svg#tabler-sun"/></svg>' : '<svg class="ti ti-moon"><use href="img/tabler-sprite.min.svg#tabler-moon"/></svg>';
   const logo = document.getElementById('sidebarLogo');
   if (logo) logo.src = t === 'dark' ? 'img/logo-dark-mode.png' : 'img/logo.png';
 }
@@ -467,7 +497,7 @@ function renderSidebarCTA() {
     if (!cta) {
       cta = document.createElement('button');
       cta.className = 'sidebar-cta btn btn-primary unlock-btn';
-      cta.innerHTML = `<svg class="ti ti-rocket" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg><span>Upgrade to Unlimited</span>`;
+      cta.innerHTML = `<svg class="ti ti-rocket" style="width:1rem;height:1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg><span>Upgrade to Unlimited</span>`;
       cta.addEventListener('click', () => window.electronAPI?.openUrl(LS_CHECKOUT_URL));
       const toggleBtn = container.querySelector('.sidebar-toggle-btn');
       if (toggleBtn) container.insertBefore(cta, toggleBtn);
@@ -500,6 +530,7 @@ document.querySelectorAll('.dropdown-item[data-page]').forEach(btn => {
 
 // ── Logout ────────────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', async () => {
+  _clearSessionLockInterval();
   // Clear session lock record before signing out
   try {
     const tok = sessionStorage.getItem('jk_session_token');
@@ -508,8 +539,11 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
         .delete().eq('user_id', _supabaseUser.id).eq('session_token', tok);
     }
   } catch (_) {}
+  try { await DB.persistUserData(currentUser?.id); } catch (_) {}
+  try { await DB.saveRecoverySnapshot(currentUser?.id, 'manual-logout'); } catch (_) {}
   try { await supabaseClient.auth.signOut(); } catch (_) {}
   sessionStorage.removeItem('jk_session_token'); // clear session lock token on logout
+  sessionStorage.removeItem('jk_pending_upgrade_applied'); // clear one-shot upgrade flag on logout
   DB.clearSession();
   window.location.href = 'index.html';
 });
@@ -543,7 +577,7 @@ const pageTitles = {
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-user-circle', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-user-circle', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload'
+  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload'
 };
 let activePage = 'home';
 window.activePage = activePage;
@@ -562,7 +596,7 @@ window.navigateTo = function navigateTo(page) {
     iconEl.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 105.74 122.88" fill="currentColor" style="width:1.6rem;height:1.6rem;display:inline-block;vertical-align:-0.15em"><path d="M3.07,79.92c4.32,1.19,29.57,17.12,32.69,10.85c0.32-0.64,2.87-6.24,2.87-6.27l13.62,3.47c0.44,1.39-5.97,12.95-7.23,14.27 c-1.6,1.68-3.21,2.68-4.93,3.57C34.31,108.79,6.82,94.12,0,93.16L3.07,79.92L3.07,79.92z M75.85,119.82 c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L75.85,119.82L75.85,119.82z M86.79,112.13c0.63,0.24,0.89,1.1,0.58,1.93 c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93s1.07-1.31,1.7-1.07L86.79,112.13L86.79,112.13z M87.12,100.47c0.63,0.24,0.89,1.1,0.58,1.93c-0.31,0.83-1.07,1.31-1.7,1.07l-18.78-7.03c-0.63-0.24-0.89-1.1-0.58-1.93 c0.31-0.83,1.07-1.31,1.7-1.07L87.12,100.47L87.12,100.47z M22.26,22.99c-0.66-0.15-1.03-0.97-0.83-1.83 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L22.26,22.99L22.26,22.99 z M19.79,12.13c-0.66-0.15-1.03-0.97-0.83-1.83c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83 c-0.19,0.86-0.88,1.44-1.54,1.29L19.79,12.13L19.79,12.13z M25.69,3.15C25.03,3,24.66,2.18,24.85,1.32 c0.19-0.86,0.88-1.44,1.54-1.29l19.56,4.41c0.66,0.15,1.03,0.97,0.83,1.83c-0.19,0.86-0.88,1.44-1.54,1.29L25.69,3.15L25.69,3.15z M38.97,47.21l-2.86,17.67c-0.58,6.69-0.63,11.89,5.95,15c3.44,1.62,4.32,1.42,8.12,2.06l19.27-0.42 c1.04-0.02,26.34,11.02,28.43,12.43l7.83-9.36c1.1-1.31-25.7-14.04-29.63-15.46c-18.65-6.72-20.64,10.5-16.9-15.51 c3.75,2.9,6.93,3.62,13.62,5.39c8.01,1.1,11.41-0.86,17.65-3.7l9.22-4.57l-7.14-10.84l-7.05,4.2c-0.26,0.12-0.92,0.45-2.08,1.01 c-2.92,1.07-5.25,1.95-7.25,1.26c-6.64-2.32-12.06-12.07-29.81-11.45c-24.69,0.86-22.32-2.09-38.63,17.42l9.79,7.55 c7.7-9.21,8.39-11.43,20.79-12.61C38.52,47.24,38.74,47.23,38.97,47.21L38.97,47.21L38.97,47.21z M59.12,9.04 c6.83-3.12,14.89-0.11,18,6.72c3.12,6.83,0.11,14.89-6.72,18c-6.83,3.12-14.89,0.11-18-6.72C49.28,20.21,52.29,12.15,59.12,9.04 L59.12,9.04z"/></svg>';
   } else {
     const iconName = (pageIcons[page] || 'ti-layout').replace('ti-', '');
-    iconEl.innerHTML = `<svg class="ti ti-${iconName}" style="width:1.6rem;height:1.6rem;vertical-align:-0.15em"><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg>`;
+    iconEl.innerHTML = `<svg class="ti ti-${iconName}" style="width:1.6rem;height:1.6rem;vertical-align:-0.15em"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg>`;
   }
   const pageSubs = {
     stats:    'Track your launch history and time saved',
@@ -607,7 +641,17 @@ const Modal = window.Modal = {
     const mb = document.getElementById('modalBody');
     if (mb) mb.scrollTop = 0;
   },
-  close() { this.overlay.style.display = 'none'; this.box.style.minHeight = ''; },
+  close() {
+    const ov = this.overlay, bx = this.box;
+    ov.style.animation = 'fadeOut 0.13s ease forwards';
+    bx.style.animation = 'slideDown 0.13s ease forwards';
+    setTimeout(() => {
+      ov.style.display = 'none';
+      ov.style.animation = '';
+      bx.style.animation = '';
+      bx.style.minHeight = '';
+    }, 130);
+  },
 };
 document.getElementById('modalClose').addEventListener('click', () => Modal.close());
 // Overlay click intentionally does NOT close the modal - use Save or Close buttons.
@@ -630,11 +674,15 @@ document.getElementById('modalClose').addEventListener('click', () => Modal.clos
 
   Modal.close = function() {
     _origClose();
-    _open = false;
-    if (_queue.length > 0) {
-      const next = _queue.shift();
-      setTimeout(() => { _open = true; _origOpen(...next); }, 120);
-    }
+    // Delay _open=false until after the close animation (130ms) so queued
+    // modals open cleanly after the fade-out completes.
+    setTimeout(() => {
+      _open = false;
+      if (_queue.length > 0) {
+        const next = _queue.shift();
+        setTimeout(() => { _open = true; _origOpen(...next); }, 30);
+      }
+    }, 130);
   };
 })();
 
@@ -699,12 +747,12 @@ document.addEventListener('keydown', e => {
 
 // ── Shared stats bar ───────────────────────────────────────────────
 function getStatsHTML(filter) {
-  const allActive   = DB.getActiveJumps(currentUser.id);
+  const allActive   = DB.getRenderableActiveJumps ? DB.getRenderableActiveJumps(currentUser.id) : DB.getActiveJumps(currentUser.id);
   const allArchived = DB.getArchivedJumps(currentUser.id);
   const totalClicks = allActive.reduce((a, j) => a + (j.clickCount || 0), 0);
   const timeSaved   = (totalClicks / 6).toFixed(1);
   if (!filter || filter === 'active') {
-    return `<p class="stats-summary"><strong>${allActive.length}</strong> active jumps · <strong>${totalClicks}</strong> total launches · <strong>${timeSaved}</strong> min saved</p>`;
+    return `<p class="stats-summary"><strong>${allActive.length}</strong> active jumps · <strong>${allArchived.length}</strong> archived · <strong>${totalClicks}</strong> total launches · <strong>${timeSaved}</strong> min saved</p>`;
   }
   if (filter === 'favorites') {
     const n = allActive.filter(j => j.favorite).length;
@@ -786,7 +834,17 @@ async function renderHome() {
       <div class="home-dash-section-label">YOUR STATISTICS</div>
       <div class="stats-cards home-roi-grid">
         <div class="stat-card">
-          ${(() => { const n = currentUser ? DB.getActiveJumps(currentUser.id).length : 0; return `<div class="stat-card-value" style="color:var(--text-card-title)">${n.toLocaleString()}</div><div class="stat-card-label">${n === 1 ? 'Jump' : 'Jumps'}</div>`; })()}
+          ${(() => {
+            const all = currentUser ? (DB.getRenderableActiveJumps ? DB.getRenderableActiveJumps(currentUser.id) : DB.getActiveJumps(currentUser.id)) : [];
+            const personal = all.filter(j => !j.teamId && !j.isShared).length;
+            const team = all.filter(j => j.teamId || j.isShared).length;
+            const n = all.length;
+            return `<div class="stat-card-value" style="color:var(--text-card-title)">${n.toLocaleString()}</div>
+                    <div class="stat-card-label">${n === 1 ? 'Jump' : 'Jumps'}</div>
+                    <div id="homeJumpCardBreakdown" style="font-size:0.7rem;color:var(--text-muted);margin-top:4px;line-height:1.6">
+                      ${personal} personal &nbsp;·&nbsp; ${team} team
+                    </div>`;
+          })()}
         </div>
         <div class="stat-card">
           <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeLaunches.toLocaleString()}</div>
@@ -794,19 +852,18 @@ async function renderHome() {
         </div>
         <div class="stat-card">
           <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeTimeStr}</div>
-          <div class="stat-card-label">Time Saved</div>
+          <div class="stat-card-label">Total Time Saved</div>
         </div>
         <div class="stat-card">
           <div class="stat-card-value" style="color:var(--text-card-title)">${lifetimeDollarStr}</div>
-          <div class="stat-card-label">$ Saved</div>
+          <div class="stat-card-label">Total $ Saved</div>
         </div>
       </div>
 
       <!-- ── Teams Section ───────────────────────────────────────── -->
-      <div class="home-dash-section-label">YOUR TEAMS</div>
       <div id="homeTeamsSummary">
         <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.85rem;padding:4px 0">
-          <svg class="ti ti-loader" style="font-size:1.1rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader"/></svg>
+          <svg class="ti ti-loader" style="font-size:1.1rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg>
           Loading teams…
         </div>
         <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
@@ -816,7 +873,7 @@ async function renderHome() {
       <div class="home-dash-section-label">APP FEATURES</div>
       <div class="tips-grid">
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
           <p>Click the <strong style="color:var(--hover-accent)">Configure Columns</strong> button on the <strong style="color:var(--hover-accent)">Jumps</strong> page to create up to 10 custom categories. Name them and order them to match your workflow.</p>
         </div>
         <div class="tip-card">
@@ -824,27 +881,27 @@ async function renderHome() {
           <p>Go to the <strong style="color:var(--hover-accent)">Jumps</strong> page and click <strong style="color:var(--hover-accent)">Add Jump</strong> to create your first jump. Paste in a URL, file path, or network share.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-mouse" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-mouse"/></svg></span>Left-Click to Jump</h3>
           <p>Left-click any jump to instantly launch it. Web links open in your browser. Local paths open in your OS. One click, you're there.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-keyboard" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg></span>Assign Hotkeys</h3>
           <p>Give each jump a hotkey code when you create or edit it. JumpKit registers it as a global shortcut so you can launch any jump without touching the mouse.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-link"/></svg></span>Mark Favorites</h3>
-          <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
+          <h3><span class="tip-icon"><svg class="ti ti-link" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-link"/></svg></span>Mark Favorites</h3>
+          <p>Toggle the favorite flag on any jump — <svg class="ti ti-link" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.min.svg#tabler-link"/></svg> web links and <svg class="ti ti-folder" style="color:var(--hover-accent);width:1.3em;height:1.3em;vertical-align:-0.2em"><use href="img/tabler-sprite.min.svg#tabler-folder"/></svg> local paths — to highlight your most-used jumps in every column.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-chart-bar" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-chart-bar"/></svg></span>Track Your ROI</h3>
           <p>JumpKit counts every launch and calculates how much time you've saved. Check the <strong style="color:var(--hover-accent)">Statistics</strong> page to see your full ROI breakdown.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-users" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-users"/></svg></span>Collaborate with Teams</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-users" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg></span>Collaborate with Teams</h3>
           <p>Create teams and share your best columns and jumps with colleagues. Everyone on the team gets instant access — keeping your whole group moving at the same speed.</p>
         </div>
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-adjustments-horizontal" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg></span>Customize Your Settings</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-adjustments-horizontal" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-adjustments-horizontal"/></svg></span>Customize Your Settings</h3>
           <p>Tailor JumpKit to your workflow in <strong style="color:var(--hover-accent)">Settings</strong> — set your starting page, configure your ROI values, toggle hotkey display, manage backups, and more.</p>
         </div>
       </div>
@@ -853,11 +910,11 @@ async function renderHome() {
       <div class="home-dash-section-label">HELP AND FEEDBACK</div>
       <div class="tips-grid" style="margin-bottom:8px">
         <div class="tip-card">
-          <h3><span class="tip-icon"><svg class="ti ti-help-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-help-circle"/></svg></span>Help &amp; Documentation</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-help-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-help-circle"/></svg></span>Help &amp; Documentation</h3>
           <p>The <strong style="color:var(--hover-accent)">Help</strong> page covers everything you need: a full feature list, hotkey reference, FAQ, tips for getting the most out of JumpKit, and plan comparison.</p>
         </div>
         <div class="tip-card" style="cursor:pointer" data-jaction="open-feedback-modal">
-          <h3><span class="tip-icon"><svg class="ti ti-message-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg></span>Send Feedback</h3>
+          <h3><span class="tip-icon"><svg class="ti ti-message-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg></span>Send Feedback</h3>
           <p>Have a bug report, feature request, or just want to share a thought? Click here to send feedback directly to the JumpKit team. We read every message.</p>
         </div>
       </div>
@@ -886,7 +943,7 @@ async function renderHome() {
 
     // 1. Fetch owned + joined team IDs (query by owner_id — no org_id required)
     const [ownedRes, membershipRes] = await Promise.all([
-      supabaseClient.from('teams').select('id, name').eq('owner_id', supaUser.id).order('name'),
+      supabaseClient.from('teams').select('id, name, created_at').eq('owner_id', supaUser.id).order('name'),
       supabaseClient.from('team_members').select('team_id, locked').eq('user_id', supaUser.id),
     ]);
     const ownedTeams  = ownedRes.data || [];
@@ -895,11 +952,24 @@ async function renderHome() {
     const joinedTeamIds = membershipRows.map(r => r.team_id).filter(id => !ownedIds.has(id));
     // Track locked status for joined teams
     const lockedTeamIds = new Set(membershipRows.filter(r => r.locked).map(r => r.team_id));
+    // Cache owned/joined team IDs so the jump card breakdown can split them
+    window._homeOwnedTeamIds = ownedIds;
+    window._homeJoinedTeamIds = new Set(joinedTeamIds);
+    // Update jump card breakdown once team IDs are known
+    // Use same filter as team cards: j.isShared && j.teamId === team.id
+    const _jcBreak = document.getElementById('homeJumpCardBreakdown');
+    if (_jcBreak && currentUser) {
+      const _all    = DB.getActiveJumps(currentUser.id);
+      const _owned  = _all.filter(j => j.teamId && ownedIds.has(j.teamId)).length;
+      const _joined = _all.filter(j => j.teamId && joinedTeamIds.includes(j.teamId)).length;
+      const _personal = _all.length - _owned - _joined;
+      _jcBreak.innerHTML = `${_personal} personal &nbsp;·&nbsp; ${_owned} shared out &nbsp;·&nbsp; ${_joined} shared in`;
+    }
 
     // Fetch joined team details (include owner_id for tier pill)
     let joinedTeams = [];
     if (joinedTeamIds.length > 0) {
-      const { data } = await supabaseClient.from('teams').select('id, name, owner_id').in('id', joinedTeamIds).order('name');
+      const { data } = await supabaseClient.from('teams').select('id, name, owner_id, created_at').in('id', joinedTeamIds).order('name');
       joinedTeams = data || [];
     }
 
@@ -925,7 +995,7 @@ async function renderHome() {
               <div style="font-size:0.9rem;font-weight:600;color:var(--text-card-title)">No teams yet</div>
               <div style="font-size:0.82rem;color:var(--text-muted);margin-top:4px">Create a team to share your best jumps and columns with colleagues.</div>
             </div>
-            <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users" style="color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Create a Team</button>
+            <button class="btn btn-primary" style="flex-shrink:0;white-space:nowrap" data-jaction="nav-teams"><svg class="ti ti-users" style="color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Create a Team</button>
           </div>`;
       return;
     }
@@ -933,7 +1003,7 @@ async function renderHome() {
     // 2. Batch: member counts + column counts for all teams
     const [allMemberRes, allColRes] = await Promise.all([
       supabaseClient.from('team_members').select('team_id').in('team_id', allTeamIds),
-      supabaseClient.from('shared_columns').select('id, team_id').in('team_id', allTeamIds),
+      supabaseClient.from('shared_columns').select('id, name, team_id').in('team_id', allTeamIds).order('position'),
     ]);
 
     const memberCountByTeam = {};
@@ -943,15 +1013,18 @@ async function renderHome() {
     // Owner IS in team_members — no manual +1 needed
 
     const colCountByTeam = {};
+    const colsByTeam = {}; // team_id → [{id, name}]
     (allColRes.data || []).forEach(r => {
       colCountByTeam[r.team_id] = (colCountByTeam[r.team_id] || 0) + 1;
+      if (!colsByTeam[r.team_id]) colsByTeam[r.team_id] = [];
+      colsByTeam[r.team_id].push(r);
     });
 
     // 3. Local data: jumps per team
     const allLocalJumps = currentUser ? DB.getJumps(currentUser.id) : [];
 
     // Build per-team card HTML
-    const teamCards = allTeams.map(team => {
+    const buildTeamCard = team => {
       const isOwner   = ownedIds.has(team.id);
       const isLocked  = !isOwner && lockedTeamIds.has(team.id);
       const members   = memberCountByTeam[team.id] || 1;
@@ -967,7 +1040,7 @@ async function renderHome() {
 
       // Tier pill (turquoise = unlimited, grey = free)
       const tierPill = isUnlimitedTeam
-        ? `<span style="background:rgba(0,194,199,0.12);color:#00C2C7;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid rgba(0,194,199,0.3)">Unlimited Team</span>`
+        ? `<span style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);background-clip:padding-box;overflow:hidden;-webkit-font-smoothing:antialiased">Unlimited Team</span>`
         : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.65rem;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
 
       // Role pill (top right)
@@ -981,12 +1054,36 @@ async function renderHome() {
       const cardBg = isLocked
         ? 'background:rgba(229,62,62,0.04);border-color:rgba(229,62,62,0.3)'
         : isUnlimitedTeam
-          ? 'background:rgba(0,194,199,0.05);border-color:rgba(0,194,199,0.18)'
+          ? 'background:var(--bg-card);border-color:var(--border)'
           : 'background:rgba(128,128,128,0.04)';
+
+      // Shared column pills for this team (local jump counts)
+      const teamCols = colsByTeam[team.id] || [];
+      const localJumps = currentUser ? DB.getActiveJumps(currentUser.id) : [];
+      const localCols  = currentUser ? DB.getColumns(currentUser.id) : [];
+      const colPills = teamCols.map(sc => {
+        const lc = localCols.find(c => c.supabaseId === sc.id || (c.teamId === team.id && c.name === sc.name));
+        const cnt = lc ? localJumps.filter(j => j.columnId === lc.id).length : 0;
+        return `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--bg-hover);border:1px solid var(--border);border-radius:12.6px;padding:2.1px 8.4px;font-size:0.65rem;font-weight:600;color:var(--text-muted);white-space:nowrap">${esc(sc.name)}<span style="opacity:0.6">(${cnt})</span></span>`;
+      }).join('');
+
+      // Smaller tier/role pills for under-name placement
+      const tierPillSm = isUnlimitedTeam
+        ? `<span style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.61rem;padding:1.1px 6.3px;border-radius:21px;white-space:nowrap;border:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.14);background-clip:padding-box;overflow:hidden;-webkit-font-smoothing:antialiased">Unlimited Team</span>`
+        : `<span style="background:rgba(128,128,128,0.08);color:var(--text-dim);font-weight:600;font-size:0.61rem;padding:1.1px 6.3px;border-radius:21px;white-space:nowrap;border:1px solid var(--border)">Free Team</span>`;
+      const rolePillSm = isOwner
+        ? `<span class="teams-badge teams-badge-owner" style="font-size:0.61rem;min-width:unset;padding:1.1px 6.3px">Owner</span>`
+        : (isLocked
+          ? `<span style="background:rgba(229,62,62,0.12);color:#e53e3e;font-weight:600;font-size:0.61rem;padding:1.1px 6.3px;border-radius:21px;white-space:nowrap;border:1px solid rgba(229,62,62,0.3)">Paused</span>`
+          : `<span class="teams-badge" style="font-size:0.61rem;min-width:unset;padding:1.1px 6.3px">Member</span>`);
+
+      const createdDate = team.created_at ? new Date(team.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '';
 
       return `
         <div class="stat-card home-team-card" style="${cardBg}">
-          <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:12px;width:100%">${esc(team.name)}</div>
+          <div style="font-size:0.95rem;font-weight:700;color:var(--text-card-title);line-height:1.3;margin-bottom:4px;width:100%">${esc(team.name)}</div>
+          ${createdDate ? `<div style="font-size:0.72rem;color:var(--text-dim);margin-bottom:6px">Created ${createdDate}</div>` : ''}
+          <div style="display:flex;align-items:center;gap:5px;margin-bottom:12px">${tierPillSm}${rolePillSm}</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
             <div>
               <div style="font-size:1.1rem;font-weight:800;color:var(--text-card-title)">${members}</div>
@@ -1001,11 +1098,23 @@ async function renderHome() {
               <div style="font-size:0.68rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim)">${jumpCount === 1 ? 'Jump' : 'Jumps'}</div>
             </div>
           </div>
-          <div style="display:flex;align-items:center;gap:6px">${tierPill}${rolePill}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px">
+            ${colPills || `<span style="font-size:0.72rem;color:var(--text-dim);font-style:italic">No shared columns yet</span>`}
+          </div>
         </div>`;
-    }).join('');
+    };
 
-    teamsEl.innerHTML = `<div class="home-teams-grid">${teamCards}</div>`;
+    const ownedCards  = ownedTeams.map(buildTeamCard).join('');
+    const joinedCards = joinedTeams.map(buildTeamCard).join('');
+
+    let teamsHTML = '';
+    if (ownedCards) {
+      teamsHTML += `<div class="home-dash-section-label" style="margin-top:20px">YOUR OWNED TEAMS</div><div class="home-teams-grid">${ownedCards}</div>`;
+    }
+    if (joinedCards) {
+      teamsHTML += `<div class="home-dash-section-label" style="margin-top:40px">YOUR JOINED TEAMS</div><div class="home-teams-grid">${joinedCards}</div>`;
+    }
+    teamsEl.innerHTML = teamsHTML;
 
   } catch (e) {
     const el = document.getElementById('homeTeamsSummary');
@@ -1022,9 +1131,11 @@ const Toast = window.Toast = (() => {
     if (timer) clearTimeout(timer);
     el.className = `toast toast-${type} toast-visible`;
     const icon = type === 'success'
-      ? '<svg class="ti ti-circle-check toast-icon"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>'
-      : '<svg class="ti ti-alert-circle toast-icon"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>';
-    el.innerHTML = `${icon}<span>${msg}</span>`;
+      ? '<svg class="ti ti-circle-check toast-icon"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg>'
+      : '<svg class="ti ti-alert-circle toast-icon"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg>';
+    el.innerHTML = `${icon}<span></span>`;
+    const span = el.querySelector('span');
+    if (span) span.textContent = String(msg ?? '');
     timer = setTimeout(() => {
       el.classList.remove('toast-visible');
       el.classList.add('toast-hide');
@@ -1092,9 +1203,9 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     </div>` : '';
 
   document.getElementById('pageContent').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:0;height:100%">
+    <div style="display:flex;flex-direction:column;gap:0;height:100%" id="acctPageWrap">
       ${_upgradeBannerHTML}
-      <div style="max-width:960px;margin:0 auto;width:100%;flex-shrink:0;padding:0 0 16px 0">
+      <div style="max-width:960px;margin:0 auto;width:100%;flex-shrink:0;padding:0 0 16px 0;opacity:0;transition:opacity 0.15s" id="acctTabBarWrap">
         <div class="jump-filter-bar" id="acctTabBar">
           <div class="jfb-slider" id="acctTabPill"></div>
           ${ACCT_TABS.map(t=>`<button class="jfb-tab${t===currentAcctTab?' active':''}" data-at="${t}">${ACCT_LABELS[t]}</button>`).join('')}
@@ -1103,6 +1214,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
       <div id="acctTabContent" style="flex:1;min-height:0;overflow-y:auto"></div>
     </div>`;
 
+  function _revealAcctPage() { const w = document.getElementById('acctTabBarWrap'); if (w) w.style.opacity = '1'; }
   function renderAcctTabContent(tab) {
     const el = document.getElementById('acctTabContent');
     if (!el) return;
@@ -1111,7 +1223,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
         <div class="acct-grid">
 
           <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.svg#tabler-user-circle"/></svg> Profile</div>
+            <div class="acct-section-title"><svg class="ti ti-user-circle"><use href="img/tabler-sprite.min.svg#tabler-user-circle"/></svg> Profile</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Name</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${fullName || '-'}</span>
@@ -1126,7 +1238,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.svg#tabler-id-badge"/></svg> Account</div>
+            <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.min.svg#tabler-id-badge"/></svg> Account</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Account Type</span></div>
               <span style="display:inline-flex;align-items:center;gap:8px">
@@ -1157,12 +1269,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-save-row" style="justify-content:flex-start;gap:.6rem;flex-wrap:wrap;">
-            <button class="btn btn-subtle" data-jaction="open-feedback-modal"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Send Feedback</button>
+            <button class="btn btn-subtle" data-jaction="open-feedback-modal"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg> Send Feedback</button>
           </div>
         </div>`;
+      _revealAcctPage();
     } else if (tab === 'teams') {
       el.innerHTML = `<div class="acct-teams-wrap"></div>`;
-      renderTeams(el.firstElementChild);
+      renderTeams(el.firstElementChild).finally(() => _revealAcctPage());
     } else if (tab === 'settings') {
       const p = DB.getPrefs(currentUser.id);
       const pageChoices = ['home','jumps','stats','teams','settings','account','help'].map(pg =>
@@ -1172,18 +1285,18 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
       el.innerHTML = `
         <div class="acct-grid">
           <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-adjustments-horizontal"><use href="img/tabler-sprite.svg#tabler-adjustments-horizontal"/></svg> Preferences</div>
+            <div class="acct-section-title"><svg class="ti ti-adjustments-horizontal"><use href="img/tabler-sprite.min.svg#tabler-adjustments-horizontal"/></svg> Preferences</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Starting Page</span><span class="acct-row-hint">Page shown when app opens</span></div>
               <div class="custom-select acct-select" id="startPageDrop">
-                <div class="custom-select-trigger" id="startPageTrigger"><span id="startPageLabel">${pageTitles[p.startPage]||p.startPage}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-trigger" id="startPageTrigger"><span id="startPageLabel">${pageTitles[p.startPage]||p.startPage}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="startPageMenu">${pageChoices}</div>
               </div>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Nav Menu on Startup</span><span class="acct-row-hint">Sidebar state when app opens</span></div>
               <div class="custom-select acct-select" id="navStateDrop">
-                <div class="custom-select-trigger" id="navStateTrigger"><span id="navStateLabel">${p.navDefaultCollapsed ? 'Collapsed' : 'Expanded'}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-trigger" id="navStateTrigger"><span id="navStateLabel">${p.navDefaultCollapsed ? 'Collapsed' : 'Expanded'}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="navStateMenu">
                   <div class="custom-select-option${!p.navDefaultCollapsed ? ' selected' : ''}" data-value="expanded">Expanded</div>
                   <div class="custom-select-option${p.navDefaultCollapsed ? ' selected' : ''}" data-value="collapsed">Collapsed</div>
@@ -1198,13 +1311,17 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Show Jump Description</span><span class="acct-row-hint">Show or hide description under jump name on jump page</span></div>
               <label class="toggle"><input type="checkbox" id="prefDesc" ${p.showDescription?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
-            <div class="acct-row" style="border-bottom:none">
+            <div class="acct-row">
               <div class="acct-row-label"><span>Show Hotkey</span><span class="acct-row-hint">Show or hide hotkey pill next to jump name on jumps page</span></div>
               <label class="toggle"><input type="checkbox" id="prefHotkey" ${p.showHotkey?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>Show Column Team Name</span><span class="acct-row-hint">Show or hide the subtle Personal / team name label under each column title on the jumps page</span></div>
+              <label class="toggle"><input type="checkbox" id="prefColTeamName" ${p.showColTeamName!==false?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
           </div>
           <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.svg#tabler-chart-bar"/></svg> ROI</div>
+            <div class="acct-section-title"><svg class="ti ti-chart-bar"><use href="img/tabler-sprite.min.svg#tabler-chart-bar"/></svg> ROI</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Time Saved per Click</span><span class="acct-row-hint">The default seconds saved per jump launch, set to what is accurate for you</span></div>
               <div class="acct-number-wrap"><input class="form-input acct-number" type="number" id="prefTime" min="1" max="300" value="${p.timePerClick}"/><span class="acct-unit">sec</span></div>
@@ -1215,14 +1332,14 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-section">
-            <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.svg#tabler-tool"/></svg> Maintenance</div>
+            <div class="acct-section-title"><svg class="ti ti-tool"><use href="img/tabler-sprite.min.svg#tabler-tool"/></svg> Maintenance</div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Backup Jumps Manually</span><span class="acct-row-hint">Export all personal jumps &amp; columns to a local JSON file</span></div>
-              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Export</button>
+              <button class="btn btn-subtle" data-jaction="force-backup"><svg class="ti ti-download"><use href="img/tabler-sprite.min.svg#tabler-download"/></svg> Export</button>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Import Jumps from Backup</span><span class="acct-row-hint">Restore jumps from a previously exported JSON backup file</span></div>
-              <button class="btn btn-subtle" data-jaction="import-jumps"><svg class="ti ti-upload"><use href="img/tabler-sprite.svg#tabler-upload"/></svg> Import</button>
+              <button class="btn btn-subtle" data-jaction="import-jumps"><svg class="ti ti-upload"><use href="img/tabler-sprite.min.svg#tabler-upload"/></svg> Import</button>
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>Auto-Backup Jumps</span><span class="acct-row-hint">Automatically saves a local backup of all your jumps on each login</span></div>
@@ -1235,18 +1352,19 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               ${tier==='free'
                 ? buildUnlockButton('Upgrade to Unlimited', { fontSize: '0.78rem', padding: '5px 12px' })
                 : `<div class="custom-select acct-select" id="autoArchiveDrop">
-                <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg></div>
+                <div class="custom-select-trigger" id="autoArchiveTrigger"><span id="autoArchiveLabel">${{never:'Never','1m':'1 Month','6m':'6 Months','1y':'1 Year'}[p.autoArchive]}</span><svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg></div>
                 <div class="custom-select-menu" id="autoArchiveMenu">${archiveChoices}</div>
               </div>`}
             </div>
           </div>
           <div class="acct-save-row">
-            <button class="btn btn-save" data-jaction="save-account-prefs"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.svg#tabler-device-floppy"/></svg> Save Settings</button>
+            <button class="btn btn-save" data-jaction="save-account-prefs"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.min.svg#tabler-device-floppy"/></svg> Save Settings</button>
           </div>
         </div>`;
       wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
       wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
       if (document.getElementById('autoArchiveDrop')) wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
+      _revealAcctPage();
     }
   }
 
@@ -1260,6 +1378,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     const el = document.getElementById('topbarSubtitle');
     if (el) el.innerHTML = acctTabSubs[tab] || '';
   }
+  const acctTabIcons = { teams: 'users', settings: 'settings', account: 'user-circle' };
+  function setAcctIcon(tab) {
+    const iconEl = document.getElementById('topbarIcon');
+    if (!iconEl) return;
+    const name = acctTabIcons[tab] || 'user-circle';
+    iconEl.innerHTML = `<svg class="ti ti-${name}" style="width:1.6rem;height:1.6rem;vertical-align:-0.15em"><use href="img/tabler-sprite.min.svg#tabler-${name}"/></svg>`;
+  }
 
   document.getElementById('acctTabBar').addEventListener('click', e => {
     const btn = e.target.closest('.jfb-tab');
@@ -1268,13 +1393,15 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     document.querySelectorAll('#acctTabBar .jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.at === currentAcctTab));
     moveAcctPill();
     setAcctSubtitle(currentAcctTab);
+    setAcctIcon(currentAcctTab);
     renderAcctTabContent(currentAcctTab);
     // Sync sidebar nav highlight with the active tab
-    const tabNavMap = { teams: 'teams', settings: 'settings', account: null };
-    const navPage = tabNavMap[currentAcctTab];
-    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', navPage ? b.dataset.page === navPage : false));
+    // Map each tab to its sidebar nav item; account shares the settings nav slot
+    const tabNavMap = { teams: 'teams', settings: 'settings', account: 'settings' };
+    const navPage = tabNavMap[currentAcctTab] || 'settings';
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === navPage));
     // Update topbar title and activePage to reflect the active tab
-    activePage = navPage || 'account';
+    activePage = currentAcctTab === 'teams' ? 'teams' : 'settings';
     window.activePage = activePage;
     const titleEl = document.getElementById('topbarTitle');
     if (titleEl) titleEl.textContent = pageTitles[currentAcctTab] || '';
@@ -1294,6 +1421,10 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   }
 
   setAcctSubtitle(currentAcctTab);
+  setAcctIcon(currentAcctTab);
+  // Sync sidebar highlight on initial render
+  const _initNavPage = { teams: 'teams', settings: 'settings', account: 'settings' }[currentAcctTab] || 'settings';
+  document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === _initNavPage));
   renderAcctTabContent(currentAcctTab);
   requestAnimationFrame(() => requestAnimationFrame(moveAcctPill));
 }
@@ -1390,8 +1521,9 @@ window.saveAccountPrefs = function saveAccountPrefs() {
     cloudBackup:     (window._supabaseProfile?.subscription_tier || 'free') !== 'free' && document.getElementById('prefCloud')?.checked,
     timePerClick:    Math.max(1, parseInt(document.getElementById('prefTime').value)  || cur.timePerClick),
     dollarsPerHour:  Math.max(1, parseInt(document.getElementById('prefDollar').value) || cur.dollarsPerHour),
-    showDescription: document.getElementById('prefDesc').checked,
-    showHotkey:      document.getElementById('prefHotkey').checked,
+    showDescription:  document.getElementById('prefDesc').checked,
+    showHotkey:       document.getElementById('prefHotkey').checked,
+    showColTeamName:  document.getElementById('prefColTeamName')?.checked ?? true,
     autoArchive:         (window._supabaseProfile?.subscription_tier || 'free') !== 'free' ? (archSel ? archSel.dataset.value : cur.autoArchive) : 'never',
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
   };
@@ -1420,7 +1552,7 @@ window.openFeedbackModal = function openFeedbackModal() {
       <div class="custom-select" id="fbCatDrop">
         <div class="custom-select-trigger" id="fbCatTrigger" tabindex="1">
           <span id="fbCatLabel" style="color:var(--text-dim)">- Select a category -</span>
-          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="fbCatMenu">
           ${['Bug','Positive Feedback','Negative Feedback','Feature Request','Other'].map(c =>
@@ -1435,9 +1567,9 @@ window.openFeedbackModal = function openFeedbackModal() {
       <span class="form-error" id="fbMsgErr">A message is required.</span>
     </div>`;
 
-  Modal.open('<svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> Feedback', body,
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Cancel</button>
-     <button class="btn btn-save" data-jaction="submit-feedback"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Submit</button>`);
+  Modal.open('<svg class="ti ti-message-circle"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg> Feedback', body,
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
+     <button class="btn btn-save" data-jaction="submit-feedback"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Submit</button>`);
 
   wireDropdown({
     dropId: 'fbCatDrop', triggerId: 'fbCatTrigger', menuId: 'fbCatMenu',
@@ -1459,7 +1591,7 @@ window.submitFeedback = async function submitFeedback() {
 
   // Show sending state
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg> Sending...</button>`;
+    `<button class="btn btn-subtle" disabled><svg class="ti ti-loader-2 spin"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg> Sending...</button>`;
 
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-feedback`, {
@@ -1475,21 +1607,34 @@ window.submitFeedback = async function submitFeedback() {
         message: msg,
       }),
     });
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || `Send failed (${res.status})`);
+    }
     const data = await res.json().catch(() => ({}));
-    if (!res.ok && !data.ok) throw new Error(data.error || 'Send failed');
+    if (data.ok === false) throw new Error(data.error || 'Send failed');
   } catch (e) {
     console.warn('Feedback send error:', e);
-    // Still show success to user - don't block on edge fn errors
+    document.getElementById('modalBody').innerHTML = `
+      <div style="text-align:center;padding:32px 0">
+        <svg class="ti ti-alert-circle" style="font-size:3rem;color:#ef4444;display:block;margin:0 auto 16px"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg>
+        <p style="color:var(--text-card-title);font-size:1rem;font-weight:600;margin-bottom:8px">Feedback did not send</p>
+        <p style="color:var(--text-muted);font-size:0.88rem">${esc(e.message || 'Please try again.')}</p>
+      </div>`;
+    document.getElementById('modalFooter').innerHTML =
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`;
+    Toast.danger('Feedback did not send. Please try again.');
+    return;
   }
 
   document.getElementById('modalBody').innerHTML = `
     <div style="text-align:center;padding:32px 0">
-      <svg class="ti ti-circle-check" style="font-size:3rem;color:#22c55e;display:block;margin:0 auto 16px;-webkit-font-smoothing:antialiased"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg>
+      <svg class="ti ti-circle-check" style="font-size:3rem;color:#22c55e;display:block;margin:0 auto 16px;-webkit-font-smoothing:antialiased"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg>
       <p style="color:var(--text-card-title);font-size:1rem;font-weight:600;margin-bottom:8px">Thanks for your feedback!</p>
       <p style="color:var(--text-muted);font-size:0.88rem">We'll review it and be in touch if needed.</p>
     </div>`;
   document.getElementById('modalFooter').innerHTML =
-    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
+    `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`;
 }
 let currentStatView = 'summary';
 const STAT_VIEWS  = ['summary','daily','weekly','monthly','yearly'];
@@ -1544,7 +1689,7 @@ window.renderStats = async function renderStats() {
           <div class="jfb-slider" id="statsPill"></div>
           ${STAT_VIEWS.map(v=>`<button class="jfb-tab${v===currentStatView?' active':''}" data-sv="${v}">${STAT_LABELS[v]}</button>`).join('')}
         </div>
-        ${_statsHasData ? `<button class="btn btn-subtle" style="font-size:0.82rem;padding:0 14px;height:34px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Export PDF</button>` : ''}
+        ${_statsHasData ? `<button class="btn btn-subtle" style="font-size:0.82rem;padding:0 14px;height:34px;white-space:nowrap;flex-shrink:0" data-jaction="export-stats-pdf"><svg class="ti ti-file-download" style="width:1em;height:1em"><use href="img/tabler-sprite.min.svg#tabler-file-download"/></svg> Export PDF</button>` : ''}
       </div>
       <div id="statsDash"></div>
     </div>`;
@@ -1631,7 +1776,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
           // Fetch member counts per team (owner counts as +1)
           const pdfMemberCountMap = {};
           await Promise.all(pdfOwnedTeams.map(async t => {
-            const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+            const { count } = await supabaseClient.from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', t.id);
             pdfMemberCountMap[t.id] = (count || 0) + 1;
           }));
           const teamSections = pdfOwnedTeams.map(team => {
@@ -1640,7 +1785,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
             if (ts.length === 0) return `
               <div style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;page-break-inside:avoid">
                 <div style="background:#f3f4f6;padding:12px 16px;border-bottom:1px solid #e5e7eb">
-                  <div style="font-size:13px;font-weight:700;color:#374151">${team.name}</div>
+                  <div style="font-size:13px;font-weight:700;color:#374151">${esc(team.name)}</div>
                   <div style="font-size:10px;color:#9ca3af;margin-top:2px">${memberCount} member${memberCount !== 1 ? 's' : ''}</div>
                 </div>
                 <div style="padding:16px"><p style="font-size:12px;color:#6b7280">No usage data yet.</p></div>
@@ -1661,7 +1806,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
               return `<tr style="border-bottom:1px solid #e5e7eb">
                 <td style="padding:6px 10px;color:#9ca3af;font-size:12px">${i+1}</td>
                 <td style="padding:6px 10px;font-size:12px;color:#374151">
-                  <div style="font-weight:${isMe ? '700' : '400'}">${name}${isMe ? ' <span style="font-size:10px;color:#00C2C7">(you)</span>' : ''}</div>
+                  <div style="font-weight:${isMe ? '700' : '400'}">${esc(name)}${isMe ? ' <span style="font-size:10px;color:#00C2C7">(you)</span>' : ''}</div>
                   ${lastSeen ? `<div style="font-size:10px;color:#9ca3af">Last sync: ${lastSeen}</div>` : ''}
                 </td>
                 <td style="padding:6px 10px;font-size:12px;text-align:right;font-weight:700;color:#00C2C7">${(s.total_launches||0).toLocaleString()}</td>
@@ -1672,7 +1817,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
             return `
               <div style="margin-bottom:20px;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden;page-break-inside:avoid">
                 <div style="background:#f3f4f6;padding:12px 16px;border-bottom:1px solid #e5e7eb">
-                  <div style="font-size:13px;font-weight:700;color:#374151">${team.name}</div>
+                  <div style="font-size:13px;font-weight:700;color:#374151">${esc(team.name)}</div>
                   <div style="font-size:10px;color:#9ca3af;margin-top:2px">${memberCount} member${memberCount !== 1 ? 's' : ''}${activeBadge}</div>
                 </div>
                 <div style="padding:16px">
@@ -1722,6 +1867,7 @@ window.exportStatsPDF = async function exportStatsPDF() {
   let logoDataUrl = '';
   try {
     const logoResp = await fetch('img/logo.png');
+    if (!logoResp.ok) throw new Error(`Logo fetch failed (${logoResp.status})`);
     const blob = await logoResp.blob();
     logoDataUrl = await new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(blob); });
   } catch (_) {}
@@ -1867,12 +2013,12 @@ function renderStatsDash() {
     const jump = allJumps.find(j => j.id === c.jumpId);
     return sum + (jump?.timeSaved != null ? jump.timeSaved : prefs.timePerClick);
   }, 0);
-  const mins   = Math.round(totalSecondsSaved / 60);
+  const mins   = (totalSecondsSaved / 60).toFixed(1);
   const dollars= ((totalSecondsSaved / 3600) * prefs.dollarsPerHour).toFixed(2);
   const fmtUSD = v => '$' + parseFloat(v).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
   if (n === 0) {
-    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;text-align:center"><svg class="ti ti-chart-bar-popular" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.svg#tabler-chart-bar-popular"/></svg><p style="margin-bottom:6px">No launch data yet.</p><p style="font-size:0.82rem;color:var(--text-dim)">Head to the <strong style="color:var(--text-muted)">Jumps</strong> page and click a jump — your stats will show up here.</p></div>`;
+    dash.innerHTML = `<div class="stats-empty" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:220px;text-align:center"><svg class="ti ti-chart-bar" style="width:3rem;height:3rem;color:var(--text-dim);display:block;margin-bottom:14px"><use href="img/tabler-sprite.min.svg#tabler-chart-bar"/></svg><p style="margin-bottom:6px">No launch data yet.</p><p style="font-size:0.82rem;color:var(--text-dim)">Head to the <strong style="color:var(--text-muted)">Jumps</strong> page and click a jump — your stats will show up here.</p></div>`;
     return;
   }
 
@@ -1939,7 +2085,7 @@ function renderStatsDash() {
       <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
       <div class="stats-cards" style="grid-template-columns:repeat(4,1fr)">
         <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
-        <div class="stat-card"><div class="stat-card-value">${mins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
+        <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${jumps.length}</div><div class="stat-card-label">Active Jumps</div></div>
       </div>
@@ -2040,7 +2186,7 @@ function renderStatsDash() {
   dash.innerHTML = `
     <div class="stats-cards">
       <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Jumps Clicked</div></div>
-      <div class="stat-card"><div class="stat-card-value">${mins.toLocaleString()} min</div><div class="stat-card-label">Time Saved</div></div>
+      <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
       <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
     </div>
     <div class="stats-chart-row">
@@ -2139,7 +2285,7 @@ async function renderTeamROISection() {
 
       const memberCountMap = {};
       for (const t of ownedTeams) {
-        const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+        const { count } = await supabaseClient.from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', t.id);
         memberCountMap[t.id] = (count || 0); // owner is already a team_members row
       }
       for (const t of memberTeams) { memberCountMap[t.id] = null; }
@@ -2176,7 +2322,7 @@ async function renderTeamROISection() {
                 Upgrade to see <strong style="color:var(--hover-accent)">real per-member stats</strong>.
               </div>
               <a href="https://jumpkit.app/#pricing" target="_blank" class="btn btn-primary" style="margin-top:14px;font-size:0.8rem;padding:7px 16px">
-                <svg class="ti ti-rocket" style="width:0.85rem;height:0.85rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
+                <svg class="ti ti-rocket" style="width:0.85rem;height:0.85rem;color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg>
                 Upgrade to Unlimited
               </a>
             </div>
@@ -2211,7 +2357,7 @@ async function renderTeamROISection() {
       // Fetch member counts for header badges (parallel)
       const memberCountMap = {};
       await Promise.all(ownedTeams.map(async t => {
-        const { count } = await supabaseClient.from('team_members').select('*', { count: 'exact', head: true }).eq('team_id', t.id);
+        const { count } = await supabaseClient.from('team_members').select('id', { count: 'exact', head: true }).eq('team_id', t.id);
         memberCountMap[t.id] = (count || 0); // owner is already a team_members row
       }));
 
@@ -2403,7 +2549,7 @@ function buildUnlockButton(label = 'Upgrade to Unlimited', opts = {}) {
   if (opts.width && opts.width !== 'auto') btnStyle += `width:${opts.width};`;
   if (opts.padding) btnStyle += `padding:${opts.padding};`;
   if (opts.fontSize) spanStyle += `font-size:${opts.fontSize};`;
-  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg><span style="${spanStyle}">${label}</span></button>`;
+  return `<button class="btn btn-primary unlock-btn ${extraClass}" style="${btnStyle}" data-jaction="open-url" data-url="${LS_CHECKOUT_URL}"><svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white" aria-hidden="true"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg><span style="${spanStyle}">${label}</span></button>`;
 }
 
 // ── Paywall event tracking ────────────────────────────────────────────────────────────────
@@ -2422,12 +2568,12 @@ window.showUpgradeModal = function(title, message) {
   const body = `<p style="color:var(--text-muted);font-size:0.95rem;line-height:1.7">${message}</p>`;
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">
-      <svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Not Now
+      <svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Not Now
     </button>
     <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-      <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Unlimited
+      <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Upgrade to Unlimited
     </button>`;
-  Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
+  Modal.open(`<svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg> ${title}`, body, footer, 'sm');
 };
 
 window.showPaywall = function() {
@@ -2440,7 +2586,7 @@ window.showPaywall = function() {
       </p>
       <div style="display:flex;flex-direction:column;gap:12px;max-width:280px;margin:0 auto">
         <button class="btn btn-primary" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}" style="padding:14px;font-size:1rem;font-weight:700;background:linear-gradient(135deg,#50CACC,#1A4FD6)">
-          <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Upgrade to Unlimited
+          <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Upgrade to Unlimited
         </button>
         <button class="btn btn-ghost" data-jaction="modal-close" style="padding:10px;font-size:0.82rem;color:var(--text-muted)">
           Maybe later
@@ -2448,7 +2594,7 @@ window.showPaywall = function() {
       </div>
     </div>
   `;
-  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Jump Launch Limit Reached', body, '', { closeable: false });
+  Modal.open('<svg class="ti ti-lock"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg> Jump Launch Limit Reached', body, '', { closeable: false });
 };
 
 // ── Notifications ────────────────────────────────────────────────
@@ -2529,7 +2675,7 @@ window.forceBackup = async function forceBackup() {
   // 0. Intro modal — explain what will be exported before opening the save dialog
   const proceed = await new Promise(resolve => {
     Modal.open(
-      '<svg class="ti ti-database-export" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-export"/></svg> Export Jumps Backup',
+      '<svg class="ti ti-database-export" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-database-export"/></svg> Export Jumps Backup',
       `<div style="display:flex;flex-direction:column;gap:14px;padding:4px 0">
         <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">Save a backup of your personal jumps to a local file.</p>
         <p style="color:var(--text-muted);font-size:0.85rem;margin:0">You’ll be prompted to choose where to save a <strong>.json</strong> backup file. This file can later be imported into any JumpKit account.</p>
@@ -2541,7 +2687,7 @@ window.forceBackup = async function forceBackup() {
       </div>`,
       `<button class="btn btn-subtle" id="exportIntroCancelBtn">Cancel</button>
        <button class="btn btn-primary" id="exportIntroSaveBtn" style="min-width:140px">
-         <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Choose Save Location
+         <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.min.svg#tabler-download"/></svg> Choose Save Location
        </button>`,
       'sm'
     );
@@ -2568,17 +2714,17 @@ window.forceBackup = async function forceBackup() {
     const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
     if (result?.ok) {
       addNotification({ type: 'backup', message: `Backup saved to: ${result.path}`, ts: Date.now() });
-      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Backup Saved',
+      Modal.open('<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg> Backup Saved',
         `<div style="text-align:center;padding:8px 0">
           <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin-bottom:6px">Your data has been exported successfully.</p>
           <p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:16px">All personal jumps and associated columns were exported. Empty columns and shared columns are by default excluded.</p>
           <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;font-size:0.82rem;font-family:monospace;color:var(--text);word-break:break-all;text-align:left">${esc(result.path)}</div>
         </div>`,
-        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Got it</button>`
+        `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Got it</button>`
       );
     } else if (result?.reason !== 'canceled') {
       addNotification({ type: 'backup-failed', message: `Backup failed: ${result?.reason || 'Unknown error'}`, ts: Date.now() });
-      Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Backup Failed',
+      Modal.open('<svg class="ti ti-alert-circle" style="color:#ef4444"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Backup Failed',
         `<p style="color:var(--text-muted);font-size:0.9rem">${esc(result?.reason || 'Unknown error')}</p>`,
         `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>`
       );
@@ -2598,7 +2744,7 @@ window.importJumps = async function importJumps() {
   // 0. Intro modal — explain what to do before opening the file picker
   const proceed = await new Promise(resolve => {
     Modal.open(
-      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-import"/></svg> Import Jumps from Backup',
+      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-database-import"/></svg> Import Jumps from Backup',
       `<div style="display:flex;flex-direction:column;gap:14px;padding:4px 0">
         <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">Choose a JumpKit backup file to import.</p>
         <p style="color:var(--text-muted);font-size:0.85rem;margin:0">Select a <strong>.json</strong> file previously exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>. You'll be able to choose which columns to import before anything is added.</p>
@@ -2610,7 +2756,7 @@ window.importJumps = async function importJumps() {
       </div>`,
       `<button class="btn btn-subtle" id="importIntroCancelBtn">Cancel</button>
        <button class="btn btn-primary" id="importIntroPickBtn" style="min-width:140px">
-         <svg class="ti ti-folder-open" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-folder-open"/></svg> Choose File
+         <svg class="ti ti-folder-open" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.min.svg#tabler-folder-open"/></svg> Choose File
        </button>`,
       'sm'
     );
@@ -2637,23 +2783,23 @@ window.importJumps = async function importJumps() {
   let backup;
   try { backup = JSON.parse(fileResult.content); } catch (_) {
     Modal.open(
-      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Invalid File',
+      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Invalid File',
       `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">
         <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">This file could not be read as a JumpKit backup.</p>
         <p style="color:var(--text-muted);font-size:0.85rem;margin:0">The file you selected is not valid JSON. Please choose a <strong>.json</strong> file exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>.</p>
       </div>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`
     );
     return;
   }
   if (!Array.isArray(backup?.jumps) || !Array.isArray(backup?.columns)) {
     Modal.open(
-      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Unrecognised File',
+      '<svg class="ti ti-alert-circle" style="color:#e15b59;vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Unrecognised File',
       `<div style="display:flex;flex-direction:column;gap:10px;padding:4px 0">
         <p style="color:var(--text);font-size:0.95rem;font-weight:600;margin:0">This doesn’t look like a JumpKit backup file.</p>
         <p style="color:var(--text-muted);font-size:0.85rem;margin:0">The file is valid JSON but is missing the required <code>jumps</code> and <code>columns</code> data. Please select a <strong>.json</strong> file exported from JumpKit via <strong>Settings → Backup Jumps Manually</strong>.</p>
       </div>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`
     );
     return;
   }
@@ -2694,11 +2840,11 @@ window.importJumps = async function importJumps() {
     const footer = `
       <button class="btn btn-subtle" id="importCancelBtn">Cancel</button>
       <button class="btn btn-primary" id="importConfirmBtn" style="min-width:120px">
-        <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Import Selected
+        <svg class="ti ti-download" style="width:1em;height:1em;color:inherit"><use href="img/tabler-sprite.min.svg#tabler-download"/></svg> Import Selected
       </button>`;
 
     Modal.open(
-      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-database-import"/></svg> Select Collections to Import',
+      '<svg class="ti ti-database-import" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-database-import"/></svg> Select Collections to Import',
       body, footer, 'sm'
     );
 
@@ -2723,8 +2869,18 @@ window.importJumps = async function importJumps() {
 
     for (const bCol of backup.columns) {
       if (!bCol.name || !selectedColIds.has(bCol.id)) continue;
-      const existing = existingCols.find(c => c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase());
+      // Import backup columns into personal, visible columns only. Do not map an
+      // imported personal jump into a shared/hidden column with the same name.
+      const existing = existingCols.find(c =>
+        !c.isShared &&
+        c.name &&
+        c.name.trim().toLowerCase() === bCol.name.trim().toLowerCase()
+      );
       if (existing) {
+        if (!existing.visible) {
+          existing.visible = true;
+          DB.saveColumns(currentUser.id, existingCols);
+        }
         colIdMap[bCol.id] = existing.id;
       } else {
         const maxOrder = existingCols.reduce((m, c) => Math.max(m, c.order ?? 0), 0);
@@ -2738,7 +2894,12 @@ window.importJumps = async function importJumps() {
     let archivedColId = null;
     if (includeArchived && archivedJumps.length > 0) {
       const archColName = 'Archived';
-      const existingArchCol = existingCols.find(c => c.name.trim().toLowerCase() === archColName.toLowerCase());
+      const existingArchCol = existingCols.find(c =>
+        !c.isShared &&
+        !c.teamId &&
+        c.name &&
+        c.name.trim().toLowerCase() === archColName.toLowerCase()
+      );
       if (existingArchCol) {
         archivedColId = existingArchCol.id;
       } else {
@@ -2755,7 +2916,12 @@ window.importJumps = async function importJumps() {
     const skippedJumps = []; // { name, url, reason }
 
     const doImport = (bJump, targetColId, archive) => {
+      if (!targetColId || !DB.getColumns(currentUser.id).some(c => c.id === targetColId)) {
+        skippedJumps.push({ name: bJump.name || 'Unnamed', url: bJump.url || '', reason: 'Missing target column' });
+        return;
+      }
       const isDupe = existingJumps.some(j =>
+        !j.isShared &&
         j.columnId === targetColId &&
         (j.url || '').trim().toLowerCase() === (bJump.url || '').trim().toLowerCase()
       );
@@ -2772,6 +2938,10 @@ window.importJumps = async function importJumps() {
         hotkey:      bJump.hotkey || '',
         favorite:    bJump.favorite || false,
       });
+      if (!newJump) {
+        skippedJumps.push({ name: bJump.name || 'Unnamed', url: bJump.url || '', reason: 'Missing target column' });
+        return;
+      }
       if (archive) DB.archiveJump(currentUser.id, newJump.id);
       existingJumps.push(newJump);
       imported++;
@@ -2789,7 +2959,23 @@ window.importJumps = async function importJumps() {
       }
     }
 
-    // 8. Navigate to jumps page + refresh UI (always, so nav stays in sync)
+    // 8. Force an awaited persistence pass. The import loop updates the live DB cache
+    // immediately, but individual SQLite writes are normally fire-and-forget; without
+    // this flush, logging out right after import can reload an empty/unimported dataset.
+    try {
+      if (typeof DB.persistUserData === 'function') await DB.persistUserData(currentUser.id);
+      if (typeof DB.saveRecoverySnapshot === 'function') await DB.saveRecoverySnapshot(currentUser.id, 'import-jumps');
+    } catch (err) {
+      console.warn('[importJumps] persist after import failed:', err);
+      Modal.open(
+        '<svg class="ti ti-alert-circle" style="color:#e15b59"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Import Save Failed',
+        `<p style="color:var(--text-muted);font-size:0.9rem;line-height:1.5">The import rendered in memory, but JumpKit could not confirm the local SQLite save: <strong>${esc(err.message || err)}</strong></p>`,
+        '<button class="btn btn-subtle" data-jaction="modal-close">Close</button>'
+      );
+      return;
+    }
+
+    // 9. Navigate to jumps page + refresh UI (always, so nav stays in sync)
     if (typeof navigateTo === 'function') {
       navigateTo('jumps');
     } else if (imported > 0) {
@@ -2811,13 +2997,13 @@ window.importJumps = async function importJumps() {
       : '';
 
     Modal.open(
-      `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.svg#tabler-circle-check"/></svg> Import Complete`,
+      `<svg class="ti ti-circle-check" style="color:#22c55e"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg> Import Complete`,
       `<div style="text-align:center;padding:8px 0">
         <p style="color:var(--text);font-size:1rem;font-weight:600;margin-bottom:4px">${imported} jump${imported !== 1 ? 's' : ''} imported</p>
         ${skippedJumps.length > 0 ? `<p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0">${skippedJumps.length} skipped</p>` : ''}
         ${skippedListHTML}
       </div>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done</button>`
+      `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Done</button>`
     );
   });
 };
@@ -2847,7 +3033,7 @@ window.runCloudBackup = async function runCloudBackup() {
       overlay.innerHTML = `
         <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,0.4)">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-            <svg class="ti ti-database-export" style="font-size:1.6rem;color:var(--turq)"><use href="img/tabler-sprite.svg#tabler-database-export"/></svg>
+            <svg class="ti ti-database-export" style="font-size:1.6rem;color:var(--turq)"><use href="img/tabler-sprite.min.svg#tabler-database-export"/></svg>
             <h3 style="margin:0;font-size:1.05rem;font-weight:700;color:var(--text)">Auto-Backup Ready</h3>
           </div>
           <p style="margin:0 0 24px;font-size:0.9rem;color:var(--text-muted);line-height:1.6">Your JumpKit data is ready to back up. Save a copy to your chosen location now?</p>
@@ -2881,14 +3067,17 @@ window.checkPendingInvites = async function checkPendingInvites() {
     const email = window._supabaseUser.email;
 
     // Check for pending invites for this email (flat query to avoid stack depth limit)
-    const { data: rawInvites = [] } = await supabaseClient
+    const { data: rawInvites = [], error: inviteErr } = await supabaseClient
       .from('team_invites')
-      .select('*')
+      .select('id,email,team_id,status,invited_at,created_at')
       .eq('email', email)
-      .eq('status', 'pending');
+      .eq('status', 'pending')
+      .limit(100);
+    if (inviteErr) throw inviteErr;
     const invites = [];
     for (const inv of rawInvites) {
-      const { data: t } = await supabaseClient.from('teams').select('name').eq('id', inv.team_id).single();
+      const { data: t, error: teamErr } = await supabaseClient.from('teams').select('name').eq('id', inv.team_id).single();
+      if (teamErr) throw teamErr;
       invites.push({ ...inv, teams: t || null });
     }
 
@@ -2914,9 +3103,9 @@ window.checkPendingInvites = async function checkPendingInvites() {
         </p>
       </div>`;
 
-    Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.svg#tabler-mail"/></svg> Team Invitation', body,
+    Modal.open('<svg class="ti ti-mail"><use href="img/tabler-sprite.min.svg#tabler-mail"/></svg> Team Invitation', body,
       `<button class="btn btn-subtle" data-jaction="modal-close">Later</button>
-       <button class="btn btn-primary" data-jaction="nav-teams-close"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.svg#tabler-users"/></svg> Go to Teams</button>`
+       <button class="btn btn-primary" data-jaction="nav-teams-close"><svg class="ti ti-users" style="color:white"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg> Go to Teams</button>`
     );
   } catch(e) {
     console.warn('[checkPendingInvites]', e.message);
@@ -3070,7 +3259,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
 
     const upgradeBtn = `
       <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="open-url-close" data-url="${LS_CHECKOUT_URL}">
-        <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg>
+        <svg class="ti ti-rocket" style="width:1.1rem;height:1.1rem;flex-shrink:0;color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg>
         Upgrade to Unlimited
       </button>`;
 
@@ -3079,7 +3268,7 @@ window.checkAndHandleDowngrade = async function checkAndHandleDowngrade() {
     const _lastDowngradeTs = parseInt(localStorage.getItem(_downgradeNotifKey) || '0');
     if (Date.now() - _lastDowngradeTs > 24 * 60 * 60 * 1000) {
       localStorage.setItem(_downgradeNotifKey, Date.now().toString());
-      Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
+      Modal.open('<svg class="ti ti-alert-triangle" style="color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-alert-triangle"/></svg> Subscription Ended', body,
         `<button class="btn btn-subtle" data-jaction="modal-close">OK</button>
          ${upgradeBtn.replace('Unlock JumpKit Unlimited', 'Reactivate JumpKit Unlimited')}`,
         'lg'
@@ -3142,7 +3331,7 @@ function openTierFeaturesModal() {
     : `<button class="btn btn-subtle" data-jaction="modal-close">Close</button>
        ${buildUnlockButton('Upgrade to Unlimited', {})}`;
 
-  Modal.open(`<svg class="ti ti-sparkles"><use href="img/tabler-sprite.svg#tabler-sparkles"/></svg> ${tierLabel} Features`, body, footer, 'sm');
+  Modal.open(`<svg class="ti ti-sparkles"><use href="img/tabler-sprite.min.svg#tabler-sparkles"/></svg> ${tierLabel} Features`, body, footer, 'sm');
 }
 
 
@@ -3156,7 +3345,7 @@ document.addEventListener('click', e => {
       clearAllNotifications();
       updateNotifBadge();
       document.getElementById('modalBody').innerHTML   = window._notifEmptyHTML();
-      document.getElementById('modalFooter').innerHTML = `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti"><use href="img/tabler-sprite.svg#tabler-x"/></svg> Close</button>`;
+      document.getElementById('modalFooter').innerHTML = `<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>`;
       const _lbl = document.getElementById('notifCountLabel');
       if (_lbl) _lbl.remove();
       break;

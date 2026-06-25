@@ -31,8 +31,9 @@ const DB = (() => {
       cloudBackup:        false,
       timePerClick:       10,
       dollarsPerHour:     50,
-      showDescription: false,
-      showHotkey:      false,
+      showDescription:  false,
+      showHotkey:       false,
+      showColTeamName:  true,
       autoArchive:        'never',
       subscriptionStatus: 'free',
       subscriptionTier:   'free',
@@ -50,13 +51,316 @@ const DB = (() => {
     // subscription/role are intentionally not read from localStorage — always
     // use window._supabaseProfile (in-memory) to prevent paywall tampering.
     const prefs = Object.assign(defaultPrefs(), rawPrefs || {});
-    return { jumps, columns, clickLog, prefs };
+    return { jumps, columns, clickLog, prefs, hasPrefs: !!rawPrefs };
+  }
+
+  function normalizeLegacyRows(rows, userId) {
+    return (Array.isArray(rows) ? rows : []).map(r => ({ ...r, userId }));
+  }
+
+  function hasPersonalData(rows) {
+    return (Array.isArray(rows) ? rows : []).some(r => !r.isShared);
+  }
+
+  function hasLegacyData(legacy) {
+    return hasPersonalData(legacy?.columns) || hasPersonalData(legacy?.jumps);
+  }
+
+  function normalizeSnapshotRows(rows, userId) {
+    return (Array.isArray(rows) ? rows : []).map(r => ({ ...r, userId }));
+  }
+
+  async function restoreLegacyLocalStorageToSQLite(userId, legacy) {
+    if (!window.electronAPI || !legacy || !hasLegacyData(legacy)) return false;
+    const columns  = normalizeLegacyRows(legacy.columns, userId);
+    const jumps    = normalizeLegacyRows(legacy.jumps, userId);
+    const clickLog = normalizeLegacyRows(legacy.clickLog, userId);
+
+    try {
+      if (window.electronAPI.saveColumn) {
+        for (const col of columns) await window.electronAPI.saveColumn(userId, col);
+      } else if (window.electronAPI.saveColumns) {
+        await window.electronAPI.saveColumns(userId, columns);
+      }
+      for (const jump of jumps) await window.electronAPI.saveJump(userId, jump);
+      for (const entry of clickLog) {
+        await window.electronAPI.logClick(userId, entry.jumpId, entry.ts || Date.now(), entry.jumpName || null);
+      }
+      if (legacy.hasPrefs && window.electronAPI.savePrefs) {
+        await window.electronAPI.savePrefs(userId, legacy.prefs);
+      }
+      console.info('[DB.init] Restored legacy localStorage JumpKit data into SQLite.');
+      return true;
+    } catch (err) {
+      console.warn('[DB.init] Legacy localStorage restore failed:', err);
+      return false;
+    }
   }
 
   return {
     // ── In-memory cache ────────────────────────────────────────────
     _cache: { jumps: [], columns: [], clickLog: [], prefs: null },
     _userId: null,
+    _sqliteAvailable: true,
+
+    _saveLocalFallback(userId) {
+      if (!userId) return;
+      lsSet(`jk_cols_${userId}`, this.getColumns(userId));
+      lsSet(`jk_jumps_${userId}`, this.getJumps(userId));
+      lsSet(`jk_clicks_${userId}`, this.getClickLog(userId));
+      if (this._cache.prefs) lsSet(`jk_prefs_${userId}`, this._cache.prefs);
+    },
+
+    _markSqliteUnavailable(reason) {
+      if (this._sqliteAvailable) console.warn('[DB] SQLite unavailable; using local fallback:', reason || 'unknown');
+      this._sqliteAvailable = false;
+    },
+
+    async persistUserData(userId) {
+      if (!userId) return false;
+      const columns = this.getColumns(userId);
+      const jumps = this.getJumps(userId);
+      const prefs = this._cache.prefs;
+
+      // Always write the local fallback first. It is harmless when SQLite works,
+      // and it protects imports when a packaged/dev build cannot load better-sqlite3.
+      this._saveLocalFallback(userId);
+
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        try {
+          if (window.electronAPI.saveColumns) {
+            const result = await window.electronAPI.saveColumns(userId, columns);
+            if (result && result.ok === false) throw new Error(result.reason || 'saveColumns failed');
+          }
+          for (const jump of jumps) {
+            if (window.electronAPI.saveJump) {
+              const result = await window.electronAPI.saveJump(userId, jump);
+              if (result && result.ok === false) throw new Error(result.reason || `saveJump failed for ${jump.id}`);
+            }
+          }
+          if (prefs && window.electronAPI.savePrefs) {
+            const result = await window.electronAPI.savePrefs(userId, prefs);
+            if (result && result.ok === false) throw new Error(result.reason || 'savePrefs failed');
+          }
+        } catch (err) {
+          this._markSqliteUnavailable(err.message || err);
+          // Local fallback was already written above, so persistence is still ok.
+          return true;
+        }
+      }
+      return true;
+    },
+
+    async saveRecoverySnapshot(userId, reason = 'manual') {
+      if (!userId) return false;
+      try {
+        const snapshot = {
+          version: 1,
+          reason,
+          savedAt: new Date().toISOString(),
+          userId,
+          // Personal only — exclude team/shared jumps so they don't get
+          // re-injected into SQLite as ghost entries on restore.
+          jumps:   this.getJumps(userId).filter(j => !j.teamId),
+          columns: this.getColumns(userId).filter(c => !c.teamId),
+          clickLog: this.getClickLog(userId),
+          prefs: this.getPrefs(userId),
+        };
+        if (!hasLegacyData(snapshot) && !snapshot.clickLog.length) return false;
+        if (window.electronAPI?.saveRecoverySnapshot && this._sqliteAvailable !== false) {
+          const result = await window.electronAPI.saveRecoverySnapshot(userId, snapshot);
+          if (result?.ok) return true;
+          this._markSqliteUnavailable(result?.reason || 'saveRecoverySnapshot failed');
+        }
+        // Browser/no-SQLite mode deliberately does not persist recovery snapshots
+        // to localStorage because snapshots can contain jump URLs and click history.
+        return false;
+      } catch (_) {
+        return false;
+      }
+    },
+
+    async _restoreRecoverySnapshot(userId) {
+      let snapshot = null;
+      try {
+        if (window.electronAPI?.getRecoverySnapshot && this._sqliteAvailable !== false) {
+          const result = await window.electronAPI.getRecoverySnapshot(userId);
+          if (result?.ok) snapshot = result.snapshot;
+        }
+      } catch (_) {}
+      if (!snapshot || snapshot.userId !== userId) return false;
+
+      // Strip any team-linked rows that may have been saved by older versions.
+      const snapColumns = normalizeSnapshotRows(snapshot.columns, userId).filter(c => !c.teamId);
+      const snapJumps   = normalizeSnapshotRows(snapshot.jumps, userId).filter(j => !j.teamId);
+      const snapClickLog = normalizeSnapshotRows(snapshot.clickLog, userId);
+      let restored = false;
+
+      // If the local machine looks empty after a forced remote logout/login, restore
+      // the last known local dataset before first-run seeding or rendering can make
+      // the account appear reset.
+      if (!hasPersonalData(this._cache.columns) && !hasPersonalData(this._cache.jumps) && (hasPersonalData(snapColumns) || hasPersonalData(snapJumps))) {
+        this._cache.columns = snapColumns;
+        this._cache.jumps = snapJumps.map(j => ({ ...j, favorite: !!j.favorite, isArchived: !!j.isArchived, isShared: !!j.isShared }));
+        if (window.electronAPI) {
+          if (window.electronAPI.saveColumns) await window.electronAPI.saveColumns(userId, snapColumns);
+          for (const jump of this._cache.jumps) await window.electronAPI.saveJump(userId, jump);
+        } else {
+          lsSet(`jk_cols_${userId}`, snapColumns);
+          lsSet(`jk_jumps_${userId}`, this._cache.jumps);
+        }
+        restored = true;
+      }
+
+      // Stats are independently valuable. Restore only when the current click log is
+      // empty to avoid duplicates.
+      if ((!this._cache.clickLog || this._cache.clickLog.length === 0) && snapClickLog.length) {
+        this._cache.clickLog = snapClickLog;
+        if (window.electronAPI) {
+          for (const entry of snapClickLog) {
+            await window.electronAPI.logClick(userId, entry.jumpId, entry.ts || Date.now(), entry.jumpName || null);
+          }
+        } else {
+          lsSet(`jk_clicks_${userId}`, snapClickLog);
+        }
+        restored = true;
+      }
+
+      if (!this._cache.prefs && snapshot.prefs) {
+        this._cache.prefs = Object.assign(defaultPrefs(), snapshot.prefs);
+        if (window.electronAPI?.savePrefs) await window.electronAPI.savePrefs(userId, this._cache.prefs);
+        else lsSet(`jk_prefs_${userId}`, this._cache.prefs);
+      }
+
+      return restored;
+    },
+
+    async _repairRenderablePersonalData(userId) {
+      let changed = false;
+      let personalJumps = this._cache.jumps.filter(j => j.userId === userId && !j.isShared);
+      if (!personalJumps.length) return false;
+
+      const isRecoveredCol = c => c.name === 'Recovered' || String(c.id || '').startsWith('recovered_');
+      let userCols = this._cache.columns.filter(c => c.userId === userId);
+      let personalCols = userCols.filter(c => !c.isShared);
+      const recoveredCols = personalCols.filter(isRecoveredCol);
+      const realPersonalCols = personalCols.filter(c => !isRecoveredCol(c));
+
+      // If repeated failed-import/recovery cycles created several Recovered cols,
+      // collapse them into one so the UI doesn't show piles of the same jump.
+      let primaryRecovered = recoveredCols[0] || null;
+      if (recoveredCols.length > 1) {
+        const recoveredIds = new Set(recoveredCols.map(c => c.id));
+        personalJumps.forEach(j => {
+          if (recoveredIds.has(j.columnId)) j.columnId = primaryRecovered.id;
+        });
+        const removeIds = new Set(recoveredCols.slice(1).map(c => c.id));
+        this._cache.columns = this._cache.columns.filter(c => !(c.userId === userId && removeIds.has(c.id)));
+        changed = true;
+      }
+
+      userCols = this._cache.columns.filter(c => c.userId === userId);
+      personalCols = userCols.filter(c => !c.isShared);
+      const visibleRealCol = realPersonalCols.find(c => c.visible) || realPersonalCols[0] || null;
+      let validColIds = new Set(userCols.map(c => c.id));
+
+      if (personalCols.length === 0) {
+        primaryRecovered = {
+          id: `recovered_${Date.now()}`,
+          userId,
+          name: 'Recovered',
+          visible: true,
+          order: 0,
+          createdAt: Date.now(),
+          isShared: false,
+          teamId: null,
+          supabaseId: null,
+        };
+        this._cache.columns.push(primaryRecovered);
+        validColIds.add(primaryRecovered.id);
+        personalCols = [primaryRecovered];
+        changed = true;
+      }
+
+      // Keep columns with personal jumps visible; hidden columns made imported data
+      // look missing even though Home counted the jumps.
+      const jumpColIds = new Set(personalJumps.map(j => j.columnId).filter(Boolean));
+      this._cache.columns.forEach(c => {
+        if (c.userId === userId && !c.isShared && jumpColIds.has(c.id) && !c.visible) {
+          c.visible = true;
+          changed = true;
+        }
+      });
+
+      validColIds = new Set(this._cache.columns.filter(c => c.userId === userId).map(c => c.id));
+      personalCols = this._cache.columns.filter(c => c.userId === userId && !c.isShared);
+      primaryRecovered = personalCols.find(isRecoveredCol) || null;
+      const fallbackCol = visibleRealCol || personalCols.find(c => c.visible) || personalCols[0];
+
+      personalJumps.forEach(j => {
+        if (!j.columnId || !validColIds.has(j.columnId)) {
+          j.columnId = fallbackCol.id;
+          changed = true;
+        }
+      });
+
+      // Dedupe recovered junk from repeated failed imports. Prefer the non-Recovered
+      // copy if one exists elsewhere; otherwise keep a single copy in Recovered.
+      const recoveredIds = new Set(personalCols.filter(isRecoveredCol).map(c => c.id));
+      const nonRecoveredKeys = new Set();
+      const norm = v => String(v || '').trim().toLowerCase();
+      const jumpKey = j => norm(j.url) || `name:${norm(j.name)}`;
+      this._cache.jumps
+        .filter(j => j.userId === userId && !j.isShared && !recoveredIds.has(j.columnId))
+        .forEach(j => { const key = jumpKey(j); if (key) nonRecoveredKeys.add(key); });
+
+      const seenRecovered = new Set();
+      const duplicateRecoveredIds = new Set();
+      this._cache.jumps
+        .filter(j => j.userId === userId && !j.isShared && recoveredIds.has(j.columnId))
+        .forEach(j => {
+          const key = jumpKey(j);
+          if (!key) return;
+          if (nonRecoveredKeys.has(key) || seenRecovered.has(key)) duplicateRecoveredIds.add(j.id);
+          else seenRecovered.add(key);
+        });
+      if (duplicateRecoveredIds.size > 0) {
+        this._cache.jumps = this._cache.jumps.filter(j => !(j.userId === userId && duplicateRecoveredIds.has(j.id)));
+        changed = true;
+      }
+
+      if (!changed) return false;
+      this._saveLocalFallback(userId);
+      const colsForUser = this._cache.columns.filter(c => c.userId === userId);
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        if (window.electronAPI.saveColumns) await window.electronAPI.saveColumns(userId, colsForUser);
+        for (const jump of this._cache.jumps.filter(j => j.userId === userId && !j.isShared)) {
+          await window.electronAPI.saveJump(userId, jump);
+        }
+        for (const id of duplicateRecoveredIds || []) {
+          if (window.electronAPI.deleteJump) await window.electronAPI.deleteJump(userId, id);
+        }
+      }
+      return true;
+    },
+
+    async _removeOrphanSharedJumps(userId) {
+      const validColumnIds = new Set(this._cache.columns
+        .filter(c => c.userId === userId)
+        .map(c => c.id));
+      const orphanSharedIds = this._cache.jumps
+        .filter(j => j.userId === userId && !j.isArchived && (j.isShared || j.teamId) && (!j.columnId || !validColumnIds.has(j.columnId)))
+        .map(j => j.id);
+      if (!orphanSharedIds.length) return false;
+
+      this._cache.jumps = this._cache.jumps.filter(j => !(j.userId === userId && orphanSharedIds.includes(j.id)));
+      this._saveLocalFallback(userId);
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        for (const id of orphanSharedIds) await window.electronAPI.deleteJump(userId, id);
+      }
+      console.info(`[DB.repair] Removed ${orphanSharedIds.length} orphan shared/team jump(s).`);
+      return true;
+    },
 
     // ── Init (called once after auth, before renderApp) ────────────
     async init(userId) {
@@ -95,6 +399,53 @@ const DB = (() => {
           this._cache.clickLog = log     || [];
           this._cache.prefs    = prefs   || defaultPrefs();
 
+          // If Electron IPC exists but SQLite is unavailable, getters return empty
+          // arrays. In that case use the same local fallback as browser mode.
+          const localFallback = lsLoadAll(userId);
+          if (!hasPersonalData(this._cache.columns) && !hasPersonalData(this._cache.jumps) && hasLegacyData(localFallback)) {
+            this._markSqliteUnavailable('empty electron data with local fallback present');
+            this._cache.jumps    = normalizeLegacyRows(localFallback.jumps, userId).map(j => ({ ...j, favorite: !!j.favorite, isArchived: !!j.isArchived, isShared: !!j.isShared }));
+            this._cache.columns  = normalizeLegacyRows(localFallback.columns, userId).map(c => ({ ...c, visible: !!c.visible, isShared: !!c.isShared }));
+            this._cache.clickLog = normalizeLegacyRows(localFallback.clickLog, userId);
+            this._cache.prefs    = localFallback.prefs || defaultPrefs();
+          }
+
+          // Safety net for older/web builds: if SQLite has no personal data but
+          // legacy localStorage still does, restore it into SQLite before any
+          // first-run seeding or cleanup can make the app look empty.
+          const legacy = lsLoadAll(userId);
+          if (!hasPersonalData(this._cache.columns) && !hasPersonalData(this._cache.jumps) && hasLegacyData(legacy)) {
+            const restored = await restoreLegacyLocalStorageToSQLite(userId, legacy);
+            if (restored) {
+              const [restoredJumps, restoredColumns, restoredLog, restoredPrefs] = await Promise.all([
+                window.electronAPI.getJumps(userId),
+                window.electronAPI.getColumns(userId),
+                window.electronAPI.getClickLog(userId),
+                window.electronAPI.getPrefs(userId),
+              ]);
+              this._cache.jumps    = (restoredJumps   || []).map(j => ({ ...j, favorite: !!j.favorite, isArchived: !!j.isArchived, isShared: !!j.isShared }));
+              this._cache.columns  = (restoredColumns || []).map(c => ({ ...c, visible: !!c.visible, isShared: !!c.isShared }));
+              this._cache.clickLog = restoredLog      || [];
+              this._cache.prefs    = restoredPrefs    || defaultPrefs();
+            }
+          }
+
+          await this._restoreRecoverySnapshot(userId);
+          await this._repairRenderablePersonalData(userId);
+          await this._removeOrphanSharedJumps(userId);
+
+          // After a successful SQLite load (with data), remove stale localStorage
+          // fallback keys. They were written when SQLite was unavailable and now
+          // cause false "empty electron data with local fallback present" warnings.
+          // Only clear when SQLite is confirmed available and has personal data.
+          if (this._sqliteAvailable !== false && (hasPersonalData(this._cache.columns) || hasPersonalData(this._cache.jumps))) {
+            try {
+              [`jk_cols_${userId}`, `jk_jumps_${userId}`, `jk_clicks_${userId}`, `jk_prefs_${userId}`]
+                .forEach(k => localStorage.removeItem(k));
+              console.info('[DB] Cleared localStorage fallback — SQLite is source of truth.');
+            } catch (_) {}
+          }
+
           // Backfill jumpName on existing click log entries where it's missing
           // This preserves names for currently-existing jumps if they're deleted later
           let _backfillDirty = false;
@@ -107,14 +458,18 @@ const DB = (() => {
           if (_backfillDirty && window.electronAPI?.logClickName) {
             // Persist backfilled names to SQLite
             this._cache.clickLog.filter(e => e.jumpName && e.id).forEach(e => {
-              window.electronAPI.logClickName(e.id, e.jumpName).catch(() => {});
+              window.electronAPI.logClickName(userId, e.id, e.jumpName).catch(() => {});
             });
           }
 
-          // Auto-seed if this user has no personal (non-shared) columns
-          // Re-fetch columns fresh after any migration to avoid seeding over existing data
-          const freshCols = await window.electronAPI.getColumns(userId);
-          this._cache.columns = freshCols || [];
+          // Auto-seed if this user has no personal (non-shared) columns.
+          // Re-fetch columns fresh only when SQLite is available. If SQLite is
+          // unavailable, the cache already contains the local fallback data;
+          // overwriting it with empty IPC results makes the Jumps page render blank.
+          if (this._sqliteAvailable !== false) {
+            const freshCols = await window.electronAPI.getColumns(userId);
+            this._cache.columns = (freshCols || []).map(c => ({ ...c, visible: !!c.visible, isShared: !!c.isShared }));
+          }
           const personalCols = this._cache.columns.filter(c => !c.isShared);
 
           // Check seeded_at from Supabase profiles instead of localStorage.
@@ -155,6 +510,8 @@ const DB = (() => {
           this._cache.columns  = fb.columns;
           this._cache.clickLog = fb.clickLog;
           this._cache.prefs    = fb.prefs;
+          await this._restoreRecoverySnapshot(userId);
+          await this._repairRenderablePersonalData(userId);
         }
       } else {
         // Browser / dev mode — use localStorage
@@ -163,6 +520,13 @@ const DB = (() => {
         this._cache.columns  = fb.columns;
         this._cache.clickLog = fb.clickLog;
         this._cache.prefs    = fb.prefs;
+        await this._restoreRecoverySnapshot(userId);
+        await this._repairRenderablePersonalData(userId);
+        await this._removeOrphanSharedJumps(userId);
+        if (!hasPersonalData(this._cache.columns) && !hasPersonalData(this._cache.jumps) && !_seededThisSession.has(userId)) {
+          _seededThisSession.add(userId);
+          await this.seedNewUser(userId);
+        }
       }
     },
 
@@ -177,6 +541,17 @@ const DB = (() => {
       users.push(user);
       this.saveUsers(users);
       return user;
+    },
+    migrateLocalStorageUserId(oldId, newId) {
+      if (!oldId || !newId || oldId === newId) return;
+      ['jumps', 'cols', 'clicks', 'prefs'].forEach(kind => {
+        const oldKey = `jk_${kind}_${oldId}`;
+        const newKey = `jk_${kind}_${newId}`;
+        const val = lsGet(oldKey, null);
+        if (!val || localStorage.getItem(newKey)) return;
+        const migrated = Array.isArray(val) ? val.map(row => ({ ...row, userId: newId })) : val;
+        lsSet(newKey, migrated);
+      });
     },
     // NOTE: jk_current_user localStorage key has been removed.
     // The canonical user ID always comes from window._supabaseUser (in-memory Supabase session).
@@ -204,18 +579,33 @@ const DB = (() => {
         ...this._cache.columns.filter(c => c.userId !== userId),
         ...cols.map(c => ({ ...c, userId })),
       ];
-      // Persist to SQLite (fire-and-forget) or localStorage fallback
-      if (window.electronAPI) {
-        window.electronAPI.saveColumns(userId, cols).catch(e => console.warn('[DB.saveColumns]', e));
-      } else {
-        lsSet(`jk_cols_${userId}`, cols);
+      // Persist to local fallback always, then SQLite when available.
+      this._saveLocalFallback(userId);
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        window.electronAPI.saveColumns(userId, cols).then(result => {
+          if (result && result.ok === false) this._markSqliteUnavailable(result.reason || 'saveColumns failed');
+        }).catch(e => this._markSqliteUnavailable(e.message || e));
+      }
+    },
+
+    _persistColumn(userId, col) {
+      lsSet(`jk_cols_${userId}`, this.getColumns(userId));
+      if (window.electronAPI?.saveColumn && this._sqliteAvailable !== false) {
+        window.electronAPI.saveColumn(userId, col).then(result => {
+          if (result && result.ok === false) this._markSqliteUnavailable(result.reason || 'saveColumn failed');
+        }).catch(e => this._markSqliteUnavailable(e.message || e));
+      } else if (window.electronAPI?.saveColumns && this._sqliteAvailable !== false) {
+        window.electronAPI.saveColumns(userId, this.getColumns(userId)).then(result => {
+          if (result && result.ok === false) this._markSqliteUnavailable(result.reason || 'saveColumns failed');
+        }).catch(e => this._markSqliteUnavailable(e.message || e));
       }
     },
 
     createColumn(userId, name, order) {
-      const col = { id: uid(), userId, name, visible: true, order, createdAt: Date.now() };
+      const col = { id: uid(), userId, name, visible: true, order, createdAt: Date.now(), isShared: false, teamId: null, supabaseId: null };
       this._cache.columns.push(col);
-      this.saveColumns(userId, this.getColumns(userId));
+      // Single-column upsert avoids destructive bulk-replace races during imports/sync.
+      this._persistColumn(userId, col);
       return col;
     },
 
@@ -226,14 +616,20 @@ const DB = (() => {
 
     // Internal: persist a single jump to SQLite or localStorage
     _persistJump(userId, jump) {
-      if (window.electronAPI) {
-        window.electronAPI.saveJump(userId, jump).catch(e => console.warn('[DB._persistJump]', e));
-      } else {
-        lsSet(`jk_jumps_${userId}`, this.getJumps(userId));
+      lsSet(`jk_jumps_${userId}`, this.getJumps(userId).filter(j => !j.teamId));
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        window.electronAPI.saveJump(userId, jump).then(result => {
+          if (result && result.ok === false) this._markSqliteUnavailable(result.reason || 'saveJump failed');
+        }).catch(e => this._markSqliteUnavailable(e.message || e));
       }
     },
 
     createJump(userId, data) {
+      const validColumnIds = new Set(this.getColumns(userId).map(c => c.id));
+      if (!data.columnId || !validColumnIds.has(data.columnId)) {
+        console.warn('[DB.createJump] blocked orphan jump create: invalid columnId');
+        return null;
+      }
       const jump = {
         id:          data.id || uid(),
         userId,
@@ -261,6 +657,13 @@ const DB = (() => {
     updateJump(userId, id, data) {
       const idx = this._cache.jumps.findIndex(j => j.id === id && j.userId === userId);
       if (idx < 0) return null;
+      if (Object.prototype.hasOwnProperty.call(data, 'columnId')) {
+        const validColumnIds = new Set(this.getColumns(userId).map(c => c.id));
+        if (!data.columnId || !validColumnIds.has(data.columnId)) {
+          console.warn('[DB.updateJump] blocked orphan jump update: invalid columnId');
+          return null;
+        }
+      }
       Object.assign(this._cache.jumps[idx], data, { updatedAt: Date.now() });
       this._persistJump(userId, this._cache.jumps[idx]);
       return this._cache.jumps[idx];
@@ -268,10 +671,11 @@ const DB = (() => {
 
     deleteJump(userId, id) {
       this._cache.jumps = this._cache.jumps.filter(j => !(j.id === id && j.userId === userId));
-      if (window.electronAPI) {
-        window.electronAPI.deleteJump(userId, id).catch(e => console.warn('[DB.deleteJump]', e));
-      } else {
-        lsSet(`jk_jumps_${userId}`, this.getJumps(userId));
+      lsSet(`jk_jumps_${userId}`, this.getJumps(userId));
+      if (window.electronAPI && this._sqliteAvailable !== false) {
+        window.electronAPI.deleteJump(userId, id).then(result => {
+          if (result && result.ok === false) this._markSqliteUnavailable(result.reason || 'deleteJump failed');
+        }).catch(e => this._markSqliteUnavailable(e.message || e));
       }
     },
 
@@ -291,6 +695,10 @@ const DB = (() => {
     },
 
     getActiveJumps(userId)   { return this.getJumps(userId).filter(j => !j.isArchived); },
+    getRenderableActiveJumps(userId) {
+      const validColumnIds = new Set(this.getColumns(userId).map(c => c.id));
+      return this.getActiveJumps(userId).filter(j => j.columnId && validColumnIds.has(j.columnId));
+    },
     getArchivedJumps(userId) { return this.getJumps(userId).filter(j =>  j.isArchived); },
 
     // ── Click Log ─────────────────────────────────────────────────

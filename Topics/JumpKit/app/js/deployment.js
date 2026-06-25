@@ -109,7 +109,7 @@ window.renderDeployment = function renderDeployment(view) {
   if (window._supabaseProfile?.role !== 'admin') {
     pageContent.innerHTML = `
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60vh;gap:16px">
-        <svg class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-lock"/></svg>
+        <svg class="ti ti-lock" style="font-size:3rem;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg>
         <h2 style="font-size:1.4rem;font-weight:700;color:var(--text)">403 — Access Restricted</h2>
         <p style="color:var(--text-muted);font-size:0.9rem">This page is only available to administrators.</p>
       </div>`;
@@ -145,7 +145,7 @@ window.renderDeployment = function renderDeployment(view) {
               ${step.cmd ? `<div style="margin-top:7px;display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;max-width:480px">
                 <code style="flex:1;padding:5px 10px;font-size:0.8rem;background:var(--bg-card);color:var(--text);white-space:pre;overflow-x:auto;line-height:1.5">${step.cmd}</code>
                 <button data-deploy-copy="${step.id}" title="Copy command" style="flex-shrink:0;border:none;border-left:1px solid var(--border);background:var(--bg-card);cursor:pointer;padding:0 10px;color:var(--text-muted);display:flex;align-items:center;transition:background .15s" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background='var(--bg-card)'">
-                  <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-copy"/></svg>
+                  <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>
                 </button>
               </div>` : ''}
             </td>
@@ -156,8 +156,8 @@ window.renderDeployment = function renderDeployment(view) {
               data-deploy-action="toggle"
               style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3)' : ''}">
               ${isDone
-                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg> Done`
-                : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.svg#tabler-clipboard-list"/></svg> To Do`
+                ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Done`
+                : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> To Do`
               }
             </button>
           </td>
@@ -168,8 +168,8 @@ window.renderDeployment = function renderDeployment(view) {
       <div style="margin-bottom:28px">
         <div style="padding:14px 4px 0;cursor:pointer;user-select:none" data-deploy-toggle-section="${sectionId}">
           <div style="display:flex;align-items:center;gap:8px">
-            <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(-90deg)"><use href="img/tabler-sprite.svg#tabler-chevron-down"/></svg>
-            <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.svg#tabler-${phase.icon.slice(3)}"/></svg>
+            <svg class="ti ti-chevron-down" id="${chevronId}" style="font-size:1rem;color:var(--text-muted);transition:transform .2s;transform:rotate(-90deg)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
+            <svg class="ti ${phase.icon}" style="font-size:1.1rem;color:var(--text-muted);flex-shrink:0"><use href="img/tabler-sprite.min.svg#tabler-${phase.icon.slice(3)}"/></svg>
             <span style="font-size:0.8rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-muted)">${phase.label}</span>
             <span style="font-size:0.75rem;color:var(--text-dim);font-weight:500">(${phaseTotal})</span>
             ${pillHTML}
@@ -194,21 +194,21 @@ window.renderDeployment = function renderDeployment(view) {
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
         <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
+          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-rotate"/></svg> Reset All
         </button>
         <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment
+          <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment
         </button>
         <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
+          <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-file-download"/></svg> Save Results
         </button>
         <div id="activeRunToggle" style="margin-left:auto;display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
           <button id="deployTabChecklist" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;font-size:0.78rem;letter-spacing:.02em;transition:all .15s;${_deployCurrentView==='checklist'?'background:rgba(13,148,136,0.12);color:#0d9488;font-weight:700':'background:transparent;color:var(--text-muted);font-weight:600'}">
-            <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='checklist'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg>
+            <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='checklist'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.min.svg#tabler-checklist"/></svg>
             Checklist
           </button>
           <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;font-size:0.78rem;letter-spacing:.02em;transition:all .15s;${_deployCurrentView==='history'?'background:rgba(13,148,136,0.12);color:#0d9488;font-weight:700':'background:transparent;color:var(--text-muted);font-weight:600'}">
-            <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='history'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
+            <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;${_deployCurrentView==='history'?'color:#0d9488':'color:var(--text-muted)'}"><use href="img/tabler-sprite.min.svg#tabler-world-upload"/></svg>
             All Deployments
           </button>
         </div>
@@ -259,7 +259,7 @@ window.renderDeployment = function renderDeployment(view) {
       if (!step?.cmd) return;
       navigator.clipboard.writeText(step.cmd).then(() => {
         const orig = btn.innerHTML;
-        btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.svg#tabler-check"/></svg>';
+        btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg>';
         setTimeout(() => { btn.innerHTML = orig; }, 1500);
       }).catch(() => {});
     });
@@ -310,21 +310,21 @@ async function _renderDeployHistory() {
         <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
       </div>
       <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-        <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.svg#tabler-rotate"/></svg> Reset All
+        <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-rotate"/></svg> Reset All
       </button>
       <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-        <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment
+        <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment
       </button>
       <button class="btn btn-subtle" id="deploySaveBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-        <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.svg#tabler-file-download"/></svg> Save Results
+        <svg class="ti ti-file-download" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-file-download"/></svg> Save Results
       </button>
       <div id="activeRunToggle" style="margin-left:auto;display:inline-flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;flex-shrink:0;background:var(--bg-card);box-shadow:0 1px 3px rgba(0,0,0,.06)">
         <button id="deployTabChecklist" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:transparent;color:var(--text-muted);font-size:0.78rem;font-weight:600;letter-spacing:.02em;transition:all .15s">
-          <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-checklist"/></svg>
+          <svg class="ti ti-checklist" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-checklist"/></svg>
           Checklist
         </button>
         <button id="deployTabHistory" style="display:inline-flex;align-items:center;gap:6px;padding:5px 15px;border:none;cursor:pointer;background:rgba(13,148,136,0.12);color:#0d9488;font-size:0.78rem;font-weight:700;letter-spacing:.02em;transition:all .15s">
-          <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
+          <svg class="ti ti-world-upload" style="width:1.05rem;height:1.05rem;flex-shrink:0;color:#0d9488"><use href="img/tabler-sprite.min.svg#tabler-world-upload"/></svg>
           All Deployments
         </button>
       </div>
@@ -338,13 +338,13 @@ async function _renderDeployHistory() {
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
             <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em">All Deployments</div>
             <div class="jump-search-wrap">
-              <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.svg#tabler-search"/></svg>
+              <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.min.svg#tabler-search"/></svg>
               <input id="deployHistSearch" type="text" placeholder="Search deployments..." class="jump-search-input" style="width:210px" />
             </div>
           </div>
           <div id="deployHistTableWrap">
             <div style="padding:32px;text-align:center;color:var(--text-dim)">
-              <svg class="ti ti-loader-2" style="font-size:1.6rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>
+              <svg class="ti ti-loader-2" style="font-size:1.6rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg>
               <div style="margin-top:10px;font-size:0.85rem">Loading deployments…</div>
             </div>
           </div>
@@ -368,13 +368,14 @@ async function _renderDeployHistory() {
   try {
     const { data, error } = await supabaseClient
       .from('deployments')
-      .select('*')
-      .order('created_at', { ascending: false });
+      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,mac_installer_path,win_installer_path,deployment_folder,notes,commit_id,deploy_account,deploy_results_file')
+      .order('created_at', { ascending: false })
+      .limit(200);
     if (error) throw new Error(error.message);
     deployments = data || [];
   } catch (err) {
     document.getElementById('deployHistTableWrap').innerHTML =
-      `<div style="padding:24px;text-align:center;color:var(--text-dim)">Failed to load deployments: ${err.message}</div>`;
+      `<div style="padding:24px;text-align:center;color:var(--text-dim)">Failed to load deployments: ${_esc(err.message)}</div>`;
     return;
   }
 
@@ -383,16 +384,16 @@ async function _renderDeployHistory() {
     if (s === 'deployed')            return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71">Deployed</span>`;
     if (s === 'testing_complete')    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(99,102,241,0.15);color:#6366f1">Testing Complete</span>`;
     if (s === 'testing_in_progress') return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b">In Progress</span>`;
-    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-input);color:var(--text-dim)">${s || '—'}</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:99px;font-size:0.7rem;font-weight:700;background:var(--bg-input);color:var(--text-dim)">${_esc(s || '—')}</span>`;
   };
 
   // Check helper
-  const _check = (v) => v ? `<span style="display:inline-flex;align-items:center;justify-content:center;padding:2px 10px;border-radius:99px;background:#3fbe7133"><svg class="ti ti-check" style="color:#3fbe71;font-size:0.99rem"><use href="img/tabler-sprite.svg#tabler-check"/></svg></span>` : `<span style="color:var(--text-dim)">—</span>`;
+  const _check = (v) => v ? `<span style="display:inline-flex;align-items:center;justify-content:center;padding:2px 10px;border-radius:99px;background:#3fbe7133"><svg class="ti ti-check" style="color:#3fbe71;font-size:0.99rem"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg></span>` : `<span style="color:var(--text-dim)">—</span>`;
   const _fmt = (v) => v ? new Date(v).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' }) : '—';
   const _score = (p, t) => (t > 0) ? `${p}/${t}` : '—';
 
   const buildRow = (d, isLast = false) => `<tr style="${isLast ? '' : 'border-bottom:1px solid var(--border)'}">
-    <td style="padding:10px 12px;font-size:0.86rem;font-weight:700;color:var(--text);white-space:nowrap">${d.version || '—'}</td>
+    <td style="padding:10px 12px;font-size:0.86rem;font-weight:700;color:var(--text);white-space:nowrap">${_esc(d.version || '—')}</td>
     <td style="padding:10px 12px">${_statusPill(d.status)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_check(d.mac_finalized_at)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_score(d.mac_tests_passed, d.mac_tests_total)}</td>
@@ -400,7 +401,7 @@ async function _renderDeployHistory() {
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_score(d.win_tests_passed, d.win_tests_total)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.mac_finalized_at || d.win_finalized_at || d.created_at)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.deployed_at || d.testing_completed_at)}</td>
-    <td style="padding:10px 12px;font-size:0.78rem;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(d.notes||'').replace(/"/g,'&quot;')}">${d.notes || '—'}</td>
+    <td style="padding:10px 12px;font-size:0.78rem;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${_esc(d.notes || '')}">${_esc(d.notes || '—')}</td>
   </tr>`;
 
   const tableHTML = `
@@ -466,7 +467,7 @@ async function _openDeployManageModal() {
   try {
     const { data, error } = await supabaseClient
       .from('deployments')
-      .select('*')
+      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,mac_installer_path,win_installer_path,deployment_folder,notes,commit_id,deploy_account,deploy_results_file')
       .eq('status', 'testing_complete')
       .order('created_at', { ascending: false })
       .limit(20);
@@ -480,9 +481,9 @@ async function _openDeployManageModal() {
   // If fetch failed, show error state and bail
   if (fetchError) {
     Modal.open(
-      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment',
       `<div style="text-align:center;padding:24px">
-        <svg class="ti ti-alert-circle" style="font-size:2rem;color:#e15b59;margin-bottom:12px"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg>
+        <svg class="ti ti-alert-circle" style="font-size:2rem;color:#e15b59;margin-bottom:12px"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg>
         <p style="margin:0 0 8px;font-weight:600;color:var(--text)">Could not load deployments</p>
         <p style="margin:0;font-size:0.85rem;color:var(--text-muted)">${fetchError}</p>
       </div>`,
@@ -495,9 +496,9 @@ async function _openDeployManageModal() {
   // If no deployments yet, show helpful empty state
   if (deployments.length === 0) {
     Modal.open(
-      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+      '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment',
       `<div style="text-align:center;padding:32px 24px">
-        <svg class="ti ti-world-upload" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.svg#tabler-world-upload"/></svg>
+        <svg class="ti ti-world-upload" style="font-size:2.5rem;color:var(--text-dim);margin-bottom:16px"><use href="img/tabler-sprite.min.svg#tabler-world-upload"/></svg>
         <p style="margin:0 0 8px;font-size:1rem;font-weight:700;color:var(--text)">No deployments yet</p>
         <p style="margin:0;font-size:0.88rem;color:var(--text-muted);line-height:1.6">No completed testing sessions found. Both Mac and Windows testing must be finalized before a deployment record appears here.<br>Go to <strong style="color:var(--text)">Testing &rarr; Manage Testing</strong> to finalize both platform runs.</p>
       </div>`,
@@ -563,13 +564,13 @@ async function _openDeployManageModal() {
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
     <button id="dmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff;min-width:160px">
-      <svg class="ti ti-rocket" style="width:.9rem;height:.9rem"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Finalize Deployment
+      <svg class="ti ti-rocket" style="width:.9rem;height:.9rem"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment
     </button>
     <button id="dmSaveBtn" class="btn btn-primary" style="min-width:100px">Save</button>`;
 
   // Re-open modal with full content
   Modal.open(
-    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.svg#tabler-adjustments"/></svg> Manage Deployment',
+    '<svg class="ti ti-adjustments" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment',
     body, footer, 'xl'
   );
 
@@ -585,20 +586,25 @@ async function _openDeployManageModal() {
   // Wire deployment folder picker
   document.getElementById('dmDeployFolderBtn')?.addEventListener('click', async () => {
     if (!window.electronAPI?.openFileDialog) { alert('File picker not available outside Electron.'); return; }
-    const result = await window.electronAPI.openFileDialog({ title: 'Select Deployment Folder', properties: ['openDirectory'] });
-    if (!result?.canceled && result?.filePath) {
-      const folder = result.filePath;
-      document.getElementById('dmDeployFolder').value = folder;
-      // Save to deploy config
-      if (typeof _loadDeployConfig === 'function') {
-        _saveDeployConfig({ ..._loadDeployConfig(), folder });
+    try {
+      const result = await window.electronAPI.openFileDialog({ title: 'Select Deployment Folder', properties: ['openDirectory'] });
+      if (!result?.canceled && result?.filePath) {
+        const folder = result.filePath;
+        document.getElementById('dmDeployFolder').value = folder;
+        // Save to deploy config
+        if (typeof _loadDeployConfig === 'function') {
+          _saveDeployConfig({ ..._loadDeployConfig(), folder });
+        }
+        // Update Supabase record if one is selected
+        const selId = document.getElementById('dmDeploySelect')?.value;
+        if (selId) {
+          const { error } = await supabaseClient.from('deployments').update({ deployment_folder: folder }).eq('id', selId);
+          if (error) throw error;
+        }
+        window.Toast?.success('Deployment folder saved.');
       }
-      // Update Supabase record if one is selected
-      const selId = document.getElementById('dmDeploySelect')?.value;
-      if (selId) {
-        await supabaseClient.from('deployments').update({ deployment_folder: folder }).eq('id', selId).catch(() => {});
-      }
-      window.Toast?.success('Deployment folder saved.');
+    } catch (e) {
+      window.Toast?.danger('Failed to save deployment folder: ' + (e.message || 'Unknown error'));
     }
   });
 
@@ -606,16 +612,26 @@ async function _openDeployManageModal() {
   const _el_dmSaveBtn = document.getElementById('dmSaveBtn'); if (_el_dmSaveBtn) _el_dmSaveBtn.onclick = async () => {
     const selId = document.getElementById('dmDeploySelect')?.value;
     if (!selId) return Modal.close();
+    const originalHTML = _el_dmSaveBtn.innerHTML;
+    _el_dmSaveBtn.disabled = true;
+    _el_dmSaveBtn.innerHTML = '<svg class="ti ti-loader" style="font-size:0.85rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving…';
     const macFile = document.getElementById('dmMacFile').value.trim();
     const winFile = document.getElementById('dmWinFile').value.trim();
     const notes   = document.getElementById('dmNotes').value.trim();
-    await supabaseClient.from('deployments').update({ mac_installer_path: macFile, win_installer_path: winFile, notes }).eq('id', selId);
-    // Update local selected
-    if (window._jkSelectedDeployment?.id === selId) {
-      window._jkSelectedDeployment = { ...window._jkSelectedDeployment, mac_installer_path: macFile, win_installer_path: winFile, notes };
+    try {
+      const { error } = await supabaseClient.from('deployments').update({ mac_installer_path: macFile, win_installer_path: winFile, notes }).eq('id', selId);
+      if (error) throw error;
+      // Update local selected
+      if (window._jkSelectedDeployment?.id === selId) {
+        window._jkSelectedDeployment = { ...window._jkSelectedDeployment, mac_installer_path: macFile, win_installer_path: winFile, notes };
+      }
+      Modal.close();
+      window.Toast?.success('Deployment info saved.');
+    } catch (e) {
+      window.Toast?.danger('Failed to save deployment info: ' + (e.message || 'Unknown error'));
+      _el_dmSaveBtn.disabled = false;
+      _el_dmSaveBtn.innerHTML = originalHTML;
     }
-    Modal.close();
-    window.Toast?.success('Deployment info saved.');
   };
 
   // Finalize Deployment
@@ -638,15 +654,15 @@ async function _openDeployManageModal() {
 
     // Show confirmation modal
     Modal.open(
-      '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.svg#tabler-rocket"/></svg> Finalize Deployment',
+      '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment',
       `<div style="display:flex;flex-direction:column;gap:14px">
         <p style="margin:0;color:var(--text-muted);font-size:0.88rem">This will mark the deployment as <strong style="color:#f97316">Deployed</strong> in Supabase and record the following:</p>
         <div style="padding:12px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.85rem;display:flex;flex-direction:column;gap:6px">
-          <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${commitId || '(not found)'}</code> ${commitMsg ? `— ${commitMsg}` : ''}</div>
-          <div><strong style="color:var(--text)">Deployed by:</strong> ${account}</div>
+          <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${_esc(commitId || '(not found)')}</code> ${commitMsg ? `— ${_esc(commitMsg)}` : ''}</div>
+          <div><strong style="color:var(--text)">Deployed by:</strong> ${_esc(account)}</div>
           <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date().toLocaleString()}</div>
-          ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${macFile.split('/').pop()}</div>` : ''}
-          ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${winFile.split('/').pop()}</div>` : ''}
+          ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${_esc(macFile.split('/').pop())}</div>` : ''}
+          ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${_esc(winFile.split('/').pop())}</div>` : ''}
         </div>
         <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">This action cannot be undone. Confirm to finalize.</p>
       </div>`,
@@ -693,7 +709,7 @@ async function _saveDeployResults() {
 
   if (!version || !folder) {
     Modal.open(
-      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.svg#tabler-alert-triangle"/></svg> Not Configured',
+      '<svg class="ti ti-alert-triangle" style="vertical-align:middle;margin-right:6px;color:#f59e0b"><use href="img/tabler-sprite.min.svg#tabler-alert-triangle"/></svg> Not Configured',
       `<p style="margin:0 0 10px">Please set a <strong>version number</strong> and <strong>deployment folder</strong> before saving.</p>
        <p style="margin:0;font-size:0.88rem;color:var(--text-muted)">Click <strong style="color:var(--text)">Manage Deployment</strong> to configure these.</p>`,
       '<button class="btn btn-subtle" data-jaction="modal-close">Got it</button>',

@@ -5,6 +5,10 @@
 
 let _syncInterval = null;
 
+function syncEsc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 // ── Stale shared column recovery modal ──────────────────────────────
 // Shows a modal when stale shared columns are detected during sync.
 // reason: 'team-deleted' | 'column-unshared'
@@ -14,13 +18,13 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
   const tier = window._supabaseProfile?.subscription_tier || 'free';
   const canKeep = tier === 'core' || tier === 'teams_jet';
   const isUnshared = reason === 'column-unshared';
-  const ownerName = ctx.ownerName || 'The team owner';
-  const teamName  = ctx.teamName  || 'your team';
+  const ownerName = syncEsc(ctx.ownerName || 'The team owner');
+  const teamName  = syncEsc(ctx.teamName  || 'your team');
   const LS_CHECKOUT_URL = 'https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb';
 
   const title = isUnshared
-    ? '<svg class="ti ti-alert-circle" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Shared Column Removed'
-    : '<svg class="ti ti-alert-circle" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.svg#tabler-alert-circle"/></svg> Team Deleted';
+    ? '<svg class="ti ti-alert-circle" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Shared Column Removed'
+    : '<svg class="ti ti-alert-circle" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.min.svg#tabler-alert-circle"/></svg> Team Deleted';
 
   const introText = isUnshared
     ? `<strong style="color:var(--text-card-title)">${ownerName}</strong> removed sharing on the following column(s) from team <strong style="color:var(--text-card-title)">${teamName}</strong>. You no longer have access to these shared columns and their corresponding jumps:`
@@ -42,8 +46,8 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
       const count = jumpCountMap[c.id] || 0;
       const countStr = `(${count} jump${count !== 1 ? 's' : ''})`;
       return `<li style="display:flex;align-items:center;padding:3px 0;gap:6px">
-         <svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.svg#tabler-layout-columns"/></svg>
-         <span style="color:var(--text-muted);font-size:0.88rem">${name} <span style="color:var(--text-dim);font-size:0.8rem">${countStr}</span></span>
+         <svg class="ti ti-layout-columns" style="width:.85rem;height:.85rem;flex-shrink:0;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg>
+         <span style="color:var(--text-muted);font-size:0.88rem">${syncEsc(name)} <span style="color:var(--text-dim);font-size:0.8rem">${syncEsc(countStr)}</span></span>
        </li>`;
     }).join('');
 
@@ -66,16 +70,16 @@ function _promptStaleTeamRecovery(staleCols, reason = 'team-deleted', ctx = {}) 
 
     const footer = canKeep
       ? `<button class="btn btn-subtle" data-jaction="stale-remove">
-           <svg class="ti ti-trash"><use href="img/tabler-sprite.svg#tabler-trash"/></svg> Remove Columns
+           <svg class="ti ti-trash"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg> Remove Columns
          </button>
          <button class="btn btn-primary" data-jaction="stale-keep">
-           <svg class="ti ti-download" style="color:white"><use href="img/tabler-sprite.svg#tabler-download"/></svg> Keep as My Jumps
+           <svg class="ti ti-download" style="color:white"><use href="img/tabler-sprite.min.svg#tabler-download"/></svg> Keep as My Jumps
          </button>`
       : `<button class="btn btn-subtle" data-jaction="stale-remove">
            OK, Understood
          </button>
          <button class="btn btn-primary" style="background:linear-gradient(135deg,#50CACC,#1A4FD6)" data-jaction="stale-upgrade" data-url="${LS_CHECKOUT_URL}">
-           <svg class="ti ti-lock" style="width:1rem;height:1rem;color:white;stroke:white"><use href="img/tabler-sprite.svg#tabler-lock"/></svg> Unlock JumpKit Unlimited
+           <svg class="ti ti-lock" style="width:1rem;height:1rem;color:white;stroke:white"><use href="img/tabler-sprite.min.svg#tabler-lock"/></svg> Unlock JumpKit Unlimited
          </button>`;
 
     Modal.open(title, body, footer, { closeable: false });
@@ -176,14 +180,15 @@ async function syncSharedJumps() {
     // 2. For each team: fetch shared_columns + shared_jumps
     const { data: remoteCols = [], error: colErr } = await supabaseClient
       .from('shared_columns')
-      .select('*')
+      .select('id,team_id,name,position,created_by,created_at,updated_at')
       .in('team_id', teamIds)
-      .order('position');
+      .order('position')
+      .limit(500);
     if (colErr) throw colErr;
 
     const { data: remoteJumps = [], error: jumpErr } = await supabaseClient
       .from('shared_jumps')
-      .select('*')
+      .select('id,shared_column_id,team_id,name,url,description,reason,position,created_by,created_at,updated_at')
       .in('team_id', teamIds)
       .order('position')
       .limit(1000);
@@ -203,8 +208,9 @@ async function syncSharedJumps() {
 
     // Fetch teams owned by this user — we never sync our own shared columns back in
     // (owner-format columns already exist locally and are the source of truth)
-    const { data: ownedTeams = [] } = await supabaseClient
-      .from('teams').select('id').eq('owner_id', userId);
+    const { data: ownedTeams = [], error: ownedErr } = await supabaseClient
+      .from('teams').select('id').eq('owner_id', userId).limit(200);
+    if (ownedErr) throw ownedErr;
     const ownedTeamIds = new Set(ownedTeams.map(t => t.id));
 
     // Dedupe remote cols — keep only latest per (team_id + name)
@@ -398,8 +404,13 @@ async function syncSharedJumps() {
       const existing = existingJumps.find(j => j.supabaseId && j.supabaseId === rj.id);
       const preservedHotkey = existing?.hotkey || hotkeyMap[rj.id] || '';
       // Find the local column id that maps to this supabase column
-      const localCol = existingCols.find(c => c.supabaseId === rj.shared_column_id || c.id === rj.shared_column_id);
-      const columnId = localCol ? localCol.id : rj.shared_column_id;
+      const localCol = existingCols.find(c =>
+        c.supabaseId === rj.shared_column_id ||
+        c.id === rj.shared_column_id ||
+        (Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.supabaseId === rj.shared_column_id))
+      );
+      if (!localCol) continue; // never create a shared jump without a real local column
+      const columnId = localCol.id;
       if (existing) {
         DB.updateJump(localUserId, existing.id, {
           name: rj.name,
@@ -477,20 +488,31 @@ async function syncSharedJumps() {
     if (window.electronAPI) {
       // Upsert remote jumps into SQLite (preserves existing hotkeys)
       if (window.electronAPI.upsertSharedJumps && remoteJumps.length > 0) {
-        const jumpsPayload = remoteJumps.map(rj => ({
-          id:          rj.id,
-          userId:      localUserId,
-          name:        rj.name,
-          url:         rj.url,
-          description: rj.description || '',
-          reason:      rj.reason || '',
-          columnId:    rj.shared_column_id,
-          hotkey:      hotkeyMap[rj.id] || '',
-          createdAt:   new Date(rj.created_at).getTime(),
-          updatedAt:   new Date(rj.updated_at).getTime(),
-          teamId:      rj.team_id,
-        }));
-        await window.electronAPI.upsertSharedJumps(jumpsPayload);
+        const currentLocalCols = DB.getColumns(localUserId);
+        const jumpsPayload = remoteJumps.map(rj => {
+          const localCol = currentLocalCols.find(c =>
+            c.supabaseId === rj.shared_column_id ||
+            c.id === rj.shared_column_id ||
+            (Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.supabaseId === rj.shared_column_id))
+          );
+          if (!localCol) return null;
+          const localJump = DB.getJumps(localUserId).find(j => j.supabaseId === rj.id || j.id === rj.id);
+          return {
+            id:          localJump?.id || rj.id,
+            userId:      localUserId,
+            name:        rj.name,
+            url:         rj.url,
+            description: rj.description || '',
+            reason:      rj.reason || '',
+            columnId:    localCol.id,
+            hotkey:      localJump?.hotkey || hotkeyMap[rj.id] || '',
+            createdAt:   new Date(rj.created_at).getTime(),
+            updatedAt:   new Date(rj.updated_at).getTime(),
+            teamId:      rj.team_id,
+            supabaseId:  rj.id,
+          };
+        }).filter(Boolean);
+        if (jumpsPayload.length > 0) await window.electronAPI.upsertSharedJumps(jumpsPayload);
       }
 
       // Delete local shared jumps that are no longer in Supabase
@@ -498,14 +520,16 @@ async function syncSharedJumps() {
         .filter(j => j.isShared && j.supabaseId && j.teamId && teamIds.includes(j.teamId) && !remoteJumpIds.has(j.supabaseId))
         .map(j => j.id);
       if (window.electronAPI.deleteSharedJumps && staleIds.length > 0) {
-        await window.electronAPI.deleteSharedJumps(staleIds);
+        await window.electronAPI.deleteSharedJumps(localUserId, staleIds);
       }
 
       // Update sync timestamp in SQLite
       if (window.electronAPI.updateSyncState) {
-        await window.electronAPI.updateSyncState('lastSync', Date.now().toString());
+        await window.electronAPI.updateSyncState(localUserId, 'lastSync', Date.now().toString());
       }
     }
+
+    if (typeof DB._removeOrphanSharedJumps === 'function') await DB._removeOrphanSharedJumps(localUserId);
 
 
     // Sync aggregate stats for Team ROI (unlimited users only)

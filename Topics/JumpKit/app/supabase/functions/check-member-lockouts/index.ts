@@ -127,7 +127,7 @@ serve(async (req) => {
             }),
           });
         } catch (e) {
-          console.error(`send-team-downgrade-alert error for team ${teamId}:`, e);
+          console.error('send-team-downgrade-alert error for team:', e?.message || e);
         }
 
         // Mark as warned
@@ -138,7 +138,7 @@ serve(async (req) => {
           .in('id', warnIds);
 
         if (warnUpdateErr) {
-          console.error(`Error setting lock_notified_2day for team ${teamId}:`, warnUpdateErr);
+          console.error('Error setting lock_notified_2day for team:', warnUpdateErr?.message || warnUpdateErr);
         } else {
           warnedCount += warnIds.length;
         }

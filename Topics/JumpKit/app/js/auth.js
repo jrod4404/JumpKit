@@ -63,6 +63,29 @@ function showError(inputId, errId) {
   document.getElementById(errId)?.classList.add('show');
 }
 function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+function escHtml(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+async function callEdgeFunction(name, payload) {
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
+    body: JSON.stringify(payload || {})
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || `${name} failed (${res.status})`);
+  }
+  const data = await res.json().catch(() => ({}));
+  if (data.ok === false) throw new Error(data.error || `${name} failed`);
+  return data;
+}
 
 // ── Redirect if already logged in ─────────────────────────────────
 async function checkExistingSession() {
@@ -91,7 +114,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   btn.disabled = true; btn.style.opacity = '0.85';
   const loginIcon = btn.querySelector('.btn-label svg');
   const loginIconHTML = loginIcon ? loginIcon.outerHTML : null;
-  if (loginIcon) loginIcon.outerHTML = '<svg class="ti ti-loader-2" style="width:1.32rem;height:1.32rem;flex-shrink:0;animation:auth-spin 0.7s linear infinite"><use href="img/tabler-sprite.svg#tabler-loader-2"/></svg>';
+  if (loginIcon) loginIcon.outerHTML = '<svg class="ti ti-loader-2" style="width:1.32rem;height:1.32rem;flex-shrink:0;animation:auth-spin 0.7s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg>';
 
   try {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password: pass });
@@ -101,11 +124,12 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const userId = data?.user?.id || '';
     const newToken = crypto.randomUUID();
     try {
-      const { data: existingRow } = await supabaseClient
+      const { data: existingRow, error: existingErr } = await supabaseClient
         .from('user_sessions')
         .select('session_token, device_hint, last_seen')
         .eq('user_id', userId)
         .maybeSingle();
+      if (existingErr) throw existingErr;
 
       if (existingRow) {
         // Another session active — pause, show conflict modal
@@ -117,10 +141,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
       }
 
       // No conflict — write our session and proceed
-      await supabaseClient.from('user_sessions').insert({
+      const { error: insertSessionErr } = await supabaseClient.from('user_sessions').insert({
         user_id: userId, session_token: newToken,
         device_hint: _deviceHint(), last_seen: new Date().toISOString()
       });
+      if (insertSessionErr) throw insertSessionErr;
       sessionStorage.setItem('jk_session_token', newToken);
     } catch (_) {
       // Session table unavailable — fail open
@@ -130,26 +155,17 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Send welcome email — Edge Function handles the "only once" check server-side
     const firstName = data?.user?.user_metadata?.first_name || '';
     try {
-      await fetch(`${SUPABASE_URL}/functions/v1/send-welcome`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ email, firstName, userId })
-      });
-    } catch (_) {}
+      await callEdgeFunction('send-welcome', { email, firstName, userId });
+    } catch (e) { console.warn('[Auth] Welcome email failed:', e.message); }
 
     // Apply any pending upgrade (user paid for Unlimited before creating an account)
     // Awaited so the profile is upgraded before app.html loads and reads the tier
     try {
-      const upgradeRes = await fetch(`${SUPABASE_URL}/functions/v1/apply-pending-upgrade`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-        body: JSON.stringify({ email })
-      });
-      const upgradeData = await upgradeRes.json().catch(() => ({}));
-      if (upgradeRes.ok && upgradeData.applied) {
+      const upgradeData = await callEdgeFunction('apply-pending-upgrade', { email });
+      if (upgradeData.applied) {
         sessionStorage.setItem('jk_pending_upgrade_applied', '1');
       }
-    } catch (_) {}
+    } catch (e) { console.warn('[Auth] Pending upgrade check failed:', e.message); }
 
     window.location.href = 'app.html';
   } catch (err) {
@@ -233,12 +249,8 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
       // The UI still shows the same generic modal — no email enumeration from the UI.
       if (data?.user && (!data.user.identities || data.user.identities.length === 0)) {
         try {
-          await fetch(`${SUPABASE_URL}/functions/v1/send-account-exists`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` },
-            body: JSON.stringify({ email })
-          });
-        } catch (_) {}
+          await callEdgeFunction('send-account-exists', { email });
+        } catch (e) { console.warn('[Auth] Account-exists email failed:', e.message); }
       }
       // Show modal overlay
       const overlay = document.createElement('div');
@@ -251,7 +263,7 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
           </div>
           <h2 style="color:var(--text);font-size:1.3rem;font-weight:700;margin:0 0 12px">Check Your Email</h2>
           <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0 0 28px">
-            If this is a new account, check <strong style="color:var(--text)">${email}</strong> for a confirmation link to activate your account.<br><br>
+            If this is a new account, check <strong style="color:var(--text)">${escHtml(email)}</strong> for a confirmation link to activate your account.<br><br>
             If you already have an account with this email, use the <strong style="color:var(--text)">Sign In</strong> tab or <strong style="color:var(--text)">reset your password</strong> instead.
           </p>
           <button id="signupSuccessOk" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:700;font-size:0.95rem;padding:12px 32px;border-radius:10px;border:none;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:8px">
@@ -285,9 +297,10 @@ document.getElementById('forgotForm').addEventListener('submit', async (e) => {
   if (!isValidEmail(email)) { showError('forgotEmail', 'forgotEmailErr'); return; }
 
   try {
-    await supabaseClient.auth.resetPasswordForEmail(email, {
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
       redirectTo: 'https://jumpkit.app/reset-password'
     });
+    if (error) throw error;
   } catch (_) {
     // Silently swallow — don't reveal if email exists
   }
@@ -352,8 +365,8 @@ function _showSessionConflictModal(userId, newToken, existingRow) {
         </div>
         <h2 style="color:var(--text);font-size:1.2rem;font-weight:700;margin:0 0 10px">Already Logged In</h2>
         <p style="color:var(--text-muted);font-size:0.88rem;line-height:1.65;margin:0 0 24px">
-          This account is active on <strong style="color:var(--text)">${deviceHint}</strong><br>
-          <span style="font-size:0.82rem">Last seen: ${lastSeen}</span><br><br>
+          This account is active on <strong style="color:var(--text)">${escHtml(deviceHint)}</strong><br>
+          <span style="font-size:0.82rem">Last seen: ${escHtml(lastSeen)}</span><br><br>
           Log out that device to continue here.
         </p>
         <div style="display:flex;flex-direction:column;gap:10px">
@@ -371,10 +384,11 @@ function _showSessionConflictModal(userId, newToken, existingRow) {
       overlay.remove();
       try {
         // Overwrite the existing session with our new token
-        await supabaseClient.from('user_sessions').upsert({
+        const { error: forceErr } = await supabaseClient.from('user_sessions').upsert({
           user_id: userId, session_token: newToken,
           device_hint: _deviceHint(), last_seen: new Date().toISOString()
         }, { onConflict: 'user_id' });
+        if (forceErr) throw forceErr;
         sessionStorage.setItem('jk_session_token', newToken);
       } catch (_) {}
       window.location.href = 'app.html';
@@ -384,6 +398,8 @@ function _showSessionConflictModal(userId, newToken, existingRow) {
     document.getElementById('sessionCancelBtn').addEventListener('click', async () => {
       overlay.remove();
       try { await supabaseClient.auth.signOut(); } catch (_) {}
+      sessionStorage.removeItem('jk_session_token');
+      sessionStorage.removeItem('jk_pending_upgrade_applied');
       resolve('cancel');
     });
   });

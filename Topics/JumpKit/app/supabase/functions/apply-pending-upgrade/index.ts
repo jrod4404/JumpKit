@@ -40,6 +40,7 @@ serve(async (req) => {
   if (!authHeader.startsWith('Bearer ') || authHeader.length < 20) {
     return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
   }
+  const jwt = authHeader.slice('Bearer '.length).trim();
 
   try {
     const { email } = await req.json();
@@ -49,7 +50,17 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'Server config error' }), { status: 500, headers });
     }
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    // Verify the JWT actually belongs to the email being applied. This prevents an
+    // authenticated user from triggering another user's pending upgrade by email.
+    const supabaseAuth = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const { data: userRes, error: userErr } = await supabaseAuth.auth.getUser(jwt);
+    const callerEmail = userRes?.user?.email?.toLowerCase() || '';
+    const targetEmail = String(email || '').toLowerCase().trim();
+    if (userErr || !callerEmail || callerEmail !== targetEmail) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers });
+    }
+
+    const supabase = supabaseAuth;
 
     // 1. Check for a pending upgrade for this email
     const { data: pending, error: fetchErr } = await supabase
@@ -110,7 +121,7 @@ serve(async (req) => {
       }).catch(e => console.error('send-welcome-core error:', e));
     }
 
-    console.log(`Pending upgrade applied for ${email}: tier=${pending.tier}`);
+    console.log(`Pending upgrade applied: tier=${pending.tier}`);
     return new Response(JSON.stringify({ ok: true, applied: true, tier: pending.tier }), { headers });
 
   } catch (err) {

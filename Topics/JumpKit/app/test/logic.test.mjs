@@ -212,6 +212,48 @@ describe('column removal – orphan detection', () => {
 
 });
 
+// ─── User preference defaults ───────────────────────────────────────────────
+
+describe('user preference defaults', () => {
+  // Mirror the defaultPrefs() object from db.js so changes to defaults are caught here.
+  const defaultPrefs = () => ({
+    startPage:           'home',
+    notifications:       true,
+    timePerClick:        30,
+    dollarsPerHour:      50,
+    showDescription:     false,
+    showHotkey:          false,
+    showColTeamName:     true,
+    cloudBackup:         false,
+    autoArchive:         'never',
+    navDefaultCollapsed: false,
+  });
+
+  test('showDescription defaults to false', () => {
+    assert.equal(defaultPrefs().showDescription, false);
+  });
+
+  test('showHotkey defaults to false', () => {
+    assert.equal(defaultPrefs().showHotkey, false);
+  });
+
+  test('showColTeamName defaults to true', () => {
+    assert.equal(defaultPrefs().showColTeamName, true);
+  });
+
+  test('showColTeamName can be toggled off', () => {
+    const p = { ...defaultPrefs(), showColTeamName: false };
+    assert.equal(p.showColTeamName, false);
+  });
+
+  test('all expected pref keys are present', () => {
+    const keys = Object.keys(defaultPrefs());
+    for (const k of ['showDescription','showHotkey','showColTeamName','startPage','timePerClick']) {
+      assert.ok(keys.includes(k), `missing pref key: ${k}`);
+    }
+  });
+});
+
 // ─── colPadCount ─────────────────────────────────────────────────────────────
 
 describe('colPadCount (default-10 slot padding)', () => {

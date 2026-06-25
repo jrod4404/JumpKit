@@ -5,7 +5,7 @@ function renderHelp() {
     <div class="help-grid">
 
       <div class="help-card">
-        <h3><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.svg#tabler-layout-grid"/></svg> Features</h3>
+        <h3><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Features</h3>
         <ul>
           <li>Instant jump launcher for URLs, folders, and file paths</li>
           <li>Up to 10 custom columns for organized categories</li>
@@ -30,9 +30,9 @@ function renderHelp() {
       </div>
 
       <div class="help-card">
-        <h3><svg class="ti ti-list-check"><use href="img/tabler-sprite.svg#tabler-list-check"/></svg> How-To Tips</h3>
+        <h3><svg class="ti ti-list-check"><use href="img/tabler-sprite.min.svg#tabler-list-check"/></svg> How-To Tips</h3>
         <ol>
-          <li><strong>Left-click</strong> any jump to instantly open it — <svg class="ti ti-link"><use href="img/tabler-sprite.svg#tabler-link"/></svg> web URLs open in your browser, <svg class="ti ti-folder"><use href="img/tabler-sprite.svg#tabler-folder"/></svg> local paths open in your file manager.</li>
+          <li><strong>Left-click</strong> any jump to instantly open it — <svg class="ti ti-link"><use href="img/tabler-sprite.min.svg#tabler-link"/></svg> web URLs open in your browser, <svg class="ti ti-folder"><use href="img/tabler-sprite.min.svg#tabler-folder"/></svg> local paths open in your file manager.</li>
           <li>Go to <strong>Jumps</strong> and click the <strong>Add Jump</strong> button to create a new jump.</li>
           <li>Paste in a web URL (<code>https://...</code>) or a local/network path (<code>\\\\server\\share</code>).</li>
           <li>Right-click a jump to copy URL, edit, archive, or delete it.</li>
@@ -44,7 +44,7 @@ function renderHelp() {
       </div>
 
       <div class="help-card">
-        <h3><svg class="ti ti-message-circle"><use href="img/tabler-sprite.svg#tabler-message-circle"/></svg> FAQs</h3>
+        <h3><svg class="ti ti-message-circle"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg> FAQs</h3>
         <div class="faq-item">
           <div class="faq-q">Where is my data stored?</div>
           <div class="faq-a">All data is stored locally on your machine in a local database. Nothing is sent to external servers unless you enable optional cloud backup.</div>
@@ -72,7 +72,7 @@ function renderHelp() {
       </div>
 
       <div class="help-card">
-        <h3><svg class="ti ti-headset"><use href="img/tabler-sprite.svg#tabler-headset"/></svg> Support & About</h3>
+        <h3><svg class="ti ti-headset"><use href="img/tabler-sprite.min.svg#tabler-headset"/></svg> Support & About</h3>
         <div class="faq-item">
           <div class="faq-q">Support</div>
           <div class="faq-a">Email: <a href="mailto:support@jumpkit.app" style="color:var(--turq)">support@jumpkit.app</a><br/>Response time: within 1 business day.</div>
