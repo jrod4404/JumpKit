@@ -559,16 +559,25 @@ const pages = {
   account:  () => renderAccount('account'),
   teams:    () => renderAccount('teams'),
   tests:      async () => {
-    try { await loadScript('js/tests.js'); renderTests(); }
-    catch { document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Admin pages are not available in this build.</strong><br>Use dev mode (<code>npm start</code>) to access Testing.</div>`; }
+    try {
+      if (typeof renderTests === 'function') renderTests();
+      else throw new Error('renderTests is not defined');
+    }
+    catch (err) { console.error('[tests] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load Testing page.</strong><br>Error: ${err.message}</div>`; }
   },
   deployment: async () => {
-    try { _loadedScripts.delete('js/deployment.js'); await loadScript('js/deployment.js'); window.renderDeployment(); }
-    catch { document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Admin pages are not available in this build.</strong><br>Use dev mode (<code>npm start</code>) to access Deployments.</div>`; }
+    try {
+      if (typeof window.renderDeployment === 'function') window.renderDeployment();
+      else throw new Error('renderDeployment is not defined');
+    }
+    catch (err) { console.error('[deployment] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load Deployments page.</strong><br>Error: ${err.message}</div>`; }
   },
   admin:      async () => {
-    try { await loadScript('js/admin.js'); window.renderAdmin(); }
-    catch { document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Admin pages are not available in this build.</strong><br>Use dev mode (<code>npm start</code>) to access Users.</div>`; }
+    try {
+      if (typeof window.renderAdmin === 'function') window.renderAdmin();
+      else throw new Error('renderAdmin is not defined');
+    }
+    catch (err) { console.error('[admin] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load Users page.</strong><br>Error: ${err.message}</div>`; }
   },
 };
 const pageTitles = {

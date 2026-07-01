@@ -1,0 +1,693 @@
+{
+  "projects": [
+    {
+      "id": "mqqp2ihuyhpx",
+      "name": "JumpKit",
+      "users": [
+        "Jeff",
+        "Maximus"
+      ],
+      "customCategories": [
+        "Support",
+        "Deployment"
+      ],
+      "description": "For tracking bugs to fix, new features, and next things to do in JumpKit",
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#15803d",
+          "isDefault": true
+        },
+        {
+          "id": "custom-0-support",
+          "name": "Support",
+          "color": "#5b6af0",
+          "isDefault": false
+        },
+        {
+          "id": "custom-mqsbs83q-deployment",
+          "name": "Deployment",
+          "color": "#0042aa",
+          "isDefault": false
+        }
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#15803d",
+        "Support": "#5b6af0",
+        "Deployment": "#0042aa"
+      }
+    },
+    {
+      "id": "mqqw3xxcq6s0",
+      "name": "Business Ideas",
+      "description": "Business idea tracking and notes",
+      "users": [],
+      "customCategories": [
+        "Idea"
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#15803d",
+        "Idea": "#fffc41"
+      },
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#15803d",
+          "isDefault": true
+        },
+        {
+          "id": "custom-mqqw4quu-idea",
+          "name": "Idea",
+          "color": "#fffc41",
+          "isDefault": false
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "mqqp9lc5kwc8",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add notes field to test cases",
+      "priority": "Med",
+      "status": "Completed",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "For each test case on the jumpkit app testing page we need a text input box to input notes about the test case which will be also saved into the release testing html file upon save results btn click.",
+      "completionNotes": "",
+      "executionOrder": 1,
+      "comments": [
+        {
+          "id": "mqr7smajar40",
+          "author": "Jeff",
+          "html": "Prepped by Max. Needs a Jeff check",
+          "createdAt": "2026-06-23T22:27:10.171Z",
+          "updatedAt": "2026-06-23T22:27:57.363Z",
+          "legacyCompletionNotes": false
+        }
+      ]
+    },
+    {
+      "id": "mqqpddxl1su5",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add details btn on unit tests",
+      "priority": "Med",
+      "status": "Completed",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "On each unit test row on the jumpkit realease testing html file, for each unit test add a details btn which when clicked opens a modal to show all info associated with the unit test ie make the release testing file mirror the app unit testing page.",
+      "completionNotes": "",
+      "executionOrder": 2,
+      "comments": []
+    },
+    {
+      "id": "mqqpih4qagsr",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup GLM5.2",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Support",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-01",
+      "description": "Need to complete setup of GLM5.2 with openclaw",
+      "completionNotes": "",
+      "executionOrder": 7,
+      "comments": [
+        {
+          "id": "auto_glm_setup_1782338926",
+          "author": "Maximus",
+          "html": "ZAI API key added to openclaw.json env. zai/glm-5.2 registered in model allowlist with alias glm. Gateway restarted and model verified live — session running on GLM-5.2.",
+          "createdAt": "2026-06-24T22:08:46.888262Z",
+          "updatedAt": "2026-06-24T22:08:46.888262Z",
+          "legacyCompletionNotes": false
+        }
+      ]
+    },
+    {
+      "id": "mqqpr0fnbmug",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup supabase development database",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-07-12",
+      "description": "We need to have a replica of our current jumpkit supabase database (excluding deployments table) so that we can do testing on the dev db and not on a live db.",
+      "completionNotes": "",
+      "executionOrder": 9,
+      "comments": []
+    },
+    {
+      "id": "mqqpsy69daun",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Create MSP marketing material",
+      "priority": "Med",
+      "status": "In Progress",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-11",
+      "description": "Need to create:\n1. One pager MSP marketing guide\n2. Affiliates page on landing page with info about LS and links to demo videos\n3. Example marketing email copy",
+      "completionNotes": "",
+      "executionOrder": 8,
+      "comments": []
+    },
+    {
+      "id": "mqqpxjcfqhcf",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup social media posting automation",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-12",
+      "description": "Need to research and setup social media posting automation tools.",
+      "completionNotes": "",
+      "executionOrder": 10,
+      "comments": []
+    },
+    {
+      "id": "mqqq90k8am5w",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Reduce icon load time",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "Need to do a review across the whole jumpkit app codebase and implement a fix so that icons are rendered immediately with the rest of the page content.  Current the page content loads and then the icons load 1-3s later which does not looks good and is bad ux.",
+      "completionNotes": "",
+      "executionOrder": 3,
+      "comments": [
+        {
+          "id": "mqs3481ggfav",
+          "author": "Jeff",
+          "html": "Tested on 6/24 and working much better.",
+          "createdAt": "2026-06-24T13:03:59.668Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ]
+    },
+    {
+      "id": "mqqqd5rq41do",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add delay between rendering double modals",
+      "priority": "Med",
+      "status": "Completed",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "On the testing page manage testing modal and finalize Mac or finalize win testing modals, there is the occurrence where the manage testing modal is open, then the finalize Mac testing modal is open, then it's closed and the manage testing modal is rerendered.  Currently it's a little flashy and there need to be some delay between fully closing the first modal then fully rendering the other modal.",
+      "completionNotes": "",
+      "executionOrder": 5,
+      "comments": []
+    },
+    {
+      "id": "mqqw5g12plms",
+      "executionOrder": 1,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Todo Kit",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "Perhaps add-on to jumpkit which manages tasks.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqw7ytlxyk8",
+      "executionOrder": 2,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "AgentKit / Ai Employees",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "",
+      "description": "App for deploying agent with Hermes, composio, orgo.  Could be desktop app, iOS/android app, do text, give assignment, check status, create central brain, create and store workflows.\n\nAi Receptionist: responds to text msgs, website chats, voicemails, schedules meetings, sends basic info, logs into CRM. $1k/mon\nAi Marketer: handles social media marketing ie IG, FB, YT, LI, TT, X, Reddit, with text posts, images, videos and shorts. $2k/mon\nAi Chief of Staff: see above. $1k/mon \nAi Accounting: check on accounts receiavable, do expenses, do reporting. $2K/mon\n\nDo AI audit to kick things off with new client.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqw8wlxsohv",
+      "executionOrder": 3,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "CaddyAi",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "AI caddy which helps you choose clubs / shots on the golf course after it's ingested your launch monitor data.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqwaytlgx65",
+      "executionOrder": 4,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "GolfTripAi",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "App which you can upload your participant emails, pairings, tee times, do side bets, show live stats for golf weekend trips, scrambles, and leagues.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqr05vu5kr21",
+      "executionOrder": 4,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Fix logout other user loss of person jump data",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "On second login of the same account, after the first account is logged out and when a fresh login on that account and first machine is attempted again, after that login the personal jump data for that account is lost and/or not rendered on the jumps page when it should be rendered on the jumps page.",
+      "completionNotes": "",
+      "comments": [
+        {
+          "id": "legacy-mqr05vu5kr21",
+          "author": "Jeff",
+          "html": "Need to check that fix works",
+          "createdAt": "2026-06-23T22:19:46Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": true
+        },
+        {
+          "id": "mqs_forced_logout_recovery_1782307083",
+          "author": "Maximus",
+          "html": "Added forced-logout snapshot/recovery so personal jumps/stats restore if local DB renders empty. Jeff to check.",
+          "createdAt": "2026-06-24T13:18:03.281Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ]
+    },
+    {
+      "id": "mqs2hnzwplhr",
+      "executionOrder": 6,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Do Deployment Checklist",
+      "priority": "Urgent",
+      "status": "In Progress",
+      "category": "Deployment",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-30",
+      "description": "Go through all deployment checklist items, save docs, fully deploy.",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mqs2puhj910h",
+      "executionOrder": 5,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Website Rank and Rent",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "",
+      "description": "Find websites who are low ranking, build a new one, do really good SEO, setup email and phone number, get confirmed leaders, then rent the website back to a business in that business niche for $500-$5k / mon depending on how many leader the website is generating.",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mqs493zsgven",
+      "executionOrder": 11,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Finish Release Testing",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Deployment",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-25",
+      "description": "1. Redo Mac testing\n2. Rebuild windows installer, uninstall, reinstall, do windows testing\n3. Save release testing html and jumpkit_docs.html into deploy folder",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mqs7t1xfopj4",
+      "executionOrder": 12,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Fix Team Stats & Col Sharing",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Bug",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-24",
+      "description": "1. DONE Ensure total number of share jumps is correct on home page jumps card and across team cards\n2. DONE Split teams into my teams and my joined teams on home page\n3. DONE Add \"(x)\" where x is the number of jumps the shared col pill on teams page\n4. DONE On team page, remove lines between members and ensure team owner always listed and add label for members\n5. DONE On jumps page, under each column, in suble text add \"Personal\" if the col is personal or add the team name from which the column comes\n6.  DONE On the teams page manage sharing, ensure only personal cols can be shared ie cols received by joining a team cannot be shared out into another team\n7. DONE Hide toggle control until after the rest of the page renders on the teams page",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mqsmjjq19wei",
+      "executionOrder": 13,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup Hermes Agent",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Support",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-03",
+      "description": "Finish setup of Hermes agent.",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mqsp61a8b8op",
+      "executionOrder": 6,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Shopify App",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "",
+      "description": "1. Data analytics\n2. Inventory mgmt",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "auto_db_audit_y2y1yog2",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Fix database audit release blockers",
+      "priority": "Urgent",
+      "status": "Completed",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-25",
+      "description": "Change plan from DB audit. Jeff deferred item #2 (dev/prod Supabase separation) and accepted item #6 (auto-backup behavior) as-is for now.\n\n1. Remove tracked secret/temp files: untrack app/.env and app/supabase/.temp/*, add ignore rules, and rotate Apple app-specific password if it was pushed.\n2. Sanitize logs: remove emails, profile IDs, recipient emails, and raw query/error objects from client and Edge Function console logs.\n3. Tighten SQLite IPC scoping: add userId/teamId scoping for delete-shared-jumps, log-click-name, and sync_state, or explicitly document any intentional global/team scope.\n4. Whitelist SQLite migrations: replace addColumnIfMissing identifier string interpolation with fixed, hardcoded migration definitions.\n\nDo not implement until Jeff approves.",
+      "completionNotes": "",
+      "executionOrder": 14,
+      "comments": [
+        {
+          "id": "auto_db_audit_plan_1782390181",
+          "author": "Maximus",
+          "html": "Added DB audit fix plan; no code implemented. Jeff to approve.",
+          "createdAt": "2026-06-25T12:23:01.073Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_db_audit_done_1782390657",
+          "author": "Maximus",
+          "html": "Implemented DB audit blockers 1-4; npm test passes. Jeff to check.",
+          "createdAt": "2026-06-25T12:30:57.014Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_orphan_jump_fix_1782391200",
+          "author": "Maximus",
+          "html": "Cleaned orphan shared jumps and added guard so Home count matches renderable columns. Jeff to check.",
+          "createdAt": "2026-06-25T12:40:00.295Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_orphan_prevention_1782391482",
+          "author": "Maximus",
+          "html": "Checked import and shared-sync paths; added guards to prevent future orphan jumps. Tests passed. Jeff to check after restart.",
+          "createdAt": "2026-06-25T12:44:42.155Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_jumps_subtitle_1782391706",
+          "author": "Maximus",
+          "html": "Updated Jumps page subtitle to show archived count and say launches. Jeff to check.",
+          "createdAt": "2026-06-25T12:48:26.165Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_stats_col_config_polish_1782392066",
+          "author": "Maximus",
+          "html": "Polished stats time-saved decimal display and Configure Columns read-only sharing/jump counts. Jeff to check.",
+          "createdAt": "2026-06-25T12:54:26.184Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_config_cols_width_align_1782392394",
+          "author": "Maximus",
+          "html": "Widened Configure Columns modal and tightened row alignment/ellipsis for sharing labels. Jeff to check.",
+          "createdAt": "2026-06-25T12:59:54.359Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_sharing_direction_badges_1782392662",
+          "author": "Maximus",
+          "html": "Added Shared out / Shared in badges with ellipsis and tooltips in Configure Columns. Jeff to check.",
+          "createdAt": "2026-06-25T13:04:22.790Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_share_pill_color_arrows_1782393054",
+          "author": "Maximus",
+          "html": "Adjusted sharing pills with tighter padding, arrow separators, green Shared in, and gradient Unlimited team pill. Jeff to check.",
+          "createdAt": "2026-06-25T13:10:54.051Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_remove_share_icons_1782393178",
+          "author": "Maximus",
+          "html": "Removed icons from Shared out / Shared in Configure Columns pills. Jeff to check.",
+          "createdAt": "2026-06-25T13:12:58.476Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_teams_page_unlimited_gradient_1782393247",
+          "author": "Maximus",
+          "html": "Recolored Teams page Unlimited Team pills to CTA gradient. Jeff to check.",
+          "createdAt": "2026-06-25T13:14:07.833Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_unbold_unlimited_pill_1782393364",
+          "author": "Maximus",
+          "html": "Unbolded Unlimited Team gradient pill text. Jeff to check.",
+          "createdAt": "2026-06-25T13:16:04.252Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_unlimited_pill_edge_hover_1782393523",
+          "author": "Maximus",
+          "html": "Smoothed Unlimited pill edge and forced Home team-card hover styling. Jeff to check.",
+          "createdAt": "2026-06-25T13:18:43.611Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_unlimited_pill_slight_bold_1782393600",
+          "author": "Maximus",
+          "html": "Adjusted Unlimited gradient pill text slightly bolder. Jeff to check.",
+          "createdAt": "2026-06-25T13:20:00.718Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_home_unlimited_team_label_1782393671",
+          "author": "Maximus",
+          "html": "Changed Home page Unlimited pills to say Unlimited Team. Jeff to check.",
+          "createdAt": "2026-06-25T13:21:11.377Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_home_pills_5pct_1782393743",
+          "author": "Maximus",
+          "html": "Increased Home page team pills by about 5%. Jeff to check.",
+          "createdAt": "2026-06-25T13:22:23.674Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_testing_clear_session_stale_1782394196",
+          "author": "Maximus",
+          "html": "Fixed Manage Testing clear-session flow so Start New Session no longer shows replace modal after reset. Jeff to check.",
+          "createdAt": "2026-06-25T13:29:56.168Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_testing_save_toast_1782394468",
+          "author": "Maximus",
+          "html": "Hardened Testing Save Results button feedback so every save/cancel/error path shows a toast. Jeff to check.",
+          "createdAt": "2026-06-25T13:34:28.004Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_testing_save_delegated_1782398120",
+          "author": "Maximus",
+          "html": "Fixed Testing Save Results no-op after table re-render by using delegated save button handling and declared visible column count. Jeff to check.",
+          "createdAt": "2026-06-25T14:35:20.185Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_storage_audit_fixes_1782399098",
+          "author": "Maximus",
+          "html": "Implemented storage audit fixes: recovery snapshots moved to SQLite, pending-upgrade flag cleared on logout, and Supabase auth persistence moved to Electron safeStorage. Jeff to check login/session behavior.",
+          "createdAt": "2026-06-25T14:51:38.739Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_testing_auto_run_skips_1782399297",
+          "author": "Maximus",
+          "html": "Fixed Automatic Tests run path to run only automatic-section tests, exclude preflight/platform-inapplicable tests, and avoid packaged admin test skip. Jeff to check.",
+          "createdAt": "2026-06-25T14:54:57.401Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ]
+    },
+    {
+      "id": "auto_code_quality_audit_1782400413",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Fix code quality audit release blockers",
+      "description": "Address code quality audit failures in JumpKit app/js production code before release.",
+      "status": "Completed",
+      "priority": "High",
+      "createdAt": "2026-06-25T15:13:33.414Z",
+      "updatedAt": "2026-06-25T15:13:33.414Z",
+      "completedAt": "2026-06-25T15:13:33.414Z",
+      "comments": [
+        {
+          "id": "code_quality_fixes_1782400413",
+          "author": "Maximus",
+          "html": "Fixed code quality audit blockers: debug logging scan clean, no junk/select-star hits, hardened async/fetch/Supabase/UI paths, added bounds and escaping. npm test passes. Jeff to check.",
+          "createdAt": "2026-06-25T15:13:33.414Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "completionNotes": "",
+      "executionOrder": 15,
+      "category": "Bug",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-23"
+    },
+    {
+      "id": "auto_security_audit_1782401479",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Fix security audit findings (High + Mediums + Lows)",
+      "description": "Implement all proposed security audit fixes across Electron, Edge Functions, and renderer.",
+      "status": "Completed",
+      "priority": "High",
+      "createdAt": "2026-06-25T15:31:19.203Z",
+      "updatedAt": "2026-06-25T15:31:19.203Z",
+      "completedAt": "2026-06-25T15:31:19.203Z",
+      "comments": [
+        {
+          "id": "security_audit_fixes_1782401479",
+          "author": "Maximus",
+          "html": "Implemented all security audit fixes: open-url scheme allow-list (High), pdfWin sandbox, CSP meta tag fallback, apply-pending-upgrade JWT email match, send-feedback length caps, preload homeDir removal. npm test passes 28/28. Jeff to check.",
+          "createdAt": "2026-06-25T15:31:19.203Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "completionNotes": "",
+      "executionOrder": 16,
+      "category": "Bug",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-23"
+    },
+    {
+      "id": "mr0y3fp8c68e",
+      "executionOrder": 17,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Ping Jon about beta testing JumpKit",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Tell Jon to kickoff beta testing.",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mr0yta2j0umq",
+      "executionOrder": 18,
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Do screen studio demo videos",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-05",
+      "description": "Do screen studio demo videos and images of app for landing page… need to redo so Jeff Roder not visible.  a) Video for add jump, launch link, launch directory; win and Mac images of jumps page b) video for teams; 2 teams images c) video for stats 2 team images",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "mr0yv1u06h47",
+      "executionOrder": 7,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Premium Rental Coolers",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "",
+      "description": "Deliver and pick up premium coolers stocked with ice and beer or whatever for daily use",
+      "comments": [],
+      "completionNotes": ""
+    }
+  ],
+  "updatedAt": "2026-06-30T18:18:29.912Z"
+}

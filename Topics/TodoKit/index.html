@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo Kit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <img class="logo-light" src="assets/todokit-logo-light-mode.png" alt="TodoKit" height="28" />
+        <img class="logo-dark" src="assets/todokit-logo-dark-mode.png" alt="TodoKit" height="28" />
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-header">
+        <span>Projects</span>
+        <button class="btn-icon" id="btn-new-project" title="New Project"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></button>
+      </div>
+      <ul class="project-list" id="project-list"></ul>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main" id="main">
+
+    <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+      <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+      <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+    </button>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="empty-state">
+      <div class="empty-state-icon"><svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="13" y2="16"/></svg></div>
+      <h2>No project selected</h2>
+      <p>Create a project or select one from the sidebar to get started.</p>
+      <button class="btn btn-primary" id="btn-new-project-empty">+ New Project</button>
+    </div>
+
+    <!-- Project View -->
+    <div class="project-view" id="project-view" style="display:none">
+      <div class="project-header">
+        <div class="project-header-left">
+          <div class="project-title-row">
+            <h1 class="project-name" id="project-name-heading"></h1>
+            <button class="btn btn-secondary btn-settings-icon" id="btn-project-settings" title="Project Settings" aria-label="Project Settings"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
+            <span class="task-count" id="task-count"></span>
+          </div>
+          <p class="project-description" id="project-description-heading"></p>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <div class="project-action-bar">
+          <button class="btn btn-primary" id="btn-new-task"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span> New Task</button>
+          <button class="btn btn-secondary" id="btn-manage-filters" title="Manage saved filters"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span> Manage Filters</button>
+        </div>
+        <div class="filters">
+          <!-- Hidden selects kept for JS compat; wrapper built by buildCustomSelect goes inside this hidden div -->
+          <div id="filter-selects-hidden" style="display:none;position:absolute;pointer-events:none">
+            <select class="filter-select" id="filter-status"><option value="">All Status</option><option>To Do</option><option>In Progress</option><option>To Test</option><option>Completed</option><option>Cancelled</option></select>
+            <select class="filter-select" id="filter-priority"><option value="">All Priority</option><option>Urgent</option><option>High</option><option>Med</option><option>Low</option></select>
+            <select class="filter-select" id="filter-category"><option value="">All Categories</option></select>
+            <select class="filter-select" id="filter-responsible"><option value="">All Responsible</option></select>
+          </div>
+          <div class="saved-filter-wrap" id="saved-filter-wrap" style="display:none">
+            <select class="filter-select" id="saved-filter-select"></select>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon search-magnifying-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
+          <input type="text" class="search-input" id="global-search" placeholder="Search title or description...">
+        </div>
+      </div>
+
+      <div class="task-table-wrap">
+        <table class="task-table" id="task-table">
+          <thead>
+            <tr>
+              <th class="th-sortable col-order" data-sort="executionOrder">ID</th>
+              <th class="th-sortable" data-sort="title">Title</th>
+              <th class="th-sortable" data-sort="category">Category</th>
+              <th class="th-sortable" data-sort="priority">Priority</th>
+              <th class="th-sortable" data-sort="status">Status</th>
+              <th class="th-sortable" data-sort="responsible">Responsible</th>
+              <th class="th-sortable" data-sort="plannedStart">Start Date</th>
+              <th class="col-actions"></th>
+            </tr>
+          </thead>
+          <tbody id="task-tbody"></tbody>
+        </table>
+        <div class="no-tasks" id="no-tasks" style="display:none">
+          <span>No tasks match your filters.</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===================== MODALS ===================== -->
+
+  <!-- Modal: New/Edit Project -->
+  <div class="modal-overlay" id="modal-project" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-project-title">New Project</h2>
+        <button class="btn-icon modal-close" data-modal="modal-project"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Project Name <span class="required">*</span></label>
+          <input type="text" class="form-input" id="project-name-input" placeholder="e.g. JumpKit Launch">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-modal="modal-project">Cancel</button>
+        <button class="btn btn-primary" id="btn-save-project">Save Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: New/Edit Task -->
+  <div class="modal-overlay" id="modal-task" style="display:none">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2><span class="modal-title-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span id="modal-task-title">New Task</span></h2>
+        <button class="btn-icon modal-close" data-modal="modal-task"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Title <span class="required">*</span></label>
+          <input type="text" class="form-input" id="task-title" placeholder="What needs to be done?">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Priority</label>
+            <select class="form-input" id="task-priority">
+              <option>Urgent</option>
+              <option>High</option>
+              <option selected>Med</option>
+              <option>Low</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select class="form-input" id="task-status">
+              <option>To Do</option>
+              <option>In Progress</option>
+              <option>To Test</option>
+              <option>Completed</option>
+              <option>Cancelled</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Category</label>
+            <select class="form-input" id="task-category"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Responsible</label>
+            <select class="form-input" id="task-responsible">
+              <option value="">Unassigned</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Planned Start</label>
+            <input type="date" class="form-input" id="task-start-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="form-input form-textarea" id="task-description" placeholder="Optional details, context, or steps..."></textarea>
+        </div>
+        <div class="form-group comments-section" id="comments-group">
+          <div class="comments-header-row">
+            <label>Comments</label>
+          </div>
+          <div class="comments-list" id="task-comments-list"></div>
+          <div class="comment-editor-card">
+            <div class="wysiwyg-toolbar" aria-label="Comment formatting toolbar">
+              <select class="form-input comment-author-select" id="comment-author"></select>
+              <span class="toolbar-sep"></span>
+              <button type="button" class="btn-editor" data-command="bold" title="Bold"><strong>B</strong></button>
+              <button type="button" class="btn-editor" data-command="italic" title="Italic"><em>I</em></button>
+              <button type="button" class="btn-editor" data-command="underline" title="Underline"><u>U</u></button>
+              <button type="button" class="btn-editor" data-command="insertUnorderedList" title="Bullet list">• List</button>
+              <button type="button" class="btn-editor" data-command="insertOrderedList" title="Numbered list">1. List</button>
+              <span class="comment-editing-label" id="comment-editing-label" style="display:none">Editing comment</span>
+            </div>
+            <div class="comment-editor form-input" id="comment-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Add a comment..."></div>
+            <div class="comment-actions-row">
+              <button type="button" class="btn btn-ghost" id="btn-cancel-comment-edit" style="display:none">Cancel Edit</button>
+              <button type="button" class="btn btn-secondary" id="btn-add-comment"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span> Add Comment</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-left">
+          <button class="btn btn-danger-ghost btn-delete-task-shared" id="btn-delete-task" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 13.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span> Delete Task</button>
+          <button class="btn btn-progress-ghost" id="btn-mark-task-progress" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg></span> In Progress</button>
+          <button class="btn btn-done-ghost" id="btn-mark-task-done" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Mark as Done</button>
+        </div>
+        <div class="modal-footer-right">
+          <div class="task-nav-actions" id="task-nav-actions" style="display:none">
+            <button class="btn btn-secondary btn-task-nav" id="btn-prev-task" type="button"><span class="task-nav-caret">‹</span> Prev</button>
+            <button class="btn btn-secondary btn-task-nav" id="btn-next-task" type="button">Next <span class="task-nav-caret">›</span></button>
+          </div>
+          <button class="btn btn-secondary" data-modal="modal-task">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-task">Save Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Task Detail (read-only) -->
+  <div class="modal-overlay" id="modal-task-detail" style="display:none">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2><span class="modal-title-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Task Details</h2>
+        <button class="btn-icon modal-close" data-modal="modal-task-detail"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body" id="task-detail-body"></div>
+      <div class="modal-footer">
+        <div class="modal-footer-left">
+          <button class="btn btn-danger-ghost btn-delete-task-shared" id="btn-delete-task-detail" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 13.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></span> Delete Task</button>
+          <button class="btn btn-progress-ghost" id="btn-mark-task-progress-detail" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg></span> In Progress</button>
+          <button class="btn btn-done-ghost" id="btn-mark-task-done-detail" style="display:none"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span> Mark as Done</button>
+        </div>
+        <div class="modal-footer-right">
+          <div class="task-nav-actions" id="task-detail-nav-actions">
+            <button class="btn btn-secondary btn-task-nav" id="btn-prev-task-detail" type="button"><span class="task-nav-caret">‹</span> Prev</button>
+            <button class="btn btn-secondary btn-task-nav" id="btn-next-task-detail" type="button">Next <span class="task-nav-caret">›</span></button>
+          </div>
+          <button class="btn btn-secondary" data-modal="modal-task-detail">Cancel</button>
+          <button class="btn btn-primary" id="btn-edit-from-detail"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span> Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Project Settings -->
+  <div class="modal-overlay" id="modal-settings" style="display:none">
+    <div class="modal modal-lg">
+      <div class="modal-header">
+        <h2><span class="modal-title-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg></span>Project Settings</h2>
+        <button class="btn-icon modal-close" data-modal="modal-settings"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-tabs">
+          <button class="settings-tab active" data-tab="project">Project</button>
+          <button class="settings-tab" data-tab="users">Users</button>
+          <button class="settings-tab" data-tab="categories">Categories</button>
+          <button class="settings-tab settings-tab-danger" data-tab="danger">Danger Zone</button>
+        </div>
+
+        <div class="settings-panel" id="tab-project">
+          <div class="form-group">
+            <label>Project Name <span class="required">*</span></label>
+            <input type="text" class="form-input" id="settings-project-name" placeholder="Project name...">
+          </div>
+          <div class="form-group">
+            <label>Project Description</label>
+            <textarea class="form-input form-textarea" id="settings-project-description" placeholder="Optional project context, goals, scope, or notes..."></textarea>
+          </div>
+          <div class="settings-actions-row">
+            <button class="btn btn-primary" id="btn-save-project-details">Save Project Details</button>
+          </div>
+        </div>
+
+        <div class="settings-panel" id="tab-users" style="display:none">
+          <p class="settings-hint">Users added here can be assigned as "Responsible" on tasks.</p>
+          <div class="add-item-row">
+            <input type="text" class="form-input" id="new-user-input" placeholder="Add user name...">
+            <button class="btn btn-primary" id="btn-add-user">Add</button>
+          </div>
+          <ul class="item-list" id="users-list"></ul>
+        </div>
+
+        <div class="settings-panel" id="tab-categories" style="display:none">
+          <p class="settings-hint">Edit category names and colors here. Renaming a category updates existing tasks using it.</p>
+          <div class="add-item-row add-category-row">
+            <input type="text" class="form-input" id="new-category-input" placeholder="Add category name...">
+            <label class="category-color-picker" title="Category color seed">
+              <span>Color</span>
+              <input type="color" id="new-category-color" value="#4a8a5e" aria-label="Category color seed">
+            </label>
+            <button class="btn btn-primary" id="btn-add-category">Add</button>
+          </div>
+          <ul class="item-list" id="categories-list"></ul>
+        </div>
+
+        <div class="settings-panel" id="tab-danger" style="display:none">
+          <div class="danger-zone">
+            <div class="danger-item">
+              <div>
+                <strong>Delete Project</strong>
+                <p>Permanently delete this project and all its tasks. This cannot be undone.</p>
+              </div>
+              <button class="btn btn-danger" id="btn-delete-project">Delete Project</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-modal="modal-settings">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <!-- Manage Filters Modal -->
+  <div class="modal-overlay" id="modal-manage-filters" style="display:none">
+    <div class="modal modal-lg" style="max-width:580px">
+      <div class="modal-header">
+        <h2><span class="modal-title-icon"><svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg></span>Manage Filters</h2>
+        <button class="btn-icon modal-close" data-modal="modal-manage-filters"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+      </div>
+      <div class="modal-body" style="overflow-y:auto;max-height:calc(90vh - 140px)">
+
+        <!-- Saved filters list -->
+        <div style="margin-bottom:4px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)">Saved Filters</label>
+        </div>
+        <div id="mf-saved-list" style="margin-bottom:4px"></div>
+
+        <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+
+        <!-- Filter builder -->
+        <div style="margin-bottom:10px">
+          <label style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted)" id="mf-builder-label">New Filter</label>
+        </div>
+
+        <div class="form-group">
+          <label>Filter Name</label>
+          <input type="text" class="form-input" id="mf-filter-name" placeholder="e.g. High Priority In Progress" maxlength="60">
+          <label class="mf-default-label" style="display:flex;align-items:center;gap:7px;margin-top:8px;font-size:13px;font-weight:400;cursor:pointer;color:var(--text)">
+            <input type="checkbox" id="mf-is-default" style="width:15px;height:15px;accent-color:var(--accent);cursor:pointer;flex-shrink:0">
+            Set as default filter <span style="font-size:11px;color:var(--text-muted)">(auto-applied when project opens)</span>
+          </label>
+        </div>
+
+        <div class="form-group" style="margin-top:10px">
+          <label>Filter Parameters <span style="font-weight:400;font-size:11px;color:var(--text-muted)">(select one or more)</span></label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div id="mf-multi-status"></div>
+            <div id="mf-multi-priority"></div>
+            <div id="mf-multi-category"></div>
+            <div id="mf-multi-responsible"></div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;margin-top:10px">
+          <label>Sort Order <span style="font-weight:400;font-size:11px;color:var(--text-muted)">(up to 3 levels)</span></label>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--text-muted);min-width:68px">Primary</span>
+              <select id="mf-sort-col-0" style="flex:1" data-sort-idx="0">
+                <option value="">None</option><option value="priority">Priority</option><option value="status">Status</option><option value="title">Title</option><option value="responsible">Responsible</option><option value="plannedStart">Start Date</option><option value="category">Category</option><option value="executionOrder">ID</option>
+              </select>
+              <select id="mf-sort-dir-0" style="width:96px" data-sort-idx="0"><option value="asc">Asc ↑</option><option value="desc">Desc ↓</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--text-muted);min-width:68px">Then by</span>
+              <select id="mf-sort-col-1" style="flex:1" data-sort-idx="1">
+                <option value="">None</option><option value="priority">Priority</option><option value="status">Status</option><option value="title">Title</option><option value="responsible">Responsible</option><option value="plannedStart">Start Date</option><option value="category">Category</option><option value="executionOrder">ID</option>
+              </select>
+              <select id="mf-sort-dir-1" style="width:96px" data-sort-idx="1"><option value="asc">Asc ↑</option><option value="desc">Desc ↓</option></select>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--text-muted);min-width:68px">Then by</span>
+              <select id="mf-sort-col-2" style="flex:1" data-sort-idx="2">
+                <option value="">None</option><option value="priority">Priority</option><option value="status">Status</option><option value="title">Title</option><option value="responsible">Responsible</option><option value="plannedStart">Start Date</option><option value="category">Category</option><option value="executionOrder">ID</option>
+              </select>
+              <select id="mf-sort-dir-2" style="width:96px" data-sort-idx="2"><option value="asc">Asc ↑</option><option value="desc">Desc ↓</option></select>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <div class="modal-footer-left" style="display:flex;gap:8px">
+          <button class="btn btn-ghost" id="mf-btn-delete" disabled title="Select a saved filter first">Delete Filter</button>
+          <button class="btn btn-ghost" id="mf-btn-edit" disabled title="Select a saved filter first">Edit Filter</button>
+        </div>
+        <div class="modal-footer-right">
+          <button class="btn btn-secondary" data-modal="modal-manage-filters">Close</button>
+          <button class="btn btn-primary" id="mf-btn-save">Save Filter</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

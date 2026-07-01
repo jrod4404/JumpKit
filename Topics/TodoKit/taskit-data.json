@@ -1,0 +1,275 @@
+{
+  "projects": [
+    {
+      "id": "mqqp2ihuyhpx",
+      "name": "JumpKit",
+      "users": [
+        "Jeff",
+        "Maximus"
+      ],
+      "customCategories": [
+        "Support"
+      ],
+      "description": "For tracking bugs to fix, new features, and next things to do in JumpKit",
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#15803d",
+          "isDefault": true
+        },
+        {
+          "id": "custom-0-support",
+          "name": "Support",
+          "color": "#5b6af0",
+          "isDefault": false
+        }
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#15803d",
+        "Support": "#5b6af0"
+      }
+    },
+    {
+      "id": "mqqw3xxcq6s0",
+      "name": "Business Ideas",
+      "description": "",
+      "users": [],
+      "customCategories": [
+        "Idea"
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#15803d",
+        "Idea": "#fffc41"
+      },
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#15803d",
+          "isDefault": true
+        },
+        {
+          "id": "custom-mqqw4quu-idea",
+          "name": "Idea",
+          "color": "#fffc41",
+          "isDefault": false
+        }
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "mqqp9lc5kwc8",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add notes field to test cases",
+      "priority": "Med",
+      "status": "To Test",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-30",
+      "description": "For each test case on the jumpkit app testing page we need a text input box to input notes about the test case which will be also saved into the release testing html file upon save results btn click.",
+      "completionNotes": "",
+      "executionOrder": 1,
+      "comments": []
+    },
+    {
+      "id": "mqqpddxl1su5",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add details btn on unit tests",
+      "priority": "Med",
+      "status": "To Test",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-30",
+      "description": "On each unit test row on the jumpkit app unit testing page add a details btn which when clicked opens a modal to show all info associated with the unit test.",
+      "completionNotes": "",
+      "executionOrder": 2,
+      "comments": []
+    },
+    {
+      "id": "mqqpih4qagsr",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup GLM5.2 & Hermes Agent",
+      "priority": "Urgent",
+      "status": "To Do",
+      "category": "Support",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-24",
+      "description": "Need to complete setup of GLM5.2 with openclaw, then setup Hermes agent",
+      "completionNotes": "",
+      "executionOrder": 3,
+      "comments": []
+    },
+    {
+      "id": "mqqpr0fnbmug",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup supabase development database",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "2026-07-06",
+      "description": "We need to have a replica of our current jumpkit supabase database (excluding deployments table) so that we can do testing on the dev db and not on a live db.",
+      "completionNotes": "",
+      "executionOrder": 4,
+      "comments": []
+    },
+    {
+      "id": "mqqpsy69daun",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Create MSP marketing material",
+      "priority": "High",
+      "status": "To Test",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-29",
+      "description": "Need to create:\n1. One pager MSP marketing guide\n2. Affiliates page on landing page with info about LS and links to demo videos\n3. Example marketing email copy",
+      "completionNotes": "",
+      "executionOrder": 5,
+      "comments": [
+        {
+          "id": "legacy-mqqpsy69daun",
+          "author": "Jeff",
+          "html": "Created MSP/affiliate marketing kit in Topics/JumpKit/Commercial/affiliates, plus a polished client-facing PDF one-pager: JumpKit_Client_Facing_One_Pager.pdf. Also included PNG preview, HTML client-facing draft, and reproducible PDF generator. Publishing placeholders remain for affiliate signup URL, commission rate, cookie window, and payout terms.",
+          "createdAt": "2026-06-23T22:19:46Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": true
+        }
+      ]
+    },
+    {
+      "id": "mqqpxjcfqhcf",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Setup social media posting automation",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-06",
+      "description": "Need to research and setup social media posting automation tools.",
+      "completionNotes": "",
+      "executionOrder": 6,
+      "comments": []
+    },
+    {
+      "id": "mqqq90k8am5w",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Reduce icon load time",
+      "priority": "Urgent",
+      "status": "To Test",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-24",
+      "description": "Need to do a review across the whole jumpkit app codebase and implement a fix so that icons are rendered immediately with the rest of the page content.  Current the page content loads and then the icons load 1-3s later which does not looks good and is bad ux.",
+      "completionNotes": "",
+      "executionOrder": 7,
+      "comments": []
+    },
+    {
+      "id": "mqqqd5rq41do",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Add delay between rendering double modals",
+      "priority": "Med",
+      "status": "To Test",
+      "category": "Bug",
+      "responsible": "Maximus",
+      "plannedStart": "2026-06-30",
+      "description": "On the testing page manage testing modal and finalize Mac or finalize win testing modals, there is the occurrence where the manage testing modal is open, then the finalize Mac testing modal is open, then it's closed and the manage testing modal is rerendered.  Currently it's a little flashy and there need to be some delay between fully closing the first modal then fully rendering the other modal.",
+      "completionNotes": "",
+      "executionOrder": 8,
+      "comments": []
+    },
+    {
+      "id": "mqqw5g12plms",
+      "executionOrder": 1,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Todo Kit",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "Perhaps add-on to jumpkit which manages tasks.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqw7ytlxyk8",
+      "executionOrder": 2,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "AgentKit",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "App for deploying agent with Hermes, composio, orgo.  Could be desktop app, iOS/android app, do text, give assignment, check status, create central brain, create and store workflows.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqw8wlxsohv",
+      "executionOrder": 3,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "CaddyAi",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "AI caddy which helps you choose clubs / shots on the golf course after it's ingested your launch monitor data.",
+      "completionNotes": "",
+      "comments": []
+    },
+    {
+      "id": "mqqwaytlgx65",
+      "executionOrder": 4,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "GolfTripAi",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "",
+      "plannedStart": "",
+      "description": "App which you can upload your participant emails, pairings, tee times, do side bets, show live stats for golf weekend trips, scrambles, and leagues.",
+      "completionNotes": "",
+      "comments": []
+    }
+  ],
+  "updatedAt": "2026-06-23T19:57:00Z"
+}

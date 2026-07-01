@@ -50,8 +50,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkMigrations: (filenames)         => ipcRenderer.invoke('check-migrations', filenames),
   readFile:        (filePath)          => ipcRenderer.invoke('read-file', filePath),
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
+  renameFile:      (oldPath, newPath)  => ipcRenderer.invoke('rename-file', oldPath, newPath),
   getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),
   getLatestCommitId:          () => ipcRenderer.invoke('get-latest-commit-id'),
+  listDistFiles:              () => ipcRenderer.invoke('list-dist-files'),
   checkAdminFilesExcluded:    () => ipcRenderer.invoke('check-admin-files-excluded'),
   readBuildConfig:            () => ipcRenderer.invoke('read-build-config'),
+  checkIconFiles:             () => ipcRenderer.invoke('check-icon-files'),
 });

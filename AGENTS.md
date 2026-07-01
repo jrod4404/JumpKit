@@ -17,6 +17,11 @@ Before doing anything else:
 
 Don't ask permission. Just do it.
 
+
+## JumpKit Todo SOP
+
+When Jeff asks to create, brainstorm, organize, or update a to-do/task list for **JumpKit**, do not leave it only in chat or memory. Load/check the relevant memory context, then create or update the tasks inside the **TodoKit → JumpKit** project JSON (`Topics/TodoKit/todokit-data.json`; legacy safety copy may exist as `taskit-data.json`). Use the existing JumpKit project rather than creating a duplicate project. For JumpKit work items, add a very brief new comment under the relevant task after each change, e.g. “Changed active Notes border color to turquoise. Jeff to check.”
+
 ## Memory
 
 You wake up fresh each session. These files are your continuity:

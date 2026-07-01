@@ -148,7 +148,7 @@
   color: #fff; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.02em;
 }
 .page-content { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 24px; scrollbar-gutter: stable; }
-.page-content.jumps-page { overflow: hidden; padding-bottom: 0; display: flex; flex-direction: column; }
+.page-content.jumps-page { overflow: hidden; padding-bottom: 0; display: flex; flex-direction: column; scrollbar-gutter: auto; padding-right: 0; }
 
 /* ── Home Page ── */
 /* ── Toast ── */
@@ -238,7 +238,7 @@
   width: 100%;
 }
 .acct-team-header { margin-bottom: 6px; }
-.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; align-items: flex-start; }
+.acct-team-entry .acct-member-row { padding-left: 0; padding-right: 0; padding-top: 3px; padding-bottom: 3px; align-items: flex-start; border-bottom: none !important; }
 .acct-team-entry:first-of-type { border-top: none; }
 .acct-team-name-block { display: flex; flex-direction: row; align-items: flex-start; gap: 6px; }
 .acct-team-name-text { display: flex; flex-direction: column; gap: 2px; }
@@ -259,6 +259,12 @@
 /* Member row label fills col 1; indent to align under team name first letter */
 .acct-team-entry .acct-member-row .acct-row-label { min-width: 0; padding-left: calc(1rem + 10px); }
 .acct-empty-state { padding: 20px; color: var(--text-muted); font-size: 0.88rem; text-align: center; }
+/* Section labels inside team cards (Members / Shared Columns) */
+.acct-team-cols-label { display: flex; align-items: center; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-dim); padding: 6px 0 4px 0; }
+.acct-team-members > .acct-team-cols-label { margin-left: 24px; margin-top: 19px; }
+.acct-team-cols-section > .acct-team-cols-label { padding-bottom: 0; margin-bottom: -2px; margin-top: 8px; }
+.acct-team-cols-section { padding-top: 8px; }
+.acct-team-cols-list, .acct-t\2026list { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 0 6px; }
 
 .feedback-wrap { display: flex; justify-content: center; padding-top: 12px; }
 .feedback-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 32px; width: 100%; max-width: 520px; }
@@ -287,6 +293,7 @@
 .home-dash .stat-card:hover,
 .home-roi-link:hover { border-color: var(--hover-accent); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,79,214,0.12), 0 0 40px rgba(0,194,199,0.08); }
 .home-team-card { display: flex; flex-direction: column; }
+.home-dash .home-team-card:hover { border-color: var(--hover-accent) !important; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,79,214,0.12), 0 0 40px rgba(0,194,199,0.08); }
 .teams-badge { display: inline-flex; align-items: center; justify-content: center; padding: 1px 7px; border-radius: 10px; font-size: 0.69rem; font-weight: 600; min-width: 70px; background: rgba(34,197,94,0.13); color: #178a3a; border: 1px solid rgba(34,197,94,0.35); white-space: nowrap; }
 .teams-badge-owner { background: rgba(0,194,199,0.15); color: #00a8ad; border-color: rgba(0,194,199,0.32); }
 .teams-badge-pending { background: rgba(250,173,20,0.15); color: #a07010; border-color: rgba(250,173,20,0.32); }
@@ -347,7 +354,7 @@
 .jumps-toolbar h2 { font-size: 1.1rem; font-weight: 700; flex: 1; }
 .columns-area {
   display: grid; gap: 14px; align-items: flex-start;
-  overflow-x: hidden; padding-bottom: 0; margin-bottom: 14px; flex: 1; min-height: 0;
+  overflow-x: hidden; padding: 8px 14px 12px 8px; margin-bottom: 14px; flex: 1; min-height: 0;
   /* grid-template-columns set dynamically in JS */
   grid-template-columns: repeat(auto-fill, minmax(0, 1fr));
 }
@@ -357,7 +364,7 @@
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg); overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.06);
 }
 .col-header {
   padding: 12px 14px; font-size: 0.75rem; font-weight: 700;
@@ -480,7 +487,9 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
   z-index: 8000; display: flex; align-items: center; justify-content: center;
   padding: 24px; animation: fadeIn 0.15s ease;
 }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeOut  { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slideDown { from { transform: translateY(0); opacity: 1; } to { transform: translateY(12px); opacity: 0; } }
 .modal-box {
   background: var(--bg-modal); border: 1px solid var(--border);
   border-radius: var(--radius-lg); width: 100%; max-width: 520px;
@@ -493,6 +502,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .spin { display: inline-block; animation: spin 0.8s linear infinite; }
 .modal-box.sm { max-width: 480px; }
 .modal-box.lg { max-width: 680px; }
+.modal-box.config-cols-modal { max-width: 782px; }
 .modal-box.xl { max-width: 864px; }
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
@@ -517,7 +527,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-config-item {
   background: var(--bg); border: 1px solid var(--border);
   border-radius: var(--radius); padding: 12px 14px;
-  display: grid; grid-template-columns: 28px 1fr 70px 1fr 36px; gap: 10px; align-items: start;
+  display: grid; grid-template-columns: 28px minmax(0,1fr) 70px 62px minmax(0,1.1fr) 36px; gap: 10px; align-items: start;
   cursor: grab; transition: background var(--transition), border-color var(--transition);
 }
 /* Delete column button — matches btn-delete style from teams page */
@@ -531,18 +541,33 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 }
 .btn-col-remove:hover:not([disabled]) { background: rgba(229,62,62,0.13); border-color: rgba(229,62,62,0.35); color: #e05252; }
 .btn-col-remove[disabled] { opacity: 0.35; cursor: not-allowed; background: rgba(229,62,62,0.04); }
-.col-config-field { display: flex; flex-direction: column; gap: 4px; }
+.col-config-field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .col-config-label { font-size: 0.7rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.05em; }
-.col-status-field { justify-content: flex-start; }
+.col-status-field { justify-content: flex-start; align-items: flex-start; min-width: 0; overflow: hidden; }
 .col-status-badge {
-  display: inline-flex; align-items: center;
-  padding: 3px 10px; border-radius: 20px;
+  display: inline-flex; align-items: center; max-width: 100%; min-width: 0;
+  padding: 3px 8px 3px 6px; border-radius: 20px;
   font-size: 0.76rem; font-weight: 500; white-space: nowrap;
   border: 1px solid var(--border-input);
 }
+.col-status-dir { flex-shrink: 0; font-weight: 500; color: var(--text-muted); }
+.col-status-arrow { flex-shrink: 0; margin: 0 5px; color: var(--text-dim); font-weight: 700; }
+.col-status-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-readonly-value {
+  display: inline-flex; align-items: center;
+  min-height: 24px; padding: 3px 0; font-size: 0.78rem; font-weight: 500;
+  color: var(--text-dim); cursor: default; user-select: none;
+}
+.col-jump-count {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 24px; height: 24px; border-radius: 999px;
+  font-size: 0.76rem; font-weight: 700;
+  color: var(--text-dim); background: var(--bg-card); border: 1px solid var(--border);
+  cursor: default; user-select: none;
+}
 .col-status-personal { color: var(--text-dim); background: transparent; }
-.col-status-shared-out { color: var(--turq); background: rgba(0,194,199,0.08); border-color: rgba(0,194,199,0.25); }
-.col-status-shared-from { color: var(--text-muted); background: var(--bg-card); }
+.col-status-shared-out { color: var(--text-muted); background: rgba(0,194,199,0.08); border-color: rgba(0,194,199,0.22); }
+.col-status-shared-from { color: var(--text-muted); background: rgba(34,197,94,0.08); border-color: rgba(34,197,94,0.24); }
 .col-config-item:active { cursor: grabbing; }
 .col-config-item.drag-over { border-color: var(--hover-accent); background: var(--bg-hover); }
 .col-drag-handle { font-size: 1.2rem; color: var(--text-dim); text-align: center; cursor: grab; user-select: none; align-self: center; padding-top: 7px; }

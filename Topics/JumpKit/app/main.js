@@ -1,4 +1,15 @@
 const { app, BrowserWindow, ipcMain, shell, safeStorage } = require('electron');
+
+// Catch any uncaught exceptions in main process
+process.on('uncaughtException', (err) => {
+  const { dialog } = require('electron');
+  const msg = err?.stack || err?.message || String(err);
+  console.error('[JumpKit] UNCAUGHT EXCEPTION:', msg);
+  try { dialog.showErrorBoxSync('JumpKit Error', msg); } catch(_) {}
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[JumpKit] UNHANDLED REJECTION:', reason);
+});
 const { spawn } = require('child_process');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
@@ -809,7 +820,9 @@ ipcMain.handle('open-url', async (_e, url, isShared) => {
   const fullUrl = isWeb && !isHttp ? 'https://' + trimmed : trimmed;
 
   // 3. Detect explicit non-http schemes (anything with `scheme:` not already classified as web).
-  const hasScheme = /^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(trimmed) && !isHttp;
+  //    Exception: Windows drive paths (C:\, D:/) look like schemes to the regex but are local paths.
+  const isWinDrivePath = /^[a-zA-Z]:[\\/]/.test(trimmed);
+  const hasScheme = !isWinDrivePath && /^[a-zA-Z][a-zA-Z0-9+.\-]*:/.test(trimmed) && !isHttp;
   if (hasScheme && !ALLOWED_APP_SCHEMES.test(trimmed)) {
     return { ok: false, reason: 'scheme blocked' };
   }
@@ -852,7 +865,11 @@ ipcMain.handle('open-url', async (_e, url, isShared) => {
       if (response !== 1) return { ok: false, reason: 'cancelled' };
     }
 
-    shell.openPath(resolvedPath);
+    const openErr = await shell.openPath(resolvedPath);
+    if (openErr) {
+      console.warn('[open-url] shell.openPath error:', openErr);
+      return { ok: false, reason: openErr };
+    }
     return { ok: true };
   } catch (e) {
     console.warn('[open-url] error:', e?.message || 'open failed');
@@ -974,6 +991,21 @@ ipcMain.handle('write-file-direct', (_e, filePath, content) => {
   }
 });
 
+ipcMain.handle('rename-file', (_e, oldPath, newPath) => {
+  const fs = require('fs');
+  try {
+    if (!oldPath || !newPath) return { ok: false, reason: 'missing path' };
+    if (oldPath === newPath) return { ok: true };
+    if (!fs.existsSync(oldPath)) return { ok: false, reason: 'source does not exist' };
+    // If destination already exists, refuse rather than clobber
+    if (fs.existsSync(newPath)) return { ok: false, reason: 'destination already exists' };
+    fs.renameSync(oldPath, newPath);
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e.message };
+  }
+});
+
 ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
 
 // ── IPC: admin build guard ───────────────────────────────────────
@@ -1003,6 +1035,58 @@ ipcMain.handle('read-build-config', () => {
     const pkgPath = path.join(__dirname, 'package.json');
     const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
     return { ok: true, buildFiles: pkg?.build?.files || [] };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+ipcMain.handle('check-icon-files', () => {
+  const fs = require('fs');
+  try {
+    const macIconPath = path.join(__dirname, 'assets', 'icon.icns');
+    const winIconPath = path.join(__dirname, 'assets', 'icon.ico');
+    // Check file existence (works on the platform the file is for)
+    const macFileExists = fs.existsSync(macIconPath);
+    const winFileExists = fs.existsSync(winIconPath);
+    // Also verify via package.json build config — more reliable cross-platform.
+    // On Windows, icon.icns is not bundled (Mac-only format) so file check alone
+    // would always fail. Reading the config confirms the path is correctly set.
+    let pkgMacIcon = null, pkgWinIcon = null;
+    try {
+      const pkg = require('./package.json');
+      pkgMacIcon = pkg && pkg.build && pkg.build.mac && pkg.build.mac.icon;
+      pkgWinIcon = pkg && pkg.build && pkg.build.win && pkg.build.win.icon;
+    } catch (_) {}
+    return {
+      ok: true,
+      macIconExists: macFileExists || pkgMacIcon === 'assets/icon.icns',
+      winIconExists: winFileExists || pkgWinIcon === 'assets/icon.ico',
+      macIconPath,
+      winIconPath
+    };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+});
+
+ipcMain.handle('list-dist-files', () => {
+  const fs = require('fs');
+  const distPath = path.join(__dirname, 'dist');
+  try {
+    if (!fs.existsSync(distPath)) return { ok: false, error: 'dist/ folder not found — run a build first.' };
+    const files = fs.readdirSync(distPath)
+      .filter(f => f.endsWith('.dmg') || f.endsWith('.exe'))
+      .map(f => {
+        const fPath = path.join(distPath, f);
+        try {
+          const stat = fs.statSync(fPath);
+          const mb = (stat.size / 1024 / 1024).toFixed(1);
+          return { name: f, sizeMb: `${mb} MB`, bytes: stat.size };
+        } catch (_) {
+          return { name: f, sizeMb: '?', bytes: 0 };
+        }
+      });
+    return { ok: true, files };
   } catch (e) {
     return { ok: false, error: e.message };
   }

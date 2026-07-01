@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit Client Productivity Brief</title>
+  <style>
+    @page { size: Letter; margin: 0; }
+    * { box-sizing: border-box; }
+    :root {
+      --royal: #1A4FD6;
+      --turq: #00C2C7;
+      --ink: #102033;
+      --muted: #5F7288;
+      --line: #D9E6F2;
+      --soft: #F4F8FC;
+      --dark: #081727;
+      --grad: linear-gradient(135deg, #1A4FD6 0%, #00C2C7 100%);
+    }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      position: relative;
+      overflow: hidden;
+      padding: 0.46in 0.54in 0.38in;
+      background:
+        radial-gradient(circle at 8% 8%, rgba(0,194,199,.18), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+      page-break-after: always;
+    }
+    .accent-bar { position: absolute; inset: 0 auto 0 0; width: 0.13in; background: var(--grad); }
+    .top { display:flex; align-items:center; justify-content:space-between; gap:24px; margin-bottom: 22px; }
+    .logo { height: 58px; object-fit: contain; }
+    .label { display:inline-flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; background:rgba(0,194,199,.10); color:#086C83; font-size:11px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; border:1px solid rgba(0,194,199,.25); }
+    h1 { font-size: 39px; line-height: 1.03; letter-spacing: -1.35px; margin: 0 0 13px; max-width: 690px; }
+    .gradient-text { background: var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .lead { font-size: 16px; line-height: 1.52; color: #40566d; margin: 0 0 18px; max-width: 690px; }
+    .hero-grid { display:grid; grid-template-columns: 1.02fr .98fr; gap: 22px; align-items: stretch; margin-top: 14px; }
+    .hero-copy { display:flex; flex-direction:column; justify-content:center; }
+    .hero-card { border-radius: 24px; overflow:hidden; background: var(--dark); border: 1px solid rgba(26,79,214,.15); box-shadow: 0 24px 48px rgba(16,32,51,.17); position:relative; }
+    .hero-card img { width:100%; height:100%; object-fit:cover; display:block; min-height: 255px; }
+    .hero-badge { position:absolute; left:18px; bottom:18px; padding:10px 13px; border-radius:14px; background:rgba(8,23,39,.76); color:#fff; backdrop-filter: blur(8px); font-size: 12px; font-weight: 800; box-shadow:0 10px 22px rgba(0,0,0,.25); }
+    .problem-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:22px 0; }
+    .mini { border:1px solid var(--line); background:#fff; border-radius:16px; padding:13px 13px 12px; min-height:82px; box-shadow:0 8px 20px rgba(16,32,51,.05); }
+    .mini strong { display:block; font-size: 12px; margin-bottom:5px; color:#13283f; }
+    .mini span { display:block; color:var(--muted); font-size:10.8px; line-height:1.35; }
+    .section-title { font-size: 18px; line-height:1.1; margin: 0 0 12px; letter-spacing:-.25px; }
+    .two-col { display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:20px; padding:17px; box-shadow:0 10px 26px rgba(16,32,51,.06); }
+    .panel.dark { background:linear-gradient(145deg, #0b1d31, #102d4b); color:#fff; border:0; }
+    .panel.dark p, .panel.dark li { color:#C8D9EA; }
+    ul { margin: 0; padding:0; list-style:none; display:grid; gap:8px; }
+    li { color:#4f637a; font-size: 12.3px; line-height:1.38; display:flex; gap:8px; align-items:flex-start; }
+    li:before { content:"✓"; flex:0 0 16px; width:16px; height:16px; border-radius:50%; display:grid; place-items:center; background:rgba(0,194,199,.12); color:#047f94; font-size:10px; font-weight:900; margin-top:1px; }
+    .panel.dark li:before { background:rgba(0,194,199,.22); color:#72F4FF; }
+    .value-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:18px; }
+    .value { background:#fff; border-radius:16px; padding:13px 11px; text-align:center; border:1px solid var(--line); }
+    .value b { display:block; color:var(--royal); font-size:20px; line-height:1; margin-bottom:5px; }
+    .value span { font-size:10.4px; color:var(--muted); line-height:1.25; display:block; }
+    .cta { margin-top: 20px; padding: 17px 18px; border-radius: 20px; background: var(--grad); color:#fff; display:flex; justify-content:space-between; gap:18px; align-items:center; box-shadow: 0 18px 40px rgba(26,79,214,.22); }
+    .cta h3 { margin:0 0 3px; font-size:17px; }
+    .cta p { margin:0; font-size:11.8px; color:rgba(255,255,255,.86); }
+    .cta .url { padding:10px 13px; border-radius:12px; background:rgba(255,255,255,.16); font-weight:800; white-space:nowrap; font-size:12px; }
+    .footer { position:absolute; left:.54in; right:.54in; bottom:.26in; display:flex; justify-content:space-between; align-items:center; color:#7d8ea2; font-size:9.5px; }
+    .footer .line { height:1px; flex:1; margin:0 12px; background:var(--line); }
+
+    .page.two { background:#fff; }
+    .banner { border-radius:26px; background:linear-gradient(135deg, #081727, #153B62); color:#fff; padding:22px 24px; display:grid; grid-template-columns: 1fr 180px; gap:18px; align-items:center; margin-bottom:20px; overflow:hidden; position:relative; }
+    .banner:after { content:""; position:absolute; width:260px; height:260px; border-radius:50%; right:-80px; top:-90px; background:rgba(0,194,199,.18); }
+    .banner h2 { margin:0 0 8px; font-size:29px; letter-spacing:-.8px; line-height:1.05; }
+    .banner p { margin:0; color:#C9D9EA; font-size:13px; line-height:1.45; }
+    .banner img { width:160px; justify-self:end; position:relative; z-index:1; filter:drop-shadow(0 20px 20px rgba(0,0,0,.28)); }
+    .workflow { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; margin: 18px 0; }
+    .step { border:1px solid var(--line); border-radius:20px; padding:16px; background:var(--soft); position:relative; min-height:132px; }
+    .num { width:30px; height:30px; border-radius:50%; background:var(--grad); color:#fff; display:grid; place-items:center; font-weight:900; font-size:13px; margin-bottom:10px; }
+    .step h3 { margin:0 0 6px; font-size:14px; }
+    .step p { margin:0; color:var(--muted); font-size:11.4px; line-height:1.4; }
+    .pricing { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+    .price { border:1px solid var(--line); border-radius:20px; padding:17px; background:#fff; }
+    .price.featured { border:2px solid rgba(0,194,199,.55); box-shadow:0 18px 38px rgba(0,194,199,.12); }
+    .price h3 { margin:0 0 8px; font-size:16px; display:flex; justify-content:space-between; align-items:center; }
+    .pill { font-size:9px; color:#075E73; background:rgba(0,194,199,.13); padding:5px 8px; border-radius:999px; text-transform:uppercase; letter-spacing:.06em; font-weight:900; }
+    .big-price { font-size:25px; font-weight:900; color:#13283f; margin:5px 0 10px; }
+    .big-price small { font-size:12px; color:var(--muted); font-weight:700; }
+    .quote { margin-top:16px; border-left:4px solid var(--turq); padding:10px 0 10px 14px; color:#3e536a; font-size:13px; line-height:1.45; }
+    .quote strong { color:#13283f; }
+    .contact-card { margin-top:16px; display:grid; grid-template-columns:1.05fr .95fr; gap:14px; }
+    .contact-card .panel { min-height:126px; }
+    .small { font-size:11.2px; color:var(--muted); line-height:1.45; margin:0; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <div class="accent-bar"></div>
+    <header class="top">
+      <img class="logo" src="../../landing/logo-dark-mode.png" alt="JumpKit logo" />
+      <div class="label">Client Productivity Brief</div>
+    </header>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <h1>Stop searching.<br><span class="gradient-text">Start jumping.</span></h1>
+        <p class="lead">JumpKit gives your team one clean launchpad for the web links, folders, shared drives, portals, and project resources they open every day.</p>
+        <div class="problem-strip">
+          <div class="mini"><strong>Lost links</strong><span>Bookmarks, shortcuts, and spreadsheets drift out of sync.</span></div>
+          <div class="mini"><strong>Buried folders</strong><span>Shared drives and local paths take too many clicks to reach.</span></div>
+          <div class="mini"><strong>Slow onboarding</strong><span>New users ask where key resources live.</span></div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <img src="../../landing/assets/hero-mac-dark.jpg" alt="JumpKit app screenshot" />
+        <div class="hero-badge">Windows + macOS desktop app</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top:20px">
+      <div class="panel">
+        <h2 class="section-title">What JumpKit organizes</h2>
+        <ul>
+          <li>Web links, SaaS portals, internal sites, and customer resources</li>
+          <li>Local folders, shared drives, network paths, and project directories</li>
+          <li>Team collections for departments, clients, projects, or onboarding</li>
+          <li>Searchable jump categories with one-click launching</li>
+        </ul>
+      </div>
+      <div class="panel dark">
+        <h2 class="section-title">Why teams feel the impact</h2>
+        <ul>
+          <li>Less time hunting for repeat destinations</li>
+          <li>Fewer “where is that?” interruptions</li>
+          <li>Faster employee setup and knowledge transfer</li>
+          <li>Built-in ROI tracking for time and money saved</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="value-row">
+      <div class="value"><b>1</b><span>place for daily resources</span></div>
+      <div class="value"><b>2</b><span>platforms: Windows + Mac</span></div>
+      <div class="value"><b>∞</b><span>teams and jumps on Unlimited</span></div>
+      <div class="value"><b>ROI</b><span>dashboard for time saved</span></div>
+    </div>
+
+    <div class="cta">
+      <div><h3>Ready to clean up daily navigation?</h3><p>Ask your MSP or IT partner to set up a starter JumpKit workspace with your top recurring resources.</p></div>
+      <div class="url">jumpkit.app</div>
+    </div>
+
+    <div class="footer"><span>JumpKit Client Productivity Brief</span><span class="line"></span><span>Stop searching. Start jumping.</span></div>
+  </section>
+
+  <section class="page two">
+    <div class="accent-bar"></div>
+    <header class="top">
+      <img class="logo" src="../../landing/logo-dark-mode.png" alt="JumpKit logo" />
+      <div class="label">Deployment Conversation Guide</div>
+    </header>
+
+    <div class="banner">
+      <div>
+        <h2>A practical launcher for modern work.</h2>
+        <p>JumpKit is not another heavy platform. It is a simple workday shortcut that standardizes how people reach the resources they already use.</p>
+      </div>
+      <img src="../../landing/icon-512.png" alt="JumpKit icon" />
+    </div>
+
+    <h2 class="section-title">Recommended rollout</h2>
+    <div class="workflow">
+      <div class="step"><div class="num">1</div><h3>Pick resource sets</h3><p>Identify the top links, folders, portals, shared drives, and project resources users open repeatedly.</p></div>
+      <div class="step"><div class="num">2</div><h3>Create starter columns</h3><p>Group resources by department, client, project, workflow, or onboarding role.</p></div>
+      <div class="step"><div class="num">3</div><h3>Share and improve</h3><p>Roll out to users, track launches, and adjust categories as teams discover what saves the most time.</p></div>
+    </div>
+
+    <div class="two-col" style="margin-top:18px">
+      <div class="panel">
+        <h2 class="section-title">Best-fit teams</h2>
+        <ul>
+          <li>Small and mid-sized businesses with recurring portals and shared folders</li>
+          <li>Sales, engineering, service, operations, and admin teams</li>
+          <li>Manufacturing and automotive suppliers with deep customer/project resources</li>
+          <li>Any company onboarding employees into many links, drives, or systems</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h2 class="section-title">Discovery questions</h2>
+        <ul>
+          <li>Where do employees keep their most-used links today?</li>
+          <li>How often do people ask where shared folders or portals are?</li>
+          <li>Which resources should every new hire receive on day one?</li>
+          <li>Could one shared launcher reduce repetitive navigation friction?</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2 class="section-title" style="margin-top:20px">Simple pricing path</h2>
+    <div class="pricing">
+      <div class="price">
+        <h3>JumpKit Free <span class="pill">Start here</span></h3>
+        <div class="big-price">$0 <small>free</small></div>
+        <ul>
+          <li>Web links and local folders</li>
+          <li>250 jump launches</li>
+          <li>Limited teams and members</li>
+          <li>Personal ROI dashboard, hotkey launcher, search/filter</li>
+        </ul>
+      </div>
+      <div class="price featured">
+        <h3>JumpKit Unlimited <span class="pill">Best for teams</span></h3>
+        <div class="big-price">$10 <small>/ user / month</small></div>
+        <ul>
+          <li>Unlimited jump launches</li>
+          <li>Unlimited teams, members, and jumps</li>
+          <li>Personal and team ROI dashboard</li>
+          <li>Auto-backup, auto-archive, and early access features</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="contact-card">
+      <div class="panel dark">
+        <h2 class="section-title">Suggested next step</h2>
+        <p class="small" style="color:#C8D9EA">Start with a pilot workspace: your top 20 recurring destinations, organized by department or workflow, then expand after users confirm what saves time.</p>
+      </div>
+      <div class="panel">
+        <h2 class="section-title">Demo and download</h2>
+        <p class="small"><strong>Demo:</strong> https://jumpkit.app/#solution<br><strong>Website:</strong> https://jumpkit.app<br><strong>Ask your MSP/IT partner:</strong> “Can we set up a JumpKit starter workspace?”</p>
+      </div>
+    </div>
+
+    <div class="quote"><strong>Bottom line:</strong> JumpKit helps teams spend less time navigating and more time doing the work they came to do.</div>
+
+    <div class="footer"><span>JumpKit for client productivity</span><span class="line"></span><span>jumpkit.app</span></div>
+  </section>
+</body>
+</html>

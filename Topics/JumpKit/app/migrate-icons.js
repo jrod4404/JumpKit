@@ -1,7 +1,7 @@
 /**
  * Tabler Icons Migration: webfont → SVG sprite
  * Replaces all <i class="ti ti-X [extra-classes]" [style="..."]></i>
- * with <svg class="ti ti-X [extra-classes]" [style="..."]><use href="img/tabler-sprite.svg#tabler-X"/></svg>
+ * with <svg class="ti ti-X [extra-classes]" [style="..."]><use href="img/tabler-sprite.min.svg#tabler-X"/></svg>
  *
  * Special cases handled:
  * - nav-icon class preserved
@@ -62,7 +62,7 @@ FILES.forEach(relPath => {
     const innerStr = inner ? inner.trim() : '';
 
     count++;
-    return `<svg class="${svgClass}"${attrStr ? ' ' + attrStr : ''}><use href="img/tabler-sprite.svg#tabler-${iconName}"/></svg>${innerStr ? innerStr : ''}`;
+    return `<svg class="${svgClass}"${attrStr ? ' ' + attrStr : ''}><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg>${innerStr ? innerStr : ''}`;
   });
 
   fs.writeFileSync(filePath, content, 'utf8');

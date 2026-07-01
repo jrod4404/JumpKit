@@ -1,0 +1,2181 @@
+{
+  "version": 1,
+  "exportedAt": "2026-06-25T17:17:37.708Z",
+  "userId": "6c0763f4-21d4-470a-bc10-1e6eafa3873a",
+  "email": "jeffroder@gmail.com",
+  "jumps": [
+    {
+      "id": "moyepl3ul3e5f",
+      "name": "OpenClaw",
+      "url": "/Users/jeffroder/.openclaw",
+      "description": "Link to openclaw folder",
+      "reason": "Need to go there often",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "Ctrl+Shift+O",
+      "favorite": true,
+      "isArchived": true,
+      "clickCount": 2,
+      "lastUsed": 1778413010292,
+      "createdAt": 1778334944538,
+      "updatedAt": 1781527257974,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": "seconds"
+    },
+    {
+      "id": "mozp86yph1zwv",
+      "name": "OpenClaw Topics",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics",
+      "description": "Link to OpenClaw Topics folder",
+      "reason": "Need to go there often / quickly",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "Ctrl+Shift+T",
+      "favorite": true,
+      "isArchived": true,
+      "clickCount": 1,
+      "lastUsed": 1779020423089,
+      "createdAt": 1778413075009,
+      "updatedAt": 1781612780616,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "e22ad0c9-0637-4c08-a8e1-f71069774680",
+      "name": "Tabler Icons",
+      "url": "https://tabler.io/icons",
+      "description": "Link to tabler icons",
+      "reason": "Need to check icons",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781614156797,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "df445925-ef32-4e5f-b036-c37fcc13c810",
+      "name": "Supademo",
+      "url": "https://app.supademo.com",
+      "description": "Link to supademo",
+      "reason": "Used for created demo videos",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781615435451,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "15ee86fa-58af-40ea-b8e1-d13b909ca852",
+      "name": "GoDaddy",
+      "url": "www.godaddy.com",
+      "description": "Link to godaddy",
+      "reason": "Holds jumpkit.app",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781615653651,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "c18b24b8-5f3b-49c9-abf5-2d46062c5b44",
+      "name": "Squarespace",
+      "url": "www.squarespace.com",
+      "description": "Link to squarespace",
+      "reason": "Holds jumpkit.ai",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781615781654,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "f61f9f94-bc11-4819-83e8-5b26ddda010d",
+      "name": "Jumpkit MD",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/JUMPKIT_DOCS.md",
+      "description": "Link to JumpKit markdown file",
+      "reason": "Used for tracking markdown notes for ai notes",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781618684878,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mq2dce33cdk57",
+      "name": "LS Checkout Test",
+      "url": "https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0",
+      "description": "Link to LS testmode checkout page.",
+      "reason": "Testing",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 11,
+      "lastUsed": 1781786438198,
+      "createdAt": 1780751296335,
+      "updatedAt": 1781786438198,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "3c8b8730-d41b-492c-a51c-f7c60cb3b313",
+      "name": "Claude Dashboard",
+      "url": "https://platform.claude.com/workspaces/default/cost",
+      "description": "Link to Claude cost dashboard",
+      "reason": "Need to check costs",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963754770,
+      "createdAt": 1779547501609,
+      "updatedAt": 1781963754770,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "13ef507d-1832-4f50-b19a-769268a496b7",
+      "name": "JumpKit Docs",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/JUMPKIT_DOCS.html",
+      "description": "Link to jumpkit documentation webpage (human readable).",
+      "reason": "Need to check it and update it",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 2,
+      "lastUsed": 1781963770479,
+      "createdAt": 1779912824071,
+      "updatedAt": 1781963770479,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": "seconds"
+    },
+    {
+      "id": "96f489ef-03dc-483b-a7c3-a77e639fb5fa",
+      "name": "JumpKit Landing",
+      "url": "https://jumpkit.app",
+      "description": "Link to jumpkit landing page",
+      "reason": "Need to check it for updates",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963777638,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781963777638,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "0e7d6de5-5bac-4095-b2c7-ad8525f9afcd",
+      "name": "Supabase",
+      "url": "https://supabase.com",
+      "description": "Link to supabase",
+      "reason": "Used for db storage for jumpkit",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963796374,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781963796374,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "91fa1f6c-ba74-4b4c-baef-8de90a92cc93",
+      "name": "Resend",
+      "url": "https://resend.com",
+      "description": "Link to ReSend",
+      "reason": "Used for app email sending",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963800131,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781963800131,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "724ff116-606c-4d11-9e05-c6ca0bd1ca19",
+      "name": "Vercel",
+      "url": "https://vercel.com/jeffroder-3196s-projects",
+      "description": "Link to vercel",
+      "reason": "Need to check settings there",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963809054,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781963809054,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "71aac5ba-6b30-4c52-b03b-589bac06c6d7",
+      "name": "LemonSqueezy",
+      "url": "https://www.lemonsqueezy.com",
+      "description": "Link to lemonsqueezy",
+      "reason": "Used for payments",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 3,
+      "lastUsed": 1781963820264,
+      "createdAt": 1779547501610,
+      "updatedAt": 1781963820264,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mpy23us4lv3p6",
+      "name": "Github",
+      "url": "www.github.com",
+      "description": "Link to github",
+      "reason": "Used for storing codebase and release installers.",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "Ctrl+Shift+G",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963829458,
+      "createdAt": 1780490557588,
+      "updatedAt": 1781963829458,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mqi82l4vdno6e",
+      "name": "Screen Studio",
+      "url": "https://screen.studio",
+      "description": "Link to screen recording tool",
+      "reason": "Used for tool demos",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1781963833205,
+      "createdAt": 1781709899647,
+      "updatedAt": 1781963833205,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mqmbt20y4qtvm",
+      "name": "Roderserver",
+      "url": "/Volumes/data",
+      "description": "Link to roderserver",
+      "reason": "For sharing files",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "Ctrl+Shift+R",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 3,
+      "lastUsed": 1781986882218,
+      "createdAt": 1781958038146,
+      "updatedAt": 1781986882218,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": "seconds"
+    },
+    {
+      "id": "mpv587gh0ik32",
+      "name": "Apple Developer",
+      "url": "https://developer.apple.com/programs/enroll/",
+      "description": "Link to apply developer page.",
+      "reason": "Needed for yearly apple developer license to sign apple software.",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1780314400961,
+      "updatedAt": 1780314400961,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mq2lpng411n90",
+      "name": "Support Folder",
+      "url": "/Users/jeffroder/Desktop/Support",
+      "description": "Link to support folder",
+      "reason": "testing",
+      "columnId": "mpe7rvx0qpwyk",
+      "hotkey": "Ctrl+Shift+S",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 2,
+      "lastUsed": 1782319324617,
+      "createdAt": 1780765351924,
+      "updatedAt": 1782319324617,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mp9ui2u6ykm3p",
+      "name": "asdf",
+      "url": "www.google.com",
+      "description": "",
+      "reason": "",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1782319390395,
+      "createdAt": 1779026596062,
+      "updatedAt": 1782319390395,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mqsme67b0z5m0",
+      "name": "Zai",
+      "url": "https://z.ai/manage-apikey/billing",
+      "description": "Zai billing page",
+      "reason": "For monitoring usage on Zai",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "Ctrl+Shift+Z",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1782338616551,
+      "updatedAt": 1782338616551,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "6abe6345-4d1d-423c-ad21-34cb5daaa606",
+      "name": "Google",
+      "url": "https://google.com",
+      "description": "Search the web",
+      "reason": "",
+      "columnId": "mpe7rvx08s9kw",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1779547847179,
+      "updatedAt": 1780329657682,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": "seconds"
+    },
+    {
+      "id": "mptrj9u1s239o",
+      "name": "Bitcoin Folder",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics/Bitcoin",
+      "description": "Link to Bitcoin folder",
+      "reason": "Testing",
+      "columnId": "mpe7rvx0emqp2",
+      "hotkey": "Ctrl+Shift+B",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1780230936457,
+      "updatedAt": 1782389797153,
+      "isShared": true,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mpy287uilxuoi",
+      "name": "Kite",
+      "url": "www.kite.video",
+      "description": "Link to Kite website",
+      "reason": "User for demo videos",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 1,
+      "lastUsed": 1780490764004,
+      "createdAt": 1780490761146,
+      "updatedAt": 1780490764004,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mptrlha7x2mrc",
+      "name": "Bosch Folder",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics/Bosch",
+      "description": "Link to Bosch folder",
+      "reason": "Testing",
+      "columnId": "mpe7rvx0mhrni",
+      "hotkey": "Ctrl+Shift+A",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1780231039423,
+      "updatedAt": 1782390777718,
+      "isShared": true,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mq2maa28mj1o4",
+      "name": "JumpKit Folder",
+      "url": "/Users/jeffroder/.openclaw/workspace/Topics/JumpKit",
+      "description": "Link to JumpKit folder",
+      "reason": "Use it often",
+      "columnId": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "hotkey": "Ctrl+Shift+J",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 3,
+      "lastUsed": 1781007299482,
+      "createdAt": 1780766314352,
+      "updatedAt": 1782398543461,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mp1o18ithhjwb",
+      "name": "Google",
+      "url": "https://google.com",
+      "description": "Search the web",
+      "reason": "",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1778532003173,
+      "updatedAt": 1782399407729,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "0ece7a5a-a9b1-4597-8a79-c4f3253b5431",
+      "name": "Lake Trust",
+      "url": "https://laketrust.org/?utm_term=lake%20trust%20credit%20union&utm_campaign=Brand+Awareness&utm_source=adwords&utm_medium=ppc&hsa_acc=3777209635&hsa_cam=11504577724&hsa_grp=119137546024&hsa_ad=476130087331&hsa_src=g&hsa_tgt=kwd-525325193232&hsa_kw=lake%20trust%20credit%20union&hsa_mt=b&hsa_net=adwords&hsa_ver=3&gad_source=1&gad_campaignid=11504577724&gbraid=0AAAAAB3C1UrKV_1lk_SSizyzIm7CsuZNH&gclid=CjwKCAjw857RBhAgEiwAI-1yKFOvStXbgS1sUcfo5p0IYRjWlwwQLEg8YK41oZOnrysVJsdLTBVgCxoCL3gQAvD_BwE",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117069,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "e5a02fa7-1515-43c6-be35-4968b092376c",
+      "name": "MSGCU",
+      "url": "https://www.genisyscu.org/",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117185,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "695cef26-99af-41dd-a4ea-c8b772e61f13",
+      "name": "Christian Financial",
+      "url": "https://www.christianfinancialcu.com/",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117292,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "bad5e63f-8cd1-4e8d-bfe8-aa216a84c6f0",
+      "name": "Genisys",
+      "url": "https://www.genisyscu.org/",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117397,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "270f5f70-f02a-4cab-8e73-d5fd5415fa26",
+      "name": "Zeal",
+      "url": "https://www.zealcu.org/",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117485,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "3d3a8569-baa1-4879-b7a8-cea9fc9d9545",
+      "name": "TLC",
+      "url": "https://www.tlccu.org/",
+      "description": "",
+      "reason": "",
+      "columnId": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117583,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "1b1203f4-c454-4b6e-b757-0e77c120387f",
+      "name": "LARA",
+      "url": "https://www.michigan.gov/lara/bureau-list/cscl/corps",
+      "description": "",
+      "reason": "",
+      "columnId": "cf7b682c-07d7-4da5-bb00-144949bfba68",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117810,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "f176be3d-7b4b-4421-b17b-068b5111b204",
+      "name": "BS&A",
+      "url": "https://bsaonline.com/Home/MunicipalityHome?uid=1421",
+      "description": "",
+      "reason": "",
+      "columnId": "cf7b682c-07d7-4da5-bb00-144949bfba68",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022117913,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "92ab8348-5bb4-4d46-bee4-14320b9fe980",
+      "name": "UCC Search",
+      "url": "https://www.michigan.gov/sos/industry-services/ucc",
+      "description": "",
+      "reason": "",
+      "columnId": "cf7b682c-07d7-4da5-bb00-144949bfba68",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022118006,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "72ed789f-a9ba-4854-948b-53675ac334ee",
+      "name": "Credit Report",
+      "url": "https://www.experian.com/lp/credit-score-unbr/?pc=sem_exp_google&cc=sem_exp_google_ad_1660548401_71286416120_491655736212_kwd-297259913931_b___k_CjwKCAjw857RBhAgEiwAI-1yKDSNhu0wHnl4onMvl4m7jsWeJfqJnSVYtLV5ldCTPlg2uuf0F-ovtRoC5wYQAvD_BwE_k_&ref=competitor&awsearchcpc=1&gad_source=1&gad_campaignid=1660548401&gbraid=0AAAAAD4mgc_KA6-QAS6NdgykOvWjdHC2U&gclid=CjwKCAjw857RBhAgEiwAI-1yKDSNhu0wHnl4onMvl4m7jsWeJfqJnSVYtLV5ldCTPlg2uuf0F-ovtRoC5wYQAvD_BwE",
+      "description": "",
+      "reason": "",
+      "columnId": "cf7b682c-07d7-4da5-bb00-144949bfba68",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022118106,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "581704dd-d76d-475d-a815-1d8c9d3bd229",
+      "name": "Abrigo",
+      "url": "https://www.abrigo.com/",
+      "description": "",
+      "reason": "",
+      "columnId": "b0939a3c-a376-465c-bfe7-945eac09a44b",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022118301,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "6ef7b45f-8d83-467a-bcad-71a3735c1b53",
+      "name": "MCUL",
+      "url": "https://www.mcul.org/",
+      "description": "",
+      "reason": "",
+      "columnId": "da8d58df-657e-417f-83d4-e3df4c7bac69",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022118519,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "d89362ea-e64d-4d80-ae31-99ca6ed82006",
+      "name": "MBC Loans",
+      "url": "https://www.mbcloans.biz/",
+      "description": "",
+      "reason": "",
+      "columnId": "da8d58df-657e-417f-83d4-e3df4c7bac69",
+      "hotkey": "",
+      "favorite": false,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1781024504020,
+      "updatedAt": 1781022118645,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906",
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mp5rr4f02jxav",
+      "name": "Home Folder",
+      "url": "~",
+      "description": "Your home directory",
+      "reason": "",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1778780114459,
+      "updatedAt": 1782401602724,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    },
+    {
+      "id": "mp1o18itvk9j0",
+      "name": "Slack",
+      "url": "https://slack.com",
+      "description": "Team chat",
+      "reason": "",
+      "columnId": "mpe7rvx0wjhrk",
+      "hotkey": "",
+      "favorite": true,
+      "isArchived": false,
+      "clickCount": 0,
+      "lastUsed": null,
+      "createdAt": 1778532003173,
+      "updatedAt": 1782401865896,
+      "isShared": false,
+      "teamId": null,
+      "timeSaved": null,
+      "timeSavedUnit": null
+    }
+  ],
+  "columns": [
+    {
+      "id": "mpe7rvx0wjhrk",
+      "name": "Directories",
+      "visible": true,
+      "order": 1,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0qpwyk",
+      "name": "Links",
+      "visible": true,
+      "order": 2,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "0f80efe7-c1c5-45cf-b678-73c2b5f94571",
+      "name": "JumpKit",
+      "visible": true,
+      "order": 3,
+      "createdAt": 1779122026287,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0emqp2",
+      "name": "Col Share 10",
+      "visible": true,
+      "order": 4,
+      "createdAt": 1779290753364,
+      "isShared": true,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0mhrni",
+      "name": "Col Share 20",
+      "visible": true,
+      "order": 5,
+      "createdAt": 1779290753364,
+      "isShared": true,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx08s9kw",
+      "name": "Testing",
+      "visible": true,
+      "order": 6,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0z0q9o",
+      "name": "Col 7",
+      "visible": false,
+      "order": 7,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0lcr0l",
+      "name": "Col 8",
+      "visible": false,
+      "order": 8,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0m13ma",
+      "name": "Col 9",
+      "visible": false,
+      "order": 9,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "mpe7rvx0bycnx",
+      "name": "Col 10",
+      "visible": false,
+      "order": 10,
+      "createdAt": 1779290753364,
+      "isShared": false,
+      "teamId": null
+    },
+    {
+      "id": "71ade75b-9b9b-43c7-98f3-1c9f814fac60",
+      "name": "__RENAMED_TEST_1782402506701__",
+      "visible": true,
+      "order": 11,
+      "createdAt": 1781022116692,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906"
+    },
+    {
+      "id": "cf7b682c-07d7-4da5-bb00-144949bfba68",
+      "name": "Due Diligence",
+      "visible": true,
+      "order": 12,
+      "createdAt": 1781022117687,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906"
+    },
+    {
+      "id": "b0939a3c-a376-465c-bfe7-945eac09a44b",
+      "name": "Portfolio",
+      "visible": true,
+      "order": 13,
+      "createdAt": 1781022118219,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906"
+    },
+    {
+      "id": "da8d58df-657e-417f-83d4-e3df4c7bac69",
+      "name": "Favorites",
+      "visible": true,
+      "order": 14,
+      "createdAt": 1781022118409,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906"
+    },
+    {
+      "id": "dbc422c6-cfde-43e0-af67-9499c6a0ed11",
+      "name": "Folders",
+      "visible": false,
+      "order": 15,
+      "createdAt": 1781022118738,
+      "isShared": true,
+      "teamId": "b2fc8d0a-7cb2-4577-9da4-525a420db906"
+    }
+  ],
+  "prefs": {
+    "startPage": "home",
+    "notifications": true,
+    "cloudBackup": true,
+    "timePerClick": 10,
+    "dollarsPerHour": 100,
+    "showDescription": false,
+    "showHotkey": false,
+    "showColTeamName": true,
+    "autoArchive": "1m",
+    "subscriptionStatus": "active",
+    "subscriptionTier": "core",
+    "role": "admin",
+    "navDefaultCollapsed": 0,
+    "userId": "6c0763f4-21d4-470a-bc10-1e6eafa3873a",
+    "testResults": {
+      "1": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "2": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "3": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "4": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "5": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "6": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "7": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "8": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "9": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "10": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "11": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "12": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "13": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "14": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "15": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "16": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "17": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "18": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "19": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "20": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "21": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "22": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "23": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "24": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "25": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "26": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "27": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "28": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "29": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "30": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "31": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "32": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "33": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "34": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "35": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "36": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "37": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "38": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "39": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "40": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "41": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "42": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "43": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "44": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "45": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "46": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "47": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "48": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "49": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "50": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "51": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "52": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "53": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "54": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "55": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "56": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "57": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "58": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "59": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "61": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "63": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "64": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407447686
+      },
+      "65": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "66": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407449419
+      },
+      "67": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "68": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "69": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "70": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "71": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "72": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "73": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "75": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "76": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "77": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "78": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "79": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "80": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "81": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "82": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "83": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "84": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "85": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "86": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "87": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "88": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "89": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "90": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "91": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "92": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "93": {
+        "state": "not-run",
+        "received": "Loaded from file",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "94": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "95": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "96": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "97": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "98": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "99": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "100": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "101": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "102": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "103": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "104": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "105": {
+        "state": "not-run",
+        "received": "1. Open Chrome or Safari\n2. Navigate to https://www.jumpkit.app\n3. Chrome: confirm the padlock icon appears in the address bar (left side). Safari: confirm the URL shows https:// with no warning - click the page settings icon (left of URL) and verify \"Connection is encrypted\". Note: Safari 15+ removed the explicit padlock; a clean address bar with https:// is the equivalent.\n4. Navigate to http://jumpkit.app - confirm the address bar changes to https:// (redirect working)\n5. Mark Pass if both steps succeed with no SSL warnings",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "106": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "107": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "108": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "109": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "110": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "113": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "114": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407450343
+      },
+      "115": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407624759
+      },
+      "116": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407627424
+      },
+      "117": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407629471
+      },
+      "118": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407719075
+      },
+      "119": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407722044
+      },
+      "120": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "121": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782407774906
+      },
+      "122": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "123": {
+        "state": "fail",
+        "received": "No backup notification found after runCloudBackup() - notification may not have been created.",
+        "message": "No backup notification found after runCloudBackup() - notification may not have been created.",
+        "notes": "",
+        "ts": 1782407856061
+      },
+      "124": {
+        "state": "not-run",
+        "received": "Click the user menu (top-right) → click Logout → verify you are redirected to the login screen and cannot navigate back without logging in again.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "125": {
+        "state": "not-run",
+        "received": "1. Open Supabase dashboard for your JumpKit project.\n2. Go to Project Settings → Database → Backups.\n3. Confirm the backup plan is active (Pro plan = daily backups; Free plan = no auto-backups).\n4. If on free plan, consider upgrading to Pro or scheduling manual exports.\n5. Mark as Pass once confirmed.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "126": {
+        "state": "not-run",
+        "received": "1. Create a separate Supabase project for development (free tier is fine).\n2. Add DEV_SUPABASE_URL to your supabase/config.js pointing to the dev project.\n3. Re-run this test - it will pass automatically once a separate URL is configured.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "127": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "128": {
+        "state": "not-run",
+        "received": "Step 1: Go to the Jumps page → click any jump with a URL (e.g. www.google.com) → verify it opens in your browser.\nStep 2: Click any jump with a local directory path → verify it opens in your file explorer.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "129": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "130": {
+        "state": "not-run",
+        "received": [
+          {
+            "text": "Open the LS checkout page - confirm Test mode is active by verifying the orange \"Test mode\" banner at the top of the page.",
+            "link": {
+              "url": "https://jumpkit.lemonsqueezy.com/checkout/buy/81c37b98-510a-4ca9-9849-06f10fd3a8d0",
+              "label": "LS Checkout"
+            }
+          },
+          {
+            "text": "Complete a LS test checkout using a fresh test email that has NO JumpKit account - e.g. a Gmail + alias like jeffroder+testpending@gmail.com. Use test card 4242 4242 4242 4242."
+          },
+          {
+            "text": "Wait ~5 seconds, then confirm the pending_upgrades row was created by the webhook.",
+            "cmd": "SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';"
+          },
+          {
+            "text": "Go to the JumpKit sign-up page and create an account with that same test email."
+          },
+          {
+            "text": "Sign in with that email - apply-pending-upgrade fires automatically on login. Confirm the profile was upgraded.",
+            "cmd": "SELECT subscription_tier, subscription_status FROM profiles WHERE email='jeffroder+testpending@gmail.com';"
+          },
+          {
+            "text": "Confirm no pending row remains.",
+            "cmd": "SELECT * FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';"
+          },
+          {
+            "text": "Clean up - delete the test profile and any leftover pending row.",
+            "cmd": "DELETE FROM profiles WHERE email='jeffroder+testpending@gmail.com';\nDELETE FROM pending_upgrades WHERE email='jeffroder+testpending@gmail.com';"
+          }
+        ],
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "131": {
+        "state": "not-run",
+        "received": "Loaded from file",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "139": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "140": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "142": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "144": {
+        "state": "pass",
+        "received": "true",
+        "message": null,
+        "notes": "",
+        "ts": 1782407724197
+      },
+      "146": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "147": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "148": {
+        "state": "not-run",
+        "received": "1. Keep this device logged in.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available).\n3. In the second instance, enter the same email + password and click Sign In.\n4. Verify the \"Already Logged In\" modal appears showing device and last-seen time.\n5. Click Cancel - verify you are NOT redirected to app.html.\n6. Click Sign In again and this time click \"Log out other device & continue\" - verify you are redirected to app.html on the second instance.\n7. After testing, click the Cleanup command above to remove the temp profile.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "149": {
+        "state": "not-run",
+        "received": "1. Keep first device open and active on any page.\n2. On second device, perform force-logout (test 148 step 6).\n3. On first device, wait up to 30 seconds.\n4. Verify the red warning toast appears and the app redirects to login.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "150": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "151": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "152": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "153": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "154": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "155": {
+        "state": "not-run",
+        "received": "1. On this instance (device A): Settings → Maintenance → Export. Save the JSON file.\n2. Open a second JumpKit instance on the same Mac using one of the Terminal commands above (copy button available) - this is your simulated device B. ⚠️ Log in with a DIFFERENT account on the second instance (using the same account will trigger the double-login conflict modal - see test 148).\n3. Log in on the second instance with a different account.\n4. On device B: Settings → Maintenance → Import. Select the exported JSON file.\n5. Verify the import summary shows the expected count of imported jumps.\n6. Navigate to Jumps page and confirm all personal columns and jumps appear.\n7. Run Import again with the same file - verify all jumps are skipped (0 imported) with no duplicates created.\n8. After testing, click the Cleanup command above to remove the temp profile.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "156": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "157": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "158": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "159": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "160": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "161": {
+        "state": "not-run",
+        "received": "1. Go to Jumps page → click \"Configure Columns\".\n2. Click \"+ Add Column\" at the bottom - a new blank row should appear.\n3. Enter a column name and toggle it visible.\n4. Click Save Columns. Verify the new column appears in the jump view.\n5. Reopen Configure Columns. Find the new row and click its trash icon.\n6. An inline confirmation row should appear (\"Delete X and all N jumps?\"). Click \"Yes, Delete\".\n7. Click Save Columns. Verify the column is gone.\n8. If shared/team columns are present, verify their trash icon is greyed out and non-clickable with tooltip \"Team columns can only be hidden, not removed\".",
+        "message": null,
+        "notes": "",
+        "ts": 1782403102468
+      },
+      "162": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "163": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "169": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "200": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "201": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "202": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "203": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "204": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "205": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "374": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403014089
+      },
+      "375": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "yes checked and passed on 6/25",
+        "ts": 1782403016018
+      },
+      "376": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "377": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "378": {
+        "state": "pass",
+        "received": "Manually marked as passed",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "379": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "380": {
+        "state": "skip",
+        "received": "Loaded from file",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "381": {
+        "state": "pass",
+        "received": "Test passed successfully.",
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      },
+      "382": {
+        "state": "skip",
+        "received": [
+          {
+            "text": "Install the test installer (<code>.exe</code>) and confirm the NSIS installer completes without errors and the app launches."
+          },
+          {
+            "text": "Confirm the SQLite database is created at <code>%APPDATA%\\JumpKit\\jumpkit.db</code> (not a temp or app-bundle path)."
+          },
+          {
+            "text": "Confirm auto-backup writes to the user-selected folder on Windows (no path separator errors)."
+          },
+          {
+            "text": "Confirm jump URLs open correctly in the default Windows browser via <code>shell.openExternal()</code>."
+          },
+          {
+            "text": "Confirm the folder-picker (deployment folder, file dialogs) works on Windows paths including spaces and Unicode characters."
+          },
+          {
+            "text": "Confirm the Windows build is code-signed: right-click the <code>.exe</code> → Properties → Digital Signatures tab → should show a valid signature."
+          },
+          {
+            "text": "Confirm the auto-updater can see the latest release: check that <code>latest.yml</code> is present in the GitHub release assets and the app detects the update banner within 30 seconds of launch."
+          }
+        ],
+        "message": null,
+        "notes": "",
+        "ts": 1782403016018
+      }
+    },
+    "testWinResults": {}
+  }
+}

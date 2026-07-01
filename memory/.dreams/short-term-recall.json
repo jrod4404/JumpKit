@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updatedAt": "2026-06-18T11:21:00.346Z",
+  "updatedAt": "2026-06-25T14:30:50.316Z",
   "entries": {
     "memory:memory/2026-03-01.md:73:82": {
       "key": "memory:memory/2026-03-01.md:73:82",
@@ -9,20 +9,14 @@
       "endLine": 82,
       "source": "memory",
       "snippet": "## JumpKit App — Tech Notes - Auth: localStorage-based (signup/login/forgot password) - DB: localStorage abstraction in db.js (easy swap to SQLite in Electron) - Styling: Tabler Icons throughout (grayscale), turquoise+royal blue accent, light/dark mode - Color palette: --royal #1A4FD6, --turq #00C2C7, --hover-accent #2B9ED8 - Text softened: dark --text #C8D6E8, light --text #2C3E52 - Pages: Home, Jumps (columns + context menus), Archive, Stats (placeholder), Help, Settings (placeholder), Account (placeholder) - User dropdown in topbar (Settings, My Account, Logout) - Drag-and-drop column reordering in configure columns modal",
-      "recallCount": 41,
+      "recallCount": 47,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 16.130628558993337,
+      "totalScore": 18.519771879911417,
       "maxScore": 0.45596020221710204,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
       "queryHashes": [
-        "8fb8a0cac588",
-        "330bafa1e201",
-        "4e728c4d2251",
-        "ad24dacfa0a4",
-        "7eb8dc00caa7",
-        "c83688468d96",
         "c9788a011d93",
         "430500fcd7d3",
         "041cb717e665",
@@ -48,13 +42,15 @@
         "838e223785ec",
         "390539ee7587",
         "7151ca52ed80",
-        "281a870f21b4"
+        "281a870f21b4",
+        "729fa7e8905c",
+        "2926851513b2",
+        "fda28fadb21c",
+        "cc2940c44e09",
+        "23db0913a58d",
+        "50c9608868a6"
       ],
       "recallDays": [
-        "2026-05-30",
-        "2026-05-31",
-        "2026-06-01",
-        "2026-06-02",
         "2026-06-03",
         "2026-06-05",
         "2026-06-08",
@@ -66,7 +62,11 @@
         "2026-06-15",
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19",
+        "2026-06-22",
+        "2026-06-23",
+        "2026-06-24"
       ],
       "conceptTags": [
         "localstorage-based",
@@ -133,13 +133,13 @@
       "endLine": 34,
       "source": "memory",
       "snippet": "# 2026-05-03 — Session Notes ## Infrastructure - Supabase free tier had paused the JumpKit project over the weekend — Jeff resumed it manually, back online by ~7:55 AM - jumpkit.app DNS is correct (all 3 Vercel A records in GoDaddy), landing page renders via HTTP - Vercel still showing \"invalid configuration\" for SSL cert as of morning — Jeff hit Refresh, pending resolution - No vercel.json in landing repo (confirmed) ## JumpKit Landing Page — Major Updates Today ### Hero Section - Replaced both mock window HTML elements with real app screenshot - Dark mode: `assets/Jumpkit-hero.png` - Light mode: `assets/Jumpkit-hero-light.png` - CSS uses `[data-theme]` attribute to swap images automatic",
-      "recallCount": 9,
+      "recallCount": 11,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 3.42400614619255,
+      "totalScore": 4.204358494281768,
       "maxScore": 0.41001847982406614,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-14T12:05:47.216Z",
+      "lastRecalledAt": "2026-06-23T19:59:45.778Z",
       "queryHashes": [
         "401b0ff2f490",
         "0287dc4dc6d9",
@@ -149,7 +149,9 @@
         "f0be698caf08",
         "797f0e4cec23",
         "8bbfe3138dc2",
-        "1916a314209b"
+        "1916a314209b",
+        "2926851513b2",
+        "cc2940c44e09"
       ],
       "recallDays": [
         "2026-05-20",
@@ -159,7 +161,9 @@
         "2026-06-01",
         "2026-06-08",
         "2026-06-10",
-        "2026-06-14"
+        "2026-06-14",
+        "2026-06-22",
+        "2026-06-23"
       ],
       "conceptTags": [
         "jumpkit.app",
@@ -221,13 +225,13 @@
       "endLine": 61,
       "source": "memory",
       "snippet": "- [ ] Welcome to JumpKit Core — test with a real paid subscription event - [ ] Cancellation email — test - [ ] Complete Teams E2E Tests 4.1 (remove member) and 4.2 (delete team) - [ ] Move `send-feedback.js` → `supabase/functions/send-feedback/index.ts` - [ ] Wire \"Get JumpKit Free Tier\" button → Lemon Squeezy - [ ] Dev/prod Supabase separation - [ ] Rebuild Windows installer - [ ] Pagination on list queries ## Key Identifiers - New Edge Functions: `send-welcome` (deployed ✅), `send-welcome-core` (not yet deployed), `send-cancellation` (not yet deployed) - Onboarding file: `Topics/JumpKit/app/js/onboarding.js` - Git corruption: object `be1cf517c9cde53a9290fbe61a8472f56a4e8eb3` - Backups: `a",
-      "recallCount": 14,
+      "recallCount": 15,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 5.628215728911442,
+      "totalScore": 6.041783000740094,
       "maxScore": 0.6260774808254667,
       "firstRecalledAt": "2026-05-20T20:49:52.957Z",
-      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "lastRecalledAt": "2026-06-19T10:41:48.995Z",
       "queryHashes": [
         "401b0ff2f490",
         "8fb8a0cac588",
@@ -242,7 +246,8 @@
         "1916a314209b",
         "390539ee7587",
         "7151ca52ed80",
-        "281a870f21b4"
+        "281a870f21b4",
+        "5a68f00a2bb0"
       ],
       "recallDays": [
         "2026-05-20",
@@ -256,7 +261,8 @@
         "2026-06-14",
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19"
       ],
       "conceptTags": [
         "backup",
@@ -276,13 +282,13 @@
       "endLine": 30,
       "source": "memory",
       "snippet": "# 2026-04-07 — Session Notes ## 📋 JumpKit To-Do List (as of Apr 10) 1. **Audit tests 46–51** — verify team sharing writes to Supabase + local SQLite are in sync 2. **Live invite email test** — trigger a real team invite, verify end-to-end delivery via Resend 3. **Account + Teams page UI cleanup** — review layout/design, evaluate merging into one page 4. **Supademo** — Jeff records demo, Max swaps into landing page in place of static screenshots 5. **Connect \"Get JumpKit Now\" landing page buttons to Lemon Squeezy** — free tier card button still links to `#` (download placeholder), needs to be wired to actual download or LS flow 6. **Security + vibe coding audit + backup** — check for secur",
-      "recallCount": 19,
+      "recallCount": 21,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 7.293107488751411,
+      "totalScore": 8.053651389479636,
       "maxScore": 0.4214278906583786,
       "firstRecalledAt": "2026-05-20T21:28:25.062Z",
-      "lastRecalledAt": "2026-06-13T11:20:14.708Z",
+      "lastRecalledAt": "2026-06-23T19:59:45.778Z",
       "queryHashes": [
         "cd71ff1b4e59",
         "84f72e652e71",
@@ -299,7 +305,9 @@
         "f3926a289e7c",
         "f0be698caf08",
         "8d672aa6babe",
-        "095836eeb37a"
+        "095836eeb37a",
+        "2926851513b2",
+        "cc2940c44e09"
       ],
       "recallDays": [
         "2026-05-20",
@@ -312,7 +320,9 @@
         "2026-06-05",
         "2026-06-08",
         "2026-06-12",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-22",
+        "2026-06-23"
       ],
       "conceptTags": [
         "backup",
@@ -529,13 +539,13 @@
       "endLine": 119,
       "source": "memory",
       "snippet": "- GitHub: `https://github.com/jrod4404/JumpKit.git` - Supabase URL: `https://iuexwdjnqfidcwvwbgwr.supabase.co` - Lemon Squeezy checkout: `https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb` - Admin email: `jeffroder@gmail.com` - App SQLite DB: `/Users/jeffroder/Library/Application Support/jumpkit/jumpkit.db` --- ## 2026-05-11 Afternoon Updates ### Account + Teams merge complete - Slider toggle (My Account | My Teams) added to Account page - Teams nav item removed from sidebar - navigateTo('teams') now opens Account with My Teams tab active - Button updates: \"Unlock JumpKit Core!\" with JumpKit icon, no hover shift ### Account page new fields - Trial Launche",
-      "recallCount": 10,
+      "recallCount": 11,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 3.795573917031288,
+      "totalScore": 4.173681119084358,
       "maxScore": 0.4456766098737716,
       "firstRecalledAt": "2026-05-21T11:22:31.234Z",
-      "lastRecalledAt": "2026-06-13T11:20:20.627Z",
+      "lastRecalledAt": "2026-06-23T18:45:31.307Z",
       "queryHashes": [
         "84f72e652e71",
         "8fb8a0cac588",
@@ -546,7 +556,8 @@
         "563b36c52816",
         "8d672aa6babe",
         "de346ae63b5e",
-        "7539dcba99c1"
+        "7539dcba99c1",
+        "fda28fadb21c"
       ],
       "recallDays": [
         "2026-05-21",
@@ -556,7 +567,8 @@
         "2026-06-09",
         "2026-06-10",
         "2026-06-12",
-        "2026-06-13"
+        "2026-06-13",
+        "2026-06-23"
       ],
       "conceptTags": [
         "github.com/jrod4404/jumpkit.git",
@@ -576,13 +588,13 @@
       "endLine": 67,
       "source": "memory",
       "snippet": "## JumpKit Current State - App entry: `Topics/JumpKit/app/index.html` → `app.html` - All data in localStorage (file-based DB attempt was reverted — broke the app) - Click logging: `DB.logClick()` called in `incrementClick()`, stored as `jk_clicks_${userId}` - Jump click handler: shows `alert()` placeholder + toast + increments count - Toast: success (green ✓) and danger (red !) — centered top, 3s auto-dismiss, defined in app.js as IIFE - Stats charts use bundled Chart.js (`js/chart.min.js`, 205KB) --- ## Session Continued (Thu Mar 5, afternoon/evening) ### JumpKit UI Polish #### Jumping Man Icon - Downloaded `jump-icon.svg` + `jump-icon.png` from Jeff's Downloads folder - Copied to `app/",
-      "recallCount": 13,
+      "recallCount": 15,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 5.175127020478247,
+      "totalScore": 5.952376911044119,
       "maxScore": 0.43472100198268887,
       "firstRecalledAt": "2026-05-21T11:22:34.882Z",
-      "lastRecalledAt": "2026-06-16T11:16:22.570Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
       "queryHashes": [
         "0287dc4dc6d9",
         "ad24dacfa0a4",
@@ -594,7 +606,9 @@
         "6ed9e6f9fb2f",
         "f0be698caf08",
         "797f0e4cec23",
-        "f2e258799699"
+        "f2e258799699",
+        "fda28fadb21c",
+        "50c9608868a6"
       ],
       "recallDays": [
         "2026-05-21",
@@ -608,7 +622,9 @@
         "2026-06-10",
         "2026-06-14",
         "2026-06-15",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-23",
+        "2026-06-24"
       ],
       "conceptTags": [
         "topics/jumpkit/app/index.html",
@@ -782,13 +798,13 @@
       "endLine": 99,
       "source": "memory",
       "snippet": "- Test users: jeffroder@gmail.com / KickAss11!! (org owner), jeff.roder@us.bosch.com / KickAss22@@ (member), support@jumpkit.ai / TestUser1! (Test User 1) - Test teams: JeffTestOrg-Team1/JeffTestOrg-Team1!, JeffTestOrg-Team2/JeffTestOrg-Team2@, E2E-Test-Team/TestPass123! - Lemon Squeezy checkout: https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb - send-invite Edge Function: `Topics/JumpKit/app/supabase/functions/send-invite/index.ts` - Vercel deploy: `cd Topics/JumpKit/landing && vercel --prod` - Edge Function deploy: `cd Topics/JumpKit/app && npx supabase functions deploy send-invite` - Git commits (2026-05-13): ae8b365 (invite modal password field), 4f4232e",
-      "recallCount": 12,
+      "recallCount": 13,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 4.747196740812862,
+      "totalScore": 5.14555083901366,
       "maxScore": 0.6401916721530808,
       "firstRecalledAt": "2026-05-23T12:57:51.834Z",
-      "lastRecalledAt": "2026-06-17T19:51:50.048Z",
+      "lastRecalledAt": "2026-06-19T10:41:48.995Z",
       "queryHashes": [
         "c9d5194a7fb5",
         "86bd0f4206c7",
@@ -801,7 +817,8 @@
         "095836eeb37a",
         "1916a314209b",
         "390539ee7587",
-        "7151ca52ed80"
+        "7151ca52ed80",
+        "5a68f00a2bb0"
       ],
       "recallDays": [
         "2026-05-23",
@@ -814,7 +831,8 @@
         "2026-06-13",
         "2026-06-14",
         "2026-06-16",
-        "2026-06-17"
+        "2026-06-17",
+        "2026-06-19"
       ],
       "conceptTags": [
         "gmail.com",
@@ -904,13 +922,13 @@
       "endLine": 79,
       "source": "memory",
       "snippet": "- **Blocker**: Apple Developer Account ($99/yr) not yet enrolled — required for macOS code signing + notarization + auto-update to work. Without it Gatekeeper blocks the update install. - **TODO added** to TODO.md and documented in JUMPKIT_DOCS.html Section 6 --- ## Docs Updates - JUMPKIT_DOCS.html changelog updated with all 2026-05-21 changes - Section 6 (Paid Services) updated: GitHub Releases and Apple Developer Program rows added # 2026-05-21 ## JumpKit localStorage Security Audit & Cleanup Full audit of all localStorage keys. Identified 10 keys total. ### Decisions made: - **Items 1-3** (jk_theme, jk_sidebar_collapsed, jk_teams_collapsed): Keep in localStorage — UI state only, har",
-      "recallCount": 18,
+      "recallCount": 20,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 7.638695328914322,
+      "totalScore": 8.45625365623156,
       "maxScore": 0.6623080711326179,
       "firstRecalledAt": "2026-05-25T23:32:48.884Z",
-      "lastRecalledAt": "2026-06-16T11:23:28.003Z",
+      "lastRecalledAt": "2026-06-25T12:24:30.512Z",
       "queryHashes": [
         "73b44f91d11d",
         "0ca3bfbb147b",
@@ -927,7 +945,9 @@
         "797f0e4cec23",
         "6319bcef2e02",
         "f2e258799699",
-        "838e223785ec"
+        "838e223785ec",
+        "5936fbae6e0d",
+        "d10aafddff5c"
       ],
       "recallDays": [
         "2026-05-25",
@@ -941,7 +961,8 @@
         "2026-06-11",
         "2026-06-14",
         "2026-06-15",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-25"
       ],
       "conceptTags": [
         "99/yr",
@@ -961,22 +982,24 @@
       "endLine": 35,
       "source": "memory",
       "snippet": "# Memory — 2026-05-11 ## JumpKit Session Summary (2026-05-10 afternoon) ### Security Fixes Applied (all committed + pushed) - CORS locked to `https://jumpkit.app` on `send-feedback.js` and `waitlist-signup` Edge Functions - Rate limiting: `send-feedback` 5 req/min, `send-invite` 10 req/min - Team password hashing: SHA-256 → PBKDF2 (100,000 iterations) in `teams.js` - `console.log` → `console.debug` in all production JS (teams.js, db.js, sync.js, app.js, main.js) - Unchecked awaits fixed in `teams.js` (6 locations now log/throw on error) - `npm audit fix` run → 0 vulnerabilities (fixed tar + picomatch) ### Migration Files Reorganized - `supabase/migration_001/002/003.sql` → `supabase/migra",
-      "recallCount": 3,
+      "recallCount": 4,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 1.1767071932554245,
+      "totalScore": 1.5749867737293244,
       "maxScore": 0.39915322363376615,
       "firstRecalledAt": "2026-05-25T23:32:48.884Z",
-      "lastRecalledAt": "2026-06-16T11:23:28.003Z",
+      "lastRecalledAt": "2026-06-25T12:24:30.512Z",
       "queryHashes": [
         "73b44f91d11d",
         "86bd0f4206c7",
-        "838e223785ec"
+        "838e223785ec",
+        "d10aafddff5c"
       ],
       "recallDays": [
         "2026-05-25",
         "2026-05-27",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-25"
       ],
       "conceptTags": [
         "jumpkit.app",
@@ -996,22 +1019,24 @@
       "endLine": 19,
       "source": "memory",
       "snippet": "# 2026-05-21 ## JumpKit localStorage Security Audit & Cleanup Full audit of all localStorage keys. Identified 10 keys total. ### Decisions made: - **Items 1-3** (jk_theme, jk_sidebar_collapsed, jk_teams_collapsed): Keep in localStorage — UI state only, harmless. - **Items 4-6** (jk_subscription_status, jk_subscription_tier, jk_role): **REMOVED** — security risk, could be tampered to bypass paywalls/roles. Now read exclusively from `window._supabaseProfile` (in-memory, resets from Supabase on every load). Tamper-proof. - **Item 7** (jk_current_user): **REMOVED** — redundant with Supabase session. `DB.setSession/clearSession` made no-ops. Offline fallback simplified to redirect-to-login. -",
-      "recallCount": 3,
+      "recallCount": 4,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 1.1355777889490126,
-      "maxScore": 0.39035433232784267,
+      "totalScore": 1.5436030030250547,
+      "maxScore": 0.40802521407604214,
       "firstRecalledAt": "2026-05-25T23:32:48.884Z",
-      "lastRecalledAt": "2026-06-16T11:23:28.003Z",
+      "lastRecalledAt": "2026-06-25T12:24:30.512Z",
       "queryHashes": [
         "73b44f91d11d",
         "7eb8dc00caa7",
-        "838e223785ec"
+        "838e223785ec",
+        "d10aafddff5c"
       ],
       "recallDays": [
         "2026-05-25",
         "2026-05-28",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-25"
       ],
       "conceptTags": [
         "1-3",
@@ -1304,20 +1329,22 @@
       "endLine": 21,
       "source": "memory",
       "snippet": "# Memory — 2026-03-16 ## JumpKit Landing Page — Morning Session ### Fixes applied (all deployed to jumpkit.app via Vercel): 1. **Stray SVG path data removed** from Instant Jump Launcher feature card — raw `<path d=\"...\"/>` text was sitting outside any `<svg>` tag, breaking the card title visually. Fixed by stripping the path data. 2. **Jump icon still broken** — `.jump-icon-inline` span is in the HTML but the icon is not rendering on the live site. Root cause not yet fully confirmed — likely a CSS mask URL path issue (`url(assets/jump-icon.svg)` may not resolve correctly from Vercel's CDN). **Still needs a real fix.** 3. **Logging for Audits card** — added to Jet AI section, then removed",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.7520581007003784,
-      "maxScore": 0.3827709227800369,
+      "totalScore": 1.3202166645435918,
+      "maxScore": 0.5681585638432134,
       "firstRecalledAt": "2026-05-28T18:28:16.397Z",
-      "lastRecalledAt": "2026-06-01T11:19:53.784Z",
+      "lastRecalledAt": "2026-06-22T17:30:59.742Z",
       "queryHashes": [
         "83dea8379cbe",
-        "e41f070436e9"
+        "e41f070436e9",
+        "2926851513b2"
       ],
       "recallDays": [
         "2026-05-28",
-        "2026-06-01"
+        "2026-06-01",
+        "2026-06-22"
       ],
       "conceptTags": [
         "jumpkit.app",
@@ -1370,18 +1397,20 @@
       "endLine": 54,
       "source": "memory",
       "snippet": "- Replaced \"Get JumpKit Now\" button in \"Ready to stop searching?\" section with email signup form - Styles were already in place (`.cta-form`, `.cta-input`, `.cta-note`) - Form shows \"Signing up...\" while submitting, success/error state after ## Waitlist — Full Pipeline Live ✅ - Created `waitlist` Supabase table (email unique, created_at) - Built + deployed `waitlist-signup` Edge Function (Supabase + Resend) - Stores email via service role key (upsert, ignores duplicates) - Sends confirmation email from noreply@jumpkit.ai via Resend - CORS handled for browser fetch - Wired `handleSubmit` in landing/script.js to hit edge function - Fixed logo image in confirmation email (width: auto to",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.3605587363243103,
+      "totalScore": 0.7141926646232605,
       "maxScore": 0.3605587363243103,
       "firstRecalledAt": "2026-05-29T11:48:54.523Z",
-      "lastRecalledAt": "2026-05-29T11:48:54.523Z",
+      "lastRecalledAt": "2026-06-22T17:30:59.742Z",
       "queryHashes": [
-        "44b45ad06b96"
+        "44b45ad06b96",
+        "2926851513b2"
       ],
       "recallDays": [
-        "2026-05-29"
+        "2026-05-29",
+        "2026-06-22"
       ],
       "conceptTags": [
         "cta-form",
@@ -1603,18 +1632,22 @@
       "endLine": 25,
       "source": "memory",
       "snippet": "# Memory — March 5, 2026 ## JumpKit Dev Session (Thu Mar 5) ### Stats Page — Fixed & Fully Built - Stats page was blank due to Chart.js CDN blocking local scripts — fixed by bundling chart.js locally (`js/chart.min.js`) - Stats fully inline in `app.js` (not stats.js) — stats.js is now essentially unused - Filter slider uses `.jump-filter-bar` / `.jfb-tab` / `.jfb-slider` classes (same as jumps page) - **View data ranges (final):** - Summary: all-time - Daily: this week (one bar per day, Sun–Sat) - Weekly: last 52 calendar weeks (one bar per week, labels every 4th) - Monthly: this year Jan–Dec (one bar per month) - Yearly: last 4 full years + current year YTD (5 bars) ### Setting",
-      "recallCount": 1,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.38114217221736907,
+      "totalScore": 1.129648894071579,
       "maxScore": 0.38114217221736907,
       "firstRecalledAt": "2026-06-01T11:19:53.783Z",
-      "lastRecalledAt": "2026-06-01T11:19:53.783Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
       "queryHashes": [
-        "75f6d7c47531"
+        "75f6d7c47531",
+        "fda28fadb21c",
+        "50c9608868a6"
       ],
       "recallDays": [
-        "2026-06-01"
+        "2026-06-01",
+        "2026-06-23",
+        "2026-06-24"
       ],
       "conceptTags": [
         "chart.js",
@@ -1822,18 +1855,20 @@
       "endLine": 121,
       "source": "memory",
       "snippet": "### Final localStorage state (4 keys remain, all UI state): | Key | Purpose | |---|---| | jk_theme | Dark/light mode | | jk_sidebar_collapsed | Sidebar state | | jk_teams_expanded | Team expand/collapse state (renamed from jk_teams_collapsed) | | jk_notifs_<userId> | Local notification inbox | --- ## Teams Page — Default Collapsed Fix - Teams were showing expanded by default due to old localStorage key `jk_teams_collapsed` using ambiguous format (true=collapsed, false=expanded) - Renamed key to `jk_teams_expanded` with inverted semantics (only stores explicitly-expanded teams as true) - Root cause of debug difficulty: Electron was serving cached JS (static ?v= param never changed). Fixed",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.4022606879472732,
+      "totalScore": 0.7856122314929961,
       "maxScore": 0.4022606879472732,
       "firstRecalledAt": "2026-06-08T12:10:31.942Z",
-      "lastRecalledAt": "2026-06-08T12:10:31.942Z",
+      "lastRecalledAt": "2026-06-23T18:45:31.307Z",
       "queryHashes": [
-        "7917f319bb86"
+        "7917f319bb86",
+        "fda28fadb21c"
       ],
       "recallDays": [
-        "2026-06-08"
+        "2026-06-08",
+        "2026-06-23"
       ],
       "conceptTags": [
         "jk-theme",
@@ -2018,18 +2053,20 @@
       "endLine": 232,
       "source": "memory",
       "snippet": "- `confirm-email.html` — Supabase Auth built-in (confirm signup) - `reset-email.html` — Supabase Auth built-in (password reset) - `invite-email.html` → `send-invite` edge function - `welcome-email.html` → `send-welcome` edge function - `welcome-unlimited-email.html` → `send-welcome-core` edge function (renamed from welcome-core) - `cancellation-email.html` → `send-cancellation` edge function - `team-deleted-email.html` → `send-team-deleted` edge function - `waitlist-email.html` → `waitlist-signup` edge function ### Landing subpages Location: `/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/landing/subpages/` - `confirmed.html` — post-email-confirm landing page - `reset-password.html` —",
-      "recallCount": 1,
+      "recallCount": 2,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.3753824025392532,
+      "totalScore": 0.7270496636629105,
       "maxScore": 0.3753824025392532,
       "firstRecalledAt": "2026-06-11T16:02:45.625Z",
-      "lastRecalledAt": "2026-06-11T16:02:45.625Z",
+      "lastRecalledAt": "2026-06-22T17:30:59.742Z",
       "queryHashes": [
-        "bbfcde8fe8d9"
+        "bbfcde8fe8d9",
+        "2926851513b2"
       ],
       "recallDays": [
-        "2026-06-11"
+        "2026-06-11",
+        "2026-06-22"
       ],
       "conceptTags": [
         "confirm-email.html",
@@ -2207,21 +2244,23 @@
       "endLine": 131,
       "source": "memory",
       "snippet": "UPDATE profiles SET subscription_tier = 'free', subscription_status = 'free', trial_launches_used = 0 WHERE id = (SELECT id FROM auth.users WHERE email = 'sales@jumpkit.app'); ``` ### Reverted Changes - \"Click here for more details\" nav links under each section — Jeff asked to revert after implementation ### Files Modified Today - `Topics/JumpKit/app/js/app.js` — primary - `Topics/JumpKit/app/css/app.css` — CSS additions - Workspace root copies kept in sync --- ## JumpKit Session — Afternoon Fixes (2026-06-11) ### Deployments & Git - Reset password green card (#48BB78 + SVG check icon) deployed to both `landing/reset-password.html` and `landing/subpages/reset-password.html` - **Critical",
-      "recallCount": 3,
+      "recallCount": 4,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 1.1116365075111387,
+      "totalScore": 1.4791931092739103,
       "maxScore": 0.37905822098255154,
       "firstRecalledAt": "2026-06-13T11:20:14.665Z",
-      "lastRecalledAt": "2026-06-16T11:23:28.003Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
       "queryHashes": [
         "de346ae63b5e",
         "7539dcba99c1",
-        "838e223785ec"
+        "838e223785ec",
+        "50c9608868a6"
       ],
       "recallDays": [
         "2026-06-13",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-24"
       ],
       "conceptTags": [
         "subscription-tier",
@@ -2458,21 +2497,25 @@
       "endLine": 29,
       "source": "memory",
       "snippet": "--- ## JumpKit Session — 2026-06-13 Morning ### Pending Upgrade Flow (Pay Before Account) — FULLY TESTED ✅ - `pending_upgrades` table stores tier + ls_customer_id when webhook fires with no matching profile - `ls-webhook` redeployed with `--no-verify-jwt` (was returning 401 to LS) - `apply-pending-upgrade` edge function: applies tier on login, deletes row, fires send-welcome-core - **Bug fixed:** was fire-and-forget; changed to `await` in auth.js so upgrade applies before redirect to app.html - **Bug fixed:** modal not showing on re-test — used `sessionStorage.setItem('jk_pending_upgrade_applied', '1')` in auth.js, checked in app.js to reliably show modal regardless of `last_known_tier`",
-      "recallCount": 3,
+      "recallCount": 5,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 1.2491059213876723,
+      "totalScore": 2.0228064984083174,
       "maxScore": 0.4170006781816482,
       "firstRecalledAt": "2026-06-14T11:23:32.409Z",
-      "lastRecalledAt": "2026-06-16T11:16:22.570Z",
+      "lastRecalledAt": "2026-06-23T19:59:45.778Z",
       "queryHashes": [
         "ce55ef56be06",
-        "797f0e4cec23"
+        "797f0e4cec23",
+        "2aad7e473990",
+        "cc2940c44e09"
       ],
       "recallDays": [
         "2026-06-14",
         "2026-06-15",
-        "2026-06-16"
+        "2026-06-16",
+        "2026-06-19",
+        "2026-06-23"
       ],
       "conceptTags": [
         "pending-upgrades",
@@ -2492,18 +2535,22 @@
       "endLine": 225,
       "source": "memory",
       "snippet": "(Details in earlier session entry above) --- ## JumpKit Session — 2026-06-13 Morning ### Pending Upgrade Flow (Pay Before Account) — FULLY TESTED ✅ - `pending_upgrades` table stores tier + ls_customer_id when webhook fires with no matching profile - `ls-webhook` redeployed with `--no-verify-jwt` (was returning 401 to LS) - `apply-pending-upgrade` edge function: applies tier on login, deletes row, fires send-welcome-core - **Bug fixed:** was fire-and-forget; changed to `await` in auth.js so upgrade applies before redirect to app.html - **Bug fixed:** modal not showing on re-test — used `sessionStorage.setItem('jk_pending_upgrade_applied', '1')` in auth.js, checked in app.js to reliably show",
-      "recallCount": 1,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.40916085839271543,
+      "totalScore": 1.1798547118902205,
       "maxScore": 0.40916085839271543,
       "firstRecalledAt": "2026-06-14T11:23:32.409Z",
-      "lastRecalledAt": "2026-06-14T11:23:32.409Z",
+      "lastRecalledAt": "2026-06-23T19:59:45.778Z",
       "queryHashes": [
-        "ce55ef56be06"
+        "ce55ef56be06",
+        "2aad7e473990",
+        "cc2940c44e09"
       ],
       "recallDays": [
-        "2026-06-14"
+        "2026-06-14",
+        "2026-06-19",
+        "2026-06-23"
       ],
       "conceptTags": [
         "pending-upgrades",
@@ -2585,22 +2632,24 @@
       "endLine": 187,
       "source": "memory",
       "snippet": "- JUMPKIT_DOCS.html path: `Topics/JumpKit/JUMPKIT_DOCS.html` (uppercase — always check this) - tests.js path: `Topics/JumpKit/app/js/tests.js` --- ## JumpKit Status (as of today) - Target: Feature-complete by end of June 2026 - Jump organizer: in progress - Jet AI (OpenClaw wrapper in Docker + Ollama): planned, documented in Future Features - 14 transactional emails implemented and documented - 141 unit tests defined (renumbered from 140) --- ## Tests.js Afternoon Fixes (continued) ### Bugs fixed - **Collapse/expand**: `scrollHeight=0` on Electron/WebKit when `maxHeight:0` → fixed with `void body.offsetHeight` reflow trick; removed `transitionend` listener that was causing phantom re-op",
-      "recallCount": 3,
+      "recallCount": 4,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 1.2141074985265732,
+      "totalScore": 1.59281367957592,
       "maxScore": 0.40896033644676205,
       "firstRecalledAt": "2026-06-16T14:45:21.321Z",
-      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "lastRecalledAt": "2026-06-19T11:23:24.091Z",
       "queryHashes": [
         "390539ee7587",
         "7151ca52ed80",
-        "281a870f21b4"
+        "281a870f21b4",
+        "2aad7e473990"
       ],
       "recallDays": [
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19"
       ],
       "conceptTags": [
         "jumpkit-docs.html",
@@ -2686,20 +2735,22 @@
       "endLine": 31,
       "source": "memory",
       "snippet": "# 2026-06-16 — JumpKit Release Testing Overhaul ## Summary Full-day polish pass on the JumpKit v1.0.0 release testing system — tests page UI and HTML report brought to full parity. ## What Was Done ### App (tests.js) - Execution order (`#execOrder · testId`) surfaced in test row first column across all 4 sections - 4-section layout: Pre-Flight (139), Automatic (120), Auto+Manual (10), Manual (15) - Each section header: inline pill stats (Pass/Fail/Manual, only non-zero) - Unified total summary card (Passed/Failed/Manual/Not Run/Total) — no per-section cards - Summary card: Passed=green, Failed=red, Manual=orange — ALWAYS, even at 0 - Summary card: vertical divider lines removed - Arrow ic",
-      "recallCount": 2,
+      "recallCount": 3,
       "dailyCount": 0,
       "groundedCount": 0,
-      "totalScore": 0.7772397309541701,
+      "totalScore": 1.1644669890403745,
       "maxScore": 0.3958634704351425,
       "firstRecalledAt": "2026-06-17T19:51:50.048Z",
-      "lastRecalledAt": "2026-06-18T11:21:00.346Z",
+      "lastRecalledAt": "2026-06-20T11:47:07.130Z",
       "queryHashes": [
         "7151ca52ed80",
-        "281a870f21b4"
+        "281a870f21b4",
+        "bcba5e10a3b3"
       ],
       "recallDays": [
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-20"
       ],
       "conceptTags": [
         "full-day",
@@ -2741,6 +2792,923 @@
         "jumpkit-releasetesting-v1.0.0",
         "html",
         "desktop"
+      ]
+    },
+    "memory:memory/2026-06-18.md:85:108": {
+      "key": "memory:memory/2026-06-18.md:85:108",
+      "path": "memory/2026-06-18.md",
+      "startLine": 85,
+      "endLine": 108,
+      "source": "memory",
+      "snippet": "- Vercel root directory fixed to `Topics/JumpKit/landing` → GitHub pushes now auto-deploy ## Pre-Flight Code Audit Tests Added (375-378) - 375: Database Security & Integrity Audit - 376: localStorage/sessionStorage Audit (approved key inventory) - 377: Code Quality Audit (console.logs, async errors, UI states, pagination) - 378: Full Security Audit (secrets, Electron hardening, XSS, auth, API, supply chain, privacy) - Pre-flight filter refactored from hardcoded `id===139` to `preflight:true` flag ## Deployment Page (new) - New \"Deployment\" admin page with world-upload icon in sidebar - 5 phases (Pre-Deploy + Testing removed, remaining: Code & Version, Backup, Build Installers, Landing, Rel",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41129516959190365,
+      "maxScore": 0.41129516959190365,
+      "firstRecalledAt": "2026-06-19T10:41:48.995Z",
+      "lastRecalledAt": "2026-06-19T10:41:48.995Z",
+      "queryHashes": [
+        "5a68f00a2bb0"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "backup",
+        "topics/jumpkit/landing",
+        "auto-deploy",
+        "pre-flight",
+        "375-378",
+        "localstorage/sessionstorage",
+        "console.logs",
+        "world-upload"
+      ]
+    },
+    "memory:memory/2026-06-18.md:22:45": {
+      "key": "memory:memory/2026-06-18.md:22:45",
+      "path": "memory/2026-06-18.md",
+      "startLine": 22,
+      "endLine": 45,
+      "source": "memory",
+      "snippet": "- New \"Deployment\" admin page with world-upload icon in sidebar - 5 phases (Pre-Deploy + Testing removed, remaining: Code & Version, Backup, Build Installers, Landing, Release) - Section headers match tests page style (flat header, collapsed by default, inline pills) - Done/To Do toggle buttons, green bg on done rows matching tests pass row style - Summary card (Done/To Do/Total) in fixed header bar with border-bottom - Reset All + Manage Deployment + Save Results buttons - State persisted in `localStorage` as `jk_deploy_state` - Deploy page: `_loadedScripts.delete()` before load so always fresh ## Deployments Supabase Table (new) Migration: `supabase/migrations/20260618000000_create_deploy",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.194216564297676,
+      "maxScore": 0.404537233710289,
+      "firstRecalledAt": "2026-06-19T10:41:48.995Z",
+      "lastRecalledAt": "2026-06-19T11:23:27.510Z",
+      "queryHashes": [
+        "5a68f00a2bb0",
+        "2aad7e473990",
+        "984fcedb4e64"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "backup",
+        "world-upload",
+        "pre-deploy",
+        "done/to",
+        "do/total",
+        "border-bottom",
+        "jk-deploy-state",
+        "loadedscripts.delete"
+      ]
+    },
+    "memory:memory/2026-06-18.md:1:25": {
+      "key": "memory:memory/2026-06-18.md:1:25",
+      "path": "memory/2026-06-18.md",
+      "startLine": 1,
+      "endLine": 25,
+      "source": "memory",
+      "snippet": "# 2026-06-18 — Tests 93 & 130 + Auth Fixes + Deployment Page + Deployments Table ## Tests Run Today - **Test 93** — LS webhook upgrades existing account → PASSED ✅ - **Test 130** — apply-pending-upgrade (paid before account creation) → PASSED ✅ ## Auth Improvements (auth.js + landing) - Login shows \"Click here to resend the confirmation email\" on email-not-confirmed error - Resend calls `supabaseClient.auth.resend()` with `emailRedirectTo: https://jumpkit.app/confirmed` - `confirmed.html` shows red \"Link Expired\" card on `#error=otp_expired` - `index.html` root detects error hash → red overlay modal; detects `access_token+type=signup` → redirects to `/confirmed` - Vercel root directory fix",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.39677445590496063,
+      "maxScore": 0.39677445590496063,
+      "firstRecalledAt": "2026-06-19T10:41:48.995Z",
+      "lastRecalledAt": "2026-06-19T10:41:48.995Z",
+      "queryHashes": [
+        "5a68f00a2bb0"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "apply-pending-upgrade",
+        "auth.js",
+        "email-not-confirmed",
+        "supabaseclient.auth.resend",
+        "jumpkit.app/confirmed",
+        "confirmed.html",
+        "otp-expired",
+        "index.html"
+      ]
+    },
+    "memory:memory/2026-04-04.md:1:35": {
+      "key": "memory:memory/2026-04-04.md:1:35",
+      "path": "memory/2026-04-04.md",
+      "startLine": 1,
+      "endLine": 35,
+      "source": "memory",
+      "snippet": "# 2026-04-04 — Session Notes ## JumpKit Progress ### Feedback Form — Fully Wired ✅ - Created `supabase/send-feedback.js` Edge Function (Resend-based) - Wired `submitFeedback()` in `app.js` to call it with correct JWT anon key - Fixed 401 (wrong anon key format) and 500 (domain not verified) errors - Temporarily sending to `jeffroder@gmail.com` from `onboarding@resend.dev` - TODO: Once `jumpkit.ai` verified in Resend → swap `from` to `noreply@jumpkit.ai` and `to` to `support@jumpkit.ai`, redeploy edge function ### Supabase Anon Key (JWT) - Updated in `app.js` and `supabase/config.js` - Key starts with `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...` ### UI Polish - Modal overlay click-to-close d",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.38183765709400175,
+      "maxScore": 0.38183765709400175,
+      "firstRecalledAt": "2026-06-19T10:41:48.995Z",
+      "lastRecalledAt": "2026-06-19T10:41:48.995Z",
+      "queryHashes": [
+        "5a68f00a2bb0"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "supabase/send-feedback.js",
+        "resend-based",
+        "app.js",
+        "gmail.com",
+        "resend.dev",
+        "jumpkit.ai",
+        "supabase/config.js",
+        "click-to-close"
+      ]
+    },
+    "memory:memory/2026-06-13.md:218:250": {
+      "key": "memory:memory/2026-06-13.md:218:250",
+      "path": "memory/2026-06-13.md",
+      "startLine": 218,
+      "endLine": 250,
+      "source": "memory",
+      "snippet": "### Welcome to JumpKit Unlimited Modal Redesign - Replaced comparison grid (Free vs Unlimited) with: - Lightning bolt icon in modal title (teal) - Gradient teal/blue confirmation banner with checkmark circle - Feature checklist with gradient circle checkmarks - Full-width gradient \"Let's Go →\" CTA button ### Home Page Fixes - No-teams card: added `margin-bottom: 20px` to match `.home-teams-grid` spacing - Account/stats stat-card-value: added explicit `color: var(--text-card-title)` inline ### account-exists-email.html (earlier this morning) - Removed Sign In btn + Forgot Password btn - Updated body copy to direct users to open desktop app first - Finalized copy: \"If it was not you,",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41952026188373565,
+      "maxScore": 0.41952026188373565,
+      "firstRecalledAt": "2026-06-19T11:23:24.091Z",
+      "lastRecalledAt": "2026-06-19T11:23:24.091Z",
+      "queryHashes": [
+        "2aad7e473990"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "teal/blue",
+        "full-width",
+        "no-teams",
+        "margin-bottom",
+        "home-teams-grid",
+        "account/stats",
+        "stat-card-value",
+        "text-card-title"
+      ]
+    },
+    "memory:memory/2026-06-13.md:22:54": {
+      "key": "memory:memory/2026-06-13.md:22:54",
+      "path": "memory/2026-06-13.md",
+      "startLine": 22,
+      "endLine": 54,
+      "source": "memory",
+      "snippet": "### Welcome to JumpKit Unlimited Modal Redesign - Replaced comparison grid (Free vs Unlimited) with: - Lightning bolt icon in modal title (teal) - Gradient teal/blue confirmation banner with checkmark circle - Feature checklist with gradient circle checkmarks - Full-width gradient \"Let's Go →\" CTA button ### Home Page Fixes - No-teams card: added `margin-bottom: 20px` to match `.home-teams-grid` spacing - Account/stats stat-card-value: added explicit `color: var(--text-card-title)` inline ### account-exists-email.html (earlier this morning) - Removed Sign In btn + Forgot Password btn - Updated body copy to direct users to open desktop app first - Finalized copy: \"If it was not you,",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41952026188373565,
+      "maxScore": 0.41952026188373565,
+      "firstRecalledAt": "2026-06-19T11:23:24.091Z",
+      "lastRecalledAt": "2026-06-19T11:23:24.091Z",
+      "queryHashes": [
+        "2aad7e473990"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "teal/blue",
+        "full-width",
+        "no-teams",
+        "margin-bottom",
+        "home-teams-grid",
+        "account/stats",
+        "stat-card-value",
+        "text-card-title"
+      ]
+    },
+    "memory:memory/2026-06-18.md:106:132": {
+      "key": "memory:memory/2026-06-18.md:106:132",
+      "path": "memory/2026-06-18.md",
+      "startLine": 106,
+      "endLine": 132,
+      "source": "memory",
+      "snippet": "Fields: id, created_at, version, testing_account, testing_completed_at, test_os, tests_total/passed/failed/skipped, deployment_folder, mac_results_file, win_results_file, status, commit_id, deployed_at, deploy_account, mac_installer_path, win_installer_path, deploy_results_file, notes RLS: admin-only via profiles.role = 'admin' ## Manage Testing Modal (tests page) - Added Version Number field - Added Deployment Folder field (Choose button → directory picker) - Saves version + folder to shared `jk_deploy_config` localStorage key - \"Finalize Testing & Prepare Deployment\" button (renamed from \"Conclude & Reset\", blue) - On click: inserts row to Supabase `deployments` table with full test score",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41347919404506683,
+      "maxScore": 0.41347919404506683,
+      "firstRecalledAt": "2026-06-19T11:23:27.510Z",
+      "lastRecalledAt": "2026-06-19T11:23:27.510Z",
+      "queryHashes": [
+        "984fcedb4e64"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "created-at",
+        "testing-account",
+        "testing-completed-at",
+        "test-os",
+        "deployment-folder",
+        "mac-results-file",
+        "win-results-file",
+        "commit-id"
+      ]
+    },
+    "memory:memory/2026-06-18.md:40:70": {
+      "key": "memory:memory/2026-06-18.md:40:70",
+      "path": "memory/2026-06-18.md",
+      "startLine": 40,
+      "endLine": 70,
+      "source": "memory",
+      "snippet": "- \"Finalize Testing & Prepare Deployment\" button (renamed from \"Conclude & Reset\", blue) - On click: inserts row to Supabase `deployments` table with full test scorecard - Auto-copies test result HTML files to deployment folder on each Save Results ## Manage Deployment Modal (deploy page) - Dropdown populated from Supabase `deployments` table - Shows version, date, account per row - On selection: auto-applies version + deployment_folder to deploy page - Mac/Win installer path fields + Notes - \"Finalize Deployment\" button → auto-fetches git commit ID via IPC → confirmation modal → updates deployments row with commit_id, deployed_at, deploy_account, status='deployed' ## Electron IPC Added -",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.39425923228263854,
+      "maxScore": 0.39425923228263854,
+      "firstRecalledAt": "2026-06-19T11:23:27.510Z",
+      "lastRecalledAt": "2026-06-19T11:23:27.510Z",
+      "queryHashes": [
+        "984fcedb4e64"
+      ],
+      "recallDays": [
+        "2026-06-19"
+      ],
+      "conceptTags": [
+        "auto-copies",
+        "auto-applies",
+        "deployment-folder",
+        "mac/win",
+        "auto-fetches",
+        "commit-id",
+        "deployed-at",
+        "deploy-account"
+      ]
+    },
+    "memory:memory/2026-06-19.md:76:114": {
+      "key": "memory:memory/2026-06-19.md:76:114",
+      "path": "memory/2026-06-19.md",
+      "startLine": 76,
+      "endLine": 114,
+      "source": "memory",
+      "snippet": "- **File created immediately** on Start New Session (folder picker fires then) - **Resume flow**: pick existing HTML file → extracts version, restores all test results ### jk_deploy_config schema (final) ```json { \"version\": \"1.0.0\", \"resultsFilePath\": \"/path/JumpKit_ReleaseTestingSession_v1.0.0.html\", \"deploymentRecordId\": \"uuid\", \"folder\": \"/deploy/folder\", \"macFinalized\": false, \"winFinalized\": false, \"activeRun\": \"mac\" } ``` ### Supabase migration run `20260619000000_alter_deployments_dual_platform.sql` — executed successfully in Supabase SQL Editor by Jeff. New columns: `mac_testing_account`, `mac_tests_total/passed/failed/skipped`, `mac_finalized_at`, same for `win_`.",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.1274259006900798,
+      "maxScore": 0.6990866368932734,
+      "firstRecalledAt": "2026-06-20T11:47:07.130Z",
+      "lastRecalledAt": "2026-06-21T12:26:32.827Z",
+      "queryHashes": [
+        "bcba5e10a3b3",
+        "b6d2cff50430"
+      ],
+      "recallDays": [
+        "2026-06-20",
+        "2026-06-21"
+      ],
+      "conceptTags": [
+        "jk-deploy-config",
+        "1.0.0",
+        "deploy/folder",
+        "mac-testing-account",
+        "mac-finalized-at",
+        "created",
+        "immediately",
+        "start"
+      ]
+    },
+    "memory:memory/2026-06-19.md:290:324": {
+      "key": "memory:memory/2026-06-19.md:290:324",
+      "path": "memory/2026-06-19.md",
+      "startLine": 290,
+      "endLine": 324,
+      "source": "memory",
+      "snippet": "- **One HTML results file** (`JumpKit_ReleaseTestingSession_vX.Y.Z.html`) with two tabs (Mac / Windows) - **localStorage consolidated** into single key `jk_deploy_config` — eliminated separate `_RT_KEY` - **Mac-only tests** on Windows run: shown in HTML but pre-marked skipped, NOT counted in Windows totals - **Deployment folder** moved from Testing modal → Deployment modal - **File created immediately** on Start New Session (folder picker fires then) - **Resume flow**: pick existing HTML file → extracts version, restores all test results ### jk_deploy_config schema (final) ```json { \"version\": \"1.0.0\", \"resultsFilePath\": \"/path/JumpKit_ReleaseTestingSession_v1.0.0.html\", \"deploymentRe",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.11952985360302,
+      "maxScore": 0.699543960234299,
+      "firstRecalledAt": "2026-06-20T11:47:07.130Z",
+      "lastRecalledAt": "2026-06-21T12:26:32.827Z",
+      "queryHashes": [
+        "bcba5e10a3b3",
+        "b6d2cff50430"
+      ],
+      "recallDays": [
+        "2026-06-20",
+        "2026-06-21"
+      ],
+      "conceptTags": [
+        "jk-deploy-config",
+        "rt-key",
+        "mac-only",
+        "pre-marked",
+        "1.0.0",
+        "one",
+        "html",
+        "results"
+      ]
+    },
+    "memory:memory/2026-06-19.md:1:36": {
+      "key": "memory:memory/2026-06-19.md:1:36",
+      "path": "memory/2026-06-19.md",
+      "startLine": 1,
+      "endLine": 36,
+      "source": "memory",
+      "snippet": "# Memory — 2026-06-19 ## JumpKit — Testing & Deployment Modal Redesign (Major Session) ### What was built today Full redesign of the testing and deployment flow in JumpKit (Electron app). ~6 hours of iterative build + polish. ### Key decisions made - **One Supabase record per release** (UUID PK, version as label field) - **One HTML results file** (`JumpKit_ReleaseTestingSession_vX.Y.Z.html`) with two tabs (Mac / Windows) - **localStorage consolidated** into single key `jk_deploy_config` — eliminated separate `_RT_KEY` - **Mac-only tests** on Windows run: shown in HTML but pre-marked skipped, NOT counted in Windows totals - **Deployment folder** moved from Testing modal → Deployment modal",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.41225822567939757,
+      "maxScore": 0.41225822567939757,
+      "firstRecalledAt": "2026-06-20T11:47:07.130Z",
+      "lastRecalledAt": "2026-06-20T11:47:07.130Z",
+      "queryHashes": [
+        "bcba5e10a3b3"
+      ],
+      "recallDays": [
+        "2026-06-20"
+      ],
+      "conceptTags": [
+        "jk-deploy-config",
+        "rt-key",
+        "mac-only",
+        "pre-marked",
+        "jumpkit",
+        "testing",
+        "deployment",
+        "modal"
+      ]
+    },
+    "memory:memory/2026-06-19.md:165:199": {
+      "key": "memory:memory/2026-06-19.md:165:199",
+      "path": "memory/2026-06-19.md",
+      "startLine": 165,
+      "endLine": 199,
+      "source": "memory",
+      "snippet": "- **localStorage consolidated** into single key `jk_deploy_config` — eliminated separate `_RT_KEY` - **Mac-only tests** on Windows run: shown in HTML but pre-marked skipped, NOT counted in Windows totals - **Deployment folder** moved from Testing modal → Deployment modal - **File created immediately** on Start New Session (folder picker fires then) - **Resume flow**: pick existing HTML file → extracts version, restores all test results ### jk_deploy_config schema (final) ```json { \"version\": \"1.0.0\", \"resultsFilePath\": \"/path/JumpKit_ReleaseTestingSession_v1.0.0.html\", \"deploymentRecordId\": \"uuid\", \"folder\": \"/deploy/folder\", \"macFinalized\": false, \"winFinalized\": false, \"acti",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.0691740023112255,
+      "maxScore": 0.6762013899302441,
+      "firstRecalledAt": "2026-06-20T11:47:07.130Z",
+      "lastRecalledAt": "2026-06-21T12:26:32.827Z",
+      "queryHashes": [
+        "bcba5e10a3b3",
+        "b6d2cff50430"
+      ],
+      "recallDays": [
+        "2026-06-20",
+        "2026-06-21"
+      ],
+      "conceptTags": [
+        "jk-deploy-config",
+        "rt-key",
+        "mac-only",
+        "pre-marked",
+        "1.0.0",
+        "deploy/folder",
+        "localstorage",
+        "consolidated"
+      ]
+    },
+    "memory:memory/2026-06-19.md:56:84": {
+      "key": "memory:memory/2026-06-19.md:56:84",
+      "path": "memory/2026-06-19.md",
+      "startLine": 56,
+      "endLine": 84,
+      "source": "memory",
+      "snippet": "- `js/tests.js` — major rewrite of modal, save, finalize, HTML output functions - `js/deployment.js` — added deployment folder field, updated to use `results_file` - `supabase/migrations/20260619000000_alter_deployments_dual_platform.sql` — created + run - `Topics/JumpKit/testing_deployment_spec.md` — created as full spec doc ### Where things stand All core testing modal + page logic is implemented and iteratively polished. Jeff is testing the app. Session ended mid-polish — still possible minor UI fixes needed when Jeff resumes testing. # Memory — 2026-06-19 ## JumpKit — Testing & Deployment Modal Redesign (Major Session) ### What was built today Full redesign of the testing and deployme",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.3924529075622558,
+      "maxScore": 0.3924529075622558,
+      "firstRecalledAt": "2026-06-20T11:47:07.130Z",
+      "lastRecalledAt": "2026-06-20T11:47:07.130Z",
+      "queryHashes": [
+        "bcba5e10a3b3"
+      ],
+      "recallDays": [
+        "2026-06-20"
+      ],
+      "conceptTags": [
+        "js/tests.js",
+        "js/deployment.js",
+        "results-file",
+        "mid-polish",
+        "tests.js",
+        "major",
+        "rewrite",
+        "modal"
+      ]
+    },
+    "memory:memory/2026-06-19.md:192:224": {
+      "key": "memory:memory/2026-06-19.md:192:224",
+      "path": "memory/2026-06-19.md",
+      "startLine": 192,
+      "endLine": 224,
+      "source": "memory",
+      "snippet": "3. Resume testing session from results file btn 4. Platform Testing section (Mac + Win cards with pills + Finalize buttons) 5. Footer: Close only ### Testing page header (final) - Mac Testing pill (Incomplete🔴 / Started🟡 / Passed🟢) - Win Testing pill (same states) - Results file pill (green pass-style when file loaded, amber when not) - Mac | Windows active run toggle (subtle teal/sky active colors, tabler icons) ### Guards added - Windows toggle blocked until Mac is finalized (warning modal) - Section expand / Run button blocked if no session active (warning modal) ### localStorage audit `jk_deploy_config` and `jk_deploy_state` added to approved list in test #376. ### Files changed -",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.6844254148675386,
+      "maxScore": 0.6844254148675386,
+      "firstRecalledAt": "2026-06-21T12:26:32.827Z",
+      "lastRecalledAt": "2026-06-21T12:26:32.827Z",
+      "queryHashes": [
+        "b6d2cff50430"
+      ],
+      "recallDays": [
+        "2026-06-21"
+      ],
+      "conceptTags": [
+        "pass-style",
+        "teal/sky",
+        "jk-deploy-config",
+        "jk-deploy-state",
+        "resume",
+        "testing",
+        "results",
+        "btn"
+      ]
+    },
+    "memory:memory/2026-06-20.md:36:66": {
+      "key": "memory:memory/2026-06-20.md:36:66",
+      "path": "memory/2026-06-20.md",
+      "startLine": 36,
+      "endLine": 66,
+      "source": "memory",
+      "snippet": "- DB audit item #4 resolved: passwords no longer stored in `jk_users` - All `console.log`/`console.debug` removed from production JS - `.bak` files deleted - `.limit(1000)` added to `shared_jumps` query ## Safari Tabs Recovery - Jeff had ~10 tabs open yesterday (June 19) and lost them - Recovered from Safari history and reopened ~8 tabs: - Claude Platform / Cost - Apple Developer: Programs, Enterprise Program, Account Info, Migrate Individual → Org, D-U-N-S Lookup - Tabler Icons - Proton Mail inbox ## JumpKit Release Checklist Reminder - Must add: \"Confirm Lemon Squeezy is in non-test mode\" to deployment checklist - Mac testing must complete before Windows unlocks - Release HTML ex",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.6636556393080744,
+      "maxScore": 0.6636556393080744,
+      "firstRecalledAt": "2026-06-21T12:26:32.827Z",
+      "lastRecalledAt": "2026-06-21T12:26:32.827Z",
+      "queryHashes": [
+        "b6d2cff50430"
+      ],
+      "recallDays": [
+        "2026-06-21"
+      ],
+      "conceptTags": [
+        "jk-users",
+        "console.log",
+        "console.debug",
+        "shared-jumps",
+        "d-u-n-s",
+        "non-test",
+        "audit",
+        "item"
+      ]
+    },
+    "memory:memory/2026-06-19.md:146:168": {
+      "key": "memory:memory/2026-06-19.md:146:168",
+      "path": "memory/2026-06-19.md",
+      "startLine": 146,
+      "endLine": 168,
+      "source": "memory",
+      "snippet": "2. **Cancel in Clear Session modal** → should reopen the Manage Testing modal (currently just closes) 3. **Loaded file pill styling** (`JumpKit_ReleaseTesting_v1.0.0.html`) — should look like the test-pass green pill (tabler-file-check icon, green background/border); currently amber/wrong style ### Key identifiers - File: `/Users/jeffroder/.openclaw/workspace/Topics/JumpKit/app/js/tests.js` - `rtActiveLabel` — top-of-page pill that shows loaded file name - `rtConfirmResetBtn` — the \"Yes, Clear Session\" button ID - Clear Session modal confirmation — cancel button handler needs to call `Modal.open('rtManageModal')` or equivalent - Color refs: `#3fbe71` (green pass), `#3fbe7122`/`#3fbe7155` (g",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.8271186888217925,
+      "maxScore": 0.4220298111438751,
+      "firstRecalledAt": "2026-06-21T12:26:32.827Z",
+      "lastRecalledAt": "2026-06-24T13:08:20.078Z",
+      "queryHashes": [
+        "b6d2cff50430",
+        "23db0913a58d"
+      ],
+      "recallDays": [
+        "2026-06-21",
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "test-pass",
+        "tabler-file-check",
+        "background/border",
+        "amber/wrong",
+        "users/jeffroder",
+        "top-of-page",
+        "modal.open",
+        "cancel"
+      ]
+    },
+    "memory:memory/2026-06-24.md:1:5": {
+      "key": "memory:memory/2026-06-24.md:1:5",
+      "path": "memory/2026-06-24.md",
+      "startLine": 1,
+      "endLine": 5,
+      "source": "memory",
+      "snippet": "## TodoKit UI fixes — 2026-06-24 - Confirmed JumpKit todo SOP in AGENTS.md: JumpKit task lists go into TodoKit → JumpKit project JSON, not just chat/memory. - TodoKit edit task modal polish: default Responsible dropdown includes/defaults to Jeff when blank/new, comment author custom select syncs when editing, comment Add/Update button keeps icon styling, and Cancel Edit gets a visible background.",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.9808391630649567,
+      "maxScore": 0.50237056016922,
+      "firstRecalledAt": "2026-06-24T13:08:20.078Z",
+      "lastRecalledAt": "2026-06-24T13:12:36.099Z",
+      "queryHashes": [
+        "23db0913a58d",
+        "f949b14b772c"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "agents.md",
+        "chat/memory",
+        "includes/defaults",
+        "blank/new",
+        "add/update",
+        "todokit",
+        "fixes",
+        "confirmed"
+      ]
+    },
+    "memory:memory/2026-06-23.md:92:103": {
+      "key": "memory:memory/2026-06-23.md:92:103",
+      "path": "memory/2026-06-23.md",
+      "startLine": 92,
+      "endLine": 103,
+      "source": "memory",
+      "snippet": "- Run Notes persist through SQLite prefs (`testResults` / `testWinResults`), load from release testing HTML, and are included as a Notes column in exported release testing HTML. - Preserved existing Details buttons/modal on every test row and fixed result updates to preserve notes when tests are run or manually marked. - Updated TodoKit `taskit-data.json`: JumpKit items 1, 2, 7, and 8 set to `To Test`. ## TodoKit UI Fix Batch — Status/IDs/Modal - Renamed TodoKit status label `Started` to `In Progress` across UI, status ordering/badges, spec docs, and JSON task data migration; app normalizes legacy `Started` statuses on load. - Changed project task table simple display ID to use numeric per-",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4464508682489395,
+      "maxScore": 0.4464508682489395,
+      "firstRecalledAt": "2026-06-24T13:08:20.078Z",
+      "lastRecalledAt": "2026-06-24T13:08:20.078Z",
+      "queryHashes": [
+        "23db0913a58d"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "buttons/modal",
+        "taskit-data.json",
+        "status/ids/modal",
+        "ordering/badges",
+        "run",
+        "persist",
+        "sqlite",
+        "prefs"
+      ]
+    },
+    "memory:memory/2026-06-23.md:79:93": {
+      "key": "memory:memory/2026-06-23.md:79:93",
+      "path": "memory/2026-06-23.md",
+      "startLine": 79,
+      "endLine": 93,
+      "source": "memory",
+      "snippet": "- Fixed one invalid icon reference (`tabler-chart-bar-popular`) to use existing `tabler-chart-bar`. - Verification: no remaining old sprite references; static icon refs checked against min sprite (only template-literal dynamic partials ignored); `node --check` passed for key JS files; `npm test -- --runInBand` passed 23/23. ## TodoKit Status Choices Update - Jeff asked to add status choices `Started` and `To Test`. - Confirmed `Started` already existed in TodoKit UI/status ordering/badges. - Added `To Test` to `/Topics/TodoKit/index.html` status filter and task modal status dropdown. - Updated `/Topics/TodoKit/app.js` status sort order and status badge mapping: `To Do` → `Started` → `To Tes",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.8973065227270125,
+      "maxScore": 0.4527458637952804,
+      "firstRecalledAt": "2026-06-24T13:08:20.078Z",
+      "lastRecalledAt": "2026-06-24T13:12:36.099Z",
+      "queryHashes": [
+        "23db0913a58d",
+        "f949b14b772c"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "tabler-chart-bar-popular",
+        "tabler-chart-bar",
+        "template-literal",
+        "23/23",
+        "ui/status",
+        "ordering/badges",
+        "topics/todokit/index.html",
+        "topics/todokit/app.js"
+      ]
+    },
+    "memory:memory/2026-06-23.md:108:121": {
+      "key": "memory:memory/2026-06-23.md:108:121",
+      "path": "memory/2026-06-23.md",
+      "startLine": 108,
+      "endLine": 121,
+      "source": "memory",
+      "snippet": "- Migrated `todokit-data.json` and `taskit-data.json` so every task has a `comments` array and old `completionNotes` is cleared/migrated. - Verification: `node --check app.js`, `node --check server.js`, JSON parse checks, no remaining completion-notes app refs, and live `/api/state` smoke test on PORT=8796 returned 2 projects / 13 tasks / 13 comment arrays. ## TodoKit Latest Comment / Settings Button Fix - Adjusted TodoKit project title row so `btn-project-settings` is 24x24 and matches the explicit 24px project title line height. - Replaced the old task ID subtext under each task title in the main project table with the most recent comment text; if no comment exists it shows `No comments y",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.49787139594554897,
+      "maxScore": 0.49787139594554897,
+      "firstRecalledAt": "2026-06-24T13:12:36.099Z",
+      "lastRecalledAt": "2026-06-24T13:12:36.099Z",
+      "queryHashes": [
+        "f949b14b772c"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "todokit-data.json",
+        "taskit-data.json",
+        "cleared/migrated",
+        "app.js",
+        "server.js",
+        "completion-notes",
+        "api/state",
+        "btn-project-settings"
+      ]
+    },
+    "memory:memory/2026-06-20.md:109:139": {
+      "key": "memory:memory/2026-06-20.md:109:139",
+      "path": "memory/2026-06-20.md",
+      "startLine": 109,
+      "endLine": 139,
+      "source": "memory",
+      "snippet": "- Logout clears `jk_session_token` - DB audit item #4 resolved: passwords no longer stored in `jk_users` - All `console.log`/`console.debug` removed from production JS - `.bak` files deleted - `.limit(1000)` added to `shared_jumps` query ## Safari Tabs Recovery - Jeff had ~10 tabs open yesterday (June 19) and lost them - Recovered from Safari history and reopened ~8 tabs: - Claude Platform / Cost - Apple Developer: Programs, Enterprise Program, Account Info, Migrate Individual → Org, D-U-N-S Lookup - Tabler Icons - Proton Mail inbox ## JumpKit Release Checklist Reminder - Must add: \"Confirm Lemon Squeezy is in non-test mode\" to deployment checklist - Mac testing must complete befor",
+      "recallCount": 3,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 1.2513540744781495,
+      "maxScore": 0.44409682154655455,
+      "firstRecalledAt": "2026-06-24T13:12:36.099Z",
+      "lastRecalledAt": "2026-06-25T12:22:15.467Z",
+      "queryHashes": [
+        "f949b14b772c",
+        "50c9608868a6",
+        "5936fbae6e0d"
+      ],
+      "recallDays": [
+        "2026-06-24",
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "jk-session-token",
+        "jk-users",
+        "console.log",
+        "console.debug",
+        "shared-jumps",
+        "d-u-n-s",
+        "non-test",
+        "logout"
+      ]
+    },
+    "memory:memory/2026-06-23.md:56:66": {
+      "key": "memory:memory/2026-06-23.md:56:66",
+      "path": "memory/2026-06-23.md",
+      "startLine": 56,
+      "endLine": 66,
+      "source": "memory",
+      "snippet": "- Verification: `node --check app.js`, `node --check server.js`, JSON parse of `todokit-data.json`, grep for browser storage refs, and live GET/POST smoke test on PORT=8791 all passed. ## TodoKit LocalStorage Recovery - Jeff noticed data disappeared after JSON persistence switch. Root cause: existing data was still in Safari/WebKit localStorage under key `todokit_data`; the new JSON file had been initialized empty. - Recovered Safari localStorage from `~/Library/Containers/com.apple.Safari/Data/Library/WebKit/WebsiteData/.../LocalStorage/localstorage.sqlite3` by copying the SQLite DB/WAL and parsing key `todokit_data`. - Restored `/Topics/TodoKit/todokit-data.json` with 2 projects and 12 ta",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.8269000381231307,
+      "maxScore": 0.4431132584810257,
+      "firstRecalledAt": "2026-06-24T13:12:36.099Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
+      "queryHashes": [
+        "f949b14b772c",
+        "50c9608868a6"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "app.js",
+        "server.js",
+        "todokit-data.json",
+        "get/post",
+        "safari/webkit",
+        "todokit-data",
+        "db/wal",
+        "topics/todokit/todokit-data.json"
+      ]
+    },
+    "memory:memory/2026-06-23.md:63:74": {
+      "key": "memory:memory/2026-06-23.md:63:74",
+      "path": "memory/2026-06-23.md",
+      "startLine": 63,
+      "endLine": 74,
+      "source": "memory",
+      "snippet": "- Verification: `node --check app.js`, `node --check server.js`, JSON count check, and live `/api/state` server check returned 2 projects / 12 tasks. ## JumpKit Session Conflict Data-Loss Fix - Investigated bug where forcing a second login (`Log out other device & continue`) could make the logged-out machine's personal jumps disappear on next login. - Root cause/risk found in `/Topics/JumpKit/app/js/app.js`: app startup deleted all legacy `jk_jumps_*`, `jk_cols_*`, `jk_clicks_*`, and `jk_prefs_*` localStorage keys after `DB.init()`. In browser/dev fallback mode those keys are the primary data store, so a forced logout/re-login cycle could reload after the app had erased its own persisted da",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4324141651391983,
+      "maxScore": 0.4324141651391983,
+      "firstRecalledAt": "2026-06-24T13:15:38.191Z",
+      "lastRecalledAt": "2026-06-24T13:15:38.191Z",
+      "queryHashes": [
+        "50c9608868a6"
+      ],
+      "recallDays": [
+        "2026-06-24"
+      ],
+      "conceptTags": [
+        "app.js",
+        "server.js",
+        "api/state",
+        "data-loss",
+        "logged-out",
+        "cause/risk",
+        "topics/jumpkit/app/js/app.js",
+        "jk-jumps"
+      ]
+    },
+    "memory:memory/2026-06-20.md:16:44": {
+      "key": "memory:memory/2026-06-20.md:16:44",
+      "path": "memory/2026-06-20.md",
+      "startLine": 16,
+      "endLine": 44,
+      "source": "memory",
+      "snippet": "- Future feature: add confirmation modal for risky extensions on personal jumps too (tracked in JUMPKIT_DOCS.html) ## JumpKit Tests ### Test fixes this session - **Test 382**: Confirmed `platforms: ['win']` — Windows only ✅ - **Test 23**: Fixed `renderAdmin is not defined` error by loading `js/admin.js` via `loadScript()` before calling `renderAdmin()` - **Mark as Skipped bug**: Two bugs fixed: 1. `_buildTestDetailContent` had no `state === 'skip'` branch → added proper branch with gray minus icon + \"Skipped\" label 2. \"Mark as Skipped\" button remained visible after already skipped → now hides when state is already `skip` - **Test 376 prompt**: Jeff asked to update end of prompt wording",
+      "recallCount": 2,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.8009684532880783,
+      "maxScore": 0.42037010192871094,
+      "firstRecalledAt": "2026-06-24T13:15:38.191Z",
+      "lastRecalledAt": "2026-06-25T12:22:15.467Z",
+      "queryHashes": [
+        "50c9608868a6",
+        "5936fbae6e0d"
+      ],
+      "recallDays": [
+        "2026-06-24",
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "jumpkit-docs.html",
+        "js/admin.js",
+        "future",
+        "feature",
+        "add",
+        "confirmation",
+        "modal",
+        "risky"
+      ]
+    },
+    "memory:memory/2026-06-24.md:1:17": {
+      "key": "memory:memory/2026-06-24.md:1:17",
+      "path": "memory/2026-06-24.md",
+      "startLine": 1,
+      "endLine": 17,
+      "source": "memory",
+      "snippet": "## TodoKit UI fixes — 2026-06-24 - Confirmed JumpKit todo SOP in AGENTS.md: JumpKit task lists go into TodoKit → JumpKit project JSON, not just chat/memory. - TodoKit edit task modal polish: default Responsible dropdown includes/defaults to Jeff when blank/new, comment author custom select syncs when editing, comment Add/Update button keeps icon styling, and Cancel Edit gets a visible background. ## JumpKit TodoKit comment style - Jeff preference: for JumpKit TodoKit tasks, after changes add a very brief task comment in `todokit-data.json` with what changed and whether Jeff should check. ## JumpKit forced logout recovery - JumpKit forced logout bug: added local recovery snapshots before f",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4643288433551788,
+      "maxScore": 0.4643288433551788,
+      "firstRecalledAt": "2026-06-25T12:22:15.467Z",
+      "lastRecalledAt": "2026-06-25T12:22:15.467Z",
+      "queryHashes": [
+        "5936fbae6e0d"
+      ],
+      "recallDays": [
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "agents.md",
+        "chat/memory",
+        "includes/defaults",
+        "blank/new",
+        "add/update",
+        "todokit-data.json",
+        "todokit",
+        "fixes"
+      ]
+    },
+    "memory:memory/2026-06-14.md:49:86": {
+      "key": "memory:memory/2026-06-14.md:49:86",
+      "path": "memory/2026-06-14.md",
+      "startLine": 49,
+      "endLine": 86,
+      "source": "memory",
+      "snippet": "- 138–139: New team creation modal + real Supabase insert/cleanup round-trip - 140: Team password change (wrong password → valid:false, manual step for correct) - Total test count: 140 (pre-existing duplicate IDs 53/54 noted, not introduced today) - JUMPKIT_DOCS.html updated to reflect new test count ### Email Gap Analysis - Identified 3 missing email scenarios: - (a) New team created → owner — still not implemented (low priority) - (b) Member joined → owner — ✅ implemented today - (c) Member removed → removed member — ✅ implemented today --- ## Technical Notes - Supabase CLI is outdated: current `v2.75.0`, latest `v2.106.0` — `brew upgrade supabase` when ready - Safari won't op",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.4149608910083771,
+      "maxScore": 0.4149608910083771,
+      "firstRecalledAt": "2026-06-25T12:22:15.467Z",
+      "lastRecalledAt": "2026-06-25T12:22:15.467Z",
+      "queryHashes": [
+        "5936fbae6e0d"
+      ],
+      "recallDays": [
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "insert/cleanup",
+        "round-trip",
+        "pre-existing",
+        "53/54",
+        "jumpkit-docs.html",
+        "v2.75.0",
+        "v2.106.0",
+        "new"
+      ]
+    },
+    "memory:memory/2026-06-25.md:1:6": {
+      "key": "memory:memory/2026-06-25.md:1:6",
+      "path": "memory/2026-06-25.md",
+      "startLine": 1,
+      "endLine": 6,
+      "source": "memory",
+      "snippet": "## JumpKit DB audit change plan — 2026-06-25 - Jeff accepted audit item #6 (auto-backup behavior) as-is for now and asked to skip item #2 (dev/prod Supabase separation) for now. - Added TodoKit JumpKit task `auto_db_audit_y2y1yog2` titled \"Fix database audit release blockers\" with no code implementation. - Plan covers: untrack secrets/temp files + rotate Apple password if pushed, sanitize logs, tighten SQLite IPC scoping, and whitelist SQLite migrations.",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.5314229816198348,
+      "maxScore": 0.5314229816198348,
+      "firstRecalledAt": "2026-06-25T12:24:30.512Z",
+      "lastRecalledAt": "2026-06-25T12:24:30.512Z",
+      "queryHashes": [
+        "d10aafddff5c"
+      ],
+      "recallDays": [
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "backup",
+        "auto-backup",
+        "as-is",
+        "dev/prod",
+        "auto-db-audit-y2y1yog2",
+        "secrets/temp",
+        "jumpkit",
+        "audit"
+      ]
+    },
+    "memory:memory/2026-06-24.md:46:57": {
+      "key": "memory:memory/2026-06-24.md:46:57",
+      "path": "memory/2026-06-24.md",
+      "startLine": 46,
+      "endLine": 57,
+      "source": "memory",
+      "snippet": "- JumpKit import save modal: Jeff saw \"Import Save Failed… saveColumns failed.\" Root cause likely Electron IPC exists but SQLite layer returns ok:false/no db. Patched DB to always write jk_* local fallback keys, mark SQLite unavailable on ok:false, and reload fallback data when Electron getters return empty data. ## JumpKit fallback columns render fix - JumpKit fallback render fix: Jeff saw Home count 80 jumps but Jumps page missing imports; console showed SQLite unavailable fallback. Found DB init loaded fallback then re-fetched empty SQLite columns and overwrote fallback columns. Patched to skip fresh SQLite column reload when SQLite is marked unavailable. ## JumpKit recovered duplicate",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.39943575263023373,
+      "maxScore": 0.39943575263023373,
+      "firstRecalledAt": "2026-06-25T12:24:30.512Z",
+      "lastRecalledAt": "2026-06-25T12:24:30.512Z",
+      "queryHashes": [
+        "d10aafddff5c"
+      ],
+      "recallDays": [
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "false/no",
+        "re-fetched",
+        "jumpkit",
+        "import",
+        "save",
+        "modal",
+        "jeff",
+        "saw"
+      ]
+    },
+    "memory:memory/2026-06-25.md:119:128": {
+      "key": "memory:memory/2026-06-25.md:119:128",
+      "path": "memory/2026-06-25.md",
+      "startLine": 119,
+      "endLine": 128,
+      "source": "memory",
+      "snippet": "- Jeff reported: after Clear Session → Yes, Clear Session, Manage Testing re-rendered as reset, but clicking Start New Testing Session still showed Replace Active Session. - Root cause likely stale/live `jk_deploy_config.version` being read by the Start New Session click handler even after the modal had re-rendered in no-session mode. The handler checked live `_getReleaseState()?.version`, not the modal-open state. - Patched `app/js/tests.js`: added `_clearReleaseSessionState(preserve)` that removes `jk_deploy_config` first, then writes back only preserved non-session fields (currently folder), preventing leftover version/results fields. Updated Clear Session confirm to use it. - Patched Sta",
+      "recallCount": 1,
+      "dailyCount": 0,
+      "groundedCount": 0,
+      "totalScore": 0.7606238202076544,
+      "maxScore": 0.7606238202076544,
+      "firstRecalledAt": "2026-06-25T14:30:50.316Z",
+      "lastRecalledAt": "2026-06-25T14:30:50.316Z",
+      "queryHashes": [
+        "9cbd98f000f6"
+      ],
+      "recallDays": [
+        "2026-06-25"
+      ],
+      "conceptTags": [
+        "re-rendered",
+        "stale/live",
+        "jk-deploy-config.version",
+        "no-session",
+        "modal-open",
+        "app/js/tests.js",
+        "jk-deploy-config",
+        "non-session"
       ]
     }
   }

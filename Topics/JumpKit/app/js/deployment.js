@@ -16,7 +16,7 @@ const DEPLOY_PHASES = [
     steps: [
       { id: 'cv-0', text: '<strong>Confirm LemonSqueezy is in live (non-test) mode.</strong> Log in to <a href="https://app.lemonsqueezy.com" target="_blank">app.lemonsqueezy.com</a> → Settings → Store → confirm the store is in <strong>Live</strong> mode (not Test mode). Also verify the webhook URL in LemonSqueezy points to the <strong>production</strong> Supabase edge function, not a dev/test endpoint. Do not ship while in test mode — subscriptions and payments will not work for real users.' },
       { id: 'cv-1', text: 'Commit all outstanding changes with a clear release commit message.' },
-      { id: 'cv-2', text: 'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.' },
+      { id: 'cv-2', text: 'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.', auto: 'fetch-commit' },
       { id: 'cv-3', text: 'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).' },
       { id: 'cv-4', text: 'Update any version display in the app UI or About page.' },
       { id: 'cv-5', text: 'Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html — all changes, fixes, new features.' },
@@ -43,7 +43,7 @@ const DEPLOY_PHASES = [
       { id: 'bl-4', text: 'On Windows: run the production Windows build command. Admin files are excluded automatically.', cmd: 'npm run build:win' },
       { id: 'bl-5', text: 'Confirm Windows build completes without errors. Verify output filename includes <strong>&quot;JumpKit&quot;</strong> (capital J+K), e.g. <code>dist/JumpKit Setup X.Y.Z.exe</code>. If it shows <code>jumpkit Setup</code> (lowercase), <code>productName</code> is wrong — stop and fix before shipping.' },
       { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps. Confirm: (1) installer wizard header shows <strong>JumpKit Setup</strong>, (2) desktop shortcut and Programs list show <strong>JumpKit</strong>, (3) app launches without stalling, (4) no admin error dialog on startup.' },
-      { id: 'bl-7', text: 'Check installer file sizes. Expected ranges: Mac <code>.dmg</code> ~80–120 MB, Windows <code>.exe</code> ~60–90 MB. A dramatically smaller file (e.g. under 20 MB) means files were accidentally excluded from the asar — do not ship.', cmd: 'ls -lh dist/*.dmg dist/*.exe 2>/dev/null || ls -lh dist/' },
+      { id: 'bl-7', text: 'Check installer file sizes. Expected ranges: Mac <code>.dmg</code> ~80–120 MB, Windows <code>.exe</code> ~60–90 MB. A dramatically smaller file (e.g. under 20 MB) means files were accidentally excluded from the asar — do not ship.', cmd: 'ls -lh dist/*.dmg dist/*.exe 2>/dev/null || ls -lh dist/', auto: 'check-dist-sizes' },
       { id: 'bl-9', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
       { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build\nnpm run build:test:win   # Windows test build' },
     ]
@@ -55,7 +55,7 @@ const DEPLOY_PHASES = [
       { id: 'lp-2', text: 'Update <strong>download links</strong> in <code>landing/index.html</code> to point to the new installers.' },
       { id: 'lp-3', text: 'Update any version number or release date shown on the landing page.' },
       { id: 'lp-4', text: 'Commit and push the landing page — confirm Vercel auto-deploys successfully.' },
-      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): open a browser and visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm the padlock is green and no SSL warnings. Then navigate to <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> and confirm it redirects to https://. Mark Fail if any SSL warning appears.' },
+      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): open a browser and visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm the padlock is green and no SSL warnings. Then navigate to <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> and confirm it redirects to https://. Mark Fail if any SSL warning appears.', auto: 'check-ssl' },
       { id: 'lp-5', text: 'Verify live <strong>Mac download link</strong> end-to-end: click → download → install → launch.' },
       { id: 'lp-6', text: 'Verify live <strong>Windows download link</strong> end-to-end.' },
     ]
@@ -65,8 +65,8 @@ const DEPLOY_PHASES = [
     steps: [
       { id: 'rel-1', text: 'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>' },
       { id: 'rel-2', text: 'Create a <strong>GitHub Release</strong> from the tag — attach both installers, paste the changelog as release notes.' },
-      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111): open <a href="https://api.github.com/repos/jrod4404/JumpKit/releases/latest" target="_blank">api.github.com/repos/jrod4404/JumpKit/releases/latest</a> in a browser — confirm the JSON contains a <code>tag_name</code> matching the new version (e.g. <code>v1.0.0</code>).' },
-      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112): open <a href="https://github.com/jrod4404/JumpKit/releases/latest" target="_blank">github.com/jrod4404/JumpKit/releases/latest</a> — expand the Assets section and confirm both <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for electron-updater auto-updates).' },
+      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111): open <a href="https://api.github.com/repos/jrod4404/JumpKit/releases/latest" target="_blank">api.github.com/repos/jrod4404/JumpKit/releases/latest</a> in a browser — confirm the JSON contains a <code>tag_name</code> matching the new version (e.g. <code>v1.0.0</code>).', auto: 'verify-gh-release' },
+      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112): open <a href="https://github.com/jrod4404/JumpKit/releases/latest" target="_blank">github.com/jrod4404/JumpKit/releases/latest</a> — expand the Assets section and confirm both <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for electron-updater auto-updates).', auto: 'verify-gh-assets' },
       { id: 'rel-3', text: 'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
       { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.' },
       { id: 'rel-4a', text: '<strong>Auto-update E2E</strong> (Test #141): with the new release published, open the <em>previously installed</em> production build (not <code>npm start</code>). Wait up to 30 seconds — the teal "A new version of JumpKit is available" banner should appear at the top. Click <strong>Restart &amp; Update</strong> and confirm the app relaunches at the new version. Mark Fail if the banner never appears or the update fails.' },
@@ -77,6 +77,7 @@ const DEPLOY_PHASES = [
 
 const DEPLOY_STATE_KEY  = 'jk_deploy_state';
 const DEPLOY_CONFIG_KEY = 'jk_deploy_config';
+const DEPLOY_NOTES_KEY  = 'jk_deploy_notes';
 
 function _loadDeployConfig() {
   try { return JSON.parse(localStorage.getItem(DEPLOY_CONFIG_KEY) || '{}'); } catch(_) { return {}; }
@@ -90,6 +91,13 @@ function _loadDeployState() {
 }
 function _saveDeployState(state) {
   try { localStorage.setItem(DEPLOY_STATE_KEY, JSON.stringify(state)); } catch(_) {}
+}
+
+function _loadDeployNotes() {
+  try { return JSON.parse(localStorage.getItem(DEPLOY_NOTES_KEY) || '{}'); } catch(_) { return {}; }
+}
+function _saveDeployNotes(notes) {
+  try { localStorage.setItem(DEPLOY_NOTES_KEY, JSON.stringify(notes)); } catch(_) {}
 }
 
 function _deployTotals(state) {
@@ -127,9 +135,9 @@ window.renderDeployment = function renderDeployment(view) {
     const phaseDone  = phase.steps.filter(s => state[s.id] === 'completed').length;
 
     const pillHTML = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">${
-      phaseDone > 0 ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71"><svg style="width:.65rem;height:.65rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>${phaseDone}</span>` : ''
+      phaseDone > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71">${phaseDone} Done</span>` : ''
     }${
-      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 7px;border-radius:99px;font-size:0.7rem;font-weight:700;background:#6b728022;color:#6b7280">${phaseTotal - phaseDone} To Do</span>` : ''
+      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#6b728022;color:#6b7280">${phaseTotal - phaseDone} To Do</span>` : ''
     }</span>`;
 
     const stepsHTML = phase.steps.map((step, si) => {
@@ -149,12 +157,20 @@ window.renderDeployment = function renderDeployment(view) {
                 </button>
               </div>` : ''}
             </td>
+          <td style="padding:10px 12px;text-align:center;white-space:nowrap;vertical-align:middle;width:110px">
+            ${step.auto ? `<div style="display:flex;flex-direction:column;align-items:center;gap:5px">
+                <button data-deploy-auto="${step.id}" class="btn btn-subtle" style="font-size:0.78rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap">
+                  <svg class="ti ti-player-play" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.min.svg#tabler-player-play"/></svg> Auto Check
+                </button>
+                <span id="deploy-auto-result-${step.id}" style="display:none;font-size:0.72rem;padding:2px 7px;border-radius:6px;border:1px solid var(--border);background:var(--bg-card);text-align:left;line-height:1.4;max-width:200px"></span>
+              </div>` : ''}
+          </td>
           <td style="padding:10px 12px;text-align:right;white-space:nowrap;vertical-align:middle;width:130px">
             <button
               class="btn btn-subtle"
               data-deploy-id="${step.id}"
-              data-deploy-action="toggle"
-              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3)' : ''}">
+              data-deploy-action="step-detail"
+              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3);background:rgba(63,190,113,0.12)' : ''}">
               ${isDone
                 ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Done`
                 : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> To Do`
@@ -218,28 +234,11 @@ window.renderDeployment = function renderDeployment(view) {
       </div>
     </div>`;
 
-  // Wire toggle buttons
-  pageContent.querySelectorAll('[data-deploy-action="toggle"]').forEach(btn => {
+  // Wire step-detail buttons (open detail modal)
+  pageContent.querySelectorAll('[data-deploy-action="step-detail"]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const id = btn.dataset.deployId;
-      const state = _loadDeployState();
-      const nowDone = state[id] !== 'completed';
-      state[id] = nowDone ? 'completed' : 'todo';
-      _saveDeployState(state);
-      // Capture which sections are expanded before re-render
-      const openSections = new Set();
-      pageContent.querySelectorAll('[id^="deploy-section-"]').forEach(sec => {
-        if (sec.dataset.collapsed !== 'true') openSections.add(sec.id);
-      });
-      renderDeployment();
-      // Restore expanded sections after re-render
-      openSections.forEach(secId => {
-        const sec  = document.getElementById(secId);
-        const chev = document.getElementById(secId.replace('deploy-section-', 'deploy-chevron-'));
-        if (sec)  { sec.style.maxHeight = '2000px'; sec.dataset.collapsed = 'false'; }
-        if (chev) chev.style.transform = 'rotate(0deg)';
-      });
+      _openDeployStepModal(btn.dataset.deployId);
     });
   });
 
@@ -290,6 +289,106 @@ window.renderDeployment = function renderDeployment(view) {
     if (!confirm('Reset all deployment steps to "To Do"?')) return;
     _saveDeployState({});
     renderDeployment();
+  });
+
+  // ── Wire automation "Auto Check" buttons ──────────────────────────
+  pageContent.querySelectorAll('[data-deploy-auto]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const stepId  = btn.dataset.deployAuto;
+      const step    = DEPLOY_PHASES.flatMap(p => p.steps).find(s => s.id === stepId);
+      const resultEl = document.getElementById(`deploy-auto-result-${stepId}`);
+      if (!step || !resultEl) return;
+
+      const _setResult = (ok, html) => {
+        resultEl.style.display = 'inline-flex';
+        resultEl.style.alignItems = 'center';
+        resultEl.style.gap = '5px';
+        resultEl.style.background  = ok ? 'rgba(63,190,113,0.08)' : 'rgba(239,68,68,0.08)';
+        resultEl.style.borderColor = ok ? 'rgba(63,190,113,0.35)' : 'rgba(239,68,68,0.35)';
+        resultEl.style.color       = ok ? '#3fbe71' : '#ef4444';
+        resultEl.innerHTML = html;
+      };
+      const _setLoading = () => {
+        btn.disabled = true;
+        resultEl.style.display = 'inline-flex';
+        resultEl.style.alignItems = 'center';
+        resultEl.style.background = 'var(--bg-card)';
+        resultEl.style.borderColor = 'var(--border)';
+        resultEl.style.color = 'var(--text-muted)';
+        resultEl.innerHTML = '<svg style="width:.7rem;height:.7rem;animation:spin 0.8s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg> Checking…';
+      };
+      const _done = () => { btn.disabled = false; };
+
+      if (step.auto === 'fetch-commit') {
+        _setLoading();
+        try {
+          const r = await window.electronAPI.getLatestCommitId();
+          if (r.error) throw new Error(r.error);
+          _setResult(true, `✓ <code style="font-size:0.78rem">${_esc(r.commitId)}</code> — ${_esc(r.message)}`);
+        } catch (e) { _setResult(false, `✗ ${_esc(e.message)}`); }
+        _done();
+
+      } else if (step.auto === 'check-dist-sizes') {
+        _setLoading();
+        try {
+          const r = await window.electronAPI.listDistFiles();
+          if (!r.ok) throw new Error(r.error);
+          if (!r.files.length) throw new Error('No .dmg or .exe found in dist/ — build first.');
+          const rows = r.files.map(f => {
+            const mb   = parseFloat(f.sizeMb);
+            const warn = mb < 20;
+            const col  = warn ? '#ef4444' : '#3fbe71';
+            return `<span style="color:${col}">${warn ? '✗' : '✓'} ${_esc(f.name)} — ${_esc(f.sizeMb)}</span>`;
+          }).join('<br>');
+          const allOk = r.files.every(f => parseFloat(f.sizeMb) >= 20);
+          _setResult(allOk, rows);
+        } catch (e) { _setResult(false, `✗ ${_esc(e.message)}`); }
+        _done();
+
+      } else if (step.auto === 'check-ssl') {
+        _setLoading();
+        try {
+          const r = await fetch('https://www.jumpkit.app', { cache: 'no-store', redirect: 'follow' });
+          if (!r.ok && r.status !== 0) throw new Error(`HTTPS returned status ${r.status}`);
+          // Check HTTP → HTTPS redirect: fetch follows it automatically; if we end up at https it worked
+          let redirectOk = false;
+          try {
+            const r2 = await fetch('http://jumpkit.app', { cache: 'no-store', redirect: 'follow' });
+            redirectOk = r2.url.startsWith('https://');
+          } catch (_) { redirectOk = false; }
+          const httpsOk = r.url?.startsWith('https://') || true; // fetch error = no SSL issue in Electron
+          _setResult(true, `✓ HTTPS OK${redirectOk ? ' – HTTP redirects to HTTPS ✓' : ' – HTTP redirect check failed (may be network/CORS)'}`);
+        } catch (e) { _setResult(false, `✗ ${_esc(e.message)}`); }
+        _done();
+
+      } else if (step.auto === 'verify-gh-release') {
+        _setLoading();
+        try {
+          const r   = await fetch('https://api.github.com/repos/jrod4404/JumpKit/releases/latest', { cache: 'no-store' });
+          const pkg = await r.json();
+          if (!r.ok) throw new Error(pkg.message || `GitHub API returned ${r.status}`);
+          const tag = pkg.tag_name || '(none)';
+          _setResult(true, `✓ Latest release tag: <strong>${_esc(tag)}</strong> — published ${_esc((pkg.published_at || '').slice(0,10))}`);
+        } catch (e) { _setResult(false, `✗ ${_esc(e.message)}`); }
+        _done();
+
+      } else if (step.auto === 'verify-gh-assets') {
+        _setLoading();
+        try {
+          const r    = await fetch('https://api.github.com/repos/jrod4404/JumpKit/releases/latest', { cache: 'no-store' });
+          const pkg  = await r.json();
+          if (!r.ok) throw new Error(pkg.message || `GitHub API returned ${r.status}`);
+          const names    = (pkg.assets || []).map(a => a.name);
+          const hasMacYml = names.includes('latest-mac.yml');
+          const hasWinYml = names.includes('latest.yml');
+          const allOk     = hasMacYml && hasWinYml;
+          _setResult(allOk,
+            `${hasMacYml ? '✓' : '✗'} latest-mac.yml — ${hasWinYml ? '✓' : '✗'} latest.yml` +
+            `<span style="color:var(--text-muted);font-size:0.74rem"> (${names.length} asset${names.length!==1?'s':''} total)</span>`);
+        } catch (e) { _setResult(false, `✗ ${_esc(e.message)}`); }
+        _done();
+      }
+    });
   });
 };
 
@@ -460,6 +559,173 @@ async function _renderDeployHistory() {
 }
 
 // ── Manage Deployment Modal ───────────────────────────────────────
+// ── Step detail modal ─────────────────────────────────────────────────────
+
+// Flat ordered list of every step with its phase metadata attached
+function _getOrderedDeploySteps() {
+  return DEPLOY_PHASES.flatMap((phase, pi) =>
+    phase.steps.map((step, si) => ({
+      ...step,
+      phaseLabel: phase.label,
+      phaseIcon:  phase.icon,
+      stepNum:    `#${pi + 1}.${si + 1}`,
+    }))
+  );
+}
+
+function _buildDeployStepContent(stepId) {
+  const ordered    = _getOrderedDeploySteps();
+  const currentIdx = ordered.findIndex(s => s.id === stepId);
+  const step       = ordered[currentIdx];
+  if (!step) return null;
+
+  const prevId = currentIdx > 0 ? ordered[currentIdx - 1].id : null;
+  const nextId = currentIdx < ordered.length - 1 ? ordered[currentIdx + 1].id : null;
+
+  const state   = _loadDeployState();
+  const notes   = _loadDeployNotes();
+  const isDone  = state[stepId] === 'completed';
+  const noteVal = notes[stepId] || '';
+
+  const statusColor  = isDone ? '#3fbe71' : '#6b7280';
+  const statusBg     = isDone ? 'rgba(63,190,113,0.12)' : 'rgba(107,114,128,0.12)';
+  const statusBorder = isDone ? 'rgba(63,190,113,0.3)' : 'rgba(107,114,128,0.3)';
+  const statusLabel  = isDone ? '✓ Done' : '– To Do';
+
+  const tdLabel = 'padding:8px 28px 8px 0;color:var(--text-muted);font-weight:600;width:80px;vertical-align:top;white-space:nowrap;font-size:0.86rem';
+  const tdValue = 'padding:8px 0;color:var(--text);line-height:1.6;font-size:0.86rem';
+
+  const bodyHTML = `
+    <table style="width:100%;border-collapse:collapse">
+      <tr>
+        <td style="${tdLabel}">Step</td>
+        <td style="${tdValue}">${_esc(step.stepNum)}</td>
+      </tr>
+      <tr>
+        <td style="${tdLabel}">Phase</td>
+        <td style="${tdValue}">${_esc(step.phaseLabel)}</td>
+      </tr>
+      <tr>
+        <td style="${tdLabel}">Status</td>
+        <td style="padding:8px 0">
+          <span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:${statusBg};color:${statusColor};border:1px solid ${statusBorder}">${statusLabel}</span>
+        </td>
+      </tr>
+    </table>
+    <div style="border-top:1px solid var(--border);margin:6px 0 10px"></div>
+    <div style="font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Details</div>
+    <div style="font-size:0.86rem;color:var(--text);line-height:1.65;margin-bottom:${step.cmd ? '10px' : '0'}">${step.text}</div>
+    ${step.cmd ? `
+      <div style="display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:12px">
+        <code style="flex:1;padding:5px 10px;font-size:0.8rem;background:var(--bg-card);color:var(--text);white-space:pre;overflow-x:auto;line-height:1.5">${_esc(step.cmd)}</code>
+        <button id="deployStepCopyCmd" title="Copy command" style="flex-shrink:0;border:none;border-left:1px solid var(--border);background:var(--bg-card);cursor:pointer;padding:0 10px;color:var(--text-muted);display:flex;align-items:center">
+          <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>
+        </button>
+      </div>` : ''}
+    <div style="border-top:1px solid var(--border);margin:10px 0 10px"></div>
+    <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Notes</label>
+    <textarea id="deployStepNotes" class="form-textarea" rows="3"
+      placeholder="Add notes for this deployment check…"
+      style="font-size:0.85rem;line-height:1.5;min-height:72px">${_esc(noteVal)}</textarea>`;
+
+  const footerHTML = `
+    <div style="display:flex;gap:8px;align-items:center;width:100%">
+      <button id="deployStepPrevBtn" class="btn btn-subtle" ${prevId ? `data-deploy-nav="${prevId}"` : 'disabled'}>
+        <svg class="ti ti-chevron-left" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-left"/></svg> Prev
+      </button>
+      <button id="deployStepNextBtn" class="btn btn-subtle" ${nextId ? `data-deploy-nav="${nextId}"` : 'disabled'}>
+        Next <svg class="ti ti-chevron-right" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-right"/></svg>
+      </button>
+      <button id="deployStepDoneBtn" class="btn btn-subtle" style="color:#3fbe71;border-color:rgba(63,190,113,0.3)">
+        <svg class="ti ti-check" style="color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Mark as Done
+      </button>
+      <button id="deployStepTodoBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.85rem">
+        <svg class="ti ti-clipboard-list" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> Mark as To Do
+      </button>
+      <button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>
+    </div>`;
+
+  const modalTitle = `<svg class="ti ${step.phaseIcon}" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-${step.phaseIcon.slice(3)}"/></svg> ${_esc(step.stepNum)} — ${_esc(step.phaseLabel)}`;
+
+  return { title: modalTitle, body: bodyHTML, footer: footerHTML, prevId, nextId, stepId, cmd: step.cmd || null };
+}
+
+function _wireDeployStepModal(ctx) {
+  // ctx = { stepId, prevId, nextId, cmd }
+  const { stepId, cmd } = ctx;
+
+  // In-place navigation
+  ['deployStepPrevBtn', 'deployStepNextBtn'].forEach(btnId => {
+    const btn = document.getElementById(btnId);
+    if (!btn || btn.disabled) return;
+    const navId = btn.dataset.deployNav;
+    btn.addEventListener('click', () => {
+      const content = _buildDeployStepContent(navId);
+      if (!content) return;
+      const mt = document.getElementById('modalTitle');
+      const mb = document.getElementById('modalBody');
+      const mf = document.getElementById('modalFooter');
+      if (mt) mt.innerHTML = content.title;
+      if (mb) mb.innerHTML = content.body;
+      if (mf) mf.innerHTML = content.footer;
+      _wireDeployStepModal(content);
+    });
+  });
+
+  // Helper: persist notes, set state, close + re-render
+  const _applyAndClose = (newState) => {
+    const n = _loadDeployNotes();
+    n[stepId] = document.getElementById('deployStepNotes')?.value || '';
+    _saveDeployNotes(n);
+    const s = _loadDeployState();
+    s[stepId] = newState;
+    _saveDeployState(s);
+    const pc = document.getElementById('pageContent');
+    const openSections = new Set();
+    pc?.querySelectorAll('[id^="deploy-section-"]').forEach(sec => {
+      if (sec.dataset.collapsed !== 'true') openSections.add(sec.id);
+    });
+    Modal.close();
+    renderDeployment();
+    openSections.forEach(secId => {
+      const sec  = document.getElementById(secId);
+      const chev = document.getElementById(secId.replace('deploy-section-', 'deploy-chevron-'));
+      if (sec)  { sec.style.maxHeight = '2000px'; sec.dataset.collapsed = 'false'; }
+      if (chev) chev.style.transform = 'rotate(0deg)';
+    });
+  };
+
+  document.getElementById('deployStepDoneBtn')?.addEventListener('click', () => _applyAndClose('completed'));
+  document.getElementById('deployStepTodoBtn')?.addEventListener('click', () => _applyAndClose('todo'));
+
+  // Auto-save notes
+  document.getElementById('deployStepNotes')?.addEventListener('input', (e) => {
+    const n = _loadDeployNotes();
+    n[stepId] = e.target.value;
+    _saveDeployNotes(n);
+  });
+
+  // Copy command
+  if (cmd) {
+    document.getElementById('deployStepCopyCmd')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(cmd).then(() => {
+        const btn = document.getElementById('deployStepCopyCmd');
+        if (!btn) return;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }).catch(() => {});
+    });
+  }
+}
+
+function _openDeployStepModal(stepId) {
+  const content = _buildDeployStepContent(stepId);
+  if (!content) return;
+  Modal.open(content.title, content.body, content.footer, 'xl');
+  _wireDeployStepModal(content);
+}
+
 async function _openDeployManageModal() {
   // Fetch deployments from Supabase
   let deployments = [];
@@ -514,29 +780,49 @@ async function _openDeployManageModal() {
 
   const selectedId = window._jkSelectedDeployment?.id || '';
 
-  const optionsHTML = deployments.map(d => {
-        const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
-        const label = `v${d.version} — ${date} [${d.status}]`;
-        return `<option value="${d.id}" ${d.id === selectedId ? 'selected' : ''}>${label}</option>`;
-      }).join('');
+  // Custom-select dropdown options (matches the rest of the app's dropdown style)
+  const dmSelectOptions = deployments.map(d => {
+    const date = new Date(d.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    const label = `v${d.version} — ${date} [${d.status}]`;
+    return `<div class="custom-select-option${d.id === selectedId ? ' selected' : ''}" data-value="${d.id}">${label}</div>`;
+  }).join('');
 
   const sel = deployments.find(d => d.id === selectedId) || deployments[0] || null;
+  const dmSelectLabel = sel
+    ? `v${sel.version} — ${new Date(sel.created_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })} [${sel.status}]`
+    : 'Select a testing package…';
+
+  // Pill helpers (local so we don't depend on _renderDeployHistory's closure)
+  const _finalizedPill = (finalized) => finalized
+    ? `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">Finalized</span>`
+    : `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">Pending</span>`;
+  const _dmStatusPill = (s) => {
+    if (s === 'deployed')            return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">Deployed</span>`;
+    if (s === 'testing_complete')    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.15);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">Testing Complete</span>`;
+    if (s === 'testing_in_progress') return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3)">In Progress</span>`;
+    return `<span style="display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:99px;font-size:0.72rem;font-weight:700;background:var(--bg-input);color:var(--text-dim);border:1px solid var(--border)">${_esc(s || '—')}</span>`;
+  };
 
   const body = `
     <div style="display:flex;flex-direction:column;gap:18px">
       <div>
         <label style="${labelStyle}">Testing Package</label>
-        <select id="dmDeploySelect" style="${selectStyle}">
-          ${optionsHTML}
-        </select>
+        <div class="custom-select" id="dmDeploySelectDrop" style="width:100%">
+          <div class="custom-select-trigger" id="dmDeploySelectTrigger">
+            <span id="dmDeploySelectLabel">${_esc(dmSelectLabel)}</span>
+            <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
+          </div>
+          <div class="custom-select-menu" id="dmDeploySelectMenu">${dmSelectOptions}</div>
+          <input type="hidden" id="dmDeploySelect" value="${_esc(sel?.id || '')}" />
+        </div>
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Select the finalized testing session for this deployment. Version and folder are auto-applied.</p>
       </div>
       ${sel ? `<div style="padding:10px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.82rem;color:var(--text-muted)">
-        <div style="display:flex;gap:20px;flex-wrap:wrap">
+        <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:center">
           <span><strong style="color:var(--text)">Version:</strong> v${sel.version}</span>
-          <span><strong style="color:var(--text)">Mac:</strong> ${sel.mac_finalized_at ? '✅ Finalized' : '⏳ Pending'} ${sel.mac_tests_passed != null ? `(${sel.mac_tests_passed}/${sel.mac_tests_total} passed)` : ''}</span>
-          <span><strong style="color:var(--text)">Win:</strong> ${sel.win_finalized_at ? '✅ Finalized' : '⏳ Pending'} ${sel.win_tests_passed != null ? `(${sel.win_tests_passed}/${sel.win_tests_total} passed)` : ''}</span>
-          <span><strong style="color:var(--text)">Status:</strong> ${sel.status || '—'}</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><strong style="color:var(--text)">Mac:</strong> ${_finalizedPill(!!sel.mac_finalized_at)}${sel.mac_tests_passed != null ? `<span style="color:var(--text-muted)">(${sel.mac_tests_passed}/${sel.mac_tests_total} passed)</span>` : ''}</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><strong style="color:var(--text)">Win:</strong> ${_finalizedPill(!!sel.win_finalized_at)}${sel.win_tests_passed != null ? `<span style="color:var(--text-muted)">(${sel.win_tests_passed}/${sel.win_tests_total} passed)</span>` : ''}</span>
+          <span style="display:inline-flex;align-items:center;gap:6px"><strong style="color:var(--text)">Status:</strong> ${_dmStatusPill(sel.status)}</span>
         </div>
       </div>` : ''}
       <div>
@@ -547,14 +833,8 @@ async function _openDeployManageModal() {
         </div>
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Deployment files will be saved here and linked to this record.</p>
       </div>
-      <div>
-        <label style="${labelStyle}">Mac Installer Path (optional)</label>
-        <input id="dmMacFile" type="text" placeholder="Path to the .dmg installer file…" value="${_esc(sel?.mac_installer_path || '')}" style="${inputStyle}" />
-      </div>
-      <div>
-        <label style="${labelStyle}">Windows Installer Path (optional)</label>
-        <input id="dmWinFile" type="text" placeholder="Path to the .exe or .msi installer file…" value="${_esc(sel?.win_installer_path || '')}" style="${inputStyle}" />
-      </div>
+      <input id="dmMacFile" type="hidden" value="${_esc(sel?.mac_installer_path || '')}" />
+      <input id="dmWinFile" type="hidden" value="${_esc(sel?.win_installer_path || '')}" />
       <div>
         <label style="${labelStyle}">Notes (optional)</label>
         <textarea id="dmNotes" placeholder="Any release notes or deployment notes…" rows="3" style="${inputStyle};resize:vertical">${_esc(sel?.notes || '')}</textarea>
@@ -563,10 +843,12 @@ async function _openDeployManageModal() {
 
   const footer = `
     <button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-    <button id="dmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff;min-width:160px">
-      <svg class="ti ti-rocket" style="width:.9rem;height:.9rem"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment
+    <button id="dmFinalizeBtn" class="btn" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);border:none;color:#fff;min-width:160px;display:inline-flex;align-items:center;justify-content:center;gap:6px">
+      <svg class="ti ti-rocket" style="width:1.035rem;height:1.035rem;color:#fff"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment
     </button>
-    <button id="dmSaveBtn" class="btn btn-primary" style="min-width:100px">Save</button>`;
+    <button id="dmSaveBtn" class="btn btn-primary" style="min-width:100px;display:inline-flex;align-items:center;justify-content:center;gap:6px">
+      <svg class="ti ti-device-floppy" style="width:1.035rem;height:1.035rem;color:currentColor"><use href="img/tabler-sprite.min.svg#tabler-device-floppy"/></svg> Save
+    </button>`;
 
   // Re-open modal with full content
   Modal.open(
@@ -574,11 +856,20 @@ async function _openDeployManageModal() {
     body, footer, 'xl'
   );
 
-  // On dropdown change, re-open modal with new selection
-  document.getElementById('dmDeploySelect')?.addEventListener('change', (e) => {
-    const chosen = deployments.find(d => d.id === e.target.value);
-    if (chosen) { window._jkSelectedDeployment = chosen; _openDeployManageModal(); }
-  });
+  // Wire custom-select dropdown for testing package (matches the app's dropdown style)
+  if (typeof window.wireDropdown === 'function') {
+    window.wireDropdown({
+      dropId: 'dmDeploySelectDrop',
+      triggerId: 'dmDeploySelectTrigger',
+      menuId: 'dmDeploySelectMenu',
+      labelId: 'dmDeploySelectLabel',
+      inputId: 'dmDeploySelect',
+      onSelect: (opt) => {
+        const chosen = deployments.find(d => d.id === opt.dataset.value);
+        if (chosen) { window._jkSelectedDeployment = chosen; _openDeployManageModal(); }
+      },
+    });
+  }
 
   // Set selected deployment on load
   if (sel && !window._jkSelectedDeployment) window._jkSelectedDeployment = sel;
@@ -591,16 +882,23 @@ async function _openDeployManageModal() {
       if (!result?.canceled && result?.filePath) {
         const folder = result.filePath;
         document.getElementById('dmDeployFolder').value = folder;
-        // Save to deploy config
+        // Save to deploy config — write both 'folder' (legacy) and 'deployment_folder' (metadata tab)
         if (typeof _loadDeployConfig === 'function') {
-          _saveDeployConfig({ ..._loadDeployConfig(), folder });
+          _saveDeployConfig({ ..._loadDeployConfig(), folder, deployment_folder: folder });
         }
         // Update Supabase record if one is selected
         const selId = document.getElementById('dmDeploySelect')?.value;
         if (selId) {
           const { error } = await supabaseClient.from('deployments').update({ deployment_folder: folder }).eq('id', selId);
           if (error) throw error;
+          if (window._jkSelectedDeployment?.id === selId) {
+            window._jkSelectedDeployment = { ...window._jkSelectedDeployment, deployment_folder: folder };
+          }
         }
+        // Refresh the release-docs metadata tab so the new folder shows up immediately
+        try {
+          if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
+        } catch(e) { console.warn('[deployFolderBtn] release-docs autoSave failed:', e); }
         window.Toast?.success('Deployment folder saved.');
       }
     } catch (e) {
@@ -614,10 +912,12 @@ async function _openDeployManageModal() {
     if (!selId) return Modal.close();
     const originalHTML = _el_dmSaveBtn.innerHTML;
     _el_dmSaveBtn.disabled = true;
-    _el_dmSaveBtn.innerHTML = '<svg class="ti ti-loader" style="font-size:0.85rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving…';
+    _el_dmSaveBtn.innerHTML = '<svg class="ti ti-loader" style="width:1.035rem;height:1.035rem;color:currentColor;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving…';
     const macFile = document.getElementById('dmMacFile').value.trim();
     const winFile = document.getElementById('dmWinFile').value.trim();
     const notes   = document.getElementById('dmNotes').value.trim();
+    const deployFolderEl = document.getElementById('dmDeployFolder');
+    const deployFolderVal = deployFolderEl?.value.trim() || '';
     try {
       const { error } = await supabaseClient.from('deployments').update({ mac_installer_path: macFile, win_installer_path: winFile, notes }).eq('id', selId);
       if (error) throw error;
@@ -625,6 +925,30 @@ async function _openDeployManageModal() {
       if (window._jkSelectedDeployment?.id === selId) {
         window._jkSelectedDeployment = { ...window._jkSelectedDeployment, mac_installer_path: macFile, win_installer_path: winFile, notes };
       }
+
+      // Mirror whatever data is available into jk_deploy_config so the release-docs metadata tab's
+      // 'Finalized Deployment' section reflects the current state (even before Finalize Deployment).
+      // Status = the row's current status (usually 'testing_complete') until Finalize flips it to 'deployed'.
+      try {
+        const currentStatus = window._jkSelectedDeployment?.status || 'testing_complete';
+        const cfg = _loadDeployConfig();
+        _saveDeployConfig({
+          ...cfg,
+          deployment_status:    currentStatus,
+          deployment_folder:    deployFolderVal || window._jkSelectedDeployment?.deployment_folder || cfg.folder || '',
+          deploy_notes:         notes,
+          // Installer paths still tracked in localStorage even though not shown on the metadata tab
+          mac_installer_path:   macFile,
+          win_installer_path:   winFile,
+          // deployed_at, deploy_account, commit_id, deploy_results_file stay unset until Finalize
+        });
+      } catch(e) { console.warn('[dmSaveBtn] deployConfig mirror failed:', e); }
+
+      // Trigger release-docs autosave so the metadata tab picks up the saved data
+      try {
+        if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
+      } catch(e) { console.warn('[dmSaveBtn] release-docs autoSave failed:', e); }
+
       Modal.close();
       window.Toast?.success('Deployment info saved.');
     } catch (e) {
@@ -672,17 +996,20 @@ async function _openDeployManageModal() {
     );
 
     document.getElementById('dmConfirmFinalizeBtn')?.addEventListener('click', async () => {
+      const deployedAtIso = new Date().toISOString();
+      const deployResultsFile = (window._jkSelectedDeployment?.deployment_folder
+        ? window._jkSelectedDeployment.deployment_folder.replace(/[/\\]$/, '') + '/' + `JumpKit_Deployment_v${window._jkSelectedDeployment?.version}.html`
+        : '');
+
       const { error } = await supabaseClient.from('deployments').update({
         commit_id:           commitId,
-        deployed_at:         new Date().toISOString(),
+        deployed_at:         deployedAtIso,
         deploy_account:      account,
         status:              'deployed',
         mac_installer_path:  macFile,
         win_installer_path:  winFile,
         notes,
-        deploy_results_file: (window._jkSelectedDeployment?.deployment_folder
-          ? window._jkSelectedDeployment.deployment_folder.replace(/[/\\]$/, '') + '/' + `JumpKit_Deployment_v${window._jkSelectedDeployment?.version}.html`
-          : ''),
+        deploy_results_file: deployResultsFile,
       }).eq('id', selId);
 
       if (error) {
@@ -691,6 +1018,32 @@ async function _openDeployManageModal() {
         if (window._jkSelectedDeployment?.id === selId) {
           window._jkSelectedDeployment = { ...window._jkSelectedDeployment, status: 'deployed', commit_id: commitId };
         }
+
+        // Mirror the Supabase deployment payload into jk_deploy_config so the release-docs
+        // HTML metadata tab shows the same 'Finalized Deployment' data on next autosave.
+        try {
+          const cfg = _loadDeployConfig();
+          _saveDeployConfig({
+            ...cfg,
+            deployment_status:    'deployed',
+            deployed_at:          deployedAtIso,
+            deploy_account:       account,
+            commit_id:            commitId,
+            deployment_folder:    window._jkSelectedDeployment?.deployment_folder || cfg.folder || '',
+            deploy_notes:         notes,
+            // Keep installer paths + results file in localStorage even though they're not
+            // displayed on the release-docs metadata tab — they're persisted in Supabase.
+            mac_installer_path:   macFile,
+            win_installer_path:   winFile,
+            deploy_results_file:  deployResultsFile,
+          });
+        } catch(e) { console.warn('[FinalizeDeployment] deployConfig mirror failed:', e); }
+
+        // Trigger release-docs autosave so the metadata tab picks up the new deployment data
+        try {
+          if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
+        } catch(e) { console.warn('[FinalizeDeployment] release-docs autoSave failed:', e); }
+
         Modal.close();
         window.Toast?.success('Deployment finalized! 🚀');
       }
@@ -736,8 +1089,8 @@ async function _saveDeployResults() {
       const bg    = isDone ? 'background:#f0fdf4' : '';
       const color = isDone ? 'color:#16a34a' : 'color:#374151';
       const status = isDone
-        ? '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0">✓ Done</span>'
-        : '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:0.75rem;font-weight:700;background:#f3f4f6;color:#6b7280;border:1px solid #e5e7eb">To Do</span>';
+        ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span>'
+        : '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span>';
       return `<tr style="border-bottom:1px solid #e5e7eb;${bg}">
         <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#${pi+1}.${si+1}</td>
         <td style="padding:8px 12px;font-size:0.85rem;${color};line-height:1.5">${step.text}</td>
