@@ -14,63 +14,54 @@ const DEPLOY_PHASES = [
   {
     id: 'codeversion', label: 'Code & Version', icon: 'ti-git-commit', color: '#8b5cf6',
     steps: [
-      { id: 'cv-0', text: '<strong>Confirm LemonSqueezy is in live (non-test) mode.</strong> Log in to <a href="https://app.lemonsqueezy.com" target="_blank">app.lemonsqueezy.com</a> → Settings → Store → confirm the store is in <strong>Live</strong> mode (not Test mode). Also verify the webhook URL in LemonSqueezy points to the <strong>production</strong> Supabase edge function, not a dev/test endpoint. Do not ship while in test mode — subscriptions and payments will not work for real users.' },
-      { id: 'cv-1', text: 'Commit all outstanding changes with a clear release commit message.' },
-      { id: 'cv-2', text: 'Note the final <strong>commit ID</strong> (<code>git log --oneline -1</code>) and record it in the changelog.', auto: 'fetch-commit' },
-      { id: 'cv-3', text: 'Update <strong>version number</strong> in <code>app/package.json</code> (semver: major.minor.patch).' },
-      { id: 'cv-4', text: 'Update any version display in the app UI or About page.' },
-      { id: 'cv-5', text: 'Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html — all changes, fixes, new features.' },
-      { id: 'cv-6', text: 'Update <strong>landing page</strong>: bump the version number display and update both download URLs in <code>landing/index.html</code> to point to the new GitHub release assets. Verify the URLs follow the pattern <code>releases/download/vX.Y.Z/JumpKit-X.Y.Z-universal.dmg</code> and <code>releases/download/vX.Y.Z/JumpKit.Setup.X.Y.Z.exe</code>.' },
-      { id: 'cv-7', text: 'Commit the version bump + changelog. Push to GitHub.' },
+      { id: 'cv-0', text: '<strong>Confirm LemonSqueezy is in live (non-test) mode.</strong> Log in to <a href="https://app.lemonsqueezy.com" target="_blank">app.lemonsqueezy.com</a> → Settings → Store → confirm the store is in <strong>Live</strong> mode (not Test mode). Also verify the webhook URL points to the <strong>production</strong> Supabase edge function. Do not ship in test mode.' },
+      { id: 'cv-1', text: 'Commit all outstanding changes with a clear release commit message. Open the step detail to copy the Max prompt.', auto: 'fetch-commit', cmd: 'Pls commit all outstanding changes in the JumpKit app directory with a clear release commit message, then run git log --oneline -1 and report back the final commit ID so I can record it in the changelog.', cmdModalOnly: true },
+      { id: 'cv-3', text: 'Update <strong>version number</strong> in <code>app/package.json</code> (semver) and update any version display in the app UI or About page. Open the step detail to copy the Max prompt.', cmd: 'Pls check the current version in app/package.json and report what it is. Also check if there is a version display in the app UI or About page and report where it is. Do not change anything yet — just report what you find so I can confirm the new version number.', cmdModalOnly: true },
+      { id: 'cv-5', text: 'Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html — all changes, fixes, new features. Open the step detail to copy the Max prompt.', cmd: 'Pls review the recent git commits and the current state of the JumpKit app and draft a full changelog entry for the new release version. List all changes, fixes, and new features in plain English. Do not write to any files yet — just output the draft so I can review and approve it first.', cmdModalOnly: true },
+      { id: 'cv-5a', text: 'Check and refresh <strong>JUMPKIT_DOCS.html</strong> documentation — verify all sections accurately reflect the current codebase. Open the step detail to copy the Max audit prompt. Then save a copy of JUMPKIT_DOCS.html into the deploy folder for this release (e.g. deploy/vX.Y.Z_YYYY-MM-DD/JUMPKIT_DOCS.html).', cmd: 'Please review the entire jumpkit app code base and the entire jumpkit_docs.html document and list out all updates and/or changes needed to correctly reflect the codebase in the html documentation file. Pls do not make any documentation changes but list out one by one which changes you would propose to make.', cmdModalOnly: true },
     ]
   },
   {
     id: 'backup', label: 'Backup', icon: 'ti-device-floppy', color: '#10b981',
     steps: [
-      { id: 'bk-1', text: 'Create a dated code backup: <code>tar -czf app_backups/app_backup_YYYY-MM-DD.tar.gz --exclude=\'./app/node_modules\' ./app ./landing</code>' },
-      { id: 'bk-2', text: 'Confirm the backup saved correctly — spot-check a few files inside the archive.' },
-      { id: 'bk-3', text: 'Note the backup filename in the changelog / release notes.' },
+      { id: 'bk-1', text: 'Create a dated code backup and note the filename in the changelog. Open the step detail to copy the Max prompt.', cmd: 'Pls do a dated full app backup (tar -czf) and save into the app_backups folder using the naming convention and exclusion below:\n\napp_backups/app_backup_YYYY-MM-DD.tar.gz --exclude=\'./app/node_modules\' ./app ./landing', cmdModalOnly: true },
+      { id: 'bk-2', text: 'Confirm the backup saved correctly. Open the step detail to copy the Max prompt.', cmd: 'Pls confirm the most recent backup in the app_backups folder was saved correctly: list the file with its size (ls -lh app_backups/ | tail -5), then run a quick integrity check (tar -tzf <backup-filename> | head -20) and confirm no errors.', cmdModalOnly: true },
     ]
   },
   {
     id: 'build', label: 'Build Installers', icon: 'ti-package', color: '#f97316',
     steps: [
-      { id: 'bl-0', text: '<strong>Verify admin file exclusions are correct</strong> before building — run pre-flight unit test <strong>#379</strong> from the Testing page. It reads <code>package.json</code> and confirms <code>!js/tests.js</code>, <code>!js/deployment.js</code>, and <code>!js/admin.js</code> are all in <code>build.files</code>. Do not build if #379 fails.' },
-      { id: 'bl-1', text: 'On Mac: run the production build command. Admin files are excluded automatically via <code>package.json</code>.', cmd: 'npm run build' },
-      { id: 'bl-2', text: 'Confirm Mac build completes without errors and the <code>.dmg</code> is notarized by Apple. Verify notarization with:', cmd: 'spctl -a -vvv -t install dist/JumpKit-*.dmg' },
-      { id: 'bl-3', text: 'Test Mac installer: install from the <code>.dmg</code> on a clean Mac, launch, log in, do a few jumps. Confirm the startup guard does <strong>not</strong> show an error dialog (would mean admin files leaked into the build).' },
-      { id: 'bl-4-pre', text: '<strong>Before Windows build — verify these production build requirements in <code>package.json</code>:</strong><ul style="margin:6px 0 0 18px;padding:0;line-height:1.8"><li><code>build.productName</code> must be <strong>&quot;JumpKit&quot;</strong> (capital J and K) — controls installer title, shortcut name, Programs list, window title</li><li><code>build.win.icon</code> must point to <code>assets/icon.ico</code> — must be a valid multi-size ICO with at least a 256&times;256 frame (regenerate from <code>icon_gradient_512.png</code> if in doubt)</li><li>Do <strong>not</strong> set <code>executableName</code> in the production config — it must default to <code>jumpkit</code> to match auto-updater expectations</li><li>Confirm <code>build.nsis.oneClick</code> is <strong>true</strong> for production (silent one-click install experience)</li></ul>' },
-      { id: 'bl-4', text: 'On Windows: run the production Windows build command. Admin files are excluded automatically.', cmd: 'npm run build:win' },
-      { id: 'bl-5', text: 'Confirm Windows build completes without errors. Verify output filename includes <strong>&quot;JumpKit&quot;</strong> (capital J+K), e.g. <code>dist/JumpKit Setup X.Y.Z.exe</code>. If it shows <code>jumpkit Setup</code> (lowercase), <code>productName</code> is wrong — stop and fix before shipping.' },
-      { id: 'bl-6', text: 'Test Windows installer: install and launch on a clean Windows machine, log in, do a few jumps. Confirm: (1) installer wizard header shows <strong>JumpKit Setup</strong>, (2) desktop shortcut and Programs list show <strong>JumpKit</strong>, (3) app launches without stalling, (4) no admin error dialog on startup.' },
-      { id: 'bl-7', text: 'Check installer file sizes. Expected ranges: Mac <code>.dmg</code> ~80–120 MB, Windows <code>.exe</code> ~60–90 MB. A dramatically smaller file (e.g. under 20 MB) means files were accidentally excluded from the asar — do not ship.', cmd: 'ls -lh dist/*.dmg dist/*.exe 2>/dev/null || ls -lh dist/', auto: 'check-dist-sizes' },
-      { id: 'bl-9', text: 'Note both installer filenames and file sizes. Save both installers into the deployment folder created in Pre-Deploy step 1.' },
-      { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead:', cmd: 'npm run build:test      # Mac test build\nnpm run build:test:win   # Windows test build' },
+      { id: 'bl-0', text: '<strong>Verify admin file exclusions</strong> before building. Open the step detail to copy the Max prompt.', cmd: 'Pls check app/package.json and confirm that !js/tests.js, !js/deployment.js, and !js/admin.js are all present in the build.files exclusions array. Report exactly what you find — do not proceed with a build if any of these are missing.', cmdModalOnly: true },
+      { id: 'bl-4-pre', text: '<strong>Verify Windows production build requirements in <code>package.json</code> before building.</strong> Open the step detail to copy the Max prompt.', cmd: 'Pls check app/package.json and confirm all of the following for the Windows production build:\n1. build.productName is exactly "JumpKit" (capital J and K)\n2. build.win.icon points to assets/icon.ico\n3. executableName is NOT set in the production config (must default to jumpkit)\n4. build.nsis.oneClick is true\nReport exactly what you find for each item.', cmdModalOnly: true },
+      { id: 'bl-1', text: 'Run the Mac production build. Open the step detail to copy the Max prompts. <strong>Check file sizes and record below.</strong>', cmd: 'Pls run the JumpKit production Mac build from the app directory (npm run build) and report back: (1) whether it completed without errors, (2) the output .dmg filename(s) and file sizes, and (3) any warnings worth noting. And pls confirm the admin pages (users page, testing page, and deployments page) are excluded from the build since this is a production build.', cmd2: 'Pls copy the two built mac installers into the deploy folder below: app/deploy/vx.y.z/installers/prod', cmdModalOnly: true },
+      { id: 'bl-2', text: 'Verify Mac .dmg notarization. Open the step detail to copy the Max prompt.', cmd: 'Pls verify the Mac .dmg is notarized by Apple by running: spctl -a -vvv -t install dist/JumpKit-*.dmg\nReport the full output. A passing result should show "accepted" with source "Notarized Developer ID".', cmdModalOnly: true },
+      { id: 'bl-4', text: 'Run the Windows production build. Open the step detail to copy the Max prompts. <strong>Check file sizes and record below.</strong>', cmd: 'Pls run the JumpKit Windows production build from the app directory: npm run build:win\nReport back: (1) whether it completed without errors, (2) the output .exe filename and file size, (3) confirm the filename includes "JumpKit" (capital J+K) not "jumpkit", and (4) any warnings. And pls confirm the admin pages (users page, testing page, and deployments page) are excluded from the build since this is a production build.', cmd2: 'Pls copy the built win installer into the deploy folder below: app/deploy/vx.y.z/installers/prod', cmdModalOnly: true },
+      { id: 'bl-8', text: '<strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead. <strong>Check file sizes and record below.</strong>', cmd: 'Pls build the macOS and Windows test installers ie installers which include the admin pages: Users, Testing, Deployments. After building, pls copy them into the folder below and report out the file names and file sizes.', cmdModalOnly: true },
+      { id: 'bl-6', text: '<strong>Manual:</strong> Test Windows installer on a clean Windows machine — install, launch, log in, do a few jumps. Confirm: installer header shows "JumpKit Setup", desktop shortcut shows "JumpKit", no admin error on startup.' },
+      { id: 'bl-3', text: '<strong>Manual:</strong> Test Mac installer on a clean Mac — install from the .dmg, launch, log in, do a few jumps. Confirm no admin error dialog on startup.' },
     ]
   },
   {
     id: 'landing', label: 'Landing Page & Distribution', icon: 'ti-world-upload', color: '#ec4899',
     steps: [
-      { id: 'lp-1', text: 'Upload both installers to the hosting/storage location (Supabase Storage, S3, or GitHub Releases).' },
-      { id: 'lp-2', text: 'Update <strong>download links</strong> in <code>landing/index.html</code> to point to the new installers.' },
-      { id: 'lp-3', text: 'Update any version number or release date shown on the landing page.' },
-      { id: 'lp-4', text: 'Commit and push the landing page — confirm Vercel auto-deploys successfully.' },
-      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): open a browser and visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm the padlock is green and no SSL warnings. Then navigate to <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> and confirm it redirects to https://. Mark Fail if any SSL warning appears.', auto: 'check-ssl' },
-      { id: 'lp-5', text: 'Verify live <strong>Mac download link</strong> end-to-end: click → download → install → launch.' },
-      { id: 'lp-6', text: 'Verify live <strong>Windows download link</strong> end-to-end.' },
+      { id: 'lp-2', text: 'Update landing page: download links, version number, and release date in <code>landing/index.html</code>. Open the step detail to copy the Max prompt.', cmd: 'Pls update landing/index.html with the following for the new release:\n1. Update both download URLs to point to the new GitHub release assets. Mac pattern: releases/download/vX.Y.Z/JumpKit-X.Y.Z-universal.dmg — Windows pattern: releases/download/vX.Y.Z/JumpKit.Setup.X.Y.Z.exe\n2. Update any version number or release date displayed on the landing page.\nReport exactly what you changed.', cmdModalOnly: true },
+      { id: 'lp-4', text: 'Commit and push landing page changes — confirm Vercel auto-deploys. Open the step detail to copy the Max prompt.', cmd: 'Pls commit and push the landing page changes to GitHub with a clear commit message (e.g. "Landing: update download links and version for vX.Y.Z"). Then report the commit ID and confirm the push succeeded so Vercel can auto-deploy.', cmdModalOnly: true },
+      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm padlock is green. Visit <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> — confirm it redirects to https://.', auto: 'check-ssl' },
+      { id: 'lp-5', text: '<strong>Manual:</strong> Verify live Mac download end-to-end: click download link on jumpkit.app → download → install → launch.' },
+      { id: 'lp-6', text: '<strong>Manual:</strong> Verify live Windows download end-to-end: click download link on jumpkit.app → download → install → launch.' },
     ]
   },
   {
     id: 'release', label: 'Release & Post-Deploy', icon: 'ti-tag', color: '#f59e0b',
     steps: [
-      { id: 'rel-1', text: 'Create a Git release tag: <code>git tag v1.x.x && git push origin v1.x.x</code>' },
-      { id: 'rel-2', text: 'Create a <strong>GitHub Release</strong> from the tag — attach both installers, paste the changelog as release notes.' },
-      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111): open <a href="https://api.github.com/repos/jrod4404/JumpKit/releases/latest" target="_blank">api.github.com/repos/jrod4404/JumpKit/releases/latest</a> in a browser — confirm the JSON contains a <code>tag_name</code> matching the new version (e.g. <code>v1.0.0</code>).', auto: 'verify-gh-release' },
-      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112): open <a href="https://github.com/jrod4404/JumpKit/releases/latest" target="_blank">github.com/jrod4404/JumpKit/releases/latest</a> — expand the Assets section and confirm both <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for electron-updater auto-updates).', auto: 'verify-gh-assets' },
-      { id: 'rel-3', text: 'Smoke test from the live site: download from <code>jumpkit.app</code>, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
-      { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes.' },
-      { id: 'rel-4a', text: '<strong>Auto-update E2E</strong> (Test #141): with the new release published, open the <em>previously installed</em> production build (not <code>npm start</code>). Wait up to 30 seconds — the teal "A new version of JumpKit is available" banner should appear at the top. Click <strong>Restart &amp; Update</strong> and confirm the app relaunches at the new version. Mark Fail if the banner never appears or the update fails.' },
-      { id: 'rel-5', text: '<strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert the landing page download URLs back to the previous version’s GitHub release assets and redeploy via Vercel. (2) Delete or unpublish the new GitHub Release so the auto-updater stops offering it. (3) Document the incident in JUMPKIT_DOCS.html changelog. (4) Fix the bug, re-run the full test cycle, and re-release.' },
+      { id: 'rel-1', text: 'Create and push a Git release tag. Open the step detail to copy the Max prompt.', cmd: 'Pls create a Git release tag for the new version and push it to origin. Use the format: git tag vX.Y.Z && git push origin vX.Y.Z\nReport the tag name and confirm the push succeeded.', cmdModalOnly: true },
+      { id: 'rel-2', text: '<strong>Manual:</strong> Create a GitHub Release from the tag — attach both installers, paste the changelog as release notes. Do this at <a href="https://github.com/jrod4404/JumpKit/releases/new" target="_blank">github.com/jrod4404/JumpKit/releases/new</a>.' },
+      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111). Open the step detail to copy the Max prompt.', auto: 'verify-gh-release', cmd: 'Pls verify the new GitHub release is published by fetching this URL and reporting the result: https://api.github.com/repos/jrod4404/JumpKit/releases/latest\nConfirm the tag_name matches the new version and the release is not a draft.', cmdModalOnly: true },
+      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112) — confirm <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for auto-updates). Open the step detail to copy the Max prompt.', auto: 'verify-gh-assets', cmd: 'Pls fetch https://api.github.com/repos/jrod4404/JumpKit/releases/latest and check that both latest-mac.yml and latest.yml are listed in the assets array. Report what you find.', cmdModalOnly: true },
+      { id: 'rel-3', text: '<strong>Manual:</strong> Smoke test from the live site — download from jumpkit.app, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
+      { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes. Open the step detail to copy the Max prompt.', cmd: 'Pls look at JUMPKIT_DOCS.html and find where the release date, version number, commit ID, and installer filenames are recorded. Report exactly where each field is in the file so I can give you the final values to fill in.', cmdModalOnly: true },
+      { id: 'rel-4a', text: '<strong>Auto-update E2E</strong> (Test #141): open the previously installed production build, wait up to 30 seconds for the "A new version of JumpKit is available" banner. Click <strong>Restart & Update</strong> and confirm the app relaunches at the new version.' },
+      { id: 'rel-5', text: '<strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert landing page download URLs to the previous version and redeploy. (2) Unpublish the GitHub Release. (3) Document the incident in JUMPKIT_DOCS.html. (4) Fix, re-test, and re-release.' },
     ]
   },
 ];
@@ -131,17 +122,22 @@ window.renderDeployment = function renderDeployment(view) {
   const sectionsHTML = DEPLOY_PHASES.map((phase, pi) => {
     const sectionId = `deploy-section-${phase.id}`;
     const chevronId = `deploy-chevron-${phase.id}`;
-    const phaseTotal = phase.steps.length;
-    const phaseDone  = phase.steps.filter(s => state[s.id] === 'completed').length;
+    const phaseTotal   = phase.steps.length;
+    const phaseDone     = phase.steps.filter(s => state[s.id] === 'completed').length;
+    const phaseSkipped  = phase.steps.filter(s => state[s.id] === 'skipped').length;
+    const phaseTodo     = phaseTotal - phaseDone - phaseSkipped;
 
     const pillHTML = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:8px">${
       phaseDone > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71">${phaseDone} Done</span>` : ''
     }${
-      (phaseTotal - phaseDone) > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#6b728022;color:#6b7280">${phaseTotal - phaseDone} To Do</span>` : ''
+      phaseSkipped > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#9ca3af22;color:#9ca3af">${phaseSkipped} Skipped</span>` : ''
+    }${
+      phaseTodo > 0 ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:#6b728022;color:#6b7280">${phaseTodo} To Do</span>` : ''
     }</span>`;
 
     const stepsHTML = phase.steps.map((step, si) => {
-      const isDone = state[step.id] === 'completed';
+      const isDone    = state[step.id] === 'completed';
+      const isSkipped  = state[step.id] === 'skipped';
       const isLast = si === phase.steps.length - 1;
       const rowBg    = isDone ? 'background:rgba(63,190,113,0.04)' : '';
       const rowBorder = isLast ? '' : 'border-bottom:1px solid var(--border);';
@@ -150,7 +146,7 @@ window.renderDeployment = function renderDeployment(view) {
           <td style="padding:10px 12px;color:var(--text-dim);font-size:0.78rem;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">#${pi + 1}.${si + 1}</td>
           <td style="padding:10px 12px;font-size:0.86rem;color:var(--text-muted);line-height:1.55;vertical-align:middle" id="deploy-text-${step.id}">
               ${step.text}
-              ${step.cmd ? `<div style="margin-top:7px;display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;max-width:480px">
+              ${(step.cmd && !step.cmdModalOnly) ? `<div style="margin-top:7px;display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;max-width:480px">
                 <code style="flex:1;padding:5px 10px;font-size:0.8rem;background:var(--bg-card);color:var(--text);white-space:pre;overflow-x:auto;line-height:1.5">${step.cmd}</code>
                 <button data-deploy-copy="${step.id}" title="Copy command" style="flex-shrink:0;border:none;border-left:1px solid var(--border);background:var(--bg-card);cursor:pointer;padding:0 10px;color:var(--text-muted);display:flex;align-items:center;transition:background .15s" onmouseenter="this.style.background='var(--bg)'" onmouseleave="this.style.background='var(--bg-card)'">
                   <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>
@@ -170,10 +166,12 @@ window.renderDeployment = function renderDeployment(view) {
               class="btn btn-subtle"
               data-deploy-id="${step.id}"
               data-deploy-action="step-detail"
-              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3);background:rgba(63,190,113,0.12)' : ''}">
+              style="font-size:0.78rem;padding:4px 12px;gap:5px;display:inline-flex;align-items:center;${isDone ? 'color:#3fbe71;border-color:rgba(63,190,113,0.3);background:rgba(63,190,113,0.12)' : isSkipped ? 'color:#9ca3af;border-color:rgba(107,114,128,0.25);background:rgba(107,114,128,0.10)' : ''}">
               ${isDone
                 ? `<svg class="ti ti-check" style="width:.8rem;height:.8rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> Done`
-                : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> To Do`
+                : isSkipped
+                  ? `<svg class="ti ti-minus" style="width:.8rem;height:.8rem;color:#9ca3af"><use href="img/tabler-sprite.min.svg#tabler-minus"/></svg> Skipped`
+                  : `<svg class="ti ti-clipboard-list" style="width:.8rem;height:.8rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> To Do`
               }
             </button>
           </td>
@@ -300,13 +298,26 @@ window.renderDeployment = function renderDeployment(view) {
       if (!step || !resultEl) return;
 
       const _setResult = (ok, html) => {
-        resultEl.style.display = 'inline-flex';
-        resultEl.style.alignItems = 'center';
-        resultEl.style.gap = '5px';
-        resultEl.style.background  = ok ? 'rgba(63,190,113,0.08)' : 'rgba(239,68,68,0.08)';
-        resultEl.style.borderColor = ok ? 'rgba(63,190,113,0.35)' : 'rgba(239,68,68,0.35)';
-        resultEl.style.color       = ok ? '#3fbe71' : '#ef4444';
-        resultEl.innerHTML = html;
+        if (ok) {
+          // Strip HTML tags to get plain text for the step notes
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const noteText = (tmp.textContent || tmp.innerText || '').trim() || html.replace(/<[^>]*>/g, '').trim();
+          // Persist: save note + mark step completed
+          const n = _loadDeployNotes(); n[stepId] = noteText; _saveDeployNotes(n);
+          const s = _loadDeployState(); s[stepId] = 'completed'; _saveDeployState(s);
+          // Re-render — Done state replaces the button row; no extra pill needed
+          window.renderDeployment();
+        } else {
+          // Failure: show red pill inline so user sees what went wrong
+          resultEl.style.display = 'inline-flex';
+          resultEl.style.alignItems = 'center';
+          resultEl.style.gap = '5px';
+          resultEl.style.background  = 'rgba(239,68,68,0.08)';
+          resultEl.style.borderColor = 'rgba(239,68,68,0.35)';
+          resultEl.style.color       = '#ef4444';
+          resultEl.innerHTML = html;
+        }
       };
       const _setLoading = () => {
         btn.disabled = true;
@@ -584,13 +595,14 @@ function _buildDeployStepContent(stepId) {
 
   const state   = _loadDeployState();
   const notes   = _loadDeployNotes();
-  const isDone  = state[stepId] === 'completed';
+  const isDone    = state[stepId] === 'completed';
+  const isSkipped  = state[stepId] === 'skipped';
   const noteVal = notes[stepId] || '';
 
-  const statusColor  = isDone ? '#3fbe71' : '#6b7280';
-  const statusBg     = isDone ? 'rgba(63,190,113,0.12)' : 'rgba(107,114,128,0.12)';
-  const statusBorder = isDone ? 'rgba(63,190,113,0.3)' : 'rgba(107,114,128,0.3)';
-  const statusLabel  = isDone ? '✓ Done' : '– To Do';
+  const statusColor  = isDone ? '#3fbe71' : isSkipped ? '#9ca3af' : '#6b7280';
+  const statusBg     = isDone ? 'rgba(63,190,113,0.12)' : isSkipped ? 'rgba(156,163,175,0.12)' : 'rgba(107,114,128,0.12)';
+  const statusBorder = isDone ? 'rgba(63,190,113,0.3)' : isSkipped ? 'rgba(156,163,175,0.25)' : 'rgba(107,114,128,0.3)';
+  const statusLabel  = isDone ? '✓ Done' : isSkipped ? '– Skipped' : '– To Do';
 
   const tdLabel = 'padding:8px 28px 8px 0;color:var(--text-muted);font-weight:600;width:80px;vertical-align:top;white-space:nowrap;font-size:0.86rem';
   const tdValue = 'padding:8px 0;color:var(--text);line-height:1.6;font-size:0.86rem';
@@ -616,9 +628,16 @@ function _buildDeployStepContent(stepId) {
     <div style="font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Details</div>
     <div style="font-size:0.86rem;color:var(--text);line-height:1.65;margin-bottom:${step.cmd ? '10px' : '0'}">${step.text}</div>
     ${step.cmd ? `
-      <div style="display:flex;align-items:stretch;gap:0;border:1px solid var(--border);border-radius:7px;overflow:hidden;margin-bottom:12px">
-        <code style="flex:1;padding:5px 10px;font-size:0.8rem;background:var(--bg-card);color:var(--text);white-space:pre;overflow-x:auto;line-height:1.5">${_esc(step.cmd)}</code>
-        <button id="deployStepCopyCmd" title="Copy command" style="flex-shrink:0;border:none;border-left:1px solid var(--border);background:var(--bg-card);cursor:pointer;padding:0 10px;color:var(--text-muted);display:flex;align-items:center">
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:${step.cmd2 ? '8px' : '12px'}">
+        <code style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:6px 10px;border-radius:6px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.5">${_esc(step.cmd)}</code>
+        <button id="deployStepCopyCmd" class="btn btn-subtle" title="Copy" style="flex-shrink:0;padding:5px 7px;margin-top:1px">
+          <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>
+        </button>
+      </div>` : ''}
+    ${step.cmd2 ? `
+      <div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:12px">
+        <code style="flex:1;font-size:0.78rem;background:var(--bg-input);padding:6px 10px;border-radius:6px;color:var(--text);white-space:pre-wrap;word-break:break-all;line-height:1.5">${_esc(step.cmd2)}</code>
+        <button id="deployStepCopyCmd2" class="btn btn-subtle" title="Copy" style="flex-shrink:0;padding:5px 7px;margin-top:1px">
           <svg class="ti ti-copy" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>
         </button>
       </div>` : ''}
@@ -642,17 +661,20 @@ function _buildDeployStepContent(stepId) {
       <button id="deployStepTodoBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.85rem">
         <svg class="ti ti-clipboard-list" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard-list"/></svg> Mark as To Do
       </button>
+      <button id="deployStepSkipBtn" class="btn btn-subtle" style="display:inline-flex;align-items:center;gap:5px;font-size:0.85rem;color:#6b7280;border-color:rgba(107,114,128,0.3)">
+        <svg class="ti ti-minus" style="width:.85rem;height:.85rem;color:#6b7280"><use href="img/tabler-sprite.min.svg#tabler-minus"/></svg> Mark as Skipped
+      </button>
       <button class="btn btn-subtle" data-jaction="modal-close" style="margin-left:auto"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>
     </div>`;
 
   const modalTitle = `<svg class="ti ${step.phaseIcon}" style="vertical-align:middle;margin-right:6px"><use href="img/tabler-sprite.min.svg#tabler-${step.phaseIcon.slice(3)}"/></svg> ${_esc(step.stepNum)} — ${_esc(step.phaseLabel)}`;
 
-  return { title: modalTitle, body: bodyHTML, footer: footerHTML, prevId, nextId, stepId, cmd: step.cmd || null };
+  return { title: modalTitle, body: bodyHTML, footer: footerHTML, prevId, nextId, stepId, cmd: step.cmd || null, cmd2: step.cmd2 || null };
 }
 
 function _wireDeployStepModal(ctx) {
-  // ctx = { stepId, prevId, nextId, cmd }
-  const { stepId, cmd } = ctx;
+  // ctx = { stepId, prevId, nextId, cmd, cmd2 }
+  const { stepId, cmd, cmd2 } = ctx;
 
   // In-place navigation
   ['deployStepPrevBtn', 'deployStepNextBtn'].forEach(btnId => {
@@ -697,6 +719,7 @@ function _wireDeployStepModal(ctx) {
 
   document.getElementById('deployStepDoneBtn')?.addEventListener('click', () => _applyAndClose('completed'));
   document.getElementById('deployStepTodoBtn')?.addEventListener('click', () => _applyAndClose('todo'));
+  document.getElementById('deployStepSkipBtn')?.addEventListener('click', () => _applyAndClose('skipped'));
 
   // Auto-save notes
   document.getElementById('deployStepNotes')?.addEventListener('input', (e) => {
@@ -710,6 +733,18 @@ function _wireDeployStepModal(ctx) {
     document.getElementById('deployStepCopyCmd')?.addEventListener('click', () => {
       navigator.clipboard.writeText(cmd).then(() => {
         const btn = document.getElementById('deployStepCopyCmd');
+        if (!btn) return;
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg>';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }).catch(() => {});
+    });
+  }
+  // Copy command 2
+  if (cmd2) {
+    document.getElementById('deployStepCopyCmd2')?.addEventListener('click', () => {
+      navigator.clipboard.writeText(cmd2).then(() => {
+        const btn = document.getElementById('deployStepCopyCmd2');
         if (!btn) return;
         const orig = btn.innerHTML;
         btn.innerHTML = '<svg class="ti ti-check" style="width:.85rem;height:.85rem;color:#3fbe71"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg>';
@@ -1053,6 +1088,86 @@ async function _openDeployManageModal() {
 
 function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// ── Build deploy tab HTML (mirrors the template in tests.js) ─────
+function _buildDeployTabHtml(state, notes) {
+  const phases = DEPLOY_PHASES || [];
+  if (!phases.length) return '<div style="padding:28px 32px;font-size:0.85rem;color:#9ca3af">Deployment checklist data unavailable.</div>';
+
+  const totalSteps = phases.reduce((n, p) => n + p.steps.length, 0);
+  const doneSteps  = phases.reduce((n, p) => n + p.steps.filter(s => state[s.id] === 'completed').length, 0);
+  const pctDone    = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0;
+
+  const statPill = (val, label, color) =>
+    `<div class="stat"><div class="stat-val" style="color:${color}">${val}</div><div class="stat-lbl">${label}</div></div>`;
+  const statsBar = `<div class="stats-bar">
+        ${statPill(doneSteps, 'Completed', '#3fbe71')}
+        ${statPill(totalSteps - doneSteps, 'To Do', '#6b7280')}
+        ${statPill(totalSteps, 'Total', '#374151')}
+        ${statPill(pctDone + '%', 'Progress', '#1A4FD6')}
+      </div>`;
+
+  const _plainPreview = (html, max = 110) => {
+    const s = String(html || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    return s.length > max ? s.slice(0, max - 1) + '\u2026' : s;
+  };
+
+  const _dcPill = (val, label, color) => val > 0
+    ? `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 8px;border-radius:99px;font-size:10px;font-weight:700;background:${color}22;color:${color}">${val} ${label}</span>`
+    : '';
+
+  const _phaseEmoji = {
+    'ti-git-commit':    '🔖',
+    'ti-device-floppy': '💾',
+    'ti-package':       '📦',
+    'ti-world-upload':  '🌐',
+    'ti-tag':           '🏷️',
+  };
+  const _phaseIconSvg = (iconKey) => {
+    const emoji = _phaseEmoji[iconKey] || '';
+    return emoji ? `<span style="font-size:14px;vertical-align:middle;margin-right:6px;line-height:1">${emoji}</span>` : '';
+  };
+
+  const phaseRows = phases.map((phase, pi) => {
+    const phaseDone    = phase.steps.filter(s => state[s.id] === 'completed').length;
+    const phaseSkipped = phase.steps.filter(s => state[s.id] === 'skipped').length;
+    const phaseTotal   = phase.steps.length;
+    const phaseTodo    = phaseTotal - phaseDone - phaseSkipped;
+    const tbodyId = `deploy-sec-tbody-${phase.id}`;
+    const btnId   = `deploy-sec-btn-${phase.id}`;
+    const spacer  = pi > 0 ? `<tr><td colspan="3" style="padding:14px 0"></td></tr>` : '';
+    const pillsHtml = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
+      + _dcPill(phaseDone,    'Done',    '#3fbe71')
+      + _dcPill(phaseSkipped, 'Skipped', '#9ca3af')
+      + _dcPill(phaseTodo,    'To Do',   '#6b7280')
+      + `</span>`;
+    const header = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
+          <td colspan="3" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
+            <span id="${btnId}" style="margin-right:8px;font-size:20px;line-height:1;vertical-align:middle">▸</span>${_phaseIconSvg(phase.icon)}${_esc(phase.label)} <span style="font-weight:400;color:#9ca3af;letter-spacing:0;text-transform:none">(${phaseTotal})</span>
+            ${pillsHtml}
+          </td>
+        </tr>`;
+    const stepRows = phase.steps.map((step, si) => {
+      const done    = state[step.id] === 'completed';
+      const skipped = state[step.id] === 'skipped';
+      const stepNum = `#${pi + 1}.${si + 1}`;
+      const stateBtn = done
+        ? `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3);cursor:pointer;white-space:nowrap;line-height:1">✔ Done</button>`
+        : skipped
+          ? `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(156,163,175,0.12);color:#9ca3af;border:1px solid rgba(156,163,175,0.25);cursor:pointer;white-space:nowrap;line-height:1">– Skipped</button>`
+          : `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;line-height:1">To Do</button>`;
+      const preview = _plainPreview(step.text);
+      return `<tr style="border-bottom:1px solid #e5e7eb">
+            <td style="padding:7px 10px;font-size:12px;color:#9ca3af;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">${stepNum}</td>
+            <td style="padding:7px 10px;font-size:12px;color:#1f2937;line-height:1.5;vertical-align:middle">${_esc(preview)}</td>
+            <td style="padding:7px 10px;text-align:right;white-space:nowrap;vertical-align:middle;width:110px">${stateBtn}</td>
+          </tr>`;
+    }).join('');
+    return `${spacer}${header}<tbody id="${tbodyId}" style="display:none">${stepRows}</tbody>`;
+  }).join('');
+
+  return `\n    ${statsBar}<table style="width:100%;border-collapse:collapse">${phaseRows}</table>\n`;
+}
+
 // ── Save Deploy Results ───────────────────────────────────────────
 async function _saveDeployResults() {
   const sel = window._jkSelectedDeployment;
@@ -1085,19 +1200,23 @@ async function _saveDeployResults() {
 
   const sectionsHtml = DEPLOY_PHASES.map((phase, pi) => {
     const rows = phase.steps.map((step, si) => {
-      const isDone = state[step.id] === 'completed';
+      const isDone    = state[step.id] === 'completed';
+      const isSkipped = state[step.id] === 'skipped';
       const bg    = isDone ? 'background:#f0fdf4' : '';
-      const color = isDone ? 'color:#16a34a' : 'color:#374151';
+      const color = isDone ? 'color:#16a34a' : isSkipped ? 'color:#9ca3af' : 'color:#374151';
       const status = isDone
         ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span>'
-        : '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span>';
+        : isSkipped
+          ? '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(156,163,175,0.12);color:#9ca3af;border:1px solid rgba(156,163,175,0.25)">– Skipped</span>'
+          : '<span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span>';
       return `<tr style="border-bottom:1px solid #e5e7eb;${bg}">
         <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#${pi+1}.${si+1}</td>
         <td style="padding:8px 12px;font-size:0.85rem;${color};line-height:1.5">${step.text}</td>
         <td style="padding:8px 12px;text-align:right;white-space:nowrap">${status}</td>
       </tr>`;
     }).join('');
-    const phaseDone = phase.steps.filter(s => state[s.id] === 'completed').length;
+    const phaseDone    = phase.steps.filter(s => state[s.id] === 'completed').length;
+    const phaseSkipped = phase.steps.filter(s => state[s.id] === 'skipped').length;
     return `<div style="margin-bottom:24px">
       <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
         <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">${_esc(phase.label)}</span>
@@ -1130,7 +1249,8 @@ async function _saveDeployResults() {
   <div class="meta">Saved ${dateStr} at ${timeStr}${(sel?.results_file || cfg.resultsFilePath) ? ' &nbsp;|&nbsp; Results: ' + _esc((sel?.results_file || cfg.resultsFilePath || '').split('/').pop()) : ''}</div>
   <div class="summary">
     <div class="stat"><div class="stat-val" style="color:#16a34a">${done}</div><div class="stat-lbl">Done</div></div>
-    <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done}</div><div class="stat-lbl">To Do</div></div>
+    ${(() => { const sk = Object.values(state).filter(v => v === 'skipped').length; return sk > 0 ? `<div class="stat"><div class="stat-val" style="color:#9ca3af">${sk}</div><div class="stat-lbl">Skipped</div></div>` : ''; })()}
+    <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done - Object.values(state).filter(v => v === 'skipped').length}</div><div class="stat-lbl">To Do</div></div>
     <div class="stat"><div class="stat-val" style="color:#374151">${total}</div><div class="stat-lbl">Total</div></div>
   </div>
   ${sectionsHtml}
@@ -1144,9 +1264,73 @@ async function _saveDeployResults() {
 
   try {
     const result = await window.electronAPI.writeFileDirect(filePath, html);
-    if (result?.error) throw new Error(result.error);
+    if (!result?.ok) throw new Error(result?.reason || 'Write failed');
     window.Toast?.success(`Saved: ${fileName}`);
   } catch (err) {
     alert(`Failed to save deployment results:\n${err.message}`);
+    return;
+  }
+
+  // ── Also patch _jkDeploy in the release docs HTML so the Deployment Checklist tab reflects current state ──
+  const releasePath = cfg.resultsFilePath || sel?.deploy_results_file;
+  if (!releasePath) {
+    window.Toast?.warning('Release docs path not set — open Testing → Manage Testing to configure.');
+    return;
+  }
+  if (!window.electronAPI?.readFile) {
+    return;
+  }
+  try {
+    const notes = _loadDeployNotes();
+    // Build _deployDetail matching the shape baked in by tests.js
+    const newDeployDetail = {};
+    DEPLOY_PHASES.forEach((phase, pi) => {
+      phase.steps.forEach((step, si) => {
+        newDeployDetail[step.id] = {
+          id: step.id,
+          stepNum: `${pi + 1}.${si + 1}`,
+          phaseId: phase.id,
+          phaseLabel: phase.label,
+          phaseColor: phase.color,
+          phaseIcon: phase.icon,
+          text: step.text,
+          cmd: step.cmd || null,
+          done: state[step.id] === 'completed',
+          skipped: state[step.id] === 'skipped',
+          note: notes[step.id] || '',
+        };
+      });
+    });
+    const readResult = await window.electronAPI.readFile(releasePath);
+    if (!readResult?.ok || !readResult?.content) throw new Error(readResult?.reason || 'Could not read release docs file');
+    let content = readResult.content;
+
+    // ── 1. Patch _jkDeploy data blob ──────────────────────────────────────
+    const MARKER = 'const _jkDeploy = ';
+    const markerIdx = content.indexOf(MARKER);
+    if (markerIdx === -1) throw new Error('_jkDeploy marker not found in release docs HTML — re-save from the Testing page first');
+    const lineEnd = content.indexOf('\n', markerIdx);
+    const endIdx  = lineEnd === -1 ? content.length : lineEnd;
+    const newBlob = `${MARKER}${JSON.stringify(newDeployDetail).replace(/<\/script>/gi, '<\\u002fscript>')};`;
+    content = content.slice(0, markerIdx) + newBlob + content.slice(endIdx);
+
+    // ── 2. Replace deployment tab body HTML between markers ───────────────
+    const TAB_START = '<!-- JK_DEPLOY_TAB_BODY_START -->';
+    const TAB_END   = '<!-- JK_DEPLOY_TAB_BODY_END -->';
+    const tabStartIdx = content.indexOf(TAB_START);
+    const tabEndIdx   = content.indexOf(TAB_END);
+    if (tabStartIdx !== -1 && tabEndIdx !== -1 && tabEndIdx > tabStartIdx) {
+      const freshTabHtml = _buildDeployTabHtml(state, notes);
+      content = content.slice(0, tabStartIdx + TAB_START.length)
+              + freshTabHtml
+              + content.slice(tabEndIdx);
+    } else {
+    }
+
+    const writeResult = await window.electronAPI.writeFileDirect(releasePath, content);
+    if (!writeResult?.ok) throw new Error(writeResult?.reason || 'Write failed');
+    window.Toast?.success('Release docs updated ✔');
+  } catch (err) {
+    window.Toast?.danger(`Release docs update failed: ${err.message}`);
   }
 }

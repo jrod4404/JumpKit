@@ -6778,8 +6778,10 @@ function jkShowDeployStep(stepId) {
   const d = _jkDeploy[stepId];
   if (!d) return;
   const stCfg = d.done
-    ? {bg:'rgba(63,190,113,0.12)', color:'#3fbe71', brd:'rgba(63,190,113,0.3)',   lbl:'✔ Done'}
-    : {bg:'#f9fafb',                color:'#6b7280', brd:'#e5e7eb',                lbl:'To Do'};
+    ? {bg:'rgba(63,190,113,0.12)',    color:'#3fbe71', brd:'rgba(63,190,113,0.3)',    lbl:'✔ Done'}
+    : d.skipped
+      ? {bg:'rgba(156,163,175,0.12)', color:'#9ca3af', brd:'rgba(156,163,175,0.25)', lbl:'– Skipped'}
+      : {bg:'#f9fafb',                color:'#6b7280', brd:'#e5e7eb',                 lbl:'To Do'};
   const row = (lbl, val) => val !== undefined && val !== '' && val !== null ? '<tr><td style="padding:8px 24px 8px 0;font-size:0.85rem;font-weight:600;color:#6b7280;white-space:nowrap;vertical-align:top">' + lbl + '</td><td style="padding:8px 0;font-size:0.85rem;color:#374151;line-height:1.6">' + val + '</td></tr>' : '';
   const phasePill = '<span style="display:inline-flex;align-items:center;gap:6px;padding:2px 10px;border-radius:99px;font-size:0.78rem;font-weight:700;background:' + d.phaseColor + '22;color:' + d.phaseColor + ';border:1px solid ' + d.phaseColor + '55"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:' + d.phaseColor + '"></span>' + jkEsc(d.phaseLabel) + '</span>';
   const stateBadge = '<span style="display:inline-block;padding:4px 13px;border-radius:99px;font-size:0.82rem;font-weight:700;background:' + stCfg.bg + ';color:' + stCfg.color + ';border:1px solid ' + stCfg.brd + '">' + stCfg.lbl + '</span>';
@@ -6849,11 +6851,19 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
 
   <!-- Deployment Checklist Tab -->
   <div class="tab-content" id="tab-deploy">
+<!-- JK_DEPLOY_TAB_BODY_START -->
     ${(() => {
       const phases = (typeof DEPLOY_PHASES !== 'undefined') ? DEPLOY_PHASES : [];
       let deployState = {}, deployNotes = {};
       try { deployState = (typeof _loadDeployState === 'function') ? _loadDeployState() : {}; } catch(_) {}
       try { deployNotes = (typeof _loadDeployNotes === 'function') ? _loadDeployNotes() : {}; } catch(_) {}
+      // Standalone HTML fallback: reconstruct state from the _jkDeploy snapshot baked in at save time
+      if (!Object.keys(deployState).length && typeof _jkDeploy !== 'undefined') {
+        Object.keys(_jkDeploy).forEach(id => { if (_jkDeploy[id]?.done) deployState[id] = 'completed'; });
+      }
+      if (!Object.keys(deployNotes).length && typeof _jkDeploy !== 'undefined') {
+        Object.keys(_jkDeploy).forEach(id => { if (_jkDeploy[id]?.note) deployNotes[id] = _jkDeploy[id].note; });
+      }
 
       if (!phases.length) {
         return `<div style="padding:28px 32px;font-size:0.85rem;color:#9ca3af">Deployment checklist data unavailable.</div>`;
@@ -6898,15 +6908,17 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
       // Render all phases into a single <table>, with spacer rows between phases — exactly the
       // Mac Testing tab pattern (no per-phase table, no colored borders, no phase-color dot).
       const phaseRows = phases.map((phase, pi) => {
-        const phaseDone = phase.steps.filter(s => deployState[s.id] === 'completed').length;
-        const phaseTotal = phase.steps.length;
-        const phaseTodo = phaseTotal - phaseDone;
+        const phaseDone    = phase.steps.filter(s => deployState[s.id] === 'completed').length;
+        const phaseSkipped = phase.steps.filter(s => deployState[s.id] === 'skipped').length;
+        const phaseTotal   = phase.steps.length;
+        const phaseTodo    = phaseTotal - phaseDone - phaseSkipped;
         const tbodyId = `deploy-sec-tbody-${phase.id}`;
         const btnId   = `deploy-sec-btn-${phase.id}`;
         const spacer  = pi > 0 ? `<tr><td colspan="3" style="padding:14px 0"></td></tr>` : '';
         const pillsHtml = `<span style="display:inline-flex;align-items:center;gap:4px;margin-left:10px;vertical-align:middle">`
-          + _dcPill(phaseDone, 'Done', '#3fbe71')
-          + _dcPill(phaseTodo, 'To Do', '#6b7280')
+          + _dcPill(phaseDone,    'Done',    '#3fbe71')
+          + _dcPill(phaseSkipped, 'Skipped', '#9ca3af')
+          + _dcPill(phaseTodo,    'To Do',   '#6b7280')
           + `</span>`;
         const header = `<tr style="cursor:pointer" onclick="(function(){var b=document.getElementById('${tbodyId}');var i=document.getElementById('${btnId}');var hidden=b.style.display==='none';b.style.display=hidden?'':'none';i.textContent=hidden?'▾':'▸';})()">
           <td colspan="3" style="padding:14px 12px 8px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#6b7280;background:#f9fafb;border-top:2px solid #e5e7eb;user-select:none">
@@ -6915,11 +6927,14 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
           </td>
         </tr>`;
         const stepRows = phase.steps.map((step, si) => {
-          const done = deployState[step.id] === 'completed';
+          const done    = deployState[step.id] === 'completed';
+          const skipped = deployState[step.id] === 'skipped';
           const stepNum = `#${pi + 1}.${si + 1}`;
           const stateBtn = done
             ? `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3);cursor:pointer;white-space:nowrap;line-height:1">✔ Done</button>`
-            : `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;line-height:1">To Do</button>`;
+            : skipped
+              ? `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:rgba(156,163,175,0.12);color:#9ca3af;border:1px solid rgba(156,163,175,0.25);cursor:pointer;white-space:nowrap;line-height:1">– Skipped</button>`
+              : `<button onclick="jkShowDeployStep('${step.id}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;border-radius:20px;font-size:0.82rem;font-weight:700;background:#f9fafb;color:#6b7280;border:1px solid #e5e7eb;cursor:pointer;white-space:nowrap;line-height:1">To Do</button>`;
           const preview = _plainPreview(step.text);
           return `<tr style="border-bottom:1px solid #e5e7eb">
             <td style="padding:7px 10px;font-size:12px;color:#9ca3af;font-weight:600;white-space:nowrap;vertical-align:middle;width:60px">${stepNum}</td>
@@ -6932,6 +6947,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
 
       return `${statsBar}<table style="width:100%;border-collapse:collapse">${phaseRows}</table>`;
     })()}
+<!-- JK_DEPLOY_TAB_BODY_END -->
   </div>
 
   <!-- Summary Tab -->

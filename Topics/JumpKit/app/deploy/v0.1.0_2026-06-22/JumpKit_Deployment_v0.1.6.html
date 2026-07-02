@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>JumpKit Deployment v0.1.6</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f9fafb;color:#111827;margin:0;padding:24px}
+    .container{max-width:860px;margin:0 auto;background:#fff;border-radius:12px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+    h1{font-size:1.4rem;font-weight:800;margin:0 0 4px}
+    .meta{font-size:0.82rem;color:#6b7280;margin-bottom:24px}
+    .summary{display:flex;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+    .stat{text-align:center;padding:10px 20px;border-radius:10px;border:1px solid #e5e7eb;min-width:80px}
+    .stat-val{font-size:1.4rem;font-weight:900}
+    .stat-lbl{font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:#6b7280;margin-top:2px}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>JumpKit Deployment v0.1.6</h1>
+  <div class="meta">Saved July 2, 2026 at 02:25 PM &nbsp;|&nbsp; Results: JumpKit_ReleaseDocs_v0.1.6.html</div>
+  <div class="summary">
+    <div class="stat"><div class="stat-val" style="color:#16a34a">20</div><div class="stat-lbl">Done</div></div>
+    <div class="stat"><div class="stat-val" style="color:#9ca3af">1</div><div class="stat-lbl">Skipped</div></div>
+    <div class="stat"><div class="stat-val" style="color:#6b7280">7</div><div class="stat-lbl">To Do</div></div>
+    <div class="stat"><div class="stat-val" style="color:#374151">28</div><div class="stat-lbl">Total</div></div>
+  </div>
+  <div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">Code &amp; Version</span>
+        <span style="font-size:0.72rem;color:#9ca3af">5/5</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse"><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#1.1</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>Confirm LemonSqueezy is in live (non-test) mode.</strong> Log in to <a href="https://app.lemonsqueezy.com" target="_blank">app.lemonsqueezy.com</a> → Settings → Store → confirm the store is in <strong>Live</strong> mode (not Test mode). Also verify the webhook URL points to the <strong>production</strong> Supabase edge function. Do not ship in test mode.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#1.2</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Commit all outstanding changes with a clear release commit message. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#1.3</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Update <strong>version number</strong> in <code>app/package.json</code> (semver) and update any version display in the app UI or About page. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#1.4</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Write a full <strong>changelog entry</strong> in JUMPKIT_DOCS.html — all changes, fixes, new features. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#1.5</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Check and refresh <strong>JUMPKIT_DOCS.html</strong> documentation — verify all sections accurately reflect the current codebase. Open the step detail to copy the Max audit prompt. Then save a copy of JUMPKIT_DOCS.html into the deploy folder for this release (e.g. deploy/vX.Y.Z_YYYY-MM-DD/JUMPKIT_DOCS.html).</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr></table>
+    </div><div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">Backup</span>
+        <span style="font-size:0.72rem;color:#9ca3af">2/2</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse"><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#2.1</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Create a dated code backup and note the filename in the changelog. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#2.2</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Confirm the backup saved correctly. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr></table>
+    </div><div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">Build Installers</span>
+        <span style="font-size:0.72rem;color:#9ca3af">7/8</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse"><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.1</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>Verify admin file exclusions</strong> before building. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.2</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>Verify Windows production build requirements in <code>package.json</code> before building.</strong> Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.3</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Run the Mac production build. Open the step detail to copy the Max prompts. <strong>Check file sizes and record below.</strong></td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.4</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#9ca3af;line-height:1.5">Verify Mac .dmg notarization. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(156,163,175,0.12);color:#9ca3af;border:1px solid rgba(156,163,175,0.25)">– Skipped</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.5</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5">Run the Windows production build. Open the step detail to copy the Max prompts. <strong>Check file sizes and record below.</strong></td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.6</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>If building a test installer</strong> (for release testing with admin pages included), use the test build commands instead. <strong>Check file sizes and record below.</strong></td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.7</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>Manual:</strong> Test Windows installer on a clean Windows machine — install, launch, log in, do a few jumps. Confirm: installer header shows "JumpKit Setup", desktop shortcut shows "JumpKit", no admin error on startup.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;background:#f0fdf4">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#3.8</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#16a34a;line-height:1.5"><strong>Manual:</strong> Test Mac installer on a clean Mac — install from the .dmg, launch, log in, do a few jumps. Confirm no admin error dialog on startup.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(63,190,113,0.12);color:#3fbe71;border:1px solid rgba(63,190,113,0.3)">✓ Done</span></td>
+      </tr></table>
+    </div><div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">Landing Page &amp; Distribution</span>
+        <span style="font-size:0.72rem;color:#9ca3af">0/5</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse"><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#4.1</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5">Update landing page: download links, version number, and release date in <code>landing/index.html</code>. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#4.2</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5">Commit and push landing page changes — confirm Vercel auto-deploys. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#4.3</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>SSL check</strong> (Test #105): visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm padlock is green. Visit <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> — confirm it redirects to https://.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#4.4</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Manual:</strong> Verify live Mac download end-to-end: click download link on jumpkit.app → download → install → launch.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#4.5</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Manual:</strong> Verify live Windows download end-to-end: click download link on jumpkit.app → download → install → launch.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr></table>
+    </div><div style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 0 6px;border-bottom:2px solid #e5e7eb;margin-bottom:0">
+        <span style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#6b7280">Release &amp; Post-Deploy</span>
+        <span style="font-size:0.72rem;color:#9ca3af">0/8</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse"><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.1</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5">Create and push a Git release tag. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.2</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Manual:</strong> Create a GitHub Release from the tag — attach both installers, paste the changelog as release notes. Do this at <a href="https://github.com/jrod4404/JumpKit/releases/new" target="_blank">github.com/jrod4404/JumpKit/releases/new</a>.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.3</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Verify GitHub release is published</strong> (Test #111). Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.4</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Verify release assets</strong> (Test #112) — confirm <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for auto-updates). Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.5</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Manual:</strong> Smoke test from the live site — download from jumpkit.app, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.6</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5">Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes. Open the step detail to copy the Max prompt.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.7</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Auto-update E2E</strong> (Test #141): open the previously installed production build, wait up to 30 seconds for the "A new version of JumpKit is available" banner. Click <strong>Restart & Update</strong> and confirm the app relaunches at the new version.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr><tr style="border-bottom:1px solid #e5e7eb;">
+        <td style="padding:8px 12px;font-size:0.75rem;font-weight:600;color:#9ca3af;white-space:nowrap">#5.8</td>
+        <td style="padding:8px 12px;font-size:0.85rem;color:#374151;line-height:1.5"><strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert landing page download URLs to the previous version and redeploy. (2) Unpublish the GitHub Release. (3) Document the incident in JUMPKIT_DOCS.html. (4) Fix, re-test, and re-release.</td>
+        <td style="padding:8px 12px;text-align:right;white-space:nowrap"><span style="display:inline-flex;align-items:center;gap:3px;padding:1px 8px;border-radius:99px;font-size:0.72rem;font-weight:700;background:rgba(107,114,128,0.12);color:#6b7280;border:1px solid rgba(107,114,128,0.3)">To Do</span></td>
+      </tr></table>
+    </div>
+</div>
+</body>
+</html>

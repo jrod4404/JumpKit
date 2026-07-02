@@ -20,43 +20,19 @@ function _supabaseAuthStorageKey(url) {
 const SUPABASE_AUTH_STORAGE_KEY = _supabaseAuthStorageKey(SUPABASE_URL);
 
 function _createSecureAuthStorage() {
-  const sessionFallback = new Map();
+  // NOTE: safeStorage (Electron keychain) is intentionally bypassed until the app
+  // is notarized. On non-notarized builds, macOS re-prompts keychain access on every
+  // login because the code signature changes between builds. localStorage is sufficient
+  // here — Electron's renderer isolation protects it from other apps.
+  // Re-enable safeStorage paths once notarization is set up.
   return {
-    async getItem(key) {
-      if (window.electronAPI?.secureAuthGet) {
-        const result = await window.electronAPI.secureAuthGet(key);
-        if (result?.ok && result.value) return result.value;
-      }
-      // One-time migration from Supabase's previous default localStorage key.
-      // This preserves logged-in sessions after the storage hardening update,
-      // then removes the token from localStorage once secure storage accepts it.
-      try {
-        const legacy = localStorage.getItem(key);
-        if (legacy && window.electronAPI?.secureAuthSet) {
-          const migrated = await window.electronAPI.secureAuthSet(key, legacy);
-          if (migrated?.ok) localStorage.removeItem(key);
-          return migrated?.ok ? legacy : null;
-        }
-      } catch (_) {}
-      // Browser/no-safeStorage fallback only. Electron release builds should use
-      // safeStorage; this in-memory fallback avoids token persistence.
-      return sessionFallback.get(key) || null;
+    getItem(key) {
+      try { return localStorage.getItem(key); } catch (_) { return null; }
     },
-    async setItem(key, value) {
-      if (window.electronAPI?.secureAuthSet) {
-        const result = await window.electronAPI.secureAuthSet(key, value);
-        if (result?.ok) {
-          try { localStorage.removeItem(key); } catch (_) {}
-          return;
-        }
-      }
-      sessionFallback.set(key, value);
+    setItem(key, value) {
+      try { localStorage.setItem(key, value); } catch (_) {}
     },
-    async removeItem(key) {
-      if (window.electronAPI?.secureAuthRemove) {
-        await window.electronAPI.secureAuthRemove(key).catch(() => {});
-      }
-      sessionFallback.delete(key);
+    removeItem(key) {
       try { localStorage.removeItem(key); } catch (_) {}
     },
   };

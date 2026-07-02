@@ -263,8 +263,9 @@ async function initApp() {
   })();
   setTimeout(() => checkPendingInvites(), 500); // defer until Modal is defined
 
-  // Show Tests nav item only for admin
-  if (window._supabaseProfile?.role === 'admin') {
+  // Show Tests nav item only for admin AND only when admin JS files are loaded
+  // (admin scripts are excluded from prod builds, so renderAdmin won't be defined)
+  if (window._supabaseProfile?.role === 'admin' && typeof window.renderAdmin === 'function') {
     const testNavBtn = document.querySelector('[data-page="tests"]');
     if (testNavBtn) testNavBtn.style.display = '';
     const deployNavBtn = document.querySelector('[data-page="deployment"]');
@@ -1405,12 +1406,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
     setAcctIcon(currentAcctTab);
     renderAcctTabContent(currentAcctTab);
     // Sync sidebar nav highlight with the active tab
-    // Map each tab to its sidebar nav item; account shares the settings nav slot
-    const tabNavMap = { teams: 'teams', settings: 'settings', account: 'settings' };
-    const navPage = tabNavMap[currentAcctTab] || 'settings';
-    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === navPage));
+    // teams tab → highlight Teams nav; settings tab → highlight Settings nav;
+    // account tab → no sidebar item highlighted
+    const tabNavMap = { teams: 'teams', settings: 'settings', account: null };
+    const navPage = tabNavMap[currentAcctTab] ?? null;
+    document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', navPage !== null && b.dataset.page === navPage));
     // Update topbar title and activePage to reflect the active tab
-    activePage = currentAcctTab === 'teams' ? 'teams' : 'settings';
+    activePage = currentAcctTab === 'teams' ? 'teams' : currentAcctTab === 'settings' ? 'settings' : 'account';
     window.activePage = activePage;
     const titleEl = document.getElementById('topbarTitle');
     if (titleEl) titleEl.textContent = pageTitles[currentAcctTab] || '';
@@ -1432,8 +1434,9 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   setAcctSubtitle(currentAcctTab);
   setAcctIcon(currentAcctTab);
   // Sync sidebar highlight on initial render
-  const _initNavPage = { teams: 'teams', settings: 'settings', account: 'settings' }[currentAcctTab] || 'settings';
-  document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === _initNavPage));
+  // account tab → no sidebar item highlighted; teams → teams; settings → settings
+  const _initNavPage = { teams: 'teams', settings: 'settings', account: null }[currentAcctTab] ?? null;
+  document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', _initNavPage !== null && b.dataset.page === _initNavPage));
   renderAcctTabContent(currentAcctTab);
   requestAnimationFrame(() => requestAnimationFrame(moveAcctPill));
 }

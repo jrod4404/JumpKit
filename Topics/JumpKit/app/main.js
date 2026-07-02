@@ -1,4 +1,6 @@
-const { app, BrowserWindow, ipcMain, shell, safeStorage } = require('electron');
+const { app, BrowserWindow, ipcMain, shell } = require('electron');
+// safeStorage intentionally not imported - session tokens use localStorage until notarization is set up.
+// Re-add safeStorage to the destructure and restore the IPC handler bodies when notarization is ready.
 
 // Catch any uncaught exceptions in main process
 process.on('uncaughtException', (err) => {
@@ -13,6 +15,31 @@ process.on('unhandledRejection', (reason) => {
 const { spawn } = require('child_process');
 const path = require('path');
 const { autoUpdater } = require('electron-updater');
+
+// Suppress the macOS keychain prompt on every launch.
+// Electron 40+ creates a "JumpKit Safe Storage" item in the system keychain via
+// its internal safe-storage layer (separate from the OSCrypt "JumpKit Keys" item).
+// Both flags are needed to cover both layers:
+//   --use-mock-keychain     → suppresses OSCrypt ("JumpKit Keys")
+//   SafeStorageLevel3 disabled → downgrades Electron’s safe storage to level 2
+//                              (PBKDF2-based, no keychain access)
+// Neither affects JumpKit’s auth — tokens live in localStorage via Supabase.
+// Remove once the app is notarized (notarization lets macOS persist
+// "Always Allow" so the prompt appears at most once per user.)
+if (process.platform === 'darwin') {
+  app.commandLine.appendSwitch('use-mock-keychain');
+  app.commandLine.appendSwitch('disable-features', 'SafeStorageLevel3');
+  // Also delete any stale "JumpKit Safe Storage" keychain entry left by
+  // previous non-notarized builds. The security CLI is always available on macOS.
+  // If the entry doesn’t exist the command exits non-zero — that’s fine.
+  try {
+    require('child_process').execSync(
+      'security delete-generic-password -s "JumpKit Safe Storage" 2>/dev/null; ' +
+      'security delete-generic-password -s "JumpKit Keys" 2>/dev/null',
+      { stdio: 'ignore' }
+    );
+  } catch (_) {}
+}
 
 // ── SQLite (better-sqlite3, if available) ──────────────────────────
 let db = null;
@@ -88,7 +115,7 @@ function initDB() {
       );
     `);
 
-    // Safely migrate existing tables — add new columns if they don't exist.
+    // Safely migrate existing tables - add new columns if they don't exist.
     // Keep migration SQL whitelisted/fixed; do not interpolate table or column names.
     const sqliteMigrations = [
       { tableInfo: 'table_info(jumps)',      column: 'isShared',            sql: 'ALTER TABLE jumps ADD COLUMN isShared INTEGER DEFAULT 0' },
@@ -111,7 +138,7 @@ function initDB() {
 
     console.log('[JumpKit] SQLite DB initialized at', dbPath);
   } catch (e) {
-    // better-sqlite3 not available or compiled for wrong ABI — all IPC handlers
+    // better-sqlite3 not available or compiled for wrong ABI - all IPC handlers
     // will return {ok:false} / empty arrays. App falls back to localStorage.
     // Fix: run  npx @electron/rebuild -f -w better-sqlite3  from the app directory.
     console.error('[JumpKit] SQLite UNAVAILABLE:', e.message, '\n>>> Run: npx @electron/rebuild -f -w better-sqlite3');
@@ -563,42 +590,12 @@ function _writeSecureStore(store) {
   fs.writeFileSync(_secureStorePath(), JSON.stringify(store), { encoding: 'utf8', mode: 0o600 });
 }
 
-ipcMain.handle('secure-auth-get', (_e, key) => {
-  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key', value: null };
-  if (!safeStorage.isEncryptionAvailable()) return { ok: false, reason: 'safeStorage unavailable', value: null };
-  try {
-    const enc = _readSecureStore()[key];
-    if (!enc) return { ok: true, value: null };
-    return { ok: true, value: safeStorage.decryptString(Buffer.from(enc, 'base64')) };
-  } catch (e) {
-    return { ok: false, reason: e.message, value: null };
-  }
-});
-
-ipcMain.handle('secure-auth-set', (_e, key, value) => {
-  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key' };
-  if (!safeStorage.isEncryptionAvailable()) return { ok: false, reason: 'safeStorage unavailable' };
-  try {
-    const store = _readSecureStore();
-    store[key] = safeStorage.encryptString(String(value || '')).toString('base64');
-    _writeSecureStore(store);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, reason: e.message };
-  }
-});
-
-ipcMain.handle('secure-auth-remove', (_e, key) => {
-  if (!_allowedSecureAuthKey(key)) return { ok: false, reason: 'unsupported key' };
-  try {
-    const store = _readSecureStore();
-    delete store[key];
-    _writeSecureStore(store);
-    return { ok: true };
-  } catch (e) {
-    return { ok: false, reason: e.message };
-  }
-});
+// secure-auth-* handlers are stubbed - safeStorage disabled until notarization is ready.
+// The renderer (client.js) uses localStorage directly and never calls these handlers.
+// Restore full safeStorage implementations here when re-enabling.
+ipcMain.handle('secure-auth-get',    () => ({ ok: false, reason: 'safeStorage disabled', value: null }));
+ipcMain.handle('secure-auth-set',    () => ({ ok: false, reason: 'safeStorage disabled' }));
+ipcMain.handle('secure-auth-remove', () => ({ ok: false, reason: 'safeStorage disabled' }));
 
 // ── IPC: seed-new-user ─────────────────────────────────────────────
 ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
@@ -608,7 +605,7 @@ ipcMain.handle('migrate-user-id', (_e, oldId, newId) => {
       db.prepare('UPDATE jumps     SET userId = ? WHERE userId = ?').run(newId, oldId);
       db.prepare('UPDATE columns   SET userId = ? WHERE userId = ?').run(newId, oldId);
       db.prepare('UPDATE click_log SET userId = ? WHERE userId = ?').run(newId, oldId);
-      // user_prefs has unique constraint — delete new if exists, then update old
+      // user_prefs has unique constraint - delete new if exists, then update old
       db.prepare('DELETE FROM user_prefs WHERE userId = ?').run(newId);
       db.prepare('UPDATE user_prefs SET userId = ? WHERE userId = ?').run(newId, oldId);
       const rows = db.prepare('SELECT key, value FROM sync_state WHERE key LIKE ?').all(`${oldId}:%`);
@@ -744,7 +741,7 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'index.html'));
   }
 
-  // Discourage accidental DevTools access — not a true security control;
+  // Discourage accidental DevTools access - not a true security control;
   // determined users can still open DevTools via menu or attach a remote debugger.
   if (!isDev) {
     win.webContents.on('before-input-event', (event, input) => {
@@ -767,7 +764,7 @@ function createWindow() {
   win.on('closed', () => { win = null; });
 
   // Prevent new BrowserWindows from being opened (e.g. via window.open or target=_blank)
-  // Redirect to system browser instead — keeps preload out of uncontrolled windows
+  // Redirect to system browser instead - keeps preload out of uncontrolled windows
   // Only allow http/https URLs; block javascript:, data:, file:, etc.
   win.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) shell.openExternal(url);
@@ -789,7 +786,7 @@ function fireAndForget(cmd, args) {
 // Open URLs / local paths from renderer
 const RISKY_EXTENSIONS = /\.(app|exe|sh|bat|cmd|command|pkg|dmg|scpt)$/i;
 
-// Hard-blocked URL schemes — never passed to shell.openExternal or shell.openPath.
+// Hard-blocked URL schemes - never passed to shell.openExternal or shell.openPath.
 // Includes web/script schemes, OS-level handlers that can trigger other apps,
 // and remote mount/connect schemes a malicious shared jump could abuse.
 const BLOCKED_URL_SCHEME = /^(javascript|data|vbscript|file|jar|view-source|smb|afp|nfs|cifs|vnc|ssh|telnet|ftp|sftp|gopher|x-apple\.systempreferences|prefs|ms-settings|shell|chrome|about):/i;
@@ -858,7 +855,7 @@ ipcMain.handle('open-url', async (_e, url, isShared) => {
         buttons: ['Cancel', 'Open'],
         defaultId: 0,
         cancelId: 0,
-        title: 'Shared Team Jump — Local Path',
+        title: 'Shared Team Jump - Local Path',
         message: 'Open this shared jump?',
         detail: `This jump was shared by your team and points to a local path: ${resolvedPath}. As a security precaution, is this the file you actually want to open?`,
       });
@@ -1048,7 +1045,7 @@ ipcMain.handle('check-icon-files', () => {
     // Check file existence (works on the platform the file is for)
     const macFileExists = fs.existsSync(macIconPath);
     const winFileExists = fs.existsSync(winIconPath);
-    // Also verify via package.json build config — more reliable cross-platform.
+    // Also verify via package.json build config - more reliable cross-platform.
     // On Windows, icon.icns is not bundled (Mac-only format) so file check alone
     // would always fail. Reading the config confirms the path is correctly set.
     let pkgMacIcon = null, pkgWinIcon = null;
@@ -1073,7 +1070,7 @@ ipcMain.handle('list-dist-files', () => {
   const fs = require('fs');
   const distPath = path.join(__dirname, 'dist');
   try {
-    if (!fs.existsSync(distPath)) return { ok: false, error: 'dist/ folder not found — run a build first.' };
+    if (!fs.existsSync(distPath)) return { ok: false, error: 'dist/ folder not found - run a build first.' };
     const files = fs.readdirSync(distPath)
       .filter(f => f.endsWith('.dmg') || f.endsWith('.exe'))
       .map(f => {
@@ -1104,7 +1101,7 @@ ipcMain.handle('get-latest-commit-id', async () => {
   }
 });
 
-// Single instance lock — prevent two processes opening the same SQLite db
+// Single instance lock - prevent two processes opening the same SQLite db
 const gotSingleInstanceLock = app.requestSingleInstanceLock();
 if (!gotSingleInstanceLock) {
   app.quit();
@@ -1124,7 +1121,7 @@ app.whenReady().then(() => {
     if (leaked.length > 0) {
       const { dialog } = require('electron');
       dialog.showErrorBoxSync(
-        '⚠️ Build Error — Admin Code Leaked',
+        '⚠️ Build Error - Admin Code Leaked',
         `This installer contains admin-only files that should have been excluded from the build:\n\n${leaked.map(f => '  • ' + f).join('\n')}\n\nDo NOT ship this build. Rebuild with the correct package.json exclusions.`
       );
     }
