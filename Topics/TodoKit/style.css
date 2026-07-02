@@ -1937,3 +1937,73 @@ body {
   margin-left: 6px;
   vertical-align: middle;
 }
+
+/* ── Tag Pills ─────────────────────────────────────────────────────────────── */
+.tag-input-area {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius, 6px);
+  background: var(--bg-input, var(--bg-card));
+  cursor: text;
+}
+.tag-input-area:focus-within {
+  border-color: var(--accent);
+  outline: none;
+}
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px 2px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--accent-light, rgba(99,102,241,0.12));
+  color: var(--accent, #6366f1);
+  white-space: nowrap;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag-pill-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.55;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.tag-pill-remove:hover { opacity: 1; }
+.tag-text-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text);
+  flex: 1;
+  min-width: 80px;
+  padding: 2px 0;
+}
+.tag-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+/* Table tags cell */
+.col-tags { min-width: 80px; }
+.table-tags { display: flex; flex-wrap: wrap; gap: 3px; }
+/* Detail modal tags */
+.detail-tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }

@@ -201,7 +201,7 @@ const filters = {
   responsible: '',
 };
 
-let sort = { col: null, dir: 'asc' };
+let sort = { col: null, dir: 'asc', cols: [] }; // cols: [{col, dir}, ...] for multi-sort
 
 const PRIORITY_ORDER = { Low: 0, Med: 1, Medium: 1, High: 2, Urgent: 3 };
 const STATUS_ORDER   = { Cancelled: 0, Completed: 1, 'To Do': 2, 'In Progress': 3, 'To Test': 4 };
@@ -356,6 +356,47 @@ function latestCommentText(task) {
   return stripHtml(latest?.html || '').replace(/\s+/g, ' ').trim();
 }
 
+// ── Tag helpers ────────────────────────────────────────────────────────────
+let _modalTags = [];
+
+function initTagInput(tags) {
+  _modalTags = Array.isArray(tags) ? [...tags] : [];
+  renderModalTagPills();
+  const input = document.getElementById('tag-text-input');
+  if (input) input.value = '';
+}
+
+function renderModalTagPills() {
+  const area = document.getElementById('tag-input-area');
+  if (!area) return;
+  const input = document.getElementById('tag-text-input');
+  // Remove existing pills (keep the input)
+  Array.from(area.querySelectorAll('.tag-pill')).forEach(p => p.remove());
+  // Insert pills before input
+  _modalTags.forEach((tag, i) => {
+    const pill = document.createElement('span');
+    pill.className = 'tag-pill';
+    pill.innerHTML = `${escapeHtml(tag)}<button class="tag-pill-remove" type="button" data-tag-idx="${i}" aria-label="Remove tag">&#x00D7;</button>`;
+    area.insertBefore(pill, input);
+  });
+}
+
+function getModalTags() {
+  return [..._modalTags];
+}
+
+function addModalTag(raw) {
+  const tag = raw.trim().replace(/,+$/, '').trim();
+  if (!tag || _modalTags.includes(tag)) return;
+  _modalTags.push(tag);
+  renderModalTagPills();
+}
+
+function renderTableTags(tags) {
+  if (!tags || !tags.length) return '<span style="color:var(--text-muted);font-size:11px">—</span>';
+  return `<div class="table-tags">${tags.map(t => `<span class="tag-pill">${escapeHtml(t)}</span>`).join('')}</div>`;
+}
+
 function formatDate(dateStr) {
   if (!dateStr) return '—';
   const [y, m, d] = dateStr.split('-');
@@ -431,7 +472,7 @@ function renderProjectView() {
     _mfActiveId            = null;
     _mfAppliedMultiFilters = null;
     filters.status = filters.priority = filters.category = filters.responsible = filters.search = '';
-    sort.col = null; sort.dir = 'asc';
+    sort.col = null; sort.dir = 'asc'; sort.cols = [];
     const defaultF = _mfGetList(activeProjectId).find(f => f.isDefault);
     if (defaultF) _mfApplyFilter(defaultF);
   }
@@ -487,48 +528,55 @@ function getVisibleTasks(projectTasks) {
   }
 
   // Apply sorting
-  if (sort.col) {
+  if (sort.cols.length > 0 || sort.col) {
     tasks = [...tasks].sort(compareTasksForCurrentSort);
   }
 
   return tasks;
 }
 
-function compareTasksForCurrentSort(a, b) {
-  const dir = sort.dir === 'asc' ? 1 : -1;
-  let av = a[sort.col] || '';
-  let bv = b[sort.col] || '';
+function _compareBySortEntry(a, b, col, dir) {
+  const d = dir === 'asc' ? 1 : -1;
+  let av, bv;
 
-  if (sort.col === 'priority') {
-    av = PRIORITY_ORDER[av] ?? 99;
-    bv = PRIORITY_ORDER[bv] ?? 99;
-    return tieBreakTasks(a, b, (av - bv) * dir);
+  if (col === 'priority') {
+    av = PRIORITY_ORDER[a.priority] ?? 99;
+    bv = PRIORITY_ORDER[b.priority] ?? 99;
+    return (av - bv) * d; // asc = Low→High, desc = High→Low (matches original)
   }
-
-  if (sort.col === 'status') {
-    av = STATUS_ORDER[av] ?? 99;
-    bv = STATUS_ORDER[bv] ?? 99;
-    return tieBreakTasks(a, b, (av - bv) * dir);
+  if (col === 'status') {
+    av = STATUS_ORDER[a.status] ?? 99;
+    bv = STATUS_ORDER[b.status] ?? 99;
+    return (av - bv) * d;
   }
-
-  if (sort.col === 'executionOrder') {
+  if (col === 'executionOrder') {
     av = Number.isFinite(Number(a.executionOrder)) ? Number(a.executionOrder) : Number.MAX_SAFE_INTEGER;
     bv = Number.isFinite(Number(b.executionOrder)) ? Number(b.executionOrder) : Number.MAX_SAFE_INTEGER;
-    return tieBreakTasks(a, b, (av - bv) * dir);
+    return (av - bv) * d;
   }
-
-  if (sort.col === 'plannedStart') {
+  if (col === 'plannedStart') {
     av = a.plannedStart || '9999-12-31';
     bv = b.plannedStart || '9999-12-31';
   } else {
-    av = String(av).toLowerCase();
-    bv = String(bv).toLowerCase();
+    av = String(a[col] || '').toLowerCase();
+    bv = String(b[col] || '').toLowerCase();
   }
+  if (av < bv) return -1 * d;
+  if (av > bv) return  1 * d;
+  return 0;
+}
 
-  let result = 0;
-  if (av < bv) result = -1;
-  if (av > bv) result = 1;
-  return tieBreakTasks(a, b, result * dir);
+function compareTasksForCurrentSort(a, b) {
+  // Use full multi-sort cols array if available, fall back to legacy single sort.col
+  const sortCols = sort.cols.length > 0
+    ? sort.cols
+    : (sort.col ? [{ col: sort.col, dir: sort.dir }] : []);
+
+  for (const s of sortCols) {
+    const result = _compareBySortEntry(a, b, s.col, s.dir);
+    if (result !== 0) return result;
+  }
+  return tieBreakTasks(a, b, 0);
 }
 
 function tieBreakTasks(a, b, result) {
@@ -581,6 +629,7 @@ function renderTaskTable(project, projectTasks) {
         <span class="task-title-text">${escapeHtml(t.title)}</span>
         <span class="task-latest-comment" title="${escapeHtml(latestCommentText(t) || 'No comments yet')}">${escapeHtml(latestCommentText(t) || 'No comments yet')}</span>
       </td>
+      <td class="col-tags">${renderTableTags(t.tags)}</td>
       <td>${categoryBadge(t.category)}</td>
       <td>${priorityBadge(t.priority)}</td>
       <td>${statusBadge(t.status)}</td>
@@ -721,6 +770,7 @@ function selectProject(id) {
   filters.responsible = '';
   sort.col = null;
   sort.dir = 'asc';
+  sort.cols = [];
   document.getElementById('global-search').value = '';
   document.getElementById('filter-status').value = '';
   document.getElementById('filter-priority').value = '';
@@ -822,6 +872,7 @@ function openTaskDetailModal(taskId) {
       <div class="detail-meta-item"><span class="detail-label-inline">Priority</span><span class="detail-value-inline">${priorityBadge(task.priority)}</span></div>
       <div class="detail-meta-item"><span class="detail-label-inline">Responsible</span><span class="detail-value-inline">${escapeHtml(task.responsible || '—')}</span></div>
       <div class="detail-meta-item"><span class="detail-label-inline">Planned Start</span><span class="detail-value-inline">${formatDate(task.plannedStart)}</span></div>
+      ${(task.tags && task.tags.length) ? `<div class="detail-meta-item" style="flex-basis:100%"><span class="detail-label-inline">Tags</span><span class="detail-value-inline"><div class="detail-tags-row">${task.tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join('')}</div></span></div>` : ''}
     </div>
     <div class="detail-section">
       <div class="detail-label">Description</div>
@@ -897,6 +948,7 @@ function openTaskModal(taskId) {
   document.getElementById('task-status').value           = task?.status || 'To Do';
   document.getElementById('task-start-date').value       = task?.plannedStart || '';
   document.getElementById('task-description').value      = task?.description || '';
+  initTagInput(task?.tags || []);
   modalComments = cloneComments(task?.comments || []);
   editingCommentId = null;
   populateCommentAuthorDropdown(project, task);
@@ -1081,6 +1133,7 @@ function getTaskFormData() {
     description:     document.getElementById('task-description').value.trim(),
     comments:        cloneComments(modalComments),
     completionNotes: '',
+    tags:            getModalTags(),
   };
 }
 
@@ -1539,6 +1592,32 @@ function initEventListeners() {
   // Status/comment controls
   document.getElementById('task-status').addEventListener('change', updateTaskModalStatusButtons);
   document.getElementById('btn-add-comment').addEventListener('click', addOrUpdateComment);
+
+  // Tag input: Enter or comma adds a tag
+  document.getElementById('tag-text-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const val = e.target.value;
+      if (val.trim()) { addModalTag(val); e.target.value = ''; }
+    } else if (e.key === 'Backspace' && !e.target.value && _modalTags.length) {
+      _modalTags.pop();
+      renderModalTagPills();
+    }
+  });
+  document.getElementById('tag-text-input').addEventListener('blur', e => {
+    if (e.target.value.trim()) { addModalTag(e.target.value); e.target.value = ''; }
+  });
+  // Remove tag via pill × button (delegated)
+  document.getElementById('tag-input-area').addEventListener('click', e => {
+    const btn = e.target.closest('.tag-pill-remove');
+    if (!btn) return;
+    const idx = parseInt(btn.dataset.tagIdx, 10);
+    if (!isNaN(idx)) { _modalTags.splice(idx, 1); renderModalTagPills(); }
+  });
+  // Click anywhere in tag area focuses input
+  document.getElementById('tag-input-area').addEventListener('click', e => {
+    if (!e.target.closest('.tag-pill-remove')) document.getElementById('tag-text-input').focus();
+  });
   document.getElementById('btn-cancel-comment-edit').addEventListener('click', resetCommentEditor);
   document.querySelectorAll('.btn-editor').forEach(btn => {
     btn.addEventListener('click', () => runCommentCommand(btn.dataset.command));
@@ -1967,8 +2046,10 @@ function _mfApplyFilter(f) {
   };
   filters.search = f.filters?.search || '';
 
-  // Apply primary sort
-  const firstSort = (f.sorts || []).find(s => s.col);
+  // Apply all sort columns (multi-sort support)
+  const allSorts = (f.sorts || []).filter(s => s.col);
+  sort.cols = allSorts;
+  const firstSort = allSorts[0];
   if (firstSort) { sort.col = firstSort.col; sort.dir = firstSort.dir; }
   else           { sort.col = null; sort.dir = 'asc'; }
 
@@ -1992,7 +2073,7 @@ function _mfClearActiveFilter() {
   _mfActiveId = null;
   _mfAppliedMultiFilters = null;
   filters.status = filters.priority = filters.category = filters.responsible = filters.search = '';
-  sort.col = null; sort.dir = 'asc';
+  sort.col = null; sort.dir = 'asc'; sort.cols = [];
   ['filter-status','filter-priority','filter-category','filter-responsible','global-search'].forEach(id => {
     const el = document.getElementById(id); if (el) el.value = '';
   });

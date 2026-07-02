@@ -98,6 +98,53 @@
           "isDefault": false
         }
       ]
+    },
+    {
+      "id": "mr3k0lxpcldt",
+      "name": "TurboSBA",
+      "description": "",
+      "users": [
+        "Jeff",
+        "Maximus"
+      ],
+      "customCategories": [
+        "Support"
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#3d754e",
+        "Support": "#874efe"
+      },
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#3d754e",
+          "isDefault": true
+        },
+        {
+          "id": "custom-mr3k29md-support",
+          "name": "Support",
+          "color": "#874efe",
+          "isDefault": false
+        }
+      ]
     }
   ],
   "tasks": [
@@ -154,7 +201,7 @@
         {
           "id": "auto_glm_setup_1782338926",
           "author": "Maximus",
-          "html": "ZAI API key added to openclaw.json env. zai/glm-5.2 registered in model allowlist with alias glm. Gateway restarted and model verified live — session running on GLM-5.2.",
+          "html": "ZAI API key added to openclaw.json env. zai/glm-5.2 registered in model allowlist with alias glm. Gateway restarted and model verified live \u2014 session running on GLM-5.2.",
           "createdAt": "2026-06-24T22:08:46.888262Z",
           "updatedAt": "2026-06-24T22:08:46.888262Z",
           "legacyCompletionNotes": false
@@ -248,8 +295,8 @@
       "priority": "Med",
       "status": "To Do",
       "category": "Idea",
-      "responsible": "",
-      "plannedStart": "",
+      "responsible": "Jeff",
+      "plannedStart": "2026-06-23",
       "description": "Perhaps add-on to jumpkit which manages tasks.",
       "completionNotes": "",
       "comments": []
@@ -276,7 +323,7 @@
       "priority": "Med",
       "status": "To Do",
       "category": "Idea",
-      "responsible": "",
+      "responsible": "Jeff",
       "plannedStart": "",
       "description": "AI caddy which helps you choose clubs / shots on the golf course after it's ingested your launch monitor data.",
       "completionNotes": "",
@@ -290,7 +337,7 @@
       "priority": "Med",
       "status": "To Do",
       "category": "Idea",
-      "responsible": "",
+      "responsible": "Jeff",
       "plannedStart": "",
       "description": "App which you can upload your participant emails, pairings, tee times, do side bets, show live stats for golf weekend trips, scrambles, and leagues.",
       "completionNotes": "",
@@ -670,7 +717,7 @@
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
-      "description": "Do screen studio demo videos and images of app for landing page… need to redo so Jeff Roder not visible.  a) Video for add jump, launch link, launch directory; win and Mac images of jumps page b) video for teams; 2 teams images c) video for stats 2 team images",
+      "description": "Do screen studio demo videos and images of app for landing page\u2026 need to redo so Jeff Roder not visible.  a) Video for add jump, launch link, launch directory; win and Mac images of jumps page b) video for teams; 2 teams images c) video for stats 2 team images",
       "comments": [],
       "completionNotes": ""
     },
@@ -687,7 +734,957 @@
       "description": "Deliver and pick up premium coolers stocked with ice and beer or whatever for daily use",
       "comments": [],
       "completionNotes": ""
+    },
+    {
+      "id": "mr3jy99ab705",
+      "executionOrder": 8,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "TurboSBA",
+      "priority": "Urgent",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-02",
+      "description": "A turbo tax style web app for easily completing with thoroughness and speed the various SBA loan applications.  Customers are credit unions and banks and ie B2B and single end uses ie B2C.",
+      "comments": [],
+      "completionNotes": ""
+    },
+    {
+      "id": "wum8bscn6f67",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Choose final product name (e.g. LoanWizard, TurboLoan, EasySBA)",
+      "priority": "High",
+      "status": "Completed",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Evaluate name options, check trademarks, shortlist top 3, make final call.",
+      "completionNotes": "",
+      "executionOrder": 1,
+      "comments": [
+        {
+          "id": "mr3koehgsqmq",
+          "author": "Jeff",
+          "html": "TurboSBA",
+          "createdAt": "2026-07-02T14:01:02.548Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "xyog5gf1edud",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Check domain availability and purchase .com (plus variations)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Search Namecheap/GoDaddy. Purchase primary .com and relevant variations/alternatives.",
+      "completionNotes": "",
+      "executionOrder": 2,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "m84tm4esrji4",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Secure social handles (X, YT, LI, etc.)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Claim matching handles on X, LinkedIn, and any other relevant platforms before launch.",
+      "completionNotes": "",
+      "executionOrder": 4,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "6q90slqclegd",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Create catchphrase / tagline",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. e.g. 'SBA Loans, Simplified' or 'TurboTax for SBA Applications'. Keep it short and memorable.",
+      "completionNotes": "",
+      "executionOrder": 6,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "rqn6vzgebdyh",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Design logo and basic brand assets (colors, fonts, icons)",
+      "priority": "High",
+      "status": "In Progress",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Use Figma or hire a freelancer. Deliverables: logo (light/dark), color palette, font stack, icon set.",
+      "completionNotes": "",
+      "executionOrder": 3,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "4jbva2s7vaz3",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Write brand story and positioning",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Short narrative for website and pitch: who it's for, why it exists, what makes it different.",
+      "completionNotes": "",
+      "executionOrder": 7,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "bxbqc9rw1dsu",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Register LLC and set up business banking",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. File LLC in preferred state. Open dedicated business checking account.",
+      "completionNotes": "",
+      "executionOrder": 5,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "vhuygd343vcf",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0 \u00b7 Set up Proton for Email",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Get a professional email on your domain (e.g. jeff@turbosba.com).",
+      "completionNotes": "",
+      "executionOrder": 8,
+      "comments": [],
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "bi06n4nw7uqr",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 Finalize full requirements / spec doc",
+      "priority": "High",
+      "status": "In Progress",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Lock in scope for Phase 1. Covers all wizard steps, user roles, data fields, integrations.",
+      "completionNotes": "",
+      "executionOrder": 9,
+      "comments": [
+        {
+          "id": "mr3kvqrkhusr",
+          "author": "Jeff",
+          "html": "<span>MARKDOWN SPECS:</span><div><br></div><div><div>Here is the refreshed, complete Markdown requirements and specifications document for Phase 1, incorporating the borrower document list, upload guidance, and all previous details.</div><div># Phase 1 Requirements &amp; Technical Specifications</div><div><br></div><div>## 1. Project Overview</div><div>**Product Name**: [Your Chosen Name, e.g., LoanWizard / TurboLoan / EasySBA]</div><div><br></div><div>**Description**: A web-based guided SBA loan application platform that makes completing 7(a) and Express applications as easy and intuitive as TurboTax. The wizard collects information step-by-step, provides smart guidance, auto-fills where possible, generates basic pro formas, validates data, handles document uploads, and prepares exports or submissions for lenders.</div><div><br></div><div>**Target Users**:</div><div>- Primary: Small business owners / borrowers</div><div>- Secondary: Banks &amp; credit unions (white-label / branded instances)</div><div><br></div><div>**Core Value**: Reduce time, errors, and frustration in SBA applications while delivering a delightful, trustworthy experience.</div><div><br></div><div>## 2. Tech Stack</div><div>- **Framework**: Next.js 15 (App Router) + TypeScript + Tailwind CSS</div><div>- **Hosting**: Vercel</div><div>- **Backend / Database / Auth**: Supabase (PostgreSQL, Auth, Storage, Edge Functions)</div><div>- **Emails**: Resend</div><div>- **Payments**: Stripe (Subscriptions + one-time fees)</div><div>- **Forms &amp; Validation**: React Hook Form + Zod</div><div>- **UI**: shadcn/ui + Tailwind</div><div>- **AI Features**: Vercel AI SDK + OpenAI/Anthropic (suggestions, document insights, pro formas)</div><div>- **Analytics**: PostHog or Vercel Analytics</div><div><br></div><div>## 3. Key Features (Phase 1 MVP)</div><div><br></div><div>### Authentication &amp; Onboarding</div><div>- Supabase Auth (email/password, magic links, optional social)</div><div>- Multi-tenant support for lender branding (subdomains or custom domains)</div><div>- Role-based access (Borrower vs. Lender Admin)</div><div><br></div><div>### Guided Application Wizard (TurboTax-Style)</div><div>- Multi-step stepper with progress bar, navigation, and save/resume functionality</div><div>- Auto-save every few seconds</div><div>- Conditional logic based on answers (e.g., show veteran questions or collateral sections)</div><div>- Clean, calm, professional UI with helpful explanations and tooltips</div><div><br></div><div>**Main Wizard Sections**:</div><div>1. Business Information</div><div>2. Ownership &amp; Management (including veteran status)</div><div>3. Loan Request Details</div><div>4. Financial Information</div><div>5. Collateral &amp; Additional Details (conditional)</div><div>6. Document Uploads</div><div>7. Review &amp; Summary</div><div>8. Export / Submit</div><div><br></div><div>**Smart Features**:</div><div>- Real-time validation and error highlighting</div><div>- AI-assisted auto-fill and suggestions</div><div>- Basic pro forma / cash flow projection generation</div><div>- SBA program eligibility checker (including Veterans Advantage)</div><div><br></div><div>### Document Upload Section</div><div>Support secure uploads with clear guidance. Required/common documents include:</div><div><br></div><div>**Core / Always-Required**:</div><div>- SBA Form 1919 (Borrower Information Form)</div><div>- Personal Financial Statement (SBA Form 413 or equivalent)</div><div>- Business Tax Returns (last 2\u20133 years)</div><div>- Personal Tax Returns (last 2\u20133 years for owners/guarantors)</div><div>- Business Financial Statements (YTD P&amp;L and balance sheet)</div><div>- Business Plan / Executive Summary with use of proceeds and projections</div><div>- Ownership Documents (operating agreement, articles, etc.)</div><div><br></div><div>**Financial &amp; Debt**:</div><div>- Business Debt Schedule</div><div>- Aging Reports (AR/AP if applicable)</div><div>- Bank Statements (last 3\u201312 months)</div><div>- Cash Flow Projections / Pro Formas</div><div><br></div><div>**Identification &amp; Background**:</div><div>- Photo ID for principals</div><div>- Resumes for owners/key management</div><div>- SBA Form 912 (if required by background questions)</div><div><br></div><div>**Collateral &amp; Other (Conditional)**:</div><div>- Collateral Schedule and valuations</div><div>- Real estate documents (appraisals, leases, etc.)</div><div>- Business license, permits, franchise agreements, purchase agreements</div><div><br></div><div>**Upload Guidelines in Wizard**:</div><div>- Support PDF, JPEG, PNG, Excel/CSV</div><div>- Allow \"Upload Later\" with save/resume</div><div>- Provide \"Why we need this\" explanations and examples</div><div>- Conditional visibility based on loan type/answers</div><div>- Secure Supabase Storage with signed URLs</div><div><br></div><div>### Output &amp; Lender Features</div><div>- Generate filled PDF forms and summary reports</div><div>- White-label branding for lenders</div><div>- Basic lender dashboard to view borrower applications</div><div><br></div><div>### Payments (Stripe)</div><div>- Lender subscriptions ($2,500/month base)</div><div>- Per-application fees ($250)</div><div>- Stripe Checkout, Customer Portal, and webhooks</div><div><br></div><div>## 4. Non-Functional Requirements</div><div>- **Performance**: Fast loads, responsive (mobile/tablet/desktop)</div><div>- **Security &amp; Compliance**:</div><div>&nbsp; - Encryption in transit (HTTPS) and at rest (Supabase defaults + column-level where needed)</div><div>&nbsp; - Strong Row Level Security and access controls</div><div>&nbsp; - Data minimization for sensitive info</div><div>&nbsp; - Audit logging</div><div>&nbsp; - Prepare for SOC 2 readiness</div><div>- **Accessibility**: WCAG 2.1 AA</div><div>- **Error Handling**: Friendly messages with recovery options</div><div><br></div><div>## 5. Design &amp; UX Guidelines</div><div>- Style: Clean, modern, trustworthy (similar to TurboTax/Intuit)</div><div>- Tone: Helpful, encouraging, professional</div><div>- Mobile-first responsive design</div><div><br></div><div>## 6. Out of Scope for Phase 1</div><div>- Direct E-Tran submission (export only)</div><div>- Advanced underwriting</div><div>- Native mobile apps (Phase 2)</div><div>- Full SOC 2 audit</div><div><br></div><div>## 7. Success Metrics</div><div>- Wizard completion rate &gt;60%</div><div>- High user satisfaction</div><div>- Time to complete &lt;30\u201345 minutes for typical cases</div><div>- Successful pilots with early lenders</div><div><br></div><div>---</div><div><br></div><div>**Implementation Notes**:</div><div>- Prioritize the wizard UX as the core differentiator.</div><div>- Make document uploads modular and conditional.</div><div>- Build with multi-tenancy and white-labeling in mind from the start.</div><div><br></div><div>This spec is ready for implementation. Let me know if you want to expand any section (e.g., detailed database schema or user stories).</div><div>This version is self-contained and includes everything we\u2019ve discussed. You can now feed it directly into your AI coding assistant. Good luck with Phase 1! Let me know what\u2019s next.</div></div>",
+          "createdAt": "2026-07-02T14:06:45.056Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "m9bspj6lrilx",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 Create wireframes for key screens",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Screens: landing, auth, dashboard, wizard steps, document upload, review, success.",
+      "completionNotes": "",
+      "executionOrder": 10,
+      "comments": [],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "4qzenww60mny",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 Design high-fidelity mockups (Figma) \u2014 TurboTax-style wizard UX",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Focus on wizard UX \u2014 this is the core differentiator. Clean, guided, low-intimidation flow.",
+      "completionNotes": "",
+      "executionOrder": 11,
+      "comments": [],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "yl9egl9mkjdf",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 Define user flows and conditional logic in the wizard",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Map all branch points: loan type, business structure, ownership %, collateral, etc.",
+      "completionNotes": "",
+      "executionOrder": 12,
+      "comments": [],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "rl8fhdoqksr7",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 List all form fields and document upload requirements",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Full SBA form field inventory. Tag required vs optional, and conditionally required fields.",
+      "completionNotes": "",
+      "executionOrder": 13,
+      "comments": [],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "c354gpy0ol84",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 1 \u00b7 Plan multi-tenancy / white-label approach for lenders",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-18",
+      "description": "Phase 1 \u2014 Planning & Design. Define how lender branding will be applied. Subdomain vs. custom domain, branding config schema.",
+      "completionNotes": "",
+      "executionOrder": 14,
+      "comments": [],
+      "tags": [
+        "Phase 1"
+      ]
+    },
+    {
+      "id": "us1f2ut0o2ci",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Set up project: Next.js 15 + TypeScript + Tailwind on Vercel",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Scaffold repo, configure Vercel project, set up CI/CD, add ESLint/Prettier.",
+      "completionNotes": "",
+      "executionOrder": 15,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "1h3qt3b5mnlp",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Integrate Supabase (Auth, Database, Storage, RLS)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Set up Supabase project. Configure auth providers, define schema, enable RLS policies.",
+      "completionNotes": "",
+      "executionOrder": 16,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "r393zgp59ix0",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Implement authentication flows",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Email/password + magic link. Borrower and lender roles. Protected routes.",
+      "completionNotes": "",
+      "executionOrder": 17,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "xkvhcpj13bha",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Build multi-step wizard with React Hook Form + Zod",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Core product feature. Step-by-step SBA application wizard with validation, save progress, resume.",
+      "completionNotes": "",
+      "executionOrder": 18,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "lujtpqqgs7wt",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Add smart features (AI suggestions, auto-fill, basic pro formas)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. AI-assisted field suggestions, auto-fill from prior inputs, simple financial pro forma generation.",
+      "completionNotes": "",
+      "executionOrder": 23,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "1iiifu0pkldy",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Implement document upload section with guidance and conditional fields",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Guided doc uploads via Supabase Storage. Show/hide fields based on loan type and borrower answers.",
+      "completionNotes": "",
+      "executionOrder": 19,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "0itk5acieoid",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Add Stripe for subscriptions and per-application payments",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Subscription tiers + pay-per-application model. Webhooks for upgrade/downgrade/cancel.",
+      "completionNotes": "",
+      "executionOrder": 20,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "l8j3b4di9vve",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Integrate Resend for transactional email",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Confirmation emails, status updates, lender notifications, password reset.",
+      "completionNotes": "",
+      "executionOrder": 24,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "s7qfqnf641fw",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Build lender white-label / branding system",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Allow lenders to configure logo, colors, subdomain. Store branding config in DB.",
+      "completionNotes": "",
+      "executionOrder": 25,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "ravdfdk1w1bq",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Add analytics (PostHog)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Track wizard step completion, drop-off points, feature usage. Set up funnels and session recordings.",
+      "completionNotes": "",
+      "executionOrder": 26,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "4wzh9dcljnqg",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Implement security best practices (encryption, data minimization, logging)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. Encrypt sensitive fields at rest, minimize PII stored, add audit logging for data access.",
+      "completionNotes": "",
+      "executionOrder": 21,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "scgavy2m3uvl",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 2 \u00b7 Thorough testing (usability, edge cases, mobile, error flows)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 2 \u2014 Development. End-to-end testing across devices and browsers. Cover all conditional branches in the wizard.",
+      "completionNotes": "",
+      "executionOrder": 22,
+      "comments": [],
+      "tags": [
+        "Phase 2"
+      ]
+    },
+    {
+      "id": "1twqvkjjzihw",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 Internal testing + bug fixing",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Systematic walkthrough of all flows. Log and fix all blockers and major bugs before external testing.",
+      "completionNotes": "",
+      "executionOrder": 27,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "hikbohxn9hnt",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 User testing with 5\u201310 potential borrowers and lenders",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Recruit real users. Run moderated or unmoderated sessions. Capture friction points and confusion.",
+      "completionNotes": "",
+      "executionOrder": 28,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "a2pe7jj8a2ac",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 Performance and accessibility audit",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Lighthouse audit. Fix Core Web Vitals. WCAG 2.1 AA compliance check.",
+      "completionNotes": "",
+      "executionOrder": 30,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "fjds46j6sm1n",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 Security review (basic penetration testing)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Run OWASP-based checklist. Test auth, RLS, file upload, and input sanitization.",
+      "completionNotes": "",
+      "executionOrder": 29,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "1e1xln988jj3",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 Finalize copy, tooltips, and help text",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Review every label, tooltip, error message, and help text. Plain English, no jargon.",
+      "completionNotes": "",
+      "executionOrder": 31,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "o1a6n4r1agod",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 3 \u00b7 Set up error monitoring (Sentry or Vercel)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-15",
+      "description": "Phase 3 \u2014 Testing & Polish. Configure Sentry or Vercel error tracking. Set up alerts for critical errors in production.",
+      "completionNotes": "",
+      "executionOrder": 32,
+      "comments": [],
+      "tags": [
+        "Phase 3"
+      ]
+    },
+    {
+      "id": "db2se5v6umy1",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Deploy to production on Vercel",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Final production deploy. Verify environment variables, edge config, and build output.",
+      "completionNotes": "",
+      "executionOrder": 33,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "gqi516qa8o97",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Set up custom domain and SSL",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Point domain to Vercel. Verify SSL cert. Set up www and apex redirects.",
+      "completionNotes": "",
+      "executionOrder": 34,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "psfhiakgzogb",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Configure SEO basics (meta tags, sitemap, robots.txt)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Add meta titles/descriptions, Open Graph tags, sitemap.xml, robots.txt, and Google Search Console.",
+      "completionNotes": "",
+      "executionOrder": 40,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "uj86sjob4ye0",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Create landing / marketing website pages",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Hero, features, how it works, pricing, testimonials, CTA. Optimized for conversion.",
+      "completionNotes": "",
+      "executionOrder": 35,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "dy02dfbar6au",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Set up Stripe in live mode",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Switch from Stripe test mode to live. Verify webhook endpoints, pricing objects, and billing portal.",
+      "completionNotes": "",
+      "executionOrder": 36,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "29b35o7x1akw",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Prepare legal docs (Privacy Policy, ToS, financial advice disclaimer)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Draft or purchase Privacy Policy, Terms of Service, and a clear disclaimer that this is not legal/financial advice.",
+      "completionNotes": "",
+      "executionOrder": 37,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "cccc8pyljadq",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Soft launch / beta with initial pilot users",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Invite 10\u201320 hand-picked borrowers and 1\u20132 lenders. Collect structured feedback before full public launch.",
+      "completionNotes": "",
+      "executionOrder": 38,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "m9yqfp102z0v",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Official public launch",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-29",
+      "description": "Phase 4 \u2014 Launch. Announce on all channels. ProductHunt, LinkedIn, X, email list. Monitor closely for issues.",
+      "completionNotes": "",
+      "executionOrder": 39,
+      "comments": [],
+      "tags": [
+        "Phase 4"
+      ]
+    },
+    {
+      "id": "ldzz16tacj4m",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Create marketing website content (features, how-it-works, testimonials)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Content-driven pages that convert visitors. Use beta feedback for early testimonials.",
+      "completionNotes": "",
+      "executionOrder": 41,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "74be8fu41mha",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Develop pitch deck for lenders",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. ROI-focused deck for small banks/credit unions. Highlight faster applications, lower dropout rates.",
+      "completionNotes": "",
+      "executionOrder": 42,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "bbd3lmd1ps7m",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Reach out to 20\u201350 small banks and credit unions doing SBA lending",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Identify and contact SBA preferred lenders (SBA.gov list). Personalized outreach. Track in CRM.",
+      "completionNotes": "",
+      "executionOrder": 43,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "mupft4iph5ae",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Attend fintech / banking events or webinars",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Find relevant conferences or virtual events. Goal: meet lenders and potential borrowers.",
+      "completionNotes": "",
+      "executionOrder": 45,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "gr7zptzu7kzu",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Content marketing \u2014 blog posts (e.g. 'SBA Application in Under 30 Min')",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. SEO-driven content targeting borrowers searching SBA loan help. Minimum 4 posts at launch.",
+      "completionNotes": "",
+      "executionOrder": 46,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "c30mih9o7k74",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 LinkedIn outreach and thought leadership",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Post regularly on SBA lending, small business finance, fintech. Build credibility with lenders.",
+      "completionNotes": "",
+      "executionOrder": 47,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "mnk7p1v211k2",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Build email waitlist (borrowers and lenders)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Pre-launch waitlist + post-launch nurture sequence. Use Resend or Mailchimp.",
+      "completionNotes": "",
+      "executionOrder": 44,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "u86f296c3ct9",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Prepare case studies from pilot users",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Document 2\u20133 pilot stories: time saved, success rate, experience. Use for sales and content.",
+      "completionNotes": "",
+      "executionOrder": 48,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "78gnyh32ta1s",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 Set up paid ads (LinkedIn/Google) if budget allows",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-05",
+      "description": "Phase 5 \u2014 Marketing & Sales. Start small. LinkedIn for lender targeting, Google for borrower keyword intent.",
+      "completionNotes": "",
+      "executionOrder": 49,
+      "comments": [],
+      "tags": [
+        "Phase 5"
+      ]
+    },
+    {
+      "id": "zgfbodxevcjk",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Post-Launch \u00b7 Monitor wizard drop-off points and usage",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-19",
+      "description": "Post-Launch. Use PostHog funnels to identify where users abandon the wizard. Prioritize fixes for highest drop-off steps.",
+      "completionNotes": "",
+      "executionOrder": 50,
+      "comments": [],
+      "tags": [
+        "Post-Launch"
+      ]
+    },
+    {
+      "id": "2myiiiqj05x8",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Post-Launch \u00b7 Gather feedback and iterate quickly",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-19",
+      "description": "Post-Launch. In-app feedback, user interviews, support tickets. 2-week sprint cycles to ship improvements.",
+      "completionNotes": "",
+      "executionOrder": 51,
+      "comments": [],
+      "tags": [
+        "Post-Launch"
+      ]
+    },
+    {
+      "id": "2q60jkzcovpd",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Post-Launch \u00b7 Plan Phase 2 (mobile apps)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-19",
+      "description": "Post-Launch. React Native or Expo app. Define scope once Phase 1 metrics are stable.",
+      "completionNotes": "",
+      "executionOrder": 53,
+      "comments": [],
+      "tags": [
+        "Post-Launch"
+      ]
+    },
+    {
+      "id": "x20mhfhnbqiw",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Post-Launch \u00b7 Work toward SOC 2 compliance for larger lenders",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-19",
+      "description": "Post-Launch. Research SOC 2 requirements. Identify gaps. Consider a compliance tool (Vanta, Drata) when revenue supports it.",
+      "completionNotes": "",
+      "executionOrder": 54,
+      "comments": [],
+      "tags": [
+        "Post-Launch"
+      ]
+    },
+    {
+      "id": "i6qjuktwq7m6",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Post-Launch \u00b7 Track key metrics (sign-ups, completion rate, revenue, churn)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-19",
+      "description": "Post-Launch. Build a simple metrics dashboard. Weekly review of sign-ups, wizard completion %, MRR, churn.",
+      "completionNotes": "",
+      "executionOrder": 52,
+      "comments": [],
+      "tags": [
+        "Post-Launch"
+      ]
     }
   ],
-  "updatedAt": "2026-06-30T18:18:29.912Z"
+  "updatedAt": "2026-07-02T14:14:54.817Z"
 }

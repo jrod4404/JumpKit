@@ -587,7 +587,7 @@
                 <p class="header-tagline">Stop searching. Start jumping.</p>
                 <h1>Developer and Marketing Documentation</h1>
                 <p class="header-subtext">A comprehensive guide to the JumpKit technical implementation and codebase for developers as well as the marketing strategy to drive user growth.</p>
-                <p class="header-updated">Last updated: 2026-06-14</p>
+                <p class="header-updated">Last updated: 2026-07-02</p>
             </div>
 
             <!-- Scrollable Content -->
@@ -827,8 +827,7 @@ App ready to render</code></pre>
 <li>Initialize and maintain SQLite database (<code>jumpkit.db</code>)</li>
 <li>Create and manage the app window</li>
 <li>Handle all IPC (Inter-Process Communication) requests from the renderer</li>
-<li>Register global hotkeys and launch jumps when hotkey is pressed</li>
-<li>Manage auto-updates and backups (write to ~/Documents/JumpKit Backups/)</li>
+<li>Manage auto-updates and backups (presents a native Save dialog; user chooses destination)</li>
 </ul>
 <p><strong>Key IPC Handlers:</strong></p>
 <ul>
@@ -839,15 +838,23 @@ App ready to render</code></pre>
 <li><code>sync-jumps</code>, <code>upsert-shared-jumps</code>, <code>delete-shared-jumps</code> - Sync from Supabase</li>
 <li><code>open-url</code>, <code>open-path</code> - Launch web links and local folders (cross-platform)</li>
 <li><code>seed-new-user</code> - Create default columns and jumps for new users</li>
-<li><code>save-backup</code>, <code>export-backup</code> - Backup/restore user data as JSON</li>
+<li><code>save-backup</code> - Backup user data as JSON (native Save dialog)</li>
+<li><code>export-pdf</code> - Export jumps/stats to PDF (hidden BrowserWindow → print → native Save dialog)</li>
+<li><code>migrate-user-id</code> - Migrate all SQLite rows from local ID to Supabase UUID</li>
+<li><code>save-recovery-snapshot</code>, <code>get-recovery-snapshot</code>, <code>delete-recovery-snapshot</code> - Full state backup/restore for recovery</li>
+<li><code>secure-auth-get</code>, <code>secure-auth-set</code>, <code>secure-auth-remove</code> - OS-encrypted auth token storage via <code>safeStorage</code></li>
+<li><code>open-file-dialog</code>, <code>read-file</code>, <code>write-file-direct</code>, <code>rename-file</code> - Granular local file operations</li>
+<li><code>check-migrations</code> - Run SQLite schema version checks</li>
+<li><code>get-app-version</code>, <code>is-packaged</code> - Runtime metadata</li>
 </ul>
 <p><strong>SQLite Tables Created:</strong></p>
 <ul>
 <li><code>jumps</code> - All jumps (personal + shared)</li>
-<li><code>columns</code> - Column definitions</li>
-<li><code>click_log</code> - Click history (for stats)</li>
+<li><code>columns</code> - Column definitions (includes <code>sharedTeams TEXT DEFAULT NULL</code>)</li>
+<li><code>click_log</code> - Click history for stats (includes <code>jumpName TEXT</code>)</li>
 <li><code>user_prefs</code> - Preferences per user</li>
 <li><code>sync_state</code> - Tracks last sync timestamp</li>
+<li><code>recovery_snapshots</code> - Full state snapshots for recovery (<code>userId TEXT PK</code>, <code>snapshot TEXT</code>, <code>savedAt TEXT</code>)</li>
 </ul>
 <h4 id="apphtml">2.2.2 app.html - Main Entry Point (App UI)</h4>
 <p><strong>Responsibilities:</strong></p>
@@ -1006,7 +1013,7 @@ DB.clearSession()</code></pre>
   notifications:      true,
   cloudBackup:        false,
   timePerClick:       10,                  // seconds
-  dollarsPerHour:     50,
+  dollarsPerHour:     150,
   showDescription:    false,
   showHotkey:         false,
   autoArchive:        'never',             // 'never', '1m', '6m', '1y'
@@ -1328,7 +1335,7 @@ ts INTEGER NOT NULL                    -- timestamp</code></pre>
 <pre><code>userId TEXT PRIMARY KEY,
 startPage TEXT DEFAULT 'home',
 timePerClick REAL DEFAULT 10,
-dollarsPerHour REAL DEFAULT 50,
+dollarsPerHour REAL DEFAULT 150,
 showDescription INTEGER DEFAULT 0,
 showHotkey INTEGER DEFAULT 0,
 subscriptionStatus TEXT DEFAULT 'free',
@@ -1352,6 +1359,9 @@ subscription_tier TEXT ('free', 'core', 'teams_jet'),
 trial_launches_used INTEGER DEFAULT 0,
 ls_customer_id TEXT,
 welcome_email_sent BOOLEAN DEFAULT FALSE, -- prevents duplicate welcome emails
+onboarding_completed BOOLEAN DEFAULT FALSE, -- set to true after completing onboarding flow
+seeded_at TIMESTAMPTZ DEFAULT NULL,        -- set after default data seeded (migration 20260521_add_seeded_at.sql)
+subscription_plan TEXT CHECK (subscription_plan IN ('monthly', 'annual')), -- migration 20260613_subscription_plan.sql
 created_at TIMESTAMPTZ</code></pre>
 <h4 id="organizations">2.3.9 organizations</h4>
 <pre><code>id UUID PRIMARY KEY,
@@ -1401,7 +1411,33 @@ position INTEGER DEFAULT 0,
 created_by UUID REFERENCES profiles(id),
 created_at TIMESTAMPTZ,
 updated_at TIMESTAMPTZ</code></pre>
-<h4 id="key-relationships">2.3.15 Key Relationships</h4>
+<h4 id="user_sessions">2.3.15 user_sessions (Supabase)</h4>
+<pre><code>id UUID PRIMARY KEY,
+user_id UUID REFERENCES profiles(id),
+session_token TEXT NOT NULL,
+created_at TIMESTAMPTZ DEFAULT now()
+-- Used for single-session lock enforcement (see Section 2.1.4)</code></pre>
+<h4 id="member_stats">2.3.16 member_stats (Supabase)</h4>
+<pre><code>id UUID PRIMARY KEY,
+team_id UUID REFERENCES teams(id),
+user_id UUID REFERENCES profiles(id),
+click_count INTEGER DEFAULT 0,
+last_synced_at TIMESTAMPTZ
+-- Populated by syncMemberStats() in sync.js for team ROI feature</code></pre>
+<h4 id="pending_upgrades">2.3.17 pending_upgrades (Supabase)</h4>
+<pre><code>id UUID PRIMARY KEY,
+email TEXT NOT NULL,
+ls_event JSONB NOT NULL,
+created_at TIMESTAMPTZ DEFAULT now()
+-- Stores ls-webhook payloads when no matching profile exists yet (new user checkout)</code></pre>
+<h4 id="deployments">2.3.18 deployments (Supabase)</h4>
+<pre><code>id UUID PRIMARY KEY,
+platform TEXT,         -- 'mac' | 'windows'
+version TEXT,
+artifact_url TEXT,
+released_at TIMESTAMPTZ DEFAULT now()
+-- Tracks build/release metadata per platform (migration 20260619_alter_deployments_dual_platform.sql)</code></pre>
+<h4 id="key-relationships">2.3.19 Key Relationships</h4>
 <ul>
 <li><strong>users</strong> (Supabase Auth) ↔ <strong>profiles</strong> (one-to-one, on auth trigger)</li>
 <li><strong>profiles</strong> → <strong>organizations</strong> (many-to-one by org_id)</li>
@@ -1596,7 +1632,7 @@ await supabaseClient.from('team_invites').update({ status: 'accepted' }).eq('id'
 <h4 id="sync-engine-bridge">2.4.4 Sync Engine - The Bridge</h4>
 <p><strong>Architecture:</strong></p>
 <pre><code>Supabase (cloud)
-  ↓ [Pull on login + every 60 min]
+  ↓ [Pull on login + every 2 min]
 Renderer (sync.js)
   ↓ [Pass to main process]
 Main (main.js IPC handler)
@@ -2076,7 +2112,8 @@ Country codes: <code>.us .uk .ca .de .fr .au .jp .cn .in .br .ru .nl .se .no .dk
   prefs: DB.getPrefs(userId),
 };
 const result = await window.electronAPI.saveBackup(JSON.stringify(backup, null, 2));
-// Returns: { ok: true, path: '~/Documents/JumpKit Backups/jumpkit-backup-2024-01-15T10-30-45.json' }</code></pre>
+// Returns: { ok: true, path: '/user/chosen/path/jumpkit-backup-2024-01-15T10-30-45.json' }
+// Note: destination is chosen by the user via a native Save dialog; no fixed path.</code></pre>
 <h3 id="section-8">2.7 Supabase RLS Policies Summary</h3>
 <h4 id="why-rls">2.7.1 Why RLS?</h4>
 <p>Row-Level Security (RLS) restricts database access at the SQL level based on the current authenticated user. This ensures:</p>
@@ -2167,16 +2204,17 @@ npm start
 # OR build for distribution
 npm run build:all</code></pre>
 <h4 id="building-for-distribution">2.8.2 Building for Distribution</h4>
-<p><strong>macOS (Universal DMG):</strong></p>
+<p><strong>macOS (separate arch DMGs):</strong></p>
 <pre><code>npm run build:all
-# Output: dist/JumpKit-1.0.0-universal.dmg
-# Contains both x64 + arm64 (Apple Silicon compatible)</code></pre>
+# Output: dist/JumpKit-Setup-0.1.6-Prod-arm64.dmg  (Apple Silicon)
+#         dist/JumpKit-Setup-0.1.6-Prod-x64.dmg   (Intel)
+# artifactName: JumpKit-Setup-\${version}-Prod-\${arch}.\${ext}</code></pre>
 <p><strong>Windows (NSIS Installer):</strong></p>
 <pre><code>npm run build:all
-# Output: dist/JumpKit Setup 1.0.0.exe</code></pre>
+# Output: dist/JumpKit-Setup-0.1.6-Prod-x64.exe</code></pre>
 <h4 id="rebuilding-native-modules">2.8.3 Rebuilding Native Modules</h4>
 <p>If <code>better-sqlite3</code> fails to compile after updating Node or Electron versions:</p>
-<pre><code>npx electron-rebuild --version 40.8.0 -f -w better-sqlite3</code></pre>
+<pre><code>npx @electron/rebuild -f -w better-sqlite3</code></pre>
 <h4 id="landing-page">2.8.4 Landing Page</h4>
 <p><strong>Location:</strong> <code>Topics/JumpKit/landing/</code><br/>
 <strong>Deploy:</strong> Via Vercel under <code>jeffroder-3196s-projects</code></p>
@@ -2205,7 +2243,7 @@ rm %APPDATA%/JumpKit/jumpkit.db  # Windows
 <p><strong>Pre-flight checks before build:</strong></p>
 <ul>
 <li>Run tests: go to Settings page → Tests tab (admin only)</li>
-<li>Check all 45 tests pass</li>
+<li>Check all tests pass (current suite: ~160 tests)</li>
 <li>Verify no console errors</li>
 <li>Test on both platforms if distributing</li>
 </ul>
@@ -2969,8 +3007,80 @@ vercel --prod</code></pre>
 <tr style="border-bottom:1px solid var(--border)">
   <td style="padding:6px 12px"><code>send-feedback</code></td>
   <td style="padding:6px 12px">App → <code>supabaseClient.functions.invoke()</code></td>
-  <td style="padding:6px 12px">Sends user feedback emails to support@jumpkit.ai via Resend</td>
+  <td style="padding:6px 12px">Sends user feedback emails to support@jumpkit.app via Resend</td>
   <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>verify-team-password</code></td>
+  <td style="padding:6px 12px">App → <code>supabaseClient.functions.invoke()</code></td>
+  <td style="padding:6px 12px">Verifies team join password server-side via PBKDF2; returns <code>{ valid: bool }</code> only — hash never exposed</td>
+  <td style="padding:6px 12px"><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-welcome</code></td>
+  <td style="padding:6px 12px">App → <code>supabaseClient.functions.invoke()</code> on first login</td>
+  <td style="padding:6px 12px">Sends one-time welcome email; server-side dedup via <code>welcome_email_sent</code> flag prevents repeats</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-welcome-core</code></td>
+  <td style="padding:6px 12px"><code>ls-webhook</code> → <code>subscription_created</code> (paid tier)</td>
+  <td style="padding:6px 12px">Sends welcome email to new paid-tier subscribers</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-cancellation</code></td>
+  <td style="padding:6px 12px"><code>ls-webhook</code> → <code>subscription_cancelled</code> / <code>subscription_expired</code></td>
+  <td style="padding:6px 12px">Notifies user of subscription cancellation/expiry</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-member-joined</code></td>
+  <td style="padding:6px 12px">App after successful team join</td>
+  <td style="padding:6px 12px">Notifies team owner when a new member joins their team</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-member-removed</code></td>
+  <td style="padding:6px 12px">App when owner removes a member</td>
+  <td style="padding:6px 12px">Notifies removed member of their removal from a team</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-team-deleted</code></td>
+  <td style="padding:6px 12px">App when owner deletes a team</td>
+  <td style="padding:6px 12px">Notifies all team members that the team has been dissolved</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-team-downgrade-alert</code></td>
+  <td style="padding:6px 12px"><code>ls-webhook</code> on tier downgrade</td>
+  <td style="padding:6px 12px">Warns team owner of upcoming member lockouts due to subscription downgrade</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-account-exists</code></td>
+  <td style="padding:6px 12px">App on duplicate signup attempt</td>
+  <td style="padding:6px 12px">Notifies user that an account already exists for their email</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>send-pending-upgrade</code></td>
+  <td style="padding:6px 12px"><code>apply-pending-upgrade</code> after upgrade applied</td>
+  <td style="padding:6px 12px">Confirms to user that their pending subscription upgrade has been applied</td>
+  <td style="padding:6px 12px"><code>RESEND_API_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>apply-pending-upgrade</code></td>
+  <td style="padding:6px 12px">App on login when <code>pending_upgrades</code> row exists for user email</td>
+  <td style="padding:6px 12px">Applies a stored pending upgrade to the user’s profile (handles new-user checkout before profile exists)</td>
+  <td style="padding:6px 12px"><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
+</tr>
+<tr style="border-bottom:1px solid var(--border)">
+  <td style="padding:6px 12px"><code>check-member-lockouts</code></td>
+  <td style="padding:6px 12px">Scheduled / app-triggered</td>
+  <td style="padding:6px 12px">Enforces team member lockouts when owner’s subscription tier drops below member count</td>
+  <td style="padding:6px 12px"><code>SUPABASE_SERVICE_ROLE_KEY</code></td>
 </tr>
 <tr style="border-bottom:1px solid var(--border)">
   <td style="padding:6px 12px"><code>ls-webhook</code></td>
@@ -3006,7 +3116,19 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 </thead>
 <tbody>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-invite</code></td><td style="padding:6px 12px"><code>supabase/functions/send-invite/index.ts</code></td><td style="padding:6px 12px">Deployed 2026-05-12. Rate limit: 10 req/min per IP. CORS locked to jumpkit.app.</td></tr>
-<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-feedback</code></td><td style="padding:6px 12px"><code>supabase/send-feedback.js</code></td><td style="padding:6px 12px">⚠️ Not yet in functions/ folder - deploy manually. Rate limit: 5 req/min per IP.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-feedback</code></td><td style="padding:6px 12px"><code>supabase/functions/send-feedback/index.ts</code></td><td style="padding:6px 12px">Deployed 2026-06-xx. Rate limit: 5 req/min per IP. Support email: support@jumpkit.app.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>verify-team-password</code></td><td style="padding:6px 12px"><code>supabase/functions/verify-team-password/index.ts</code></td><td style="padding:6px 12px">Rate-limited 20 req/min per IP. Never exposes password hash.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-welcome</code></td><td style="padding:6px 12px"><code>supabase/functions/send-welcome/index.ts</code></td><td style="padding:6px 12px">Deduped via <code>welcome_email_sent</code> flag on profiles.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-welcome-core</code></td><td style="padding:6px 12px"><code>supabase/functions/send-welcome-core/index.ts</code></td><td style="padding:6px 12px">Triggered by ls-webhook on paid subscription_created.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-cancellation</code></td><td style="padding:6px 12px"><code>supabase/functions/send-cancellation/index.ts</code></td><td style="padding:6px 12px">Triggered by ls-webhook on subscription_cancelled/expired.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-member-joined</code></td><td style="padding:6px 12px"><code>supabase/functions/send-member-joined/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-member-removed</code></td><td style="padding:6px 12px"><code>supabase/functions/send-member-removed/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-team-deleted</code></td><td style="padding:6px 12px"><code>supabase/functions/send-team-deleted/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-team-downgrade-alert</code></td><td style="padding:6px 12px"><code>supabase/functions/send-team-downgrade-alert/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-account-exists</code></td><td style="padding:6px 12px"><code>supabase/functions/send-account-exists/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>send-pending-upgrade</code></td><td style="padding:6px 12px"><code>supabase/functions/send-pending-upgrade/index.ts</code></td><td style="padding:6px 12px"></td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>apply-pending-upgrade</code></td><td style="padding:6px 12px"><code>supabase/functions/apply-pending-upgrade/index.ts</code></td><td style="padding:6px 12px">Called on login; applies pending upgrade stored before profile existed.</td></tr>
+<tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>check-member-lockouts</code></td><td style="padding:6px 12px"><code>supabase/functions/check-member-lockouts/index.ts</code></td><td style="padding:6px 12px">Enforces lockouts when owner tier drops below member count.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>ls-webhook</code></td><td style="padding:6px 12px"><code>supabase/functions/ls-webhook/index.ts</code></td><td style="padding:6px 12px">Lemon Squeezy webhook. Verifies HMAC signature before processing.</td></tr>
 <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>waitlist-signup</code></td><td style="padding:6px 12px"><code>supabase/functions/waitlist-signup/index.ts</code></td><td style="padding:6px 12px">Landing page waitlist. CORS locked to jumpkit.app.</td></tr>
 </tbody>
@@ -3288,7 +3410,7 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <h3>8.3 Step Flow</h3>
 <ol>
 <li><strong>Welcome to JumpKit</strong> - Greeting screen with JumpKit jumping man icon (turquoise SVG), welcome message, "Let's Go" button. No step label shown.</li>
-<li><strong>Set Up Your ROI (Step 1 of 4)</strong> - ROI defaults form: two numeric inputs — <em>Time saved per click (seconds)</em> (default: 10) and <em>Your hourly rate ($/hr)</em> (default: $50). Pre-filled from current prefs. Saves via <code>DB.savePrefs()</code> on "Save &amp; Continue". These values drive all personal and team ROI calculations.</li>
+<li><strong>Set Up Your ROI (Step 1 of 4)</strong> - ROI defaults form: two numeric inputs — <em>Time saved per click (seconds)</em> (default: 10) and <em>Your hourly rate ($/hr)</em> (default: $150). Pre-filled from current prefs. Saves via <code>DB.savePrefs()</code> on "Save &amp; Continue". These values drive all personal and team ROI calculations.</li>
 <li><strong>Configure Your Columns (Step 2 of 4)</strong> - Inline column editor: name inputs + visible checkboxes for each column. Saves via <code>DB.saveColumns()</code> on "Save &amp; Continue". Explains the Visible checkbox inline.</li>
 <li><strong>Add Your First Jump (Step 3 of 4)</strong> - Inline jump form: Name, URL/Path, Column (custom-select dropdown with fixed positioning to escape modal overflow). Saves via <code>DB.createJump()</code>. On submit: spinner animation → "You're all set! 🎉" completion screen.</li>
 <li><strong>Example Jumps (Step 4 of 4)</strong> - Shows the seed jumps as checkboxes (pre-checked). User unchecks any they don't want; clicking &ldquo;Finish&rdquo; deletes unchecked jumps via <code>DB.deleteJump()</code>. Directory paths show folder icon; web URLs show link icon.</li>
@@ -3942,16 +4064,16 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 <p>Security is enforced at every layer: Row-Level Security (RLS) on all Supabase tables, role-based access (owner/member/pending), JWT-scoped Edge Functions, and a strict local-first data model that prevents accidental cloud writes. Active security hardening was completed in May 2026, with remaining medium/low items tracked in Section 3.5.</p>
 
 <h3 id="conclusion-testing">10.4 Testing</h3>
-<p>A structured test suite of 77+ test cases covers unit logic, UI rendering, team sharing flows, security boundaries, and code quality audits (npm audit). Test users and team fixtures are documented to support reproducible QA across all scenarios.</p>
+<p>A structured test suite of 160+ test cases covers unit logic, UI rendering, team sharing flows, security boundaries, and code quality audits (npm audit). Test users and team fixtures are documented to support reproducible QA across all scenarios.</p>
 
 <h3 id="conclusion-deployment">10.5 Deployment</h3>
 <p>The landing page deploys to <strong>Vercel</strong> via GitHub push; backend logic runs as <strong>Supabase Edge Functions</strong> (TypeScript/Deno). The App Release Protocol (Section 5.3) defines a seven-phase process - code freeze, version bump, build, git tagging, GitHub Releases distribution, backend check, and public announcement - ensuring consistent, repeatable releases with a quick-reference checklist.</p>
 
 <h3 id="conclusion-subscriptions">10.6 Paid Services &amp; Tier Model</h3>
-<p>Stripe handles subscription billing with webhook-driven tier enforcement. The Free/Core tier matrix (Section 7) defines hard limits on launches, teams, and shared jumps with real-time enforcement via Supabase RLS, preventing over-limit actions at the data layer without relying solely on client-side checks.</p>
+<p>Lemon Squeezy handles subscription billing with webhook-driven tier enforcement. The Free/Core tier matrix (Section 7) defines hard limits on launches, teams, and shared jumps with real-time enforcement via Supabase RLS, preventing over-limit actions at the data layer without relying solely on client-side checks.</p>
 
 <h3 id="conclusion-onboarding">10.7 User Onboarding</h3>
-<p>New users are guided through a structured onboarding flow triggered on first launch. The five-step sequence (add first jump → set a hotkey → open via hotkey → explore categories → invite a teammate) is tracked with a persistent progress indicator, ensuring users reach the core value loop before the experience ends.</p>
+<p>New users are guided through a structured onboarding flow triggered on first login when <code>profiles.onboarding_completed = false</code>. The six-screen sequence (Welcome → Set Up ROI → Configure Columns → Add First Jump → Example Jumps → Setup Complete) is tracked with a gradient progress bar, ensuring users reach the core value loop before the experience ends. See Section 8 for full details.</p>
 
 <h3 id="conclusion-marketing">10.8 Go-to-Market</h3>
 <p>The primary growth channel is <strong>MSP partnerships</strong> - IT managed service providers earn commissions for each paying user they onboard, creating a scalable distribution network without a large direct sales team. Secondary channels include Reddit/LinkedIn content, email broadcast to subscribers, and direct outreach to knowledge-work verticals (legal, manufacturing, finance, healthcare). Growth projections model conservative, realistic, and optimistic scenarios with defined assumptions and key risk levers.</p>
@@ -4036,6 +4158,18 @@ npx supabase functions deploy --project-ref iuexwdjnqfidcwvwbgwr</code></pre>
 
 
 <h2 id="changelog">12. Changelog</h2>
+
+<h3 style="background:rgba(26,79,214,0.07);border-left:4px solid #1A4FD6;padding:8px 14px;border-radius:0 6px 6px 0;margin-bottom:6px">🚀 v0.1.6 &mdash; 2026-07-01 &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#1A4FD6">Release commit: <code>69692cf</code></span></h3>
+<ul>
+  <li><strong>Deployment page &mdash; Done pill style unified with Pass pill.</strong> The &ldquo;Done&rdquo; button on each checklist row now renders with the same green-tinted background (<code>rgba(63,190,113,0.12)</code>), border, padding, and font size as the &ldquo;Pass&rdquo; pill on the Testing page. Previously the button had a white/neutral background from the <code>.btn-subtle</code> class.</li>
+  <li><strong>Deployment page &mdash; section header Done pill redesigned.</strong> The per-phase Done pill in each collapsible section header now matches the Testing page pattern: no checkmark icon, plain &ldquo;N Done&rdquo; text, <code>10px</code> font, <code>padding:1px 8px</code>, matching green background and border. To Do pill updated to match the same structure.</li>
+  <li><strong>Deployment page &mdash; auto-check buttons: pass &rarr; save &amp; done, no inline pill.</strong> When any Auto Check button passes, the result text is saved into the step&rsquo;s notes and the step is marked <strong>Done</strong> automatically &mdash; the page re-renders showing the green Done state. On failure, the red error pill still appears inline. Applies to all five auto-checks: <em>fetch-commit</em>, <em>check-dist-sizes</em>, <em>check-ssl</em>, <em>verify-gh-release</em>, <em>verify-gh-assets</em>.</li>
+  <li><strong>Deployment checklist &mdash; steps 1.2 and 1.3 merged.</strong> &ldquo;Commit all outstanding changes&rdquo; and &ldquo;Note the final commit ID&rdquo; combined into a single step with the <em>fetch-commit</em> auto-check button.</li>
+  <li><strong>Release docs HTML &mdash; Summary tab first.</strong> The &ldquo;Metadata&rdquo; tab renamed to &ldquo;📊 Summary&rdquo; and moved to first position; opens by default.</li>
+  <li><strong>Release docs HTML &mdash; Deployment Checklist phase emojis.</strong> Section headers now use emoji icons: 🔖 Code &amp; Version, 💾 Backup, 📦 Build Installers, 🌐 Landing Page &amp; Distribution, 🏷️ Release &amp; Post-Deploy.</li>
+  <li><strong>Release docs HTML &mdash; Deployment Record ID in Summary tab.</strong> Added as first row in the <em>Finalized Deployment</em> section; removed from the <em>Session</em> section. Deployment Folder moved to second row.</li>
+  <li><strong><code>app/package.json</code> version bumped to <code>0.1.6</code>.</strong></li>
+</ul>
 
 <h3>2026-06-22 (Landing page UI polish, logo updates, nav CTA refresh)</h3>
 <ul>

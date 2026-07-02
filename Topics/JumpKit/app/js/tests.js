@@ -6528,12 +6528,15 @@ function _buildReleaseTestingHTML(entries, version, filePath, testEnv = {}, extr
       phase.steps.forEach((step, si) => {
         _deployDetail[step.id] = {
           id:         step.id,
-          stepNum:    `#${pi + 1}.${si + 1}`,
+          stepNum:    `${pi + 1}.${si + 1}`,
+          phaseId:    phase.id,
           phaseLabel: phase.label,
           phaseColor: phase.color || '#6b7280',
+          phaseIcon:  phase.icon  || '',
           text:       step.text || '',
-          cmd:        step.cmd || '',
+          cmd:        step.cmd  || '',
           done:       _deployState[step.id] === 'completed',
+          skipped:    _deployState[step.id] === 'skipped',
           note:       _deployNotesMap[step.id] || '',
         };
       });
@@ -6998,15 +7001,16 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
         kv('Deployment Record ID', cfg.deploymentRecordId || '—'),
         kv('Deployment Folder',    cfg.deployment_folder || cfg.folder || '—'),
         kv('Status',               cfg.deployment_status || '—'),
+        kv('Commit ID',            cfg.commit_id || '—'),
+        kv('Backup Path',          cfg.backup_path || '—'),
         kv('Deployed At',          _fmtTs(cfg.deployed_at)),
         kv('Deploy Account',       cfg.deploy_account || '—'),
-        kv('Commit ID',            cfg.commit_id || '—'),
         kv('Deploy Notes',         cfg.deploy_notes || '—'),
       ];
 
       // Fields that are surfaced above or are redundant internal state — kept out of the Other block
       const _platformKeys = ['mac_finalized_at','mac_testing_account','mac_tests_passed','mac_tests_failed','mac_tests_skipped','mac_tests_total','win_finalized_at','win_testing_account','win_tests_passed','win_tests_failed','win_tests_skipped','win_tests_total'];
-      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file'];
+      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','backup_path','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file'];
       const _redundantKeys = ['activeRun','macFinalized','winFinalized','folder'];
       const _sessionKeys = ['version','deploymentRecordId','resultsFilePath'];
       const _excluded = new Set(['changelog', ..._sessionKeys, ..._redundantKeys, ..._platformKeys, ..._deployKeys]);

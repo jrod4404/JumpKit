@@ -1,6 +1,6 @@
 {
   "name": "jumpkit",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "description": "JumpKit — Your instant jump launcher",
   "main": "main.js",
   "author": "Jeff",
@@ -19,6 +19,7 @@
     "productName": "JumpKit",
     "copyright": "Copyright © 2026 Jeff",
     "afterPack": "./fuse.js",
+    "afterSign": "./notarize.js",
     "files": [
       "**/*",
       "!node_modules/.bin",
@@ -59,6 +60,7 @@
       }
     },
     "win": {
+      "executableName": "JumpKit",
       "icon": "assets/icon.ico",
       "target": [
         {
@@ -76,6 +78,7 @@
     },
     "artifactName": "JumpKit-Setup-${version}-Prod-${arch}.${ext}",
     "nsis": {
+      "oneClick": true,
       "include": "build/installer.nsh"
     }
   },

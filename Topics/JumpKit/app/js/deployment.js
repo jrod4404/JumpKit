@@ -92,9 +92,14 @@ function _saveDeployNotes(notes) {
 }
 
 function _deployTotals(state) {
-  const total = DEPLOY_PHASES.reduce((n, p) => n + p.steps.length, 0);
-  const done  = Object.values(state).filter(v => v === 'completed').length;
-  return { total, done };
+  // Build a set of valid step IDs from the current phase definitions.
+  // State may contain stale keys from removed/merged steps — exclude those
+  // so done/skipped counts only reflect steps that actually exist.
+  const validIds = new Set(DEPLOY_PHASES.flatMap(p => p.steps.map(s => s.id)));
+  const total   = validIds.size;
+  const done    = [...validIds].filter(id => state[id] === 'completed').length;
+  const skipped = [...validIds].filter(id => state[id] === 'skipped').length;
+  return { total, done, skipped };
 }
 
 // ── View state for checklist / all-deployments toggle ──────────
@@ -116,7 +121,8 @@ window.renderDeployment = function renderDeployment(view) {
   }
 
   const state = _loadDeployState();
-  const { total, done } = _deployTotals(state);
+  const { total, done, skipped } = _deployTotals(state);
+  const todo = total - done - skipped;
 
   // Build section HTML
   const sectionsHTML = DEPLOY_PHASES.map((phase, pi) => {
@@ -204,7 +210,8 @@ window.renderDeployment = function renderDeployment(view) {
       <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
         <div style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Done</div></div>
-          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
+          ${skipped > 0 ? `<div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#9ca3af">${skipped}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Skipped</div></div>` : ''}
+          <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${todo}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
         <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
@@ -409,14 +416,16 @@ async function _renderDeployHistory() {
   if (!pageContent) return;
 
   const state = _loadDeployState();
-  const { total, done } = _deployTotals(state);
+  const { total, done, skipped } = _deployTotals(state);
+  const todo = total - done - skipped;
 
   // Shared header (same as checklist view)
   const headerHTML = `
     <div style="flex-shrink:0;background:var(--bg);padding:16px 24px 12px 24px;display:flex;flex-wrap:wrap;align-items:stretch;gap:10px;border-bottom:1px solid var(--border)">
       <div style="padding:6px 12px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);display:inline-flex;align-items:center;gap:0">
         <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#3fbe71">${done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Done</div></div>
-        <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total - done}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
+        ${skipped > 0 ? `<div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:#9ca3af">${skipped}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Skipped</div></div>` : ''}
+        <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${todo}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
         <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
       </div>
       <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
@@ -642,6 +651,18 @@ function _buildDeployStepContent(stepId) {
         </button>
       </div>` : ''}
     <div style="border-top:1px solid var(--border);margin:10px 0 10px"></div>
+    ${stepId === 'cv-1' ? (() => {
+      const saved = (_loadDeployConfig().commit_id || '');
+      return `<label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Commit ID</label>
+      <input id="deployStepCommitId" class="form-input" type="text" placeholder="e.g. a1b2c3d"
+        value="${_esc(saved)}" style="font-size:0.85rem;margin-bottom:12px;width:100%;box-sizing:border-box" />`;
+    })() : ''}
+    ${stepId === 'bk-1' ? (() => {
+      const saved = (_loadDeployConfig().backup_path || '');
+      return `<label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Backup File Path</label>
+      <input id="deployStepBackupPath" class="form-input" type="text" placeholder="e.g. app_backups/app_backup_2026-07-02.tar.gz"
+        value="${_esc(saved)}" style="font-size:0.85rem;margin-bottom:12px;width:100%;box-sizing:border-box" />`;
+    })() : ''}
     <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Notes</label>
     <textarea id="deployStepNotes" class="form-textarea" rows="3"
       placeholder="Add notes for this deployment check…"
@@ -699,6 +720,11 @@ function _wireDeployStepModal(ctx) {
     const n = _loadDeployNotes();
     n[stepId] = document.getElementById('deployStepNotes')?.value || '';
     _saveDeployNotes(n);
+    // Persist step-specific extra fields
+    const commitIdEl   = document.getElementById('deployStepCommitId');
+    const backupPathEl = document.getElementById('deployStepBackupPath');
+    if (commitIdEl)   _saveDeployConfig({ ..._loadDeployConfig(), commit_id:   commitIdEl.value.trim() });
+    if (backupPathEl) _saveDeployConfig({ ..._loadDeployConfig(), backup_path: backupPathEl.value.trim() });
     const s = _loadDeployState();
     s[stepId] = newState;
     _saveDeployState(s);
@@ -726,6 +752,14 @@ function _wireDeployStepModal(ctx) {
     const n = _loadDeployNotes();
     n[stepId] = e.target.value;
     _saveDeployNotes(n);
+  });
+
+  // Auto-save commit ID (cv-1) and backup path (bk-1) into deploy config
+  document.getElementById('deployStepCommitId')?.addEventListener('input', (e) => {
+    _saveDeployConfig({ ..._loadDeployConfig(), commit_id: e.target.value.trim() });
+  });
+  document.getElementById('deployStepBackupPath')?.addEventListener('input', (e) => {
+    _saveDeployConfig({ ..._loadDeployConfig(), backup_path: e.target.value.trim() });
   });
 
   // Copy command
@@ -1093,17 +1127,19 @@ function _buildDeployTabHtml(state, notes) {
   const phases = DEPLOY_PHASES || [];
   if (!phases.length) return '<div style="padding:28px 32px;font-size:0.85rem;color:#9ca3af">Deployment checklist data unavailable.</div>';
 
-  const totalSteps = phases.reduce((n, p) => n + p.steps.length, 0);
-  const doneSteps  = phases.reduce((n, p) => n + p.steps.filter(s => state[s.id] === 'completed').length, 0);
-  const pctDone    = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0;
+  const totalSteps   = phases.reduce((n, p) => n + p.steps.length, 0);
+  const doneSteps    = phases.reduce((n, p) => n + p.steps.filter(s => state[s.id] === 'completed').length, 0);
+  const skippedSteps = phases.reduce((n, p) => n + p.steps.filter(s => state[s.id] === 'skipped').length, 0);
+  const todoSteps    = totalSteps - doneSteps - skippedSteps;
+  const pctDone      = totalSteps ? Math.round((doneSteps / totalSteps) * 100) : 0;
 
   const statPill = (val, label, color) =>
     `<div class="stat"><div class="stat-val" style="color:${color}">${val}</div><div class="stat-lbl">${label}</div></div>`;
   const statsBar = `<div class="stats-bar">
-        ${statPill(doneSteps, 'Completed', '#3fbe71')}
-        ${statPill(totalSteps - doneSteps, 'To Do', '#6b7280')}
+        ${statPill(doneSteps, 'Done', '#3fbe71')}
+        ${skippedSteps > 0 ? statPill(skippedSteps, 'Skipped', '#9ca3af') : ''}
+        ${statPill(todoSteps, 'To Do', '#6b7280')}
         ${statPill(totalSteps, 'Total', '#374151')}
-        ${statPill(pctDone + '%', 'Progress', '#1A4FD6')}
       </div>`;
 
   const _plainPreview = (html, max = 110) => {
@@ -1195,8 +1231,9 @@ async function _saveDeployResults() {
   const now   = new Date();
   const dateStr = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const timeStr = now.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-  const total = DEPLOY_PHASES.reduce((n, p) => n + p.steps.length, 0);
-  const done  = Object.values(state).filter(v => v === 'completed').length;
+  // Use validIds so stale state keys from removed steps don't inflate counts
+  const { total, done, skipped: skippedCount } = _deployTotals(state);
+  const todoCount = total - done - skippedCount;
 
   const sectionsHtml = DEPLOY_PHASES.map((phase, pi) => {
     const rows = phase.steps.map((step, si) => {
@@ -1248,9 +1285,9 @@ async function _saveDeployResults() {
   <h1>JumpKit Deployment v${_esc(version)}</h1>
   <div class="meta">Saved ${dateStr} at ${timeStr}${(sel?.results_file || cfg.resultsFilePath) ? ' &nbsp;|&nbsp; Results: ' + _esc((sel?.results_file || cfg.resultsFilePath || '').split('/').pop()) : ''}</div>
   <div class="summary">
-    <div class="stat"><div class="stat-val" style="color:#16a34a">${done}</div><div class="stat-lbl">Done</div></div>
-    ${(() => { const sk = Object.values(state).filter(v => v === 'skipped').length; return sk > 0 ? `<div class="stat"><div class="stat-val" style="color:#9ca3af">${sk}</div><div class="stat-lbl">Skipped</div></div>` : ''; })()}
-    <div class="stat"><div class="stat-val" style="color:#6b7280">${total - done - Object.values(state).filter(v => v === 'skipped').length}</div><div class="stat-lbl">To Do</div></div>
+    <div class="stat"><div class="stat-val" style="color:#3fbe71">${done}</div><div class="stat-lbl">Done</div></div>
+    ${skippedCount > 0 ? `<div class="stat"><div class="stat-val" style="color:#9ca3af">${skippedCount}</div><div class="stat-lbl">Skipped</div></div>` : ''}
+    <div class="stat"><div class="stat-val" style="color:#6b7280">${todoCount}</div><div class="stat-lbl">To Do</div></div>
     <div class="stat"><div class="stat-val" style="color:#374151">${total}</div><div class="stat-lbl">Total</div></div>
   </div>
   ${sectionsHtml}
@@ -1333,4 +1370,12 @@ async function _saveDeployResults() {
   } catch (err) {
     window.Toast?.danger(`Release docs update failed: ${err.message}`);
   }
+
+  // Re-bake the full release docs HTML so the Summary tab picks up the latest
+  // jk_deploy_config values (commit_id, backup_path, etc.) that were saved by
+  // the step input boxes. This overwrites the patch above with an equivalent
+  // full rebuild — all fields are read fresh from localStorage.
+  try {
+    if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
+  } catch (e) { console.warn('[saveDeployResults] autoSave after patch failed:', e); }
 }

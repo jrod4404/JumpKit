@@ -83,6 +83,7 @@
             <tr>
               <th class="th-sortable col-order" data-sort="executionOrder">ID</th>
               <th class="th-sortable" data-sort="title">Title</th>
+              <th class="col-tags">Tags</th>
               <th class="th-sortable" data-sort="category">Category</th>
               <th class="th-sortable" data-sort="priority">Priority</th>
               <th class="th-sortable" data-sort="status">Status</th>
@@ -116,7 +117,7 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-modal="modal-project">Cancel</button>
+        <button class="btn btn-ghost" data-modal="modal-project">Close</button>
         <button class="btn btn-primary" id="btn-save-project">Save Project</button>
       </div>
     </div>
@@ -172,6 +173,13 @@
           </div>
         </div>
         <div class="form-group">
+          <label>Tags</label>
+          <div class="tag-input-area" id="tag-input-area">
+            <input type="text" class="tag-text-input" id="tag-text-input" placeholder="Type and press Enter or comma to add…" autocomplete="off">
+          </div>
+          <div class="tag-hint">Press Enter or , to add a tag. Click × to remove.</div>
+        </div>
+        <div class="form-group">
           <label>Description</label>
           <textarea class="form-input form-textarea" id="task-description" placeholder="Optional details, context, or steps..."></textarea>
         </div>
@@ -210,7 +218,7 @@
             <button class="btn btn-secondary btn-task-nav" id="btn-prev-task" type="button"><span class="task-nav-caret">‹</span> Prev</button>
             <button class="btn btn-secondary btn-task-nav" id="btn-next-task" type="button">Next <span class="task-nav-caret">›</span></button>
           </div>
-          <button class="btn btn-secondary" data-modal="modal-task">Cancel</button>
+          <button class="btn btn-secondary" data-modal="modal-task">Close</button>
           <button class="btn btn-primary" id="btn-save-task">Save Task</button>
         </div>
       </div>
@@ -236,7 +244,7 @@
             <button class="btn btn-secondary btn-task-nav" id="btn-prev-task-detail" type="button"><span class="task-nav-caret">‹</span> Prev</button>
             <button class="btn btn-secondary btn-task-nav" id="btn-next-task-detail" type="button">Next <span class="task-nav-caret">›</span></button>
           </div>
-          <button class="btn btn-secondary" data-modal="modal-task-detail">Cancel</button>
+          <button class="btn btn-secondary" data-modal="modal-task-detail">Close</button>
           <button class="btn btn-primary" id="btn-edit-from-detail"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span> Edit</button>
         </div>
       </div>
