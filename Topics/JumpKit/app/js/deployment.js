@@ -52,7 +52,7 @@ const DEPLOY_PHASES = [
     ]
   },
   {
-    id: 'release', label: 'Release & Post-Deploy', icon: 'ti-tag', color: '#f59e0b',
+    id: 'release', label: 'Post-Deploy', icon: 'ti-tag', color: '#f59e0b',
     steps: [
       
       
