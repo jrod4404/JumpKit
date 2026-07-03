@@ -54,12 +54,12 @@ const DEPLOY_PHASES = [
   {
     id: 'release', label: 'Release & Post-Deploy', icon: 'ti-tag', color: '#f59e0b',
     steps: [
-      { id: 'rel-1', text: 'Create and push a Git release tag. Open the step detail to copy the Max prompt.', cmd: 'Pls create a Git release tag for the new version and push it to origin. Use the format: git tag vX.Y.Z && git push origin vX.Y.Z\nReport the tag name and confirm the push succeeded.', cmdModalOnly: true },
-      { id: 'rel-2', text: '<strong>Manual:</strong> Create a GitHub Release from the tag — attach both installers, paste the changelog as release notes. Do this at <a href="https://github.com/jrod4404/JumpKit/releases/new" target="_blank">github.com/jrod4404/JumpKit/releases/new</a>.' },
-      { id: 'rel-2a', text: '<strong>Verify GitHub release is published</strong> (Test #111). Open the step detail to copy the Max prompt.', auto: 'verify-gh-release', cmd: 'Pls verify the new GitHub release is published by fetching this URL and reporting the result: https://api.github.com/repos/jrod4404/JumpKit/releases/latest\nConfirm the tag_name matches the new version and the release is not a draft.', cmdModalOnly: true },
-      { id: 'rel-2b', text: '<strong>Verify release assets</strong> (Test #112) — confirm <code>latest-mac.yml</code> and <code>latest.yml</code> are present (required for auto-updates). Open the step detail to copy the Max prompt.', auto: 'verify-gh-assets', cmd: 'Pls fetch https://api.github.com/repos/jrod4404/JumpKit/releases/latest and check that both latest-mac.yml and latest.yml are listed in the assets array. Report what you find.', cmdModalOnly: true },
-      { id: 'rel-3', text: '<strong>Manual:</strong> Smoke test from the live site — download from jumpkit.app, install, create account, confirm email, log in, upgrade subscription, add a jump, confirm it launches.' },
-      { id: 'rel-4', text: 'Update JUMPKIT_DOCS.html with final release date, version, commit ID, installer filenames, and deployment notes. Open the step detail to copy the Max prompt.', cmd: 'Pls look at JUMPKIT_DOCS.html and find where the release date, version number, commit ID, and installer filenames are recorded. Report exactly where each field is in the file so I can give you the final values to fill in.', cmdModalOnly: true },
+      
+      
+      
+      
+      
+      
       { id: 'rel-4a', text: '<strong>Auto-update E2E</strong> (Test #141): open the previously installed production build, wait up to 30 seconds for the "A new version of JumpKit is available" banner. Click <strong>Restart & Update</strong> and confirm the app relaunches at the new version.' },
       { id: 'rel-5', text: '<strong>Rollback plan</strong> (if a critical bug is found post-ship): (1) Revert landing page download URLs to the previous version and redeploy. (2) Unpublish the GitHub Release. (3) Document the incident in JUMPKIT_DOCS.html. (4) Fix, re-test, and re-release.' },
     ]
