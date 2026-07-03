@@ -44,9 +44,9 @@ const DEPLOY_PHASES = [
   {
     id: 'landing', label: 'Landing Page & Distribution', icon: 'ti-world-upload', color: '#ec4899',
     steps: [
+      { id: 'lp-0', text: 'Create Git release tag, publish GitHub Release, and upload installers. Open the step detail to copy the Max prompt.', cmd: 'Pls do the following in order for the JumpKit release:\n\n1. Check the current version in app/package.json and confirm the version number.\n2. Create a Git release tag for that version: git tag vX.Y.Z && git push origin vX.Y.Z — report the tag name and confirm the push succeeded.\n3. Find the built production installers in app/deploy/ (look for the most recent vX.Y.Z folder under installers/prod) and list the filenames and sizes.\n4. Using the GitHub CLI (gh release create), create a GitHub Release from that tag with the following:\n   - Title: JumpKit vX.Y.Z\n   - Attach all production installer files (.dmg arm64, .dmg x64, .exe)\n   - Mark as latest release (not pre-release, not draft)\n   - For release notes, pull the most recent changelog entry from JUMPKIT_DOCS.html or CHANGELOG.md\n5. After creating the release, fetch https://api.github.com/repos/jrod4404/JumpKit/releases/latest and confirm: tag_name matches, draft=false, and all installer assets are listed.\n6. Report the final GitHub release URL and the exact download asset URLs for each installer — these will be needed for the next step to update the landing page.', cmdModalOnly: true },
       { id: 'lp-2', text: 'Update landing page: download links, version number, and release date in <code>landing/index.html</code>. Open the step detail to copy the Max prompt.', cmd: 'Pls update landing/index.html with the following for the new release:\n1. Update both download URLs to point to the new GitHub release assets. Mac pattern: releases/download/vX.Y.Z/JumpKit-X.Y.Z-universal.dmg — Windows pattern: releases/download/vX.Y.Z/JumpKit.Setup.X.Y.Z.exe\n2. Update any version number or release date displayed on the landing page.\nReport exactly what you changed.', cmdModalOnly: true },
       { id: 'lp-4', text: 'Commit and push landing page changes — confirm Vercel auto-deploys. Open the step detail to copy the Max prompt.', cmd: 'Pls commit and push the landing page changes to GitHub with a clear commit message (e.g. "Landing: update download links and version for vX.Y.Z"). Then report the commit ID and confirm the push succeeded so Vercel can auto-deploy.', cmdModalOnly: true },
-      { id: 'lp-4a', text: '<strong>SSL check</strong> (Test #105): visit <a href="https://www.jumpkit.app" target="_blank">https://www.jumpkit.app</a> — confirm padlock is green. Visit <a href="http://jumpkit.app" target="_blank">http://jumpkit.app</a> — confirm it redirects to https://.', auto: 'check-ssl' },
       { id: 'lp-5', text: '<strong>Manual:</strong> Verify live Mac download end-to-end: click download link on jumpkit.app → download → install → launch.' },
       { id: 'lp-6', text: '<strong>Manual:</strong> Verify live Windows download end-to-end: click download link on jumpkit.app → download → install → launch.' },
     ]
@@ -663,6 +663,12 @@ function _buildDeployStepContent(stepId) {
       <input id="deployStepBackupPath" class="form-input" type="text" placeholder="e.g. app_backups/app_backup_2026-07-02.tar.gz"
         value="${_esc(saved)}" style="font-size:0.85rem;margin-bottom:12px;width:100%;box-sizing:border-box" />`;
     })() : ''}
+    ${stepId === 'lp-4' ? (() => {
+      const saved = (_loadDeployConfig().vercel_commit_id || '');
+      return `<label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Vercel Commit ID</label>
+      <input id="deployStepVercelCommitId" class="form-input" type="text" placeholder="e.g. 347b17b"
+        value="${_esc(saved)}" style="font-size:0.85rem;margin-bottom:12px;width:100%;box-sizing:border-box" />`;
+    })() : ''}
     <label style="display:block;font-size:0.82rem;font-weight:600;color:var(--text-muted);margin-bottom:6px">Notes</label>
     <textarea id="deployStepNotes" class="form-textarea" rows="3"
       placeholder="Add notes for this deployment check…"
@@ -721,10 +727,12 @@ function _wireDeployStepModal(ctx) {
     n[stepId] = document.getElementById('deployStepNotes')?.value || '';
     _saveDeployNotes(n);
     // Persist step-specific extra fields
-    const commitIdEl   = document.getElementById('deployStepCommitId');
-    const backupPathEl = document.getElementById('deployStepBackupPath');
-    if (commitIdEl)   _saveDeployConfig({ ..._loadDeployConfig(), commit_id:   commitIdEl.value.trim() });
-    if (backupPathEl) _saveDeployConfig({ ..._loadDeployConfig(), backup_path: backupPathEl.value.trim() });
+    const commitIdEl        = document.getElementById('deployStepCommitId');
+    const backupPathEl      = document.getElementById('deployStepBackupPath');
+    const vercelCommitIdEl  = document.getElementById('deployStepVercelCommitId');
+    if (commitIdEl)        _saveDeployConfig({ ..._loadDeployConfig(), commit_id:        commitIdEl.value.trim() });
+    if (backupPathEl)      _saveDeployConfig({ ..._loadDeployConfig(), backup_path:      backupPathEl.value.trim() });
+    if (vercelCommitIdEl)  _saveDeployConfig({ ..._loadDeployConfig(), vercel_commit_id: vercelCommitIdEl.value.trim() });
     const s = _loadDeployState();
     s[stepId] = newState;
     _saveDeployState(s);
@@ -760,6 +768,9 @@ function _wireDeployStepModal(ctx) {
   });
   document.getElementById('deployStepBackupPath')?.addEventListener('input', (e) => {
     _saveDeployConfig({ ..._loadDeployConfig(), backup_path: e.target.value.trim() });
+  });
+  document.getElementById('deployStepVercelCommitId')?.addEventListener('input', (e) => {
+    _saveDeployConfig({ ..._loadDeployConfig(), vercel_commit_id: e.target.value.trim() });
   });
 
   // Copy command

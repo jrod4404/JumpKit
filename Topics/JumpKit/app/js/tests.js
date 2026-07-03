@@ -7002,6 +7002,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
         kv('Deployment Folder',    cfg.deployment_folder || cfg.folder || '—'),
         kv('Status',               cfg.deployment_status || '—'),
         kv('Commit ID',            cfg.commit_id || '—'),
+        kv('Vercel Commit',         cfg.vercel_commit_id || '—'),
         kv('Backup Path',          cfg.backup_path || '—'),
         kv('Deployed At',          _fmtTs(cfg.deployed_at)),
         kv('Deploy Account',       cfg.deploy_account || '—'),
@@ -7010,7 +7011,7 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
 
       // Fields that are surfaced above or are redundant internal state — kept out of the Other block
       const _platformKeys = ['mac_finalized_at','mac_testing_account','mac_tests_passed','mac_tests_failed','mac_tests_skipped','mac_tests_total','win_finalized_at','win_testing_account','win_tests_passed','win_tests_failed','win_tests_skipped','win_tests_total'];
-      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','backup_path','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file'];
+      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','vercel_commit_id','backup_path','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file'];
       const _redundantKeys = ['activeRun','macFinalized','winFinalized','folder'];
       const _sessionKeys = ['version','deploymentRecordId','resultsFilePath'];
       const _excluded = new Set(['changelog', ..._sessionKeys, ..._redundantKeys, ..._platformKeys, ..._deployKeys]);
