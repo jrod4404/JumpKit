@@ -35,7 +35,7 @@
     "mac": {
       "category": "public.app-category.productivity",
       "icon": "assets/icon.icns",
-      "identity": "Jeff Roder (ZDJSH728ND)",
+      "identity": "Jumpkit LLC (ZDJSH728ND)",
       "target": [
         {
           "target": "dmg",
