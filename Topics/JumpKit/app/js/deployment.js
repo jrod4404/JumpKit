@@ -1055,6 +1055,12 @@ async function _openDeployManageModal() {
     const notes   = document.getElementById('dmNotes').value.trim();
     const account = window._supabaseUser?.email || '';
 
+    // Close the Manage Deployment modal first — if we call Modal.open() while it's open,
+    // the confirmation modal gets queued and the confirm button listener wires to null (nothing happens).
+    // Closing first ensures _open=false before the confirmation Modal.open() runs.
+    Modal.close();
+    await new Promise(r => setTimeout(r, 170)); // wait for close animation (130ms) + queue drain (30ms)
+
     // Show confirmation modal
     Modal.open(
       '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment',
