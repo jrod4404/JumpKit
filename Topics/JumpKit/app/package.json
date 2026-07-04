@@ -1,7 +1,7 @@
 {
   "name": "jumpkit",
-  "version": "0.1.6",
-  "description": "JumpKit — Your instant jump launcher",
+  "version": "0.1.7-test",
+  "description": "JumpKit \u2014 Your instant jump launcher",
   "main": "main.js",
   "author": "Jeff",
   "scripts": {
@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.jumpkit.app",
     "productName": "JumpKit",
-    "copyright": "Copyright © 2026 Jeff",
+    "copyright": "Copyright \u00a9 2026 Jeff",
     "afterPack": "./fuse.js",
     "afterSign": "./notarize.js",
     "files": [
