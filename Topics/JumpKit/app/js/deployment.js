@@ -931,6 +931,10 @@ async function _openDeployManageModal() {
     body, footer, 'xl'
   );
 
+  // Defer all wiring by 200ms — Modal.open() may be queued (if called while another modal is open,
+  // e.g. from onSelect re-calling _openDeployManageModal). The queued modal renders after ~160ms,
+  // so 200ms ensures the DOM is ready before we try to getElementById any buttons.
+  setTimeout(() => {
   // Wire custom-select dropdown for testing package (matches the app's dropdown style)
   if (typeof window.wireDropdown === 'function') {
     window.wireDropdown({
@@ -1124,6 +1128,7 @@ async function _openDeployManageModal() {
       }
     });
   };
+  }, 200); // end deferred wiring — gives queued Modal.open() time to render before getElementById calls
 }
 
 function _esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
