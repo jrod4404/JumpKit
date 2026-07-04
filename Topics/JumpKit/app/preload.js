@@ -36,7 +36,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   secureAuthSet:    (key, value) => ipcRenderer.invoke('secure-auth-set', key, value),
   secureAuthRemove: (key)        => ipcRenderer.invoke('secure-auth-remove', key),
 
-  installUpdate: () => ipcRenderer.invoke('install-update'),
+  installUpdate:   () => ipcRenderer.invoke('install-update'),
+  isUpdateReady:   () => ipcRenderer.invoke('is-update-ready'),
   onUpdateReady: (cb) => ipcRenderer.on('update-ready', cb),
 
   platform:   process.platform,

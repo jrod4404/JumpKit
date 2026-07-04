@@ -876,11 +876,17 @@ ipcMain.handle('open-url', async (_e, url, isShared) => {
 
 // ── Auto-updater ──────────────────────────────────────────────────
 autoUpdater.autoDownload = true;
-autoUpdater.autoInstallOnAppQuit = true;
+autoUpdater.autoInstallOnAppQuit = false; // Only install when user explicitly clicks Restart & Update
+
+let _updateReady = false; // Flag so app.html can poll on load and catch missed IPC
 
 autoUpdater.on('update-downloaded', () => {
+  _updateReady = true;
   if (win) win.webContents.send('update-ready');
 });
+
+// app.html polls this on load to catch updates downloaded before the page was ready
+ipcMain.handle('is-update-ready', () => _updateReady);
 
 autoUpdater.on('error', (err) => {
   console.error('[updater] error:', err?.message || err);

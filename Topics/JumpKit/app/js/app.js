@@ -77,11 +77,23 @@ async function initAuth() {
 
 // Placeholder - real initApp() wraps all startup logic below
 // ── Auto-update banner ────────────────────────────────────────────
+// ── Auto-update banner ───────────────────────────────────────────────
+// Two paths: (1) real-time IPC if update finishes while app.html is open,
+// (2) startup poll in case download completed before app.html loaded.
+function _showUpdateBanner() {
+  const banner = document.getElementById('updateBanner');
+  if (banner) banner.style.display = 'flex';
+}
+
 if (window.electronAPI?.onUpdateReady) {
-  window.electronAPI.onUpdateReady(() => {
-    const banner = document.getElementById('updateBanner');
-    if (banner) banner.style.display = 'flex';
-  });
+  window.electronAPI.onUpdateReady(_showUpdateBanner);
+}
+
+// Poll on load — catches updates that downloaded during auth/login phase
+if (window.electronAPI?.isUpdateReady) {
+  window.electronAPI.isUpdateReady().then(ready => {
+    if (ready) _showUpdateBanner();
+  }).catch(() => {});
 }
 
 // ── Session lock ─────────────────────────────────────────────────────
