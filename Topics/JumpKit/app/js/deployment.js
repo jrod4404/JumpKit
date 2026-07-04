@@ -1055,32 +1055,38 @@ async function _openDeployManageModal() {
     const notes   = document.getElementById('dmNotes').value.trim();
     const account = window._supabaseUser?.email || '';
 
-    // Close the Manage Deployment modal first — if we call Modal.open() while it's open,
-    // the confirmation modal gets queued and the confirm button listener wires to null (nothing happens).
-    // Closing first ensures _open=false before the confirmation Modal.open() runs.
-    Modal.close();
-    await new Promise(r => setTimeout(r, 170)); // wait for close animation (130ms) + queue drain (30ms)
+    // ── Replace modal content in-place for confirmation ──────────────────────────────
+    // DO NOT call Modal.close() + Modal.open() here — if any modal is queued from the
+    // onSelect re-render of _openDeployManageModal, closing would drain the queue and
+    // the queued modal would open BEFORE our confirmation, preventing it from showing.
+    // Replacing body/footer innerHTML directly sidesteps the queue entirely.
+    const _modalBody   = document.getElementById('modalBody');
+    const _modalFooter = document.getElementById('modalFooter');
+    const _modalTitle  = document.getElementById('modalTitle');
+    if (!_modalBody || !_modalFooter) { alert('Modal not found — please try again.'); return; }
 
-    // Show confirmation modal
-    Modal.open(
-      '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment',
-      `<div style="display:flex;flex-direction:column;gap:14px">
-        <p style="margin:0;color:var(--text-muted);font-size:0.88rem">This will mark the deployment as <strong style="color:#f97316">Deployed</strong> in Supabase and record the following:</p>
-        <div style="padding:12px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.85rem;display:flex;flex-direction:column;gap:6px">
-          <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${_esc(commitId || '(not found)')}</code> ${commitMsg ? `— ${_esc(commitMsg)}` : ''}</div>
-          <div><strong style="color:var(--text)">Deployed by:</strong> ${_esc(account)}</div>
-          <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date().toLocaleString()}</div>
-          ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${_esc(macFile.split('/').pop())}</div>` : ''}
-          ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${_esc(winFile.split('/').pop())}</div>` : ''}
-        </div>
-        <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">This action cannot be undone. Confirm to finalize.</p>
-      </div>`,
-      `<button class="btn btn-subtle" data-jaction="modal-close">Cancel</button>
-       <button id="dmConfirmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff">Confirm Finalize Deployment</button>`,
-      'lg'
-    );
+    _modalTitle.innerHTML  = '<svg class="ti ti-rocket" style="vertical-align:middle;margin-right:6px;color:#f97316"><use href="img/tabler-sprite.min.svg#tabler-rocket"/></svg> Finalize Deployment';
+    _modalBody.innerHTML   = `<div style="display:flex;flex-direction:column;gap:14px">
+      <p style="margin:0;color:var(--text-muted);font-size:0.88rem">This will mark the deployment as <strong style="color:#f97316">Deployed</strong> in Supabase and record the following:</p>
+      <div style="padding:12px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.85rem;display:flex;flex-direction:column;gap:6px">
+        <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${_esc(commitId || '(not found)')}</code> ${commitMsg ? ` — ${_esc(commitMsg)}` : ''}</div>
+        <div><strong style="color:var(--text)">Deployed by:</strong> ${_esc(account || '(unknown)')}</div>
+        <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date().toLocaleString()}</div>
+        ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${_esc(macFile.split('/').pop())}</div>` : ''}
+        ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${_esc(winFile.split('/').pop())}</div>` : ''}
+      </div>
+      <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">This action cannot be undone. Confirm to finalize.</p>
+    </div>`;
+    _modalFooter.innerHTML = `<button class="btn btn-subtle" id="dmCancelFinalizeBtn">Cancel</button>
+      <button id="dmConfirmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff">Confirm Finalize Deployment</button>`;
+
+    document.getElementById('dmCancelFinalizeBtn')?.addEventListener('click', () => Modal.close());
 
     document.getElementById('dmConfirmFinalizeBtn')?.addEventListener('click', async () => {
+      // Disable button to prevent double-submit
+      const confirmBtn = document.getElementById('dmConfirmFinalizeBtn');
+      if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Finalizing…'; }
+
       const deployedAtIso = new Date().toISOString();
       const deployResultsFile = (window._jkSelectedDeployment?.deployment_folder
         ? window._jkSelectedDeployment.deployment_folder.replace(/[/\\]$/, '') + '/' + `JumpKit_Deployment_v${window._jkSelectedDeployment?.version}.html`
@@ -1098,6 +1104,7 @@ async function _openDeployManageModal() {
       }).eq('id', selId);
 
       if (error) {
+        if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = 'Confirm Finalize Deployment'; }
         window.Toast?.danger('Failed to finalize: ' + error.message);
       } else {
         if (window._jkSelectedDeployment?.id === selId) {
@@ -1116,8 +1123,6 @@ async function _openDeployManageModal() {
             commit_id:            commitId,
             deployment_folder:    window._jkSelectedDeployment?.deployment_folder || cfg.folder || '',
             deploy_notes:         notes,
-            // Keep installer paths + results file in localStorage even though they're not
-            // displayed on the release-docs metadata tab — they're persisted in Supabase.
             mac_installer_path:   macFile,
             win_installer_path:   winFile,
             deploy_results_file:  deployResultsFile,
@@ -1129,8 +1134,24 @@ async function _openDeployManageModal() {
           if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
         } catch(e) { console.warn('[FinalizeDeployment] release-docs autoSave failed:', e); }
 
-        Modal.close();
-        window.Toast?.success('Deployment finalized! 🚀');
+        // Show success modal (replace content in-place, then close after user acknowledges)
+        _modalTitle.innerHTML  = '<svg class="ti ti-circle-check" style="vertical-align:middle;margin-right:6px;color:#22c55e"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg> Deployment Finalized';
+        _modalBody.innerHTML   = `<div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:16px 0">
+          <svg class="ti ti-circle-check" style="width:3rem;height:3rem;color:#22c55e"><use href="img/tabler-sprite.min.svg#tabler-circle-check"/></svg>
+          <p style="margin:0;font-size:1rem;font-weight:700;color:var(--text)">Deployment Finalized Successfully! 🚀</p>
+          <div style="padding:12px 14px;border-radius:8px;background:var(--bg-input);border:1px solid var(--border);font-size:0.85rem;width:100%;box-sizing:border-box;display:flex;flex-direction:column;gap:6px">
+            <div><strong style="color:var(--text)">Version:</strong> v${_esc(window._jkSelectedDeployment?.version || '')}</div>
+            <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date(deployedAtIso).toLocaleString()}</div>
+            <div><strong style="color:var(--text)">Deployed by:</strong> ${_esc(account || '(unknown)')}</div>
+            ${commitId ? `<div><strong style="color:var(--text)">Commit:</strong> <code style="color:var(--turq)">${_esc(commitId)}</code>${commitMsg ? ` — ${_esc(commitMsg)}` : ''}</div>` : ''}
+          </div>
+          <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">The deployment record has been updated in Supabase. You can close this dialog.</p>
+        </div>`;
+        _modalFooter.innerHTML = `<button class="btn btn-primary" id="dmFinalizeOkBtn">Done</button>`;
+        document.getElementById('dmFinalizeOkBtn')?.addEventListener('click', () => {
+          Modal.close();
+          renderDeployment(); // refresh checklist to reflect new deployed status
+        });
       }
     });
   };
