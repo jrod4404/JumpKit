@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — JumpKit</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Blog-specific styles ── */
+    .blog-hero {
+      padding: 120px 24px 60px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .blog-hero .section-label { margin-bottom: 16px; }
+    .blog-hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+    }
+    .blog-hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .blog-grid-section {
+      padding: 48px 24px 100px;
+    }
+    .blog-grid-inner {
+      max-width: 1060px;
+      margin: 0 auto;
+    }
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 28px;
+    }
+
+    .blog-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 28px 24px;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .blog-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+      border-color: rgba(0,194,199,0.35);
+    }
+    .blog-card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turq);
+      background: rgba(0,194,199,0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 16px;
+      width: fit-content;
+    }
+    .blog-card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+    .blog-card-excerpt {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      flex: 1;
+      margin-bottom: 20px;
+    }
+    .blog-card-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      margin-top: auto;
+    }
+    .blog-card-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1A4FD6, #00C2C7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .blog-card-read-more {
+      margin-left: auto;
+      color: var(--turq);
+      font-weight: 600;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .blog-empty {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;background:rgba(0,194,199,0.08)">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- OFFCANVAS -->
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#pricing" class="offcanvas-link"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <div class="blog-hero">
+    <div class="section-label"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> The JumpKit Blog</div>
+    <h1>Knowledge. Tips. <span class="accent">Success Stories.</span></h1>
+    <p>Best practices, product updates, and insights from the JumpKit community — all in one place.</p>
+  </div>
+
+  <!-- BLOG GRID -->
+  <section class="blog-grid-section">
+    <div class="blog-grid-inner">
+      <div class="blog-grid">
+
+        <!-- Article 1 -->
+        <a class="blog-card fade-up" href="/blog/introducing-jumpkit">
+          <span class="blog-card-tag">
+            <svg class="ti ti-rocket" style="width:.85em;height:.85em"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+            Product
+          </span>
+          <div class="blog-card-title">Introducing JumpKit: Stop Searching. Start Jumping.</div>
+          <div class="blog-card-excerpt">
+            Bookmarks were a great idea in the early days of the web, but they simply don't scale for modern workflows. Meet JumpKit — the launcher that puts all your resources one click away.
+          </div>
+          <div class="blog-card-meta">
+            <div class="blog-card-avatar">JR</div>
+            <span>Jeff R.</span>
+            <span style="opacity:.5">·</span>
+            <span>Jul 5, 2026</span>
+            <span class="blog-card-read-more">Read <svg class="ti ti-arrow-right" style="width:.9em;height:.9em"><use href="../assets/tabler-sprite.svg#tabler-arrow-right"/></svg></span>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="../assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="../assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="../assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script>
+    // Theme
+    (function(){
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    // Offcanvas
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    // Scroll top button
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+
+    // Fade up observer
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

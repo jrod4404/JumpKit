@@ -3,6 +3,8 @@
   "installCommand": null,
   "rewrites": [
     { "source": "/confirmed", "destination": "/confirmed.html" },
-    { "source": "/reset-password", "destination": "/reset-password.html" }
+    { "source": "/reset-password", "destination": "/reset-password.html" },
+    { "source": "/blog", "destination": "/blog/index.html" },
+    { "source": "/blog/introducing-jumpkit", "destination": "/blog/introducing-jumpkit.html" }
   ]
 }

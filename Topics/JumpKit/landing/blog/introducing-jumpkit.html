@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introducing JumpKit: Stop Searching. Start Jumping. — JumpKit Blog</title>
+  <meta name="description" content="JumpKit replaces scattered bookmarks with a unified launcher for web links, local folders, and shared resources. One click to anywhere." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Article styles ── */
+    .article-hero {
+      padding: 120px 24px 56px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .article-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turq);
+      background: rgba(0,194,199,0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+    .article-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      max-width: 780px;
+      margin: 0 auto 20px;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .article-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1A4FD6, #00C2C7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .article-meta-divider { opacity: 0.4; }
+
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 56px 24px 100px;
+    }
+
+    /* Article typography */
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text);
+      margin-bottom: 1.4rem;
+    }
+    .article-body h2 {
+      font-size: 1.5rem;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+      color: var(--text);
+      margin: 2.8rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 0.7rem;
+    }
+    .article-body ul, .article-body ol {
+      margin: 0 0 1.4rem 1.4rem;
+    }
+    .article-body li {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+    }
+    .article-body li strong {
+      color: var(--text);
+    }
+    .article-body strong { font-weight: 700; }
+
+    .article-body .callout {
+      background: rgba(0,194,199,0.07);
+      border-left: 3px solid var(--turq);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 1.6rem 0;
+    }
+    .article-body .callout p {
+      margin: 0;
+      font-size: 0.97rem;
+      color: var(--text);
+    }
+
+    .article-cta-box {
+      background: linear-gradient(135deg, rgba(26,79,214,0.15) 0%, rgba(0,194,199,0.1) 100%);
+      border: 1px solid rgba(0,194,199,0.25);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .article-cta-box h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      border: none;
+      padding: 0;
+    }
+    .article-cta-box p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+    }
+    .article-cta-box .btn {
+      background: linear-gradient(135deg,#50CACC,#1A4FD6);
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 28px;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .article-cta-box .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .article-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 48px;
+      transition: color 0.15s;
+    }
+    .article-back:hover { color: var(--turq); }
+
+    .pricing-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 1.4rem 0;
+    }
+    .pricing-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .pricing-table th, .pricing-table td {
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-table th {
+      background: rgba(0,194,199,0.07);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pricing-table tr:last-child td { border-bottom: none; }
+    .pricing-table td { color: var(--text-muted); }
+    .pricing-table td:first-child { font-weight: 600; color: var(--text); }
+    .price-highlight { color: var(--turq); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .article-body { padding: 40px 18px 80px; }
+      .article-hero { padding: 100px 18px 44px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;background:rgba(0,194,199,0.08)">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- OFFCANVAS -->
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#pricing" class="offcanvas-link"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- ARTICLE HERO -->
+  <div class="article-hero">
+    <span class="article-tag">
+      <svg class="ti ti-rocket" style="width:.85em;height:.85em"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+      Product
+    </span>
+    <h1 class="article-title">Introducing JumpKit: Stop Searching. Start Jumping.</h1>
+    <div class="article-meta">
+      <div class="article-avatar">JR</div>
+      <span><strong>Jeff R.</strong></span>
+      <span class="article-meta-divider">·</span>
+      <span>July 5, 2026</span>
+      <span class="article-meta-divider">·</span>
+      <span>5 min read</span>
+    </div>
+  </div>
+
+  <!-- ARTICLE BODY -->
+  <article class="article-body">
+    <a href="/blog" class="article-back">
+      <svg class="ti ti-arrow-left" style="width:.95em;height:.95em"><use href="../assets/tabler-sprite.svg#tabler-arrow-left"/></svg>
+      Back to Blog
+    </a>
+
+    <p>In today's fast-paced work environment, every second counts. Yet many professionals waste precious minutes — or even hours — each week hunting for the right links, folders, files, and shared resources. If you've ever felt frustrated by disorganized browser bookmarks, endless folder drilling, lost tabs, or the challenge of keeping your team aligned on key resources, you're not alone.</p>
+
+    <h2>The Pain Points: Why Traditional Tools Fall Short</h2>
+
+    <p>Bookmarks were a great idea in the early days of the web, but they simply don't scale for modern workflows:</p>
+
+    <ul>
+      <li><strong>Disorganization over time:</strong> Bookmarks quickly become a chaotic list that's hard to maintain.</li>
+      <li><strong>No support for local resources:</strong> You can't easily launch local directories or files from your bookmarks.</li>
+      <li><strong>Sharing difficulties:</strong> It's tough to share curated sets with teammates or onboard new members efficiently.</li>
+      <li><strong>Backup and migration headaches:</strong> Exporting, importing, or moving bookmarks across machines or browsers is painful.</li>
+      <li><strong>Limited search and filtering:</strong> Finding what you need often requires scrolling or relies on weak browser search.</li>
+      <li><strong>Browser dependency:</strong> Everything is locked to one browser, and updates can break your carefully arranged layout.</li>
+      <li><strong>No insights:</strong> There's zero visibility into usage patterns, time saved, or productivity impact.</li>
+    </ul>
+
+    <div class="callout">
+      <p>The result? Fragmented navigation, repeated context-switching, slower workflows, and lost productivity that adds up to real time and money.</p>
+    </div>
+
+    <h2>The Solution: JumpKit</h2>
+
+    <p>JumpKit is a desktop application for Windows and macOS that brings all your navigation resources into one clean, organized, and instantly accessible launcher. It replaces scattered bookmarks with a unified system where you can jump to web links, local directories, files, and shared resources with a single click.</p>
+
+    <p>Whether you're a solo power user, part of a small team, or working in an enterprise environment, JumpKit puts everything at your fingertips while keeping your data secure and local.</p>
+
+    <h2>Key Features That Make the Difference</h2>
+
+    <ul>
+      <li><strong>Instant Jump Launcher:</strong> Organize web URLs, local folders, and file paths into customizable categories. Launch anything in one click — no more digging through folders or tabs.</li>
+      <li><strong>Powerful Organization:</strong> Drag-and-drop categories, favorites, filters (Active, Favorites, Recent, Archive), and real-time search across everything.</li>
+      <li><strong>Global Hotkeys:</strong> Launch any saved jump with a custom keystroke — your entire navigation workspace is one hotkey away.</li>
+      <li><strong>Team Collaboration:</strong> Create teams, share group jumps, and ensure everyone starts from the same curated set of resources. Perfect for onboarding and consistent workflows.</li>
+      <li><strong>Automatic ROI Dashboard:</strong> JumpKit tracks every launch and estimates time and money saved (based on ~10 seconds per jump). View personal and team statistics locally.</li>
+      <li><strong>Data Sovereignty:</strong> 100% local storage by default — your data never leaves your machine unless you choose optional cloud backup. Automatic backups keep everything safe.</li>
+      <li><strong>Cross-Platform:</strong> Native support for both Windows and macOS.</li>
+    </ul>
+
+    <h2>How It Works (In Minutes)</h2>
+
+    <ol>
+      <li><strong>Define Categories</strong> — Set up your columns and organize them as you like.</li>
+      <li><strong>Add Jumps</strong> — Name them, assign categories, and paste in URLs, folder paths, or file locations.</li>
+      <li><strong>Jump!</strong> — Click (or use a hotkey) and instantly arrive at your destination. Watch your savings accumulate in the dashboard.</li>
+    </ol>
+
+    <h2>Pricing: Simple and Flexible</h2>
+
+    <div class="pricing-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Plan</th>
+            <th>Price</th>
+            <th>What's Included</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>JumpKit Free</td>
+            <td class="price-highlight">$0</td>
+            <td>Web links, local folders, limited launches &amp; teams, personal dashboard, core features</td>
+          </tr>
+          <tr>
+            <td>JumpKit Unlimited</td>
+            <td class="price-highlight">$10/mo or $99/yr</td>
+            <td>Unlimited everything, team ROI dashboard, auto-archive, auto-backup, and early feature access</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Ready to Reclaim Your Time?</h2>
+
+    <p>JumpKit is designed for anyone tired of navigation friction — IT professionals, consultants, engineers, sales teams, and power users who value speed, organization, and control over their digital workspace.</p>
+
+    <div class="callout">
+      <p><strong>Stop searching. Start jumping.</strong> Your future self (and your team) will thank you.</p>
+    </div>
+
+    <div class="article-cta-box">
+      <h3>Download JumpKit Today</h3>
+      <p>Free to get started. No credit card required. Available for Windows and macOS.</p>
+      <a href="/#pricing" class="btn">
+        <svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+        Start Jumping Free!
+      </a>
+    </div>
+  </article>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="../assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="../assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="../assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script>
+    // Theme
+    (function(){
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    // Offcanvas
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    // Scroll top button
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+  </script>
+</body>
+</html>
