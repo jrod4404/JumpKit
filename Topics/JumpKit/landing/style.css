@@ -723,6 +723,14 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 @media (max-width: 900px) { #problem-grid { grid-template-columns: repeat(2, auto); } }
 @media (max-width: 480px) { #problem-grid { grid-template-columns: repeat(1, auto); } }
 
+/* Solution cards — green accent, mirrors problem grid layout */
+#solution-grid { grid-template-columns: repeat(4, auto); justify-content: center; }
+#solution-grid .feature-card p { white-space: nowrap; }
+.solution-card { border-color: rgba(34,197,94,0.25); }
+.solution-card:hover { border-color: #22c55e; box-shadow: 0 8px 32px rgba(34,197,94,0.18); transform: translateY(-4px); }
+@media (max-width: 900px) { #solution-grid { grid-template-columns: repeat(2, auto); } }
+@media (max-width: 480px) { #solution-grid { grid-template-columns: repeat(1, auto); } }
+
 /* ─── JET SECTION ────────────────────────────────────────────────── */
 .jet-grid {
   display: grid;
