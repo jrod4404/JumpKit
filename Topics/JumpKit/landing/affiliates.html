@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Affiliate Program — JumpKit</title>
+  <meta name="description" content="Partner with JumpKit and earn 35% lifetime commission on every user you refer. Transparent tracking via LemonSqueezy. Sales materials provided." />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    svg.ti.hero-platform-icon { width: 1.1em; height: 1.1em; vertical-align: -0.2em; }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Affiliates page extras */
+    .aff-hero {
+      padding: 100px 24px 64px;
+      text-align: center;
+      background: var(--bg-dark);
+    }
+    .aff-hero .section-label { justify-content: center; display: inline-flex; margin-bottom: 1.2rem; }
+    .aff-hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
+      margin: 0 0 1.2rem;
+    }
+    .aff-hero p {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 640px;
+      margin: 0 auto 2.2rem;
+      line-height: 1.7;
+    }
+    .aff-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #50CACC, #1A4FD6);
+      color: #fff;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 13px 28px;
+      border-radius: 10px;
+      text-decoration: none;
+      box-shadow: 0 4px 24px rgba(0,194,199,0.25);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .aff-cta-btn:hover { opacity: 0.9; transform: translateY(-2px); }
+
+    .stat-highlight-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto 0;
+    }
+    @media (max-width: 640px) { .stat-highlight-grid { grid-template-columns: 1fr; } }
+    .stat-highlight-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+    }
+    .stat-highlight-card .stat-num {
+      font-size: 2.4rem;
+      font-weight: 800;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+    .stat-highlight-card .stat-label {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .aff-how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) { .aff-how-grid { grid-template-columns: 1fr; } }
+    .aff-how-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+    }
+    .aff-how-step {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--turq);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .aff-how-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
+    .aff-how-card p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .aff-audience-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 640px) { .aff-audience-grid { grid-template-columns: 1fr; } }
+    .aff-audience-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+    }
+    .aff-audience-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .aff-audience-card ul {
+      margin: 0;
+      padding-left: 1.1rem;
+    }
+    .aff-audience-card ul li {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    .aff-materials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 640px) { .aff-materials-grid { grid-template-columns: 1fr; } }
+    .aff-material-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(34,197,94,0.2);
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .aff-material-card .mat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(34,197,94,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+      color: #22c55e;
+    }
+    .aff-material-card h3 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 0 0 6px;
+    }
+    .aff-material-card p {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .aff-contact-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 48px 40px;
+      text-align: center;
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    @media (max-width: 480px) { .aff-contact-box { padding: 32px 20px; } }
+    .aff-contact-box h2 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 0 12px;
+    }
+    .aff-contact-box p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin: 0 0 24px;
+    }
+    .aff-email-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--turq);
+      text-decoration: none;
+      background: rgba(0,194,199,0.08);
+      border: 1px solid rgba(0,194,199,0.25);
+      padding: 12px 24px;
+      border-radius: 10px;
+      transition: background 0.2s;
+    }
+    .aff-email-link:hover { background: rgba(0,194,199,0.15); }
+
+    .ls-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;text-decoration:none">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#pricing" class="offcanvas-link"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <a href="/affiliates" class="offcanvas-link"><svg class="ti ti-users-group"><use href="assets/tabler-sprite.svg#tabler-users-group"/></svg> Affiliates</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <section class="aff-hero">
+    <div class="section-label" style="justify-content:center;margin-bottom:1.2rem">
+      <svg class="ti ti-users-group"><use href="assets/tabler-sprite.svg#tabler-users-group"/></svg> Affiliate Program
+    </div>
+    <h1>Earn 35% for Life.<br>On Every User You Refer.</h1>
+    <p>Partner with JumpKit and earn a 35% lifetime commission on every paying user you bring in — for as long as they stay subscribed. No caps. No expiry. Just passive income that compounds over time.</p>
+    <a href="mailto:affiliates@jumpkit.app" class="aff-cta-btn">
+      <svg class="ti ti-send" style="width:1.1em;height:1.1em"><use href="assets/tabler-sprite.svg#tabler-send"/></svg>
+      Apply to Become an Affiliate
+    </a>
+    <div style="margin-top:2.5rem">
+      <div class="stat-highlight-grid">
+        <div class="stat-highlight-card">
+          <div class="stat-num">35%</div>
+          <div class="stat-label">Commission per sale</div>
+        </div>
+        <div class="stat-highlight-card">
+          <div class="stat-num">Lifetime</div>
+          <div class="stat-label">Earn as long as they subscribe</div>
+        </div>
+        <div class="stat-highlight-card">
+          <div class="stat-num">$0</div>
+          <div class="stat-label">Cost to join</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how-it-works">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-list-check"><use href="assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</div>
+      <h2 class="section-title">Simple. Transparent. Rewarding.</h2>
+      <p class="section-sub">Three steps stand between you and a recurring revenue stream.</p>
+      <div class="aff-how-grid">
+        <div class="aff-how-card">
+          <div class="aff-how-step">Step 01</div>
+          <h3>Apply by Email</h3>
+          <p>Send us a quick intro at <a href="mailto:affiliates@jumpkit.app" style="color:var(--turq);text-decoration:none">affiliates@jumpkit.app</a>. Tell us who you are and how you plan to promote JumpKit. We'll get back to you quickly.</p>
+        </div>
+        <div class="aff-how-card">
+          <div class="aff-how-step">Step 02</div>
+          <h3>Get Your Affiliate Link</h3>
+          <p>Once approved, you'll receive a unique affiliate link tracked through <strong style="color:var(--text)">LemonSqueezy</strong> — so every click, trial, and purchase is attributed to you automatically.</p>
+        </div>
+        <div class="aff-how-card">
+          <div class="aff-how-step">Step 03</div>
+          <h3>Share &amp; Earn Forever</h3>
+          <p>Share your link with your audience. Every user who signs up for JumpKit Unlimited earns you <strong style="color:var(--text)">35% of their subscription revenue</strong> — every month, for as long as they stay.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHO IS IT FOR -->
+  <section class="section section-dark" id="who">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-target"><use href="assets/tabler-sprite.svg#tabler-target"/></svg> Who It's For</div>
+      <h2 class="section-title">Built for Promoters Who Mean Business</h2>
+      <p class="section-sub">The program is open to anyone — but we've created tailored sales materials for these two audiences who convert especially well.</p>
+      <div class="aff-audience-grid">
+        <div class="aff-audience-card">
+          <h3>
+            <svg class="ti ti-building" style="color:var(--turq);width:1.3em;height:1.3em"><use href="assets/tabler-sprite.svg#tabler-building"/></svg>
+            IT MSPs &amp; Resellers
+          </h3>
+          <ul>
+            <li>Offer JumpKit as a productivity tool to your clients</li>
+            <li>Earn recurring revenue on every seat you provision</li>
+            <li>Team &amp; enterprise-ready — fits naturally into onboarding</li>
+            <li>White-glove setup materials provided</li>
+            <li>Perfect upsell alongside Microsoft 365 or endpoint mgmt</li>
+          </ul>
+        </div>
+        <div class="aff-audience-card">
+          <h3>
+            <svg class="ti ti-brand-youtube" style="color:var(--turq);width:1.3em;height:1.3em"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+            Social Media &amp; Content Creators
+          </h3>
+          <ul>
+            <li>Productivity, tech, and SaaS audiences convert extremely well</li>
+            <li>Ready-made video, image, and email content provided</li>
+            <li>Easy to demo — users see the value immediately</li>
+            <li>Recurring commissions build passive income month over month</li>
+            <li>Works great for YouTube, LinkedIn, newsletters, and podcasts</li>
+          </ul>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--text-muted);font-size:0.88rem;margin-top:1.5rem">Not in one of these categories? Apply anyway — we welcome all affiliate partners.</p>
+    </div>
+  </section>
+
+  <!-- SALES MATERIALS -->
+  <section class="section" id="materials">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-package"><use href="assets/tabler-sprite.svg#tabler-package"/></svg> Sales Materials</div>
+      <h2 class="section-title">Everything You Need to Promote</h2>
+      <p class="section-sub">We've done the heavy lifting. When you're approved, you'll get a complete kit of ready-to-use materials.</p>
+      <div class="aff-materials-grid">
+        <div class="aff-material-card">
+          <div class="mat-icon">
+            <svg class="ti ti-photo" style="width:1.5em;height:1.5em"><use href="assets/tabler-sprite.svg#tabler-photo"/></svg>
+          </div>
+          <h3>Images &amp; Graphics</h3>
+          <p>Branded social images, banners, and screenshot assets ready to post.</p>
+        </div>
+        <div class="aff-material-card">
+          <div class="mat-icon">
+            <svg class="ti ti-video" style="width:1.5em;height:1.5em"><use href="assets/tabler-sprite.svg#tabler-video"/></svg>
+          </div>
+          <h3>Videos</h3>
+          <p>Demo and explainer videos you can share directly or embed in your content.</p>
+        </div>
+        <div class="aff-material-card">
+          <div class="mat-icon">
+            <svg class="ti ti-mail" style="width:1.5em;height:1.5em"><use href="assets/tabler-sprite.svg#tabler-mail"/></svg>
+          </div>
+          <h3>Email Templates</h3>
+          <p>Copy-paste email sequences designed to convert your list or client base.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRANSPARENCY / LEMONSQUEEZY -->
+  <section class="section section-dark" id="tracking">
+    <div class="section-inner" style="text-align:center">
+      <div class="section-label" style="justify-content:center"><svg class="ti ti-chart-bar"><use href="assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Full Transparency</div>
+      <h2 class="section-title">Powered by LemonSqueezy</h2>
+      <p class="section-sub" style="max-width:600px;margin:0 auto 2rem">All affiliate tracking, commission calculations, and payouts are handled by <strong style="color:var(--text)">LemonSqueezy</strong> — a trusted payments and affiliate platform. You get your own dashboard with real-time visibility into clicks, signups, and earnings. No spreadsheets. No guessing.</p>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:1rem">
+        <div class="feature-card" style="padding:16px 22px;max-width:220px;text-align:left">
+          <p><svg class="ti ti-eye" style="color:#22c55e;width:1.3em;height:1.3em;vertical-align:-0.2em;margin-right:.5em"><use href="assets/tabler-sprite.svg#tabler-eye"/></svg> Real-time dashboard</p>
+        </div>
+        <div class="feature-card" style="padding:16px 22px;max-width:220px;text-align:left">
+          <p><svg class="ti ti-click" style="color:#22c55e;width:1.3em;height:1.3em;vertical-align:-0.2em;margin-right:.5em"><use href="assets/tabler-sprite.svg#tabler-click"/></svg> Click &amp; conversion tracking</p>
+        </div>
+        <div class="feature-card" style="padding:16px 22px;max-width:220px;text-align:left">
+          <p><svg class="ti ti-cash" style="color:#22c55e;width:1.3em;height:1.3em;vertical-align:-0.2em;margin-right:.5em"><use href="assets/tabler-sprite.svg#tabler-cash"/></svg> Automatic payouts</p>
+        </div>
+        <div class="feature-card" style="padding:16px 22px;max-width:220px;text-align:left">
+          <p><svg class="ti ti-lock" style="color:#22c55e;width:1.3em;height:1.3em;vertical-align:-0.2em;margin-right:.5em"><use href="assets/tabler-sprite.svg#tabler-lock"/></svg> Tamper-proof attribution</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- APPLY / CONTACT -->
+  <section class="section" id="apply">
+    <div class="section-inner">
+      <div class="aff-contact-box">
+        <div class="section-label" style="justify-content:center;margin-bottom:1rem">
+          <svg class="ti ti-send"><use href="assets/tabler-sprite.svg#tabler-send"/></svg> Ready to Partner?
+        </div>
+        <h2>Apply to Become an Affiliate</h2>
+        <p>Send us a quick email introducing yourself and how you plan to promote JumpKit. We'll review your application and get back to you within 1–2 business days.</p>
+        <a href="mailto:affiliates@jumpkit.app" class="aff-email-link">
+          <svg class="ti ti-mail" style="width:1.1em;height:1.1em"><use href="assets/tabler-sprite.svg#tabler-mail"/></svg>
+          affiliates@jumpkit.app
+        </a>
+        <div style="margin-top:1.2rem;color:var(--text-muted);font-size:0.83rem">Include your name, website or social profile, and your audience type. That's it.</div>
+        <div class="ls-badge">
+          <svg class="ti ti-shield-check" style="color:#22c55e;width:1.1em;height:1.1em"><use href="assets/tabler-sprite.svg#tabler-shield-check"/></svg>
+          Commissions tracked &amp; paid via LemonSqueezy
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer" style="text-align:center;padding:32px 24px;color:var(--text-muted);font-size:0.82rem;border-top:1px solid var(--border)">
+    <p style="margin:0">&copy; 2026 JumpKit. All rights reserved. &nbsp;·&nbsp; <a href="/" style="color:var(--turq);text-decoration:none">Home</a> &nbsp;·&nbsp; <a href="/blog" style="color:var(--turq);text-decoration:none">Blog</a> &nbsp;·&nbsp; <a href="mailto:affiliates@jumpkit.app" style="color:var(--turq);text-decoration:none">affiliates@jumpkit.app</a></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

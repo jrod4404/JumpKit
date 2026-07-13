@@ -5,6 +5,7 @@
     { "source": "/confirmed", "destination": "/confirmed.html" },
     { "source": "/reset-password", "destination": "/reset-password.html" },
     { "source": "/blog", "destination": "/blog/index.html" },
-    { "source": "/blog/introducing-jumpkit", "destination": "/blog/introducing-jumpkit.html" }
+    { "source": "/blog/introducing-jumpkit", "destination": "/blog/introducing-jumpkit.html" },
+    { "source": "/affiliates", "destination": "/affiliates.html" }
   ]
 }
