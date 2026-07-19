@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Pro Forma Income Statement — PrepSBA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,sans-serif;font-size:10pt;color:#1F2937;background:#fff}
+  .notice{background:#EFF6FF;border-left:4px solid #3B82F6;padding:10px 16px;font-size:9pt;color:#1E40AF}
+  .page{max-width:860px;margin:0 auto;padding:40px 48px}
+  .header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #3B82F6;padding-bottom:14px;margin-bottom:28px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:36px;height:36px;background:#3B82F6;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .logo svg{width:20px;height:20px}
+  .brand-name{font-weight:700;font-size:16pt;color:#0A2540}
+  .doc-title{font-size:14pt;font-weight:600;color:#0A2540}
+  .meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;padding:16px;margin-bottom:28px}
+  .meta-item label{display:block;font-size:8.5pt;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .p{color:#2563EB;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-bottom:24px}
+  th{background:#0A2540;color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:9.5pt}
+  th.num{text-align:right}
+  td{padding:8px 14px;border-bottom:1px solid #E5E7EB}
+  td.num{text-align:right}
+  td.indent{padding-left:28px;color:#374151}
+  tr.section-hdr td{background:#F1F5F9;font-weight:700;color:#0A2540;font-size:9.5pt;letter-spacing:.3px;text-transform:uppercase;padding-top:12px}
+  tr.subtotal td{background:#DBEAFE;font-weight:700;color:#1E40AF}
+  tr.highlight td{background:#EFF6FF;font-weight:700;color:#0A2540;font-size:11pt}
+  tr.net-income td{background:#0A2540;color:#fff;font-weight:700;font-size:12pt}
+  tr.net-income .p{color:#93C5FD}
+  tr.ratios td{background:#F8FAFF;font-style:italic;color:#374151}
+  .section-title{font-size:11pt;font-weight:700;color:#0A2540;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid #DBEAFE}
+  @media print{.notice{display:none}.page{padding:20px 28px}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="notice">PrepSBA — AI-Generated Template | Review all fields marked <strong>[IN BRACKETS]</strong> before submitting to lender</div>
+<br>
+<div class="header">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L19 5V11C19 15.4 15.5 19.4 12 21C8.5 19.4 5 15.4 5 11V5L12 2Z" fill="white" opacity=".95"/><polyline points="8.5,12 10.5,14.5 15.5,9" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="brand-name">PrepSBA</span>
+  </div>
+  <span class="doc-title">Pro Forma Income Statement</span>
+</div>
+<div class="meta">
+  <div class="meta-item"><label>Business Name</label><span class="p">[BUSINESS LEGAL NAME]</span></div>
+  <div class="meta-item"><label>Projection Period</label><span class="p">Year 1–3 (3-Year Projection)</span></div>
+  <div class="meta-item"><label>Date Prepared</label><span class="p">[DATE]</span></div>
+  <div class="meta-item"><label>Growth Assumption</label><span class="p">[GROWTH %]% annually</span></div>
+  <div class="meta-item"><label>Base Year Revenue</label><span class="p">$[CURRENT ANNUAL REVENUE]</span></div>
+  <div class="meta-item"><label>Prepared By</label><span class="p">[PREPARER NAME / PrepSBA]</span></div>
+</div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:40%">Line Item</th>
+      <th class="num">Year 1</th>
+      <th class="num">Year 2</th>
+      <th class="num">Year 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr class="section-hdr"><td colspan="4">Revenue</td></tr>
+    <tr><td class="indent">Gross Revenue</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Less: Returns &amp; Allowances</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr class="subtotal"><td><strong>Net Revenue</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4">Cost of Goods Sold</td></tr>
+    <tr><td class="indent">Direct Materials</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Direct Labor</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Manufacturing Overhead</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Other COGS</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td><strong>Total COGS</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="highlight"><td><strong>GROSS PROFIT</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4">Operating Expenses</td></tr>
+    <tr><td class="indent">Salaries &amp; Wages (Non-Owner)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Owner Salary / Draw</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Payroll Taxes &amp; Benefits</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Rent / Lease</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Utilities</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Insurance</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Marketing &amp; Advertising</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Professional Fees (Legal/Accounting)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Software &amp; Technology</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Office Supplies</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Vehicle / Travel</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Depreciation &amp; Amortization</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Other Operating Expenses</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td><strong>Total Operating Expenses</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="highlight"><td><strong>EBITDA</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+    <tr><td class="indent">Less: Depreciation &amp; Amortization</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr class="subtotal"><td><strong>EBIT (Operating Income)</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4">Interest &amp; Taxes</td></tr>
+    <tr><td class="indent">Less: Interest Expense — SBA Loan</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr><td class="indent">Less: Other Interest Expense</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr class="subtotal"><td><strong>Earnings Before Tax (EBT)</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+    <tr><td class="indent">Less: Income Tax (<span class="p">[TAX RATE]</span>%)</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+
+    <tr class="net-income"><td><strong>NET INCOME</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4">Key Financial Ratios</td></tr>
+    <tr class="ratios"><td class="indent">Gross Margin %</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+    <tr class="ratios"><td class="indent">Net Profit Margin %</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+    <tr class="ratios"><td class="indent">Revenue Growth % (YoY)</td><td class="num">Base Year</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+    <tr class="ratios"><td class="indent">EBITDA Margin %</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+    <tr class="ratios"><td class="indent">Debt Service Coverage Ratio (DSCR)</td><td class="num p">[X.XX]x</td><td class="num p">[X.XX]x</td><td class="num p">[X.XX]x</td></tr>
+  </tbody>
+</table>
+<p style="font-size:9pt;color:#6B7280;font-style:italic">Note: These are forward-looking projections based on historical performance and stated assumptions. Actual results may differ materially. All figures in USD.</p>
+</div>
+</body>
+</html>

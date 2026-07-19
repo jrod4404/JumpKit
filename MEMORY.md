@@ -11,6 +11,14 @@ Mac mini M4 48GB running Ollama with these models available:
 
 Switch models with `/model qwen`, `/model nemotron`, etc.
 
+## Agent Roster
+- **Maximus (Max)** — Main OpenClaw agent. Jeff's primary co-pilot.
+- **Primus (Pri)** — Hermes SEO agent. Dedicated to ranking JumpKit (www.jumpkit.app).
+  - Profile: `hermes profile use seo` / alias `seo`
+  - Skills installed: seo-audit, seo-aeo-audit, schema, programmatic-seo, competitors
+  - SOUL.md written at `~/.hermes/profiles/seo/SOUL.md`
+  - 47 marketingskills also installed globally via npx to workspace `.agents/skills/`
+
 ## Config Notes
 - `agents.defaults.compaction.reserveTokensFloor` set to 20000 (prevents context limit errors)
 - Ollama permissions issue on blobs dir — may need `sudo chown -R $(whoami) ~/.ollama/models/` if pull fails

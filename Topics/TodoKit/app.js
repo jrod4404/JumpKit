@@ -437,11 +437,58 @@ function renderSidebar() {
     return;
   }
   list.innerHTML = state.projects.map(p => `
-    <li data-id="${p.id}" class="${p.id === activeProjectId ? 'active' : ''}" onclick="selectProject('${p.id}')">
+    <li data-id="${p.id}" class="${p.id === activeProjectId ? 'active' : ''}" draggable="true" onclick="selectProject('${p.id}')">
+      <span class="proj-drag-handle" title="Drag to reorder">⠇</span>
       <span class="proj-dot"></span>
       ${escapeHtml(p.name)}
     </li>
   `).join('');
+  initSidebarProjectDrag(list);
+}
+
+function initSidebarProjectDrag(list) {
+  let dragSrc = null;
+
+  list.querySelectorAll('li[draggable]').forEach(li => {
+    li.addEventListener('dragstart', (e) => {
+      dragSrc = li;
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', li.dataset.id);
+      setTimeout(() => li.classList.add('proj-dragging'), 0);
+    });
+    li.addEventListener('dragend', () => {
+      li.classList.remove('proj-dragging');
+      list.querySelectorAll('li').forEach(el => el.classList.remove('proj-drag-over'));
+      dragSrc = null;
+    });
+    li.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      if (dragSrc && li !== dragSrc) {
+        list.querySelectorAll('li').forEach(el => el.classList.remove('proj-drag-over'));
+        li.classList.add('proj-drag-over');
+      }
+    });
+    li.addEventListener('dragleave', () => li.classList.remove('proj-drag-over'));
+    li.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      li.classList.remove('proj-drag-over');
+      if (!dragSrc || dragSrc === li) return;
+
+      const srcId  = dragSrc.dataset.id;
+      const destId = li.dataset.id;
+      const srcIdx  = state.projects.findIndex(p => p.id === srcId);
+      const destIdx = state.projects.findIndex(p => p.id === destId);
+      if (srcIdx === -1 || destIdx === -1) return;
+
+      // Reorder projects array
+      const [moved] = state.projects.splice(srcIdx, 1);
+      state.projects.splice(destIdx, 0, moved);
+      saveState();
+      renderSidebar();
+    });
+  });
 }
 
 // ===========================
@@ -844,8 +891,143 @@ function deleteProject(id) {
 // Task Detail Modal (read-only)
 // ===========================
 let detailTaskId = null;
+let _detailChanges = {};        // pending field edits { field: value }
+let _detailPendingComments = []; // pending comments not yet saved
+let _detailDirty = false;
+let _detailEditingCommentId = null; // id of comment being edited in editor
+
+function _resetDetailDraft() {
+  _detailChanges = {};
+  _detailPendingComments = [];
+  _detailDirty = false;
+  _detailEditingCommentId = null;
+}
+
+function _markDetailDirty() {
+  _detailDirty = true;
+  const btn = document.getElementById('btn-close-detail-modal');
+  if (btn) {
+    btn.textContent = 'Save & Close';
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-primary');
+  }
+  const cancelBtn = document.getElementById('btn-cancel-detail-modal');
+  if (cancelBtn) cancelBtn.style.display = '';
+}
+
+function cancelAndCloseDetail() {
+  _resetDetailDraft();
+  // Reset close button back to default state
+  const btn = document.getElementById('btn-close-detail-modal');
+  if (btn) {
+    btn.textContent = 'Close';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-secondary');
+  }
+  const cancelBtn = document.getElementById('btn-cancel-detail-modal');
+  if (cancelBtn) cancelBtn.style.display = 'none';
+  hideModal('modal-task-detail');
+}
+
+function _onDetailCommentInput() {
+  // Mark dirty as soon as the user starts typing a comment
+  _markDetailDirty();
+}
+
+function _detailCommentAuthor() {
+  const project = getProject(activeProjectId);
+  const users = Array.from(new Set(['Jeff', ...(project?.users || [])].filter(Boolean)));
+  return users[0] || 'Jeff';
+}
+
+function _stageEditorComment() {
+  // If the editor has content, stage it (new or edit) before flushing
+  const editor = document.getElementById('detail-comment-editor');
+  if (!editor) return;
+  const html = sanitizeCommentHtml(editor.innerHTML || '');
+  if (!html.trim() || html === '<p></p>' || html === '<br>') return;
+
+  if (_detailEditingCommentId) {
+    // Update existing comment in pending list or task
+    const pending = _detailPendingComments.find(c => c.id === _detailEditingCommentId);
+    if (pending) {
+      pending.html = html;
+    } else {
+      // It's a saved comment — queue an edit via _detailChanges keyed by comment id
+      if (!_detailChanges._commentEdits) _detailChanges._commentEdits = {};
+      _detailChanges._commentEdits[_detailEditingCommentId] = html;
+    }
+    _detailEditingCommentId = null;
+  } else {
+    // New comment
+    _detailPendingComments.push({
+      id: genId(),
+      author: _detailCommentAuthor(),
+      html,
+      createdAt: new Date().toISOString(),
+    });
+  }
+  editor.innerHTML = '';
+  const form = document.getElementById('detail-comment-form');
+  if (form) form.style.display = 'none';
+  const addBtn = document.querySelector('#task-detail-body .btn-ghost.btn-sm');
+  if (addBtn) addBtn.style.display = '';
+}
+
+function _flushDetailDraft() {
+  // Stage any in-progress comment from the editor first
+  _stageEditorComment();
+  // Apply all pending changes to the real task object and save
+  const task = getTask(detailTaskId);
+  if (!task) return;
+  const commentEdits = _detailChanges._commentEdits || {};
+  const commentDeletes = new Set(_detailChanges._commentDeletes || []);
+  Object.entries(_detailChanges).forEach(([field, value]) => {
+    if (field === '_commentEdits' || field === '_commentDeletes') return;
+    if (field === 'status') {
+      applyStatusChange(task, value);
+    } else if (field === 'title') {
+      if (value) task[field] = value;
+    } else {
+      task[field] = value;
+    }
+  });
+  if (!task.comments) task.comments = [];
+  // Apply edits to saved comments
+  task.comments.forEach(c => { if (commentEdits[c.id]) c.html = commentEdits[c.id]; });
+  // Apply deletes to saved comments
+  task.comments = task.comments.filter(c => !commentDeletes.has(c.id));
+  // Append new pending comments (filter out deleted pending ones too)
+  _detailPendingComments.filter(c => !commentDeletes.has(c.id)).forEach(c => task.comments.push(c));
+  if (_detailDirty) {
+    saveState();
+    renderProjectView();
+  }
+  _resetDetailDraft();
+}
+
+function saveAndCloseDetail() {
+  _flushDetailDraft();
+  hideModal('modal-task-detail');
+}
+
+// Returns the rendered display HTML for a given field value (for in-place updates)
+function _renderDetailFieldDisplay(field, value, task, project) {
+  if (field === 'status')      return statusBadge(value);
+  if (field === 'priority')    return priorityBadge(value);
+  if (field === 'category')    return categoryBadge(value, project);
+  if (field === 'responsible') return escapeHtml(value || '—');
+  if (field === 'plannedStart') return formatDate(value);
+  if (field === 'title')       return escapeHtml(value);
+  if (field === 'description') return value ? escapeHtml(value) : '<span class="detail-empty">Click to add description…</span>';
+  return escapeHtml(String(value || ''));
+}
 
 function openTaskDetailModal(taskId) {
+  // If opening a different task while dirty, flush current draft first
+  if (_detailDirty && detailTaskId && taskId !== detailTaskId) _flushDetailDraft();
+  // Reset draft for fresh open
+  if (taskId !== detailTaskId) _resetDetailDraft();
   detailTaskId = taskId;
   const task = getTask(taskId);
   if (!task) return;
@@ -853,34 +1035,46 @@ function openTaskDetailModal(taskId) {
   const body = document.getElementById('task-detail-body');
   const project = getProject(activeProjectId);
 
-  const commentsHtml = (task.comments || []).map((c, i) => {
+  const commentsHtml = (task.comments || []).map(c => {
     const ts = c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'}) : '';
-    return `<div class="detail-comment">
-      <div class="detail-comment-meta"><strong>${escapeHtml(c.author || '—')}</strong> · <span class="detail-comment-date">${ts}</span></div>
-      <div class="detail-comment-html">${c.html || ''}</div>
-    </div>`;
+    return _buildDetailCommentHtml(c, ts);
   }).join('') || '<div class="detail-empty">No comments</div>';
 
   body.innerHTML = `
     <div class="detail-title-row">
       <span class="detail-task-id">#${simpleTaskId(task)}</span>
-      <div class="detail-title">${escapeHtml(task.title)}</div>
+      <div class="detail-title detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'title')">${escapeHtml(task.title)}</div>
     </div>
     <div class="detail-meta-row">
-      <div class="detail-meta-item"><span class="detail-label-inline">Category</span><span class="detail-value-inline">${categoryBadge(task.category, project)}</span></div>
-      <div class="detail-meta-item"><span class="detail-label-inline">Status</span><span class="detail-value-inline">${statusBadge(task.status)}</span></div>
-      <div class="detail-meta-item"><span class="detail-label-inline">Priority</span><span class="detail-value-inline">${priorityBadge(task.priority)}</span></div>
-      <div class="detail-meta-item"><span class="detail-label-inline">Responsible</span><span class="detail-value-inline">${escapeHtml(task.responsible || '—')}</span></div>
-      <div class="detail-meta-item"><span class="detail-label-inline">Planned Start</span><span class="detail-value-inline">${formatDate(task.plannedStart)}</span></div>
+      <div class="detail-meta-item"><span class="detail-label-inline">Category</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'category')">${categoryBadge(task.category, project)}</span></div>
+      <div class="detail-meta-item"><span class="detail-label-inline">Status</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'status')">${statusBadge(task.status)}</span></div>
+      <div class="detail-meta-item"><span class="detail-label-inline">Priority</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'priority')">${priorityBadge(task.priority)}</span></div>
+      <div class="detail-meta-item"><span class="detail-label-inline">Responsible</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'responsible')">${escapeHtml(task.responsible || '—')}</span></div>
+      <div class="detail-meta-item"><span class="detail-label-inline">Planned Start</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'plannedStart')">${formatDate(task.plannedStart)}</span></div>
+      ${task.closedAt ? `<div class="detail-meta-item"><span class="detail-label-inline">Closed</span><span class="detail-value-inline" style="font-size:0.82rem;color:var(--text-light)">${new Date(task.closedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span></div>` : ''}
       ${(task.tags && task.tags.length) ? `<div class="detail-meta-item" style="flex-basis:100%"><span class="detail-label-inline">Tags</span><span class="detail-value-inline"><div class="detail-tags-row">${task.tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join('')}</div></span></div>` : ''}
     </div>
     <div class="detail-section">
       <div class="detail-label">Description</div>
-      <div class="detail-text">${task.description ? escapeHtml(task.description) : '<span class="detail-empty">No description</span>'}</div>
+      <div class="detail-text detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'description')">${task.description ? escapeHtml(task.description) : '<span class="detail-empty">Click to add description…</span>'}</div>
     </div>
     <div class="detail-section">
       <div class="detail-label">Comments (${(task.comments || []).length})</div>
       <div class="detail-comments-list">${commentsHtml}</div>
+      <div id="detail-comment-form" style="display:none;margin-top:10px">
+        <div class="comment-editor-card">
+          <div class="wysiwyg-toolbar" aria-label="Comment formatting toolbar">
+            <button type="button" class="btn-editor" onclick="detailCommentCmd('bold')" title="Bold"><strong>B</strong></button>
+            <button type="button" class="btn-editor" onclick="detailCommentCmd('italic')" title="Italic"><em>I</em></button>
+            <button type="button" class="btn-editor" onclick="detailCommentCmd('underline')" title="Underline"><u>U</u></button>
+            <button type="button" class="btn-editor" onclick="detailCommentCmd('insertUnorderedList')" title="Bullet list">• List</button>
+            <button type="button" class="btn-editor" onclick="detailCommentCmd('insertOrderedList')" title="Numbered list">1. List</button>
+          </div>
+          <div class="comment-editor form-input" id="detail-comment-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Add a comment…" style="min-height:64px" oninput="_onDetailCommentInput()"></div>
+        </div>
+        <p style="font-size:11px;color:var(--text-muted);margin:5px 0 0;">ℹ️ Click <strong>Save &amp; Close</strong> to save this comment.</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="document.getElementById('detail-comment-form').style.display='block';document.getElementById('detail-comment-editor').focus()">+ Add Comment</button>
     </div>
   `;
 
@@ -891,7 +1085,285 @@ function openTaskDetailModal(taskId) {
   document.getElementById('btn-mark-task-progress-detail').style.display = '';
   document.getElementById('btn-mark-task-done-detail').style.display = '';
 
+  // Sync close/cancel button state with dirty flag
+  const _closeBtn = document.getElementById('btn-close-detail-modal');
+  const _cancelBtn = document.getElementById('btn-cancel-detail-modal');
+  if (_closeBtn) {
+    if (_detailDirty) {
+      _closeBtn.textContent = 'Save & Close';
+      _closeBtn.classList.remove('btn-secondary');
+      _closeBtn.classList.add('btn-primary');
+    } else {
+      _closeBtn.textContent = 'Close';
+      _closeBtn.classList.remove('btn-primary');
+      _closeBtn.classList.add('btn-secondary');
+    }
+  }
+  if (_cancelBtn) _cancelBtn.style.display = _detailDirty ? '' : 'none';
+
   showModal('modal-task-detail');
+}
+
+// ===========================
+// Inline editing in detail modal
+// ===========================
+function detailInlineEdit(el, field) {
+  if (el.dataset.editing) return; // already active
+  el.dataset.editing = '1';
+
+  const task = getTask(detailTaskId);
+  const project = getProject(activeProjectId);
+  if (!task) return;
+
+  const SELECT_FIELDS = {
+    status:      ['To Do','In Progress','To Test','Completed','Cancelled'],
+    priority:    ['Urgent','High','Med','Low'],
+    category:    getProjectCategories(project),
+    responsible: ['', ...Array.from(new Set(['Jeff', ...(project.users || [])].filter(Boolean)))],
+  };
+
+  const commit = (value) => {
+    const v = (typeof value === 'string') ? value.trim() : value;
+    // Store in draft (don't save yet)
+    _detailChanges[field] = (field === 'plannedStart') ? (v || '') : v;
+    _markDetailDirty();
+    // Update display in-place so user sees the new value
+    delete el.dataset.editing;
+    el.style.cursor = '';
+    el.innerHTML = _renderDetailFieldDisplay(field, v, task, project);
+  };
+
+  if (field in SELECT_FIELDS) {
+    const opts = SELECT_FIELDS[field];
+    const currentVal = task[field] || '';
+
+    // Build custom select matching the rest of the app
+    const wrapper  = document.createElement('div');
+    wrapper.className = 'custom-select-wrapper detail-inline-custom-select';
+
+    const trigger  = document.createElement('div');
+    trigger.className = 'custom-select-trigger form-input';
+    trigger.tabIndex = 0;
+    const triggerLabel = document.createElement('span');
+    triggerLabel.textContent = currentVal || '—';
+    const chevron = document.createElement('span');
+    chevron.className = 'custom-select-chevron';
+    chevron.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+    trigger.appendChild(triggerLabel);
+    trigger.appendChild(chevron);
+
+    const dropdown = document.createElement('div');
+    dropdown.className = 'custom-select-dropdown';
+
+    opts.forEach(o => {
+      const item = document.createElement('div');
+      item.className = 'custom-select-option' + (o === currentVal ? ' selected' : '');
+      item.textContent = o || '—';
+      item.dataset.value = o;
+      item.addEventListener('mousedown', (e) => {
+        e.preventDefault(); // prevent blur on trigger before click registers
+        triggerLabel.textContent = o || '—';
+        dropdown.classList.remove('open');
+        trigger.classList.remove('open');
+        commit(o);
+      });
+      dropdown.appendChild(item);
+    });
+
+    wrapper.appendChild(trigger);
+    wrapper.appendChild(dropdown);
+
+    el.innerHTML = '';
+    el.style.cursor = 'default';
+    el.appendChild(wrapper);
+
+    // Open dropdown immediately
+    dropdown.classList.add('open');
+    trigger.classList.add('open');
+    trigger.focus();
+
+    trigger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isOpen = dropdown.classList.contains('open');
+      closeAllCustomSelects();
+      if (!isOpen) { dropdown.classList.add('open'); trigger.classList.add('open'); }
+    });
+    trigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { closeAllCustomSelects(); openTaskDetailModal(detailTaskId); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); trigger.click(); }
+    });
+    trigger.addEventListener('blur', (e) => {
+      // Only close if focus left the whole wrapper
+      setTimeout(() => {
+        if (!wrapper.contains(document.activeElement)) {
+          closeAllCustomSelects();
+          openTaskDetailModal(detailTaskId);
+        }
+      }, 150);
+    });
+
+  } else if (field === 'plannedStart') {
+    const inp = document.createElement('input');
+    inp.type = 'date';
+    inp.className = 'detail-inline-input';
+    inp.value = task.plannedStart || '';
+    el.innerHTML = '';
+    el.style.cursor = 'default';
+    el.appendChild(inp);
+    inp.focus();
+    inp.showPicker?.();
+    const done = () => commit(inp.value);
+    inp.addEventListener('blur', done);
+    inp.addEventListener('change', done);
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter') { inp.blur(); } else if (e.key === 'Escape') openTaskDetailModal(detailTaskId); });
+
+  } else if (field === 'description') {
+    const ta = document.createElement('textarea');
+    ta.className = 'detail-inline-textarea';
+    ta.value = task.description || '';
+    ta.rows = Math.max(3, (task.description || '').split('\n').length + 1);
+    el.innerHTML = '';
+    el.style.cursor = 'default';
+    el.appendChild(ta);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+    ta.addEventListener('blur', () => commit(ta.value));
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Escape') openTaskDetailModal(detailTaskId);
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) ta.blur();
+    });
+
+  } else { // title or other text
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.className = 'detail-inline-input detail-inline-title';
+    inp.value = task[field] || '';
+    el.innerHTML = '';
+    el.style.cursor = 'default';
+    el.appendChild(inp);
+    inp.focus();
+    inp.select();
+    const done = () => commit(inp.value);
+    inp.addEventListener('blur', done);
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Enter') inp.blur();
+      if (e.key === 'Escape') openTaskDetailModal(detailTaskId);
+    });
+  }
+}
+
+function _buildDetailCommentHtml(c, ts) {
+  const iconEdit = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>`;
+  const iconDel  = `<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="m19 6-.867 13.142A2 2 0 0 1 16.138 21H7.862a2 2 0 0 1-1.995-1.858L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+  return `<div class="detail-comment" data-comment-id="${escapeHtml(c.id)}">
+    <div class="detail-comment-meta">
+      <span><strong>${escapeHtml(c.author || '—')}</strong> · <span class="detail-comment-date">${ts}</span></span>
+      <span class="detail-comment-actions">
+        <button class="btn-icon-sm" title="Edit comment" onclick="detailCommentEdit('${escapeHtml(c.id)}')">${iconEdit}</button>
+        <button class="btn-icon-sm btn-icon-danger" title="Delete comment" onclick="detailCommentDelete('${escapeHtml(c.id)}')">${iconDel}</button>
+      </span>
+    </div>
+    <div class="detail-comment-html">${c.html || ''}</div>
+  </div>`;
+}
+
+function detailCommentEdit(commentId) {
+  const task = getTask(detailTaskId);
+  if (!task) return;
+  // Find comment in saved or pending
+  const c = (task.comments || []).find(x => x.id === commentId) ||
+             _detailPendingComments.find(x => x.id === commentId);
+  if (!c) return;
+  _detailEditingCommentId = commentId;
+  const form = document.getElementById('detail-comment-form');
+  const editor = document.getElementById('detail-comment-editor');
+  if (form) form.style.display = 'block';
+  if (editor) { editor.innerHTML = c.html || ''; editor.focus(); }
+  _markDetailDirty();
+  // Hide the Add Comment button while editing
+  const addBtn = document.querySelector('#task-detail-body .btn-ghost.btn-sm');
+  if (addBtn) addBtn.style.display = 'none';
+}
+
+function detailCommentDelete(commentId) {
+  const task = getTask(detailTaskId);
+  if (!task) return;
+  // Check if it's a pending comment
+  const pendingIdx = _detailPendingComments.findIndex(c => c.id === commentId);
+  if (pendingIdx >= 0) {
+    _detailPendingComments.splice(pendingIdx, 1);
+  } else {
+    // Queue delete for saved comment
+    if (!_detailChanges._commentDeletes) _detailChanges._commentDeletes = [];
+    if (!_detailChanges._commentDeletes.includes(commentId)) _detailChanges._commentDeletes.push(commentId);
+  }
+  // Remove from DOM
+  const el = document.querySelector(`.detail-comment[data-comment-id="${commentId}"]`);
+  if (el) el.remove();
+  // Update count
+  const deletedSaved = (_detailChanges._commentDeletes || []).length;
+  const allComments = (task.comments || []).length - deletedSaved + _detailPendingComments.length;
+  const countEl = document.querySelector('.detail-section .detail-label');
+  if (countEl && countEl.textContent.includes('Comments')) countEl.textContent = `Comments (${Math.max(0, allComments)})`;
+  // Show 'no comments' if empty
+  const list = document.querySelector('.detail-comments-list');
+  if (list && !list.querySelector('.detail-comment')) list.innerHTML = '<div class="detail-empty">No comments</div>';
+  _markDetailDirty();
+}
+
+function detailCommentCmd(command) {
+  const editor = document.getElementById('detail-comment-editor');
+  if (!editor) return;
+  editor.focus();
+  document.execCommand(command, false, null);
+}
+
+function saveDetailComment() {
+  const task = getTask(detailTaskId);
+  if (!task) return;
+  const editor = document.getElementById('detail-comment-editor');
+  const html = sanitizeCommentHtml(editor?.innerHTML || '');
+  if (!html.trim() || html === '<p></p>' || html === '<br>') return;
+
+  const author = _detailCommentAuthor();
+  const commentId = _detailEditingCommentId || genId();
+  const isEdit = !!_detailEditingCommentId;
+
+  if (isEdit) {
+    // Update existing comment display in-place
+    const el = document.querySelector(`.detail-comment[data-comment-id="${commentId}"] .detail-comment-html`);
+    if (el) el.innerHTML = html;
+    const pending = _detailPendingComments.find(c => c.id === commentId);
+    if (pending) { pending.html = html; }
+    else {
+      if (!_detailChanges._commentEdits) _detailChanges._commentEdits = {};
+      _detailChanges._commentEdits[commentId] = html;
+    }
+    _detailEditingCommentId = null;
+  } else {
+    const newComment = { id: commentId, author, html, createdAt: new Date().toISOString() };
+    _detailPendingComments.push(newComment);
+    const ts = new Date(newComment.createdAt).toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+    const commentHtml = _buildDetailCommentHtml(newComment, ts);
+    const list = document.querySelector('.detail-comments-list');
+    if (list) {
+      const empty = list.querySelector('.detail-empty');
+      if (empty) empty.remove();
+      list.insertAdjacentHTML('beforeend', commentHtml);
+    }
+  }
+
+  _markDetailDirty();
+  // Update comment count label
+  const allComments = (task.comments || []).length + _detailPendingComments.length;
+  const countEl = document.querySelector('.detail-section .detail-label');
+  if (countEl && countEl.textContent.includes('Comments')) countEl.textContent = `Comments (${allComments})`;
+
+  const form = document.getElementById('detail-comment-form');
+  if (form) form.style.display = 'none';
+  if (editor) editor.innerHTML = '';
+  const addBtn = document.querySelector('#task-detail-body .btn-ghost.btn-sm');
+  if (addBtn) addBtn.style.display = '';
 }
 
 function updateTaskDetailNavButtons() {
@@ -908,6 +1380,7 @@ function updateTaskDetailNavButtons() {
 }
 
 function navigateTaskDetail(direction) {
+  if (_detailDirty) _flushDetailDraft(); // save pending changes before navigating
   const savedEditingId = editingTaskId;
   editingTaskId = detailTaskId;
   const nextTaskId = getAdjacentTaskId(direction);
@@ -1143,9 +1616,11 @@ function saveTask() {
 
   if (editingTaskId) {
     const task = getTask(editingTaskId);
-    if (task) Object.assign(task, taskData);
+    if (task) { Object.assign(task, taskData); applyStatusChange(task, taskData.status); }
   } else {
-    state.tasks.push({ id: genId(), executionOrder: getNextExecutionOrder(activeProjectId), ...taskData });
+    const newTask = { id: genId(), executionOrder: getNextExecutionOrder(activeProjectId), ...taskData };
+    applyStatusChange(newTask, taskData.status);
+    state.tasks.push(newTask);
   }
 
   saveState();
@@ -1205,13 +1680,28 @@ function navigateTask(direction) {
   openTaskModal(nextTaskId);
 }
 
+// ===========================
+// closedAt tracking
+// ===========================
+const CLOSED_STATUSES = new Set(['Completed', 'Cancelled']);
+
+function applyStatusChange(task, newStatus) {
+  task.status = newStatus;
+  if (CLOSED_STATUSES.has(newStatus)) {
+    if (!task.closedAt) task.closedAt = new Date().toISOString();
+  } else {
+    delete task.closedAt;
+  }
+}
+
 function markCurrentTaskStatus(status) {
   if (!editingTaskId) return;
   const taskData = getTaskFormData();
   if (!taskData) return;
   const task = getTask(editingTaskId);
   if (!task) return;
-  Object.assign(task, taskData, { status });
+  Object.assign(task, taskData);
+  applyStatusChange(task, status);
   saveState();
   hideModal('modal-task');
   renderProjectView();
@@ -1279,7 +1769,7 @@ function renderSettingsCategories(project) {
         <input type="color" id="category-color-${index}" value="${escapeHtml(cat.color)}" aria-label="Category color seed">
       </label>
       <button class="btn btn-secondary btn-category-save" onclick="updateCategory(${index})">Save</button>
-      ${cat.isDefault ? '<span class="default-tag">default</span>' : `<button class="btn-icon-sm btn-icon-danger" onclick="removeCategory(${index})" title="Remove">${ICONS.x}</button>`}
+      ${cat.isDefault ? '<span class="default-tag" title="Default category (cannot be removed)">•</span>' : `<button class="btn-icon-sm btn-icon-danger" onclick="removeCategory(${index})" title="Remove">${ICONS.x}</button>`}
     </li>
   `).join('');
 }
@@ -1296,6 +1786,7 @@ function saveProjectDetails() {
   saveState();
   renderSidebar();
   renderProjectView();
+  hideModal('modal-settings');
 }
 
 function addUser() {
@@ -1566,12 +2057,6 @@ function initEventListeners() {
   // Detail modal navigation
   document.getElementById('btn-prev-task-detail').addEventListener('click', () => navigateTaskDetail(-1));
   document.getElementById('btn-next-task-detail').addEventListener('click', () => navigateTaskDetail(1));
-  document.getElementById('btn-edit-from-detail').addEventListener('click', () => {
-    const id = detailTaskId;
-    returnToDetailOnClose = true;
-    hideModal('modal-task-detail');
-    setTimeout(() => openTaskModal(id), 160);
-  });
   // Detail modal action buttons
   document.getElementById('btn-delete-task-detail').addEventListener('click', () => {
     if (!detailTaskId) return;
@@ -1580,13 +2065,15 @@ function initEventListeners() {
   });
   document.getElementById('btn-mark-task-progress-detail').addEventListener('click', () => {
     if (!detailTaskId) return;
+    if (_detailDirty) _flushDetailDraft();
     const task = getTask(detailTaskId);
-    if (task) { task.status = 'In Progress'; saveState(); renderProjectView(); openTaskDetailModal(detailTaskId); }
+    if (task) { applyStatusChange(task, 'In Progress'); saveState(); renderProjectView(); openTaskDetailModal(detailTaskId); }
   });
   document.getElementById('btn-mark-task-done-detail').addEventListener('click', () => {
     if (!detailTaskId) return;
+    if (_detailDirty) _flushDetailDraft();
     const task = getTask(detailTaskId);
-    if (task) { task.status = 'Completed'; saveState(); renderProjectView(); openTaskDetailModal(detailTaskId); }
+    if (task) { applyStatusChange(task, 'Completed'); saveState(); renderProjectView(); openTaskDetailModal(detailTaskId); }
   });
 
   // Status/comment controls
@@ -1875,7 +2362,7 @@ function _mfRenderList() {
         const defaultPill = f.isDefault ? `<span class="mf-default-pill">★ Default</span>` : '';
         const pill = activePill + defaultPill;
         return `
-          <div class="mf-saved-item ${isSelected ? 'mf-selected' : ''}" data-mf-row="${f.id}" title="Click to select · Double-click to apply">
+          <div class="mf-saved-item ${isSelected ? 'mf-selected' : ''}" data-mf-row="${f.id}" title="Click to edit · Double-click to apply">
             <div class="mf-saved-item-name">${escapeHtml(f.name)}${pill}</div>
             <div class="mf-saved-item-meta">${escapeHtml(_mfSummary(f))}</div>
           </div>`;
@@ -1895,6 +2382,9 @@ function _mfRenderList() {
 function _mfSelectRow(id) {
   _mfSelectedId = id;
   _mfRenderList();
+  // Immediately load into builder — no separate Edit click needed
+  const f = _mfGetList(activeProjectId).find(x => x.id === id);
+  if (f) _mfLoadIntoBuilder(f);
 }
 
 function _mfSyncFooterButtons() {

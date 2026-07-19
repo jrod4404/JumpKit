@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Business Plan — PrepSBA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,sans-serif;font-size:10.5pt;color:#1F2937;background:#fff}
+  .notice{background:#EFF6FF;border-left:4px solid #3B82F6;padding:10px 16px;font-size:9pt;color:#1E40AF}
+  .page{max-width:800px;margin:0 auto;padding:40px 56px}
+  /* Cover */
+  .cover{text-align:center;padding:60px 40px;border-bottom:3px solid #3B82F6;margin-bottom:48px}
+  .cover-logo{width:64px;height:64px;background:#3B82F6;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px}
+  .cover-logo svg{width:36px;height:36px}
+  .cover h1{font-size:28pt;font-weight:800;color:#0A2540;margin-bottom:10px}
+  .cover .business-name{font-size:18pt;font-weight:700;color:#3B82F6;margin-bottom:8px}
+  .cover .tagline{font-size:11pt;color:#6B7280;margin-bottom:32px}
+  .cover-meta{display:inline-grid;grid-template-columns:auto auto;gap:8px 32px;text-align:left;background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;padding:20px 32px}
+  .cover-meta label{font-size:8.5pt;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px}
+  .cover-meta .val{font-size:10pt;font-weight:600;color:#0A2540}
+  /* Sections */
+  .section{margin-bottom:48px;page-break-inside:avoid}
+  .section-hdr{font-size:14pt;font-weight:800;color:#0A2540;border-bottom:2px solid #3B82F6;padding-bottom:10px;margin-bottom:20px;display:flex;align-items:center;gap:12px}
+  .section-num{background:#3B82F6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11pt;font-weight:700;flex-shrink:0}
+  h3{font-size:11pt;font-weight:700;color:#0A2540;margin:16px 0 8px}
+  .narrative{line-height:1.85;margin-bottom:16px;padding:16px 20px;background:#F8FAFF;border-left:3px solid #3B82F6;border-radius:0 8px 8px 0}
+  .narrative p{margin-bottom:10px}
+  .narrative p:last-child{margin-bottom:0}
+  .p{color:#2563EB;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-bottom:16px;font-size:10pt}
+  th{background:#0A2540;color:#fff;padding:9px 12px;text-align:left;font-weight:600}
+  th.num{text-align:right}
+  td{padding:9px 12px;border-bottom:1px solid #E5E7EB;vertical-align:top}
+  td.num{text-align:right}
+  tr:nth-child(even) td{background:#F8FAFF}
+  tr.total td{background:#EFF6FF;font-weight:700;color:#1E40AF;border-top:2px solid #3B82F6}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+  .info-item{padding:10px 14px;background:#F8FAFF;border:1px solid #DBEAFE;border-radius:6px}
+  .info-item label{display:block;font-size:8pt;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+  .toc{background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;padding:20px 28px;margin-bottom:40px}
+  .toc h2{font-size:12pt;font-weight:700;color:#0A2540;margin-bottom:12px}
+  .toc ol{padding-left:20px}
+  .toc li{padding:4px 0;font-size:10.5pt;color:#374151}
+  ul.bullets{padding-left:20px;margin-bottom:12px}
+  ul.bullets li{padding:4px 0;line-height:1.6}
+  .appendix-list{list-style:none;padding:0}
+  .appendix-list li{padding:8px 14px;border-bottom:1px solid #E5E7EB;display:flex;align-items:center;gap:12px}
+  .appendix-list li::before{content:"□";font-size:14pt;color:#3B82F6}
+  @media print{.notice{display:none}.page{padding:24px 40px}.section{page-break-before:auto}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="notice">PrepSBA — AI-Generated Template | Review all fields marked <strong>[IN BRACKETS]</strong> before submitting to lender</div>
+<br>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="cover-logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L19 5V11C19 15.4 15.5 19.4 12 21C8.5 19.4 5 15.4 5 11V5L12 2Z" fill="white" opacity=".95"/><polyline points="8.5,12 10.5,14.5 15.5,9" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+  <div style="font-size:11pt;font-weight:600;color:#6B7280;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Business Plan</div>
+  <div class="business-name"><span class="p">[BUSINESS LEGAL NAME]</span></div>
+  <div class="tagline"><span class="p">[DBA NAME if different]</span></div>
+  <div class="cover-meta">
+    <label>Prepared For</label><span class="val"><span class="p">[LENDER NAME]</span></span>
+    <label>Date</label><span class="val"><span class="p">[DATE]</span></span>
+    <label>SBA Loan Request</label><span class="val"><span class="p">$[LOAN AMOUNT]</span></span>
+    <label>Prepared By</label><span class="val"><span class="p">[OWNER NAME], [TITLE]</span></span>
+    <label>Contact</label><span class="val"><span class="p">[EMAIL] | [PHONE]</span></span>
+    <label>Confidentiality</label><span class="val">Confidential — For Lender Use Only</span>
+  </div>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li>Executive Summary</li>
+    <li>Company Description</li>
+    <li>Market Analysis</li>
+    <li>Organization &amp; Management</li>
+    <li>Products &amp; Services</li>
+    <li>Marketing &amp; Sales Strategy</li>
+    <li>Financial Projections Summary</li>
+    <li>Funding Request</li>
+    <li>Appendix</li>
+  </ol>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">1</div>Executive Summary</div>
+  <div class="narrative">
+    <p><span class="p">[BUSINESS LEGAL NAME]</span> is a <span class="p">[ENTITY TYPE]</span> headquartered in <span class="p">[CITY, STATE]</span>, operating in the <span class="p">[INDUSTRY]</span> industry since <span class="p">[YEAR FOUNDED]</span>. The Company is seeking an SBA 7(a) loan of <strong>$<span class="p">[LOAN AMOUNT]</span></strong> to <span class="p">[BRIEF PURPOSE: e.g., expand operations, acquire equipment, and increase working capital]</span>.</p>
+    <p><span class="p">[BUSINESS LEGAL NAME]</span> <span class="p">[BUSINESS DESCRIPTION — 2-3 sentences describing what the company does, who it serves, and how it generates revenue]</span>. The business has generated annual revenues of approximately $<span class="p">[ANNUAL REVENUE]</span> and has demonstrated <span class="p">[GROWTH DESCRIPTION]</span> over the past <span class="p">[X]</span> years.</p>
+    <p>The requested funding will enable the Company to <span class="p">[EXPECTED IMPACT — e.g., increase production capacity by 40%, enter two new markets, and grow revenue to $X by Year 3]</span>. The Company projects strong debt service coverage of <span class="p">[DSCR]</span>x based on conservative growth assumptions of <span class="p">[GROWTH %]</span>% annually.</p>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">2</div>Company Description</div>
+  <div class="info-grid">
+    <div class="info-item"><label>Legal Business Name</label><span class="p">[BUSINESS LEGAL NAME]</span></div>
+    <div class="info-item"><label>DBA / Trade Name</label><span class="p">[DBA NAME or "N/A"]</span></div>
+    <div class="info-item"><label>Entity Type</label><span class="p">[LLC / S-Corp / C-Corp / Partnership / Sole Prop]</span></div>
+    <div class="info-item"><label>EIN</label><span class="p">[XX-XXXXXXX]</span></div>
+    <div class="info-item"><label>State of Incorporation</label><span class="p">[STATE]</span></div>
+    <div class="info-item"><label>Year Founded</label><span class="p">[YEAR]</span></div>
+    <div class="info-item"><label>Industry / NAICS Code</label><span class="p">[INDUSTRY] / [NAICS CODE]</span></div>
+    <div class="info-item"><label>Number of Employees</label><span class="p">[#] full-time, [#] part-time</span></div>
+    <div class="info-item"><label>Business Address</label><span class="p">[FULL ADDRESS]</span></div>
+    <div class="info-item"><label>Phone / Email / Website</label><span class="p">[PHONE] | [EMAIL] | [WEBSITE]</span></div>
+  </div>
+  <div class="narrative">
+    <p><span class="p">[BUSINESS LEGAL NAME]</span> was founded in <span class="p">[YEAR]</span> by <span class="p">[FOUNDER NAME]</span> to <span class="p">[FOUNDING MISSION — what gap in the market did you identify?]</span>. Since inception, the Company has <span class="p">[GROWTH MILESTONES — e.g., grown from 2 to 15 employees, expanded from 1 to 3 locations, launched X new products]</span>.</p>
+    <p>The business operates primarily as a <span class="p">[B2B / B2C / both]</span> company serving <span class="p">[TARGET CUSTOMER DESCRIPTION]</span>. Revenue is generated through <span class="p">[REVENUE MODEL — e.g., project-based contracts, recurring subscriptions, product sales, service fees]</span>.</p>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">3</div>Market Analysis</div>
+  <h3>Target Market</h3>
+  <div class="narrative"><p><span class="p">[TARGET MARKET DESCRIPTION — who are your customers? Be specific: demographics, geography, industry, size, needs]</span></p></div>
+  <h3>Market Size &amp; Opportunity</h3>
+  <div class="narrative"><p>The total addressable market for <span class="p">[PRODUCT/SERVICE TYPE]</span> in <span class="p">[GEOGRAPHY]</span> is estimated at $<span class="p">[MARKET SIZE]</span> annually. <span class="p">[BUSINESS NAME]</span> currently captures approximately <span class="p">[%]</span>% of this market with significant runway for growth. <span class="p">[2-3 sentences on market trends supporting growth — e.g., regulatory tailwinds, demographic shifts, technology adoption, underserved segments]</span>.</p></div>
+  <h3>Market Trends</h3>
+  <ul class="bullets">
+    <li><span class="p">[TREND 1 — e.g., Growing demand for X driven by Y]</span></li>
+    <li><span class="p">[TREND 2 — e.g., Regulatory change creating new demand]</span></li>
+    <li><span class="p">[TREND 3 — e.g., Competitor consolidation opening mid-market opportunity]</span></li>
+  </ul>
+  <h3>Geographic Focus</h3>
+  <div class="narrative"><p>The Company primarily serves <span class="p">[GEOGRAPHIC AREA]</span>. Post-loan, we intend to expand into <span class="p">[NEW GEOGRAPHY or "same market with increased capacity"]</span>.</p></div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">4</div>Organization &amp; Management</div>
+  <table>
+    <thead><tr><th>Name</th><th>Title</th><th>Ownership %</th><th>Years in Industry</th><th>Key Role in Business</th></tr></thead>
+    <tbody>
+      <tr><td class="p">[NAME]</td><td class="p">[TITLE]</td><td class="p">[%]%</td><td class="p">[X] yrs</td><td class="p">[ROLE DESCRIPTION]</td></tr>
+      <tr><td class="p">[NAME]</td><td class="p">[TITLE]</td><td class="p">[%]%</td><td class="p">[X] yrs</td><td class="p">[ROLE DESCRIPTION]</td></tr>
+      <tr><td class="p">[NAME]</td><td class="p">[TITLE]</td><td class="p">[%]%</td><td class="p">[X] yrs</td><td class="p">[ROLE DESCRIPTION]</td></tr>
+    </tbody>
+  </table>
+  <div class="narrative"><p><span class="p">[MANAGEMENT STRUCTURE NARRATIVE — describe how the business is managed, key departments, reporting structure, and any planned hires with the loan proceeds]</span></p></div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">5</div>Products &amp; Services</div>
+  <div class="narrative">
+    <p><strong>Core Offering:</strong> <span class="p">[PRODUCTS/SERVICES DESCRIPTION — what do you sell/provide? How does it work? What problem does it solve?]</span></p>
+    <p><strong>Pricing:</strong> <span class="p">[PRICING STRATEGY — e.g., project-based ranging from $X to $Y, monthly subscription at $Z, per-unit pricing at $W]</span></p>
+    <p><strong>Competitive Advantage:</strong> <span class="p">[WHAT MAKES YOUR OFFERING BETTER THAN ALTERNATIVES — speed, quality, price, expertise, relationships, proprietary process?]</span></p>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">6</div>Marketing &amp; Sales Strategy</div>
+  <h3>Customer Acquisition Channels</h3>
+  <ul class="bullets">
+    <li><span class="p">[CHANNEL 1 — e.g., Direct sales: owner-led outreach to target accounts]</span></li>
+    <li><span class="p">[CHANNEL 2 — e.g., Referral network: existing clients, industry partners]</span></li>
+    <li><span class="p">[CHANNEL 3 — e.g., Digital: SEO, Google Ads, LinkedIn]</span></li>
+    <li><span class="p">[CHANNEL 4 — e.g., Trade shows / industry events]</span></li>
+  </ul>
+  <h3>Sales Process</h3>
+  <div class="narrative"><p><span class="p">[SALES PROCESS DESCRIPTION — how does a lead become a customer? What is your typical sales cycle, conversion rate, and average contract/order value?]</span></p></div>
+  <h3>Marketing Plan</h3>
+  <div class="narrative"><p><span class="p">[MARKETING PLAN NARRATIVE — what specific activities will you invest in? What is the anticipated ROI? How will the loan proceeds support marketing activities?]</span></p></div>
+  <h3>Customer Retention</h3>
+  <div class="narrative"><p><span class="p">[RETENTION STRATEGY — how do you keep customers? Repeat rate, NPS, contract renewals, loyalty programs, service quality]</span></p></div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">7</div>Financial Projections Summary</div>
+  <table>
+    <thead>
+      <tr><th>Metric</th><th class="num">Base Year (Actual)</th><th class="num">Year 1 (Projected)</th><th class="num">Year 2 (Projected)</th><th class="num">Year 3 (Projected)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Gross Revenue</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr><td>Gross Profit</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr><td>Gross Margin %</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+      <tr><td>Operating Expenses</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr><td>EBITDA</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr><td>Net Income</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr><td>Net Margin %</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td><td class="num p">[%]%</td></tr>
+      <tr><td>Ending Cash Balance</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td><td class="num p">$[AMOUNT]</td></tr>
+      <tr class="total"><td><strong>Debt Service Coverage Ratio (DSCR)</strong></td><td class="num p">—</td><td class="num p"><strong>[X.XX]x</strong></td><td class="num p"><strong>[X.XX]x</strong></td><td class="num p"><strong>[X.XX]x</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="narrative"><p>Full Pro Forma Income Statement, Cash Flow Projections, and Balance Sheet are included as separate exhibits. Growth assumption: <span class="p">[GROWTH %]</span>% annually. Key assumption: <span class="p">[PRIMARY ASSUMPTION — e.g., revenue ramp follows historical seasonality; new equipment deployed by Month 3 enabling capacity increase]</span>.</p></div>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">8</div>Funding Request</div>
+  <table>
+    <thead><tr><th>Use of Proceeds Category</th><th>Description</th><th class="num">Amount</th><th class="num">% of Total</th></tr></thead>
+    <tbody>
+      <tr><td class="p">[CATEGORY 1]</td><td class="p">[DESCRIPTION]</td><td class="num p">$[AMOUNT]</td><td class="num p">[%]%</td></tr>
+      <tr><td class="p">[CATEGORY 2]</td><td class="p">[DESCRIPTION]</td><td class="num p">$[AMOUNT]</td><td class="num p">[%]%</td></tr>
+      <tr><td class="p">[CATEGORY 3]</td><td class="p">[DESCRIPTION]</td><td class="num p">$[AMOUNT]</td><td class="num p">[%]%</td></tr>
+      <tr><td class="p">[CATEGORY 4]</td><td class="p">[DESCRIPTION]</td><td class="num p">$[AMOUNT]</td><td class="num p">[%]%</td></tr>
+      <tr class="total"><td colspan="2"><strong>TOTAL LOAN REQUEST</strong></td><td class="num p"><strong>$[TOTAL LOAN AMOUNT]</strong></td><td class="num"><strong>100%</strong></td></tr>
+    </tbody>
+  </table>
+  <div class="narrative">
+    <p><strong>Loan Program:</strong> SBA 7(a) — <span class="p">[Standard / Express]</span> &nbsp;|&nbsp; <strong>Requested Term:</strong> <span class="p">[X]</span> months &nbsp;|&nbsp; <strong>Collateral offered:</strong> <span class="p">[COLLATERAL DESCRIPTION or "Personal guarantee of all 20%+ owners"]</span></p>
+    <p><strong>Repayment Plan:</strong> <span class="p">[REPAYMENT NARRATIVE — e.g., The Company will repay the SBA loan over X years from operating cash flow. Estimated monthly payment of $Y represents X% of projected Year 1 gross revenue, well within the Company's repayment capacity.]</span></p>
+  </div>
+</div>
+
+<!-- SECTION 9 -->
+<div class="section">
+  <div class="section-hdr"><div class="section-num">9</div>Appendix</div>
+  <p style="margin-bottom:12px;font-size:10pt">The following supporting documents are included with this application:</p>
+  <ul class="appendix-list">
+    <li>Pro Forma Income Statement (3-Year)</li>
+    <li>Cash Flow Projections (Monthly Year 1 + Annual Years 2–5)</li>
+    <li>Pro Forma Balance Sheet (3-Year)</li>
+    <li>Competitor Analysis &amp; SWOT</li>
+    <li>Borrower Experience Narrative</li>
+    <li>SBA Form 413 — Personal Financial Statement (all owners 20%+)</li>
+    <li>SBA Form 1919 — Borrower Information Form</li>
+    <li>Business Debt Schedule</li>
+    <li>Use of Proceeds Detail</li>
+    <li>Business Tax Returns (most recent 3 years)</li>
+    <li>Personal Tax Returns — all 20%+ owners (most recent 3 years)</li>
+    <li>Business Bank Statements (most recent 12 months)</li>
+    <li>Resumes of all key management</li>
+    <li>Licenses, certifications, and permits</li>
+    <li><span class="p">[ANY ADDITIONAL DOCUMENTS — e.g., lease agreement, purchase contracts, equipment quotes]</span></li>
+  </ul>
+</div>
+
+</div>
+</body>
+</html>

@@ -15,12 +15,54 @@
 .detail-text { font-size: 0.88rem; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
 .detail-comments-list { display: flex; flex-direction: column; gap: 10px; }
 .detail-comment { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; }
-.detail-comment-meta { font-size: 0.78rem; color: var(--text-light); margin-bottom: 4px; }
+.detail-comment-meta { font-size: 0.78rem; color: var(--text-light); margin-bottom: 4px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.detail-comment-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
+.detail-comment:hover .detail-comment-actions { opacity: 1; }
+.detail-comment-actions .btn-icon-sm { width: 22px; height: 22px; }
 .detail-comment-date { color: var(--text-lighter); }
 .detail-comment-html { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
 .detail-comment-html p { margin: 0 0 6px; }
 .detail-comment-html p:last-child { margin-bottom: 0; }
 .detail-empty { font-size: 0.82rem; color: var(--text-lighter); font-style: italic; }
+
+/* Inline editing in detail modal */
+.detail-editable { cursor: pointer; border-radius: 4px; transition: background 0.12s; }
+.detail-editable:hover { background: var(--bg-hover, #f1f5f9); outline: 1px dashed var(--border, #e2e8f0); }
+.detail-inline-input {
+  font-size: inherit; font-weight: inherit; font-family: inherit; color: var(--text);
+  background: var(--surface, #fff); border: 1.5px solid var(--primary, #6366f1);
+  border-radius: 5px; padding: 2px 7px; outline: none; width: 100%; box-sizing: border-box;
+}
+.detail-inline-title {
+  font-size: 1.15rem; font-weight: 700; width: 100%;
+}
+.detail-inline-select {
+  font-size: 0.85rem; font-family: inherit; color: var(--text);
+  background: var(--surface, #fff); border: 1.5px solid var(--primary, #6366f1);
+  border-radius: 5px; padding: 2px 6px; outline: none; cursor: pointer;
+}
+
+/* Custom select used for inline editing inside the detail modal */
+.detail-inline-custom-select {
+  width: auto;
+  min-width: 120px;
+  display: inline-block;
+}
+.detail-inline-custom-select .custom-select-trigger {
+  font-size: 0.85rem;
+  padding: 3px 8px;
+  min-height: unset;
+}
+.detail-inline-custom-select .custom-select-dropdown {
+  min-width: 140px;
+  z-index: 9999;
+}
+.detail-inline-textarea {
+  font-size: 0.88rem; font-family: inherit; color: var(--text); line-height: 1.6;
+  background: var(--surface, #fff); border: 1.5px solid var(--primary, #6366f1);
+  border-radius: 5px; padding: 6px 8px; outline: none; width: 100%; box-sizing: border-box;
+  resize: vertical; min-height: 64px;
+}
 
 :root {
   --sidebar-width: 180px;
@@ -339,6 +381,29 @@ body {
   border-left-color: var(--sidebar-active-border);
   color: var(--accent);
   font-weight: 500;
+}
+
+.project-list li .proj-drag-handle {
+  font-size: 11px;
+  color: var(--sidebar-text-muted);
+  opacity: 0;
+  cursor: grab;
+  flex-shrink: 0;
+  line-height: 1;
+  transition: opacity 0.15s;
+  margin-right: -2px;
+}
+.project-list li:hover .proj-drag-handle {
+  opacity: 0.5;
+}
+.project-list li.proj-dragging {
+  opacity: 0.4;
+  background: var(--sidebar-hover);
+}
+.project-list li.proj-drag-over {
+  border-left-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
 }
 
 .project-list li .proj-dot {
@@ -1400,6 +1465,42 @@ body {
 
 .category-edit-item {
   gap: 8px;
+  align-items: center;
+}
+
+/* Shared row height for all interactive elements in a category row */
+.category-edit-item .form-input,
+.category-edit-item .category-row-color-picker,
+.category-edit-item .btn-category-save,
+.category-edit-item .btn-icon-sm {
+  height: 36px;
+  box-sizing: border-box;
+}
+
+/* Lock last column to same fixed width for both delete btn and default tag */
+.category-edit-item .btn-icon-sm,
+.category-edit-item .default-tag {
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.category-edit-item .default-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-size: 9px;
+  padding: 0;
+  text-align: center;
+  line-height: 1.1;
+}
+
+/* Spacer in add-category row to match the delete button width in edit rows */
+.category-row-spacer {
+  width: 28px;
+  flex-shrink: 0;
 }
 
 .category-name-input {
@@ -1412,7 +1513,6 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  height: 34px;
   padding: 0 8px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
@@ -1440,7 +1540,11 @@ body {
 }
 
 .btn-category-save {
-  padding: 7px 10px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 /* ===========================
@@ -1514,29 +1618,33 @@ body {
 }
 
 .btn-progress-ghost {
-  background: var(--in-progress-bg);
+  background: transparent;
   color: var(--in-progress-text);
-  border-color: transparent;
+  border: 1px solid var(--in-progress-text);
+  opacity: 0.65;
   padding: 7px 12px;
 }
 
 .btn-progress-ghost:hover {
   background: var(--in-progress-bg);
-  opacity: 0.8;
-  border-color: transparent;
+  color: var(--in-progress-text);
+  border-color: var(--in-progress-text);
+  opacity: 1;
 }
 
 .btn-done-ghost {
-  background: var(--completed-bg);
+  background: transparent;
   color: var(--completed-text);
-  border-color: transparent;
+  border: 1px solid var(--completed-text);
+  opacity: 0.65;
   padding: 7px 12px;
 }
 
 .btn-done-ghost:hover {
   background: var(--completed-bg);
-  opacity: 0.8;
-  border-color: transparent;
+  color: var(--completed-text);
+  border-color: var(--completed-text);
+  opacity: 1;
 }
 
 .btn-progress-ghost:disabled,
@@ -1568,16 +1676,19 @@ body {
   font-weight: 500;
   padding: 7px 12px;
   border-radius: var(--radius-sm);
-  border: 1px solid transparent !important;
-  background: var(--urgent-bg) !important;
+  border: 1px solid var(--urgent-text) !important;
+  background: transparent !important;
   color: var(--urgent-text) !important;
+  opacity: 0.55;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.15s, color 0.15s, opacity 0.15s;
   white-space: nowrap;
 }
 .btn-delete-task-shared:hover {
-  background: var(--cancelled-bg) !important;
-  color: var(--cancelled-text) !important;
+  background: var(--urgent-bg) !important;
+  color: var(--urgent-text) !important;
+  border-color: var(--urgent-text) !important;
+  opacity: 1 !important;
 }
 
 #btn-delete-task.btn-danger-ghost,

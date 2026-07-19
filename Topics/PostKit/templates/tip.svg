@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{{BG_COLOR}}"/>
+      <stop offset="100%" stop-color="#1A1A2E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bg-grad)"/>
+
+  <!-- Subtle glow -->
+  <circle cx="200" cy="150" r="250" fill="{{ACCENT_COLOR}}" opacity="0.03"/>
+
+  <!-- TIP header pill -->
+  <rect x="80" y="100" width="170" height="48" rx="24" fill="{{ACCENT_COLOR}}"/>
+  <text x="165" y="131" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="700" fill="{{BG_COLOR}}" text-anchor="middle">TIP</text>
+
+  <!-- Tip number badge (decorative, only shows if TIP_NUMBER is provided) -->
+  <text x="165" y="200" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="60" font-weight="800" fill="{{ACCENT_COLOR}}" text-anchor="middle" opacity="0.2">{{TIP_NUMBER}}</text>
+
+  <!-- Category label top-right -->
+  <rect x="980" y="110" width="140" height="36" rx="18" fill="none" stroke="{{ACCENT_COLOR}}" stroke-width="1.5" opacity="0.5"/>
+  <text x="1050" y="134" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="14" font-weight="600" fill="{{ACCENT_COLOR}}" text-anchor="middle">{{CATEGORY_LABEL}}</text>
+
+  <!-- Tip body text -->
+  <text id="tip-body" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="38" font-weight="500" fill="{{TEXT_COLOR}}">
+{{TIP_TEXT_LINES}}
+  </text>
+
+  <!-- Accent underline -->
+  <rect x="80" y="580" width="80" height="4" rx="2" fill="{{ACCENT_COLOR}}" opacity="0.6"/>
+
+  <!-- JumpKit wordmark -->
+  <text x="1080" y="635" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="{{TEXT_COLOR}}" opacity="0.45" text-anchor="end">JumpKit</text>
+</svg>

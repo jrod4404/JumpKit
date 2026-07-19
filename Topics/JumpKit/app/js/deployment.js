@@ -46,6 +46,7 @@ const DEPLOY_PHASES = [
     steps: [
       { id: 'lp-0', text: 'Create Git release tag, publish GitHub Release, and upload installers. Open the step detail to copy the Max prompt.', cmd: 'Pls do the following in order for the JumpKit release:\n\n1. Check the current version in app/package.json and confirm the version number.\n2. Create a Git release tag for that version: git tag vX.Y.Z && git push origin vX.Y.Z — report the tag name and confirm the push succeeded.\n3. Find the built production installers in app/deploy/ (look for the most recent vX.Y.Z folder under installers/prod) and list the filenames and sizes.\n4. Using the GitHub CLI (gh release create), create a GitHub Release from that tag with the following:\n   - Title: JumpKit vX.Y.Z\n   - Attach ALL electron-builder output files: .dmg arm64, .dmg x64, .exe, latest-mac.yml, latest.yml, and the arm64-mac.zip. Do NOT skip the .yml and .zip — electron-updater requires them for auto-update to work without ERR_UPDATER_ZIP_FILE_NOT_FOUND\n   - Mark as latest release (not pre-release, not draft)\n   - For release notes, pull the most recent changelog entry from JUMPKIT_DOCS.html or CHANGELOG.md\n5. After creating the release, fetch https://api.github.com/repos/jrod4404/JumpKit/releases/latest and confirm: tag_name matches, draft=false, and assets include latest-mac.yml, arm64-mac.zip, and all installer files.\n6. Report the final GitHub release URL and confirm assets include: arm64.dmg, x64.dmg, .exe, latest-mac.yml, latest.yml, arm64-mac.zip. All are required for auto-update to work.\nNOTE: GitHub repo must remain PUBLIC — electron-updater has no embedded auth token, so private repos will silently fail to detect updates.', cmdModalOnly: true },
       { id: 'lp-2', text: 'Update landing page: download links, version number, and release date in <code>landing/index.html</code>. Open the step detail to copy the Max prompt.', cmd: 'Pls update landing/index.html with the following for the new release:\n1. Update both download URLs to point to the new GitHub release assets. Mac pattern: releases/download/vX.Y.Z/JumpKit-X.Y.Z-universal.dmg — Windows pattern: releases/download/vX.Y.Z/JumpKit.Setup.X.Y.Z.exe\n2. Update any version number or release date displayed on the landing page.\nReport exactly what you changed.', cmdModalOnly: true },
+      { id: 'lp-2a', text: 'Update post-payment email download links in <code>app/emails/pending-upgrade-email.html</code> — ensure the Mac and Windows download URLs match the just-published GitHub release. Open the step detail to copy the Max prompt.', cmd: 'Pls check app/emails/pending-upgrade-email.html and update the two GitHub download links (Mac .dmg and Windows .exe) to point to the current release version. Steps:\n\n1. Read the file and find the two <a href> download buttons ("Download for macOS" and "Download for Windows").\n2. Fetch https://api.github.com/repos/jrod4404/JumpKit/releases/latest and get the current tag_name and the exact asset filenames for the .dmg and .exe.\n3. Update both href URLs in the email to use the correct release tag and filenames.\n4. Report the old URLs, the new URLs, and confirm the change was saved.\n\nThe correct URL pattern is: https://github.com/jrod4404/JumpKit/releases/download/vX.Y.Z/<filename>', cmdModalOnly: true },
       { id: 'lp-4', text: 'Commit and push landing page changes, then manually deploy to Vercel and alias both domains. Open the step detail to copy the Max prompt.', cmd: 'Pls do the following in order to publish the landing page:\n\n1. Commit and push the landing page changes to GitHub with a clear commit message (e.g. "Landing: update download links and version for vX.Y.Z"). Report the commit ID.\n\n2. Run the Vercel production deploy from the landing directory:\n   cd Topics/JumpKit/landing && vercel --prod\n   Note the new deployment URL from the output (e.g. https://jumpkit-landing-XXXXXXX-jeffroder-3196s-projects.vercel.app).\n\n3. Alias BOTH domains to the new deployment URL — www.jumpkit.app redirects to jumpkit.app, so both must be aliased or only jumpkit.app will update:\n   vercel alias set <deployment-url> jumpkit.app\n   vercel alias set <deployment-url> www.jumpkit.app\n\n4. Verify the live site is serving the new version by running:\n   curl -sL https://jumpkit.app | grep -o "JumpKit[^\'\"<]*\\.(dmg|exe)"\n   Confirm the output shows the new version filenames (e.g. v0.1.6), NOT the old version.\n\n5. Report the commit ID, the Vercel deployment URL, and confirm both alias commands succeeded.\n\nNote: Git-push-triggered Vercel auto-deploys do NOT automatically update the jumpkit.app domain alias — the manual vercel --prod + alias steps are always required.', cmdModalOnly: true },
       { id: 'lp-5', text: '<strong>Manual:</strong> Verify live Mac download end-to-end: click download link on jumpkit.app → download → install → launch.' },
       { id: 'lp-6', text: '<strong>Manual:</strong> Verify live Windows download end-to-end: click download link on jumpkit.app → download → install → launch.' },
@@ -209,9 +210,7 @@ window.renderDeployment = function renderDeployment(view) {
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${todo}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
           <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
         </div>
-        <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-          <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-rotate"/></svg> Reset All
-        </button>
+
         <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
           <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment
         </button>
@@ -285,11 +284,7 @@ window.renderDeployment = function renderDeployment(view) {
   });
 
   // Wire reset button
-  document.getElementById('deployResetBtn')?.addEventListener('click', () => {
-    if (!confirm('Reset all deployment steps to "To Do"?')) return;
-    _saveDeployState({});
-    renderDeployment();
-  });
+
 
   // ── Wire automation "Auto Check" buttons ──────────────────────────
   pageContent.querySelectorAll('[data-deploy-auto]').forEach(btn => {
@@ -423,9 +418,7 @@ async function _renderDeployHistory() {
         <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${todo}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">To Do</div></div>
         <div style="text-align:center;padding:2px 10px"><div style="font-size:1.3rem;font-weight:900;color:var(--text-muted)">${total}</div><div style="font-size:0.65rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);margin-top:1px">Total</div></div>
       </div>
-      <button class="btn btn-subtle" id="deployResetBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
-        <svg class="ti ti-rotate" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-rotate"/></svg> Reset All
-      </button>
+
       <button class="btn btn-subtle" id="deployManageBtn" style="display:flex;align-items:center;gap:.5rem;font-size:1rem;padding:6px 13px">
         <svg class="ti ti-adjustments" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-adjustments"/></svg> Manage Deployment
       </button>
@@ -471,18 +464,14 @@ async function _renderDeployHistory() {
   document.getElementById('deploySaveBtn')?.addEventListener('click', _saveDeployResults);
   document.getElementById('deployTabChecklist')?.addEventListener('click', () => renderDeployment('checklist'));
   document.getElementById('deployTabHistory')?.addEventListener('click', () => renderDeployment('history'));
-  document.getElementById('deployResetBtn')?.addEventListener('click', () => {
-    if (!confirm('Reset all deployment steps to "To Do"?')) return;
-    _saveDeployState({});
-    renderDeployment();
-  });
+
 
   // Fetch all deployments from Supabase
   let deployments = [];
   try {
     const { data, error } = await supabaseClient
       .from('deployments')
-      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,mac_installer_path,win_installer_path,deployment_folder,notes,commit_id,deploy_account,deploy_results_file')
+      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,deployment_folder,commit_id,deploy_account,vercel_commit_id,backup_path,deploy_notes,deploy_checks_passed,deploy_checks_skipped,deploy_checks_todo,deploy_checks_total')
       .order('created_at', { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
@@ -515,7 +504,7 @@ async function _renderDeployHistory() {
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);text-align:center">${_score(d.win_tests_passed, d.win_tests_total)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.mac_finalized_at || d.win_finalized_at || d.created_at)}</td>
     <td style="padding:10px 12px;font-size:0.82rem;color:var(--text-muted);white-space:nowrap">${_fmt(d.deployed_at || d.testing_completed_at)}</td>
-    <td style="padding:10px 12px;font-size:0.78rem;color:var(--text-dim);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${_esc(d.notes || '')}">${_esc(d.notes || '—')}</td>
+    <td style="padding:10px 12px;text-align:center"><button class="btn btn-subtle" style="font-size:0.72rem;padding:4px 12px;display:inline-flex;align-items:center;gap:5px" data-deploy-details="${_esc(d.id)}"><svg class="ti ti-info-circle" style="width:.85rem;height:.85rem"><use href="img/tabler-sprite.min.svg#tabler-info-circle"/></svg>Details</button></td>
   </tr>`;
 
   const tableHTML = `
@@ -530,7 +519,7 @@ async function _renderDeployHistory() {
           <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center">Win Score</th>
           <th data-col="created_at"       style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Started<span class="sort-ind"> ↕</span></th>
           <th data-col="deployed_at"      style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left;cursor:pointer;user-select:none">Deployed<span class="sort-ind"> ↕</span></th>
-          <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:left">Notes</th>
+          <th style="padding:8px 12px;font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;text-align:center">Details</th>
         </tr>
       </thead>
       <tbody id="deployHistTbody">${deployments.map((d,i,a) => buildRow(d, i===a.length-1)).join('') || `<tr><td colspan="9" style="padding:32px;text-align:center;color:var(--text-dim)">No deployments found.</td></tr>`}</tbody>
@@ -549,7 +538,7 @@ async function _renderDeployHistory() {
     let data = [...deployments];
     if (_searchQ) {
       const q = _searchQ.toLowerCase();
-      data = data.filter(d => ((d.version||'') + ' ' + (d.status||'') + ' ' + (d.notes||'')).toLowerCase().includes(q));
+      data = data.filter(d => ((d.version||'') + ' ' + (d.status||'') + ' ' + (d.deploy_notes||'')).toLowerCase().includes(q));
     }
     data.sort((a, b) => {
       const va = _getVal(a, _sortCol), vb = _getVal(b, _sortCol);
@@ -562,7 +551,79 @@ async function _renderDeployHistory() {
       if (ind) ind.textContent = th.dataset.col === _sortCol ? (_sortDir === -1 ? ' ▼' : ' ▲') : ' ↕';
     });
   };
-  document.querySelectorAll('#deployHistTable th[data-col]').forEach(th => {
+
+  // ── Details button handler ───────────────────────────────────────────
+  document.getElementById('deployHistTableWrap').addEventListener('click', e => {
+    const btn = e.target.closest('[data-deploy-details]');
+    if (!btn) return;
+    const id = btn.dataset.deployDetails;
+    const d  = deployments.find(x => x.id === id);
+    if (!d) return;
+
+    const _fmtFull = (v) => v ? new Date(v).toLocaleString('en-US', { weekday:'short', year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : '—';
+    const _kv = (label, val) => val != null && val !== '' && val !== '—'
+      ? `<tr>
+          <td style="padding:5px 12px 5px 0;font-size:0.8rem;color:var(--text-muted);white-space:nowrap;vertical-align:top;width:200px;min-width:160px">${label}</td>
+          <td style="padding:5px 0;font-size:0.8rem;color:var(--text);word-break:break-all">${_esc(String(val))}</td>
+        </tr>`
+      : '';
+    const _block = (title, rows) => {
+      const body = rows.filter(Boolean).join('');
+      if (!body) return '';
+      return `<div style="margin-bottom:20px">
+        <div style="font-size:0.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);border-bottom:1px solid var(--border);padding-bottom:5px;margin-bottom:8px">${title}</div>
+        <table style="border-collapse:collapse;width:100%">${body}</table>
+      </div>`;
+    };
+
+    const body = `<div style="display:flex;flex-direction:column;gap:0;padding:4px 0">
+      ${_block('Release', [
+        _kv('Version',           d.version),
+        _kv('Status',            d.status),
+        _kv('Session Started',   _fmtFull(d.created_at)),
+        _kv('Deployment Folder', d.deployment_folder),
+      ])}
+      ${_block('Mac Testing', [
+        _kv('Finalized At',    _fmtFull(d.mac_finalized_at)),
+        _kv('Account',         d.mac_testing_account),
+        _kv('Tests Passed',    d.mac_tests_passed != null ? d.mac_tests_passed : null),
+        _kv('Tests Failed',    d.mac_tests_failed  != null ? d.mac_tests_failed  : null),
+        _kv('Tests Skipped',   d.mac_tests_skipped != null ? d.mac_tests_skipped : null),
+        _kv('Tests Total',     d.mac_tests_total   != null ? d.mac_tests_total   : null),
+      ])}
+      ${_block('Windows Testing', [
+        _kv('Finalized At',    _fmtFull(d.win_finalized_at)),
+        _kv('Account',         d.win_testing_account),
+        _kv('Tests Passed',    d.win_tests_passed != null ? d.win_tests_passed : null),
+        _kv('Tests Failed',    d.win_tests_failed  != null ? d.win_tests_failed  : null),
+        _kv('Tests Skipped',   d.win_tests_skipped != null ? d.win_tests_skipped : null),
+        _kv('Tests Total',     d.win_tests_total   != null ? d.win_tests_total   : null),
+      ])}
+      ${_block('Deployment', [
+        _kv('Deployed At',       _fmtFull(d.deployed_at)),
+        _kv('Deploy Account',    d.deploy_account),
+        _kv('Commit ID',         d.commit_id),
+        _kv('Vercel Commit',     d.vercel_commit_id),
+        _kv('Backup Path',       d.backup_path),
+        _kv('Notes',             d.deploy_notes),
+      ])}
+      ${_block('Deployment Checks', [
+        _kv('Passed',  d.deploy_checks_passed  != null ? d.deploy_checks_passed  : null),
+        _kv('Skipped', d.deploy_checks_skipped != null ? d.deploy_checks_skipped : null),
+        _kv('To Do',   d.deploy_checks_todo    != null ? d.deploy_checks_todo    : null),
+        _kv('Total',   d.deploy_checks_total   != null ? d.deploy_checks_total   : null),
+      ])}
+    </div>`;
+
+    Modal.open(
+      `<svg class="ti ti-world-upload" style="vertical-align:middle;margin-right:6px;color:var(--turq)"><use href="img/tabler-sprite.min.svg#tabler-world-upload"/></svg> Deployment v${_esc(d.version || '—')}`,
+      body,
+      '<button class="btn btn-subtle" data-jaction="modal-close">Close</button>',
+      'md'
+    );
+  });
+
+    document.querySelectorAll('#deployHistTable th[data-col]').forEach(th => {
     th.addEventListener('click', () => {
       if (_sortCol === th.dataset.col) _sortDir *= -1;
       else { _sortCol = th.dataset.col; _sortDir = -1; }
@@ -808,7 +869,7 @@ async function _openDeployManageModal() {
   try {
     const { data, error } = await supabaseClient
       .from('deployments')
-      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,mac_installer_path,win_installer_path,deployment_folder,notes,commit_id,deploy_account,deploy_results_file')
+      .select('id,version,status,created_at,testing_completed_at,deployed_at,mac_finalized_at,win_finalized_at,mac_tests_passed,mac_tests_total,win_tests_passed,win_tests_total,deployment_folder,commit_id,deploy_account,vercel_commit_id,backup_path,deploy_notes,deploy_checks_passed,deploy_checks_skipped,deploy_checks_todo,deploy_checks_total')
       .eq('status', 'testing_complete')
       .order('created_at', { ascending: false })
       .limit(20);
@@ -908,8 +969,6 @@ async function _openDeployManageModal() {
         </div>
         <p style="margin:5px 0 0;font-size:0.78rem;color:var(--text-muted)">Deployment files will be saved here and linked to this record.</p>
       </div>
-      <input id="dmMacFile" type="hidden" value="${_esc(sel?.mac_installer_path || '')}" />
-      <input id="dmWinFile" type="hidden" value="${_esc(sel?.win_installer_path || '')}" />
       <div>
         <label style="${labelStyle}">Notes (optional)</label>
         <textarea id="dmNotes" placeholder="Any release notes or deployment notes…" rows="3" style="${inputStyle};resize:vertical">${_esc(sel?.notes || '')}</textarea>
@@ -985,24 +1044,22 @@ async function _openDeployManageModal() {
     }
   });
 
-  // Save (installer paths + notes)
+  // Save notes
   const _el_dmSaveBtn = document.getElementById('dmSaveBtn'); if (_el_dmSaveBtn) _el_dmSaveBtn.onclick = async () => {
     const selId = document.getElementById('dmDeploySelect')?.value;
     if (!selId) return Modal.close();
     const originalHTML = _el_dmSaveBtn.innerHTML;
     _el_dmSaveBtn.disabled = true;
     _el_dmSaveBtn.innerHTML = '<svg class="ti ti-loader" style="width:1.035rem;height:1.035rem;color:currentColor;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg> Saving…';
-    const macFile = document.getElementById('dmMacFile').value.trim();
-    const winFile = document.getElementById('dmWinFile').value.trim();
     const notes   = document.getElementById('dmNotes').value.trim();
     const deployFolderEl = document.getElementById('dmDeployFolder');
     const deployFolderVal = deployFolderEl?.value.trim() || '';
     try {
-      const { error } = await supabaseClient.from('deployments').update({ mac_installer_path: macFile, win_installer_path: winFile, notes }).eq('id', selId);
+      const { error } = await supabaseClient.from('deployments').update({ deploy_notes: notes }).eq('id', selId);
       if (error) throw error;
       // Update local selected
       if (window._jkSelectedDeployment?.id === selId) {
-        window._jkSelectedDeployment = { ...window._jkSelectedDeployment, mac_installer_path: macFile, win_installer_path: winFile, notes };
+        window._jkSelectedDeployment = { ...window._jkSelectedDeployment, deploy_notes: notes };
       }
 
       // Mirror whatever data is available into jk_deploy_config so the release-docs metadata tab's
@@ -1016,10 +1073,7 @@ async function _openDeployManageModal() {
           deployment_status:    currentStatus,
           deployment_folder:    deployFolderVal || window._jkSelectedDeployment?.deployment_folder || cfg.folder || '',
           deploy_notes:         notes,
-          // Installer paths still tracked in localStorage even though not shown on the metadata tab
-          mac_installer_path:   macFile,
-          win_installer_path:   winFile,
-          // deployed_at, deploy_account, commit_id, deploy_results_file stay unset until Finalize
+          // deployed_at, deploy_account, commit_id stay unset until Finalize
         });
       } catch(e) { console.warn('[dmSaveBtn] deployConfig mirror failed:', e); }
 
@@ -1042,6 +1096,14 @@ async function _openDeployManageModal() {
     const selId = document.getElementById('dmDeploySelect')?.value;
     if (!selId) { alert('Please select a testing package first.'); return; }
 
+    // Record that deployment was initiated in the release docs changelog
+    if (typeof _addChangelogEntry === 'function') {
+      _addChangelogEntry('Deployment — Finalize Started');
+      try {
+        if (typeof _autoSaveAllSections === 'function') await _autoSaveAllSections();
+      } catch(_) {}
+    }
+
     // Fetch latest commit ID
     let commitId = '';
     let commitMsg = '';
@@ -1050,10 +1112,11 @@ async function _openDeployManageModal() {
       if (!result?.error) { commitId = result.commitId || ''; commitMsg = result.message || ''; }
     }
 
-    const macFile = document.getElementById('dmMacFile').value.trim();
-    const winFile = document.getElementById('dmWinFile').value.trim();
-    const notes   = document.getElementById('dmNotes').value.trim();
-    const account = window._supabaseUser?.email || '';
+    const notes          = document.getElementById('dmNotes').value.trim();
+    const account        = window._supabaseUser?.email || '';
+    const _finalCfg      = _loadDeployConfig();
+    const vercelCommitId = _finalCfg.vercel_commit_id || '';
+    const backupPath     = _finalCfg.backup_path || '';
 
     // ── Replace modal content in-place for confirmation ──────────────────────────────
     // DO NOT call Modal.close() + Modal.open() here — if any modal is queued from the
@@ -1072,13 +1135,12 @@ async function _openDeployManageModal() {
         <div><strong style="color:var(--text)">Commit ID:</strong> <code style="color:var(--turq)">${_esc(commitId || '(not found)')}</code> ${commitMsg ? ` — ${_esc(commitMsg)}` : ''}</div>
         <div><strong style="color:var(--text)">Deployed by:</strong> ${_esc(account || '(unknown)')}</div>
         <div><strong style="color:var(--text)">Deployed at:</strong> ${new Date().toLocaleString()}</div>
-        ${macFile ? `<div><strong style="color:var(--text)">Mac installer:</strong> ${_esc(macFile.split('/').pop())}</div>` : ''}
-        ${winFile ? `<div><strong style="color:var(--text)">Win installer:</strong> ${_esc(winFile.split('/').pop())}</div>` : ''}
+
       </div>
       <p style="margin:0;font-size:0.82rem;color:var(--text-muted)">This action cannot be undone. Confirm to finalize.</p>
     </div>`;
     _modalFooter.innerHTML = `<button class="btn btn-subtle" id="dmCancelFinalizeBtn">Cancel</button>
-      <button id="dmConfirmFinalizeBtn" class="btn" style="background:#f97316;border-color:#f97316;color:#fff">Confirm Finalize Deployment</button>`;
+      <button id="dmConfirmFinalizeBtn" class="btn" style="background:linear-gradient(135deg,#00C2C7,#00a0a5);border-color:#00b0b5;color:#fff">Confirm Finalize Deployment</button>`;
 
     document.getElementById('dmCancelFinalizeBtn')?.addEventListener('click', () => Modal.close());
 
@@ -1088,19 +1150,22 @@ async function _openDeployManageModal() {
       if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.textContent = 'Finalizing…'; }
 
       const deployedAtIso = new Date().toISOString();
-      const deployResultsFile = (window._jkSelectedDeployment?.deployment_folder
-        ? window._jkSelectedDeployment.deployment_folder.replace(/[/\\]$/, '') + '/' + `JumpKit_Deployment_v${window._jkSelectedDeployment?.version}.html`
-        : '');
+
+      const _deployState2  = _loadDeployState();
+      const { total: _dTotal, done: _dDone, skipped: _dSkipped } = _deployTotals(_deployState2);
 
       const { error } = await supabaseClient.from('deployments').update({
-        commit_id:           commitId,
-        deployed_at:         deployedAtIso,
-        deploy_account:      account,
-        status:              'deployed',
-        mac_installer_path:  macFile,
-        win_installer_path:  winFile,
-        notes,
-        deploy_results_file: deployResultsFile,
+        commit_id:             commitId,
+        deployed_at:           deployedAtIso,
+        deploy_account:        account,
+        status:                'deployed',
+        vercel_commit_id:      vercelCommitId,
+        backup_path:           backupPath,
+        deploy_notes:          notes,
+        deploy_checks_passed:  _dDone,
+        deploy_checks_skipped: _dSkipped,
+        deploy_checks_todo:    _dTotal - _dDone - _dSkipped,
+        deploy_checks_total:   _dTotal,
       }).eq('id', selId);
 
       if (error) {
@@ -1123,11 +1188,23 @@ async function _openDeployManageModal() {
             commit_id:            commitId,
             deployment_folder:    window._jkSelectedDeployment?.deployment_folder || cfg.folder || '',
             deploy_notes:         notes,
-            mac_installer_path:   macFile,
-            win_installer_path:   winFile,
-            deploy_results_file:  deployResultsFile,
+            vercel_commit_id:     vercelCommitId,
+            backup_path:          backupPath,
+            deploy_checks_passed:  _dDone,
+            deploy_checks_skipped: _dSkipped,
+            deploy_checks_todo:    _dTotal - _dDone - _dSkipped,
+            deploy_checks_total:   _dTotal,
           });
         } catch(e) { console.warn('[FinalizeDeployment] deployConfig mirror failed:', e); }
+
+        // Reset deploy checklist state so next deployment starts fresh
+        _saveDeployState({});
+        _saveDeployNotes({});
+        _saveDeployConfig({});   // clear local deploy session config
+        window._jkSelectedDeployment = null;
+
+        // Record deployment finalized in the release docs changelog, then autosave
+        if (typeof _addChangelogEntry === 'function') _addChangelogEntry('Deployment — Finalized');
 
         // Trigger release-docs autosave so the metadata tab picks up the new deployment data
         try {
@@ -1273,6 +1350,9 @@ async function _saveDeployResults() {
   const { total, done, skipped: skippedCount } = _deployTotals(state);
   const todoCount = total - done - skippedCount;
 
+  // Persist check counts into deploy config so the release-docs Summary tab can display them
+  _saveDeployConfig({ ..._loadDeployConfig(), deploy_checks_passed: done, deploy_checks_skipped: skippedCount, deploy_checks_todo: todoCount, deploy_checks_total: total });
+
   const sectionsHtml = DEPLOY_PHASES.map((phase, pi) => {
     const rows = phase.steps.map((step, si) => {
       const isDone    = state[step.id] === 'completed';
@@ -1341,13 +1421,15 @@ async function _saveDeployResults() {
     const result = await window.electronAPI.writeFileDirect(filePath, html);
     if (!result?.ok) throw new Error(result?.reason || 'Write failed');
     window.Toast?.success(`Saved: ${fileName}`);
+    // Record in release docs changelog
+    if (typeof _addChangelogEntry === 'function') _addChangelogEntry('Deployment — Results Saved');
   } catch (err) {
     alert(`Failed to save deployment results:\n${err.message}`);
     return;
   }
 
   // ── Also patch _jkDeploy in the release docs HTML so the Deployment Checklist tab reflects current state ──
-  const releasePath = cfg.resultsFilePath || sel?.deploy_results_file;
+  const releasePath = cfg.resultsFilePath || sel?.results_file;
   if (!releasePath) {
     window.Toast?.warning('Release docs path not set — open Testing → Manage Testing to configure.');
     return;

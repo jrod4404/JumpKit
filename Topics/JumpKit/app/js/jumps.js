@@ -5,10 +5,32 @@ const FILTER_LABELS = { active:'Active', favorites:'Favorites', recent:'Recent',
 
 // { teamId → teamName } populated async when jumps page loads
 window._jumpTeamNames = window._jumpTeamNames || {};
+
+// Returns a display label for a column's sharing status: team name(s) or 'Personal'
+function _getColTeamLabel(col) {
+  // New multi-team owner format
+  if (Array.isArray(col.sharedTeams) && col.sharedTeams.length > 0) {
+    const names = col.sharedTeams.map(st => window._jumpTeamNames[st.teamId]).filter(Boolean);
+    return names.length ? names.join(', ') : 'Team';
+  }
+  // Old single-team format (member-side or legacy)
+  if (col.isShared && col.teamId) return window._jumpTeamNames[col.teamId] || 'Team';
+  return 'Personal';
+}
+
+// Returns true if column is shared in either format
+function _colIsShared(col) {
+  return !!(col.isShared || (Array.isArray(col.sharedTeams) && col.sharedTeams.length > 0));
+}
+
 async function _fetchJumpTeamNames() {
   try {
     const cols = DB.getColumns(currentUser?.id || '');
-    const teamIds = [...new Set(cols.filter(c => c.teamId).map(c => c.teamId))];
+    // Collect teamIds from both old format (col.teamId) and new format (col.sharedTeams[])
+    const teamIds = [...new Set([
+      ...cols.filter(c => c.teamId).map(c => c.teamId),
+      ...cols.flatMap(c => (Array.isArray(c.sharedTeams) ? c.sharedTeams.map(st => st.teamId) : []))
+    ].filter(Boolean))];
     if (!teamIds.length) return;
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) return;
@@ -292,8 +314,8 @@ function renderColumns() {
       colEl.innerHTML = `
         <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
           <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
-          <span class="col-count">${(col.isShared && col.teamId) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
-          ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(col.isShared && col.teamId) ? (window._jumpTeamNames[col.teamId] || 'Team') : 'Personal'}</span>` : ''}
+          <span class="col-count">${_colIsShared(col) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+          ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
       area.appendChild(colEl);
@@ -318,7 +340,7 @@ function renderColumns() {
     // We intentionally do NOT use _ownedTeamIds here — it loads async and caused a render
     // race where the cap would flash on/off depending on load timing.
     // Capping all shared cols is consistent with the save-time enforcement (sync.js + saveJump).
-    const isSharedCol = !!(col.isShared && col.teamId);
+    const isSharedCol = _colIsShared(col);
     let hiddenCount = 0;
     if (_freeTier && isSharedCol && colJumps.length > 10) {
       hiddenCount = colJumps.length - 10;
@@ -338,8 +360,8 @@ function renderColumns() {
     colEl.innerHTML = `
       <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
         <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
-        <span class="col-count">${(col.isShared && col.teamId) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
-        ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(col.isShared && col.teamId) ? (window._jumpTeamNames[col.teamId] || 'Team') : 'Personal'}</span>` : ''}
+        <span class="col-count">${_colIsShared(col) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
+        ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
       </div>
       <div class="col-items" id="col-${col.id}">
         ${colJumps.length === 0

@@ -83,7 +83,7 @@ function renderHelp() {
         </div>
         <div class="faq-item">
           <div class="faq-q">About JumpKit</div>
-          <div class="faq-a">JumpKit was built by a power user who was tired of clicking through endless folders and browser bookmarks. Version 5 — built to be shared with the world.</div>
+          <div class="faq-a">JumpKit was built by a power user who was tired of clicking through endless folders and browser bookmarks just to get to where they needed to go. It went through four prior versions — each one refining the features, speed, and layout — before Version 5 was built to be shared with the world. For many users, JumpKit is the first app opened each day. It gets you to any file, folder, link, or network share in a single click, so you can stop navigating and start working.</div>
         </div>
         <div class="faq-item">
           <div class="faq-q">Version</div>

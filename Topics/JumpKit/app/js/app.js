@@ -97,7 +97,16 @@ if (window.electronAPI?.isUpdateReady) {
 }
 
 // ── Session lock ─────────────────────────────────────────────────────
-function _initSessionLock(userId) {
+async function _initSessionLock(userId) {
+  // Skip session lock when running unpackaged (npm start / dev mode) so simultaneous
+  // production + dev instances with the same account don't kick each other out.
+  if (window.electronAPI?.isPackaged) {
+    try {
+      const packaged = await window.electronAPI.isPackaged();
+      if (!packaged) return;
+    } catch (_) {}
+  }
+
   let myToken = sessionStorage.getItem('jk_session_token');
   if (!myToken) {
     // No token yet — generate one and claim this session (handles resumed sessions
@@ -831,11 +840,29 @@ async function renderHome() {
     ? new Date(currentUser.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : '—';
 
+  // ── Collapsed state (persisted) ─────────────────────────────────
+  const _homeSectionDefaults = { account: false, stats: false, teams: true, features: true, help: true };
+  let _homeSections = {};
+  try { _homeSections = JSON.parse(localStorage.getItem('jk_home_sections') || '{}'); } catch(_) {}
+  const _isSectionCollapsed = id => _homeSections[id] !== undefined ? _homeSections[id] : _homeSectionDefaults[id];
+  const _hSvg = (icon) => `<svg class="ti ${icon}"><use href="img/tabler-sprite.min.svg#tabler-${icon.slice(3)}"/></svg>`;
+  const _hdr = (id, icon, label) => {
+    const col = _isSectionCollapsed(id);
+    return '<div class="home-section-hdr' + (col ? ' collapsed' : '') + '" data-home-section="' + id + '">' +
+      '<svg class="ti ti-chevron-down home-section-chevron" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>' +
+      _hSvg(icon) +
+      '<span class="home-section-hdr-label">' + label + '</span>' +
+      '</div>';
+  };
+  const _bOpen  = (id) => '<div class="home-section-body' + (_isSectionCollapsed(id) ? ' collapsed' : '') + '" id="home-body-' + id + '">';
+  const _bClose = '</div>';
+
   document.getElementById('pageContent').innerHTML = `
     <div class="home-dash">
 
       <!-- ── Account Section ───────────────────────────────────── -->
-      <div class="home-dash-section-label">YOUR ACCOUNT</div>
+      ${_hdr('account','ti-user-circle','Your Account')}
+      ${_bOpen('account')}
       <div class="stats-cards home-roi-grid">
         <div class="stat-card" style="gap:8px">
           <div class="stat-card-value" style="font-size:1.2rem;color:var(--text-card-title)">${_tierLabel}</div>
@@ -851,9 +878,11 @@ async function renderHome() {
           <div class="stat-card-label" style="margin-top:6px">${_launchesLabel}</div>
         </div>
       </div>
+      ${_bClose}
 
       <!-- ── ROI Section ─────────────────────────────────────────── -->
-      <div class="home-dash-section-label">YOUR STATISTICS</div>
+      ${_hdr('stats','ti-chart-bar','Your Statistics')}
+      ${_bOpen('stats')}
       <div class="stats-cards home-roi-grid">
         <div class="stat-card">
           ${(() => {
@@ -881,8 +910,11 @@ async function renderHome() {
           <div class="stat-card-label">Total $ Saved</div>
         </div>
       </div>
+      ${_bClose}
 
       <!-- ── Teams Section ───────────────────────────────────────── -->
+      ${_hdr('teams','ti-users','Teams')}
+      ${_bOpen('teams')}
       <div id="homeTeamsSummary">
         <div style="display:flex;align-items:center;gap:8px;color:var(--text-muted);font-size:0.85rem;padding:4px 0">
           <svg class="ti ti-loader" style="font-size:1.1rem;animation:spin 1s linear infinite"><use href="img/tabler-sprite.min.svg#tabler-loader"/></svg>
@@ -890,9 +922,11 @@ async function renderHome() {
         </div>
         <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
       </div>
+      ${_bClose}
 
       <!-- ── App Features Section ────────────────────────────────── -->
-      <div class="home-dash-section-label">APP FEATURES</div>
+      ${_hdr('features','ti-bulb','App Features')}
+      ${_bOpen('features')}
       <div class="tips-grid">
         <div class="tip-card">
           <h3><span class="tip-icon"><svg class="ti ti-layout-columns" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg></span>Organize Columns</h3>
@@ -927,9 +961,11 @@ async function renderHome() {
           <p>Tailor JumpKit to your workflow in <strong style="color:var(--hover-accent)">Settings</strong> — set your starting page, configure your ROI values, toggle hotkey display, manage backups, and more.</p>
         </div>
       </div>
+      ${_bClose}
 
       <!-- ── Help & Feedback Section ───────────────────────────────── -->
-      <div class="home-dash-section-label">HELP AND FEEDBACK</div>
+      ${_hdr('help','ti-help-circle','Help & Feedback')}
+      ${_bOpen('help')}
       <div class="tips-grid" style="margin-bottom:8px">
         <div class="tip-card">
           <h3><span class="tip-icon"><svg class="ti ti-help-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-help-circle"/></svg></span>Help &amp; Documentation</h3>
@@ -940,8 +976,26 @@ async function renderHome() {
           <p>Have a bug report, feature request, or just want to share a thought? Click here to send feedback directly to the JumpKit team. We read every message.</p>
         </div>
       </div>
+      ${_bClose}
 
     </div>`;
+
+  // ── Section toggle handler ─────────────────────────────────────────
+  document.getElementById('pageContent').addEventListener('click', e => {
+    const hdr = e.target.closest('[data-home-section]');
+    if (!hdr) return;
+    const id = hdr.dataset.homeSection;
+    const body = document.getElementById('home-body-' + id);
+    if (!body) return;
+    const nowCollapsed = !hdr.classList.contains('collapsed');
+    hdr.classList.toggle('collapsed', nowCollapsed);
+    body.classList.toggle('collapsed', nowCollapsed);
+    try {
+      const s = JSON.parse(localStorage.getItem('jk_home_sections') || '{}');
+      s[id] = nowCollapsed;
+      localStorage.setItem('jk_home_sections', JSON.stringify(s));
+    } catch(_) {}
+  });
 
   // ── Teams section async fill ───────────────────────────────────────
   try {

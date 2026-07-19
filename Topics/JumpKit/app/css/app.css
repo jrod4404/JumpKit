@@ -284,6 +284,15 @@
 /* Section label — consistent spacing above every section except the first */
 .home-dash-section-label { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; margin-top: 0; }
 .home-dash-section-label:not(:first-child) { margin-top: 20px; }
+.home-section-hdr { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; padding: 6px 0 8px; margin-top: 20px; margin-bottom: 12px; }
+.home-section-hdr:first-child { margin-top: 0; }
+.home-section-hdr-label { font-size: 0.72rem; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; flex: 1; }
+.home-section-hdr svg.ti { width: 1.1rem; height: 1.1rem; color: var(--text-muted); flex-shrink: 0; }
+.home-section-hdr .home-section-chevron { transition: transform 0.18s ease; color: var(--text-dim); flex-shrink: 0; }
+.home-section-hdr.collapsed .home-section-chevron { transform: rotate(-90deg); }
+.home-section-hdr:hover .home-section-hdr-label { color: var(--text-muted); }
+.home-section-body { overflow: hidden; transition: none; }
+.home-section-body.collapsed { display: none; }
 /* All home-dash grids — 4 per row default, consistent 20px bottom gap */
 .home-roi-grid  { grid-template-columns: repeat(4, 1fr) !important; margin-bottom: 20px; }
 .home-teams-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }

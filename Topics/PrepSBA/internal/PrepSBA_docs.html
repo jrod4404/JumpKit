@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrepSBA Internal Documentation</title>
+  <style>
+    :root{--royal:#0A2540;--turq:#00C4B4;--hover-accent:#007BFF;--bg:#071522;--bg-card:#0E2233;--text:#D9E6F2;--text-muted:#8FA7BA;--border:rgba(255,255,255,.09);--shadow:0 4px 12px rgba(0,0,0,.3);--spacing-unit:1rem}*{margin:0;padding:0;box-sizing:border-box}html,body{height:100%}body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Oxygen','Ubuntu','Cantarell','Fira Sans','Droid Sans','Helvetica Neue',sans-serif;background-color:var(--bg);color:var(--text);line-height:1.6;font-size:15px}a{color:var(--turq);text-decoration:none;transition:color .2s ease}a:hover{color:var(--hover-accent)}.container{display:flex;min-height:100vh;overflow:visible;align-items:flex-start}.sidebar{width:320px;background-color:var(--bg-card);border-right:1px solid var(--border);overflow-y:auto;padding:var(--spacing-unit) var(--spacing-unit) var(--spacing-unit) 6px;flex-shrink:0;position:sticky;top:0;height:100vh}.toc-title{font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);font-weight:700;margin:0 0 1rem 1rem}.toc-list{list-style:none}.toc-list li{margin:.15rem 0}.toc-list a{display:block;padding:.42rem .6rem;border-radius:8px;color:var(--text-muted);font-size:.9rem}.toc-list a:hover,.toc-list a.active{background:rgba(0,196,180,.1);color:var(--turq)}.toc-list .toc-h3 a{padding-left:1.4rem;font-size:.82rem}.content{flex:1;min-width:0}.header{padding:2rem 3rem;background:linear-gradient(135deg,#0A2540 0%,#0E2233 100%);border-bottom:1px solid var(--border)}.header img{max-width:220px;margin-bottom:1rem}.header-tagline{color:var(--turq);font-weight:700;margin-bottom:.35rem}.header h1{font-size:2.4rem;line-height:1.15;margin-bottom:.75rem}.header-subtext{color:var(--text-muted);max-width:980px;font-size:1.05rem}.header-updated{color:var(--text-muted);font-size:.9rem;margin-top:.75rem}.scroll-area{padding:2rem 3rem}.main-content{max-width:1100px}.main-content h2{font-size:1.8rem;margin:2.25rem 0 1rem;padding-bottom:.55rem;border-bottom:1px solid var(--border);color:#fff}.main-content h3{font-size:1.25rem;margin:1.6rem 0 .75rem;color:var(--turq)}.main-content h4{font-size:1.05rem;margin:1.25rem 0 .5rem;color:#fff}.main-content p{margin:.75rem 0;color:var(--text)}ul,ol{margin:.75rem 0 .75rem 1.5rem}li{margin:.35rem 0}strong{color:#fff}code{background:rgba(255,255,255,.08);padding:.12rem .32rem;border-radius:4px;color:#CFFAF6}pre{background:#06101B;border:1px solid var(--border);padding:1rem;border-radius:10px;overflow:auto;margin:1rem 0;color:#CFFAF6}table{width:100%;border-collapse:collapse;margin:1rem 0;background:rgba(255,255,255,.025);border:1px solid var(--border);border-radius:10px;overflow:hidden}th,td{padding:.75rem;text-align:left;border-bottom:1px solid var(--border);vertical-align:top}th{background:rgba(0,196,180,.12);color:#fff}.callout{border-left:4px solid var(--turq);background:rgba(0,196,180,.08);padding:1rem;border-radius:8px;margin:1rem 0}.badge{display:inline-block;border:1px solid var(--border);background:rgba(255,255,255,.06);border-radius:999px;padding:.15rem .55rem;font-size:.78rem;color:var(--text-muted);margin:.15rem .2rem .15rem 0}@media(max-width:900px){.container{display:block}.sidebar{position:relative;width:100%;height:auto}.header,.scroll-area{padding:1.25rem}.header h1{font-size:1.8rem}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar"><div class="toc-title">📖 Contents</div><ul class="toc-list" id="toc"></ul></aside>
+    <div class="content">
+      <div class="header">
+        <p class="header-tagline">TurboTax for SBA Loan Applications & Business Plans</p>
+        <h1>PrepSBA Internal Documentation</h1>
+        <p class="header-subtext">A comprehensive internal guide covering product strategy, technical implementation, architecture, data model, AI/document generation, security, roadmap, and go-to-market details for PrepSBA.</p>
+        <p class="header-updated">Last updated: 2026-07-11</p>
+      </div>
+      <div class="scroll-area"><div class="main-content" id="mainContent">
+<h2 id="section-1">1. Product Overview</h2>
+<h3 id="what-is-prepsba">1.1 What is PrepSBA?</h3>
+<p>PrepSBA is a guided web application that helps small business owners prepare smarter and faster for SBA loans. The product walks borrowers through a structured intake workflow, then uses AI to generate a complete lender-ready SBA loan package.</p>
+<p>The positioning is simple: <strong>TurboTax for SBA loan applications and business plans.</strong> Instead of forcing a borrower to manually assemble scattered forms, spreadsheets, narratives, projections, and supporting explanations, PrepSBA turns the process into a guided wizard with contextual help and export-ready deliverables.</p>
+<h3 id="who-its-for">1.2 Who It’s For</h3>
+<ul><li><strong>Small business owners</strong> seeking SBA 7(a), SBA Express, or similar lender-backed financing.</li><li><strong>First-time borrowers</strong> who need clear explanations of what lenders ask for and why.</li><li><strong>Entrepreneurs buying, starting, or expanding a business</strong> who need business plan and financial package support.</li><li><strong>Lenders and lending partners</strong> who may later use a branded portal to improve borrower intake quality and reduce incomplete submissions.</li></ul>
+<h3 id="core-value-proposition">1.3 Core Value Proposition</h3>
+<ul><li><strong>Prepare faster:</strong> one guided workflow instead of disconnected templates and forms.</li><li><strong>Improve completeness:</strong> real-time validation and step-by-step requirements reduce missing data.</li><li><strong>Generate lender-ready materials:</strong> business plan, financial projections, SBA form data, use-of-proceeds, debt schedule, and cover materials.</li><li><strong>Reduce intimidation:</strong> TurboTax-style explanations, tooltips, and “why we need this” guidance.</li><li><strong>Monetize at export:</strong> free preparation lowers adoption friction; paid export captures value when the borrower is ready.</li></ul>
+<h3 id="pricing-tiers">1.4 Pricing Tiers</h3>
+<table><thead><tr><th>Tier</th><th>Price</th><th>Includes</th></tr></thead><tbody><tr><td><strong>Free</strong></td><td>$0</td><td>Full wizard access, document guidance, AI-assisted preparation, preview/basic outputs.</td></tr><tr><td><strong>Borrower Pro</strong></td><td>$249 one-time</td><td>Documents export, complete lender package, PDF/DOCX outputs, unlimited revisions for the application.</td></tr><tr><td><strong>Lender</strong></td><td>$500/month + per-application usage fee</td><td>Future branded intake portal, borrower dashboard, lender workflow, application visibility.</td></tr><tr><td><strong>Enterprise</strong></td><td>Custom</td><td>Large banks/credit unions, SSO, custom integrations, compliance review, dedicated support.</td></tr></tbody></table>
+<h3 id="current-status">1.5 Current Status</h3>
+<p>PrepSBA currently exists as a Next.js web project under <code>Topics/PrepSBA/web</code>. The project includes landing page, login/signup flows, dashboard, application wizard routes, specs, styling direction, and Supabase-oriented architecture. Latest working brand copy includes: <strong>“PrepSBA helps you prepare smarter and faster for SBA loans. Complete your entire SBA application with expert guidance — all in one place. 100% Free until your application is submitted.”</strong></p>
+
+<h2 id="section-2">2. User Flow and Product Experience</h2>
+<h3 id="primary-flow">2.1 Primary Borrower Flow</h3>
+<pre>Landing Page → Sign Up / Log In → Dashboard → New Application
+  → Step 1: Business Identity
+  → Step 2: Ownership & Borrower Info
+  → Step 3: Loan Request & Use of Proceeds
+  → Step 4: Financial Snapshot
+  → Step 5: Market & Competition
+  → Step 6: Management & Experience
+  → Step 7: Review & Generate
+    → AI generates documents
+    → User reviews, edits, exports PDF / DOCX</pre>
+<h3 id="wizard-principles">2.2 Wizard Principles</h3>
+<ul><li><strong>Auto-save:</strong> each step saves incrementally to avoid lost work.</li><li><strong>Progress tracking:</strong> application state and current step are persistent.</li><li><strong>Inline validation:</strong> required fields and obvious errors are caught at entry time.</li><li><strong>Contextual help:</strong> explain terms like NAICS, use of proceeds, collateral, DSCR, working capital, guarantor, and ownership percentage.</li><li><strong>Review before generation:</strong> user sees a consolidated summary before paying/exporting.</li></ul>
+<h3 id="deliverables">2.3 Generated Deliverables</h3>
+<ul><li>Full business plan narrative</li><li>Pro forma income statement, balance sheet, and cash flow</li><li>3–5 year cash flow projections</li><li>Competitor analysis</li><li>Borrower experience / management resume narrative</li><li>Personal financial statement data for SBA Form 413</li><li>SBA Form 1919 borrower information data</li><li>Business debt schedule</li><li>Use-of-proceeds breakdown</li><li>Loan summary and cover letter</li></ul>
+
+<h2 id="section-3">3. Technical Stack</h2>
+<table><thead><tr><th>Layer</th><th>Choice</th><th>Reason</th></tr></thead><tbody><tr><td>Frontend</td><td>Next.js 15 App Router + TypeScript</td><td>Modern React, SEO-friendly landing pages, server components/API routes in one app.</td></tr><tr><td>Styling</td><td>Tailwind CSS + shadcn/ui style components</td><td>Fast UI development, consistent design system, easy responsive behavior.</td></tr><tr><td>Backend</td><td>Next.js API routes / server actions</td><td>Keeps V1 stack simple and deployable on Vercel.</td></tr><tr><td>Database</td><td>Supabase PostgreSQL</td><td>Auth, relational data, Row Level Security, storage, and good startup velocity.</td></tr><tr><td>Auth</td><td>Supabase Auth</td><td>Email/password and Google OAuth; integrates cleanly with RLS.</td></tr><tr><td>AI</td><td>OpenAI GPT-4o initially</td><td>High-quality document generation and business narrative creation.</td></tr><tr><td>Exports</td><td><code>docx</code>, <code>pdfkit</code> / <code>react-pdf</code></td><td>DOCX editing compatibility and polished PDF packages.</td></tr><tr><td>Payments</td><td>Stripe</td><td>One-time borrower export payment and future subscriptions.</td></tr><tr><td>Hosting</td><td>Vercel</td><td>Fast deployment for Next.js.</td></tr></tbody></table>
+<h3 id="repo-layout">3.1 Repository Layout</h3>
+<pre>Topics/PrepSBA/
+  internal/
+    PrepSBA_docs.html        ← this internal documentation file
+  web/
+    src/app/                 ← Next.js App Router pages and API routes
+    src/components/          ← reusable UI and app components
+    src/lib/                 ← Supabase, validation, helpers, AI/export utilities
+    specs/                   ← product and application specs
+    package.json             ← dependencies and scripts</pre>
+
+<h2 id="section-4">4. Architecture</h2>
+<h3 id="architecture-overview">4.1 System Overview</h3>
+<pre>Browser UI
+  ↓
+Next.js App Router pages + components
+  ↓
+Server actions / API routes
+  ├── Supabase Auth
+  ├── Supabase PostgreSQL + RLS
+  ├── Stripe checkout / billing webhooks
+  ├── OpenAI document generation
+  └── PDF/DOCX export services</pre>
+<h3 id="frontend-architecture">4.2 Frontend Architecture</h3>
+<ul><li><strong>Landing and marketing pages:</strong> optimized for conversion, SEO, and clear product education.</li><li><strong>Auth pages:</strong> login/signup with brand-aligned mint/navy design.</li><li><strong>Dashboard:</strong> shows applications, status, next step, and create-new flow.</li><li><strong>Application wizard:</strong> route-per-step or shared step component under <code>/apply/[id]/step-n</code>.</li><li><strong>Review/generate:</strong> consolidated summary, validation, payment/export gating.</li></ul>
+<h3 id="backend-architecture">4.3 Backend Architecture</h3>
+<ul><li><strong>Application CRUD:</strong> create drafts, update steps, track completion.</li><li><strong>Validation:</strong> schema validation with Zod or equivalent before database writes and AI generation.</li><li><strong>AI generation service:</strong> transforms normalized application data into controlled prompts and structured outputs.</li><li><strong>Export service:</strong> converts generated structured content into DOCX/PDF packages.</li><li><strong>Billing service:</strong> controls export access after Stripe payment confirmation.</li></ul>
+<h3 id="data-security-architecture">4.4 Data Security Architecture</h3>
+<ul><li>Supabase Row Level Security ensures users can access only their own applications.</li><li>Sensitive borrower PII should never be written into logs.</li><li>SSN or equivalent high-sensitivity fields should be encrypted server-side if stored.</li><li>Document generations and exports should be audit logged.</li><li>Users must be able to delete applications and associated generated files.</li></ul>
+
+<h2 id="section-5">5. Data Model</h2>
+<h3 id="core-tables">5.1 Core Tables</h3>
+<pre>applications
+  id uuid primary key
+  user_id uuid references auth.users(id)
+  status text default 'draft'
+  current_step int default 1
+  created_at timestamptz
+  updated_at timestamptz
+
+business_info
+  application_id uuid references applications(id)
+  legal_name text
+  dba_name text
+  entity_type text
+  ein text
+  state text
+  year_founded int
+  industry text
+  naics_code text
+  description text
+  address text
+  phone text
+  email text
+  website text
+
+ownership
+  application_id uuid references applications(id)
+  owner_name text
+  ownership_percent numeric
+  title text
+  ssn_encrypted text
+  address text
+  citizenship_status text
+
+loan_request
+  application_id uuid references applications(id)
+  loan_amount numeric
+  loan_type text
+  purpose text
+  use_of_proceeds jsonb
+  collateral jsonb
+
+financial_snapshot
+  application_id uuid references applications(id)
+  revenue numeric
+  expenses numeric
+  assets jsonb
+  liabilities jsonb
+  business_debts jsonb
+
+market_competition
+  application_id uuid references applications(id)
+  target_market text
+  competitors jsonb
+  differentiation text
+
+management_experience
+  application_id uuid references applications(id)
+  resume_narrative text
+  years_experience int
+  relevant_background text
+
+generated_documents
+  application_id uuid references applications(id)
+  document_type text
+  content_json jsonb
+  file_url text
+  generated_at timestamptz</pre>
+<h3 id="status-model">5.2 Application Status Model</h3>
+<p><span class="badge">draft</span><span class="badge">in_progress</span><span class="badge">ready_for_review</span><span class="badge">generated</span><span class="badge">paid_export</span><span class="badge">submitted</span></p>
+
+<h2 id="section-6">6. AI and Document Generation</h2>
+<h3 id="ai-principles">6.1 AI Principles</h3>
+<ul><li><strong>Structured inputs first:</strong> AI should generate from normalized application data, not raw chat only.</li><li><strong>Controlled templates:</strong> prompts should be versioned and tied to expected output schemas.</li><li><strong>User review required:</strong> AI outputs are draft/preparation materials, not legal/financial advice.</li><li><strong>Traceability:</strong> store prompt version, model, timestamp, and source data snapshot hash for each generation.</li></ul>
+<h3 id="generation-pipeline">6.2 Generation Pipeline</h3>
+<pre>Validate application completeness
+  → Build structured data package
+  → Run document-specific prompts
+  → Parse structured JSON output
+  → Render preview in app
+  → Allow edits/revisions
+  → Export DOCX/PDF after payment</pre>
+<h3 id="prompt-families">6.3 Prompt Families</h3>
+<ul><li>Business plan narrative prompt</li><li>Financial projection explanation prompt</li><li>Competitor and market analysis prompt</li><li>Management/resume narrative prompt</li><li>Loan cover letter prompt</li><li>Use-of-proceeds and loan summary prompt</li><li>SBA form data formatting prompt</li></ul>
+
+<h2 id="section-7">7. Brand and Design System</h2>
+<h3 id="brand-positioning">7.1 Brand Positioning</h3>
+<p>PrepSBA should feel clean, trustworthy, modern, and calm. SBA loan prep is intimidating; the product should reduce anxiety and make the borrower feel guided, not judged.</p>
+<h3 id="colors">7.2 Colors</h3>
+<pre>Primary:    Deep Navy   #0A2540
+Accent:     Teal        #00C4B4
+Secondary:  Blue        #007BFF
+Neutral BG: #F8F9FA
+Text:       #1F2937 / #FFFFFF</pre>
+<h3 id="voice">7.3 Messaging Voice</h3>
+<ul><li>Clear and plain-spoken</li><li>Expert but not bureaucratic</li><li>Encouraging without overpromising</li><li>Focused on readiness, completeness, and speed</li></ul>
+<h3 id="approved-copy">7.4 Approved Copy Themes</h3>
+<ul><li>“Prepare smarter and faster for SBA loans.”</li><li>“Complete your entire SBA application with expert guidance — all in one place.”</li><li>“100% free until your application is submitted.”</li><li>“From business plan to lender package, guided step by step.”</li></ul>
+
+<h2 id="section-8">8. Marketing Strategy</h2>
+<h3 id="target-segments">8.1 Target Segments</h3>
+<ul><li><strong>Borrowers:</strong> small business owners, franchise buyers, acquisition entrepreneurs, contractors, local service businesses, startups with SBA-compatible plans.</li><li><strong>Referral partners:</strong> accountants, bookkeepers, SBA consultants, business brokers, franchise consultants, local chambers, SCORE-style advisors.</li><li><strong>Lenders:</strong> community banks, credit unions, SBA-preferred lenders, loan brokers, alternative finance advisors.</li></ul>
+<h3 id="acquisition-channels">8.2 Acquisition Channels</h3>
+<ul><li>SEO content around SBA loan documents, business plan templates, SBA Form 413, SBA Form 1919, use of proceeds, debt schedules, and SBA loan preparation checklists.</li><li>Forum and community marketing in small business, acquisition entrepreneurship, franchise, and startup finance communities.</li><li>Email outreach to accountants, brokers, consultants, chambers, and lending-adjacent partners.</li><li>Affiliate/referral program for partners who send borrower leads.</li><li>Future lender channel as B2B expansion after borrower workflow proves demand.</li></ul>
+<h3 id="seo-plan">8.3 SEO Content Plan</h3>
+<ul><li>“SBA loan application checklist”</li><li>“How to prepare an SBA business plan”</li><li>“SBA Form 413 explained”</li><li>“SBA Form 1919 explained”</li><li>“Use of proceeds for SBA loan examples”</li><li>“Business debt schedule template”</li><li>“SBA loan financial projections template”</li></ul>
+<h3 id="conversion-strategy">8.4 Conversion Strategy</h3>
+<ul><li>Lead with free guided preparation to reduce friction.</li><li>Gate final export behind one-time payment after the borrower has invested effort and sees value.</li><li>Show sample outputs before signup where possible.</li><li>Use trust markers: privacy, secure storage, no lender submission without user approval, clear disclaimers.</li></ul>
+<h3 id="disclaimers">8.5 Marketing/Legal Disclaimers</h3>
+<div class="callout"><p>PrepSBA should avoid claiming guaranteed approval, guaranteed funding, official SBA affiliation, or legal/financial advice. Suggested language: <strong>“PrepSBA helps you prepare application materials. It does not guarantee loan approval and is not affiliated with or endorsed by the U.S. Small Business Administration.”</strong></p></div>
+
+<h2 id="section-9">9. Security, Privacy, and Compliance</h2>
+<ul><li>TLS for all traffic.</li><li>Supabase encryption at rest.</li><li>RLS policies for every borrower-owned table.</li><li>No sensitive PII in analytics, logs, prompt logs, or browser console output.</li><li>Clear privacy policy covering AI processing and third-party providers.</li><li>Export audit log for paid packages.</li><li>Data deletion workflow for borrower applications and generated documents.</li><li>Future lender portal should add team roles, audit trails, and stricter access controls.</li></ul>
+
+<h2 id="section-10">10. Roadmap</h2>
+<h3 id="v1">10.1 V1 Borrower Product</h3>
+<ul><li>Landing page and pricing</li><li>Auth</li><li>Dashboard</li><li>7-step borrower application wizard</li><li>Supabase persistence + RLS</li><li>AI document generation</li><li>Review/edit outputs</li><li>Stripe one-time export payment</li><li>DOCX/PDF lender package export</li></ul>
+<h3 id="v1-1">10.2 V1.1 Improvements</h3>
+<ul><li>Better revision workflow</li><li>Sample package previews</li><li>More robust financial model support</li><li>Borrower checklist and supporting-file upload</li><li>Email reminders for incomplete applications</li></ul>
+<h3 id="future">10.3 Future / Not V1</h3>
+<ul><li>Direct SBA e-filing integration</li><li>Lender matching marketplace</li><li>QuickBooks/Xero imports</li><li>Multi-language support</li><li>Native mobile apps</li><li>Lender API and branded portals</li></ul>
+
+<h2 id="section-11">11. Internal Open Questions</h2>
+<ul><li>Final domain decision.</li><li>Whether “free until submitted” means free until export, free until lender submission, or another conversion moment.</li><li>Exact Stripe payment gate: export-only vs generation+export.</li><li>Whether V1 should include uploaded supporting documents.</li><li>How conservative the AI financial projection generator should be vs user-entered assumptions only.</li><li>Preferred disclaimer placement in onboarding and export.</li></ul>
+
+<h2 id="section-12">12. Operational Notes</h2>
+<ul><li>Project folder: <code>/Users/jeffroder/.openclaw/workspace/Topics/PrepSBA</code></li><li>Web app folder: <code>/Users/jeffroder/.openclaw/workspace/Topics/PrepSBA/web</code></li><li>Internal docs folder: <code>/Users/jeffroder/.openclaw/workspace/Topics/PrepSBA/internal</code></li><li>Primary spec source: <code>web/specs/prepsba-app-spec.md</code></li><li>This file should be updated whenever major product, technical, pricing, or marketing decisions change.</li></ul>
+      </div></div>
+    </div>
+  </div>
+  <script>
+    const toc=document.getElementById('toc');const heads=document.querySelectorAll('.main-content h2,.main-content h3');heads.forEach(h=>{const li=document.createElement('li');li.className=h.tagName==='H3'?'toc-h3':'toc-h2';const a=document.createElement('a');a.href='#'+h.id;a.textContent=h.textContent;li.appendChild(a);toc.appendChild(li)});const links=[...toc.querySelectorAll('a')];const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const l=toc.querySelector('a[href="#'+e.target.id+'"]');if(l)l.classList.add('active')}})},{rootMargin:'-20% 0px -70% 0px'});heads.forEach(h=>obs.observe(h));
+  </script>
+</body>
+</html>

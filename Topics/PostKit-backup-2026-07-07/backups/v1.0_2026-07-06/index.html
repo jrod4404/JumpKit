@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PostKit</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img class="logo-img logo-expanded logo-dark" src="assets/logo/postkit-logo-dark-mode.png" alt="PostKit">
+        <img class="logo-img logo-expanded logo-light" src="assets/logo/postkit-logo.png" alt="PostKit">
+        <img class="logo-img logo-collapsed-img" src="assets/logo/postkit-logo-collapsed.png" alt="PostKit">
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="content">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+              <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+              <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+              <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
+            </svg>
+          </span>
+          <span class="nav-label">Content</span>
+        </button>
+        <button class="nav-item" data-tab="calendar">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <line x1="5" y1="1" x2="5" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="11" y1="1" x2="11" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="1" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+          </span>
+          <span class="nav-label">Calendar</span>
+        </button>
+        <button class="nav-item" data-tab="today">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5"/>
+              <polyline points="8,4 8,8 11,10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="nav-label">Today</span>
+        </button>
+        <button class="nav-item" data-tab="analytics">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="9" width="3" height="5" fill="currentColor" opacity="0.8"/>
+              <rect x="6.5" y="5" width="3" height="9" fill="currentColor" opacity="0.8"/>
+              <rect x="11" y="2" width="3" height="12" fill="currentColor" opacity="0.8"/>
+            </svg>
+          </span>
+          <span class="nav-label">Analytics</span>
+        </button>
+        <button class="nav-item" data-tab="settings">
+          <span class="nav-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Collapse sidebar">
+          <span id="sidebarToggleIcon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <polyline points="9,2 4,7 9,12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main-content">
+      <div class="topbar">
+        <span class="topbar-title">
+          <span id="topbarIcon"></span>
+          <span id="topbarTitle">Content</span>
+        </span>
+        <span class="topbar-subtitle" id="topbarSubtitle">Create and manage seed content for Hermes to process</span>
+        <div class="topbar-right">
+          <button id="theme-toggle" title="Toggle theme">
+            <span class="theme-icon-dark">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+                <circle cx="8" cy="8" r="3"/>
+                <line x1="8" y1="1" x2="8" y2="2.5"/>
+                <line x1="8" y1="13.5" x2="8" y2="15"/>
+                <line x1="1" y1="8" x2="2.5" y2="8"/>
+                <line x1="13.5" y1="8" x2="15" y2="8"/>
+                <line x1="3.05" y1="3.05" x2="4.1" y2="4.1"/>
+                <line x1="11.9" y1="11.9" x2="12.95" y2="12.95"/>
+                <line x1="12.95" y1="3.05" x2="11.9" y2="4.1"/>
+                <line x1="4.1" y1="11.9" x2="3.05" y2="12.95"/>
+              </svg>
+            </span>
+            <span class="theme-icon-light">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+      <div id="tab-content" class="tab-pane"></div>
+      <div id="tab-calendar" class="tab-pane" style="display:none"></div>
+      <div id="tab-today" class="tab-pane" style="display:none"></div>
+      <div id="tab-analytics" class="tab-pane" style="display:none"></div>
+      <div id="tab-settings" class="tab-pane" style="display:none"></div>
+    </main>
+  </div>
+
+  <!-- Modal: New Seed -->
+  <div class="modal-overlay" id="modal-new-seed" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">New Seed</h2>
+        <button class="modal-close" onclick="closeModal('modal-new-seed')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-new-seed" onsubmit="submitNewSeed(event)">
+          <div class="form-group">
+            <label class="form-label">Title <span class="required">*</span></label>
+            <input type="text" class="form-input" id="new-seed-title" placeholder="Give your seed a title..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Content Body</label>
+            <textarea class="form-textarea" id="new-seed-body" rows="6" placeholder="Write your core content here. Hermes will optimize it per platform..."></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Tags</label>
+              <input type="text" class="form-input" id="new-seed-tags" placeholder="tag1, tag2, tag3">
+              <small class="form-hint">Comma separated</small>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Campaign</label>
+              <input type="text" class="form-input" id="new-seed-campaign" placeholder="Campaign or series name">
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" onclick="closeModal('modal-new-seed')">Cancel</button>
+            <button type="submit" class="btn-primary">Create Seed</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Seed Detail -->
+  <div class="modal-overlay" id="modal-seed-detail" style="display:none">
+    <div class="modal modal-wide">
+      <div class="modal-header">
+        <h2 class="modal-title" id="seed-detail-title">Seed Detail</h2>
+        <div class="modal-header-actions">
+          <span id="seed-detail-status-badge"></span>
+          <button class="modal-close" onclick="closeModal('modal-seed-detail')">✕</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <div class="seed-detail-layout">
+          <!-- Left: Seed info -->
+          <div class="seed-detail-left">
+            <div class="seed-meta-row">
+              <div class="meta-item">
+                <span class="meta-label">Campaign</span>
+                <span id="seed-detail-campaign" class="meta-value">—</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">Created</span>
+                <span id="seed-detail-created" class="meta-value">—</span>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Content Body</label>
+              <textarea id="seed-detail-body" class="form-textarea" rows="8"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Tags</label>
+              <div id="seed-detail-tags" class="tag-list"></div>
+            </div>
+
+            <!-- Media Gallery -->
+            <div class="form-group">
+              <label class="form-label">Media</label>
+              <div id="seed-detail-media" class="media-gallery"></div>
+              <label class="media-upload-btn">
+                <input type="file" id="media-file-input" accept="image/*,video/*" multiple style="display:none" onchange="handleMediaUpload(event)">
+                <span>+ Add Media</span>
+              </label>
+            </div>
+
+            <!-- Jobs -->
+            <div id="seed-detail-jobs-section" class="form-group">
+              <label class="form-label">Job Status</label>
+              <div id="seed-detail-jobs"></div>
+            </div>
+
+            <div class="seed-detail-actions">
+              <button id="btn-finalize" class="btn-primary btn-full" onclick="finalizeSeed(window._currentSeedId)">
+                ⚡ Finalize & Send to Hermes
+              </button>
+              <button class="btn-danger btn-sm" onclick="deleteSeed(window._currentSeedId)">Delete Seed</button>
+            </div>
+          </div>
+
+          <!-- Right: Posts by platform -->
+          <div class="seed-detail-right">
+            <div class="posts-header">
+              <h3>Generated Posts</h3>
+              <span id="seed-posts-count" class="text-muted"></span>
+            </div>
+            <div id="seed-detail-posts"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Post -->
+  <div class="modal-overlay" id="modal-edit-post" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Edit Post</h2>
+        <button class="modal-close" onclick="closeModal('modal-edit-post')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="edit-post-id">
+        <div class="form-group">
+          <label class="form-label">Post Text</label>
+          <textarea class="form-textarea" id="edit-post-text" rows="8"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Scheduled For</label>
+            <input type="datetime-local" class="form-input" id="edit-post-scheduled">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="edit-post-status">
+              <option value="draft">Draft</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="posted">Posted</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="edit-post-notes" placeholder="Optional notes...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-edit-post')">Cancel</button>
+          <button type="button" class="btn-primary" onclick="saveEditPost()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Analytics Entry -->
+  <div class="modal-overlay" id="modal-analytics" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Log Metrics</h2>
+        <button class="modal-close" onclick="closeModal('modal-analytics')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="analytics-post-id">
+        <input type="hidden" id="analytics-record-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Likes</label>
+            <input type="number" class="form-input" id="analytics-likes" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Comments</label>
+            <input type="number" class="form-input" id="analytics-comments" value="0" min="0">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Views</label>
+            <input type="number" class="form-input" id="analytics-views" value="0" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Shares</label>
+            <input type="number" class="form-input" id="analytics-shares" value="0" min="0">
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-analytics')">Cancel</button>
+          <button type="button" class="btn-primary" onclick="submitAnalytics()">Save Metrics</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+  <script src="app.js"></script>
+</body>
+</html>

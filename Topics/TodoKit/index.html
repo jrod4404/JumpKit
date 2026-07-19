@@ -244,8 +244,8 @@
             <button class="btn btn-secondary btn-task-nav" id="btn-prev-task-detail" type="button"><span class="task-nav-caret">‹</span> Prev</button>
             <button class="btn btn-secondary btn-task-nav" id="btn-next-task-detail" type="button">Next <span class="task-nav-caret">›</span></button>
           </div>
-          <button class="btn btn-secondary" data-modal="modal-task-detail">Close</button>
-          <button class="btn btn-primary" id="btn-edit-from-detail"><span class="btn-icon-glyph"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg></span> Edit</button>
+          <button class="btn btn-ghost" id="btn-cancel-detail-modal" onclick="cancelAndCloseDetail()" style="display:none">Cancel</button>
+          <button class="btn btn-secondary" id="btn-close-detail-modal" onclick="saveAndCloseDetail()">Close</button>
         </div>
       </div>
     </div>
@@ -275,9 +275,7 @@
             <label>Project Description</label>
             <textarea class="form-input form-textarea" id="settings-project-description" placeholder="Optional project context, goals, scope, or notes..."></textarea>
           </div>
-          <div class="settings-actions-row">
-            <button class="btn btn-primary" id="btn-save-project-details">Save Project Details</button>
-          </div>
+
         </div>
 
         <div class="settings-panel" id="tab-users" style="display:none">
@@ -298,6 +296,7 @@
               <input type="color" id="new-category-color" value="#4a8a5e" aria-label="Category color seed">
             </label>
             <button class="btn btn-primary" id="btn-add-category">Add</button>
+            <div class="category-row-spacer"></div>
           </div>
           <ul class="item-list" id="categories-list"></ul>
         </div>
@@ -315,7 +314,10 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-ghost" data-modal="modal-settings">Close</button>
+        <div class="modal-footer-right">
+          <button class="btn btn-ghost" data-modal="modal-settings">Cancel</button>
+          <button class="btn btn-primary" id="btn-save-project-details">Save &amp; Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -393,7 +395,7 @@
       <div class="modal-footer">
         <div class="modal-footer-left" style="display:flex;gap:8px">
           <button class="btn btn-ghost" id="mf-btn-delete" disabled title="Select a saved filter first">Delete Filter</button>
-          <button class="btn btn-ghost" id="mf-btn-edit" disabled title="Select a saved filter first">Edit Filter</button>
+          <button class="btn btn-ghost" id="mf-btn-edit" disabled title="Select a saved filter first" style="display:none">Edit Filter</button>
         </div>
         <div class="modal-footer-right">
           <button class="btn btn-secondary" data-modal="modal-manage-filters">Close</button>

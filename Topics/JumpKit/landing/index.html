@@ -4,6 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>JumpKit — Stop Searching. Start Jumping.</title>
+  <meta name="description" content="JumpKit is a one-click link launcher for Windows and Mac. Organize web links, local folders, and shared files into searchable categories — and track time saved automatically." />
+  <link rel="canonical" href="https://jumpkit.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="JumpKit — Stop Searching. Start Jumping." />
+  <meta property="og:description" content="One-click launcher for web links, local folders, and team resources. Organized, searchable, shareable." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JumpKit — Stop Searching. Start Jumping." />
+  <meta name="twitter:description" content="One-click launcher for web links, local folders, and team resources." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -15,6 +32,62 @@
     svg.ti.hero-platform-icon { width: 1.1em; height: 1.1em; vertical-align: -0.2em; }
   </style>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JumpKit",
+    "url": "https://jumpkit.app",
+    "logo": "https://jumpkit.app/assets/logo-light.png",
+    "sameAs": [
+      "https://x.com/jumpkitapp",
+      "https://youtube.com/@jumpkitapp",
+      "https://linkedin.com/company/jumpkitapp"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@jumpkit.app"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: SoftwareApplication -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "JumpKit",
+    "operatingSystem": "Windows, macOS",
+    "applicationCategory": "ProductivityApplication",
+    "url": "https://jumpkit.app",
+    "description": "One-click link launcher for Windows and Mac. Organize web links, local folders, and shared files into searchable categories.",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "JumpKit Free",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      {
+        "@type": "Offer",
+        "name": "JumpKit Pro",
+        "price": "10",
+        "priceCurrency": "USD",
+        "billingDuration": "P1M"
+      },
+      {
+        "@type": "Offer",
+        "name": "JumpKit Team (Annual)",
+        "price": "99",
+        "priceCurrency": "USD",
+        "billingDuration": "P1Y"
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
@@ -176,10 +249,11 @@
       </div>
 
       <div class="demo-video-wrap" style="margin-top:2rem">
-        <p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:1rem;">👇 Watch the 60-second explainer — see exactly how JumpKit works.</p>
-        <video controls playsinline preload="metadata" poster="assets/jumpkit-demo-thumb.jpg" style="width:100%;max-width:900px;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,0.5);display:block;margin:0 auto;">
+        <p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:1rem;"><svg class="ti ti-player-play" style="color:var(--turq);width:1.1em;height:1.1em;vertical-align:-0.15em;margin-right:.35em"><use href="assets/tabler-sprite.svg#tabler-player-play"/></svg> Watch the 60-second explainer below — see exactly how JumpKit works.</p>
+        <video controls playsinline preload="metadata" poster="assets/jumpkit-demo-thumb.jpg" style="width:100%;max-width:900px;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,0.5);display:block;margin:0 auto;" aria-label="JumpKit 60-second explainer video">
           <source src="assets/jumpkit-demo.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
+          <source src="assets/jumpkit-demo.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2" />
+          <p style="color:var(--text-muted);padding:1rem;text-align:center">Your browser doesn't support inline video. <a href="assets/jumpkit-demo.mp4" style="color:var(--turq);font-weight:600" download>Download the video</a> to watch it.</p>
         </video>
       </div>
     </div>
@@ -469,11 +543,11 @@
             <div class="price-line" style="margin-bottom:10px">Free</div>
           </div>
           <div style="display:flex;flex-direction:column;gap:10px;width:100%">
-            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v0.1.6/JumpKit-Setup-0.1.6-Prod-x64.exe" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v5.0.8/JumpKit-Setup-5.0.8-Prod-x64.exe" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
               <svg class="ti ti-brand-windows" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-windows"/></svg>
               Download for Windows
             </a>
-            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v0.1.6/JumpKit-Setup-0.1.6-Prod-arm64.dmg" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v5.0.8/JumpKit-Setup-5.0.8-Prod-arm64.dmg" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
               <svg class="ti ti-brand-apple" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-apple"/></svg>
               Download for Mac
             </a>
@@ -521,6 +595,116 @@
   </section>
 
 
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="section-inner">
+      <span class="section-label">FAQ</span>
+      <h2 class="section-title">Questions? Answered.</h2>
+      <div class="faq-list" style="max-width:760px;margin:0 auto">
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            What is JumpKit?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">JumpKit is a desktop app for Windows and Mac that lets you organize web links, local folders, and shared files into searchable categories. Instead of digging through bookmarks or folder trees, you jump to any destination in one click.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            How is JumpKit different from browser bookmarks?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Bookmarks live inside one browser and can't open local folders or network shares. JumpKit sits on your desktop, works across all browsers, launches both web links and local paths, and lets you organize everything into categories with search and favorites.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Is JumpKit free?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes! JumpKit has a free tier with all the core features. The Pro plan ($10/month) adds unlimited jumps, advanced categories, and team sharing. The Team plan ($99/year) is built for small teams who want shared resource hubs.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            What platforms does JumpKit support?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">JumpKit runs natively on Windows and macOS. Download the installer from our GitHub releases page and you're ready to go in under a minute.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Can I share links with my team?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. The Team plan includes shared categories and team sync, so everyone in your organization has access to the same links, folders, and resources — no more “can someone send me that link?” messages.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Does JumpKit work offline?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. JumpKit is a desktop app, so all your jumps and categories are available locally. Web links open in your default browser when you're online, but local folders and files work regardless.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is JumpKit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "JumpKit is a desktop app for Windows and Mac that lets you organize web links, local folders, and shared files into searchable categories. Instead of digging through bookmarks or folder trees, you jump to any destination in one click."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is JumpKit different from browser bookmarks?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Bookmarks live inside one browser and can't open local folders or network shares. JumpKit sits on your desktop, works across all browsers, launches both web links and local paths, and lets you organize everything into categories with search and favorites."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is JumpKit free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! JumpKit has a free tier with all the core features. The Pro plan ($10/month) adds unlimited jumps, advanced categories, and team sharing. The Team plan ($99/year) is built for small teams who want shared resource hubs."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What platforms does JumpKit support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "JumpKit runs natively on Windows and macOS. Download the installer from our GitHub releases page."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I share links with my team?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. The Team plan includes shared categories and team sync, so everyone in your organization has access to the same links, folders, and resources."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does JumpKit work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JumpKit is a desktop app, so all your jumps and categories are available locally. Web links open in your default browser when you're online, but local folders and files work regardless."
+        }
+      }
+    ]
+  }
+  </script>
+
   <!-- CTA -->
   <section class="section cta-section" id="cta">
     <div class="section-inner cta-inner">
@@ -538,7 +722,7 @@
     <div class="footer-inner">
       <div class="logo"><img id="footerLogo" src="logo-dark-mode.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
       <p class="footer-tagline">Stop searching. Start jumping.</p>
-      <div class="footer-social">
+      <div class="footer-social" style="margin-top:24px;margin-bottom:24px">
         <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
           <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
         </a>
@@ -548,6 +732,19 @@
         <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
           <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
         </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Home</a>
+          <a href="/about" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">About</a>
+          <a href="/blog" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Blog</a>
+          <a href="/affiliates" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Contact</a>
+          <a href="/privacy" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Privacy</a>
+          <a href="/terms" style="color:var(--text-muted,#7A93B4);font-size:0.85rem;text-decoration:none">Terms</a>
+        </div>
       </div>
       <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
     </div>

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{{BG_COLOR}}"/>
+      <stop offset="100%" stop-color="#1A1A2E"/>
+    </linearGradient>
+    <linearGradient id="num-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="{{ACCENT_COLOR}}"/>
+      <stop offset="100%" stop-color="{{ACCENT_COLOR}}" stop-opacity="0.75"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bg-grad)"/>
+
+  <!-- Concentric subtle rings around centre -->
+  <circle cx="600" cy="300" r="210" fill="none" stroke="{{ACCENT_COLOR}}" stroke-width="1" opacity="0.07"/>
+  <circle cx="600" cy="300" r="270" fill="none" stroke="{{ACCENT_COLOR}}" stroke-width="1" opacity="0.04"/>
+
+  <!-- Big stat number -->
+  <text x="600" y="370" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="160" font-weight="800" fill="url(#num-fill)" text-anchor="middle">{{BIG_NUMBER}}</text>
+
+  <!-- Caption — tspans injected here -->
+  <text id="caption-body" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="30" font-weight="500" fill="{{TEXT_COLOR}}" text-anchor="middle" opacity="0.85">
+{{CAPTION_LINES}}
+  </text>
+
+  <!-- Source footnote -->
+  <text x="600" y="610" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="15" font-weight="400" fill="{{TEXT_COLOR}}" opacity="0.35" text-anchor="middle">Source: {{SOURCE}}</text>
+
+  <!-- Bottom rule -->
+  <rect x="80" y="630" width="1040" height="2" rx="1" fill="{{ACCENT_COLOR}}" opacity="0.12"/>
+
+  <!-- JumpKit wordmark -->
+  <text x="1110" y="658" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="22" font-weight="700" fill="{{TEXT_COLOR}}" opacity="0.4" text-anchor="end">JumpKit</text>
+</svg>

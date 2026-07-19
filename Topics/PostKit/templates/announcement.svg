@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{{BG_COLOR}}"/>
+      <stop offset="100%" stop-color="#1A1A2E"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bg-grad)"/>
+
+  <!-- Subtle accent glow -->
+  <circle cx="1000" cy="500" r="300" fill="{{ACCENT_COLOR}}" opacity="0.04"/>
+
+  <!-- Badge top-left -->
+  <rect x="80" y="80" width="150" height="44" rx="22" fill="{{ACCENT_COLOR}}"/>
+  <text x="155" y="109" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="18" font-weight="700" fill="{{BG_COLOR}}" text-anchor="middle">{{BADGE_TEXT}}</text>
+
+  <!-- Headline text -->
+  <text id="headline-body" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="46" font-weight="700" fill="{{TEXT_COLOR}}">
+{{HEADLINE_LINES}}
+  </text>
+
+  <!-- Subtext -->
+  <text id="subtext-body" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="400" fill="{{TEXT_COLOR}}" opacity="0.6">
+{{SUBTEXT_LINES}}
+  </text>
+
+  <!-- Accent divider line -->
+  <rect x="80" y="570" width="120" height="4" rx="2" fill="{{ACCENT_COLOR}}"/>
+
+  <!-- JumpKit wordmark -->
+  <text x="1080" y="635" font-family="Inter, 'Helvetica Neue', Arial, sans-serif" font-size="24" font-weight="700" fill="{{TEXT_COLOR}}" opacity="0.45" text-anchor="end">JumpKit</text>
+</svg>

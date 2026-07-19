@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675">
+  <defs>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="{{BG_COLOR}}"/>
+      <stop offset="100%" stop-color="#1A1A2E"/>
+    </linearGradient>
+    <linearGradient id="accent-bar" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="{{ACCENT_COLOR}}"/>
+      <stop offset="100%" stop-color="{{ACCENT_COLOR}}" stop-opacity="0.4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bg-grad)"/>
+
+  <!-- Subtle corner glow -->
+  <circle cx="1050" cy="80" r="280" fill="{{ACCENT_COLOR}}" opacity="0.04"/>
+
+  <!-- Large decorative open-quote (ASCII-safe) -->
+  <text x="72" y="230" font-family="Georgia, 'Times New Roman', serif" font-size="180"
+        fill="{{ACCENT_COLOR}}" opacity="0.18">&quot;</text>
+
+  <!-- Left accent bar -->
+  <rect x="80" y="210" width="6" height="260" rx="3" fill="url(#accent-bar)"/>
+
+  <!-- Quote body text — tspans injected here -->
+  <text id="quote-body" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="44" font-weight="600" fill="{{TEXT_COLOR}}">
+{{QUOTE_TEXT_LINES}}
+  </text>
+
+  <!-- Author line -->
+  <text x="120" y="570" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="24" font-weight="500" fill="{{ACCENT_COLOR}}">&#8212; {{AUTHOR_NAME}}</text>
+
+  <!-- Bottom accent rule -->
+  <rect x="80" y="612" width="1040" height="2" rx="1" fill="{{ACCENT_COLOR}}" opacity="0.12"/>
+
+  <!-- JumpKit wordmark -->
+  <text x="1110" y="645" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+        font-size="22" font-weight="700" fill="{{TEXT_COLOR}}" opacity="0.4" text-anchor="end">JumpKit</text>
+</svg>

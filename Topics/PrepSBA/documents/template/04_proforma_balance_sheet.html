@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Pro Forma Balance Sheet — PrepSBA</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:Inter,sans-serif;font-size:10pt;color:#1F2937;background:#fff}
+  .notice{background:#EFF6FF;border-left:4px solid #3B82F6;padding:10px 16px;font-size:9pt;color:#1E40AF}
+  .page{max-width:960px;margin:0 auto;padding:40px 48px}
+  .header{display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid #3B82F6;padding-bottom:14px;margin-bottom:28px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .logo{width:36px;height:36px;background:#3B82F6;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .logo svg{width:20px;height:20px}
+  .brand-name{font-weight:700;font-size:16pt;color:#0A2540}
+  .doc-title{font-size:14pt;font-weight:600;color:#0A2540}
+  .meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:#F8FAFF;border:1px solid #DBEAFE;border-radius:8px;padding:16px;margin-bottom:28px}
+  .meta-item label{display:block;font-size:8.5pt;font-weight:600;color:#6B7280;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+  .p{color:#2563EB;font-weight:600}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px}
+  th{background:#0A2540;color:#fff;padding:10px 14px;text-align:left;font-weight:600}
+  th.num{text-align:right}
+  td{padding:8px 14px;border-bottom:1px solid #E5E7EB}
+  td.num{text-align:right}
+  td.indent{padding-left:28px;color:#374151}
+  tr.section-hdr td{background:#F1F5F9;font-weight:700;color:#0A2540;font-size:9.5pt;letter-spacing:.3px;text-transform:uppercase}
+  tr.subtotal td{background:#DBEAFE;font-weight:700;color:#1E40AF}
+  tr.total-assets td{background:#3B82F6;color:#fff;font-weight:700;font-size:11pt}
+  tr.total-assets .p{color:#DBEAFE}
+  tr.total-liab td{background:#F1F5F9;font-weight:700;color:#374151}
+  tr.grand-total td{background:#0A2540;color:#fff;font-weight:700;font-size:11pt}
+  tr.grand-total .p{color:#93C5FD}
+  .balance-note{background:#FFFBEB;border:1px solid #FCD34D;border-radius:6px;padding:12px 16px;font-size:9.5pt;margin:20px 0}
+  @media print{.notice{display:none}.page{padding:20px 28px}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="notice">PrepSBA — AI-Generated Template | Review all fields marked <strong>[IN BRACKETS]</strong> before submitting to lender</div>
+<br>
+<div class="header">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2L19 5V11C19 15.4 15.5 19.4 12 21C8.5 19.4 5 15.4 5 11V5L12 2Z" fill="white" opacity=".95"/><polyline points="8.5,12 10.5,14.5 15.5,9" stroke="#3B82F6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <span class="brand-name">PrepSBA</span>
+  </div>
+  <span class="doc-title">Pro Forma Balance Sheet</span>
+</div>
+<div class="meta">
+  <div class="meta-item"><label>Business Name</label><span class="p">[BUSINESS LEGAL NAME]</span></div>
+  <div class="meta-item"><label>Projection Period</label><span class="p">Year 1 – Year 3</span></div>
+  <div class="meta-item"><label>Date Prepared</label><span class="p">[DATE]</span></div>
+</div>
+
+<div class="balance-note">⚠️ <strong>Balance Check:</strong> Total Assets must equal Total Liabilities + Total Equity for each year. <span class="p">[VERIFY BALANCE BEFORE SUBMISSION]</span></div>
+
+<table>
+  <thead>
+    <tr>
+      <th style="width:42%">Line Item</th>
+      <th class="num">Year 1<br><small style="font-weight:400">Dec 31, [YEAR]</small></th>
+      <th class="num">Year 2<br><small style="font-weight:400">Dec 31, [YEAR]</small></th>
+      <th class="num">Year 3<br><small style="font-weight:400">Dec 31, [YEAR]</small></th>
+    </tr>
+  </thead>
+  <tbody>
+    <!-- ASSETS -->
+    <tr class="section-hdr"><td colspan="4">ASSETS</td></tr>
+    <tr class="section-hdr"><td colspan="4" style="font-size:8.5pt;padding-left:14px;background:#F8FAFF;color:#6B7280">Current Assets</td></tr>
+    <tr><td class="indent">Cash &amp; Cash Equivalents</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Accounts Receivable</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Inventory</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Prepaid Expenses</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Other Current Assets</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td style="padding-left:14px"><strong>Total Current Assets</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4" style="font-size:8.5pt;padding-left:14px;background:#F8FAFF;color:#6B7280">Fixed Assets (Net)</td></tr>
+    <tr><td class="indent">Equipment (Gross)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Real Estate / Building</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Leasehold Improvements</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Less: Accumulated Depreciation</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr><td class="indent">Other Fixed Assets</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td style="padding-left:14px"><strong>Total Fixed Assets (Net)</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr><td class="indent">Other Long-Term Assets</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="total-assets"><td><strong>TOTAL ASSETS</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <!-- LIABILITIES -->
+    <tr class="section-hdr"><td colspan="4">LIABILITIES</td></tr>
+    <tr class="section-hdr"><td colspan="4" style="font-size:8.5pt;padding-left:14px;background:#F8FAFF;color:#6B7280">Current Liabilities</td></tr>
+    <tr><td class="indent">Accounts Payable</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Accrued Liabilities</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Current Portion of Long-Term Debt (SBA)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Other Current Liabilities</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td style="padding-left:14px"><strong>Total Current Liabilities</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="section-hdr"><td colspan="4" style="font-size:8.5pt;padding-left:14px;background:#F8FAFF;color:#6B7280">Long-Term Liabilities</td></tr>
+    <tr><td class="indent">SBA Loan Balance (Long-Term Portion)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Other Long-Term Debt</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr class="subtotal"><td style="padding-left:14px"><strong>Total Long-Term Liabilities</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+    <tr class="total-liab"><td><strong>TOTAL LIABILITIES</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <!-- EQUITY -->
+    <tr class="section-hdr"><td colspan="4">EQUITY</td></tr>
+    <tr><td class="indent">Paid-in Capital / Owner's Investment</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Retained Earnings (Prior Years)</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Current Year Net Income</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td><td class="num p">[AMOUNT]</td></tr>
+    <tr><td class="indent">Less: Owner Draw / Distributions</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td><td class="num p">([AMOUNT])</td></tr>
+    <tr class="subtotal"><td style="padding-left:14px"><strong>Total Equity</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+
+    <tr class="grand-total"><td><strong>TOTAL LIABILITIES + EQUITY</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td><td class="num p"><strong>[AMOUNT]</strong></td></tr>
+  </tbody>
+</table>
+
+<p style="font-size:9pt;color:#6B7280;font-style:italic;margin-top:8px">Note: Total Liabilities + Equity must equal Total Assets for each projection year. All figures in USD. Projections based on stated assumptions — actual results may vary.</p>
+</div>
+</body>
+</html>

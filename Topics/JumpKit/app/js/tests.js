@@ -5922,25 +5922,9 @@ async function _openReleaseTestingModal() {
         window._jkWinTestResults = {};
         // 3. Clear saved results from DB (Supabase prefs)
         _clearSavedTestResults();
-        // 3b. Null out finalization timestamps on the Supabase deployments row
-        //     so a future Resume-from-HTML for the same version reflects an unfinalized state.
-        //     The row itself is preserved (Jeff explicitly asked not to delete it).
-        if (priorRecordId) {
-          try {
-            const { error: clearFinErr } = await supabaseClient
-              .from('deployments')
-              .update({
-                mac_finalized_at: null,
-                win_finalized_at: null,
-                testing_completed_at: null,
-                status: 'testing_in_progress',
-              })
-              .eq('id', priorRecordId);
-            if (clearFinErr) console.warn('[ClearSession] could not clear deployments finalization:', clearFinErr.message);
-          } catch(e) {
-            console.warn('[ClearSession] deployments finalize-clear exception:', e.message);
-          }
-        }
+        // NOTE: The Supabase deployments record is intentionally NOT modified here.
+        // It is a permanent audit trail — the All Deployments tab reads it as frozen
+        // history. Clearing the session only resets local state (localStorage + in-memory).
         // 4. Rebuild the test table so rows show as unrun
         if (typeof _buildTestRows === 'function') _buildTestRows();
         // 5. Refresh summary cards back to zero
@@ -6432,9 +6416,10 @@ async function _saveReleaseSection(mode, btn = null) {
     memberTeams: memberTeamNames,
   };
 
-  // Record changelog entry before writing
+  // Record changelog entry before writing — include platform prefix so the log shows which run this belongs to
   const _sectionDisplayLabel = mode === 'preflight' ? 'Pre-Flight' : mode === 'auto' ? 'Automatic' : mode === 'auto-manual' ? 'Auto+Manual' : 'Manual';
-  _addChangelogEntry(`Section Saved: ${_sectionDisplayLabel}`);
+  const _platformPrefix = activeRun === 'windows' ? 'Win Testing' : 'Mac Testing';
+  _addChangelogEntry(`${_platformPrefix} — Section Saved: ${_sectionDisplayLabel}`);
   // Build two-tab HTML and write
   const _saveCfg = _getReleaseState() || {};
   const _saveMeta = { deployCfg: _saveCfg, changelog: Array.isArray(_saveCfg.changelog) ? _saveCfg.changelog : [] };
@@ -7007,11 +6992,15 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
         kv('Deployed At',          _fmtTs(cfg.deployed_at)),
         kv('Deploy Account',       cfg.deploy_account || '—'),
         kv('Deploy Notes',         cfg.deploy_notes || '—'),
+        kv('Checks Passed',        cfg.deploy_checks_passed != null ? cfg.deploy_checks_passed : '—'),
+        kv('Checks Skipped',       cfg.deploy_checks_skipped != null ? cfg.deploy_checks_skipped : '—'),
+        kv('Checks To Do',         cfg.deploy_checks_todo != null ? cfg.deploy_checks_todo : '—'),
+        kv('Checks Total',         cfg.deploy_checks_total != null ? cfg.deploy_checks_total : '—'),
       ];
 
       // Fields that are surfaced above or are redundant internal state — kept out of the Other block
       const _platformKeys = ['mac_finalized_at','mac_testing_account','mac_tests_passed','mac_tests_failed','mac_tests_skipped','mac_tests_total','win_finalized_at','win_testing_account','win_tests_passed','win_tests_failed','win_tests_skipped','win_tests_total'];
-      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','vercel_commit_id','backup_path','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file'];
+      const _deployKeys = ['deployment_status','deployed_at','deploy_account','commit_id','vercel_commit_id','backup_path','deployment_folder','deploy_notes','mac_installer_path','win_installer_path','deploy_results_file','deploy_checks_passed','deploy_checks_skipped','deploy_checks_todo','deploy_checks_total'];
       const _redundantKeys = ['activeRun','macFinalized','winFinalized','folder'];
       const _sessionKeys = ['version','deploymentRecordId','resultsFilePath'];
       const _excluded = new Set(['changelog', ..._sessionKeys, ..._redundantKeys, ..._platformKeys, ..._deployKeys]);
@@ -7031,9 +7020,17 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') jkCloseTe
       if (!log.length) return `<div style="padding:28px 32px;font-size:0.85rem;color:#9ca3af">No changelog entries recorded yet.</div>`;
       const rows = log.map((entry, i) => {
         const ts = entry.ts ? new Date(entry.ts).toLocaleString('en-US',{weekday:'short',year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '—';
-        const isCreate = entry.label === 'Session Created';
-        const isFinalize = entry.label?.includes('Finalized');
-        const dot = isCreate ? '#3fbe71' : isFinalize ? '#1A4FD6' : '#f59e0b';
+        const isCreate     = entry.label === 'Session Created';
+        const isFinalize    = entry.label?.includes('Finalized');
+        const isMacTest     = entry.label?.startsWith('Mac Testing');
+        const isWinTest     = entry.label?.startsWith('Win Testing');
+        const isDeployment  = entry.label?.startsWith('Deployment');
+        const dot = isCreate ? '#3fbe71'
+          : isFinalize   ? '#1A4FD6'
+          : isMacTest    ? '#00C2C7'
+          : isWinTest    ? '#00a0a5'
+          : isDeployment ? '#9333ea'
+          : '#f59e0b';
         return `<tr style="border-bottom:1px solid #e5e7eb">
           <td style="padding:8px 12px;font-size:12px;color:#9ca3af;white-space:nowrap">${i + 1}</td>
           <td style="padding:8px 12px;font-size:12px;font-weight:700;color:#1f2937;white-space:nowrap">
