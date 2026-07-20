@@ -12,8 +12,8 @@
   "extraMetadata": {
     "jkTestBuild": true
   },
-  "executableName": "jumpkit-test",
   "win": {
+    "executableName": "jumpkit-test",
     "icon": "assets/icon.ico",
     "target": [
       { "target": "nsis", "arch": ["x64"] }

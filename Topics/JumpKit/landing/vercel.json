@@ -6,6 +6,10 @@
     { "source": "/reset-password", "destination": "/reset-password.html" },
     { "source": "/blog", "destination": "/blog/index.html" },
     { "source": "/blog/introducing-jumpkit", "destination": "/blog/introducing-jumpkit.html" },
-    { "source": "/affiliates", "destination": "/affiliates.html" }
+    { "source": "/affiliates", "destination": "/affiliates.html" },
+    { "source": "/about", "destination": "/about.html" },
+    { "source": "/contact", "destination": "/contact.html" },
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/terms", "destination": "/terms.html" }
   ]
 }

@@ -180,7 +180,7 @@ async function syncSharedJumps() {
     // 2. For each team: fetch shared_columns + shared_jumps
     const { data: remoteCols = [], error: colErr } = await supabaseClient
       .from('shared_columns')
-      .select('id,team_id,name,position,created_by,created_at,updated_at')
+      .select('id,team_id,name,position,created_by,created_at')
       .in('team_id', teamIds)
       .order('position')
       .limit(500);
@@ -400,6 +400,8 @@ async function syncSharedJumps() {
     );
     const _newJumpsByTeam = {}; // teamId → [jumpName, ...]
     for (const rj of remoteJumps) {
+      // Skip remote records with no name or url — they are corrupt/incomplete and would create ghost cards
+      if (!rj.name || !rj.url) { console.warn('[syncSharedJumps] skipping ghost remote jump (no name/url):', rj.id); continue; }
       // Match by supabaseId only — never by local id to avoid ghost rows
       const existing = existingJumps.find(j => j.supabaseId && j.supabaseId === rj.id);
       const preservedHotkey = existing?.hotkey || hotkeyMap[rj.id] || '';
@@ -535,6 +537,16 @@ async function syncSharedJumps() {
     // Sync aggregate stats for Team ROI (unlimited users only)
     try { await syncMemberStats(); } catch (_) {}
     try { await syncPersonalStats(); } catch (_) {}
+
+    // Sync succeeded — clear any stale sync-failed notifications so they don't persist
+    try {
+      localStorage.removeItem('jk_sync_fail_notif_ts');
+      if (window.getNotifications && window.saveNotifications) {
+        const notifs = window.getNotifications().filter(n => n.type !== 'sync-failed');
+        window.saveNotifications(notifs);
+        if (typeof updateNotifBadge === 'function') updateNotifBadge();
+      }
+    } catch (_) {}
   } catch (err) {
     console.warn('[JumpKit Sync] Error:', err.message);
     // Notify user of sync failure — throttled to once per hour

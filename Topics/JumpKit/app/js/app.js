@@ -553,12 +553,12 @@ document.querySelectorAll('.dropdown-item[data-page]').forEach(btn => {
 // ── Logout ────────────────────────────────────────────────────────
 document.getElementById('logoutBtn').addEventListener('click', async () => {
   _clearSessionLockInterval();
-  // Clear session lock record before signing out
+  // Clear session lock record before signing out — delete by user_id so stale
+  // rows left from dev-mode runs (no session token written) are also cleaned up.
   try {
-    const tok = sessionStorage.getItem('jk_session_token');
-    if (tok && _supabaseUser?.id) {
+    if (_supabaseUser?.id) {
       await supabaseClient.from('user_sessions')
-        .delete().eq('user_id', _supabaseUser.id).eq('session_token', tok);
+        .delete().eq('user_id', _supabaseUser.id);
     }
   } catch (_) {}
   try { await DB.persistUserData(currentUser?.id); } catch (_) {}
@@ -1613,6 +1613,8 @@ window.saveAccountPrefs = function saveAccountPrefs() {
   }
   // Re-render jumps live if on jumps page so description/hotkey toggles apply immediately
   if (activePage === 'jumps' && typeof renderColumns === 'function') renderColumns();
+  // Update notification badge immediately so notifications pref toggle takes effect live
+  updateNotifBadge();
 }
 window.openFeedbackModal = function openFeedbackModal() {
   const body = `
@@ -2699,11 +2701,14 @@ window.markAllNotificationsRead = function markAllNotificationsRead() {
   updateNotifBadge();
 };
 window.updateNotifBadge = function updateNotifBadge() {
-  const total = getNotifications().length;
   const btn = document.getElementById('notifBtn');
   if (!btn) return;
   // Remove existing badge
   btn.querySelector('.notif-badge')?.remove();
+  // Respect notifications pref — if disabled, never show the red bubble
+  const _notifPref = currentUser ? DB.getPrefs(currentUser.id)?.notifications : true;
+  if (_notifPref === false) return;
+  const total = getNotifications().length;
   if (total > 0) {
     const badge = document.createElement('span');
     badge.className = 'notif-badge';

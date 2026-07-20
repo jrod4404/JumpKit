@@ -121,6 +121,8 @@ const DB = (() => {
       const columns = this.getColumns(userId);
       const jumps = this.getJumps(userId);
       const prefs = this._cache.prefs;
+      const _persistArchived = jumps.filter(j => j.isArchived).map(j => j.name);
+      console.log('[ARCHIVE-DEBUG] persistUserData: about to write archived =', _persistArchived, new Error().stack.split('\n')[2]?.trim());
 
       // Always write the local fallback first. It is harmless when SQLite works,
       // and it protects imports when a packaged/dev build cannot load better-sqlite3.
@@ -154,6 +156,8 @@ const DB = (() => {
     async saveRecoverySnapshot(userId, reason = 'manual') {
       if (!userId) return false;
       try {
+        const archived = this.getJumps(userId).filter(j => j.isArchived).map(j => j.name);
+        console.log(`[ARCHIVE-DEBUG] saveRecoverySnapshot(${reason}): archived in cache =`, archived);
         const snapshot = {
           version: 1,
           reason,
@@ -189,6 +193,9 @@ const DB = (() => {
         }
       } catch (_) {}
       if (!snapshot || snapshot.userId !== userId) return false;
+      const snapArchivedNames = (snapshot.jumps || []).filter(j => j.isArchived).map(j => j.name);
+      console.log('[ARCHIVE-DEBUG] _restoreRecoverySnapshot: snapshot archived =', snapArchivedNames);
+      console.log('[ARCHIVE-DEBUG] _restoreRecoverySnapshot: cache has personal data?', hasPersonalData(this._cache.columns), hasPersonalData(this._cache.jumps));
 
       // Strip any team-linked rows that may have been saved by older versions.
       const snapColumns = normalizeSnapshotRows(snapshot.columns, userId).filter(c => !c.teamId);
@@ -398,6 +405,8 @@ const DB = (() => {
           }));
           this._cache.clickLog = log     || [];
           this._cache.prefs    = prefs   || defaultPrefs();
+          const _initArchived = this._cache.jumps.filter(j => j.userId === userId && j.isArchived).map(j => j.name);
+          console.log('[ARCHIVE-DEBUG] init: loaded from SQLite, archived =', _initArchived);
 
           // If Electron IPC exists but SQLite is unavailable, getters return empty
           // arrays. In that case use the same local fallback as browser mode.
@@ -655,6 +664,10 @@ const DB = (() => {
     },
 
     updateJump(userId, id, data) {
+      if (Object.prototype.hasOwnProperty.call(data, 'isArchived')) {
+        const j = this._cache.jumps.find(j => j.id === id && j.userId === userId);
+        console.log(`[ARCHIVE-DEBUG] updateJump: ${j?.name} → isArchived=${data.isArchived}`, new Error().stack.split('\n')[2]?.trim());
+      }
       const idx = this._cache.jumps.findIndex(j => j.id === id && j.userId === userId);
       if (idx < 0) return null;
       if (Object.prototype.hasOwnProperty.call(data, 'columnId')) {

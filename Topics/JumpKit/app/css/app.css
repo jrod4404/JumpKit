@@ -418,8 +418,10 @@
 .jump-item:last-child { border-bottom: none; }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
-.jump-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .jump-desc { font-size: 0.75rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.jump-hotkey-pill { font-size: 0.68rem; font-family: monospace; color: var(--text-dim); background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; flex-shrink: 0; }
+.jump-hotkey-inline { font-size: 0.68rem; font-family: monospace; color: var(--text-dim); margin-top: 2px; }
 .jump-fav { font-size: 0.8rem; flex-shrink: 0; }
 .empty-col { padding: 32px 12px; text-align: center; color: var(--text-dim); font-size: 0.82rem; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; }
 .empty-col .ti { font-size: 1.4rem; }

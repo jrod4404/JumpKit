@@ -4,6 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Blog — JumpKit</title>
+  <meta name="description" content="Updates, guides, and stories from the JumpKit team. Learn how to organize your links, folders, and team resources faster." />
+  <link rel="canonical" href="https://jumpkit.app/blog" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="JumpKit Blog — Updates & Guides" />
+  <meta property="og:description" content="Updates, guides, and stories from the JumpKit team." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JumpKit Blog — Updates & Guides" />
+  <meta name="twitter:description" content="Updates, guides, and stories from the JumpKit team." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
@@ -14,6 +31,10 @@
   </style>
   <link rel="stylesheet" href="../style.css" />
   <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
     /* ── Blog-specific styles ── */
     .blog-hero {
       padding: 120px 24px 60px;
@@ -222,11 +243,12 @@
   </section>
 
   <!-- FOOTER -->
+  <!-- FOOTER -->
   <footer class="footer">
     <div class="footer-inner">
       <div class="logo"><img id="footerLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
       <p class="footer-tagline">Stop searching. Start jumping.</p>
-      <div class="footer-social">
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
         <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
           <svg class="ti ti-brand-x"><use href="../assets/tabler-sprite.svg#tabler-brand-x"/></svg>
         </a>
@@ -237,7 +259,21 @@
           <svg class="ti ti-brand-linkedin"><use href="../assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
         </a>
       </div>
-      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">&copy; 2026 JumpKit. All rights reserved.</p>
     </div>
   </footer>
 
@@ -255,8 +291,8 @@
         document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
         const navLogo = document.getElementById('navLogo');
         const footerLogo = document.getElementById('footerLogo');
-        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
-        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light-mode.png';
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
       };
       const toggle = () => {
         const next = isDark() ? 'light' : 'dark';

@@ -118,7 +118,8 @@ function getSearchTerm() {
 }
 
 function getFilteredJumps() {
-  let all = DB.getActiveJumps(currentUser.id);
+  // Use getRenderableActiveJumps to exclude jumps with invalid/missing columnIds
+  let all = DB.getRenderableActiveJumps ? DB.getRenderableActiveJumps(currentUser.id) : DB.getActiveJumps(currentUser.id);
   if (currentJumpFilter === 'favorites') all = all.filter(j => j.favorite);
   else if (currentJumpFilter === 'recent') {
     const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
@@ -244,7 +245,8 @@ function renderArchivedInline() {
 }
 
 window.doUnarchive = function doUnarchive(id) {
-  DB.updateJump(currentUser.id, id, { isArchived: false });
+  // Reset lastUsed to now so auto-archive clock restarts from the restore date
+  DB.updateJump(currentUser.id, id, { isArchived: false, lastUsed: Date.now() });
   Modal.close();
   setTimeout(() => {
     const row = document.querySelector(`.archive-row[data-jid="${id}"]`);
@@ -429,21 +431,20 @@ function bindJumpEvents() {
 const FAVE_COLORS = ['#ff4d4f','#ff7a45','#faad14','#d4b106','#a0d911','#389e0d','#69c0ff','#1890ff','#9254de','#eb2f96'];
 
 function jumpItemHTML(j, colIndex) {
+  // Skip ghost entries that have no name or url — these can appear from stale sync data
+  if (!j.name && !j.url) return '';
   const iconName = isURL(j.url) ? 'link' : 'folder';
   const iconColor = j.favorite ? `color:${FAVE_COLORS[colIndex % FAVE_COLORS.length]}` : '';
   const prefs = DB.getPrefs(currentUser.id);
   const isShared = j.isShared || j.teamId;
+  const displayName = esc(j.name || j.url || 'Untitled');
   return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
     <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg></span>
     <div class="jump-info">
-      <div class="jump-name">
-        ${esc(j.name)}
-
-      </div>
+      <div class="jump-name">${displayName}</div>
+      ${prefs.showHotkey && j.hotkey ? `<div class="jump-hotkey-inline">${esc(j.hotkey)}</div>` : ''}
       ${prefs.showDescription && j.description ? `<div class="jump-desc">${esc(j.description)}</div>` : ''}
     </div>
-    ${prefs.showHotkey && j.hotkey ? `<span class="jump-hotkey-pill">${esc(j.hotkey)}</span>` : ''}
-
   </div>`;
 }
 
