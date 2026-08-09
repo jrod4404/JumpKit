@@ -2489,9 +2489,9 @@ function injectToastStyles() {
     /* Post card review elements */
     .post-proposed-date { display:flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--accent); }
     .post-proposed-missing { color:var(--text-dim); font-weight:400; }
-    .post-card-scheduled { border-color:rgba(107,84,199,0.35) !important; }
-    .btn-schedule { background:rgba(107,84,199,0.12); color:var(--accent); border:1px solid rgba(107,84,199,0.3); font-weight:600; cursor:pointer; border-radius:6px; transition:all .15s; }
-    .btn-schedule:hover { background:rgba(107,84,199,0.22); border-color:var(--accent); }
+    .post-card-scheduled { border-color:color-mix(in srgb, var(--accent) 35%, transparent) !important; }
+    .btn-schedule { background:var(--accent-glow); color:var(--accent-light); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); font-weight:600; cursor:pointer; border-radius:6px; transition:all .15s; }
+    .btn-schedule:hover { background:color-mix(in srgb, var(--accent) 22%, transparent); border-color:var(--accent); }
     .btn-publish { background:rgba(34,197,94,0.07); color:rgba(34,197,94,0.75); border:1px solid rgba(34,197,94,0.18); font-weight:600; cursor:pointer; border-radius:6px; transition:all .15s; }
     .btn-publish:hover { background:rgba(34,197,94,0.14); border-color:rgba(34,197,94,0.35); color:var(--success); }
     .btn-gen-img { background:rgba(168,85,247,0.12); color:#a855f7; border:1px solid rgba(168,85,247,0.3); font-weight:600; cursor:pointer; border-radius:6px; transition:all .15s; }
@@ -2507,7 +2507,7 @@ function injectToastStyles() {
     .post-notes-details summary.post-notes-summary { font-size:11px; color:var(--text-dim); cursor:pointer; user-select:none; }
     .post-notes-details[open] summary { color:var(--text-muted); }
     /* Seed detail modal icon chip */
-    .modal-seed-icon { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:7px; background:rgba(107,84,199,0.15); flex-shrink:0; margin-right:4px; }
+    .modal-seed-icon { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:7px; background:var(--grad-soft); flex-shrink:0; margin-right:4px; }
     .seed-detail-layout { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
     @media (max-width:768px) { .seed-detail-layout { grid-template-columns:1fr; } }
     .seed-meta-row { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }

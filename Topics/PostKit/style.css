@@ -5,9 +5,13 @@
   --bg-card: #19192a;
   --bg-hover: #21213a;
   --border: #2a2a42;
-  --accent: #6b54c7;
-  --accent-light: #8b72e0;
-  --accent-glow: rgba(107,84,199,0.13);
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+  --accent-hover: #7c3aed;
+  --accent-glow: rgba(139,92,246,0.13);
+  --grad: linear-gradient(135deg, #4C1D95 0%, #8B5CF6 55%, #C4B5FD 100%);
+  --grad-text: linear-gradient(135deg, #A78BFA, #C4B5FD);
+  --grad-soft: linear-gradient(135deg, rgba(124,58,237,0.16), rgba(196,181,253,0.16));
   --text: #e8e8f2;
   --text-muted: #7878a8;
   --text-dim: #4a4a72;
@@ -28,9 +32,13 @@
   --bg-card: #ffffff;
   --bg-hover: #f0f0f8;
   --border: #dddde8;
-  --accent: #6b54c7;
-  --accent-light: #5540a8;
-  --accent-glow: rgba(107,84,199,0.09);
+  --accent: #7c3aed;
+  --accent-light: #8b5cf6;
+  --accent-hover: #6d28d9;
+  --accent-glow: rgba(124,58,237,0.09);
+  --grad: linear-gradient(135deg, #6D28D9 0%, #8B5CF6 55%, #C4B5FD 100%);
+  --grad-text: linear-gradient(135deg, #7C3AED, #A78BFA);
+  --grad-soft: linear-gradient(135deg, rgba(124,58,237,0.10), rgba(196,181,253,0.10));
   --text: #1a1a2e;
   --text-muted: #5a5a80;
   --text-dim: #9898b8;
@@ -217,7 +225,8 @@ html, body {
 
 .nav-item.active {
   color: var(--accent-light);
-  background: rgba(107,84,199,0.22);
+  background: var(--grad-soft);
+  font-weight: 600;
 }
 
 .nav-icon {
@@ -555,15 +564,15 @@ html, body {
 }
 
 .btn-primary {
-  background: var(--bg-card);
-  color: var(--text-muted);
-  border: 1px solid var(--border);
+  background: var(--grad);
+  color: #fff;
+  border: none;
   box-shadow: none;
 }
 .btn-primary:hover {
-  background: var(--bg-hover);
-  color: var(--accent-light);
-  border-color: var(--border);
+  background: var(--grad);
+  filter: brightness(1.08);
+  color: #fff;
 }
 .btn-primary:active { transform: scale(0.98); }
 
@@ -647,7 +656,7 @@ html, body {
   border: none;
   cursor: pointer;
   white-space: nowrap;
-  background: linear-gradient(135deg, #6b54c7 0%, #8b72e0 60%, #a78bfa 100%);
+  background: var(--grad);
   color: #fff;
   box-shadow: none;
   transition: all 0.15s ease;
@@ -656,7 +665,8 @@ html, body {
 }
 .btn-finalize svg { flex-shrink: 0; }
 .btn-finalize:hover {
-  background: linear-gradient(135deg, #7c62d8 0%, #9c82f0 60%, #b89dff 100%);
+  background: var(--grad);
+  filter: brightness(1.08);
   box-shadow: none;
 }
 .btn-finalize:active { transform: scale(0.98); }

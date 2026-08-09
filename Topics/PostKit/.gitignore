@@ -1,0 +1,5 @@
+node_modules/
+media/*.png
+media/*.jpg
+media/*.jpeg
+.DS_Store
