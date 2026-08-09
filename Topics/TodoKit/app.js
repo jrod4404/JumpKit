@@ -2748,13 +2748,22 @@ function initTheme() {
         ? '<svg class="ti"><use href="assets/tabler-icons.svg#tabler-moon"/></svg>'
         : '<svg class="ti"><use href="assets/tabler-icons.svg#tabler-sun"/></svg>';
     };
+    // Swap sidebar logo for the active theme (dark-mode logo has light text, light-mode has dark text)
+    const renderLogo = () => {
+      const logo = document.getElementById('sidebarLogo');
+      if (!logo) return;
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      logo.src = dark ? 'assets/todokit-logo-dark-mode.png' : 'assets/todokit-logo-light-mode.png';
+    };
     renderIcon();
+    renderLogo();
     toggle.addEventListener('click', () => {
       const current = document.documentElement.getAttribute('data-theme') || 'dark';
       const next = current === 'light' ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('todokit-theme', next);
       renderIcon();
+      renderLogo();
       renderProjectView();
     });
   }

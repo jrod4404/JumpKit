@@ -150,7 +150,7 @@ input, select, textarea { font-family: inherit; }
   color: #0A1422; font-weight: 800; font-size: 0.95rem;
   flex-shrink: 0;
 }
-.sidebar-logo .logo-name { font-weight: 700; font-size: 1.05rem; white-space: nowrap; }
+.sidebar-logo .sidebar-logo-img { height: 30px; width: auto; display: block; flex-shrink: 0; }
 .sidebar-nav { flex: 1; overflow-y: auto; }
 .sidebar-section-label {
   font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em;
@@ -206,7 +206,7 @@ input, select, textarea { font-family: inherit; }
 /* Collapsed sidebar */
 .sidebar.collapsed { width: 56px; min-width: 56px; max-width: 56px; }
 .sidebar.collapsed .sidebar-logo { justify-content: center; padding: 4px 0 10px; }
-.sidebar.collapsed .sidebar-logo .logo-name { display: none; }
+.sidebar.collapsed .sidebar-logo .sidebar-logo-img { display: none; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 8px 0; gap: 0; }
 .sidebar.collapsed .nav-label { display: none; }
 .sidebar.collapsed .nav-badge { display: none; }
