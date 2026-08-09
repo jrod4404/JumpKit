@@ -339,6 +339,10 @@ img { max-width: 100%; }
 .hero-screenshot-light { display: none; }
 [data-theme="light"] .hero-screenshot-light { display: block; }
 [data-theme="light"] .hero-screenshot-dark  { display: none; }
+picture.hero-screenshot-dark, picture.hero-screenshot-light { display: block; width: 100%; }
+picture.hero-screenshot-light { display: none; }
+[data-theme="light"] picture.hero-screenshot-light { display: block; }
+[data-theme="light"] picture.hero-screenshot-dark { display: none; }
 .dot { width: 12px; height: 12px; border-radius: 50%; }
 .dot.red    { background: #FF5F57; }
 .dot.yellow { background: #FFBD2E; }

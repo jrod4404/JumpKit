@@ -161,12 +161,24 @@
     <div class="hero-visual">
       <div class="hero-screenshots-stack">
         <div class="hero-screenshot-wrap" onclick="openLightboxThemed(this)">
-          <img src="assets/hero-mac-dark.jpg?v=2" alt="JumpKit macOS" width="2000" height="785" fetchpriority="high" class="hero-screenshot hero-screenshot-dark" />
-          <img src="assets/hero-mac-light.jpg?v=2" alt="JumpKit macOS" width="2000" height="785" fetchpriority="high" class="hero-screenshot hero-screenshot-light" />
+          <picture class="hero-screenshot-dark">
+            <source srcset="assets/hero-mac-dark.webp?v=3" type="image/webp" />
+            <img src="assets/hero-mac-dark.jpg?v=2" alt="JumpKit macOS" width="2000" height="785" fetchpriority="high" class="hero-screenshot" />
+          </picture>
+          <picture class="hero-screenshot-light">
+            <source srcset="assets/hero-mac-light.webp?v=3" type="image/webp" />
+            <img src="assets/hero-mac-light.jpg?v=2" alt="JumpKit macOS" width="2000" height="785" fetchpriority="high" class="hero-screenshot" />
+          </picture>
         </div>
         <div class="hero-screenshot-wrap hero-screenshot-win" onclick="openLightboxThemed(this)">
-          <img src="assets/hero-windows-dark.jpg?v=6" alt="JumpKit Windows" width="2000" height="788" fetchpriority="high" class="hero-screenshot hero-screenshot-dark" />
-          <img src="assets/hero-windows-light.jpg?v=6" alt="JumpKit Windows" width="2000" height="788" fetchpriority="high" class="hero-screenshot hero-screenshot-light" />
+          <picture class="hero-screenshot-dark">
+            <source srcset="assets/hero-windows-dark.webp?v=6" type="image/webp" />
+            <img src="assets/hero-windows-dark.jpg?v=6" alt="JumpKit Windows" width="2000" height="788" fetchpriority="high" class="hero-screenshot" />
+          </picture>
+          <picture class="hero-screenshot-light">
+            <source srcset="assets/hero-windows-light.webp?v=6" type="image/webp" />
+            <img src="assets/hero-windows-light.jpg?v=6" alt="JumpKit Windows" width="2000" height="788" fetchpriority="high" class="hero-screenshot" />
+          </picture>
         </div>
       </div>
     </div>
