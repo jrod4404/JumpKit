@@ -449,7 +449,6 @@ function renderSidebar() {
     const count = state.tasks.filter(t => t.projectId === p.id).length;
     return `<li data-id="${p.id}" class="${p.id === activeProjectId ? 'active' : ''}" draggable="true" onclick="selectProject('${p.id}')">
       <span class="proj-drag-handle" title="Drag to reorder">⠇</span>
-      <span class="proj-dot"></span>
       <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</span>
       <span class="nav-badge">${count}</span>
     </li>`;

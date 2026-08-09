@@ -14,6 +14,7 @@
   --grad-text:  linear-gradient(135deg, #34D399, #86EFAC);
   --grad-soft:  linear-gradient(135deg, rgba(22,163,74,0.16), rgba(134,239,172,0.16));
   --radius:   10px;
+  --radius-sm: 8px;
   --radius-lg: 16px;
   --sidebar-w: 200px;
   --topbar-h:  58px;
@@ -45,7 +46,7 @@
   --text-light:   #5A6A7E;
   --text-lighter: #3E4A5E;
   --border-light: rgba(255,255,255,0.06);
-  --table-header-bg: #0A1422;
+  --table-header-bg: #16233A;
 }
 [data-theme="light"] {
   color-scheme: light;
@@ -73,7 +74,7 @@
   --text-light:   #9AAABB;
   --text-lighter: #B8C2D0;
   --border-light: rgba(0,0,0,0.05);
-  --table-header-bg: #E8EDE4;
+  --table-header-bg: #D6DEd0;
 }
 
 /* ── Priority / status tokens (theme-aware) ── */
@@ -341,7 +342,7 @@ td .cell-sub { font-size: 0.72rem; color: var(--text-dim); }
 /* TodoKit task table */
 .task-table-wrap { flex: 1; overflow-y: auto; padding: 20px 0; }
 .task-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
-.task-table thead th { padding: 12px 16px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-dim); background: var(--table-header-bg); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.task-table thead th { padding: 12px 16px; font-size: 11.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); background: var(--table-header-bg); text-align: left; border-bottom: 1px solid var(--border-input); white-space: nowrap; }
 .th-sortable { cursor: pointer; user-select: none; }
 .th-sortable:hover { background: var(--border); color: var(--text); }
 .th-sortable.sort-active { color: var(--accent); }
@@ -418,7 +419,7 @@ td .cell-sub { font-size: 0.72rem; color: var(--text-dim); }
 .search-icon { position: absolute; left: 10px; display: flex; align-items: center; color: var(--text-muted); pointer-events: none; }
 .search-icon svg { display: block; }
 .search-magnifying-icon { opacity: 0.9; }
-.search-input { padding: 7px 12px 7px 30px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; width: 220px; background: var(--bg-input); color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+.search-input { padding: 7px 12px 7px 30px; border: 1px solid var(--border); border-radius: 999px; font-size: 13px; width: 220px; background: var(--bg-input); color: var(--text); outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
 .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
 .saved-filter-wrap { display: flex; align-items: center; }
 .saved-filter-wrap .filter-select { min-width: 222px; max-width: 222px; }
@@ -632,7 +633,6 @@ td .cell-sub { font-size: 0.72rem; color: var(--text-dim); }
 .project-list li:hover .proj-drag-handle { opacity: 0.5; }
 .project-list li.proj-dragging { opacity: 0.4; background: var(--bg-hover); }
 .project-list li.proj-drag-over { background: var(--accent-light); color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); }
-.project-list li .proj-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .project-list li.no-projects { font-style: italic; color: var(--text-dim); cursor: default; }
 
 /* ── Scrollbar ── */
