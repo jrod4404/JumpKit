@@ -20,7 +20,7 @@ const _oauthSessions = {};
 function createOAuthSession(redirectAfter) {
   const { verifier, challenge } = generatePkce();
   const state = generateState();
-  _oauthSessions[state] = { verifier, challenge, createdAt: Date.now() };
+  _oauthSessions[state] = { verifier, challenge, projectId: redirectAfter || null, createdAt: Date.now() };
   // Clean up old sessions (older than 10 min)
   for (const [k, v] of Object.entries(_oauthSessions)) {
     if (Date.now() - v.createdAt > 600000) delete _oauthSessions[k];
@@ -37,6 +37,11 @@ function consumeOAuthSession(state) {
 
 // ── Settings helpers (passed in from server) ─────────────────────────────────
 
+// App-level credentials are stored in the global settings table (client_id/secret
+// are app properties). Project-scoped tokens live in the channel config (passed
+// in as `credentials` / `projectId`). `getSetting`/`setSetting` remain for
+// app-level settings only.
+
 function getSetting(db, key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
   return row ? row.value : null;
@@ -44,6 +49,35 @@ function getSetting(db, key) {
 
 function setSetting(db, key, value) {
   db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
+}
+
+// Project-scoped channel config helpers. `projectId` may be null/undefined in
+// which case we fall back to the legacy global settings keys (backward compat).
+function getChannelConfig(db, projectId, platform) {
+  if (!projectId) {
+    // Legacy fallback — read from settings table
+    const cfg = {};
+    const access = getSetting(db, `${platform}.access_token`);
+    const refresh = getSetting(db, `${platform}.refresh_token`);
+    if (access) cfg.access_token = access;
+    if (refresh) cfg.refresh_token = refresh;
+    return cfg;
+  }
+  const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
+  if (!row) return {};
+  try { return JSON.parse(row.config || '{}'); } catch { return {}; }
+}
+
+function setChannelConfig(db, projectId, platform, configObj) {
+  if (!projectId) {
+    if (configObj.access_token !== undefined) setSetting(db, `${platform}.access_token`, configObj.access_token);
+    if (configObj.refresh_token !== undefined) setSetting(db, `${platform}.refresh_token`, configObj.refresh_token);
+    return;
+  }
+  const existing = getChannelConfig(db, projectId, platform);
+  const merged = { ...existing, ...configObj };
+  db.prepare(`UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?`)
+    .run(JSON.stringify(merged), Date.now(), projectId, platform);
 }
 
 // ── OAuth URL builder ───────────────────────────────────────────────────────
@@ -120,7 +154,7 @@ function httpsPostJson(url, body, headers = {}) {
   });
 }
 
-async function exchangeCodeForToken(db, code, redirectUri, verifier) {
+async function exchangeCodeForToken(db, code, redirectUri, verifier, projectId) {
   const clientId = getSetting(db, 'x.client_id');
   const clientSecret = getSetting(db, 'x.client_secret');
   if (!clientId) throw new Error('X client_id not configured');
@@ -151,8 +185,9 @@ async function exchangeCodeForToken(db, code, redirectUri, verifier) {
   return result.json; // { access_token, refresh_token, expires_in, ... }
 }
 
-async function refreshAccessToken(db) {
-  const refreshToken = getSetting(db, 'x.refresh_token');
+async function refreshAccessToken(db, projectId) {
+  const creds = getChannelConfig(db, projectId, 'x');
+  const refreshToken = creds.refresh_token;
   const clientId = getSetting(db, 'x.client_id');
   if (!refreshToken || !clientId) return null;
 
@@ -169,16 +204,19 @@ async function refreshAccessToken(db) {
   }
 
   const tokens = result.json;
-  setSetting(db, 'x.access_token', tokens.access_token);
-  if (tokens.refresh_token) setSetting(db, 'x.refresh_token', tokens.refresh_token);
+  setChannelConfig(db, projectId, 'x', {
+    access_token: tokens.access_token,
+    ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+  });
   return tokens.access_token;
 }
 
 // ── Publishing ──────────────────────────────────────────────────────────────
 
-async function publishTweet(db, text, mediaPaths) {
-  let accessToken = getSetting(db, 'x.access_token');
-  if (!accessToken) throw new Error('X not connected. Connect your account in Settings.');
+async function publishTweet(db, text, mediaPaths, projectId) {
+  const creds = getChannelConfig(db, projectId, 'x');
+  let accessToken = creds.access_token;
+  if (!accessToken) throw new Error('X not connected for this project. Connect your account in Channels.');
 
   // Upload media if any
   const mediaIds = [];
@@ -199,7 +237,7 @@ async function publishTweet(db, text, mediaPaths) {
 
   if (result.status === 401) {
     // Token expired — try refresh once
-    const newToken = await refreshAccessToken(db);
+    const newToken = await refreshAccessToken(db, projectId);
     if (newToken) {
       const retry = await httpsPostJson('https://api.twitter.com/2/tweets', tweetBody, {
         'Authorization': `Bearer ${newToken}`,
@@ -339,7 +377,9 @@ function startSchedulerWorker(db) {
         console.log(`[scheduler] Publishing X post ${post.id}...`);
         let mediaPaths = [];
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
-        const result = await publishTweet(db, post.post_text, mediaPaths);
+        // Resolve the post's owning project → its X channel token
+        const projectId = post.project_id || 'proj_default';
+        const result = await publishTweet(db, post.post_text, mediaPaths, projectId);
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', now, now, post.id);
         console.log(`[scheduler] Published: ${result.url}`);
@@ -363,4 +403,6 @@ module.exports = {
   startSchedulerWorker,
   getSetting,
   setSetting,
+  getChannelConfig,
+  setChannelConfig,
 };

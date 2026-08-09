@@ -4,6 +4,10 @@ const crypto = require('crypto');
 
 // ── Settings helpers ──────────────────────────────────────────────────────────
 
+// App-level credentials live in the settings table (client_id/secret). Project-
+// scoped tokens live in the channel config (passed as `projectId`). Legacy
+// fallback keeps the old settings-table keys working for project-less calls.
+
 function getSetting(db, key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
   return row ? row.value : null;
@@ -13,13 +17,42 @@ function setSetting(db, key, value) {
   db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
 }
 
+function getChannelConfig(db, projectId, platform) {
+  if (!projectId) {
+    const cfg = {};
+    const access = getSetting(db, `${platform}.access_token`);
+    const refresh = getSetting(db, `${platform}.refresh_token`);
+    const memberUrn = getSetting(db, `${platform}.member_urn`);
+    if (access) cfg.access_token = access;
+    if (refresh) cfg.refresh_token = refresh;
+    if (memberUrn) cfg.member_urn = memberUrn;
+    return cfg;
+  }
+  const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
+  if (!row) return {};
+  try { return JSON.parse(row.config || '{}'); } catch { return {}; }
+}
+
+function setChannelConfig(db, projectId, platform, configObj) {
+  if (!projectId) {
+    if (configObj.access_token !== undefined) setSetting(db, `${platform}.access_token`, configObj.access_token);
+    if (configObj.refresh_token !== undefined) setSetting(db, `${platform}.refresh_token`, configObj.refresh_token);
+    if (configObj.member_urn !== undefined) setSetting(db, `${platform}.member_urn`, configObj.member_urn);
+    return;
+  }
+  const existing = getChannelConfig(db, projectId, platform);
+  const merged = { ...existing, ...configObj };
+  db.prepare(`UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?`)
+    .run(JSON.stringify(merged), Date.now(), projectId, platform);
+}
+
 // ── State management (in-memory, cleared on restart) ─────────────────────────
 
 const _oauthStates = {};
 
-function generateState() {
+function generateState(projectId) {
   const state = crypto.randomBytes(16).toString('hex');
-  _oauthStates[state] = { createdAt: Date.now() };
+  _oauthStates[state] = { createdAt: Date.now(), projectId: projectId || null };
   // Clean up old states (>10 min)
   for (const [k, v] of Object.entries(_oauthStates)) {
     if (Date.now() - v.createdAt > 600000) delete _oauthStates[k];
@@ -28,9 +61,10 @@ function generateState() {
 }
 
 function consumeState(state) {
-  const valid = !!_oauthStates[state];
+  const valid = _oauthStates[state];
   delete _oauthStates[state];
-  return valid;
+  if (!valid) return false;
+  return valid.projectId || 'proj_default';
 }
 
 // ── HTTP helpers ──────────────────────────────────────────────────────────────
@@ -154,8 +188,9 @@ async function exchangeCodeForToken(db, code, redirectUri) {
   return result.json; // { access_token, expires_in, refresh_token?, ... }
 }
 
-async function refreshAccessToken(db) {
-  const refreshToken = getSetting(db, 'linkedin.refresh_token');
+async function refreshAccessToken(db, projectId) {
+  const creds = getChannelConfig(db, projectId, 'linkedin');
+  const refreshToken = creds.refresh_token;
   const clientId = getSetting(db, 'linkedin.client_id');
   const clientSecret = getSetting(db, 'linkedin.client_secret');
   if (!refreshToken || !clientId || !clientSecret) return null;
@@ -174,17 +209,19 @@ async function refreshAccessToken(db) {
   }
 
   const tokens = result.json;
-  setSetting(db, 'linkedin.access_token', tokens.access_token);
-  if (tokens.refresh_token) setSetting(db, 'linkedin.refresh_token', tokens.refresh_token);
+  setChannelConfig(db, projectId, 'linkedin', {
+    access_token: tokens.access_token,
+    ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+  });
   return tokens.access_token;
 }
 
 // ── Get LinkedIn member URN (required for posting) ────────────────────────────
 
-async function getMemberUrn(db, accessToken) {
-  // Check cache first
-  const cached = getSetting(db, 'linkedin.member_urn');
-  if (cached) return cached;
+async function getMemberUrn(db, accessToken, projectId) {
+  // Check cache first (stored in channel config)
+  const creds = getChannelConfig(db, projectId, 'linkedin');
+  if (creds.member_urn) return creds.member_urn;
 
   const result = await httpsGet('https://api.linkedin.com/v2/userinfo', {
     'Authorization': `Bearer ${accessToken}`,
@@ -198,19 +235,20 @@ async function getMemberUrn(db, accessToken) {
   const sub = result.json?.sub;
   if (!sub) throw new Error('LinkedIn profile missing sub/id');
   const urn = `urn:li:person:${sub}`;
-  setSetting(db, 'linkedin.member_urn', urn);
+  setChannelConfig(db, projectId, 'linkedin', { member_urn: urn });
   return urn;
 }
 
 // ── Publishing ────────────────────────────────────────────────────────────────
 
-async function publishPost(db, text, mediaPath) {
+async function publishPost(db, text, mediaPath, projectId) {
   const fs = require('fs');
   const path = require('path');
-  let accessToken = getSetting(db, 'linkedin.access_token');
-  if (!accessToken) throw new Error('LinkedIn not connected. Connect your account in Settings.');
+  const creds = getChannelConfig(db, projectId, 'linkedin');
+  let accessToken = creds.access_token;
+  if (!accessToken) throw new Error('LinkedIn not connected for this project. Connect your account in Channels.');
 
-  const authorUrn = await getMemberUrn(db, accessToken);
+  const authorUrn = await getMemberUrn(db, accessToken, projectId);
 
   let shareMediaCategory = 'NONE';
   let mediaUrn = null;
@@ -287,9 +325,9 @@ async function publishPost(db, text, mediaPath) {
 
   if (result.status === 401) {
     // Token expired — try refresh once
-    const newToken = await refreshAccessToken(db);
+    const newToken = await refreshAccessToken(db, projectId);
     if (newToken) {
-      const authorUrn2 = await getMemberUrn(db, newToken);
+      const authorUrn2 = await getMemberUrn(db, newToken, projectId);
       postBody.author = authorUrn2;
       const retry = await httpsPostJson('https://api.linkedin.com/v2/ugcPosts', postBody, {
         'Authorization': `Bearer ${newToken}`,
@@ -328,7 +366,9 @@ function startSchedulerWorker(db) {
         console.log(`[scheduler] Publishing LinkedIn post ${post.id}...`);
         let mediaPaths = [];
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
-        const result = await publishPost(db, post.post_text, mediaPaths.length ? mediaPaths[0] : null);
+        // Resolve the post's owning project → its LinkedIn channel token
+        const projectId = post.project_id || 'proj_default';
+        const result = await publishPost(db, post.post_text, mediaPaths.length ? mediaPaths[0] : null, projectId);
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', now, now, post.id);
         console.log(`[scheduler] LinkedIn published: ${result.url}`);
@@ -351,4 +391,6 @@ module.exports = {
   startSchedulerWorker,
   getSetting,
   setSetting,
+  getChannelConfig,
+  setChannelConfig,
 };

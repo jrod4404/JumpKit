@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PostKit</title>
-  <link rel="stylesheet" href="style.css?v=14">
+  <link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
   <div id="app">
@@ -16,48 +16,13 @@
         <img class="logo-img logo-collapsed-img" src="assets/logo/postkit-logo-collapsed.png" alt="PostKit">
       </div>
       <nav class="sidebar-nav">
-        <button class="nav-item active" data-tab="content">
-          <span class="nav-icon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="1" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
-              <rect x="9" y="1" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
-              <rect x="1" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
-              <rect x="9" y="9" width="6" height="6" rx="1" fill="currentColor" opacity="0.8"/>
-            </svg>
-          </span>
-          <span class="nav-label">Content</span>
-        </button>
-        <button class="nav-item" data-tab="calendar">
-          <span class="nav-icon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
-              <line x1="5" y1="1" x2="5" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="11" y1="1" x2="11" y2="5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="1" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.5"/>
-            </svg>
-          </span>
-          <span class="nav-label">Calendar</span>
-        </button>
-
-        <button class="nav-item" data-tab="analytics">
-          <span class="nav-icon">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-              <rect x="2" y="9" width="3" height="5" fill="currentColor" opacity="0.8"/>
-              <rect x="6.5" y="5" width="3" height="9" fill="currentColor" opacity="0.8"/>
-              <rect x="11" y="2" width="3" height="12" fill="currentColor" opacity="0.8"/>
-            </svg>
-          </span>
-          <span class="nav-label">Analytics</span>
-        </button>
-        <button class="nav-item" data-tab="settings">
-          <span class="nav-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"/>
-              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-            </svg>
-          </span>
-          <span class="nav-label">Settings</span>
-        </button>
+        <div class="nav-section-header">
+          <span class="nav-section-label">Projects</span>
+          <button class="nav-add-btn" id="btn-add-project" title="Add Project">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+        </div>
+        <div id="project-list" class="project-list"></div>
       </nav>
       <div class="sidebar-bottom">
         <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Collapse sidebar">
@@ -384,6 +349,52 @@
         <div class="modal-actions">
           <button type="button" class="btn-secondary" onclick="closeModal('modal-analytics')">Cancel</button>
           <button type="button" class="btn-primary" onclick="submitAnalytics()">Save Metrics</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add / Edit Project -->
+  <div class="modal-overlay" id="modal-project" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-project-title">Add Project</h2>
+        <button class="modal-close" onclick="closeModal('modal-project')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="project-form-id">
+        <div class="form-group">
+          <label class="form-label">Name <span class="required">*</span></label>
+          <input type="text" class="form-input" id="project-form-name" placeholder="Project name..." required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" id="project-form-description" rows="3" placeholder="Optional description..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-project')">Cancel</button>
+          <button type="button" class="btn-primary" onclick="submitProjectForm()">
+            <span id="project-form-submit-label">Create Project</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirm: Delete Project -->
+  <div class="modal-overlay" id="modal-confirm-delete-project" style="display:none">
+    <div class="modal modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Project</h2>
+        <button class="modal-close" onclick="closeModal('modal-confirm-delete-project')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="color:var(--text-muted);font-size:13.5px;margin:0 0 6px">
+          Delete <strong id="confirm-delete-project-name">this project</strong>? This will permanently remove its seeds, posts, analytics, and channels. This cannot be undone.
+        </p>
+        <div class="modal-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-confirm-delete-project')">Cancel</button>
+          <button type="button" class="btn-danger-solid" onclick="confirmDeleteProject()">Delete Project</button>
         </div>
       </div>
     </div>

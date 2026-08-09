@@ -25,6 +25,29 @@ window._currentPostId   = null;       // for edit-post modal
 window._analyticsRecord = null;       // {postId, recordId} for analytics modal
 
 /* ---------------------------------------------------------
+   Project state
+   --------------------------------------------------------- */
+let _projects = [];                       // array of {id, name, description, ...}
+let _activeProjectId = null;              // id of the currently active project
+
+function getActiveProjectId() {
+  return _activeProjectId || 'proj_default';
+}
+
+function getActiveProject() {
+  return _projects.find(p => p.id === getActiveProjectId()) || null;
+}
+
+// Strip the `project_id` query param (already present or not) and return final URL
+function projectQuery(extra) {
+  const active = getActiveProjectId();
+  const params = new URLSearchParams(extra || {});
+  params.set('project_id', active);
+  const qs = params.toString();
+  return qs ? '?' + qs : '';
+}
+
+/* ---------------------------------------------------------
    Utility helpers
    --------------------------------------------------------- */
 function apiUrl(path) { return API + path; }
@@ -165,6 +188,223 @@ function toggleTheme() {
 }
 
 /* ---------------------------------------------------------
+   Project Navigation
+   --------------------------------------------------------- */
+let _activeTab = 'content';
+
+const PROJECT_MENU_ITEMS = [
+  { tab: 'content',   label: 'Content' },
+  { tab: 'calendar',  label: 'Schedule' },
+  { tab: 'today',     label: 'Today' },
+  { tab: 'analytics', label: 'Analytics' },
+  { tab: 'settings',  label: 'Channels' },
+];
+
+// Icons for each submenu item (small, inline SVG)
+const PROJECT_SUB_ICONS = {
+  content: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
+  calendar: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="11.5" rx="2"/><line x1="5" y1="1.5" x2="5" y2="5"/><line x1="11" y1="1.5" x2="11" y2="5"/><line x1="1.5" y1="6.5" x2="14.5" y2="6.5"/></svg>',
+  today: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="8,4.5 8,8 10.5,9.5"/></svg>',
+  analytics: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="2.5" height="4.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="6.75" y="5" width="2.5" height="8.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="11" y="2" width="2.5" height="11.5" fill="currentColor" opacity="0.8" stroke="none"/></svg>',
+  settings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
+};
+
+function renderProjectList() {
+  const list = document.getElementById('project-list');
+  if (!list) return;
+  list.innerHTML = _projects.map(p => {
+    const isActive = p.id === getActiveProjectId();
+    const isExpanded = isActive;
+    const subItems = PROJECT_MENU_ITEMS.map(m => {
+      const activeClass = isActive && _activeTab === m.tab ? ' active' : '';
+      return `<button class="nav-item project-submenu-item${activeClass}" data-tab="${m.tab}" data-project-id="${escHtml(p.id)}">
+        <span class="nav-icon">${PROJECT_SUB_ICONS[m.tab] || ''}</span>
+        <span class="nav-label">${m.label}</span>
+      </button>`;
+    }).join('');
+    const caret = isExpanded
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+    const isDefault = p.id === 'proj_default';
+    return `
+      <div class="project-item ${isActive ? 'active' : ''}" data-project-id="${escHtml(p.id)}">
+        <div class="project-row" data-project-id="${escHtml(p.id)}">
+          <span class="project-caret">${caret}</span>
+          <span class="project-caret-placeholder"></span>
+          <span class="project-name">${escHtml(p.name)}</span>
+          <span class="project-count">${p.seed_count ?? ''}</span>
+          <span class="project-menu-wrap">
+            <button class="project-menu-trigger" title="Project options" ${isDefault ? '' : ''}>&#8943;</button>
+            <span class="project-menu-pop">
+              <button type="button" class="project-menu-item" onclick="openEditProjectModal('${escHtml(p.id)}')">Rename</button>
+              <button type="button" class="project-menu-item danger" onclick="openConfirmDeleteProject('${escHtml(p.id)}')" ${isDefault ? 'disabled title="Default project cannot be deleted"' : ''}>Delete</button>
+            </span>
+          </span>
+        </div>
+        ${isExpanded ? `<div class="project-submenu">${subItems}</div>` : ''}
+      </div>`;
+  }).join('') + `
+    <button class="project-add-bottom" id="btn-add-project-bottom" onclick="openAddProjectModal()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>Add Project</span>
+    </button>`;
+}
+
+async function loadProjects(selectFirstIfNone = false) {
+  try {
+    const projects = await apiFetch('/projects');
+    _projects = projects || [];
+    // Resolve active project
+    const prev = localStorage.getItem('pk_active_project');
+    let target = _projects.find(p => p.id === prev) ? prev : null;
+    if (!target && _projects.length) target = _projects[0].id;
+    if (!target) target = 'proj_default';
+    _activeProjectId = target;
+    renderProjectList();
+    if (selectFirstIfNone || !_activeTab) {
+      // Refresh current tab with new project scoping
+      if (_projects.length) loadActiveTab();
+    }
+  } catch(err) {
+    showToast('Failed to load projects: ' + err.message, 'error');
+  }
+}
+
+function loadActiveTab() {
+  if (!_activeTab) _activeTab = 'content';
+  switchTab(_activeTab);
+}
+
+async function selectProject(pid) {
+  if (!_projects.find(p => p.id === pid)) return;
+  _activeProjectId = pid;
+  localStorage.setItem('pk_active_project', pid);
+  renderProjectList();
+  // Reset in-tab state and reload
+  _seedFilters = { search: '', status: '', campaign: '' };
+  window._currentSeedId = null;
+  loadActiveTab();
+}
+
+function toggleProjectExpand(pid) {
+  // expand = become active; collapse = nothing (single active project expands on select)
+  // Clicking the active project again does nothing extra to avoid empty state
+}
+
+async function openAddProjectModal() {
+  document.getElementById('modal-project-title').textContent = 'Add Project';
+  document.getElementById('project-form-submit-label').textContent = 'Create Project';
+  document.getElementById('project-form-id').value = '';
+  document.getElementById('project-form-name').value = '';
+  document.getElementById('project-form-description').value = '';
+  openModal('modal-project');
+  setTimeout(() => document.getElementById('project-form-name').focus(), 60);
+}
+window.openAddProjectModal = openAddProjectModal;
+
+async function openEditProjectModal(pid) {
+  const p = _projects.find(x => x.id === pid);
+  if (!p) return;
+  document.getElementById('modal-project-title').textContent = 'Rename Project';
+  document.getElementById('project-form-submit-label').textContent = 'Save Changes';
+  document.getElementById('project-form-id').value = p.id;
+  document.getElementById('project-form-name').value = p.name || '';
+  document.getElementById('project-form-description').value = p.description || '';
+  openModal('modal-project');
+  setTimeout(() => document.getElementById('project-form-name').focus(), 60);
+}
+window.openEditProjectModal = openEditProjectModal;
+
+async function submitProjectForm() {
+  const id = document.getElementById('project-form-id').value;
+  const name = document.getElementById('project-form-name').value.trim();
+  const desc = document.getElementById('project-form-description').value.trim();
+  if (!name) {
+    showToast('Project name is required', 'error');
+    return;
+  }
+  try {
+    if (id) {
+      await apiFetch(`/projects/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ name, description: desc || undefined })
+      });
+      showToast('Project updated');
+    } else {
+      await apiFetch('/projects', {
+        method: 'POST',
+        body: JSON.stringify({ name, description: desc || undefined })
+      });
+      showToast('Project created');
+    }
+    closeModal('modal-project');
+    await loadProjects(true);
+    // If we just created a new project, select it
+    if (!id) {
+      const newest = _projects[_projects.length - 1];
+      if (newest && newest.name === name) {
+        selectProject(newest.id);
+      }
+    }
+  } catch(err) {
+    showToast('Project save failed: ' + err.message, 'error');
+  }
+}
+window.submitProjectForm = submitProjectForm;
+
+function openConfirmDeleteProject(pid) {
+  const p = _projects.find(x => x.id === pid);
+  if (!p) return;
+  if (pid === 'proj_default') {
+    showToast('The default project cannot be deleted', 'error');
+    return;
+  }
+  document.getElementById('confirm-delete-project-name').textContent = p.name || p.id;
+  document.getElementById('modal-confirm-delete-project').dataset.projectId = p.id;
+  openModal('modal-confirm-delete-project');
+}
+window.openConfirmDeleteProject = openConfirmDeleteProject;
+
+async function confirmDeleteProject() {
+  const pid = document.getElementById('modal-confirm-delete-project').dataset.projectId;
+  if (!pid || pid === 'proj_default') return;
+  try {
+    await apiFetch(`/projects/${pid}`, { method: 'DELETE' });
+    showToast('Project deleted');
+    closeModal('modal-confirm-delete-project');
+    // If deleting active project, fall back to first remaining
+    _projects = _projects.filter(p => p.id !== pid);
+    if (getActiveProjectId() === pid) {
+      _activeProjectId = _projects.length ? _projects[0].id : 'proj_default';
+      localStorage.setItem('pk_active_project', _activeProjectId);
+    }
+    await loadProjects(true);
+  } catch(err) {
+    showToast('Delete failed: ' + err.message, 'error');
+  }
+}
+window.confirmDeleteProject = confirmDeleteProject;
+
+// Open the per-project '…' popup menu
+function openProjectMenu(btn) {
+  const item = btn.closest('.project-item');
+  if (!item) return;
+  // Close any other open menu
+  document.querySelectorAll('.project-menu-pop.open').forEach(p => p.classList.remove('open'));
+  const pop = item.querySelector('.project-menu-pop');
+  if (pop) pop.classList.toggle('open');
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function onDoc(e) {
+      if (!item.contains(e.target)) {
+        if (pop) pop.classList.remove('open');
+        document.removeEventListener('click', onDoc);
+      }
+    });
+  }, 0);
+}
+
+/* ---------------------------------------------------------
    Tab Navigation
    --------------------------------------------------------- */
 const TAB_PANES = ['content', 'calendar', 'today', 'analytics', 'settings'];
@@ -176,7 +416,7 @@ const TAB_META = {
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>`
   },
   calendar:  {
-    title: 'Calendar',
+    title: 'Schedule',
     desc: 'View and manage your scheduled posts across all platforms',
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="12" rx="2"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="1" y1="7" x2="15" y2="7"/></svg>`
   },
@@ -191,8 +431,8 @@ const TAB_META = {
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="3" height="5" fill="currentColor" opacity="0.7" stroke="none"/><rect x="6.5" y="5" width="3" height="9" fill="currentColor" opacity="0.7" stroke="none"/><rect x="11" y="2" width="3" height="12" fill="currentColor" opacity="0.7" stroke="none"/></svg>`
   },
   settings:  {
-    title: 'Settings',
-    desc: 'Configure app preferences, Hermes connection, and platform criteria',
+    title: 'Channels',
+    desc: 'Connect your platform accounts and configure per-platform channels for this project',
     icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
   },
 };
@@ -201,12 +441,15 @@ function switchTab(tab) {
   // Re-apply select styles after tab switch
   setTimeout(fixSelects, 150);
 
+  _activeTab = tab;
+  renderProjectList(); // refresh submenu active highlight + active project expansion
   window._currentSeedId = null;
   TAB_PANES.forEach(t => {
     const pane = document.getElementById(`tab-${t}`);
     if (pane) pane.style.display = t === tab ? '' : 'none';
   });
-  document.querySelectorAll('.nav-item').forEach(btn => {
+  // Highlight the active submenu item under the active project
+  document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
   // Update topbar
@@ -214,9 +457,10 @@ function switchTab(tab) {
   const iconEl = document.getElementById('topbarIcon');
   const titleEl = document.getElementById('topbarTitle');
   const subEl = document.getElementById('topbarSubtitle');
+  const proj = getActiveProject();
   if (iconEl) iconEl.innerHTML = meta.icon || '';
   if (titleEl) titleEl.textContent = meta.title || tab;
-  if (subEl) subEl.textContent = meta.desc || '';
+  if (subEl) subEl.textContent = (proj ? (proj.name + ' · ') : '') + (meta.desc || '');
   // Load tab content
   switch(tab) {
     case 'content':   loadContent();   break;
@@ -228,9 +472,45 @@ function switchTab(tab) {
 }
 
 function initNav() {
-  document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
-    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-  });
+  // Event delegation for dynamic submenu items + project rows + project menu
+  const nav = document.querySelector('.sidebar-nav');
+  if (nav) {
+    nav.addEventListener('click', e => {
+      // Ignore clicks inside the per-project popup menu (handled by inline onclick)
+      if (e.target.closest('.project-menu-pop')) return;
+      // '⋯' menu (rename / delete)
+      const menuBtn = e.target.closest('.project-menu-trigger');
+      if (menuBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        openProjectMenu(menuBtn);
+        return;
+      }
+      // Submenu item (Content / Schedule / Today / Analytics / Channels)
+      const item = e.target.closest('.nav-item[data-tab]');
+      if (item) {
+        switchTab(item.dataset.tab);
+        e.stopPropagation();
+        return;
+      }
+      // Project header row -> select project
+      const projRow = e.target.closest('.project-row');
+      if (projRow) {
+        const pid = projRow.dataset.projectId;
+        if (pid) {
+          if (pid === getActiveProjectId()) {
+            toggleProjectExpand(pid);
+          } else {
+            selectProject(pid);
+          }
+        }
+        e.stopPropagation();
+      }
+    });
+  }
+  // Add Project button (in section header)
+  const addBtn = document.getElementById('btn-add-project');
+  if (addBtn) addBtn.addEventListener('click', () => openAddProjectModal());
   // Theme toggle
   const tt = document.getElementById('theme-toggle');
   if (tt) tt.addEventListener('click', toggleTheme);
@@ -302,20 +582,21 @@ function loadContent() {
 
 async function fetchSeeds() {
   const params = new URLSearchParams();
+  params.set('project_id', getActiveProjectId());
   if (_seedFilters.search)   params.set('search', _seedFilters.search);
   if (_seedFilters.status)   params.set('status', _seedFilters.status);
   if (_seedFilters.campaign) params.set('campaign', _seedFilters.campaign);
   const qs = params.toString();
 
   try {
-    const seeds = await apiFetch('/seeds' + (qs ? '?' + qs : ''));
+    const seeds = await apiFetch('/seeds?' + qs);
     renderSeedsGrid(seeds);
     // If any seed is processing, refresh the open detail pane too
     const processing = seeds.filter(s => s.status === 'processing');
     if (processing.length && window._currentSeedId) {
       const openSeedIsProcessing = processing.some(s => s.id === window._currentSeedId);
       if (openSeedIsProcessing) {
-        const fresh = await apiFetch(`/seeds/${window._currentSeedId}`);
+        const fresh = await apiFetch(`/seeds/${window._currentSeedId}?project_id=${getActiveProjectId()}`);
         populateSeedDetail(fresh);
         renderSeedPosts(fresh.posts || []);
       }
@@ -332,19 +613,19 @@ function startProcessingPoll() {
   if (_processingPollTimer) return;
   _processingPollTimer = setInterval(async () => {
     try {
-      const seeds = await apiFetch('/seeds'); // unfiltered — need all to detect status changes
+      const seeds = await apiFetch(`/seeds?project_id=${getActiveProjectId()}`); // unfiltered — need all to detect status changes
       const anyProcessing = seeds.some(s => s.status === 'processing');
       if (anyProcessing) {
         fetchSeeds(); // re-render with current filters
         if (window._currentSeedId) {
           const open = seeds.find(s => s.id === window._currentSeedId);
           if (open && open.status === 'processing') {
-            const fresh = await apiFetch(`/seeds/${window._currentSeedId}`);
+            const fresh = await apiFetch(`/seeds/${window._currentSeedId}?project_id=${getActiveProjectId()}`);
             populateSeedDetail(fresh);
             renderSeedPosts(fresh.posts || []);
           } else if (open && open.status !== 'processing') {
             // Just transitioned to done — refresh one more time
-            const fresh = await apiFetch(`/seeds/${window._currentSeedId}`);
+            const fresh = await apiFetch(`/seeds/${window._currentSeedId}?project_id=${getActiveProjectId()}`);
             populateSeedDetail(fresh);
             renderSeedPosts(fresh.posts || []);
             showToast('Auri finished — posts ready!');
@@ -359,32 +640,6 @@ function startProcessingPoll() {
   }, 8000);
 }
 window.startProcessingPoll = startProcessingPoll;
-
-async function fetchSeeds() {
-  const params = new URLSearchParams();
-  if (_seedFilters.search)   params.set('search', _seedFilters.search);
-  if (_seedFilters.status)   params.set('status', _seedFilters.status);
-  if (_seedFilters.campaign) params.set('campaign', _seedFilters.campaign);
-  const qs = params.toString();
-
-  try {
-    const seeds = await apiFetch('/seeds' + (qs ? '?' + qs : ''));
-    renderSeedsGrid(seeds);
-    // If any seed is processing, refresh the open detail pane too
-    const processing = seeds.filter(s => s.status === 'processing');
-    if (processing.length && window._currentSeedId) {
-      const openSeedIsProcessing = processing.some(s => s.id === window._currentSeedId);
-      if (openSeedIsProcessing) {
-        const fresh = await apiFetch(`/seeds/${window._currentSeedId}`);
-        populateSeedDetail(fresh);
-        renderSeedPosts(fresh.posts || []);
-      }
-    }
-  } catch(err) {
-    const grid = document.getElementById('seeds-grid');
-    if (grid) grid.innerHTML = `<div class="error-msg">Failed to load seeds: ${escHtml(err.message)}</div>`;
-  }
-}
 
 function renderSeedsGrid(seeds) {
   const grid = document.getElementById('seeds-grid');
@@ -549,7 +804,7 @@ async function submitNewSeed(event) {
   try {
     const seed = await apiFetch('/seeds', {
       method: 'POST',
-      body: JSON.stringify({ title, body, tags: JSON.stringify(tags), campaign })
+      body: JSON.stringify({ title, body, tags: JSON.stringify(tags), campaign, project_id: getActiveProjectId() })
     });
 
     // Upload any staged assets into this seed's dedicated folder
@@ -890,14 +1145,14 @@ window.confirmTemplateImage = confirmTemplateImage;
 // Check if X is connected (cached)
 let _xConnected = false;
 async function refreshXConnection() {
-  try { _xConnected = (await apiFetch('/x/status')).connected; }
+  try { _xConnected = (await apiFetch(`/x/status?project_id=${getActiveProjectId()}`)).connected; }
   catch(_) { _xConnected = false; }
 }
 
 // Check if LinkedIn is connected (cached)
 let _liConnected = false;
 async function refreshLinkedInConnection() {
-  try { _liConnected = (await apiFetch('/linkedin/status')).connected; }
+  try { _liConnected = (await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`)).connected; }
   catch(_) { _liConnected = false; }
 }
 
@@ -1238,7 +1493,7 @@ async function fetchCalendar() {
   const { from, to } = getCalRange();
   updateCalPeriodLabel();
   try {
-    const posts = await apiFetch(`/calendar?from=${from}&to=${to}`);
+    const posts = await apiFetch(`/calendar?from=${from}&to=${to}&project_id=${getActiveProjectId()}`);
     renderCalendar(posts || []);
   } catch(err) {
     const g = document.getElementById('calendar-grid');
@@ -1418,7 +1673,7 @@ function loadToday() {
 
 async function fetchToday() {
   try {
-    const posts = await apiFetch('/posts/today');
+    const posts = await apiFetch(`/posts/today?project_id=${getActiveProjectId()}`);
     renderToday(posts || []);
   } catch(err) {
     const el = document.getElementById('today-content');
@@ -1490,7 +1745,7 @@ function loadAnalytics() {
 
 async function fetchAnalytics() {
   try {
-    const records = await apiFetch('/analytics');
+    const records = await apiFetch(`/analytics?project_id=${getActiveProjectId()}`);
     renderAnalytics(records || []);
   } catch(err) {
     const el = document.getElementById('analytics-content');
@@ -1548,7 +1803,7 @@ async function submitAnalytics() {
   const comments = parseInt(document.getElementById('analytics-comments').value) || 0;
   const views    = parseInt(document.getElementById('analytics-views').value)    || 0;
   const shares   = parseInt(document.getElementById('analytics-shares').value)   || 0;
-  const payload  = { post_id: postId, likes, comments, views, shares, recorded_at: Date.now() };
+  const payload  = { post_id: postId, likes, comments, views, shares, recorded_at: Date.now(), project_id: getActiveProjectId() };
 
   try {
     if (recordId) {
@@ -2037,7 +2292,7 @@ window.testHermesConnection = testHermesConnection;
 // ── X (Twitter) OAuth ──────────────────────────────────────────────────────
 async function checkXStatus() {
   try {
-    const status = await apiFetch('/x/status');
+    const status = await apiFetch(`/x/status?project_id=${getActiveProjectId()}`);
     const hint = document.getElementById('x-status-hint');
     const btnConnect = document.getElementById('btn-x-connect');
     const btnDisconnect = document.getElementById('btn-x-disconnect');
@@ -2058,13 +2313,13 @@ async function checkXStatus() {
 
 async function connectX() {
   try {
-    const { authUrl } = await apiFetch('/x/connect');
+    const { authUrl } = await apiFetch(`/x/connect?project_id=${getActiveProjectId()}`);
     // Open OAuth in new window
     window.open(authUrl, '_blank', 'width=600,height=700');
     // Poll for connection status after redirect
     const poll = setInterval(async () => {
       try {
-        const status = await apiFetch('/x/status');
+        const status = await apiFetch(`/x/status?project_id=${getActiveProjectId()}`);
         if (status.connected) {
           clearInterval(poll);
           checkXStatus();
@@ -2082,7 +2337,10 @@ window.connectX = connectX;
 
 async function disconnectX() {
   try {
-    await apiFetch('/x/disconnect', { method: 'POST' });
+    await apiFetch('/x/disconnect', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: getActiveProjectId() })
+    });
     checkXStatus();
     showToast('X account disconnected');
   } catch(err) {
@@ -2093,11 +2351,14 @@ window.disconnectX = disconnectX;
 
 async function connectLinkedIn() {
   try {
-    const { url } = await apiFetch('/linkedin/connect', { method: 'POST' });
+    const { url } = await apiFetch('/linkedin/connect', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: getActiveProjectId() })
+    });
     window.open(url, '_blank', 'width=600,height=700');
     const poll = setInterval(async () => {
       try {
-        const status = await apiFetch('/linkedin/status');
+        const status = await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`);
         if (status.connected) {
           clearInterval(poll);
           checkLinkedInStatus();
@@ -2114,7 +2375,10 @@ window.connectLinkedIn = connectLinkedIn;
 
 async function disconnectLinkedIn() {
   try {
-    await apiFetch('/linkedin/disconnect', { method: 'POST' });
+    await apiFetch('/linkedin/disconnect', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: getActiveProjectId() })
+    });
     checkLinkedInStatus();
     showToast('LinkedIn account disconnected');
   } catch(err) {
@@ -2125,7 +2389,7 @@ window.disconnectLinkedIn = disconnectLinkedIn;
 
 async function checkLinkedInStatus() {
   let connected = false;
-  try { connected = (await apiFetch('/linkedin/status')).connected; } catch(_) {}
+  try { connected = (await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`)).connected; } catch(_) {}
   const hint  = document.getElementById('li-status-hint');
   const btnC  = document.getElementById('btn-li-connect');
   const btnD  = document.getElementById('btn-li-disconnect');
@@ -2621,9 +2885,20 @@ function init() {
   initTheme();
   injectToastStyles();
   initNav();
-  switchTab('content');
-  // Fix selects after initial render
-  setTimeout(fixSelects, 100);
+  // 1. Build project list first, then load the active project's current tab.
+  //    loadProjects resolves the active project (localStorage or first), renders
+  //    the sidebar, and calls loadActiveTab() once projects are available.
+  loadProjects(true).then(() => {
+    setTimeout(fixSelects, 100);
+  });
+  // Safety fallback: if project load hangs, still surface the content tab.
+  setTimeout(() => {
+    if (!document.querySelector('#project-list .project-item')) {
+      _activeProjectId = _activeProjectId || 'proj_default';
+      if (!_activeTab) _activeTab = 'content';
+      switchTab(_activeTab);
+    }
+  }, 3000);
 }
 
 if (document.readyState === 'loading') {

@@ -22,8 +22,27 @@ db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS projects (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT DEFAULT '',
+    created_at INTEGER,
+    updated_at INTEGER
+  );
+
+  CREATE TABLE IF NOT EXISTS channels (
+    id TEXT PRIMARY KEY,
+    project_id TEXT NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+    platform TEXT NOT NULL DEFAULT 'x',
+    enabled INTEGER DEFAULT 1,
+    config TEXT DEFAULT '{}',
+    created_at INTEGER,
+    updated_at INTEGER
+  );
+
   CREATE TABLE IF NOT EXISTS seeds (
     id TEXT PRIMARY KEY,
+    project_id TEXT,
     title TEXT NOT NULL,
     body TEXT,
     tags TEXT DEFAULT '[]',
@@ -46,6 +65,7 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS posts (
     id TEXT PRIMARY KEY,
+    project_id TEXT,
     seed_id TEXT REFERENCES seeds(id) ON DELETE SET NULL,
     platform TEXT NOT NULL,
     post_text TEXT,
@@ -129,6 +149,77 @@ const defaultSettings = [
 
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
 for (const [k, v] of defaultSettings) insertSetting.run(k, v);
+
+// ── Schema migration (idempotent) ───────────────────────────────────────────
+// Add project_id columns to existing tables (no-op if already present)
+function ensureColumn(table, column, ddl) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all();
+  if (!cols.some(c => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+  }
+}
+ensureColumn('seeds', 'project_id', 'TEXT');
+ensureColumn('posts', 'project_id', 'TEXT');
+
+// Seed a default project and adopt any legacy (project-less) data into it
+function ensureDefaultProject() {
+  const existing = db.prepare('SELECT COUNT(*) AS n FROM projects').get().n;
+  if (existing > 0) return;
+  const id = 'proj_default';
+  const now = Date.now();
+  db.prepare('INSERT INTO projects (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+    .run(id, 'JumpKit', 'Default project (legacy content migrated automatically)', now, now);
+  db.prepare('UPDATE seeds SET project_id = ? WHERE project_id IS NULL').run(id);
+  db.prepare('UPDATE posts SET project_id = ? WHERE project_id IS NULL').run(id);
+  // Default channels for the project (enabled placeholders; config via Channels tab)
+  for (const platform of ['x', 'linkedin', 'youtube']) {
+    db.prepare('INSERT OR IGNORE INTO channels (id, project_id, platform, enabled, config, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?, ?)')
+      .run(`${id}_${platform}`, id, platform, '{}', now, now);
+  }
+}
+ensureDefaultProject();
+
+// ── Project / Channel helpers ─────────────────────────────────────────────────
+
+// Read a channel's stored config JSON for a project+platform.
+function getChannelConfig(projectId, platform) {
+  const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
+  if (!row) return {};
+  try { return JSON.parse(row.config || '{}'); } catch { return {}; }
+}
+
+// Merge + write a channel's config JSON for a project+platform.
+function setChannelConfig(projectId, platform, configObj) {
+  const existing = getChannelConfig(projectId, platform);
+  const merged = { ...existing, ...configObj };
+  db.prepare('UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?')
+    .run(JSON.stringify(merged), Date.now(), projectId, platform);
+}
+
+// Resolve the active project id. Precedence: URL query param `project_id` on
+// GETs, body `project_id` on POST/PUT. Defaults to proj_default for backward
+// compat with existing frontend calls.
+function activeProjectId(url, body) {
+  if (url && url.searchParams) {
+    const q = url.searchParams.get('project_id');
+    if (q) return q;
+  }
+  if (body && body.project_id) return body.project_id;
+  return 'proj_default';
+}
+
+// Create the 3 default channels for a project.
+function createDefaultChannels(projectId, ts) {
+  for (const platform of ['x', 'linkedin', 'youtube']) {
+    db.prepare('INSERT OR IGNORE INTO channels (id, project_id, platform, enabled, config, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?, ?)')
+      .run(`${projectId}_${platform}`, projectId, platform, '{}', ts, ts);
+  }
+}
+
+// ── Custom project id generator (short, URL-safe) ────────────────────────────
+function projectId() {
+  return 'proj_' + crypto.randomBytes(6).toString('hex');
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function getSettingVal(db, key) {
@@ -247,9 +338,10 @@ function getSeeds(req, res) {
   const search = url.searchParams.get('search') || '';
   const status = url.searchParams.get('status') || '';
   const campaign = url.searchParams.get('campaign') || '';
+  const projectId = activeProjectId(url, null);
 
-  let query = 'SELECT * FROM seeds WHERE 1=1';
-  const params = [];
+  let query = 'SELECT * FROM seeds WHERE project_id = ?';
+  const params = [projectId];
 
   if (search) { query += ` AND (title LIKE ? OR body LIKE ?)`; params.push(`%${search}%`, `%${search}%`); }
   if (status) { query += ` AND status = ?`; params.push(status); }
@@ -278,9 +370,10 @@ async function createSeed(req, res) {
   const body = await parseBody(req);
   const id = uuid();
   const ts = now();
-  db.prepare(`INSERT INTO seeds (id, title, body, tags, campaign, template, status, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, 'draft', ?, ?)`)
-    .run(id, body.title || 'Untitled', body.body || '', JSON.stringify(body.tags || []),
+  const projectId = activeProjectId(null, body);
+  db.prepare(`INSERT INTO seeds (id, project_id, title, body, tags, campaign, template, status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, 'draft', ?, ?)`)
+    .run(id, projectId, body.title || 'Untitled', body.body || '', JSON.stringify(body.tags || []),
       body.campaign || '', body.template || '', ts, ts);
   send(res, 201, db.prepare('SELECT * FROM seeds WHERE id = ?').get(id));
 }
@@ -387,9 +480,10 @@ function getPosts(req, res) {
   const seed_id = url.searchParams.get('seed_id') || '';
   const from = url.searchParams.get('from') || '';
   const to = url.searchParams.get('to') || '';
+  const projectId = activeProjectId(url, null);
 
-  let query = 'SELECT p.*, s.title as seed_title FROM posts p LEFT JOIN seeds s ON p.seed_id = s.id WHERE 1=1';
-  const params = [];
+  let query = 'SELECT p.*, s.title as seed_title FROM posts p LEFT JOIN seeds s ON p.seed_id = s.id WHERE p.project_id = ?';
+  const params = [projectId];
 
   if (platform) { query += ` AND p.platform = ?`; params.push(platform); }
   if (status) { query += ` AND p.status = ?`; params.push(status); }
@@ -403,14 +497,16 @@ function getPosts(req, res) {
 }
 
 function getPostsToday(req, res) {
+  const url = new URL(req.url, `http://localhost`);
+  const projectId = activeProjectId(url, null);
   const start = new Date(); start.setHours(0,0,0,0);
   const end = new Date(); end.setHours(23,59,59,999);
   const posts = db.prepare(
     `SELECT p.*, s.title as seed_title FROM posts p 
      LEFT JOIN seeds s ON p.seed_id = s.id
-     WHERE p.scheduled_for >= ? AND p.scheduled_for <= ? AND p.status != 'posted'
+     WHERE p.project_id = ? AND p.scheduled_for >= ? AND p.scheduled_for <= ? AND p.status != 'posted'
      ORDER BY p.platform, p.scheduled_for ASC`
-  ).all(start.getTime(), end.getTime());
+  ).all(projectId, start.getTime(), end.getTime());
   send(res, 200, posts.map(p => ({ ...p, media_paths: tryParse(p.media_paths, []) })));
 }
 
@@ -419,10 +515,12 @@ async function createPost(req, res) {
   if (!body.platform) return send(res, 400, { error: 'platform is required' });
   const id = uuid();
   const ts = now();
-  db.prepare(`INSERT INTO posts (id, seed_id, platform, post_text, media_paths, scheduled_for, status, notes, version, title, image_prompt, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+  const projectId = activeProjectId(null, body);
+  db.prepare(`INSERT INTO posts (id, project_id, seed_id, platform, post_text, media_paths, scheduled_for, status, notes, version, title, image_prompt, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     .run(
       id,
+      projectId,
       body.seed_id || null,
       body.platform,
       body.post_text || '',
@@ -468,31 +566,42 @@ function getCalendar(req, res) {
   const url = new URL(req.url, `http://localhost`);
   const from = parseInt(url.searchParams.get('from') || '0');
   const to = parseInt(url.searchParams.get('to') || String(Date.now() + 86400000 * 365));
+  const projectId = activeProjectId(url, null);
   const posts = db.prepare(
     `SELECT p.*, s.title as seed_title FROM posts p 
      LEFT JOIN seeds s ON p.seed_id = s.id
-     WHERE p.scheduled_for >= ? AND p.scheduled_for <= ?
+     WHERE p.project_id = ? AND p.scheduled_for >= ? AND p.scheduled_for <= ?
      AND p.status = 'scheduled'
      ORDER BY p.scheduled_for ASC`
-  ).all(from, to);
+  ).all(projectId, from, to);
   send(res, 200, posts.map(p => ({ ...p, media_paths: tryParse(p.media_paths, []) })));
 }
 
 // Analytics
 function getAnalytics(req, res) {
+  const url = new URL(req.url, `http://localhost`);
+  const projectId = activeProjectId(url, null);
   const rows = db.prepare(
-    `SELECT a.*, p.platform, p.post_text, p.status as post_status, s.title as seed_title
+    `SELECT a.*, p.platform, p.post_text, p.status as post_status, s.title as seed_title, p.project_id
      FROM analytics a
      LEFT JOIN posts p ON a.post_id = p.id
      LEFT JOIN seeds s ON p.seed_id = s.id
+     WHERE p.project_id = ? OR (p.project_id IS NULL AND ? = 'proj_default')
      ORDER BY a.recorded_at DESC`
-  ).all();
+  ).all(projectId, projectId);
   send(res, 200, rows);
 }
 
 async function createAnalytics(req, res) {
   const body = await parseBody(req);
   if (!body.post_id) return send(res, 400, { error: 'post_id required' });
+  const projectId = activeProjectId(null, body);
+  // Validate the post belongs to the active project (or is project-less legacy)
+  const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(body.post_id);
+  if (!post) return send(res, 404, { error: 'Post not found' });
+  if (post.project_id && post.project_id !== projectId) {
+    return send(res, 403, { error: 'Post does not belong to active project' });
+  }
   const id = uuid();
   db.prepare(`INSERT INTO analytics (id, post_id, likes, comments, views, shares, recorded_at)
     VALUES (?, ?, ?, ?, ?, ?, ?)`)
@@ -519,22 +628,27 @@ async function updateAnalytics(req, res, id) {
 
 // Jobs
 function getJobs(req, res) {
+  const url = new URL(req.url, `http://localhost`);
+  const projectId = activeProjectId(url, null);
   const jobs = db.prepare(
-    `SELECT j.*, s.title as seed_title FROM jobs j
+    `SELECT j.*, s.title as seed_title, s.project_id FROM jobs j
      LEFT JOIN seeds s ON j.seed_id = s.id
+     WHERE s.project_id = ? OR (s.project_id IS NULL AND ? = 'proj_default')
      ORDER BY j.created_at DESC LIMIT 50`
-  ).all();
+  ).all(projectId, projectId);
   send(res, 200, jobs);
 }
 
 function getPendingJobs(req, res) {
+  const url = new URL(req.url, `http://localhost`);
+  const projectId = activeProjectId(url, null);
   const jobs = db.prepare(
-    `SELECT j.*, s.title as seed_title, s.body as seed_body, s.tags as seed_tags, s.campaign as seed_campaign
+    `SELECT j.*, s.title as seed_title, s.body as seed_body, s.tags as seed_tags, s.campaign as seed_campaign, s.project_id
      FROM jobs j
      LEFT JOIN seeds s ON j.seed_id = s.id
-     WHERE j.status = 'pending'
+     WHERE j.status = 'pending' AND (s.project_id = ? OR (s.project_id IS NULL AND ? = 'proj_default'))
      ORDER BY j.created_at ASC`
-  ).all();
+  ).all(projectId, projectId);
 
   const getMedia = db.prepare('SELECT * FROM seed_media WHERE seed_id = ?');
   const enriched = jobs.map(j => ({
@@ -753,6 +867,94 @@ function tryParse(str, fallback) {
   try { return JSON.parse(str); } catch { return fallback; }
 }
 
+// ── Project handlers ──────────────────────────────────────────────────────────
+
+function getProjects(req, res) {
+  const getSeedCount = db.prepare('SELECT COUNT(*) AS c FROM seeds WHERE project_id = ?');
+  const getPostCount = db.prepare('SELECT COUNT(*) AS c FROM posts WHERE project_id = ?');
+  const getChannelCount = db.prepare('SELECT COUNT(*) AS c FROM channels WHERE project_id = ? AND enabled = 1');
+  const projects = db.prepare('SELECT * FROM projects ORDER BY created_at ASC').all();
+  const result = projects.map(p => ({
+    ...p,
+    seed_count: getSeedCount.get(p.id).c,
+    post_count: getPostCount.get(p.id).c,
+    channel_count: getChannelCount.get(p.id).c,
+  }));
+  send(res, 200, result);
+}
+
+async function createProject(req, res) {
+  const body = await parseBody(req);
+  if (!body.name) return send(res, 400, { error: 'name is required' });
+  const id = projectId();
+  const ts = now();
+  db.prepare('INSERT INTO projects (id, name, description, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+    .run(id, body.name, body.description || '', ts, ts);
+  createDefaultChannels(id, ts);
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+  send(res, 201, project);
+}
+
+async function updateProject(req, res, id) {
+  const body = await parseBody(req);
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+  if (!project) return send(res, 404, { error: 'Not found' });
+  const fields = [];
+  const params = [];
+  if (body.name !== undefined) { fields.push('name = ?'); params.push(body.name); }
+  if (body.description !== undefined) { fields.push('description = ?'); params.push(body.description); }
+  if (!fields.length) return send(res, 200, project);
+  fields.push('updated_at = ?');
+  params.push(now(), id);
+  db.prepare(`UPDATE projects SET ${fields.join(', ')} WHERE id = ?`).run(...params);
+  send(res, 200, db.prepare('SELECT * FROM projects WHERE id = ?').get(id));
+}
+
+function deleteProject(req, res, id) {
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+  if (!project) return send(res, 404, { error: 'Not found' });
+  if (id === 'proj_default') return send(res, 400, { error: 'Cannot delete the default project' });
+  // ON DELETE CASCADE removes channels; seeds/posts/analytics/jobs via FKs.
+  db.prepare('DELETE FROM projects WHERE id = ?').run(id);
+  send(res, 200, { ok: true, id });
+}
+
+function getProjectChannels(req, res, id) {
+  const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+  if (!project) return send(res, 404, { error: 'Not found' });
+  const channels = db.prepare('SELECT * FROM channels WHERE project_id = ? ORDER BY platform ASC').all(id);
+  const result = channels.map(ch => {
+    const config = getChannelConfig(id, ch.platform);
+    let connected = false;
+    if (ch.platform === 'x') connected = !!(config.access_token);
+    else if (ch.platform === 'linkedin') connected = !!(config.access_token);
+    else if (ch.platform === 'youtube') connected = !!(config.access_token);
+    // Connected also requires the channel enabled
+    return {
+      ...ch,
+      config,
+      connected: connected && !!ch.enabled,
+    };
+  });
+  send(res, 200, result);
+}
+
+async function updateProjectChannel(req, res, id, platform) {
+  const body = await parseBody(req);
+  const channel = db.prepare('SELECT * FROM channels WHERE project_id = ? AND platform = ?').get(id, platform);
+  if (!channel) return send(res, 404, { error: 'Channel not found' });
+  if (body.enabled !== undefined) {
+    db.prepare('UPDATE channels SET enabled = ?, updated_at = ? WHERE project_id = ? AND platform = ?')
+      .run(body.enabled ? 1 : 0, now(), id, platform);
+  }
+  if (body.config && typeof body.config === 'object') {
+    setChannelConfig(id, platform, body.config);
+  }
+  const updated = db.prepare('SELECT * FROM channels WHERE project_id = ? AND platform = ?').get(id, platform);
+  const config = getChannelConfig(id, platform);
+  send(res, 200, { ...updated, config });
+}
+
 // ── HTTP Server ──────────────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
   // CORS preflight
@@ -815,8 +1017,12 @@ const server = http.createServer(async (req, res) => {
       const redirectUri = `http://localhost:${PORT}/oauth/x/callback`;
       const tokens = await xOAuth.exchangeCodeForToken(db, code, redirectUri, session.verifier);
 
-      xOAuth.setSetting(db, 'x.access_token', tokens.access_token || '');
-      xOAuth.setSetting(db, 'x.refresh_token', tokens.refresh_token || '');
+      const projectId = session.projectId || 'proj_default';
+      xOAuth.setChannelConfig(db, projectId, 'x', {
+        access_token: tokens.access_token || '',
+        refresh_token: tokens.refresh_token || '',
+      });
+      // Also keep legacy global keys in sync for backward compat
       xOAuth.setSetting(db, 'x.connected', 'true');
 
       res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -850,9 +1056,12 @@ const server = http.createServer(async (req, res) => {
     try {
       const redirectUri = 'http://localhost:' + PORT + '/oauth/linkedin/callback';
       const tokens = await linkedinOAuth.exchangeCodeForToken(db, code, redirectUri);
-      linkedinOAuth.setSetting(db, 'linkedin.access_token', tokens.access_token || '');
-      if (tokens.refresh_token) linkedinOAuth.setSetting(db, 'linkedin.refresh_token', tokens.refresh_token);
-      linkedinOAuth.setSetting(db, 'linkedin.member_urn', '');
+      const projectId = stateValid === true ? 'proj_default' : stateValid || 'proj_default';
+      linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', {
+        access_token: tokens.access_token || '',
+        ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+        member_urn: '',
+      });
       linkedinOAuth.setSetting(db, 'linkedin.connected', 'true');
       res.writeHead(200, { 'Content-Type': 'text/html' });
       return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2 style="color:#4ade80">Connected to LinkedIn!</h2><p>You can close this window.</p><script>setTimeout(()=>window.close(),1500)</script></body></html>');
@@ -868,6 +1077,27 @@ const server = http.createServer(async (req, res) => {
   }
 
   try {
+    // ── Projects ───────────────────────────────────────────────────────────
+    if (pathname === '/api/projects') {
+      if (method === 'GET') return getProjects(req, res);
+      if (method === 'POST') return createProject(req, res);
+    }
+
+    const projectMatch = pathname.match(/^\/api\/projects\/([^\/]+)$/);
+    if (projectMatch) {
+      const id = projectMatch[1];
+      if (method === 'PUT') return updateProject(req, res, id);
+      if (method === 'DELETE') return deleteProject(req, res, id);
+    }
+
+    const projectChannelsMatch = pathname.match(/^\/api\/projects\/([^\/]+)\/channels$/);
+    if (projectChannelsMatch && method === 'GET') return getProjectChannels(req, res, projectChannelsMatch[1]);
+
+    const projectChannelMatch = pathname.match(/^\/api\/projects\/([^\/]+)\/channels\/([^\/]+)$/);
+    if (projectChannelMatch && method === 'PUT') {
+      return updateProjectChannel(req, res, projectChannelMatch[1], projectChannelMatch[2]);
+    }
+
     // Seeds
     if (pathname === '/api/seeds') {
       if (method === 'GET') return getSeeds(req, res);
@@ -940,10 +1170,11 @@ const server = http.createServer(async (req, res) => {
     // Start OAuth flow
     if (pathname === '/api/x/connect' && method === 'GET') {
       try {
+        const projectId = activeProjectId(urlObj, null);
         const redirectUri = `http://localhost:${PORT}/oauth/x/callback`;
-        const { state, challenge } = xOAuth.createOAuthSession();
+        const { state, challenge } = xOAuth.createOAuthSession(projectId);
         const authUrl = xOAuth.buildAuthUrl(db, redirectUri, state, challenge);
-        send(res, 200, { authUrl });
+        send(res, 200, { authUrl, project_id: projectId });
       } catch(err) {
         send(res, 500, { error: err.message });
       }
@@ -957,9 +1188,10 @@ const server = http.createServer(async (req, res) => {
         if (!body.post_id) return send(res, 400, { error: 'post_id required' });
         const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(body.post_id);
         if (!post) return send(res, 404, { error: 'Post not found' });
+        const projectId = post.project_id || activeProjectId(null, body);
         let mediaPaths = [];
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
-        const result = await xOAuth.publishTweet(db, post.post_text, mediaPaths);
+        const result = await xOAuth.publishTweet(db, post.post_text, mediaPaths, projectId);
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', Date.now(), Date.now(), post.id);
         send(res, 200, result);
@@ -971,18 +1203,18 @@ const server = http.createServer(async (req, res) => {
 
     // Check X connection status
     if (pathname === '/api/x/status' && method === 'GET') {
-      const connected = xOAuth.getSetting(db, 'x.connected') === 'true';
-      const hasToken = !!xOAuth.getSetting(db, 'x.access_token');
-      send(res, 200, { connected: connected && hasToken });
+      const projectId = activeProjectId(urlObj, null);
+      const config = xOAuth.getChannelConfig(db, projectId, 'x');
+      send(res, 200, { connected: !!(config.access_token), project_id: projectId });
       return;
     }
 
     // Disconnect
     if (pathname === '/api/x/disconnect' && method === 'POST') {
-      xOAuth.setSetting(db, 'x.access_token', '');
-      xOAuth.setSetting(db, 'x.refresh_token', '');
-      xOAuth.setSetting(db, 'x.connected', 'false');
-      send(res, 200, { ok: true });
+      const body = await parseBody(req);
+      const projectId = activeProjectId(null, body);
+      xOAuth.setChannelConfig(db, projectId, 'x', { access_token: '', refresh_token: '' });
+      send(res, 200, { ok: true, project_id: projectId });
       return;
     }
 
@@ -1005,9 +1237,12 @@ const server = http.createServer(async (req, res) => {
       try {
         const redirectUri = `http://localhost:${PORT}/oauth/linkedin/callback`;
         const tokens = await linkedinOAuth.exchangeCodeForToken(db, code, redirectUri);
-        linkedinOAuth.setSetting(db, 'linkedin.access_token', tokens.access_token || '');
-        if (tokens.refresh_token) linkedinOAuth.setSetting(db, 'linkedin.refresh_token', tokens.refresh_token);
-        linkedinOAuth.setSetting(db, 'linkedin.member_urn', ''); // clear cache so it re-fetches
+        const projectId = stateValid === true ? 'proj_default' : stateValid || 'proj_default';
+        linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', {
+          access_token: tokens.access_token || '',
+          ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+          member_urn: '',
+        });
         linkedinOAuth.setSetting(db, 'linkedin.connected', 'true');
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(`<html><body style="font-family:sans-serif;padding:20px"><h2 style="color:#4ade80">✓ LinkedIn Connected!</h2><p>You can close this window.</p><script>setTimeout(()=>window.close(),1500)</script></body></html>`);
@@ -1022,10 +1257,13 @@ const server = http.createServer(async (req, res) => {
     // LinkedIn: start OAuth
     if (pathname === '/api/linkedin/connect' && method === 'POST') {
       try {
+        const body = await parseBody(req);
+        const projectId = activeProjectId(null, body);
+        // Carry project_id through the OAuth state
+        const state = linkedinOAuth.generateState(projectId);
         const redirectUri = `http://localhost:${PORT}/oauth/linkedin/callback`;
-        const state = linkedinOAuth.generateState();
         const url = linkedinOAuth.buildAuthUrl(db, redirectUri, state);
-        send(res, 200, { url });
+        send(res, 200, { url, project_id: projectId });
       } catch(err) {
         send(res, 400, { error: err.message });
       }
@@ -1039,9 +1277,10 @@ const server = http.createServer(async (req, res) => {
         const { post_id } = body;
         const post = db.prepare('SELECT * FROM posts WHERE id = ?').get(post_id);
         if (!post) return send(res, 404, { error: 'Post not found' });
+        const projectId = post.project_id || activeProjectId(null, body);
         let mediaPaths = [];
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
-        const result = await linkedinOAuth.publishPost(db, post.post_text, mediaPaths.length ? mediaPaths[0] : null);
+        const result = await linkedinOAuth.publishPost(db, post.post_text, mediaPaths.length ? mediaPaths[0] : null, projectId);
         const now = Date.now();
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', now, now, post_id);
@@ -1054,19 +1293,18 @@ const server = http.createServer(async (req, res) => {
 
     // LinkedIn: status
     if (pathname === '/api/linkedin/status' && method === 'GET') {
-      const connected = linkedinOAuth.getSetting(db, 'linkedin.connected') === 'true';
-      const hasToken = !!linkedinOAuth.getSetting(db, 'linkedin.access_token');
-      send(res, 200, { connected: connected && hasToken });
+      const projectId = activeProjectId(urlObj, null);
+      const config = linkedinOAuth.getChannelConfig(db, projectId, 'linkedin');
+      send(res, 200, { connected: !!(config.access_token), project_id: projectId });
       return;
     }
 
     // LinkedIn: disconnect
     if (pathname === '/api/linkedin/disconnect' && method === 'POST') {
-      linkedinOAuth.setSetting(db, 'linkedin.access_token', '');
-      linkedinOAuth.setSetting(db, 'linkedin.refresh_token', '');
-      linkedinOAuth.setSetting(db, 'linkedin.member_urn', '');
-      linkedinOAuth.setSetting(db, 'linkedin.connected', 'false');
-      send(res, 200, { ok: true });
+      const body = await parseBody(req);
+      const projectId = activeProjectId(null, body);
+      linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', { access_token: '', refresh_token: '', member_urn: '' });
+      send(res, 200, { ok: true, project_id: projectId });
       return;
     }
 
