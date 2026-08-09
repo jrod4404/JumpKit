@@ -3,7 +3,8 @@
    =========================== */
 
 const DEFAULT_CATEGORIES = ['Bug', 'New Feature', 'Marketing'];
-const DATA_API_URL = '/api/state';
+// Data access: Electron IPC bridge (window.todoKit) when running as the mac app.
+const DATA_API_URL = (window.todoKit && window.todoKit.loadStore) ? null : '/api/state';
 
 const ICONS = {
   pencil: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>`,
@@ -217,9 +218,13 @@ function normalizeStatus(status) {
 
 async function loadState() {
   try {
-    const response = await fetch(DATA_API_URL, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    state = await response.json();
+    if (window.todoKit && window.todoKit.loadStore) {
+      state = await window.todoKit.loadStore();
+    } else {
+      const response = await fetch(DATA_API_URL, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      state = await response.json();
+    }
   } catch (e) {
     console.warn('TodoKit: failed to load JSON state. Start with `node server.js` instead of opening index.html directly.', e);
     state = { projects: [], tasks: [] };
@@ -267,16 +272,20 @@ let saveStateErrorShown = false;
 
 function saveState() {
   normalizeState();
-  const payload = JSON.stringify({ projects: state.projects, tasks: state.tasks });
+  const payload = { projects: state.projects, tasks: state.tasks };
   saveStatePromise = saveStatePromise
     .catch(() => {})
     .then(async () => {
-      const response = await fetch(DATA_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payload,
-      });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      if (window.todoKit && window.todoKit.saveStore) {
+        await window.todoKit.saveStore(payload);
+      } else {
+        const response = await fetch(DATA_API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      }
     })
     .catch(e => {
       console.error('TodoKit: failed to save JSON state. Make sure `node server.js` is running.', e);
@@ -433,16 +442,18 @@ function categoryBadge(cat, project = getProject(activeProjectId)) {
 function renderSidebar() {
   const list = document.getElementById('project-list');
   if (state.projects.length === 0) {
-    list.innerHTML = `<li style="padding:8px 16px;color:var(--sidebar-text-muted);font-size:12.5px;font-style:italic;">No projects yet</li>`;
+    list.innerHTML = `<li class="no-projects" style="padding:8px 10px;color:var(--text-dim);font-size:12.5px;">No projects yet</li>`;
     return;
   }
-  list.innerHTML = state.projects.map(p => `
-    <li data-id="${p.id}" class="${p.id === activeProjectId ? 'active' : ''}" draggable="true" onclick="selectProject('${p.id}')">
+  list.innerHTML = state.projects.map(p => {
+    const count = state.tasks.filter(t => t.projectId === p.id).length;
+    return `<li data-id="${p.id}" class="${p.id === activeProjectId ? 'active' : ''}" draggable="true" onclick="selectProject('${p.id}')">
       <span class="proj-drag-handle" title="Drag to reorder">⠇</span>
       <span class="proj-dot"></span>
-      ${escapeHtml(p.name)}
-    </li>
-  `).join('');
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(p.name)}</span>
+      <span class="nav-badge">${count}</span>
+    </li>`;
+  }).join('');
   initSidebarProjectDrag(list);
 }
 
@@ -502,11 +513,13 @@ function renderProjectView() {
   if (!project) {
     document.getElementById('empty-state').style.display = '';
     document.getElementById('project-view').style.display = 'none';
+    updateTopbar();
     return;
   }
 
   document.getElementById('empty-state').style.display = 'none';
   document.getElementById('project-view').style.display = '';
+  updateTopbar();
 
   document.getElementById('project-name-heading').textContent = project.name;
   const descEl = document.getElementById('project-description-heading');
@@ -604,6 +617,9 @@ function _compareBySortEntry(a, b, col, dir) {
   if (col === 'plannedStart') {
     av = a.plannedStart || '9999-12-31';
     bv = b.plannedStart || '9999-12-31';
+  } else if (col === 'tags') {
+    av = (a.tags || []).join(', ').toLowerCase();
+    bv = (b.tags || []).join(', ').toLowerCase();
   } else {
     av = String(a[col] || '').toLowerCase();
     bv = String(b[col] || '').toLowerCase();
@@ -826,6 +842,7 @@ function selectProject(id) {
 
   renderSidebar();
   renderProjectView();
+  updateTopbar();
 }
 
 function openNewProjectModal() {
@@ -988,6 +1005,8 @@ function _flushDetailDraft() {
       applyStatusChange(task, value);
     } else if (field === 'title') {
       if (value) task[field] = value;
+    } else if (field === 'tags') {
+      task[field] = Array.isArray(value) ? value : [];
     } else {
       task[field] = value;
     }
@@ -1020,6 +1039,11 @@ function _renderDetailFieldDisplay(field, value, task, project) {
   if (field === 'plannedStart') return formatDate(value);
   if (field === 'title')       return escapeHtml(value);
   if (field === 'description') return value ? escapeHtml(value) : '<span class="detail-empty">Click to add description…</span>';
+  if (field === 'tags') {
+    const tags = Array.isArray(value) ? value : (task && task.tags ? task.tags : []);
+    if (!tags.length) return '<span class="detail-empty">Click to add tags…</span>';
+    return `<div class="detail-tags-row">${tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join('')}</div>`;
+  }
   return escapeHtml(String(value || ''));
 }
 
@@ -1052,7 +1076,7 @@ function openTaskDetailModal(taskId) {
       <div class="detail-meta-item"><span class="detail-label-inline">Responsible</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'responsible')">${escapeHtml(task.responsible || '—')}</span></div>
       <div class="detail-meta-item"><span class="detail-label-inline">Planned Start</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'plannedStart')">${formatDate(task.plannedStart)}</span></div>
       ${task.closedAt ? `<div class="detail-meta-item"><span class="detail-label-inline">Closed</span><span class="detail-value-inline" style="font-size:0.82rem;color:var(--text-light)">${new Date(task.closedAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</span></div>` : ''}
-      ${(task.tags && task.tags.length) ? `<div class="detail-meta-item" style="flex-basis:100%"><span class="detail-label-inline">Tags</span><span class="detail-value-inline"><div class="detail-tags-row">${task.tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join('')}</div></span></div>` : ''}
+      ${(task.tags && task.tags.length) ? `<div class="detail-meta-item" style="flex-basis:100%"><span class="detail-label-inline">Tags</span><span class="detail-value-inline detail-editable" title="Click to edit" onclick="detailInlineEdit(this,'tags')"><div class="detail-tags-row">${task.tags.map(tag => `<span class="tag-pill">${escapeHtml(tag)}</span>`).join('')}</div></span></div>` : `<div class="detail-meta-item" style="flex-basis:100%"><span class="detail-label-inline">Tags</span><span class="detail-value-inline detail-editable" title="Click to add tags" onclick="detailInlineEdit(this,'tags')"><span class="detail-empty">Click to add tags…</span></span></div>`}
     </div>
     <div class="detail-section">
       <div class="detail-label">Description</div>
@@ -1231,6 +1255,84 @@ function detailInlineEdit(el, field) {
     ta.addEventListener('keydown', e => {
       if (e.key === 'Escape') openTaskDetailModal(detailTaskId);
       if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) ta.blur();
+    });
+
+  } else if (field === 'tags') {
+    // Tag editor — inline pill UI within the detail modal
+    _modalTags = Array.isArray(task.tags) ? [...task.tags] : [];
+    el.innerHTML = '';
+    el.style.cursor = 'default';
+
+    const container = document.createElement('div');
+    container.className = 'detail-tags-editor';
+    container.innerHTML = `
+      <div class="detail-tag-area" style="min-height:32px;padding:4px;border:1px solid var(--border-color);border-radius:8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:var(--bg-input,#fff)">
+        <input type="text" class="detail-tag-input" placeholder="Type a tag and press Enter…" style="border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:120px;padding:4px;color:var(--text-primary)" />
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Press Enter or comma to add. Backspace removes the last tag. Click × to delete.</div>
+    `;
+    el.appendChild(container);
+
+    const tagArea = container.querySelector('.detail-tag-area');
+    const input = container.querySelector('.detail-tag-input');
+
+    function renderDetailPills() {
+      Array.from(tagArea.querySelectorAll('.tag-pill')).forEach(p => p.remove());
+      _modalTags.forEach((tag, i) => {
+        const pill = document.createElement('span');
+        pill.className = 'tag-pill';
+        pill.innerHTML = `${escapeHtml(tag)}<button class="tag-pill-remove" type="button" data-tag-idx="${i}" aria-label="Remove tag">&#x00D7;</button>`;
+        tagArea.insertBefore(pill, input);
+      });
+    }
+
+    renderDetailPills();
+    input.focus();
+
+    const commitTags = () => {
+      const val = input.value.trim();
+      if (val) _modalTags.push(val);
+      input.value = '';
+      _detailChanges[field] = [..._modalTags];
+      _markDetailDirty();
+      delete el.dataset.editing;
+      el.style.cursor = '';
+      el.innerHTML = _renderDetailFieldDisplay('tags', _modalTags, task, project);
+    };
+
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = input.value.trim().replace(/,+$/, '').trim();
+        if (val && !_modalTags.includes(val)) {
+          _modalTags.push(val);
+          input.value = '';
+          renderDetailPills();
+        }
+      } else if (e.key === 'Backspace' && !input.value && _modalTags.length) {
+        _modalTags.pop();
+        renderDetailPills();
+      } else if (e.key === 'Escape') {
+        openTaskDetailModal(detailTaskId);
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      setTimeout(commitTags, 200);
+    });
+
+    tagArea.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-tag-idx]');
+      if (btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.tagIdx);
+        _modalTags.splice(idx, 1);
+        renderDetailPills();
+        input.focus();
+      } else {
+        input.focus();
+      }
     });
 
   } else { // title or other text
@@ -2631,20 +2733,55 @@ async function init() {
   CUSTOM_SELECTS.forEach(buildCustomSelect);
   renderSidebar();
   renderProjectView();
+  updateTopbar();
 }
 
 function initTheme() {
-  const saved = localStorage.getItem('todokit-theme') || 'light';
+  const saved = localStorage.getItem('todokit-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
   const toggle = document.getElementById('theme-toggle');
   if (toggle) {
+    const icon = document.getElementById('themeIcon');
+    const renderIcon = () => {
+      if (!icon) return;
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+      icon.innerHTML = dark
+        ? '<svg class="ti"><use href="assets/tabler-icons.svg#tabler-moon"/></svg>'
+        : '<svg class="ti"><use href="assets/tabler-icons.svg#tabler-sun"/></svg>';
+    };
+    renderIcon();
     toggle.addEventListener('click', () => {
-      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
       const next = current === 'light' ? 'dark' : 'light';
       document.documentElement.setAttribute('data-theme', next);
       localStorage.setItem('todokit-theme', next);
+      renderIcon();
       renderProjectView();
     });
+  }
+  // Sidebar collapse persistence (SEO Spy-style)
+  const sb = document.getElementById('sidebar');
+  const sbToggle = document.getElementById('sidebarToggleBtn');
+  if (sb && sbToggle) {
+    if (localStorage.getItem('todokit_sidebar_collapsed') === '1') sb.classList.add('collapsed');
+    sbToggle.addEventListener('click', () => {
+      sb.classList.toggle('collapsed');
+      localStorage.setItem('todokit_sidebar_collapsed', sb.classList.contains('collapsed') ? '1' : '0');
+    });
+  }
+}
+
+// Sync the topbar title/sub with the active project (SEO Spy-style header)
+function updateTopbar() {
+  const project = getProject(activeProjectId);
+  const title = document.getElementById('topbarTitleText');
+  const sub = document.getElementById('topbarSub');
+  if (project) {
+    if (title) title.textContent = project.name;
+    if (sub) sub.textContent = (project.description || '').trim() ? project.description.trim() : `${state.tasks.filter(t => t.projectId === project.id).length} tasks`;
+  } else {
+    if (title) title.textContent = 'Todo Kit';
+    if (sub) sub.textContent = 'Select a project';
   }
 }
 

@@ -1,6 +1,15 @@
 {
+  "name": "todokit",
+  "version": "1.0.0",
+  "description": "TodoKit — local Mac Electron app for project + task tracking (JumpKit, PrepSBA, Business Ideas, LeadExpandr)",
+  "main": "main.js",
+  "author": "Jeff",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
-    "start": "node server.js"
+    "start": "electron ."
   },
-  "private": true
+  "devDependencies": {
+    "electron": "^33.4.11"
+  }
 }
