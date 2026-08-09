@@ -11,6 +11,26 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://jumpkit.app/pricing</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/compare/bookmarks</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/alternative</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/use-cases</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://jumpkit.app/about</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

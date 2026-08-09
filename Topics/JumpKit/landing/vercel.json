@@ -1,6 +1,20 @@
 {
   "buildCommand": null,
   "installCommand": null,
+  "redirects": [
+    { "source": "/about/", "destination": "/about", "permanent": true },
+    { "source": "/pricing/", "destination": "/pricing", "permanent": true },
+    { "source": "/compare/bookmarks/", "destination": "/compare/bookmarks", "permanent": true },
+    { "source": "/alternative/", "destination": "/alternative", "permanent": true },
+    { "source": "/use-cases/", "destination": "/use-cases", "permanent": true },
+    { "source": "/blog/", "destination": "/blog", "permanent": true },
+    { "source": "/blog/introducing-jumpkit/", "destination": "/blog/introducing-jumpkit", "permanent": true },
+    { "source": "/contact/", "destination": "/contact", "permanent": true },
+    { "source": "/privacy/", "destination": "/privacy", "permanent": true },
+    { "source": "/terms/", "destination": "/terms", "permanent": true },
+    { "source": "/videos/", "destination": "/videos", "permanent": true },
+    { "source": "/affiliates/", "destination": "/affiliates", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/confirmed", "destination": "/confirmed.html" },
     { "source": "/reset-password", "destination": "/reset-password.html" },
@@ -8,6 +22,10 @@
     { "source": "/blog/introducing-jumpkit", "destination": "/blog/introducing-jumpkit.html" },
     { "source": "/affiliates", "destination": "/affiliates.html" },
     { "source": "/about", "destination": "/about.html" },
+    { "source": "/pricing", "destination": "/pricing.html" },
+    { "source": "/compare/bookmarks", "destination": "/compare/bookmarks.html" },
+    { "source": "/alternative", "destination": "/alternative.html" },
+    { "source": "/use-cases", "destination": "/use-cases.html" },
     { "source": "/contact", "destination": "/contact.html" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },

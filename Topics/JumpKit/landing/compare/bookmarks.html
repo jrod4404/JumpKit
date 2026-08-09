@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit vs Browser Bookmarks — Why Jumps Beat Bookmarks</title>
+  <meta name="description" content="An honest comparison: JumpKit's organized jumps vs browser bookmarks. See where each wins, when to choose which, and how to migrate your bookmarks to JumpKit." />
+  <link rel="canonical" href="https://jumpkit.app/compare/bookmarks" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="JumpKit vs Browser Bookmarks — Why Jumps Beat Bookmarks" />
+  <meta property="og:description" content="An honest comparison: JumpKit's organized jumps vs browser bookmarks, with a feature table, migration path, and FAQs." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/compare/bookmarks" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JumpKit vs Browser Bookmarks — Why Jumps Beat Bookmarks" />
+  <meta name="twitter:description" content="An honest comparison: JumpKit's organized jumps vs browser bookmarks." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
+    /* ── Comparison page styles ── */
+    .cmp-hero {
+      padding: 120px 24px 40px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .cmp-hero .section-label { margin-bottom: 16px; }
+    .cmp-hero h1 { font-size: clamp(2rem, 5vw, 3rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+    .cmp-hero p { color: var(--text-muted); font-size: 1.05rem; max-width: 680px; margin: 0 auto; line-height: 1.7; }
+    .cmp-body { padding: 40px 24px 80px; }
+    .cmp-body .section-inner, .cmp-inner { max-width: 960px; margin: 0 auto; }
+    .cmp-h2 { font-size: 1.6rem; font-weight: 700; margin: 48px 0 12px; }
+    .cmp-intro { color: var(--text-muted); line-height: 1.7; margin-bottom: 24px; max-width: 860px; }
+    .cmp-table-wrap { overflow-x: auto; border: 1px solid var(--border, rgba(255,255,255,0.08)); border-radius: 14px; }
+    table.cmp { width: 100%; border-collapse: collapse; min-width: 620px; font-size: 0.95rem; }
+    table.cmp th, table.cmp td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--border, rgba(255,255,255,0.07)); vertical-align: top; }
+    table.cmp thead th { background: var(--card-bg, rgba(255,255,255,0.04)); font-weight: 700; }
+    table.cmp .cmp-row-head { font-weight: 600; color: var(--text); }
+    table.cmp .win { color: #22c55e; font-weight: 600; }
+    table.cmp .lose { color: #e05555; font-weight: 600; }
+    table.cmp .tie { color: var(--text-muted); }
+    .cmp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 24px; }
+    .cmp-card { background: var(--card-bg, rgba(255,255,255,0.02)); border: 1px solid var(--border, rgba(255,255,255,0.08)); border-radius: 16px; padding: 24px; }
+    .cmp-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .cmp-card p { color: var(--text-muted); line-height: 1.7; font-size: 0.92rem; }
+    .cmp-steps { margin: 16px 0 0; padding-left: 20px; color: var(--text-muted); line-height: 1.9; }
+    .cmp-steps li { margin-bottom: 8px; }
+    .cmp-steps strong { color: var(--text); }
+    .cmp-note { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; margin-top: 16px; font-style: italic; }
+  </style>
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JumpKit",
+    "url": "https://jumpkit.app",
+    "logo": "https://jumpkit.app/assets/logo-light.png",
+    "sameAs": [
+      "https://x.com/jumpkitapp",
+      "https://youtube.com/@jumpkitapp",
+      "https://linkedin.com/company/jumpkitapp"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@jumpkit.app"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How is JumpKit different from browser bookmarks?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Browser bookmarks are locked to one browser and can only open web pages. JumpKit is a desktop launcher that works across all browsers, launches web links, local folders, and network shares in one click, and runs regardless of which browser you use."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can JumpKit open local folders and network shares?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. This is one of the biggest differences. Browser bookmarks can only open web URLs. JumpKit jumps can point to a local directory path or a network share, so you can launch any folder on your machine or network in one click."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does JumpKit keep my bookmarks in sync across browsers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "JumpKit is browser-independent: it lives on your desktop rather than inside a single browser. That means your organized jumps work the same no matter which browser you open links in — no more maintaining separate bookmark bars in every browser."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I share my links with teammates in JumpKit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JumpKit supports teams and group jumps, so you can define jumps to share with teammates. Everyone starts from the same page — an option that browser bookmarks simply don't offer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does JumpKit track time saved?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JumpKit counts every jump and shows you exactly how much time and money you're saving in an automatic, local dashboard. Browser bookmarks offer no usage statistics at all."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I migrate my browser bookmarks to JumpKit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The common path is to export a list of your current bookmark URLs, then add them as JumpKit jumps in the relevant category. You can also simply build your JumpKit layout starting from your most-used links. Your data stays local on your machine."
+        }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="../assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="/#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="../assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="/#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="../assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="/#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="../assets/tabler-sprite.svg#tabler-list-check"/></svg> Quick Start</a>
+      <a href="/pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <div class="cmp-hero">
+    <div class="section-label"><svg class="ti ti-versions"><use href="../assets/tabler-sprite.svg#tabler-versions"/></svg> Comparison</div>
+    <h1>JumpKit vs Browser Bookmarks — Why Jumps Beat Bookmarks</h1>
+    <p>Browser bookmarks were a great idea in the early days of the web, but they don't scale for modern workflows. Here's an honest look at where each option wins — and why organized "jumps" beat bookmarks for most daily work.</p>
+  </div>
+
+  <!-- BODY -->
+  <section class="cmp-body">
+    <div class="cmp-inner">
+      <p class="cmp-intro" style="margin-top:0">
+        A bookmark lives inside one browser and opens only web pages. A <strong style="color:var(--text)">jump</strong> lives on your desktop, opens web pages <em>and</em> local folders and network shares, and sits in a searchable, shareable layout that works no matter which browser you use. That difference matters more the more time you spend hunting for things.
+      </p>
+
+      <h2 class="cmp-h2">Feature-by-feature comparison</h2>
+      <div class="cmp-table-wrap">
+        <table class="cmp">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Browser Bookmarks</th>
+              <th>JumpKit Jumps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="cmp-row-head">Structure</td>
+              <td>Flat list or nested folders that grow messy over time</td>
+              <td class="win">Category columns you define, with filters (Active, Favorites, Recent, Archive)</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Cross-browser</td>
+              <td class="lose">Locked to one browser (Chrome bookmarks ≠ Firefox bookmarks)</td>
+              <td class="win">Desktop app — works the same across every browser</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Search</td>
+              <td>Basic browser address-bar search</td>
+              <td class="win">Instant, real-time search across all links, folders, and categories</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Share with team</td>
+              <td class="lose">Not shareable</td>
+              <td class="win">Create teams and define jumps to share — everyone starts on the same page</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Offline</td>
+              <td>Works offline only for cached local pages</td>
+              <td class="win">Fully local app; local folders and files work regardless of internet</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Time-tracking</td>
+              <td class="lose">None</td>
+              <td class="win">Automatic ROI dashboard counts every jump and time saved</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Local folders</td>
+              <td class="lose">Cannot open local directories</td>
+              <td class="win">Launch any local folder path in one click</td>
+            </tr>
+            <tr>
+              <td class="cmp-row-head">Network shares</td>
+              <td class="lose">Cannot open \\server\share paths</td>
+              <td class="win">Jump directly to network shares and shared drives</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="cmp-note">
+        Honest caveat: bookmarks are free and already built into your browser, and they're perfectly fine for a handful of personal links. JumpKit earns its place when you manage many links, folders, and shared resources and want them organized, searchable, and shareable — plus tracked ROI.
+      </p>
+
+      <h2 class="cmp-h2">When to choose which</h2>
+      <div class="cmp-cards">
+        <div class="cmp-card">
+          <h3>Stick with browser bookmarks if…</h3>
+          <p>…you have a small number of personal web links (say, fewer than 10–20) that you never need to share, never need statistics on, and never need to open as local folders or network shares. For that scenario, bookmarks are perfectly fine and free.</p>
+        </div>
+        <div class="cmp-card">
+          <h3>Choose JumpKit if…</h3>
+          <p>…you regularly dig through folders, bookmark bars, or chat threads to find links, files, and shared drives. If you work in a team, switch browsers, handle local folders or network shares, or want to see the time you save — organized jumps win clearly.</p>
+        </div>
+      </div>
+
+      <h2 class="cmp-h2">Migration path: from bookmarks to jumps</h2>
+      <p class="cmp-intro" style="margin-bottom:8px">Moving over takes minutes and has no lock-in — JumpKit stores everything 100% locally, so your data stays yours either way.</p>
+      <ol class="cmp-steps">
+        <li><strong>Start free.</strong> Download JumpKit for <a href="/pricing" style="color:var(--turq);font-weight:600">Windows or Mac</a> — no credit card.</li>
+        <li><strong>Define your categories.</strong> Name columns the way you actually work (e.g., "Daily tools," "Projects," "Team shares").</li>
+        <li><strong>Add your most-used links as jumps.</strong> Paste a web URL, a local folder path, or a network share. Optionally repeat this for any bookmark you rely on.</li>
+        <li><strong>Jump.</strong> Click any jump to open it instantly, and watch your time savings appear in your local dashboard.</li>
+      </ol>
+
+      <h2 class="cmp-h2">Related reading</h2>
+      <p class="cmp-intro">JumpKit covers far more than bookmark replacement. Explore it further:</p>
+      <ul class="cmp-steps">
+        <li><a href="/alternative" style="color:var(--turq);font-weight:600">Bookmark Manager Alternatives</a> — how JumpKit compares to cloud bookmark managers as a category.</li>
+        <li><a href="/use-cases" style="color:var(--turq);font-weight:600">JumpKit Use Cases</a> — for IT, Sales, Engineering, and small teams.</li>
+        <li><a href="/pricing" style="color:var(--turq);font-weight:600">Pricing</a> — Free and Unlimited plans.</li>
+        <li><a href="/blog" style="color:var(--turq);font-weight:600">The JumpKit Blog</a> — guides and updates.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-dark" id="faq" style="margin-top:-40px">
+    <div class="section-inner">
+      <span class="section-label"><svg class="ti ti-help-circle" style="width:1.1em;height:1.1em;vertical-align:-0.15em;margin-right:0.15em"><use href="../assets/tabler-sprite.svg#tabler-help-circle"/></svg>FAQ</span>
+      <h2 class="section-title" style="text-align:center">Bookmarks vs Jumps: questions answered.</h2>
+      <div class="faq-list" style="max-width:760px;margin:0 auto">
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            How is JumpKit different from browser bookmarks?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Browser bookmarks are locked to one browser and can only open web pages. JumpKit is a desktop launcher that works across all browsers, launches web links, local folders, and network shares in one click, and runs regardless of which browser you use.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Can JumpKit open local folders and network shares?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. This is one of the biggest differences. Browser bookmarks can only open web URLs. JumpKit jumps can point to a local directory path or a network share, so you can launch any folder on your machine or network in one click.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Does JumpKit keep my bookmarks in sync across browsers?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">JumpKit is browser-independent: it lives on your desktop rather than inside a single browser. That means your organized jumps work the same no matter which browser you open links in — no more maintaining separate bookmark bars in every browser.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Can I share my links with teammates in JumpKit?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. JumpKit supports teams and group jumps, so you can define jumps to share with teammates. Everyone starts from the same page — an option that browser bookmarks simply don't offer.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Does JumpKit track time saved?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. JumpKit counts every jump and shows you exactly how much time and money you're saving in an automatic, local dashboard. Browser bookmarks offer no usage statistics at all.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            How do I migrate my browser bookmarks to JumpKit?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="../assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">The common path is to export a list of your current bookmark URLs, then add them as JumpKit jumps in the relevant category. You can also simply build your JumpKit layout starting from your most-used links. Your data stays local on your machine.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="../assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="../assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="../assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="/pricing" class="footer-page-link">Pricing</a>
+          <a href="/videos" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
+          <a href="/alternative" class="footer-page-link">Alternatives</a>
+          <a href="/use-cases" class="footer-page-link">Use Cases</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script src="../script.js"></script>
+  <script>
+    (function () {
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
