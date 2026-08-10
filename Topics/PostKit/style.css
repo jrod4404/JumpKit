@@ -89,7 +89,7 @@ html, body {
   top: 0;
   left: 0;
   right: 0;
-  height: 48px;
+  height: 28px; /* standard macOS title bar height */
   z-index: 50;
   display: flex;
   align-items: center;
@@ -98,7 +98,7 @@ html, body {
   user-select: none;
 }
 .app-titlebar-name {
-  margin-left: 86px; /* clear the macOS traffic lights (green btn is leftmost ~18px; name right of it) */
+  margin-left: 62px; /* clear the macOS traffic lights (green btn ~18px; name right of it) */
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
@@ -114,7 +114,7 @@ html, body {
   min-width: 210px;
   height: 100vh;
   min-height: 100vh;
-  padding-top: 48px; /* room for custom title bar */
+  padding-top: 28px; /* room for custom title bar */
   box-sizing: border-box;
   background: var(--bg-surface);
   display: flex;
@@ -345,13 +345,13 @@ html, body {
   display: flex;
   flex-direction: column;
   background: var(--bg);
-  padding-top: 48px; /* room for custom title bar */
+  padding-top: 28px; /* room for custom title bar */
   box-sizing: border-box;
 }
 
 .tab-pane {
   flex: 1;
-  height: calc(100vh - 48px);
+  height: calc(100vh - 28px);
   overflow-y: auto;
   padding: 12px 32px 28px;
 }

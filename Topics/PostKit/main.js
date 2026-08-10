@@ -68,7 +68,7 @@ function createWindow() {
     backgroundColor: '#0d0d14', // dark bg — no white flash
     title: 'PostKit',
     titleBarStyle: 'hiddenInset', // keep macOS traffic lights, hide native title bar
-    trafficLightPosition: { x: 18, y: 20 },
+    trafficLightPosition: { x: 14, y: 7 },
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
