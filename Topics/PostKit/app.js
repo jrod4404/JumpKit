@@ -2120,7 +2120,7 @@ async function renderAppSettings(pane) {
               <div style="font-size:13px;font-weight:600">Global connections</div>
               <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</div>
             </div>
-            <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">Loading…</div>
+            <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:stretch">Loading…</div>
           </div>
         </div>
       </div>
@@ -2169,30 +2169,39 @@ async function loadGlobalConnections() {
       ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600">Connected</span>`
       : `<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>`;
     const account = (status && status.account_name)
-      ? `<div style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</div>` : '';
+      ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</span>` : '';
     const btn = connected
-      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:28px;padding:0 12px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,1000)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
-      : (p.connect ? `<button class="btn-primary btn-sm" style="height:28px;padding:0 12px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
+      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,1000)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
+      : (p.connect ? `<button class="btn-primary btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
     const creds = p.clientIdKey ? `
-      <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:10px;color:var(--text-dim);min-width:64px">Client ID</span>
+      <div class="acct-row acct-row-stacked">
+        <div class="acct-row-label"><span>Client ID</span></div>
+        <div class="acct-control">
           <input type="text" class="form-input" id="conn-${p.key}-client-id" value="${escHtml(_settings[p.clientIdKey] || '')}" placeholder="Paste Client ID..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientIdKey}','conn-${p.key}-client-id')">
         </div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:10px;color:var(--text-dim);min-width:64px">Secret</span>
+      </div>
+      <div class="acct-row acct-row-stacked">
+        <div class="acct-row-label"><span>Client Secret</span></div>
+        <div class="acct-control">
           <input type="password" class="form-input" id="conn-${p.key}-client-secret" value="${escHtml(_settings[p.clientSecretKey] || '')}" placeholder="Paste Client Secret..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientSecretKey}','conn-${p.key}-client-secret')">
         </div>
       </div>` : '';
-    return `<div style="display:flex;flex-direction:column;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card)">
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="width:38px;height:38px;border-radius:10px;background:${p.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700;color:#fff">${p.label[0]}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600">${p.label}</div>
-          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">${badge}</div>
-          ${account}
+    return `<div class="platform-settings-card">
+      <div class="platform-settings-card-header">
+        <div style="display:flex;align-items:center;gap:8px">
+          ${platformChip(p.key)}
+          <span class="platform-settings-card-title">${escHtml(p.label)}</span>
         </div>
-        <div style="flex-shrink:0">${btn}</div>
+      </div>
+      <div class="acct-row">
+        <div class="acct-row-label">
+          <span>Connection</span>
+          <span class="acct-row-hint">Global — shared by all projects</span>
+        </div>
+        <div class="acct-control" style="gap:8px">
+          ${badge} ${account}
+          <span style="margin-left:auto">${btn}</span>
+        </div>
       </div>
       ${creds}
     </div>`;
