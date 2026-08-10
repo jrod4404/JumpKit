@@ -145,6 +145,99 @@
           "isDefault": false
         }
       ]
+    },
+    {
+      "id": "leadexpandr_mrnhq8hr",
+      "name": "LeadExpandr",
+      "description": "Rank & Rent side business \u2014 build ranked local websites and rent leads to businesses",
+      "users": [
+        "Jeff",
+        "Maximus"
+      ],
+      "customCategories": [
+        "SEO",
+        "Research"
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#15803d",
+        "SEO": "#7c3aed",
+        "Research": "#0891b2"
+      },
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#15803d",
+          "isDefault": true
+        },
+        {
+          "id": "custom-seo",
+          "name": "SEO",
+          "color": "#7c3aed",
+          "isDefault": false
+        },
+        {
+          "id": "custom-research",
+          "name": "Research",
+          "color": "#0891b2",
+          "isDefault": false
+        }
+      ]
+    },
+    {
+      "id": "mqpk1417b7ad",
+      "name": "PostKit",
+      "description": "Project for tasks for PostKit social media scheduler development",
+      "users": [
+        "Jeff",
+        "Maximus"
+      ],
+      "categories": [
+        {
+          "id": "default-0",
+          "name": "Bug",
+          "originalName": "Bug",
+          "color": "#b91c1c",
+          "isDefault": true
+        },
+        {
+          "id": "default-1",
+          "name": "New Feature",
+          "originalName": "New Feature",
+          "color": "#1d4ed8",
+          "isDefault": true
+        },
+        {
+          "id": "default-2",
+          "name": "Marketing",
+          "originalName": "Marketing",
+          "color": "#3d754e",
+          "isDefault": true
+        }
+      ],
+      "categoryColors": {
+        "Bug": "#b91c1c",
+        "New Feature": "#1d4ed8",
+        "Marketing": "#3d754e"
+      },
+      "customCategories": []
     }
   ],
   "tasks": [
@@ -201,7 +294,7 @@
         {
           "id": "auto_glm_setup_1782338926",
           "author": "Jeff",
-          "html": "ZAI API key added to openclaw.json env. zai/glm-5.2 registered in model allowlist with alias glm. Gateway restarted and model verified live — session running on GLM-5.2.",
+          "html": "ZAI API key added to openclaw.json env. zai/glm-5.2 registered in model allowlist with alias glm. Gateway restarted and model verified live \u2014 session running on GLM-5.2.",
           "createdAt": "2026-06-24T22:08:46.888262Z",
           "updatedAt": "2026-06-24T22:08:46.888262Z",
           "legacyCompletionNotes": false
@@ -268,7 +361,7 @@
         {
           "id": "postkit_workflow_1783389617395",
           "author": "Maximus",
-          "html": "PostKit now has full end-to-end workflow: root post → Auri generates text + image prompts + YT title/description/thumbnail → Generate Image buttons (DALL-E 3) → Schedule → X auto-publish via OAuth. LinkedIn + YouTube OAuth publishing next.",
+          "html": "PostKit now has full end-to-end workflow: root post \u2192 Auri generates text + image prompts + YT title/description/thumbnail \u2192 Generate Image buttons (DALL-E 3) \u2192 Schedule \u2192 X auto-publish via OAuth. LinkedIn + YouTube OAuth publishing next.",
           "createdAt": "2026-07-07T02:00:17.395Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -327,7 +420,7 @@
       "projectId": "mqqw3xxcq6s0",
       "title": "Todo Kit",
       "priority": "High",
-      "status": "In Progress",
+      "status": "To Do",
       "category": "Idea",
       "responsible": "Jeff",
       "plannedStart": "2026-06-23",
@@ -342,7 +435,7 @@
       "projectId": "mqqw3xxcq6s0",
       "title": "AgentKit / Ai Employees",
       "priority": "High",
-      "status": "In Progress",
+      "status": "To Do",
       "category": "Idea",
       "responsible": "Jeff",
       "plannedStart": "",
@@ -440,7 +533,7 @@
       "projectId": "mqqw3xxcq6s0",
       "title": "Website Rank and Rent",
       "priority": "Med",
-      "status": "To Do",
+      "status": "In Progress",
       "category": "Idea",
       "responsible": "Jeff",
       "plannedStart": "",
@@ -775,7 +868,7 @@
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-07-06",
-      "description": "Do screen studio demo videos and images of app for landing page… need to redo so Jeff Roder not visible.  a) Video for add jump, launch link, launch directory; win and Mac images of jumps page b) video for teams; 2 teams images c) video for stats 2 team images",
+      "description": "Do screen studio demo videos and images of app for landing page\u2026 need to redo so Jeff Roder not visible.  a) Video for add jump, launch link, launch directory; win and Mac images of jumps page b) video for teams; 2 teams images c) video for stats 2 team images",
       "comments": [
         {
           "id": "mr80cfg6yat9",
@@ -845,13 +938,13 @@
     {
       "id": "wum8bscn6f67",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Choose final product name (e.g. LoanWizard, TurboLoan, EasySBA)",
+      "title": "Phase 0 \u00b7 Choose final product name (e.g. LoanWizard, TurboLoan, EasySBA)",
       "priority": "High",
       "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. Evaluate name options, check trademarks, shortlist top 3, make final call.",
+      "description": "Phase 0 \u2014 Branding & Setup. Evaluate name options, check trademarks, shortlist top 3, make final call.",
       "completionNotes": "",
       "executionOrder": 1,
       "comments": [
@@ -871,13 +964,13 @@
     {
       "id": "xyog5gf1edud",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Check domain availability and purchase .com (plus variations)",
+      "title": "Phase 0 \u00b7 Check domain availability and purchase .com (plus variations)",
       "priority": "High",
       "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. Search Namecheap/GoDaddy. Purchase primary .com and relevant variations/alternatives.",
+      "description": "Phase 0 \u2014 Branding & Setup. Search Namecheap/GoDaddy. Purchase primary .com and relevant variations/alternatives.",
       "completionNotes": "",
       "executionOrder": 2,
       "comments": [
@@ -897,13 +990,13 @@
     {
       "id": "m84tm4esrji4",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Secure social handles (X, YT, LI, etc.)",
+      "title": "Phase 0 \u00b7 Secure social handles (X, YT, LI, etc.)",
       "priority": "High",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
-      "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. Claim matching handles on X, LinkedIn, and any other relevant platforms before launch.",
+      "plannedStart": "2026-08-04",
+      "description": "Phase 0 \u2014 Branding & Setup. Claim matching handles on X, LinkedIn, and any other relevant platforms before launch.",
       "completionNotes": "",
       "executionOrder": 4,
       "comments": [
@@ -923,13 +1016,13 @@
     {
       "id": "6q90slqclegd",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Create catchphrase / tagline",
+      "title": "Phase 0 \u00b7 Create catchphrase / tagline",
       "priority": "Med",
       "status": "Completed",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. e.g. 'SBA Loans, Simplified' or 'TurboTax for SBA Applications'. Keep it short and memorable.",
+      "description": "Phase 0 \u2014 Branding & Setup. e.g. 'SBA Loans, Simplified' or 'TurboTax for SBA Applications'. Keep it short and memorable.",
       "completionNotes": "",
       "executionOrder": 6,
       "comments": [
@@ -949,13 +1042,13 @@
     {
       "id": "rqn6vzgebdyh",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Design logo and basic brand assets (colors, fonts, icons)",
+      "title": "Phase 0 \u00b7 Design logo and basic brand assets (colors, fonts, icons)",
       "priority": "High",
       "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. Use Figma or hire a freelancer. Deliverables: logo (light/dark), color palette, font stack, icon set.",
+      "description": "Phase 0 \u2014 Branding & Setup. Use Figma or hire a freelancer. Deliverables: logo (light/dark), color palette, font stack, icon set.",
       "completionNotes": "",
       "executionOrder": 3,
       "comments": [
@@ -975,13 +1068,13 @@
     {
       "id": "4jbva2s7vaz3",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Write brand story and positioning",
+      "title": "Phase 0 \u00b7 Write brand story and positioning",
       "priority": "Med",
       "status": "Completed",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-07-04",
-      "description": "Phase 0 — Branding & Setup. Short narrative for website and pitch: who it's for, why it exists, what makes it different.",
+      "description": "Phase 0 \u2014 Branding & Setup. Short narrative for website and pitch: who it's for, why it exists, what makes it different.",
       "completionNotes": "",
       "executionOrder": 7,
       "comments": [],
@@ -992,37 +1085,37 @@
     {
       "id": "bxbqc9rw1dsu",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Register LLC and set up business banking",
+      "title": "Phase 0 \u00b7 Register LLC, set up business banking, setup lemon squeezy",
       "priority": "Low",
       "status": "To Do",
       "category": "Support",
       "responsible": "Jeff",
-      "plannedStart": "2026-07-08",
-      "description": "Phase 3 — Branding & Setup. File LLC in preferred state. Open dedicated business checking account.",
+      "plannedStart": "2026-08-08",
+      "description": "Phase 0 \u2014 Branding & Setup. File LLC in preferred state. Open dedicated business checking account.",
       "completionNotes": "",
       "executionOrder": 5,
       "comments": [],
       "tags": [
-        "phase 3"
+        "Phase 0"
       ]
     },
     {
       "id": "vhuygd343vcf",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Set up Proton for Email",
+      "title": "Phase 0 \u00b7 Set up Proton for Email",
       "priority": "High",
       "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-02",
-      "description": "Phase 0 — Branding & Setup. Get a professional email on your domain (e.g. jeff@turbosba.com).",
+      "description": "Phase 0 \u2014 Branding & Setup. Get a professional email on your domain (e.g. jeff@turbosba.com).",
       "completionNotes": "",
       "executionOrder": 8,
       "comments": [
         {
           "id": "c_20260703",
           "author": "Jeff",
-          "html": "Marked complete per Jeff — Proton email setup done.",
+          "html": "Marked complete per Jeff \u2014 Proton email setup done.",
           "createdAt": "2026-07-03T17:43:58.653Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -1043,20 +1136,20 @@
     {
       "id": "bi06n4nw7uqr",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · Finalize full requirements / spec doc",
+      "title": "Phase 1 \u00b7 Finalize full requirements / spec doc",
       "priority": "High",
       "status": "In Progress",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Lock in scope for Phase 1. Covers all wizard steps, user roles, data fields, integrations.",
+      "description": "Phase 1 \u2014 Planning & Design. Lock in scope for Phase 1. Covers all wizard steps, user roles, data fields, integrations.",
       "completionNotes": "",
       "executionOrder": 9,
       "comments": [
         {
           "id": "mr3kvqrkhusr",
           "author": "Jeff",
-          "html": "<span>MARKDOWN SPECS:</span><div><br></div><div><div>Here is the refreshed, complete Markdown requirements and specifications document for Phase 1, incorporating the borrower document list, upload guidance, and all previous details.</div><div># Phase 1 Requirements &amp; Technical Specifications</div><div><br></div><div>## 1. Project Overview</div><div>**Product Name**: [Your Chosen Name, e.g., LoanWizard / TurboLoan / EasySBA]</div><div><br></div><div>**Description**: A web-based guided SBA loan application platform that makes completing 7(a) and Express applications as easy and intuitive as TurboTax. The wizard collects information step-by-step, provides smart guidance, auto-fills where possible, generates basic pro formas, validates data, handles document uploads, and prepares exports or submissions for lenders.</div><div><br></div><div>**Target Users**:</div><div>- Primary: Small business owners / borrowers</div><div>- Secondary: Banks &amp; credit unions (white-label / branded instances)</div><div><br></div><div>**Core Value**: Reduce time, errors, and frustration in SBA applications while delivering a delightful, trustworthy experience.</div><div><br></div><div>## 2. Tech Stack</div><div>- **Framework**: Next.js 15 (App Router) + TypeScript + Tailwind CSS</div><div>- **Hosting**: Vercel</div><div>- **Backend / Database / Auth**: Supabase (PostgreSQL, Auth, Storage, Edge Functions)</div><div>- **Emails**: Resend</div><div>- **Payments**: Stripe (Subscriptions + one-time fees)</div><div>- **Forms &amp; Validation**: React Hook Form + Zod</div><div>- **UI**: shadcn/ui + Tailwind</div><div>- **AI Features**: Vercel AI SDK + OpenAI/Anthropic (suggestions, document insights, pro formas)</div><div>- **Analytics**: PostHog or Vercel Analytics</div><div><br></div><div>## 3. Key Features (Phase 1 MVP)</div><div><br></div><div>### Authentication &amp; Onboarding</div><div>- Supabase Auth (email/password, magic links, optional social)</div><div>- Multi-tenant support for lender branding (subdomains or custom domains)</div><div>- Role-based access (Borrower vs. Lender Admin)</div><div><br></div><div>### Guided Application Wizard (TurboTax-Style)</div><div>- Multi-step stepper with progress bar, navigation, and save/resume functionality</div><div>- Auto-save every few seconds</div><div>- Conditional logic based on answers (e.g., show veteran questions or collateral sections)</div><div>- Clean, calm, professional UI with helpful explanations and tooltips</div><div><br></div><div>**Main Wizard Sections**:</div><div>1. Business Information</div><div>2. Ownership &amp; Management (including veteran status)</div><div>3. Loan Request Details</div><div>4. Financial Information</div><div>5. Collateral &amp; Additional Details (conditional)</div><div>6. Document Uploads</div><div>7. Review &amp; Summary</div><div>8. Export / Submit</div><div><br></div><div>**Smart Features**:</div><div>- Real-time validation and error highlighting</div><div>- AI-assisted auto-fill and suggestions</div><div>- Basic pro forma / cash flow projection generation</div><div>- SBA program eligibility checker (including Veterans Advantage)</div><div><br></div><div>### Document Upload Section</div><div>Support secure uploads with clear guidance. Required/common documents include:</div><div><br></div><div>**Core / Always-Required**:</div><div>- SBA Form 1919 (Borrower Information Form)</div><div>- Personal Financial Statement (SBA Form 413 or equivalent)</div><div>- Business Tax Returns (last 2–3 years)</div><div>- Personal Tax Returns (last 2–3 years for owners/guarantors)</div><div>- Business Financial Statements (YTD P&amp;L and balance sheet)</div><div>- Business Plan / Executive Summary with use of proceeds and projections</div><div>- Ownership Documents (operating agreement, articles, etc.)</div><div><br></div><div>**Financial &amp; Debt**:</div><div>- Business Debt Schedule</div><div>- Aging Reports (AR/AP if applicable)</div><div>- Bank Statements (last 3–12 months)</div><div>- Cash Flow Projections / Pro Formas</div><div><br></div><div>**Identification &amp; Background**:</div><div>- Photo ID for principals</div><div>- Resumes for owners/key management</div><div>- SBA Form 912 (if required by background questions)</div><div><br></div><div>**Collateral &amp; Other (Conditional)**:</div><div>- Collateral Schedule and valuations</div><div>- Real estate documents (appraisals, leases, etc.)</div><div>- Business license, permits, franchise agreements, purchase agreements</div><div><br></div><div>**Upload Guidelines in Wizard**:</div><div>- Support PDF, JPEG, PNG, Excel/CSV</div><div>- Allow \"Upload Later\" with save/resume</div><div>- Provide \"Why we need this\" explanations and examples</div><div>- Conditional visibility based on loan type/answers</div><div>- Secure Supabase Storage with signed URLs</div><div><br></div><div>### Output &amp; Lender Features</div><div>- Generate filled PDF forms and summary reports</div><div>- White-label branding for lenders</div><div>- Basic lender dashboard to view borrower applications</div><div><br></div><div>### Payments (Stripe)</div><div>- Lender subscriptions ($2,500/month base)</div><div>- Per-application fees ($250)</div><div>- Stripe Checkout, Customer Portal, and webhooks</div><div><br></div><div>## 4. Non-Functional Requirements</div><div>- **Performance**: Fast loads, responsive (mobile/tablet/desktop)</div><div>- **Security &amp; Compliance**:</div><div>&nbsp; - Encryption in transit (HTTPS) and at rest (Supabase defaults + column-level where needed)</div><div>&nbsp; - Strong Row Level Security and access controls</div><div>&nbsp; - Data minimization for sensitive info</div><div>&nbsp; - Audit logging</div><div>&nbsp; - Prepare for SOC 2 readiness</div><div>- **Accessibility**: WCAG 2.1 AA</div><div>- **Error Handling**: Friendly messages with recovery options</div><div><br></div><div>## 5. Design &amp; UX Guidelines</div><div>- Style: Clean, modern, trustworthy (similar to TurboTax/Intuit)</div><div>- Tone: Helpful, encouraging, professional</div><div>- Mobile-first responsive design</div><div><br></div><div>## 6. Out of Scope for Phase 1</div><div>- Direct E-Tran submission (export only)</div><div>- Advanced underwriting</div><div>- Native mobile apps (Phase 2)</div><div>- Full SOC 2 audit</div><div><br></div><div>## 7. Success Metrics</div><div>- Wizard completion rate &gt;60%</div><div>- High user satisfaction</div><div>- Time to complete &lt;30–45 minutes for typical cases</div><div>- Successful pilots with early lenders</div><div><br></div><div>---</div><div><br></div><div>**Implementation Notes**:</div><div>- Prioritize the wizard UX as the core differentiator.</div><div>- Make document uploads modular and conditional.</div><div>- Build with multi-tenancy and white-labeling in mind from the start.</div><div><br></div><div>This spec is ready for implementation. Let me know if you want to expand any section (e.g., detailed database schema or user stories).</div><div>This version is self-contained and includes everything we’ve discussed. You can now feed it directly into your AI coding assistant. Good luck with Phase 1! Let me know what’s next.</div></div>",
+          "html": "<span>MARKDOWN SPECS:</span><div><br></div><div><div>Here is the refreshed, complete Markdown requirements and specifications document for Phase 1, incorporating the borrower document list, upload guidance, and all previous details.</div><div># Phase 1 Requirements &amp; Technical Specifications</div><div><br></div><div>## 1. Project Overview</div><div>**Product Name**: [Your Chosen Name, e.g., LoanWizard / TurboLoan / EasySBA]</div><div><br></div><div>**Description**: A web-based guided SBA loan application platform that makes completing 7(a) and Express applications as easy and intuitive as TurboTax. The wizard collects information step-by-step, provides smart guidance, auto-fills where possible, generates basic pro formas, validates data, handles document uploads, and prepares exports or submissions for lenders.</div><div><br></div><div>**Target Users**:</div><div>- Primary: Small business owners / borrowers</div><div>- Secondary: Banks &amp; credit unions (white-label / branded instances)</div><div><br></div><div>**Core Value**: Reduce time, errors, and frustration in SBA applications while delivering a delightful, trustworthy experience.</div><div><br></div><div>## 2. Tech Stack</div><div>- **Framework**: Next.js 15 (App Router) + TypeScript + Tailwind CSS</div><div>- **Hosting**: Vercel</div><div>- **Backend / Database / Auth**: Supabase (PostgreSQL, Auth, Storage, Edge Functions)</div><div>- **Emails**: Resend</div><div>- **Payments**: Stripe (Subscriptions + one-time fees)</div><div>- **Forms &amp; Validation**: React Hook Form + Zod</div><div>- **UI**: shadcn/ui + Tailwind</div><div>- **AI Features**: Vercel AI SDK + OpenAI/Anthropic (suggestions, document insights, pro formas)</div><div>- **Analytics**: PostHog or Vercel Analytics</div><div><br></div><div>## 3. Key Features (Phase 1 MVP)</div><div><br></div><div>### Authentication &amp; Onboarding</div><div>- Supabase Auth (email/password, magic links, optional social)</div><div>- Multi-tenant support for lender branding (subdomains or custom domains)</div><div>- Role-based access (Borrower vs. Lender Admin)</div><div><br></div><div>### Guided Application Wizard (TurboTax-Style)</div><div>- Multi-step stepper with progress bar, navigation, and save/resume functionality</div><div>- Auto-save every few seconds</div><div>- Conditional logic based on answers (e.g., show veteran questions or collateral sections)</div><div>- Clean, calm, professional UI with helpful explanations and tooltips</div><div><br></div><div>**Main Wizard Sections**:</div><div>1. Business Information</div><div>2. Ownership &amp; Management (including veteran status)</div><div>3. Loan Request Details</div><div>4. Financial Information</div><div>5. Collateral &amp; Additional Details (conditional)</div><div>6. Document Uploads</div><div>7. Review &amp; Summary</div><div>8. Export / Submit</div><div><br></div><div>**Smart Features**:</div><div>- Real-time validation and error highlighting</div><div>- AI-assisted auto-fill and suggestions</div><div>- Basic pro forma / cash flow projection generation</div><div>- SBA program eligibility checker (including Veterans Advantage)</div><div><br></div><div>### Document Upload Section</div><div>Support secure uploads with clear guidance. Required/common documents include:</div><div><br></div><div>**Core / Always-Required**:</div><div>- SBA Form 1919 (Borrower Information Form)</div><div>- Personal Financial Statement (SBA Form 413 or equivalent)</div><div>- Business Tax Returns (last 2\u20133 years)</div><div>- Personal Tax Returns (last 2\u20133 years for owners/guarantors)</div><div>- Business Financial Statements (YTD P&amp;L and balance sheet)</div><div>- Business Plan / Executive Summary with use of proceeds and projections</div><div>- Ownership Documents (operating agreement, articles, etc.)</div><div><br></div><div>**Financial &amp; Debt**:</div><div>- Business Debt Schedule</div><div>- Aging Reports (AR/AP if applicable)</div><div>- Bank Statements (last 3\u201312 months)</div><div>- Cash Flow Projections / Pro Formas</div><div><br></div><div>**Identification &amp; Background**:</div><div>- Photo ID for principals</div><div>- Resumes for owners/key management</div><div>- SBA Form 912 (if required by background questions)</div><div><br></div><div>**Collateral &amp; Other (Conditional)**:</div><div>- Collateral Schedule and valuations</div><div>- Real estate documents (appraisals, leases, etc.)</div><div>- Business license, permits, franchise agreements, purchase agreements</div><div><br></div><div>**Upload Guidelines in Wizard**:</div><div>- Support PDF, JPEG, PNG, Excel/CSV</div><div>- Allow \"Upload Later\" with save/resume</div><div>- Provide \"Why we need this\" explanations and examples</div><div>- Conditional visibility based on loan type/answers</div><div>- Secure Supabase Storage with signed URLs</div><div><br></div><div>### Output &amp; Lender Features</div><div>- Generate filled PDF forms and summary reports</div><div>- White-label branding for lenders</div><div>- Basic lender dashboard to view borrower applications</div><div><br></div><div>### Payments (Stripe)</div><div>- Lender subscriptions ($2,500/month base)</div><div>- Per-application fees ($250)</div><div>- Stripe Checkout, Customer Portal, and webhooks</div><div><br></div><div>## 4. Non-Functional Requirements</div><div>- **Performance**: Fast loads, responsive (mobile/tablet/desktop)</div><div>- **Security &amp; Compliance**:</div><div>&nbsp; - Encryption in transit (HTTPS) and at rest (Supabase defaults + column-level where needed)</div><div>&nbsp; - Strong Row Level Security and access controls</div><div>&nbsp; - Data minimization for sensitive info</div><div>&nbsp; - Audit logging</div><div>&nbsp; - Prepare for SOC 2 readiness</div><div>- **Accessibility**: WCAG 2.1 AA</div><div>- **Error Handling**: Friendly messages with recovery options</div><div><br></div><div>## 5. Design &amp; UX Guidelines</div><div>- Style: Clean, modern, trustworthy (similar to TurboTax/Intuit)</div><div>- Tone: Helpful, encouraging, professional</div><div>- Mobile-first responsive design</div><div><br></div><div>## 6. Out of Scope for Phase 1</div><div>- Direct E-Tran submission (export only)</div><div>- Advanced underwriting</div><div>- Native mobile apps (Phase 2)</div><div>- Full SOC 2 audit</div><div><br></div><div>## 7. Success Metrics</div><div>- Wizard completion rate &gt;60%</div><div>- High user satisfaction</div><div>- Time to complete &lt;30\u201345 minutes for typical cases</div><div>- Successful pilots with early lenders</div><div><br></div><div>---</div><div><br></div><div>**Implementation Notes**:</div><div>- Prioritize the wizard UX as the core differentiator.</div><div>- Make document uploads modular and conditional.</div><div>- Build with multi-tenancy and white-labeling in mind from the start.</div><div><br></div><div>This spec is ready for implementation. Let me know if you want to expand any section (e.g., detailed database schema or user stories).</div><div>This version is self-contained and includes everything we\u2019ve discussed. You can now feed it directly into your AI coding assistant. Good luck with Phase 1! Let me know what\u2019s next.</div></div>",
           "createdAt": "2026-07-02T14:06:45.056Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -1069,13 +1162,13 @@
     {
       "id": "m9bspj6lrilx",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · Create wireframes for key screens",
+      "title": "Phase 1 \u00b7 Create wireframes for key screens",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Screens: landing, auth, dashboard, wizard steps, document upload, review, success.",
+      "description": "Phase 1 \u2014 Planning & Design. Screens: landing, auth, dashboard, wizard steps, document upload, review, success.",
       "completionNotes": "",
       "executionOrder": 10,
       "comments": [],
@@ -1086,13 +1179,13 @@
     {
       "id": "4qzenww60mny",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · Design high-fidelity mockups (Figma) — TurboTax-style wizard UX",
+      "title": "Phase 1 \u00b7 Design high-fidelity mockups (Figma) \u2014 TurboTax-style wizard UX",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Focus on wizard UX — this is the core differentiator. Clean, guided, low-intimidation flow.",
+      "description": "Phase 1 \u2014 Planning & Design. Focus on wizard UX \u2014 this is the core differentiator. Clean, guided, low-intimidation flow.",
       "completionNotes": "",
       "executionOrder": 11,
       "comments": [],
@@ -1103,13 +1196,13 @@
     {
       "id": "yl9egl9mkjdf",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · Define user flows and conditional logic in the wizard",
+      "title": "Phase 1 \u00b7 Define user flows and conditional logic in the wizard",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Map all branch points: loan type, business structure, ownership %, collateral, etc.",
+      "description": "Phase 1 \u2014 Planning & Design. Map all branch points: loan type, business structure, ownership %, collateral, etc.",
       "completionNotes": "",
       "executionOrder": 12,
       "comments": [],
@@ -1120,13 +1213,13 @@
     {
       "id": "rl8fhdoqksr7",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · List all form fields and document upload requirements",
+      "title": "Phase 1 \u00b7 List all form fields and document upload requirements",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Full SBA form field inventory. Tag required vs optional, and conditionally required fields.",
+      "description": "Phase 1 \u2014 Planning & Design. Full SBA form field inventory. Tag required vs optional, and conditionally required fields.",
       "completionNotes": "",
       "executionOrder": 13,
       "comments": [],
@@ -1137,13 +1230,13 @@
     {
       "id": "c354gpy0ol84",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 1 · Plan multi-tenancy / white-label approach for lenders",
+      "title": "Phase 1 \u00b7 Plan multi-tenancy / white-label approach for lenders",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-18",
-      "description": "Phase 1 — Planning & Design. Define how lender branding will be applied. Subdomain vs. custom domain, branding config schema.",
+      "description": "Phase 1 \u2014 Planning & Design. Define how lender branding will be applied. Subdomain vs. custom domain, branding config schema.",
       "completionNotes": "",
       "executionOrder": 14,
       "comments": [],
@@ -1154,13 +1247,13 @@
     {
       "id": "us1f2ut0o2ci",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Set up project: Next.js 15 + TypeScript + Tailwind on Vercel",
+      "title": "Phase 2 \u00b7 Set up project: Next.js 15 + TypeScript + Tailwind on Vercel",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Scaffold repo, configure Vercel project, set up CI/CD, add ESLint/Prettier.",
+      "description": "Phase 2 \u2014 Development. Scaffold repo, configure Vercel project, set up CI/CD, add ESLint/Prettier.",
       "completionNotes": "",
       "executionOrder": 15,
       "comments": [],
@@ -1171,47 +1264,49 @@
     {
       "id": "1h3qt3b5mnlp",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Integrate Supabase (Auth, Database, Storage, RLS)",
+      "title": "Phase 0 \u00b7 Integrate Supabase (Auth, Database, Storage, RLS)",
       "priority": "High",
-      "status": "To Do",
+      "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
-      "description": "Phase 2 — Development. Set up Supabase project. Configure auth providers, define schema, enable RLS policies.",
+      "description": "Phase 2 \u2014 Development. Set up Supabase project. Configure auth providers, define schema, enable RLS policies.",
       "completionNotes": "",
       "executionOrder": 16,
       "comments": [],
       "tags": [
         "Phase 0"
-      ]
+      ],
+      "closedAt": "2026-08-03T15:25:27.203Z"
     },
     {
       "id": "r393zgp59ix0",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Implement authentication flows",
+      "title": "Phase 0 \u00b7 Implement authentication flows",
       "priority": "High",
-      "status": "To Do",
+      "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
-      "description": "Phase 2 — Development. Email/password + magic link. Borrower and lender roles. Protected routes.",
+      "description": "Phase 2 \u2014 Development. Email/password + magic link. Borrower and lender roles. Protected routes.",
       "completionNotes": "",
       "executionOrder": 17,
       "comments": [],
       "tags": [
         "Phase 0"
-      ]
+      ],
+      "closedAt": "2026-08-03T15:25:34.069Z"
     },
     {
       "id": "xkvhcpj13bha",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Build multi-step wizard with React Hook Form + Zod",
+      "title": "Phase 2 \u00b7 Build multi-step wizard with React Hook Form + Zod",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Core product feature. Step-by-step SBA application wizard with validation, save progress, resume.",
+      "description": "Phase 2 \u2014 Development. Core product feature. Step-by-step SBA application wizard with validation, save progress, resume.",
       "completionNotes": "",
       "executionOrder": 18,
       "comments": [],
@@ -1222,13 +1317,13 @@
     {
       "id": "lujtpqqgs7wt",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Add smart features (AI suggestions, auto-fill, basic pro formas)",
+      "title": "Phase 2 \u00b7 Add smart features (AI suggestions, auto-fill, basic pro formas)",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. AI-assisted field suggestions, auto-fill from prior inputs, simple financial pro forma generation.",
+      "description": "Phase 2 \u2014 Development. AI-assisted field suggestions, auto-fill from prior inputs, simple financial pro forma generation.",
       "completionNotes": "",
       "executionOrder": 23,
       "comments": [],
@@ -1239,13 +1334,13 @@
     {
       "id": "1iiifu0pkldy",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Implement document upload section with guidance and conditional fields",
+      "title": "Phase 2 \u00b7 Implement document upload section with guidance and conditional fields",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Guided doc uploads via Supabase Storage. Show/hide fields based on loan type and borrower answers.",
+      "description": "Phase 2 \u2014 Development. Guided doc uploads via Supabase Storage. Show/hide fields based on loan type and borrower answers.",
       "completionNotes": "",
       "executionOrder": 19,
       "comments": [],
@@ -1256,13 +1351,13 @@
     {
       "id": "0itk5acieoid",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Add Stripe for subscriptions and per-application payments",
+      "title": "Phase 2 \u00b7 Add Stripe for subscriptions and per-application payments",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Subscription tiers + pay-per-application model. Webhooks for upgrade/downgrade/cancel.",
+      "description": "Phase 2 \u2014 Development. Subscription tiers + pay-per-application model. Webhooks for upgrade/downgrade/cancel.",
       "completionNotes": "",
       "executionOrder": 20,
       "comments": [],
@@ -1273,16 +1368,33 @@
     {
       "id": "l8j3b4di9vve",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Integrate Resend for transactional email",
+      "title": "Phase 0 \u00b7 Integrate Resend for transactional email",
       "priority": "Med",
-      "status": "To Do",
+      "status": "Completed",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-07",
-      "description": "Phase 2 — Development. Confirmation emails, status updates, lender notifications, password reset.",
+      "description": "Phase 2 \u2014 Development. Confirmation emails, status updates, lender notifications, password reset.",
       "completionNotes": "",
       "executionOrder": 24,
-      "comments": [],
+      "comments": [
+        {
+          "id": "auto_complete_20260803",
+          "author": "Maximus",
+          "html": "Verified in PrepSBA codebase \u2014 Resend SDK installed, sendEmail() helper in lib/resend.ts, used for signup confirmation + password reset emails. Marking complete.",
+          "createdAt": "2026-08-03T15:36:00Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "msde72vs5z4b",
+          "author": "Jeff",
+          "html": "Confirmed implemented in code: src/lib/resend.ts + Supabase auth email flows",
+          "createdAt": "2026-08-03T15:37:00.760Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": true
+        }
+      ],
       "tags": [
         "Phase 0"
       ]
@@ -1290,13 +1402,13 @@
     {
       "id": "s7qfqnf641fw",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Build lender white-label / branding system",
+      "title": "Phase 2 \u00b7 Build lender white-label / branding system",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Allow lenders to configure logo, colors, subdomain. Store branding config in DB.",
+      "description": "Phase 2 \u2014 Development. Allow lenders to configure logo, colors, subdomain. Store branding config in DB.",
       "completionNotes": "",
       "executionOrder": 25,
       "comments": [],
@@ -1307,13 +1419,13 @@
     {
       "id": "ravdfdk1w1bq",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Add analytics (PostHog)",
+      "title": "Post-Launch \u00b7 Add analytics (PostHog)",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Track wizard step completion, drop-off points, feature usage. Set up funnels and session recordings.",
+      "description": "Phase 2 \u2014 Development. Track wizard step completion, drop-off points, feature usage. Set up funnels and session recordings.",
       "completionNotes": "",
       "executionOrder": 26,
       "comments": [],
@@ -1324,13 +1436,13 @@
     {
       "id": "4wzh9dcljnqg",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Implement security best practices (encryption, data minimization, logging)",
+      "title": "Phase 2 \u00b7 Implement security best practices (encryption, data minimization, logging)",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. Encrypt sensitive fields at rest, minimize PII stored, add audit logging for data access.",
+      "description": "Phase 2 \u2014 Development. Encrypt sensitive fields at rest, minimize PII stored, add audit logging for data access.",
       "completionNotes": "",
       "executionOrder": 21,
       "comments": [],
@@ -1341,13 +1453,13 @@
     {
       "id": "scgavy2m3uvl",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 2 · Thorough testing (usability, edge cases, mobile, error flows)",
+      "title": "Phase 2 \u00b7 Thorough testing (usability, edge cases, mobile, error flows)",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-08",
-      "description": "Phase 2 — Development. End-to-end testing across devices and browsers. Cover all conditional branches in the wizard.",
+      "description": "Phase 2 \u2014 Development. End-to-end testing across devices and browsers. Cover all conditional branches in the wizard.",
       "completionNotes": "",
       "executionOrder": 22,
       "comments": [],
@@ -1358,13 +1470,13 @@
     {
       "id": "1twqvkjjzihw",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Internal testing + bug fixing",
+      "title": "Phase 3 \u00b7 Internal testing + bug fixing",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Systematic walkthrough of all flows. Log and fix all blockers and major bugs before external testing.",
+      "description": "Phase 3 \u2014 Testing & Polish. Systematic walkthrough of all flows. Log and fix all blockers and major bugs before external testing.",
       "completionNotes": "",
       "executionOrder": 27,
       "comments": [],
@@ -1375,13 +1487,13 @@
     {
       "id": "hikbohxn9hnt",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · User testing with 5–10 potential borrowers and lenders",
+      "title": "Phase 3 \u00b7 User testing with 5\u201310 potential borrowers and lenders",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Recruit real users. Run moderated or unmoderated sessions. Capture friction points and confusion.",
+      "description": "Phase 3 \u2014 Testing & Polish. Recruit real users. Run moderated or unmoderated sessions. Capture friction points and confusion.",
       "completionNotes": "",
       "executionOrder": 28,
       "comments": [],
@@ -1392,13 +1504,13 @@
     {
       "id": "a2pe7jj8a2ac",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Performance and accessibility audit",
+      "title": "Phase 3 \u00b7 Performance and accessibility audit",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Lighthouse audit. Fix Core Web Vitals. WCAG 2.1 AA compliance check.",
+      "description": "Phase 3 \u2014 Testing & Polish. Lighthouse audit. Fix Core Web Vitals. WCAG 2.1 AA compliance check.",
       "completionNotes": "",
       "executionOrder": 30,
       "comments": [],
@@ -1409,13 +1521,13 @@
     {
       "id": "fjds46j6sm1n",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Security review (basic penetration testing)",
+      "title": "Phase 3 \u00b7 Security review (basic penetration testing)",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Run OWASP-based checklist. Test auth, RLS, file upload, and input sanitization.",
+      "description": "Phase 3 \u2014 Testing & Polish. Run OWASP-based checklist. Test auth, RLS, file upload, and input sanitization.",
       "completionNotes": "",
       "executionOrder": 29,
       "comments": [],
@@ -1426,13 +1538,13 @@
     {
       "id": "1e1xln988jj3",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Finalize copy, tooltips, and help text",
+      "title": "Phase 3 \u00b7 Finalize copy, tooltips, and help text",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Review every label, tooltip, error message, and help text. Plain English, no jargon.",
+      "description": "Phase 3 \u2014 Testing & Polish. Review every label, tooltip, error message, and help text. Plain English, no jargon.",
       "completionNotes": "",
       "executionOrder": 31,
       "comments": [],
@@ -1443,13 +1555,13 @@
     {
       "id": "o1a6n4r1agod",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 3 · Set up error monitoring (Sentry or Vercel)",
+      "title": "Phase 3 \u00b7 Set up error monitoring (Sentry or Vercel)",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-15",
-      "description": "Phase 3 — Testing & Polish. Configure Sentry or Vercel error tracking. Set up alerts for critical errors in production.",
+      "description": "Phase 3 \u2014 Testing & Polish. Configure Sentry or Vercel error tracking. Set up alerts for critical errors in production.",
       "completionNotes": "",
       "executionOrder": 32,
       "comments": [],
@@ -1460,13 +1572,13 @@
     {
       "id": "db2se5v6umy1",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Deploy to production on Vercel",
+      "title": "Phase 4 \u00b7 Deploy to production on Vercel",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Final production deploy. Verify environment variables, edge config, and build output.",
+      "description": "Phase 4 \u2014 Launch. Final production deploy. Verify environment variables, edge config, and build output.",
       "completionNotes": "",
       "executionOrder": 33,
       "comments": [],
@@ -1477,13 +1589,13 @@
     {
       "id": "gqi516qa8o97",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Set up custom domain and SSL",
+      "title": "Phase 4 \u00b7 Set up custom domain and SSL",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Point domain to Vercel. Verify SSL cert. Set up www and apex redirects.",
+      "description": "Phase 4 \u2014 Launch. Point domain to Vercel. Verify SSL cert. Set up www and apex redirects.",
       "completionNotes": "",
       "executionOrder": 34,
       "comments": [],
@@ -1494,13 +1606,13 @@
     {
       "id": "psfhiakgzogb",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Configure SEO basics (meta tags, sitemap, robots.txt)",
+      "title": "Phase 4 \u00b7 Configure SEO basics (meta tags, sitemap, robots.txt)",
       "priority": "Med",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Add meta titles/descriptions, Open Graph tags, sitemap.xml, robots.txt, and Google Search Console.",
+      "description": "Phase 4 \u2014 Launch. Add meta titles/descriptions, Open Graph tags, sitemap.xml, robots.txt, and Google Search Console.",
       "completionNotes": "",
       "executionOrder": 40,
       "comments": [],
@@ -1511,13 +1623,13 @@
     {
       "id": "uj86sjob4ye0",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Create landing / marketing website pages",
+      "title": "Phase 4 \u00b7 Create landing / marketing website pages",
       "priority": "High",
       "status": "In Progress",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Hero, features, how it works, pricing, testimonials, CTA. Optimized for conversion.",
+      "description": "Phase 4 \u2014 Launch. Hero, features, how it works, pricing, testimonials, CTA. Optimized for conversion.",
       "completionNotes": "",
       "executionOrder": 35,
       "comments": [],
@@ -1528,13 +1640,13 @@
     {
       "id": "dy02dfbar6au",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Set up Stripe in live mode",
+      "title": "Phase 4 \u00b7 Set up Stripe in live mode",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Switch from Stripe test mode to live. Verify webhook endpoints, pricing objects, and billing portal.",
+      "description": "Phase 4 \u2014 Launch. Switch from Stripe test mode to live. Verify webhook endpoints, pricing objects, and billing portal.",
       "completionNotes": "",
       "executionOrder": 36,
       "comments": [],
@@ -1545,13 +1657,13 @@
     {
       "id": "29b35o7x1akw",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Prepare legal docs (Privacy Policy, ToS, financial advice disclaimer)",
+      "title": "Phase 4 \u00b7 Prepare legal docs (Privacy Policy, ToS, financial advice disclaimer)",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Draft or purchase Privacy Policy, Terms of Service, and a clear disclaimer that this is not legal/financial advice.",
+      "description": "Phase 4 \u2014 Launch. Draft or purchase Privacy Policy, Terms of Service, and a clear disclaimer that this is not legal/financial advice.",
       "completionNotes": "",
       "executionOrder": 37,
       "comments": [],
@@ -1562,13 +1674,13 @@
     {
       "id": "cccc8pyljadq",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Soft launch / beta with initial pilot users",
+      "title": "Phase 4 \u00b7 Soft launch / beta with initial pilot users",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Invite 10–20 hand-picked borrowers and 1–2 lenders. Collect structured feedback before full public launch.",
+      "description": "Phase 4 \u2014 Launch. Invite 10\u201320 hand-picked borrowers and 1\u20132 lenders. Collect structured feedback before full public launch.",
       "completionNotes": "",
       "executionOrder": 38,
       "comments": [],
@@ -1579,13 +1691,13 @@
     {
       "id": "m9yqfp102z0v",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 4 · Official public launch",
+      "title": "Phase 4 \u00b7 Official public launch",
       "priority": "High",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-08-29",
-      "description": "Phase 4 — Launch. Announce on all channels. ProductHunt, LinkedIn, X, email list. Monitor closely for issues.",
+      "description": "Phase 4 \u2014 Launch. Announce on all channels. ProductHunt, LinkedIn, X, email list. Monitor closely for issues.",
       "completionNotes": "",
       "executionOrder": 39,
       "comments": [],
@@ -1596,13 +1708,13 @@
     {
       "id": "ldzz16tacj4m",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0 · Create marketing website content (features, how-it-works, testimonials)",
+      "title": "Phase 0 \u00b7 Create marketing website content (features, how-it-works, testimonials)",
       "priority": "High",
       "status": "Completed",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 0 — Marketing & Sales. Content-driven pages that convert visitors. Use beta feedback for early testimonials.",
+      "description": "Phase 0 \u2014 Marketing & Sales. Content-driven pages that convert visitors. Use beta feedback for early testimonials.",
       "completionNotes": "",
       "executionOrder": 41,
       "comments": [],
@@ -1613,13 +1725,13 @@
     {
       "id": "74be8fu41mha",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Develop pitch deck for lenders",
+      "title": "Phase 5 \u00b7 Develop pitch deck for lenders",
       "priority": "High",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. ROI-focused deck for small banks/credit unions. Highlight faster applications, lower dropout rates.",
+      "description": "Phase 5 \u2014 Marketing & Sales. ROI-focused deck for small banks/credit unions. Highlight faster applications, lower dropout rates.",
       "completionNotes": "",
       "executionOrder": 42,
       "comments": [],
@@ -1630,13 +1742,13 @@
     {
       "id": "bbd3lmd1ps7m",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Reach out to 20–50 small banks and credit unions doing SBA lending",
+      "title": "Phase 5 \u00b7 Reach out to 20\u201350 small banks and credit unions doing SBA lending",
       "priority": "High",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Identify and contact SBA preferred lenders (SBA.gov list). Personalized outreach. Track in CRM.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Identify and contact SBA preferred lenders (SBA.gov list). Personalized outreach. Track in CRM.",
       "completionNotes": "",
       "executionOrder": 43,
       "comments": [],
@@ -1647,13 +1759,13 @@
     {
       "id": "mupft4iph5ae",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Attend fintech / banking events or webinars",
+      "title": "Phase 5 \u00b7 Attend fintech / banking events or webinars",
       "priority": "Med",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Find relevant conferences or virtual events. Goal: meet lenders and potential borrowers.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Find relevant conferences or virtual events. Goal: meet lenders and potential borrowers.",
       "completionNotes": "",
       "executionOrder": 45,
       "comments": [],
@@ -1664,13 +1776,13 @@
     {
       "id": "gr7zptzu7kzu",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Content marketing — blog posts (e.g. 'SBA Application in Under 30 Min')",
+      "title": "Phase 5 \u00b7 Content marketing \u2014 blog posts (e.g. 'SBA Application in Under 30 Min')",
       "priority": "Med",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. SEO-driven content targeting borrowers searching SBA loan help. Minimum 4 posts at launch.",
+      "description": "Phase 5 \u2014 Marketing & Sales. SEO-driven content targeting borrowers searching SBA loan help. Minimum 4 posts at launch.",
       "completionNotes": "",
       "executionOrder": 46,
       "comments": [],
@@ -1681,13 +1793,13 @@
     {
       "id": "c30mih9o7k74",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · LinkedIn outreach and thought leadership",
+      "title": "Phase 5 \u00b7 LinkedIn outreach and thought leadership",
       "priority": "Med",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Post regularly on SBA lending, small business finance, fintech. Build credibility with lenders.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Post regularly on SBA lending, small business finance, fintech. Build credibility with lenders.",
       "completionNotes": "",
       "executionOrder": 47,
       "comments": [],
@@ -1698,13 +1810,13 @@
     {
       "id": "mnk7p1v211k2",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Build email waitlist (borrowers and lenders)",
+      "title": "Phase 5 \u00b7 Build email waitlist (borrowers and lenders)",
       "priority": "High",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Pre-launch waitlist + post-launch nurture sequence. Use Resend or Mailchimp.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Pre-launch waitlist + post-launch nurture sequence. Use Resend or Mailchimp.",
       "completionNotes": "",
       "executionOrder": 44,
       "comments": [],
@@ -1715,13 +1827,13 @@
     {
       "id": "u86f296c3ct9",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Prepare case studies from pilot users",
+      "title": "Phase 5 \u00b7 Prepare case studies from pilot users",
       "priority": "Med",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Document 2–3 pilot stories: time saved, success rate, experience. Use for sales and content.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Document 2\u20133 pilot stories: time saved, success rate, experience. Use for sales and content.",
       "completionNotes": "",
       "executionOrder": 48,
       "comments": [],
@@ -1732,13 +1844,13 @@
     {
       "id": "78gnyh32ta1s",
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 5 · Set up paid ads (LinkedIn/Google) if budget allows",
+      "title": "Phase 5 \u00b7 Set up paid ads (LinkedIn/Google) if budget allows",
       "priority": "Low",
       "status": "To Do",
       "category": "Marketing",
       "responsible": "Jeff",
       "plannedStart": "2026-09-05",
-      "description": "Phase 5 — Marketing & Sales. Start small. LinkedIn for lender targeting, Google for borrower keyword intent.",
+      "description": "Phase 5 \u2014 Marketing & Sales. Start small. LinkedIn for lender targeting, Google for borrower keyword intent.",
       "completionNotes": "",
       "executionOrder": 49,
       "comments": [],
@@ -1749,7 +1861,7 @@
     {
       "id": "zgfbodxevcjk",
       "projectId": "mr3k0lxpcldt",
-      "title": "Post-Launch · Monitor wizard drop-off points and usage",
+      "title": "Post-Launch \u00b7 Monitor wizard drop-off points and usage",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
@@ -1766,7 +1878,7 @@
     {
       "id": "2myiiiqj05x8",
       "projectId": "mr3k0lxpcldt",
-      "title": "Post-Launch · Gather feedback and iterate quickly",
+      "title": "Post-Launch \u00b7 Gather feedback and iterate quickly",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
@@ -1783,7 +1895,7 @@
     {
       "id": "2q60jkzcovpd",
       "projectId": "mr3k0lxpcldt",
-      "title": "Post-Launch · Plan Phase 2 (mobile apps)",
+      "title": "Post-Launch \u00b7 Plan (mobile apps)",
       "priority": "Med",
       "status": "To Do",
       "category": "New Feature",
@@ -1800,7 +1912,7 @@
     {
       "id": "x20mhfhnbqiw",
       "projectId": "mr3k0lxpcldt",
-      "title": "Post-Launch · Work toward SOC 2 compliance for larger lenders",
+      "title": "Post-Launch \u00b7 Work toward SOC 2 compliance for larger lenders",
       "priority": "Low",
       "status": "To Do",
       "category": "New Feature",
@@ -1817,7 +1929,7 @@
     {
       "id": "i6qjuktwq7m6",
       "projectId": "mr3k0lxpcldt",
-      "title": "Post-Launch · Track key metrics (sign-ups, completion rate, revenue, churn)",
+      "title": "Post-Launch \u00b7 Track key metrics (sign-ups, completion rate, revenue, churn)",
       "priority": "High",
       "status": "To Do",
       "category": "New Feature",
@@ -1835,9 +1947,9 @@
       "id": "mr50o8g5e25a",
       "executionOrder": 55,
       "projectId": "mr3k0lxpcldt",
-      "title": "Phase 0: Setup new Supabase with auth and doc storage",
+      "title": "Phase 0: Setup new Supabase with doc storage",
       "priority": "Med",
-      "status": "To Do",
+      "status": "Completed",
       "category": "Support",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
@@ -1846,7 +1958,7 @@
         {
           "id": "c_ns_mr50o8_20260703",
           "author": "Jeff",
-          "html": "NEXT STEPS — Supabase: Create a NEW PROJECT within your existing Supabase org (do not create a new account). Same billing, but fully separate Postgres instance, separate API keys, separate storage buckets — complete data isolation from JumpKit. Go to supabase.com → your org → New Project → name it PrepSBA. If PrepSBA later becomes its own entity, use Settings → General → Transfer Project to move it to a new org — no dump/restore needed as long as both orgs are on paid plans.",
+          "html": "NEXT STEPS \u2014 Supabase: Create a NEW PROJECT within your existing Supabase org (do not create a new account). Same billing, but fully separate Postgres instance, separate API keys, separate storage buckets \u2014 complete data isolation from JumpKit. Go to supabase.com \u2192 your org \u2192 New Project \u2192 name it PrepSBA. If PrepSBA later becomes its own entity, use Settings \u2192 General \u2192 Transfer Project to move it to a new org \u2014 no dump/restore needed as long as both orgs are on paid plans.",
           "createdAt": "2026-07-03T17:43:58.653Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -1855,7 +1967,8 @@
       "completionNotes": "",
       "tags": [
         "Phase 0"
-      ]
+      ],
+      "closedAt": "2026-08-03T15:41:43.476Z"
     },
     {
       "id": "mr50oqa292pf",
@@ -1863,7 +1976,7 @@
       "projectId": "mr3k0lxpcldt",
       "title": "Phase 0: Setup new Vercel to hosting",
       "priority": "Med",
-      "status": "To Do",
+      "status": "Completed",
       "category": "Support",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
@@ -1872,7 +1985,7 @@
         {
           "id": "c_ns_mr50oq_20260703",
           "author": "Jeff",
-          "html": "NEXT STEPS — Vercel: Add PrepSBA as a new project within your existing Vercel account/team — no new account needed. Once the GitHub repo is created, go to vercel.com → Add New Project → import from GitHub → select the PrepSBA repo. Add the prepsba.com domain (or turbosba.com) and configure env vars separately from JumpKit.",
+          "html": "NEXT STEPS \u2014 Vercel: Add PrepSBA as a new project within your existing Vercel account/team \u2014 no new account needed. Once the GitHub repo is created, go to vercel.com \u2192 Add New Project \u2192 import from GitHub \u2192 select the PrepSBA repo. Add the prepsba.com domain (or turbosba.com) and configure env vars separately from JumpKit.",
           "createdAt": "2026-07-03T17:43:58.653Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -1881,7 +1994,8 @@
       "completionNotes": "",
       "tags": [
         "Phase 0"
-      ]
+      ],
+      "closedAt": "2026-08-03T15:28:27.635Z"
     },
     {
       "id": "mr50q93he7o6",
@@ -1889,7 +2003,7 @@
       "projectId": "mr3k0lxpcldt",
       "title": "Phase 0: Setup Resend for emails",
       "priority": "Med",
-      "status": "To Do",
+      "status": "Completed",
       "category": "Support",
       "responsible": "Jeff",
       "plannedStart": "2026-07-06",
@@ -1898,10 +2012,26 @@
         {
           "id": "c_ns_mr50q9_20260703",
           "author": "Jeff",
-          "html": "NEXT STEPS — Resend: Use your existing Resend account — no new account needed. Go to resend.com → Domains → Add Domain → add your PrepSBA domain (e.g. prepsba.com). Set up DNS records, verify the domain, then create a domain-specific API key for PrepSBA. Keep it separate from the JumpKit API key in your env vars.",
+          "html": "NEXT STEPS \u2014 Resend: Use your existing Resend account \u2014 no new account needed. Go to resend.com \u2192 Domains \u2192 Add Domain \u2192 add your PrepSBA domain (e.g. prepsba.com). Set up DNS records, verify the domain, then create a domain-specific API key for PrepSBA. Keep it separate from the JumpKit API key in your env vars.",
           "createdAt": "2026-07-03T17:43:58.653Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
+        },
+        {
+          "id": "auto_complete_20260803",
+          "author": "Maximus",
+          "html": "Verified in PrepSBA codebase \u2014 Resend SDK installed, sendEmail() helper in lib/resend.ts, used for signup confirmation + password reset emails. Marking complete.",
+          "createdAt": "2026-08-03T15:36:00Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "msde72vsoiok",
+          "author": "Jeff",
+          "html": "Confirmed implemented in code: src/lib/resend.ts + Supabase auth email flows",
+          "createdAt": "2026-08-03T15:37:00.760Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": true
         }
       ],
       "completionNotes": "",
@@ -1915,11 +2045,11 @@
       "projectId": "mr3k0lxpcldt",
       "title": "Phase 0: Setup GitHub repo",
       "priority": "Med",
-      "status": "To Do",
+      "status": "Completed",
       "category": "Support",
       "responsible": "Jeff",
       "plannedStart": "2026-07-05",
-      "description": "Create a new private GitHub repo for PrepSBA under the existing jrod4404 account. No new GitHub account needed — same account, new repo.",
+      "description": "Create a new private GitHub repo for PrepSBA under the existing jrod4404 account. No new GitHub account needed \u2014 same account, new repo.",
       "completionNotes": "",
       "tags": [
         "Phase 0"
@@ -1928,12 +2058,13 @@
         {
           "id": "c_gh_20260703",
           "author": "Jeff",
-          "html": "NEXT STEPS — GitHub: Create a new private repo under your existing jrod4404 GitHub account — no new account needed. Go to github.com → New Repository → name it something like prepsba or turbosba → set to Private. Push the existing local TurboSBA/web code as the initial commit. This keeps all your projects under one GitHub account with one set of credentials.",
+          "html": "NEXT STEPS \u2014 GitHub: Create a new private repo under your existing jrod4404 GitHub account \u2014 no new account needed. Go to github.com \u2192 New Repository \u2192 name it something like prepsba or turbosba \u2192 set to Private. Push the existing local TurboSBA/web code as the initial commit. This keeps all your projects under one GitHub account with one set of credentials.",
           "createdAt": "2026-07-03T17:43:58.653Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
         }
-      ]
+      ],
+      "closedAt": "2026-08-03T15:28:47.536Z"
     },
     {
       "id": "mr588fjz3x94",
@@ -1944,7 +2075,7 @@
       "status": "In Progress",
       "category": "Support",
       "responsible": "Jeff",
-      "plannedStart": "2026-07-12",
+      "plannedStart": "2026-08-07",
       "description": "",
       "comments": [
         {
@@ -1952,6 +2083,14 @@
           "author": "Jeff",
           "html": "Need to get docs from Jackie.",
           "createdAt": "2026-07-03T17:48:13.225Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "msddzk2w82pd",
+          "author": "Jeff",
+          "html": "In progress... need to review all doc creation md files and complete a detailed formatting review",
+          "createdAt": "2026-08-03T15:31:09.800Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
         }
@@ -2002,7 +2141,7 @@
       "category": "New Feature",
       "responsible": "Jeff",
       "plannedStart": "2026-07-07",
-      "description": "Set up X (Twitter) Developer credentials to enable PostKit auto-publishing.\n\nSteps:\n1. Go to developer.x.com → sign in\n2. Create a new Project + App\n3. Under User Authentication Settings:\n   - App type: Web App or Automated App\n   - OAuth 2.0: ON\n   - Redirect URI: http://localhost:8788/oauth/x/callback\n   - Scopes: tweet.read, tweet.write, users.read, offline.access\n4. Copy Client ID and Client Secret\n5. Open PostKit (http://localhost:8788) → Settings → Connected Accounts\n6. Paste Client ID and Client Secret → Save Settings\n7. Click Connect X → authorize in popup → verify green checkmark\n8. Test: create a root post → run Auri → schedule X post → click Publish Now\n\nNote: Free X Developer tier allows posting. Rate limited but fine for personal/small use.",
+      "description": "Set up X (Twitter) Developer credentials to enable PostKit auto-publishing.\n\nSteps:\n1. Go to developer.x.com \u2192 sign in\n2. Create a new Project + App\n3. Under User Authentication Settings:\n   - App type: Web App or Automated App\n   - OAuth 2.0: ON\n   - Redirect URI: http://localhost:8788/oauth/x/callback\n   - Scopes: tweet.read, tweet.write, users.read, offline.access\n4. Copy Client ID and Client Secret\n5. Open PostKit (http://localhost:8788) \u2192 Settings \u2192 Connected Accounts\n6. Paste Client ID and Client Secret \u2192 Save Settings\n7. Click Connect X \u2192 authorize in popup \u2192 verify green checkmark\n8. Test: create a root post \u2192 run Auri \u2192 schedule X post \u2192 click Publish Now\n\nNote: Free X Developer tier allows posting. Rate limited but fine for personal/small use.",
       "completionNotes": "",
       "comments": [
         {
@@ -2031,7 +2170,7 @@
       "id": "postkit_tiktok_1783476637084",
       "projectId": "mqqp2ihuyhpx",
       "title": "Add TikTok as auto-post platform in PostKit",
-      "description": "Add TikTok Content Posting API integration to PostKit alongside X, LinkedIn, and YouTube.\n\nProposal summary:\n- API cost: Free (no per-post fees)\n- Requires TikTok Developer app approval (1-4 week review)\n- TikTok requires media on every post (no text-only) — pairs well with image generation\n\nWork items:\n1. tiktok-oauth.js — OAuth 2.0 flow (auth URL, callback, token exchange, refresh)\n2. Server endpoints: /oauth/tiktok/callback, /api/tiktok/connect, /api/tiktok/publish, /api/tiktok/status, /api/tiktok/disconnect\n3. Upload flow: 3-step TikTok process (init → binary chunk upload → publish)\n4. Auri skill update — add TikTok platform, hook-first short-form captions\n5. PostKit UI — TikTok tab in seed detail modal, platform chip, settings card (Client Key/Secret + Connect), scheduler worker\n6. Action: Apply for TikTok Content Posting API access early so review is not the bottleneck",
+      "description": "Add TikTok Content Posting API integration to PostKit alongside X, LinkedIn, and YouTube.\n\nProposal summary:\n- API cost: Free (no per-post fees)\n- Requires TikTok Developer app approval (1-4 week review)\n- TikTok requires media on every post (no text-only) \u2014 pairs well with image generation\n\nWork items:\n1. tiktok-oauth.js \u2014 OAuth 2.0 flow (auth URL, callback, token exchange, refresh)\n2. Server endpoints: /oauth/tiktok/callback, /api/tiktok/connect, /api/tiktok/publish, /api/tiktok/status, /api/tiktok/disconnect\n3. Upload flow: 3-step TikTok process (init \u2192 binary chunk upload \u2192 publish)\n4. Auri skill update \u2014 add TikTok platform, hook-first short-form captions\n5. PostKit UI \u2014 TikTok tab in seed detail modal, platform chip, settings card (Client Key/Secret + Connect), scheduler worker\n6. Action: Apply for TikTok Content Posting API access early so review is not the bottleneck",
       "status": "open",
       "priority": "medium",
       "category": "New Feature",
@@ -2042,7 +2181,7 @@
         {
           "id": "tiktok_note_1783476637084",
           "author": "Max",
-          "html": "Queued after Jeff approved proposal (2026-07-07). Apply for TikTok Developer API access early — 1-4 week review is the main risk. Build after X + LinkedIn auto-post flows are validated in production.",
+          "html": "Queued after Jeff approved proposal (2026-07-07). Apply for TikTok Developer API access early \u2014 1-4 week review is the main risk. Build after X + LinkedIn auto-post flows are validated in production.",
           "createdAt": "2026-07-08T02:10:37.084Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -2058,7 +2197,7 @@
       "id": "postkit_facebook_ig_1783478301890",
       "projectId": "mqqp2ihuyhpx",
       "title": "Add Facebook + Instagram as auto-post platforms in PostKit",
-      "description": "Add Meta Graph API integration to PostKit — one OAuth flow covers both Facebook Page posts and Instagram Business posts.\n\nAPI cost: Free (no per-post fees)\nRequires: Meta Business account + Business Verification (legal docs, 1-5 days) + App Review for pages_manage_posts permission (1-2 weeks)\nPosting target: Facebook Page (not personal profile — Meta locked personal profile posting via API)\n\nWork items:\n1. facebook-oauth.js — OAuth 2.0 flow + Page access token exchange (permanent tokens available)\n2. Server endpoints: /oauth/facebook/callback, /api/facebook/connect, /api/facebook/publish, /api/facebook/status, /api/facebook/disconnect\n3. Post via /page-id/photos or /page-id/feed (text + image)\n4. Instagram posts via /ig-user-id/media + /ig-user-id/media_publish (same app/auth, requires linked IG Business account)\n5. Auri skill update — add Facebook platform (longer-form, community tone) and Instagram (visual-first, hashtag strategy)\n6. PostKit UI — Facebook + Instagram tabs, platform chips, settings cards, scheduler workers\n\nSettings needed from Meta Developer Portal:\n- App ID + App Secret\n- Facebook Page ID\n\nNote: Apply for Meta Business Verification and pages_manage_posts App Review early — review is the main bottleneck.",
+      "description": "Add Meta Graph API integration to PostKit \u2014 one OAuth flow covers both Facebook Page posts and Instagram Business posts.\n\nAPI cost: Free (no per-post fees)\nRequires: Meta Business account + Business Verification (legal docs, 1-5 days) + App Review for pages_manage_posts permission (1-2 weeks)\nPosting target: Facebook Page (not personal profile \u2014 Meta locked personal profile posting via API)\n\nWork items:\n1. facebook-oauth.js \u2014 OAuth 2.0 flow + Page access token exchange (permanent tokens available)\n2. Server endpoints: /oauth/facebook/callback, /api/facebook/connect, /api/facebook/publish, /api/facebook/status, /api/facebook/disconnect\n3. Post via /page-id/photos or /page-id/feed (text + image)\n4. Instagram posts via /ig-user-id/media + /ig-user-id/media_publish (same app/auth, requires linked IG Business account)\n5. Auri skill update \u2014 add Facebook platform (longer-form, community tone) and Instagram (visual-first, hashtag strategy)\n6. PostKit UI \u2014 Facebook + Instagram tabs, platform chips, settings cards, scheduler workers\n\nSettings needed from Meta Developer Portal:\n- App ID + App Secret\n- Facebook Page ID\n\nNote: Apply for Meta Business Verification and pages_manage_posts App Review early \u2014 review is the main bottleneck.",
       "status": "open",
       "priority": "high",
       "category": "New Feature",
@@ -2069,7 +2208,7 @@
         {
           "id": "fb_ig_note_1783478301890",
           "author": "Max",
-          "html": "Queued after Jeff approved proposal (2026-07-07). Recommended priority: build after X + LinkedIn are validated in production. One Meta OAuth covers both FB and IG — highest value-per-effort of remaining platforms. Start Meta Business Verification early.",
+          "html": "Queued after Jeff approved proposal (2026-07-07). Recommended priority: build after X + LinkedIn are validated in production. One Meta OAuth covers both FB and IG \u2014 highest value-per-effort of remaining platforms. Start Meta Business Verification early.",
           "createdAt": "2026-07-08T02:38:21.890Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -2085,7 +2224,7 @@
       "id": "postkit_bluesky_1783478571709",
       "projectId": "mqqp2ihuyhpx",
       "title": "Add Bluesky as auto-post platform in PostKit",
-      "description": "Add Bluesky (AT Protocol) auto-posting to PostKit.\n\nAPI cost: Free. No app review, no business verification, no gatekeeping — just an API key.\nAudience: Tech/developer/IT — perfect overlap with JumpKit MSP and IT buyer persona.\n\nWork items:\n1. bluesky-auth.js — App password auth (simpler than OAuth: username + app password → session token)\n2. Server endpoints: /api/bluesky/connect, /api/bluesky/publish, /api/bluesky/status, /api/bluesky/disconnect\n3. Post via AT Protocol com.atproto.repo.createRecord (text + image embed)\n4. Auri skill update — add Bluesky platform (similar to X but slightly longer, tech-forward tone)\n5. PostKit UI — Bluesky tab, platform chip, settings card (handle + app password), scheduler worker\n\nNote: Easiest platform to add. No review process. AT Protocol is open and well-documented. Handle is @user.bsky.social format.",
+      "description": "Add Bluesky (AT Protocol) auto-posting to PostKit.\n\nAPI cost: Free. No app review, no business verification, no gatekeeping \u2014 just an API key.\nAudience: Tech/developer/IT \u2014 perfect overlap with JumpKit MSP and IT buyer persona.\n\nWork items:\n1. bluesky-auth.js \u2014 App password auth (simpler than OAuth: username + app password \u2192 session token)\n2. Server endpoints: /api/bluesky/connect, /api/bluesky/publish, /api/bluesky/status, /api/bluesky/disconnect\n3. Post via AT Protocol com.atproto.repo.createRecord (text + image embed)\n4. Auri skill update \u2014 add Bluesky platform (similar to X but slightly longer, tech-forward tone)\n5. PostKit UI \u2014 Bluesky tab, platform chip, settings card (handle + app password), scheduler worker\n\nNote: Easiest platform to add. No review process. AT Protocol is open and well-documented. Handle is @user.bsky.social format.",
       "status": "open",
       "priority": "high",
       "category": "New Feature",
@@ -2096,7 +2235,7 @@
         {
           "id": "bluesky_note_1783478571709",
           "author": "Max",
-          "html": "Queued after Jeff approved (2026-07-07). Easiest platform to add — no review process, open API, right audience for JumpKit. Recommend building this right after LinkedIn is validated.",
+          "html": "Queued after Jeff approved (2026-07-07). Easiest platform to add \u2014 no review process, open API, right audience for JumpKit. Recommend building this right after LinkedIn is validated.",
           "createdAt": "2026-07-08T02:42:51.708Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -2112,7 +2251,7 @@
       "id": "postkit_threads_1783478571710",
       "projectId": "mqqp2ihuyhpx",
       "title": "Add Threads as auto-post platform in PostKit",
-      "description": "Add Threads (Meta) auto-posting to PostKit. Threads shares Meta OAuth infrastructure with Facebook + Instagram — build this alongside the FB+IG task for ~10% extra effort.\n\nAPI cost: Free.\nRequires: Same Meta app as Facebook + Instagram. Threads Graph API uses same App ID/Secret. No separate review needed once FB+IG app is approved.\n\nWork items:\n1. threads-publish.js — Threads-specific publish flow using Meta Graph API /threads endpoint\n2. Server endpoints: /api/threads/publish, /api/threads/status (auth reuses Facebook OAuth)\n3. Post via POST /me/threads (create container) + POST /me/threads_publish\n4. Auri skill update — add Threads platform (conversational, X-like but slightly longer, growing B2B)\n5. PostKit UI — Threads tab, platform chip, scheduler worker\n\nNote: Build alongside Facebook + Instagram task. Marginal extra effort since auth is shared.",
+      "description": "Add Threads (Meta) auto-posting to PostKit. Threads shares Meta OAuth infrastructure with Facebook + Instagram \u2014 build this alongside the FB+IG task for ~10% extra effort.\n\nAPI cost: Free.\nRequires: Same Meta app as Facebook + Instagram. Threads Graph API uses same App ID/Secret. No separate review needed once FB+IG app is approved.\n\nWork items:\n1. threads-publish.js \u2014 Threads-specific publish flow using Meta Graph API /threads endpoint\n2. Server endpoints: /api/threads/publish, /api/threads/status (auth reuses Facebook OAuth)\n3. Post via POST /me/threads (create container) + POST /me/threads_publish\n4. Auri skill update \u2014 add Threads platform (conversational, X-like but slightly longer, growing B2B)\n5. PostKit UI \u2014 Threads tab, platform chip, scheduler worker\n\nNote: Build alongside Facebook + Instagram task. Marginal extra effort since auth is shared.",
       "status": "open",
       "priority": "medium",
       "category": "New Feature",
@@ -2123,7 +2262,7 @@
         {
           "id": "threads_note_1783478571710",
           "author": "Max",
-          "html": "Queued after Jeff approved (2026-07-07). Build alongside Facebook + Instagram — same Meta OAuth, ~10% extra work for a second platform. Fold into that task sprint.",
+          "html": "Queued after Jeff approved (2026-07-07). Build alongside Facebook + Instagram \u2014 same Meta OAuth, ~10% extra work for a second platform. Fold into that task sprint.",
           "createdAt": "2026-07-08T02:42:51.708Z",
           "updatedAt": null,
           "legacyCompletionNotes": false
@@ -2134,7 +2273,310 @@
       ],
       "completionNotes": "",
       "executionOrder": 25
+    },
+    {
+      "id": "le_mrnhq8hr_1",
+      "projectId": "leadexpandr_mrnhq8hr",
+      "title": "Register leadexpandr.com domain",
+      "priority": "Urgent",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-16",
+      "description": "Purchase leadexpandr.com on Namecheap. Enable WHOIS privacy.",
+      "completionNotes": "",
+      "executionOrder": 1,
+      "comments": []
+    },
+    {
+      "id": "le_mrnhq8hr_2",
+      "projectId": "leadexpandr_mrnhq8hr",
+      "title": "Research and select first niche + city",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Research",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-20",
+      "description": "Use Wikipedia for city demographics, HomeAdvisor for niche ideas, Google Keyword Planner for volume/competition. Target: decent search volume + low competition + high lead value.",
+      "completionNotes": "",
+      "executionOrder": 2,
+      "comments": []
+    },
+    {
+      "id": "le_mrnhq8hr_3",
+      "projectId": "leadexpandr_mrnhq8hr",
+      "title": "Build first rank-and-rent website",
+      "priority": "High",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Jeff",
+      "plannedStart": "2026-07-25",
+      "description": "Use AI to build the site. Host on Hostinger. Include: service pages, lead capture forms, click-to-call, local SEO content, mobile-first design.",
+      "completionNotes": "",
+      "executionOrder": 3,
+      "comments": []
+    },
+    {
+      "id": "le_mrnhq8hr_4",
+      "projectId": "leadexpandr_mrnhq8hr",
+      "title": "SEO \u2014 Rank the site on Google",
+      "priority": "High",
+      "status": "To Do",
+      "category": "SEO",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-01",
+      "description": "Local SEO: Google Business Profile, citations, on-page SEO, content, backlinks. Track rankings with SEO Rank Check App.",
+      "completionNotes": "",
+      "executionOrder": 4,
+      "comments": []
+    },
+    {
+      "id": "le_mrnhq8hr_5",
+      "projectId": "leadexpandr_mrnhq8hr",
+      "title": "Rent the ranked site to a local business",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-09-15",
+      "description": "Once site ranks and generates leads, pitch local businesses. Show traffic proof and lead counts. Target: $500-$5k/month depending on lead volume.",
+      "completionNotes": "",
+      "executionOrder": 5,
+      "comments": []
+    },
+    {
+      "id": "msde9urkb7v9",
+      "executionOrder": 60,
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 0: clean up prepsba.com pages",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Support",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-08",
+      "description": "1.  Create more services pages & checklists\n2. Follow pri website ranking rules\n3. Add more images, icons, and spacing fixes throughout the page",
+      "comments": [],
+      "completionNotes": "",
+      "tags": [
+        "Phase 0"
+      ]
+    },
+    {
+      "id": "msdez53rgue8",
+      "executionOrder": 9,
+      "projectId": "mqqw3xxcq6s0",
+      "title": "Golf Destination AirBNB with par 3 course",
+      "priority": "Low",
+      "status": "To Do",
+      "category": "Idea",
+      "responsible": "Jeff",
+      "plannedStart": "",
+      "description": "Buy land next to destination golf courses (ideally in southern status with longer golf season), build custom new airbnb houses on the land, build par 3 course on the land, rent for yearly income.l",
+      "comments": [],
+      "completionNotes": "",
+      "tags": []
+    },
+    {
+      "id": "prepsba_demo_video_01",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 4 \u00b7 Create & publish 2-min demo video (YouTube @prepsba)",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Jeff",
+      "plannedStart": "2026-08-10",
+      "description": "Record ~2-min screen capture of app flow: start application \u2192 guided wizard \u2192 forms 1919/413 auto-fill \u2192 lender-ready export. Publish to youtube.com/@prepsba (channel already wired in footer + Organization sameAs schema). Required for Product Hunt (2.7x upvotes) and most Tier 1/2 directory submissions. Currently the hero 'Watch 2-min Demo' button points to #how-it-works placeholder.",
+      "completionNotes": "",
+      "executionOrder": 61,
+      "comments": [
+        {
+          "id": "c_saashub_20260808",
+          "author": "Maximus",
+          "html": "SaaSHub directory: account verified (email max@prepsba.com confirmed) + PrepSBA product VERIFIED (green badge \u2713 live on saashub.com/prepsba-alternatives). Listing itself pending staff approval (up to 32 days). Phase B continues: AlternativeTo \u2192 Startup Stash \u2192 F6S \u2192 SourceForge \u2192 TheSaaSDirectory \u2192 Software Advice \u2192 AI dirs.",
+          "createdAt": "2026-08-09T00:01:16.367074Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "tags": [
+        "Phase 4",
+        "Launch",
+        "Directory Submissions"
+      ]
+    },
+    {
+      "id": "prepsba_dir_subs_02",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase B \u00b7 Complete remaining SaaS directory submissions (SaaSHub \u2713, then AlternativeTo, Startup Stash, F6S, SourceForge, TheSaaSDirectory, Software Advice, AI dirs)",
+      "status": "In Progress",
+      "category": "Marketing",
+      "comments": [
+        {
+          "id": "c_dir_20260808",
+          "author": "Maximus",
+          "html": "SaaSHub DONE (email + product verified 2026-08-08). Next in queue: AlternativeTo.",
+          "createdAt": "2026-08-09T00:01:16.367074Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "c_at_20260808",
+          "author": "Maximus",
+          "html": "AlternativeTo DONE (2026-08-08): PrepSBA submitted, account prepsba verified. Pending AT review (months, or $5 priority). Next: Startup Stash (low value, email form) / SourceForge / TheSaaSDirectory.",
+          "createdAt": "2026-08-09T00:29:35.547696Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        }
+      ],
+      "completionNotes": "",
+      "executionOrder": 67
+    },
+    {
+      "id": "prepsba_seo_6244270083",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 SEO: SBA loan vertical pages (laundromat, franchise, working capital, EIDL, CRE, acquisition)",
+      "priority": "Med",
+      "status": "Not Started",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "description": "Build Phase 2 vertical/persona pages per Topics/SEO-Registry/sites/prepsba/content-build-plan.md (pages 4-9): sba-loan-for-laundromat, sba-loan-for-franchise, sba-working-capital-loan, sba-eidl-loan, sba-commercial-real-estate-loan, sba-business-acquisition-loan. Auto-triggered 2026-09-15 05:00 ET (cron prepsba-phase2-content-build).",
+      "completionNotes": "",
+      "executionOrder": 62,
+      "comments": []
+    },
+    {
+      "id": "prepsba_seo_6244270083",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 SEO: SBA loan vertical pages expansion (restaurant, women, veterans, buy-a-business)",
+      "priority": "Med",
+      "status": "Not Started",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "description": "Phase 2 expansion (pages 10-13) after first verticals show SERP movement. Per content-build-plan.md.",
+      "completionNotes": "",
+      "executionOrder": 63,
+      "comments": []
+    },
+    {
+      "id": "prepsba_seo_6244270083",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 SEO: Types of SBA loans hub + process pages",
+      "priority": "Med",
+      "status": "Not Started",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "description": "Phase 3 (pages 14-16): types-of-sba-loans hub, sba-loan-process-timeline, sba-loan-down-payment-requirements. Auto-triggered 2026-09-29 05:00 ET (cron prepsba-phase3-content-build).",
+      "completionNotes": "",
+      "executionOrder": 64,
+      "comments": []
+    },
+    {
+      "id": "prepsba_seo_6244270083",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Phase 5 \u00b7 SEO: Small Business Loans guide + SBA Business Loan guide",
+      "priority": "Med",
+      "status": "Not Started",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "description": "Phase 1 pages 2-3 (small-business-loans-guide, sba-business-loan) after flagship sba-loans-for-small-business deploys. Per content-build-plan.md.",
+      "completionNotes": "",
+      "executionOrder": 65,
+      "comments": []
+    },
+    {
+      "id": "seospy_87170db35a0d",
+      "projectId": "mr3k0lxpcldt",
+      "title": "Build SEO Spy \u2014 Mac Electron app for domain SEO tracking (backlinks/citations/pending/rankings + charts)",
+      "priority": "High",
+      "status": "Completed",
+      "category": "New Feature",
+      "responsible": "Max",
+      "plannedStart": "2026-08-09",
+      "description": "Local Mac Electron app (no auth) to track SEO per domain: backlinks, citations, pending citations (to-do), ranking data, historical ranking charts. One global seo-spy.json; auto-ingests weekly SEO-Registry analysis files on open (merge, never overwrite manual edits); domain-specific export to separate JSON. JumpKit-style layout but green\u2192yellow accent gradient. Code in Topics/SeoSpy. Requirements fully confirmed 2026-08-09.",
+      "completionNotes": "",
+      "executionOrder": 66,
+      "comments": [
+        {
+          "id": "seospy_c1_bd634452",
+          "author": "Max",
+          "html": "Requirements confirmed (all 5 + A-F). Spec saved to MEMORY.md. Building into Topics/SeoSpy. Jeff to review once scaffolded.",
+          "createdAt": "2026-08-09T15:12:33.293640+00:00",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "seospy_c2_152655",
+          "author": "Max",
+          "html": "Marked Complete \u2014 v0.1 built, headless-tested (0 console errors), seeded with PrepSBA data. Charts populate weekly from Sat snapshots. Jeff to open app and review.",
+          "createdAt": "2026-08-09T15:26:55.380085+00:00",
+          "updatedAt": null,
+          "legacyCompletionNotes": false
+        },
+        {
+          "id": "msm5c113p6j0",
+          "author": "Max",
+          "html": "SEO Spy v0.1 built &amp; verified 2026-08-09. Electron app in Topics/SeoSpy: dashboard, per-domain tabs (rankings/backlinks/citations/pending/GSC), historical SVG charts, auto-ingest from SEO-Registry (merge), domain export, green\u2192yellow JumpKit-style theme. Seeded with real PrepSBA data. Run: npm start.",
+          "createdAt": "2026-08-09T18:38:50.679Z",
+          "updatedAt": null,
+          "legacyCompletionNotes": true
+        }
+      ],
+      "tags": [
+        "SEO",
+        "SEO Spy"
+      ]
+    },
+    {
+      "id": "jumpkit_seo_503be82a5099",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "JumpKit E-E-A-T content: author bio + customer case study",
+      "priority": "High",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "plannedStart": "2026-08-09",
+      "description": "SEO audit follow-up (2026-08-09). Build E-E-A-T signals on jumpkit.app landing site: (1) real author bio/byline page for Jeff (founder, EE background, Bosch sales director, JumpKit builder) with Person schema; (2) one customer case study / use-case page with real details. Needs Jeff input for accuracy, Max drafts. Landing-site files only; deploy via vercel --prod CLI after Jeff OK.",
+      "completionNotes": "",
+      "executionOrder": 26,
+      "comments": []
+    },
+    {
+      "id": "jumpkit_seo_401459b8ead1",
+      "projectId": "mqqp2ihuyhpx",
+      "title": "Expand JumpKit SerpRobot keyword tracking (link launcher, brand terms)",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "Marketing",
+      "responsible": "Maximus",
+      "plannedStart": "2026-08-23",
+      "description": "After ~2 weeks of baseline data (initially all 6 keywords unranked), add higher-value terms to SerpRobot project 5135869: e.g. 'link launcher', 'jump launcher', brand terms ('jumpkit'), plus any queries surfacing in GSC. Max to flag in weekly cron report when data is ready (~2026-08-23).",
+      "completionNotes": "",
+      "executionOrder": 27,
+      "comments": []
+    },
+    {
+      "id": "mqtk652c1d6d",
+      "projectId": "mqpk1417b7ad",
+      "title": "Add Google Business Profile (GBP) as a PostKit channel",
+      "priority": "Med",
+      "status": "To Do",
+      "category": "New Feature",
+      "responsible": "Maximus",
+      "plannedStart": "",
+      "description": "Future PostKit feature: add Google Business Profile as a channel for auto-posting updates to local business listings. Useful for rank-and-rent local sites (helps local SEO signals). Official API via Google Business Profile API; OAuth + per-project token storage like other channels.",
+      "completionNotes": "",
+      "executionOrder": 1,
+      "comments": [
+        {
+          "id": "mqtkc180d9c24",
+          "author": "Jeff",
+          "html": "Add GBP as a future PostKit feature. Not yet \u2014 add to roadmap.",
+          "createdAt": "2026-08-10T00:16:28.562454+00:00",
+          "updatedAt": "2026-08-10T00:16:28.562457+00:00",
+          "legacyCompletionNotes": false
+        }
+      ]
     }
   ],
-  "updatedAt": "2026-07-08T10:57:00.954Z"
+  "updatedAt": "2026-08-09T18:40:14.297Z"
 }
