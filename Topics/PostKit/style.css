@@ -155,7 +155,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 46px 12px 8px; /* clear the app titlebar at top; room at bottom so logo is never clipped */
+  padding: 36px 12px 8px; /* clear the app titlebar at top; room at bottom so logo is never clipped */
   overflow: visible;
   flex-shrink: 0;
 }
@@ -180,7 +180,7 @@ html, body {
 .logo-collapsed-img { display: none; width: 27px; max-width: 27px; }
 
 .sidebar.collapsed .logo-expanded     { display: none !important; }
-.sidebar.collapsed .logo-collapsed-img { display: block !important; margin: 42px auto 0; }
+.sidebar.collapsed .logo-collapsed-img { display: block !important; margin: 32px auto 0; }
 
 .sidebar-nav {
   flex: 1;
