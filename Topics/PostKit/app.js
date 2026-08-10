@@ -1969,8 +1969,7 @@ function renderDashboard(data) {
         <div class="dash-cal" id="dash-cal">
           <div class="dash-cal-header">
             <div class="dash-cal-filter-row">
-              <label class="dash-cal-filter-label" for="dash-cal-project-filter">Project</label>
-              <div class="csel-mount" style="max-width:260px;flex:1"></div>
+              <div class="csel-mount" style="max-width:260px"></div>
             </div>
             <div class="dash-cal-controls">
               <div class="dash-cal-viewbar">
