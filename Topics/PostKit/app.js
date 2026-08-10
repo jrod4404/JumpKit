@@ -1968,6 +1968,10 @@ function renderDashboard(data) {
         <div class="dash-section-title">Calendar</div>
         <div class="dash-cal" id="dash-cal">
           <div class="dash-cal-header">
+            <div class="dash-cal-filter-row">
+              <label class="dash-cal-filter-label" for="dash-cal-project-filter">Project</label>
+              <select id="dash-cal-project-filter" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
+            </div>
             <div class="dash-cal-controls">
               <div class="dash-cal-viewbar">
                 <button class="dash-cal-viewtab${_dashCalView==='month'?' active':''}" data-dashview="month">Month</button>
@@ -1979,9 +1983,8 @@ function renderDashboard(data) {
                 <span class="dash-cal-period" id="dash-cal-period"></span>
                 <button class="btn-secondary btn-sm" onclick="dashCalNav(1)">›</button>
               </div>
-              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
+              <button class="btn-secondary btn-sm" onclick="dashCalToday()">Today</button>
             </div>
-            <button class="btn-secondary btn-sm" onclick="dashCalToday()">Today</button>
           </div>
           <div id="dash-cal-grid"><div class="dash-day-empty">Loading calendar…</div></div>
           <div id="dash-cal-panel" class="dash-cal-panel" style="display:none"></div>
