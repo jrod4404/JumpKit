@@ -97,12 +97,11 @@ html, body {
   align-items: center;
   -webkit-app-region: drag;
   background: var(--bg-titlebar);
-  border-bottom: 1px solid var(--border);
   user-select: none;
 }
 .app-titlebar-name {
   margin-left: 82px; /* clear the macOS traffic lights (green btn ~18px; 3 lights + spacing extend to ~72px) */
-  margin-top: 3px; /* nudge the title text down slightly */
+  margin-top: 5px; /* nudge the title text down slightly */
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
@@ -156,10 +155,8 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 60px;
-  min-height: 60px;
-  padding: 0 12px;
-  overflow: hidden;
+  padding: 74px 12px 8px; /* clear the app titlebar at top; room at bottom so logo is never clipped */
+  overflow: visible;
   flex-shrink: 0;
 }
 
@@ -170,7 +167,7 @@ html, body {
   height: auto;
   object-fit: contain;
   image-rendering: auto;
-  margin-top: 54px; /* keep logo clear of the app window header (titlebar) */
+  margin: 0 auto; /* centered, no giant top margin that could clip */
 }
 
 /* Expanded logos: theme-switched */
@@ -180,10 +177,10 @@ html, body {
 [data-theme="light"] .logo-light { display: block; }
 
 /* Collapsed logo: icon only */
-.logo-collapsed-img { display: none; width: 27px; max-width: 27px; margin-top: 50px; }
+.logo-collapsed-img { display: none; width: 27px; max-width: 27px; }
 
 .sidebar.collapsed .logo-expanded     { display: none !important; }
-.sidebar.collapsed .logo-collapsed-img { display: block !important; }
+.sidebar.collapsed .logo-collapsed-img { display: block !important; margin: 70px auto 0; }
 
 .sidebar-nav {
   flex: 1;
