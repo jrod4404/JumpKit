@@ -2077,7 +2077,7 @@ async function renderAppSettings(pane) {
           <div class="acct-row">
             <div class="acct-row-label">
               <span>Global connections</span>
-              <span class="acct-row-hint">Connect each platform once — all projects share it. Then pick the account/board per project in Channels.</span>
+              <span class="acct-row-hint">Enter app credentials + connect each platform once. All projects share it — then pick the account/board per project in Channels.</span>
             </div>
             <div class="acct-control" style="flex-direction:column;align-items:stretch;gap:8px">
               <div id="global-connections-list" style="display:flex;flex-direction:column;gap:6px">Loading…</div>
@@ -2110,10 +2110,10 @@ async function renderAppSettings(pane) {
 
 // Render the global platform connections list (Option B) in App Settings.
 const GLOBAL_CONN_PLATFORMS = [
-  { key: 'x', label: 'X (Twitter)', color: '#1d9bf0', connect: 'connectX', disconnect: 'disconnectX' },
-  { key: 'linkedin', label: 'LinkedIn', color: '#0077b5', connect: 'connectLinkedIn', disconnect: 'disconnectLinkedIn' },
-  { key: 'youtube', label: 'YouTube', color: '#c0392b', connect: null, disconnect: null },
-  { key: 'pinterest', label: 'Pinterest', color: '#e60023', connect: 'connectPinterest', disconnect: 'disconnectPinterest' },
+  { key: 'x', label: 'X (Twitter)', color: '#1d9bf0', clientIdKey: 'x.client_id', clientSecretKey: 'x.client_secret', connect: 'connectX', disconnect: 'disconnectX' },
+  { key: 'linkedin', label: 'LinkedIn', color: '#0077b5', clientIdKey: 'linkedin.client_id', clientSecretKey: 'linkedin.client_secret', connect: 'connectLinkedIn', disconnect: 'disconnectLinkedIn' },
+  { key: 'youtube', label: 'YouTube', color: '#c0392b', clientIdKey: null, clientSecretKey: null, connect: null, disconnect: null },
+  { key: 'pinterest', label: 'Pinterest', color: '#e60023', clientIdKey: 'pinterest.client_id', clientSecretKey: 'pinterest.client_secret', connect: 'connectPinterest', disconnect: 'disconnectPinterest' },
 ];
 
 async function loadGlobalConnections() {
@@ -2133,17 +2133,45 @@ async function loadGlobalConnections() {
       : `<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>`;
     const account = (status && status.account_name) ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</span>` : '';
     const btn = connected
-      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,800)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
+      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,1000)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
       : (p.connect ? `<button class="btn-primary btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
-    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--border);border-radius:6px">
-      <span style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></span>
-      <span style="font-size:13px;font-weight:600;min-width:110px">${p.label}</span>
-      ${badge} ${account}
-      <span style="margin-left:auto">${btn}</span>
+    const creds = p.clientIdKey ? `
+      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:var(--text-dim);min-width:64px">Client ID</span>
+          <input type="text" class="form-input" id="conn-${p.key}-client-id" value="${escHtml(_settings[p.clientIdKey] || '')}" placeholder="Paste Client ID..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientIdKey}','conn-${p.key}-client-id')">
+        </div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:10px;color:var(--text-dim);min-width:64px">Secret</span>
+          <input type="password" class="form-input" id="conn-${p.key}-client-secret" value="${escHtml(_settings[p.clientSecretKey] || '')}" placeholder="Paste Client Secret..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientSecretKey}','conn-${p.key}-client-secret')">
+        </div>
+      </div>` : '';
+    return `<div style="display:flex;flex-direction:column;padding:8px;border:1px solid var(--border);border-radius:6px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></span>
+        <span style="font-size:13px;font-weight:600;min-width:110px">${p.label}</span>
+        ${badge} ${account}
+        <span style="margin-left:auto">${btn}</span>
+      </div>
+      ${creds}
     </div>`;
   }).join('');
 }
 window.loadGlobalConnections = loadGlobalConnections;
+
+// Save a platform client id/secret from App Settings (global credential).
+async function saveConnCredential(platform, key, inputId) {
+  const el = document.getElementById(inputId);
+  if (!el) return;
+  try {
+    await apiFetch('/settings', { method: 'PUT', body: JSON.stringify({ [key]: el.value }) });
+    _settings[key] = el.value;
+    showToast(`${platform} credential saved`);
+  } catch(err) {
+    showToast('Failed to save credential: ' + err.message, 'error');
+  }
+}
+window.saveConnCredential = saveConnCredential;
 
 let _settings = {};
 
@@ -2261,64 +2289,17 @@ async function renderSettings() {
         </div>
       </div>
       ${p === 'x' ? `
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>X Client ID</span>
-          <span class="acct-row-hint">From developer.x.com → App → OAuth 2.0</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="text" class="form-input" id="setting-x-client-id" value="${get('x.client_id') || ''}" placeholder="Paste Client ID..." oninput="markSettingDirty('x.client_id', this.value)">
-        </div>
-      </div>
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>X Client Secret</span>
-          <span class="acct-row-hint">OAuth 2.0 client secret</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="password" class="form-input" id="setting-x-client-secret" value="${get('x.client_secret') || ''}" placeholder="Paste Client Secret..." oninput="markSettingDirty('x.client_secret', this.value)">
-        </div>
-      </div>
       <div class="acct-row">
         <div class="acct-row-label">
-          <span>X Connection</span>
-          <span class="acct-row-hint" id="x-status-hint">Checking...</span>
+          <span>Account</span>
+          <span class="acct-row-hint">Uses the global X connection (App Settings → Platform Connections)</span>
         </div>
         <div class="acct-control">
-          <button class="btn-primary" id="btn-x-connect" onclick="connectX()" style="display:none">Connect X</button>
-          <button class="btn-danger-solid" id="btn-x-disconnect" onclick="disconnectX()" style="display:none">Disconnect</button>
+          <span class="acct-row-hint" id="x-account-hint">Checking…</span>
         </div>
       </div>
       ` : ''}
       ${p === 'linkedin' ? `
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>LinkedIn Client ID</span>
-          <span class="acct-row-hint">From linkedin.com/developers → App → Auth</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="text" class="form-input" id="setting-linkedin-client-id" value="${get('linkedin.client_id') || ''}" placeholder="Paste Client ID..." oninput="markSettingDirty('linkedin.client_id', this.value)">
-        </div>
-      </div>
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>LinkedIn Client Secret</span>
-          <span class="acct-row-hint">Primary client secret</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="password" class="form-input" id="setting-linkedin-client-secret" value="${get('linkedin.client_secret') || ''}" placeholder="Paste Client Secret..." oninput="markSettingDirty('linkedin.client_secret', this.value)">
-        </div>
-      </div>
-      <div class="acct-row">
-        <div class="acct-row-label">
-          <span>LinkedIn Connection</span>
-          <span class="acct-row-hint" id="li-status-hint">Checking...</span>
-        </div>
-        <div class="acct-control">
-          <button class="btn-primary" id="btn-li-connect" onclick="connectLinkedIn()" style="display:none">Connect LinkedIn</button>
-          <button class="btn-danger-solid" id="btn-li-disconnect" onclick="disconnectLinkedIn()" style="display:none">Disconnect</button>
-        </div>
-      </div>
       <div class="acct-row acct-row-stacked" id="li-org-wrap" style="display:none">
         <div class="acct-row-label">
           <span>Company Page</span>
@@ -2329,36 +2310,15 @@ async function renderSettings() {
           <button class="btn-secondary btn-sm" onclick="setLinkedInOrg()">Set Page</button>
         </div>
       </div>
+      <div class="acct-row" id="li-notconn-row">
+        <div class="acct-row-label">
+          <span>Company Page</span>
+          <span class="acct-row-hint">Connect LinkedIn in App Settings → Platform Connections first</span>
+        </div>
+        <div class="acct-control"></div>
+      </div>
       ` : ''}
       ${p === 'pinterest' ? `
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>Pinterest App ID</span>
-          <span class="acct-row-hint">From developers.pinterest.com → App → OAuth</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="text" class="form-input" id="setting-pinterest-client-id" value="${get('pinterest.client_id') || ''}" placeholder="Paste Client ID..." oninput="markSettingDirty('pinterest.client_id', this.value)">
-        </div>
-      </div>
-      <div class="acct-row acct-row-stacked">
-        <div class="acct-row-label">
-          <span>Pinterest App Secret</span>
-          <span class="acct-row-hint">App secret for token exchange</span>
-        </div>
-        <div class="acct-control" style="min-width:300px">
-          <input type="password" class="form-input" id="setting-pinterest-client-secret" value="${get('pinterest.client_secret') || ''}" placeholder="Paste App Secret..." oninput="markSettingDirty('pinterest.client_secret', this.value)">
-        </div>
-      </div>
-      <div class="acct-row">
-        <div class="acct-row-label">
-          <span>Pinterest Connection</span>
-          <span class="acct-row-hint" id="pin-status-hint">Checking...</span>
-        </div>
-        <div class="acct-control">
-          <button class="btn-primary" id="btn-pin-connect" onclick="connectPinterest()" style="display:none">Connect Pinterest</button>
-          <button class="btn-danger-solid" id="btn-pin-disconnect" onclick="disconnectPinterest()" style="display:none">Disconnect</button>
-        </div>
-      </div>
       <div class="acct-row acct-row-stacked" id="pin-board-wrap" style="display:none">
         <div class="acct-row-label">
           <span>Pinterest Board</span>
@@ -2684,6 +2644,7 @@ async function connectX() {
         if (status.connected) {
           clearInterval(poll);
           checkXStatus();
+          if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
           showToast('X account connected! ✓');
         }
       } catch(_) {}
@@ -2703,6 +2664,7 @@ async function disconnectX() {
       body: JSON.stringify({ project_id: getActiveProjectId() })
     });
     checkXStatus();
+    if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
     showToast('X account disconnected');
   } catch(err) {
     showToast('Disconnect failed: ' + err.message, 'error');
@@ -2723,6 +2685,7 @@ async function connectLinkedIn() {
         if (status.connected) {
           clearInterval(poll);
           checkLinkedInStatus();
+          if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
           showToast('LinkedIn account connected! ✓');
         }
       } catch(_) {}
@@ -2741,6 +2704,7 @@ async function disconnectLinkedIn() {
       body: JSON.stringify({ project_id: getActiveProjectId() })
     });
     checkLinkedInStatus();
+    if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
     showToast('LinkedIn account disconnected');
   } catch(err) {
     showToast('Disconnect failed: ' + err.message, 'error');
@@ -2841,6 +2805,7 @@ async function connectPinterest() {
         if (status.connected) {
           clearInterval(poll);
           checkPinterestStatus();
+          if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
           showToast('Pinterest account connected! ✓');
         }
       } catch(_) {}
@@ -2859,6 +2824,7 @@ async function disconnectPinterest() {
       body: JSON.stringify({ project_id: getActiveProjectId() })
     });
     checkPinterestStatus();
+    if (typeof loadGlobalConnections === 'function') loadGlobalConnections();
     showToast('Pinterest account disconnected');
   } catch(err) {
     showToast('Disconnect failed: ' + err.message, 'error');
@@ -2899,33 +2865,68 @@ async function setPinterestBoard() {
 }
 window.setPinterestBoard = setPinterestBoard;
 
-// Auto-check X + LinkedIn status when settings tab loads
+// Auto-check platform account status when the Channels tab loads (global
+// connections are managed in App Settings; here we only show per-project
+// account/board selectors based on connection state).
 const _originalLoadSettings = loadSettings;
 loadSettings = function() {
   _originalLoadSettings();
-  setTimeout(checkXStatus, 500);
-  setTimeout(checkLinkedInStatus, 600);
-  setTimeout(checkPinterestStatus, 700);
+  setTimeout(checkXAccount, 500);
+  setTimeout(checkLinkedInAccount, 600);
+  setTimeout(checkPinterestAccount, 700);
 };
 
+// Per-project account rows on the Channels page (Option B).
+// X: single global account — just show its status.
+async function checkXAccount() {
+  const hint = document.getElementById('x-account-hint');
+  if (!hint) return;
+  try {
+    const status = await apiFetch(`/x/status?project_id=${getActiveProjectId()}`);
+    hint.innerHTML = status.connected
+      ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected${status.account_name ? ' — ' + escHtml(status.account_name) : ''}</span>`
+      : `<span style="opacity:.6">Not connected</span>`;
+  } catch(_) { hint.innerHTML = '<span style="opacity:.6">Unknown</span>'; }
+}
+window.checkXAccount = checkXAccount;
+
+// LinkedIn: show the company-page selector when a global connection exists.
+async function checkLinkedInAccount() {
+  let status = null;
+  try { status = await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`); } catch(_) {}
+  const orgWrap = document.getElementById('li-org-wrap');
+  const notRow  = document.getElementById('li-notconn-row');
+  if (orgWrap && notRow) {
+    if (status && status.connected) {
+      orgWrap.style.display = '';
+      notRow.style.display  = 'none';
+      loadLinkedInOrgs(status.orgs || []);
+    } else {
+      orgWrap.style.display = 'none';
+      notRow.style.display  = '';
+    }
+  }
+}
+window.checkLinkedInAccount = checkLinkedInAccount;
+
+// Pinterest: show the board selector when a global connection exists.
+async function checkPinterestAccount() {
+  const wrap = document.getElementById('pin-board-wrap');
+  if (!wrap) return;
+  try {
+    const status = await apiFetch(`/pinterest/status?project_id=${getActiveProjectId()}`);
+    if (status.connected) {
+      wrap.style.display = '';
+      loadPinterestBoards();
+    } else {
+      wrap.style.display = 'none';
+    }
+  } catch(_) { wrap.style.display = 'none'; }
+}
+window.checkPinterestAccount = checkPinterestAccount;
+
 async function saveSettings() {
-  const xClientIdEl = document.getElementById('setting-x-client-id');
-  const xClientSecretEl = document.getElementById('setting-x-client-secret');
-  const liClientIdEl = document.getElementById('setting-linkedin-client-id');
-  const liClientSecretEl = document.getElementById('setting-linkedin-client-secret');
-  const pinClientIdEl = document.getElementById('setting-pinterest-client-id');
-  const pinClientSecretEl = document.getElementById('setting-pinterest-client-secret');
-
   const payload = {};
-
-  if (xClientIdEl)     payload['x.client_id']     = xClientIdEl.value.trim();
-  if (xClientSecretEl) payload['x.client_secret'] = xClientSecretEl.value.trim();
-  if (liClientIdEl)    payload['linkedin.client_id']     = liClientIdEl.value.trim();
-  if (liClientSecretEl) payload['linkedin.client_secret'] = liClientSecretEl.value.trim();
-  if (xClientSecretEl) payload['x.client_secret'] = xClientSecretEl.value.trim();
-  if (pinClientIdEl)     payload['pinterest.client_id']     = pinClientIdEl.value.trim();
-  if (pinClientSecretEl) payload['pinterest.client_secret'] = pinClientSecretEl.value.trim();
-
   // Brand settings
   const brandNameEl = document.getElementById('setting-brand-name');
   const brandPrimaryEl = document.getElementById('setting-brand-primary-color');
