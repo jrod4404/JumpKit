@@ -2069,13 +2069,13 @@ async function renderAppSettings(pane) {
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
         <div class="jfb" id="appSettingsViewBar">
           <div class="jfb-slider" id="appSettingsViewPill"></div>
-          <button class="jfb-tab active" data-panel="app" onclick="switchAppSettingsView('app')">App Settings</button>
-          <button class="jfb-tab" data-panel="platform" onclick="switchAppSettingsView('platform')">Platform Settings</button>
+          <button class="jfb-tab active" data-panel="platform" onclick="switchAppSettingsView('platform')">Platform Settings</button>
+          <button class="jfb-tab" data-panel="app" onclick="switchAppSettingsView('app')">App Settings</button>
         </div>
       </div>
 
       <!-- View: App Settings -->
-      <div class="settings-panel" id="appSettingsViewApp">
+      <div class="settings-panel" id="appSettingsViewApp" style="display:none">
         <div class="settings-row">
           <div class="acct-section settings-col">
             <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> App Settings</div>
@@ -2112,23 +2112,20 @@ async function renderAppSettings(pane) {
       </div>
 
       <!-- View: Platform Settings -->
-      <div class="settings-panel" id="appSettingsViewPlatform" style="display:none">
+      <div class="settings-panel" id="appSettingsViewPlatform">
         <div class="settings-row">
           <div class="acct-section settings-col">
             <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
-            <div class="acct-row">
-              <div class="acct-row-label">
-                <span>Global connections</span>
-                <span class="acct-row-hint">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</span>
-              </div>
-              <div class="acct-control" style="flex-direction:column;align-items:stretch;gap:8px">
-                <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">Loading…</div>
-              </div>
+            <div style="margin-bottom:12px">
+              <div style="font-size:13px;font-weight:600">Global connections</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</div>
             </div>
+            <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">Loading…</div>
           </div>
         </div>
       </div>
     </div>`;
+  setTimeout(() => { switchAppSettingsView('platform'); }, 30);
   loadGlobalConnections();
 }
 
