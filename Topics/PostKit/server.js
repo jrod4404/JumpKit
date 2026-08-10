@@ -906,6 +906,72 @@ function getProjects(req, res) {
   send(res, 200, result);
 }
 
+// Dashboard: aggregate overview stats across ALL projects (global, not project-scoped)
+function getDashboard(req, res) {
+  const projects = db.prepare('SELECT * FROM projects ORDER BY created_at ASC').all();
+
+  const seedByProj   = db.prepare('SELECT project_id, COUNT(*) AS c FROM seeds GROUP BY project_id').all();
+  const postByProj   = db.prepare('SELECT project_id, COUNT(*) AS c FROM posts GROUP BY project_id').all();
+  const statusByProj = db.prepare('SELECT project_id, status, COUNT(*) AS c FROM posts GROUP BY project_id, status').all();
+  const chanByProj   = db.prepare('SELECT project_id, platform, enabled FROM channels').all();
+
+  const seedMap   = {}; seedByProj.forEach(r => seedMap[r.project_id] = r.c);
+  const postMap   = {}; postByProj.forEach(r => postMap[r.project_id] = r.c);
+  const statusMap = {};
+  statusByProj.forEach(r => {
+    statusMap[r.project_id] = statusMap[r.project_id] || { draft: 0, scheduled: 0, posted: 0 };
+    statusMap[r.project_id][r.status] = (statusMap[r.project_id][r.status] || 0) + r.c;
+  });
+  const chanMap = {};
+  chanByProj.forEach(r => {
+    chanMap[r.project_id] = chanMap[r.project_id] || { enabled: 0, total: 0, platforms: [] };
+    chanMap[r.project_id].total++;
+    if (r.enabled) {
+      chanMap[r.project_id].enabled++;
+      chanMap[r.project_id].platforms.push(r.platform);
+    }
+  });
+
+  const now = Date.now();
+  const upcoming = db.prepare(
+    `SELECT p.id, p.platform, p.status, p.scheduled_for, p.post_text, p.project_id, pr.name AS project_name
+     FROM posts p LEFT JOIN projects pr ON p.project_id = pr.id
+     WHERE p.scheduled_for >= ? AND p.status != 'posted'
+     ORDER BY p.scheduled_for ASC LIMIT 20`
+  ).all(now);
+
+  const perProject = projects.map(p => {
+    const st = statusMap[p.id] || { draft: 0, scheduled: 0, posted: 0 };
+    const ch = chanMap[p.id] || { enabled: 0, total: 0, platforms: [] };
+    return {
+      id: p.id,
+      name: p.name,
+      description: p.description || '',
+      seeds: seedMap[p.id] || 0,
+      posts: postMap[p.id] || 0,
+      draft: st.draft,
+      scheduled: st.scheduled,
+      posted: st.posted,
+      channels_enabled: ch.enabled,
+      channels_total: ch.total,
+      platforms: ch.platforms,
+    };
+  });
+
+  const totals = perProject.reduce((acc, p) => {
+    acc.projects++;
+    acc.seeds += p.seeds;
+    acc.posts += p.posts;
+    acc.draft += p.draft;
+    acc.scheduled += p.scheduled;
+    acc.posted += p.posted;
+    acc.channels_enabled += p.channels_enabled;
+    return acc;
+  }, { projects: 0, seeds: 0, posts: 0, draft: 0, scheduled: 0, posted: 0, channels_enabled: 0 });
+
+  send(res, 200, { totals, projects: perProject, upcoming: upcoming.map(p => ({ ...p, post_text: tryParse(p.post_text, '') })) });
+}
+
 async function createProject(req, res) {
   const body = await parseBody(req);
   if (!body.name) return send(res, 400, { error: 'name is required' });
@@ -1149,6 +1215,8 @@ const server = http.createServer(async (req, res) => {
       if (method === 'GET') return getProjects(req, res);
       if (method === 'POST') return createProject(req, res);
     }
+
+    if (pathname === '/api/dashboard' && method === 'GET') return getDashboard(req, res);
 
     const projectMatch = pathname.match(/^\/api\/projects\/([^\/]+)$/);
     if (projectMatch) {

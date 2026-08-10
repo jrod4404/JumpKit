@@ -37,6 +37,8 @@ window._analyticsRecord = null;       // {postId, recordId} for analytics modal
    --------------------------------------------------------- */
 let _projects = [];                       // array of {id, name, description, ...}
 let _activeProjectId = null;              // id of the currently active project
+let _expandedProjects = new Set();        // ids of projects whose submenu is independently expanded
+let _dashboardExpanded = true;            // whether the global Dashboard nav item is expanded
 
 function getActiveProjectId() {
   return _activeProjectId || 'proj_default';
@@ -203,6 +205,12 @@ const PROJECT_MENU_ITEMS = [
   { tab: 'settings',  label: 'Channels' },
 ];
 
+// Global (non-project) nav items under the Dashboard link
+const DASHBOARD_MENU_ITEMS = [
+  { tab: 'dashboard',   label: 'Overview' },
+  { tab: 'appsettings', label: 'Settings' },
+];
+
 // Icons for each submenu item (small, inline SVG)
 const PROJECT_SUB_ICONS = {
   content: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
@@ -212,12 +220,49 @@ const PROJECT_SUB_ICONS = {
   settings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
 };
 
+// Icons for global Dashboard submenu items
+const DASHBOARD_SUB_ICONS = {
+  dashboard: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="6" height="6" rx="1"/><rect x="8.5" y="1.5" width="6" height="6" rx="1"/><rect x="1.5" y="8.5" width="6" height="6" rx="1"/><rect x="8.5" y="8.5" width="6" height="6" rx="1"/></svg>',
+  appsettings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
+};
+
+function renderDashboardNav() {
+  const el = document.getElementById('dashboard-nav');
+  if (!el) return;
+  const isExpanded = _dashboardExpanded;
+  const subItems = DASHBOARD_MENU_ITEMS.map(m => {
+    const activeClass = _activeTab === m.tab ? ' active' : '';
+    return `<button class="nav-item project-submenu-item${activeClass}" data-tab="${m.tab}">
+      <span class="nav-icon">${DASHBOARD_SUB_ICONS[m.tab] || ''}</span>
+      <span class="nav-label">${m.label}</span>
+    </button>`;
+  }).join('');
+  const caret = isExpanded
+    ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+    : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  el.innerHTML = `
+    <div class="project-item dashboard-item ${_activeTab === 'dashboard' || _activeTab === 'appsettings' ? 'active' : ''}" data-dashboard="1">
+      <div class="project-row" data-dashboard-row="1">
+        <span class="project-caret">${caret}</span>
+        <span class="project-caret-placeholder"></span>
+        <span class="project-name">Dashboard</span>
+      </div>
+      ${isExpanded ? `<div class="project-submenu">${subItems}</div>` : ''}
+    </div>`;
+}
+
+function toggleDashboardExpand() {
+  _dashboardExpanded = !_dashboardExpanded;
+  try { localStorage.setItem('pk_dashboard_expanded', _dashboardExpanded ? '1' : '0'); } catch(_e) {}
+  renderDashboardNav();
+}
+
 function renderProjectList() {
   const list = document.getElementById('project-list');
   if (!list) return;
   list.innerHTML = _projects.map(p => {
     const isActive = p.id === getActiveProjectId();
-    const isExpanded = isActive;
+    const isExpanded = _expandedProjects.has(p.id);
     const subItems = PROJECT_MENU_ITEMS.map(m => {
       const activeClass = isActive && _activeTab === m.tab ? ' active' : '';
       return `<button class="nav-item project-submenu-item${activeClass}" data-tab="${m.tab}" data-project-id="${escHtml(p.id)}">
@@ -226,8 +271,8 @@ function renderProjectList() {
       </button>`;
     }).join('');
     const caret = isExpanded
-      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>'
-      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
+      : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
     const isDefault = p.id === 'proj_default';
     return `
       <div class="project-item ${isActive ? 'active' : ''}" data-project-id="${escHtml(p.id)}">
@@ -246,11 +291,7 @@ function renderProjectList() {
         </div>
         ${isExpanded ? `<div class="project-submenu">${subItems}</div>` : ''}
       </div>`;
-  }).join('') + `
-    <button class="project-add-bottom" id="btn-add-project-bottom" onclick="openAddProjectModal()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span>Add Project</span>
-    </button>`;
+  }).join('');
 }
 
 async function loadProjects(selectFirstIfNone = false) {
@@ -263,6 +304,16 @@ async function loadProjects(selectFirstIfNone = false) {
     if (!target && _projects.length) target = _projects[0].id;
     if (!target) target = 'proj_default';
     _activeProjectId = target;
+    // Independent expansion state: restore persisted expanded ids, and ensure the
+    // active project is expanded so its submenu is visible on load.
+    _expandedProjects = new Set();
+    try {
+      const stored = JSON.parse(localStorage.getItem('pk_expanded_projects') || '[]');
+      if (Array.isArray(stored)) stored.forEach(id => { if (id) _expandedProjects.add(id); });
+    } catch (_e) { /* ignore malformed persisted state */ }
+    if (target) _expandedProjects.add(target);
+    try { _dashboardExpanded = localStorage.getItem('pk_dashboard_expanded') !== '0'; } catch(_e) {}
+    renderDashboardNav();
     renderProjectList();
     if (selectFirstIfNone || !_activeTab) {
       // Refresh current tab with new project scoping
@@ -278,10 +329,21 @@ function loadActiveTab() {
   switchTab(_activeTab);
 }
 
+function persistProjectExpansion() {
+  try {
+    localStorage.setItem('pk_expanded_projects', JSON.stringify([..._expandedProjects]));
+  } catch (_e) { /* ignore */ }
+}
+
 async function selectProject(pid) {
   if (!_projects.find(p => p.id === pid)) return;
   _activeProjectId = pid;
   localStorage.setItem('pk_active_project', pid);
+  // Selecting a collapsed project also expands it so its submenu is visible
+  if (!_expandedProjects.has(pid)) {
+    _expandedProjects.add(pid);
+    persistProjectExpansion();
+  }
   renderProjectList();
   // Reset in-tab state and reload
   _seedFilters = { search: '', status: '', campaign: '' };
@@ -290,8 +352,16 @@ async function selectProject(pid) {
 }
 
 function toggleProjectExpand(pid) {
-  // expand = become active; collapse = nothing (single active project expands on select)
-  // Clicking the active project again does nothing extra to avoid empty state
+  // Independently expand/collapse a project's submenu without changing active project
+  const p = _projects.find(p => p.id === pid);
+  if (!p) return;
+  if (_expandedProjects.has(pid)) {
+    _expandedProjects.delete(pid);
+  } else {
+    _expandedProjects.add(pid);
+  }
+  persistProjectExpansion();
+  renderProjectList();
 }
 
 async function openAddProjectModal() {
@@ -410,9 +480,21 @@ function openProjectMenu(btn) {
 /* ---------------------------------------------------------
    Tab Navigation
    --------------------------------------------------------- */
-const TAB_PANES = ['content', 'calendar', 'today', 'analytics', 'settings'];
+const TAB_PANES = ['dashboard', 'appsettings', 'content', 'calendar', 'today', 'analytics', 'settings'];
+
+const GLOBAL_TABS = new Set(['dashboard', 'appsettings']);
 
 const TAB_META = {
+  dashboard: {
+    title: 'Dashboard',
+    desc: 'Overview stats across all projects',
+    icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="6" height="6" rx="1"/><rect x="8.5" y="1.5" width="6" height="6" rx="1"/><rect x="1.5" y="8.5" width="6" height="6" rx="1"/><rect x="8.5" y="8.5" width="6" height="6" rx="1"/></svg>`
+  },
+  appsettings: {
+    title: 'Settings',
+    desc: 'Global app settings',
+    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+  },
   content:   {
     title: 'Content',
     desc: 'Create and manage seed content packages for Hermes to process',
@@ -446,6 +528,7 @@ function switchTab(tab) {
 
   _activeTab = tab;
   renderProjectList(); // refresh submenu active highlight + active project expansion
+  renderDashboardNav(); // refresh dashboard submenu active highlight
   window._currentSeedId = null;
   TAB_PANES.forEach(t => {
     const pane = document.getElementById(`tab-${t}`);
@@ -460,12 +543,14 @@ function switchTab(tab) {
   const iconEl = document.getElementById('topbarIcon');
   const titleEl = document.getElementById('topbarTitle');
   const subEl = document.getElementById('topbarSubtitle');
-  const proj = getActiveProject();
+  const proj = GLOBAL_TABS.has(tab) ? null : getActiveProject();
   if (iconEl) iconEl.innerHTML = meta.icon || '';
   if (titleEl) titleEl.textContent = meta.title || tab;
   if (subEl) subEl.textContent = (proj ? (proj.name + ' · ') : '') + (meta.desc || '');
   // Load tab content
   switch(tab) {
+    case 'dashboard':   loadDashboard();   break;
+    case 'appsettings': loadAppSettings(); break;
     case 'content':   loadContent();   break;
     case 'calendar':  loadCalendar();  break;
     case 'today':     loadToday();     break;
@@ -489,6 +574,13 @@ function initNav() {
         openProjectMenu(menuBtn);
         return;
       }
+      // Dashboard header row -> toggle global dashboard expansion
+      const dashRow = e.target.closest('[data-dashboard-row]');
+      if (dashRow) {
+        toggleDashboardExpand();
+        e.stopPropagation();
+        return;
+      }
       // Submenu item (Content / Schedule / Today / Analytics / Channels)
       const item = e.target.closest('.nav-item[data-tab]');
       if (item) {
@@ -496,13 +588,19 @@ function initNav() {
         e.stopPropagation();
         return;
       }
-      // Project header row -> select project
+      // Project header row: caret toggles expansion; name selects project
       const projRow = e.target.closest('.project-row');
       if (projRow) {
         const pid = projRow.dataset.projectId;
         if (pid) {
-          if (pid === getActiveProjectId()) {
+          const onCaret = !!e.target.closest('.project-caret');
+          if (onCaret) {
             toggleProjectExpand(pid);
+          } else if (pid === getActiveProjectId()) {
+            // Clicking the active project's name: collapse if expanded, else keep
+            if (_expandedProjects.has(pid)) {
+              toggleProjectExpand(pid);
+            }
           } else {
             selectProject(pid);
           }
@@ -1846,6 +1944,143 @@ window.submitAnalytics = submitAnalytics;
 /* =========================================================
    SETTINGS TAB
    ========================================================= */
+/* ---------------------------------------------------------
+   Dashboard (global overview across all projects)
+   --------------------------------------------------------- */
+async function loadDashboard() {
+  const pane = document.getElementById('tab-dashboard');
+  if (!pane) return;
+  pane.innerHTML = `<div class="dashboard-wrap"><div class="loading">Loading dashboard…</div></div>`;
+  try {
+    const data = await apiFetch('/dashboard');
+    renderDashboard(data);
+  } catch(err) {
+    pane.innerHTML = `<div class="error-msg">Failed to load dashboard: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function dashboardStatCard(label, value, sub, accent) {
+  return `
+    <div class="dash-stat-card" style="${accent ? `--dash-accent:${accent};` : ''}">
+      <div class="dash-stat-value">${value}</div>
+      <div class="dash-stat-label">${label}</div>
+      ${sub ? `<div class="dash-stat-sub">${sub}</div>` : ''}
+    </div>`;
+}
+
+function renderDashboard(data) {
+  const pane = document.getElementById('tab-dashboard');
+  if (!pane) return;
+  const t = data.totals || {};
+  const PLATFORM_LABELS = { youtube: 'YouTube', x: 'X', linkedin: 'LinkedIn', pinterest: 'Pinterest' };
+
+  const projectRows = (data.projects || []).map(p => `
+    <div class="dash-project-row">
+      <div class="dash-project-main">
+        <div class="dash-project-name">${escHtml(p.name)}</div>
+        <div class="dash-project-desc">${escHtml(p.description || 'No description')}</div>
+      </div>
+      <div class="dash-project-stat"><b>${p.seeds}</b><span>Seeds</span></div>
+      <div class="dash-project-stat"><b>${p.draft}</b><span>Draft</span></div>
+      <div class="dash-project-stat"><b>${p.scheduled}</b><span>Scheduled</span></div>
+      <div class="dash-project-stat"><b>${p.posted}</b><span>Posted</span></div>
+      <div class="dash-project-stat"><b>${p.channels_enabled}/${p.channels_total}</b><span>Channels</span></div>
+      <div class="dash-project-chips">${(p.platforms || []).map(pl => `<span class="dash-chip">${PLATFORM_LABELS[pl] || pl}</span>`).join('')}</div>
+    </div>`).join('') || `<div class="dash-empty">No projects yet.</div>`;
+
+  const upcomingRows = (data.upcoming || []).map(p => {
+    const d = new Date(p.scheduled_for);
+    const dateStr = isNaN(d) ? '—' : d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    const text = (p.post_text || '').replace(/\s+/g, ' ').trim();
+    return `
+      <div class="dash-upcoming-row">
+        <span class="dash-chip dash-chip-platform">${PLATFORM_LABELS[p.platform] || p.platform}</span>
+        <span class="dash-upcoming-project">${escHtml(p.project_name || '')}</span>
+        <span class="dash-upcoming-text">${escHtml(text.length > 90 ? text.slice(0, 90) + '…' : text) || '—'}</span>
+        <span class="dash-upcoming-date">${dateStr}</span>
+      </div>`;
+  }).join('') || `<div class="dash-empty">No upcoming scheduled posts.</div>`;
+
+  pane.innerHTML = `
+    <div class="dashboard-wrap">
+      <div class="dash-stats-grid">
+        ${dashboardStatCard('Projects', t.projects || 0, '', 'var(--accent)')}
+        ${dashboardStatCard('Seeds', t.seeds || 0, 'content packages', '#8b5cf6')}
+        ${dashboardStatCard('Total Posts', t.posts || 0, 'across all projects', '#6366f1')}
+        ${dashboardStatCard('Draft', t.draft || 0, 'not yet scheduled', '#94a3b8')}
+        ${dashboardStatCard('Scheduled', t.scheduled || 0, 'awaiting publish', '#f59e0b')}
+        ${dashboardStatCard('Posted', t.posted || 0, 'published', '#22c55e')}
+        ${dashboardStatCard('Channels', (t.channels_enabled || 0) + ' on', '', '#06b6d4')}
+      </div>
+
+      <div class="dash-section">
+        <div class="dash-section-title">Projects</div>
+        <div class="dash-project-list">${projectRows}</div>
+      </div>
+
+      <div class="dash-section">
+        <div class="dash-section-title">Upcoming Posts</div>
+        <div class="dash-upcoming-list">${upcomingRows}</div>
+      </div>
+    </div>`;
+}
+
+/* ---------------------------------------------------------
+   Global App Settings (under Dashboard → Settings)
+   --------------------------------------------------------- */
+async function loadAppSettings() {
+  const pane = document.getElementById('tab-appsettings');
+  if (!pane) return;
+  pane.innerHTML = `<div class="settings-wrap"><div class="loading">Loading settings…</div></div>`;
+  try {
+    const settings = await apiFetch('/settings');
+    _settings = settings || {};
+    renderAppSettings(pane);
+  } catch(err) {
+    pane.innerHTML = `<div class="error-msg">Failed to load settings: ${escHtml(err.message)}</div>`;
+  }
+}
+
+async function renderAppSettings(pane) {
+  const get = key => escHtml(_settings[key] || '');
+  pane.innerHTML = `
+    <div class="settings-wrap">
+      <div class="settings-row">
+        <div class="acct-section settings-col">
+          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> App Settings</div>
+          <div class="acct-row">
+            <div class="acct-row-label">
+              <span>Server Port</span>
+              <span class="acct-row-hint">Restart server to change</span>
+            </div>
+            <div class="acct-control">
+              <input type="text" class="form-input" id="setting-port" value="${get('app.port') || '8788'}" readonly style="max-width:90px;text-align:center">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="acct-section settings-col">
+          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Hermes Connection</div>
+          <div class="acct-row">
+            <div class="acct-row-label">
+              <span>Config path</span>
+              <span class="acct-row-hint">Where Hermes finds its profile</span>
+            </div>
+            <div class="acct-control">
+              <input type="text" class="form-input" id="hermes-config-path" value="${get('hermes.config_path')}" readonly style="flex:1;font-family:var(--font-mono,monospace);font-size:12px">
+              <button class="btn-secondary btn-sm" onclick="testHermesConnection()">Test</button>
+            </div>
+          </div>
+          <div class="acct-row acct-row-stacked" id="hermes-config-preview" style="display:none">
+            <div class="acct-row-label"><span>Config preview</span></div>
+            <pre id="hermes-config-json" class="strategy-pre" style="max-height:240px;overflow:auto"></pre>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
 let _settings = {};
 
 function loadSettings() {
@@ -2063,8 +2298,7 @@ async function renderSettings() {
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
       <div class="jfb" id="settingsViewBar">
         <div class="jfb-slider" id="settingsViewPill"></div>
-        <button class="jfb-tab active" data-panel="app" onclick="switchSettingsPanel('app')">App Settings</button>
-        <button class="jfb-tab" data-panel="brand" onclick="switchSettingsPanel('brand')">Brand Settings</button>
+        <button class="jfb-tab active" data-panel="brand" onclick="switchSettingsPanel('brand')">Brand Settings</button>
         <button class="jfb-tab" data-panel="platform" onclick="switchSettingsPanel('platform')">Platform Settings</button>
       </div>
       <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0">
@@ -2073,26 +2307,8 @@ async function renderSettings() {
       </button>
     </div>
 
-    <!-- Panel: App Settings -->
-    <div class="settings-panel" id="settings-panel-app">
-    <div class="settings-row">
-    <div class="acct-section settings-col">
-      <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> App Settings</div>
-      <div class="acct-row">
-        <div class="acct-row-label">
-          <span>Server Port</span>
-          <span class="acct-row-hint">Restart server to change</span>
-        </div>
-        <div class="acct-control">
-          <input type="text" class="form-input" id="setting-port" value="${get('app.port') || '8788'}" readonly style="max-width:90px;text-align:center">
-        </div>
-      </div>
-    </div>
-    </div>
-    </div><!-- /settings-panel-app -->
-
     <!-- Panel: Brand Settings -->
-    <div class="settings-panel" id="settings-panel-brand" style="display:none">
+    <div class="settings-panel" id="settings-panel-brand">
     <div class="settings-row">
       <div class="acct-section settings-col">
         <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" opacity="0.8"/><circle cx="17.5" cy="10.5" r="2.5" fill="currentColor" opacity="0.6"/><path d="M3 17l4-4 4 4 3-3 4 4 3-3"/></svg> Brand & Image Settings</div>
@@ -2225,7 +2441,7 @@ function markPlatformOverride(platform, field) {
 window.markPlatformOverride = markPlatformOverride;
 
 function switchSettingsPanel(name) {
-  ['app','brand','platform'].forEach(p => {
+  ['brand','platform'].forEach(p => {
     const panel = document.getElementById(`settings-panel-${p}`);
     if (panel) panel.style.display = p === name ? '' : 'none';
     const btn = document.querySelector(`#settingsViewBar .jfb-tab[data-panel="${p}"]`);
