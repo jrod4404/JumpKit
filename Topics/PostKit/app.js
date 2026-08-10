@@ -241,8 +241,12 @@ function renderDashboardNav() {
 function renderProjectList() {
   const list = document.getElementById('project-list');
   if (!list) return;
+  const onGlobalTab = GLOBAL_TABS.has(_activeTab);
   list.innerHTML = _projects.map(p => {
-    const isActive = p.id === getActiveProjectId();
+    // On global tabs (Dashboard/Settings) no project parent or subpage may be
+    // highlighted — only the single active global page. On project tabs, exactly
+    // the active project's parent + its active subpage highlight.
+    const isActive = !onGlobalTab && p.id === getActiveProjectId();
     const isExpanded = _expandedProjects.has(p.id);
     const subItems = PROJECT_MENU_ITEMS.map(m => {
       const activeClass = isActive && _activeTab === m.tab ? ' active' : '';
