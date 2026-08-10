@@ -2073,6 +2073,20 @@ async function renderAppSettings(pane) {
       </div>
       <div class="settings-row">
         <div class="acct-section settings-col">
+          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
+          <div class="acct-row">
+            <div class="acct-row-label">
+              <span>Global connections</span>
+              <span class="acct-row-hint">Connect each platform once — all projects share it. Then pick the account/board per project in Channels.</span>
+            </div>
+            <div class="acct-control" style="flex-direction:column;align-items:stretch;gap:8px">
+              <div id="global-connections-list" style="display:flex;flex-direction:column;gap:6px">Loading…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-row">
+        <div class="acct-section settings-col">
           <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Hermes Connection</div>
           <div class="acct-row">
             <div class="acct-row-label">
@@ -2091,7 +2105,45 @@ async function renderAppSettings(pane) {
         </div>
       </div>
     </div>`;
+  loadGlobalConnections();
 }
+
+// Render the global platform connections list (Option B) in App Settings.
+const GLOBAL_CONN_PLATFORMS = [
+  { key: 'x', label: 'X (Twitter)', color: '#1d9bf0', connect: 'connectX', disconnect: 'disconnectX' },
+  { key: 'linkedin', label: 'LinkedIn', color: '#0077b5', connect: 'connectLinkedIn', disconnect: 'disconnectLinkedIn' },
+  { key: 'youtube', label: 'YouTube', color: '#c0392b', connect: null, disconnect: null },
+  { key: 'pinterest', label: 'Pinterest', color: '#e60023', connect: 'connectPinterest', disconnect: 'disconnectPinterest' },
+];
+
+async function loadGlobalConnections() {
+  const list = document.getElementById('global-connections-list');
+  if (!list) return;
+  list.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Checking…</span>';
+  const rows = [];
+  for (const p of GLOBAL_CONN_PLATFORMS) {
+    let status = null;
+    try { status = await apiFetch(`/${p.key}/status?project_id=${getActiveProjectId()}`); } catch(_) {}
+    rows.push({ p, status });
+  }
+  list.innerHTML = rows.map(({ p, status }) => {
+    const connected = !!(status && status.connected);
+    const badge = connected
+      ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected</span>`
+      : `<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>`;
+    const account = (status && status.account_name) ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</span>` : '';
+    const btn = connected
+      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,800)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
+      : (p.connect ? `<button class="btn-primary btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 8px;border:1px solid var(--border);border-radius:6px">
+      <span style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></span>
+      <span style="font-size:13px;font-weight:600;min-width:110px">${p.label}</span>
+      ${badge} ${account}
+      <span style="margin-left:auto">${btn}</span>
+    </div>`;
+  }).join('');
+}
+window.loadGlobalConnections = loadGlobalConnections;
 
 let _settings = {};
 
