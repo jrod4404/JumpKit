@@ -2106,6 +2106,14 @@ async function fetchSettings() {
   try {
     const settings = await apiFetch('/settings');
     _settings = settings || {};
+    // Load the active project's LinkedIn channel config so the company-page
+    // selector can preselect the project's chosen org (Option B).
+    window._liOrgUrn = '';
+    try {
+      const chans = await apiFetch(`/projects/${getActiveProjectId()}/channels`);
+      const li = (chans || []).find(c => c.platform === 'linkedin');
+      if (li && li.config && li.config.org_urn) window._liOrgUrn = li.config.org_urn;
+    } catch(_) {}
     renderSettings();
   } catch(err) {
     const el = document.getElementById('settings-content');
@@ -2257,6 +2265,16 @@ async function renderSettings() {
         <div class="acct-control">
           <button class="btn-primary" id="btn-li-connect" onclick="connectLinkedIn()" style="display:none">Connect LinkedIn</button>
           <button class="btn-danger-solid" id="btn-li-disconnect" onclick="disconnectLinkedIn()" style="display:none">Disconnect</button>
+        </div>
+      </div>
+      <div class="acct-row acct-row-stacked" id="li-org-wrap" style="display:none">
+        <div class="acct-row-label">
+          <span>Company Page</span>
+          <span class="acct-row-hint">This project publishes to this LinkedIn page</span>
+        </div>
+        <div class="acct-control" style="gap:6px">
+          <select class="form-input" id="li-org-select" style="flex:1;min-width:180px"><option value="">Select company page…</option></select>
+          <button class="btn-secondary btn-sm" onclick="setLinkedInOrg()">Set Page</button>
         </div>
       </div>
       ` : ''}
@@ -2679,8 +2697,9 @@ async function disconnectLinkedIn() {
 window.disconnectLinkedIn = disconnectLinkedIn;
 
 async function checkLinkedInStatus() {
-  let connected = false;
-  try { connected = (await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`)).connected; } catch(_) {}
+  let status = null;
+  try { status = await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`); } catch(_) {}
+  const connected = !!(status && status.connected);
   const hint  = document.getElementById('li-status-hint');
   const btnC  = document.getElementById('btn-li-connect');
   const btnD  = document.getElementById('btn-li-disconnect');
@@ -2689,13 +2708,50 @@ async function checkLinkedInStatus() {
     hint.innerHTML = '<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected</span>';
     if (btnC) btnC.style.display = 'none';
     if (btnD) btnD.style.display = '';
+    loadLinkedInOrgs(status.orgs || []);
   } else {
     hint.innerHTML = '<span style="opacity:.6">Not connected</span>';
     if (btnC) btnC.style.display = '';
     if (btnD) btnD.style.display = 'none';
+    const orgWrap = document.getElementById('li-org-wrap');
+    if (orgWrap) orgWrap.style.display = 'none';
   }
 }
 window.checkLinkedInStatus = checkLinkedInStatus;
+
+// Populate the per-project LinkedIn company page selector.
+function loadLinkedInOrgs(orgs) {
+  const wrap = document.getElementById('li-org-wrap');
+  const sel  = document.getElementById('li-org-select');
+  if (!wrap || !sel) return;
+  if (!orgs.length) {
+    wrap.style.display = 'none';
+    return;
+  }
+  wrap.style.display = '';
+  const current = (window._liOrgUrn || '');
+  sel.innerHTML = '<option value="">Select company page…</option>' + orgs.map(o =>
+    `<option value="${escHtml(o.id)}" ${o.id === current ? 'selected' : ''}>${escHtml(o.name)}</option>`
+  ).join('');
+}
+
+async function setLinkedInOrg() {
+  const sel = document.getElementById('li-org-select');
+  if (!sel) return;
+  const orgUrn = sel.value;
+  if (!orgUrn) return showToast('Pick a company page first', 'error');
+  try {
+    await apiFetch(`/projects/${getActiveProjectId()}/channels/linkedin`, {
+      method: 'PUT',
+      body: JSON.stringify({ config: { org_urn: orgUrn } }),
+    });
+    window._liOrgUrn = orgUrn;
+    showToast('LinkedIn company page set for this project');
+  } catch(err) {
+    showToast('Failed to set company page: ' + err.message, 'error');
+  }
+}
+window.setLinkedInOrg = setLinkedInOrg;
 
 // ── Pinterest OAuth ──────────────────────────────────────────────────────
 async function checkPinterestStatus() {

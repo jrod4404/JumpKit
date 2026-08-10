@@ -1,6 +1,7 @@
 // X (Twitter) OAuth 2.0 + Publishing for PostKit
 const https = require('https');
 const crypto = require('crypto');
+const connections = require('./connections');
 
 // ── OAuth 2.0 PKCE helpers ─────────────────────────────────────────────────
 
@@ -38,9 +39,9 @@ function consumeOAuthSession(state) {
 // ── Settings helpers (passed in from server) ─────────────────────────────────
 
 // App-level credentials are stored in the global settings table (client_id/secret
-// are app properties). Project-scoped tokens live in the channel config (passed
-// in as `credentials` / `projectId`). `getSetting`/`setSetting` remain for
-// app-level settings only.
+// are app properties). Account tokens live in the GLOBAL connections table (one
+// per platform, shared by all projects). Per-project channel configs hold only
+// references (which account/board a project publishes to).
 
 function getSetting(db, key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
@@ -51,29 +52,18 @@ function setSetting(db, key, value) {
   db.prepare('INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)').run(key, value);
 }
 
-// Project-scoped channel config helpers. `projectId` may be null/undefined in
-// which case we fall back to the legacy global settings keys (backward compat).
+// Project-scoped channel config helpers (references only — no tokens).
+// Kept for backward compat with older call sites; token lookups go through
+// connections.getAccessToken instead.
 function getChannelConfig(db, projectId, platform) {
-  if (!projectId) {
-    // Legacy fallback — read from settings table
-    const cfg = {};
-    const access = getSetting(db, `${platform}.access_token`);
-    const refresh = getSetting(db, `${platform}.refresh_token`);
-    if (access) cfg.access_token = access;
-    if (refresh) cfg.refresh_token = refresh;
-    return cfg;
-  }
+  if (!projectId) return {};
   const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
   if (!row) return {};
   try { return JSON.parse(row.config || '{}'); } catch { return {}; }
 }
 
 function setChannelConfig(db, projectId, platform, configObj) {
-  if (!projectId) {
-    if (configObj.access_token !== undefined) setSetting(db, `${platform}.access_token`, configObj.access_token);
-    if (configObj.refresh_token !== undefined) setSetting(db, `${platform}.refresh_token`, configObj.refresh_token);
-    return;
-  }
+  if (!projectId) return;
   const existing = getChannelConfig(db, projectId, platform);
   const merged = { ...existing, ...configObj };
   db.prepare(`UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?`)
@@ -185,9 +175,9 @@ async function exchangeCodeForToken(db, code, redirectUri, verifier, projectId) 
   return result.json; // { access_token, refresh_token, expires_in, ... }
 }
 
-async function refreshAccessToken(db, projectId) {
-  const creds = getChannelConfig(db, projectId, 'x');
-  const refreshToken = creds.refresh_token;
+async function refreshAccessToken(db) {
+  const conn = connections.getConnection(db, 'x');
+  const refreshToken = conn ? conn.refresh_token : null;
   const clientId = getSetting(db, 'x.client_id');
   if (!refreshToken || !clientId) return null;
 
@@ -204,7 +194,7 @@ async function refreshAccessToken(db, projectId) {
   }
 
   const tokens = result.json;
-  setChannelConfig(db, projectId, 'x', {
+  connections.saveConnection(db, 'x', {
     access_token: tokens.access_token,
     ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
   });
@@ -213,10 +203,9 @@ async function refreshAccessToken(db, projectId) {
 
 // ── Publishing ──────────────────────────────────────────────────────────────
 
-async function publishTweet(db, text, mediaPaths, projectId) {
-  const creds = getChannelConfig(db, projectId, 'x');
-  let accessToken = creds.access_token;
-  if (!accessToken) throw new Error('X not connected for this project. Connect your account in Channels.');
+async function publishTweet(db, text, mediaPaths) {
+  let accessToken = connections.getAccessToken(db, 'x');
+  if (!accessToken) throw new Error('X not connected. Connect your X account in App Settings.');
 
   // Upload media if any
   const mediaIds = [];
@@ -237,7 +226,7 @@ async function publishTweet(db, text, mediaPaths, projectId) {
 
   if (result.status === 401) {
     // Token expired — try refresh once
-    const newToken = await refreshAccessToken(db, projectId);
+    const newToken = await refreshAccessToken(db);
     if (newToken) {
       const retry = await httpsPostJson('https://api.twitter.com/2/tweets', tweetBody, {
         'Authorization': `Bearer ${newToken}`,
@@ -379,7 +368,7 @@ function startSchedulerWorker(db) {
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
         // Resolve the post's owning project → its X channel token
         const projectId = post.project_id || 'proj_default';
-        const result = await publishTweet(db, post.post_text, mediaPaths, projectId);
+        const result = await publishTweet(db, post.post_text, mediaPaths);
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', now, now, post.id);
         console.log(`[scheduler] Published: ${result.url}`);

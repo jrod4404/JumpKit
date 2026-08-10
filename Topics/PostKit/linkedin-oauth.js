@@ -1,12 +1,13 @@
 // LinkedIn OAuth 2.0 + Publishing for PostKit
 const https = require('https');
 const crypto = require('crypto');
+const connections = require('./connections');
 
 // ── Settings helpers ──────────────────────────────────────────────────────────
 
-// App-level credentials live in the settings table (client_id/secret). Project-
-// scoped tokens live in the channel config (passed as `projectId`). Legacy
-// fallback keeps the old settings-table keys working for project-less calls.
+// App-level credentials live in the settings table (client_id/secret). Account
+// tokens live in the GLOBAL connections table. Per-project channel configs hold
+// only references (which company page / org a project publishes to).
 
 function getSetting(db, key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
@@ -18,28 +19,14 @@ function setSetting(db, key, value) {
 }
 
 function getChannelConfig(db, projectId, platform) {
-  if (!projectId) {
-    const cfg = {};
-    const access = getSetting(db, `${platform}.access_token`);
-    const refresh = getSetting(db, `${platform}.refresh_token`);
-    const memberUrn = getSetting(db, `${platform}.member_urn`);
-    if (access) cfg.access_token = access;
-    if (refresh) cfg.refresh_token = refresh;
-    if (memberUrn) cfg.member_urn = memberUrn;
-    return cfg;
-  }
+  if (!projectId) return {};
   const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
   if (!row) return {};
   try { return JSON.parse(row.config || '{}'); } catch { return {}; }
 }
 
 function setChannelConfig(db, projectId, platform, configObj) {
-  if (!projectId) {
-    if (configObj.access_token !== undefined) setSetting(db, `${platform}.access_token`, configObj.access_token);
-    if (configObj.refresh_token !== undefined) setSetting(db, `${platform}.refresh_token`, configObj.refresh_token);
-    if (configObj.member_urn !== undefined) setSetting(db, `${platform}.member_urn`, configObj.member_urn);
-    return;
-  }
+  if (!projectId) return;
   const existing = getChannelConfig(db, projectId, platform);
   const merged = { ...existing, ...configObj };
   db.prepare(`UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?`)
@@ -153,7 +140,8 @@ function buildAuthUrl(db, redirectUri, state) {
   const clientId = getSetting(db, 'linkedin.client_id');
   if (!clientId) throw new Error('LinkedIn client_id not configured. Set it in Settings.');
 
-  const scopes = 'openid profile email w_member_social';
+  // w_organization_social lets us post to company pages the user administers.
+  const scopes = 'openid profile email w_member_social w_organization_social';
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId,
@@ -188,9 +176,9 @@ async function exchangeCodeForToken(db, code, redirectUri) {
   return result.json; // { access_token, expires_in, refresh_token?, ... }
 }
 
-async function refreshAccessToken(db, projectId) {
-  const creds = getChannelConfig(db, projectId, 'linkedin');
-  const refreshToken = creds.refresh_token;
+async function refreshAccessToken(db) {
+  const conn = connections.getConnection(db, 'linkedin');
+  const refreshToken = conn ? conn.refresh_token : null;
   const clientId = getSetting(db, 'linkedin.client_id');
   const clientSecret = getSetting(db, 'linkedin.client_secret');
   if (!refreshToken || !clientId || !clientSecret) return null;
@@ -209,46 +197,75 @@ async function refreshAccessToken(db, projectId) {
   }
 
   const tokens = result.json;
-  setChannelConfig(db, projectId, 'linkedin', {
+  connections.saveConnection(db, 'linkedin', {
     access_token: tokens.access_token,
     ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
   });
   return tokens.access_token;
 }
 
-// ── Get LinkedIn member URN (required for posting) ────────────────────────────
+// ── Get LinkedIn organizations (company pages) the user administers ───────────
+// Returns [{ id: 'urn:li:organization:123', name: 'Acme' }, ...].
+async function getOrganizations(db) {
+  const accessToken = connections.getAccessToken(db, 'linkedin');
+  if (!accessToken) throw new Error('LinkedIn not connected. Connect your account in App Settings.');
 
-async function getMemberUrn(db, accessToken, projectId) {
-  // Check cache first (stored in channel config)
-  const creds = getChannelConfig(db, projectId, 'linkedin');
-  if (creds.member_urn) return creds.member_urn;
+  const result = await httpsGet(
+    'https://api.linkedin.com/v2/organizationalEntityAcls?q=roleAssignee&role=ADMINISTRATOR&projection=(elements*(organizationalTarget~,role))',
+    { 'Authorization': `Bearer ${accessToken}` }
+  );
 
-  const result = await httpsGet('https://api.linkedin.com/v2/userinfo', {
-    'Authorization': `Bearer ${accessToken}`,
-  });
-
-  if (result.status !== 200) {
-    throw new Error(`Failed to get LinkedIn profile: ${result.status}`);
+  if (result.status === 401) {
+    const newToken = await refreshAccessToken(db);
+    if (newToken) {
+      const retry = await httpsGet(
+        'https://api.linkedin.com/v2/organizationalEntityAcls?q=roleAssignee&role=ADMINISTRATOR&projection=(elements*(organizationalTarget~,role))',
+        { 'Authorization': `Bearer ${newToken}` }
+      );
+      if (retry.status === 200) return extractOrgs(retry.json);
+    }
+    throw new Error('LinkedIn token expired or invalid. Reconnect your account.');
   }
 
-  // OpenID userinfo returns 'sub' as the member ID
-  const sub = result.json?.sub;
-  if (!sub) throw new Error('LinkedIn profile missing sub/id');
-  const urn = `urn:li:person:${sub}`;
-  setChannelConfig(db, projectId, 'linkedin', { member_urn: urn });
-  return urn;
+  if (result.status !== 200) {
+    throw new Error(`LinkedIn organizations fetch failed: ${result.status} ${JSON.stringify(result.json || result.raw)}`);
+  }
+  return extractOrgs(result.json);
+}
+
+function extractOrgs(json) {
+  const orgs = [];
+  const elements = json?.elements || [];
+  for (const el of elements) {
+    const target = el?.['organizationalTarget~'];
+    const id = el?.organizationalTarget;
+    if (id) orgs.push({ id, name: target?.localizedName || target?.name || id.replace(/^urn:li:organization:/, '') || id });
+  }
+  return orgs;
 }
 
 // ── Publishing ────────────────────────────────────────────────────────────────
+// Posts to a COMPANY PAGE (organization URN). The org is resolved from the
+// project's channel config (org_urn) — falling back to the first org the
+// connection can access. Member-profile posting is intentionally not used
+// (Jeff: company pages only for now).
 
 async function publishPost(db, text, mediaPath, projectId) {
   const fs = require('fs');
   const path = require('path');
-  const creds = getChannelConfig(db, projectId, 'linkedin');
-  let accessToken = creds.access_token;
-  if (!accessToken) throw new Error('LinkedIn not connected for this project. Connect your account in Channels.');
+  let accessToken = connections.getAccessToken(db, 'linkedin');
+  if (!accessToken) throw new Error('LinkedIn not connected. Connect your account in App Settings.');
 
-  const authorUrn = await getMemberUrn(db, accessToken, projectId);
+  // Resolve the company page (org URN) for this project
+  const cfg = getChannelConfig(db, projectId, 'linkedin');
+  let orgUrn = cfg.org_urn || null;
+  if (!orgUrn) {
+    const conn = connections.getConnection(db, 'linkedin');
+    const orgs = (conn && conn.meta && conn.meta.orgs) || [];
+    if (orgs.length) orgUrn = orgs[0].id;
+  }
+  if (!orgUrn) throw new Error('No LinkedIn company page selected for this project. Pick one in Channels.');
+  const authorUrn = orgUrn;
 
   let shareMediaCategory = 'NONE';
   let mediaUrn = null;
@@ -325,10 +342,8 @@ async function publishPost(db, text, mediaPath, projectId) {
 
   if (result.status === 401) {
     // Token expired — try refresh once
-    const newToken = await refreshAccessToken(db, projectId);
+    const newToken = await refreshAccessToken(db);
     if (newToken) {
-      const authorUrn2 = await getMemberUrn(db, newToken, projectId);
-      postBody.author = authorUrn2;
       const retry = await httpsPostJson('https://api.linkedin.com/v2/ugcPosts', postBody, {
         'Authorization': `Bearer ${newToken}`,
         'X-Restli-Protocol-Version': '2.0.0',
@@ -387,6 +402,7 @@ module.exports = {
   buildAuthUrl,
   exchangeCodeForToken,
   refreshAccessToken,
+  getOrganizations,
   publishPost,
   startSchedulerWorker,
   getSetting,

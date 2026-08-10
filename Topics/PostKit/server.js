@@ -9,6 +9,7 @@ const Database = require('better-sqlite3');
 const xOAuth = require('./x-oauth');
 const linkedinOAuth = require('./linkedin-oauth');
 const pinterestOAuth = require('./pinterest-oauth');
+const connections = require('./connections');
 const { renderImage, DEFAULT_BRAND } = require('./lib/image-renderer');
 
 const PORT = 8788;
@@ -200,6 +201,15 @@ ensureDefaultProject();
     }
   }
 })();
+
+// ── Global platform connections (Option B) ─────────────────────────────────
+// One row per platform holds the OAuth credential, shared by all projects.
+// Per-project channels reference these (which account/board to publish to).
+connections.ensureConnectionsTable(db);
+connections.migrateLegacyConnections(db, (key) => {
+  const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
+  return row ? row.value : null;
+});
 
 // ── Project / Channel helpers ─────────────────────────────────────────────────
 
@@ -923,16 +933,19 @@ function getDashboard(req, res) {
     statusMap[r.project_id][r.status] = (statusMap[r.project_id][r.status] || 0) + r.c;
   });
   const chanMap = {};
+  // Global connections (Option B) — a platform is "connected" once, globally.
+  const connectedPlatforms = new Set(
+    db.prepare('SELECT platform FROM connections WHERE access_token IS NOT NULL AND access_token != \'\'').all()
+      .map(r => r.platform)
+  );
   chanByProj.forEach(r => {
     chanMap[r.project_id] = chanMap[r.project_id] || { enabled: 0, total: 0, platforms: [], connected: [] };
     chanMap[r.project_id].total++;
     if (r.enabled) {
       chanMap[r.project_id].enabled++;
       chanMap[r.project_id].platforms.push(r.platform);
-      // Connected = channel enabled AND has an access token in its config
-      let cfg = {};
-      try { cfg = JSON.parse(r.config || '{}'); } catch(_) {}
-      if (cfg.access_token) chanMap[r.project_id].connected.push(r.platform);
+      // Connected = channel enabled AND a global connection exists for the platform
+      if (connectedPlatforms.has(r.platform)) chanMap[r.project_id].connected.push(r.platform);
     }
   });
 
@@ -1019,16 +1032,14 @@ function getProjectChannels(req, res, id) {
   const channels = db.prepare('SELECT * FROM channels WHERE project_id = ? ORDER BY platform ASC').all(id);
   const result = channels.map(ch => {
     const config = getChannelConfig(id, ch.platform);
-    let connected = false;
-    if (ch.platform === 'x') connected = !!(config.access_token);
-    else if (ch.platform === 'linkedin') connected = !!(config.access_token);
-    else if (ch.platform === 'youtube') connected = !!(config.access_token);
-    else if (ch.platform === 'pinterest') connected = !!(config.access_token);
-    // Connected also requires the channel enabled
+    // Connected = a GLOBAL connection exists for the platform (Option B).
+    const conn = connections.getConnection(db, ch.platform);
+    const connected = !!(conn && conn.access_token);
     return {
       ...ch,
       config,
       connected: connected && !!ch.enabled,
+      account_name: conn ? conn.account_name : null,
     };
   });
   send(res, 200, result);
@@ -1112,12 +1123,13 @@ const server = http.createServer(async (req, res) => {
       const redirectUri = `http://localhost:${PORT}/oauth/x/callback`;
       const tokens = await xOAuth.exchangeCodeForToken(db, code, redirectUri, session.verifier);
 
-      const projectId = session.projectId || 'proj_default';
-      xOAuth.setChannelConfig(db, projectId, 'x', {
+      // Store globally (Option B) — one X connection shared by all projects.
+      connections.saveConnection(db, 'x', {
         access_token: tokens.access_token || '',
         refresh_token: tokens.refresh_token || '',
+        account_name: 'X account',
       });
-      // Also keep legacy global keys in sync for backward compat
+      // Keep legacy global key in sync for backward compat (read-only now)
       xOAuth.setSetting(db, 'x.connected', 'true');
 
       res.writeHead(200, { 'Content-Type': 'text/html' });
@@ -1151,13 +1163,24 @@ const server = http.createServer(async (req, res) => {
     try {
       const redirectUri = 'http://localhost:' + PORT + '/oauth/linkedin/callback';
       const tokens = await linkedinOAuth.exchangeCodeForToken(db, code, redirectUri);
-      const projectId = stateValid === true ? 'proj_default' : stateValid || 'proj_default';
-      linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', {
+
+      // Store globally (Option B) — one LinkedIn connection shared by all projects.
+      connections.saveConnection(db, 'linkedin', {
         access_token: tokens.access_token || '',
         ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
-        member_urn: '',
+        account_name: 'LinkedIn account',
       });
       linkedinOAuth.setSetting(db, 'linkedin.connected', 'true');
+
+      // Fetch the company pages (orgs) this user administers — best-effort.
+      try {
+        const orgs = await linkedinOAuth.getOrganizations(db);
+        const conn = connections.getConnection(db, 'linkedin');
+        connections.saveConnection(db, 'linkedin', { meta: { ...(conn ? conn.meta : {}), orgs } });
+      } catch (orgErr) {
+        console.error('[linkedin oauth] org fetch warning:', orgErr.message);
+      }
+
       res.writeHead(200, { 'Content-Type': 'text/html' });
       return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2 style="color:#4ade80">Connected to LinkedIn!</h2><p>You can close this window.</p><script>setTimeout(()=>window.close(),1500)</script></body></html>');
     } catch(err) {
@@ -1184,22 +1207,20 @@ const server = http.createServer(async (req, res) => {
     try {
       const redirectUri = 'http://localhost:' + PORT + '/oauth/pinterest/callback';
       const tokens = await pinterestOAuth.exchangeCodeForToken(db, code, redirectUri, session.verifier);
-      const projectId = session.projectId || 'proj_default';
-      pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', {
+
+      // Store globally (Option B) — one Pinterest connection shared by all projects.
+      connections.saveConnection(db, 'pinterest', {
         access_token: tokens.access_token || '',
         ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
-        ...(tokens.expires_in ? { expiry: Date.now() + tokens.expires_in * 1000 } : {}),
-        token_type: tokens.token_type || 'bearer',
+        ...(tokens.expires_in ? { token_expires_at: Date.now() + tokens.expires_in * 1000 } : {}),
+        account_name: 'Pinterest account',
       });
       pinterestOAuth.setSetting(db, 'pinterest.connected', 'true');
-      // Default the board to the user's first board if not yet set, and record username
+      // Fetch user boards into the global connection meta — best-effort.
       try {
-        const boards = await pinterestOAuth.getUserBoards(db, projectId);
-        const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
-        pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', {
-          boards,
-          board: cfg.board || (boards.length ? boards[0].id : null),
-        });
+        const boards = await pinterestOAuth.getUserBoards(db);
+        const conn = connections.getConnection(db, 'pinterest');
+        connections.saveConnection(db, 'pinterest', { meta: { ...(conn ? conn.meta : {}), boards } });
       } catch(_) { /* boards fetch is best-effort */ }
       res.writeHead(200, { 'Content-Type': 'text/html' });
       return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2 style="color:#4ade80">Connected to Pinterest!</h2><p>You can close this window.</p><script>setTimeout(()=>window.close(),1500)</script></body></html>');
@@ -1300,6 +1321,13 @@ const server = http.createServer(async (req, res) => {
       if (method === 'PUT') return updateSettings(req, res);
     }
 
+    // Global platform connections (Option B) — one credential per platform.
+    if (pathname === '/api/connections' && method === 'GET') {
+      const rows = db.prepare('SELECT platform, account_name, account_id, updated_at FROM connections ORDER BY platform').all();
+      send(res, 200, rows.map(r => ({ ...r, connected: true })));
+      return;
+    }
+
     if (pathname === '/api/hermes/config' && method === 'GET') return getHermesConfig(req, res);
     const strategyMatch = pathname.match(/^\/api\/strategy\/(youtube|x|linkedin|pinterest)$/);
     if (strategyMatch && method === 'GET') return getStrategyFile(req, res, strategyMatch[1]);
@@ -1331,7 +1359,7 @@ const server = http.createServer(async (req, res) => {
         const projectId = post.project_id || activeProjectId(null, body);
         let mediaPaths = [];
         try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
-        const result = await xOAuth.publishTweet(db, post.post_text, mediaPaths, projectId);
+        const result = await xOAuth.publishTweet(db, post.post_text, mediaPaths);
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', Date.now(), Date.now(), post.id);
         send(res, 200, result);
@@ -1344,17 +1372,15 @@ const server = http.createServer(async (req, res) => {
     // Check X connection status
     if (pathname === '/api/x/status' && method === 'GET') {
       const projectId = activeProjectId(urlObj, null);
-      const config = xOAuth.getChannelConfig(db, projectId, 'x');
-      send(res, 200, { connected: !!(config.access_token), project_id: projectId });
+      const conn = connections.getConnection(db, 'x');
+      send(res, 200, { connected: !!(conn && conn.access_token), account_name: conn ? conn.account_name : null, project_id: projectId });
       return;
     }
 
     // Disconnect
     if (pathname === '/api/x/disconnect' && method === 'POST') {
-      const body = await parseBody(req);
-      const projectId = activeProjectId(null, body);
-      xOAuth.setChannelConfig(db, projectId, 'x', { access_token: '', refresh_token: '' });
-      send(res, 200, { ok: true, project_id: projectId });
+      connections.clearConnection(db, 'x');
+      send(res, 200, { ok: true });
       return;
     }
 
@@ -1434,17 +1460,30 @@ const server = http.createServer(async (req, res) => {
     // LinkedIn: status
     if (pathname === '/api/linkedin/status' && method === 'GET') {
       const projectId = activeProjectId(urlObj, null);
-      const config = linkedinOAuth.getChannelConfig(db, projectId, 'linkedin');
-      send(res, 200, { connected: !!(config.access_token), project_id: projectId });
+      const conn = connections.getConnection(db, 'linkedin');
+      const cfg = conn ? {} : {};
+      send(res, 200, {
+        connected: !!(conn && conn.access_token),
+        account_name: conn ? conn.account_name : null,
+        orgs: (conn && conn.meta && conn.meta.orgs) || [],
+        project_id: projectId,
+      });
       return;
     }
 
     // LinkedIn: disconnect
     if (pathname === '/api/linkedin/disconnect' && method === 'POST') {
-      const body = await parseBody(req);
-      const projectId = activeProjectId(null, body);
-      linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', { access_token: '', refresh_token: '', member_urn: '' });
-      send(res, 200, { ok: true, project_id: projectId });
+      connections.clearConnection(db, 'linkedin');
+      send(res, 200, { ok: true });
+      return;
+    }
+
+    // YouTube status (connection row may exist from legacy migration; OAuth
+    // flow for YouTube is not yet implemented)
+    if (pathname === '/api/youtube/status' && method === 'GET') {
+      const projectId = activeProjectId(urlObj, null);
+      const conn = connections.getConnection(db, 'youtube');
+      send(res, 200, { connected: !!(conn && conn.access_token), account_name: conn ? conn.account_name : null, project_id: projectId });
       return;
     }
 
@@ -1504,17 +1543,22 @@ const server = http.createServer(async (req, res) => {
     // Check Pinterest connection status
     if (pathname === '/api/pinterest/status' && method === 'GET') {
       const projectId = activeProjectId(urlObj, null);
-      const config = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
-      send(res, 200, { connected: !!(config.access_token), project_id: projectId, board: config.board || null });
+      const conn = connections.getConnection(db, 'pinterest');
+      const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
+      send(res, 200, {
+        connected: !!(conn && conn.access_token),
+        account_name: conn ? conn.account_name : null,
+        boards: (conn && conn.meta && conn.meta.boards) || [],
+        board: cfg.board || null,
+        project_id: projectId,
+      });
       return;
     }
 
     // Disconnect
     if (pathname === '/api/pinterest/disconnect' && method === 'POST') {
-      const body = await parseBody(req);
-      const projectId = activeProjectId(null, body);
-      pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', { access_token: '', refresh_token: '', board: null });
-      send(res, 200, { ok: true, project_id: projectId });
+      connections.clearConnection(db, 'pinterest');
+      send(res, 200, { ok: true });
       return;
     }
 
@@ -1522,7 +1566,10 @@ const server = http.createServer(async (req, res) => {
     if (pathname === '/api/pinterest/boards' && method === 'GET') {
       try {
         const projectId = activeProjectId(urlObj, null);
-        const boards = await pinterestOAuth.getUserBoards(db, projectId);
+        const boards = await pinterestOAuth.getUserBoards(db);
+        // Cache into the global connection meta
+        const conn = connections.getConnection(db, 'pinterest');
+        connections.saveConnection(db, 'pinterest', { meta: { ...(conn ? conn.meta : {}), boards } });
         const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
         send(res, 200, { boards, board: cfg.board || null, project_id: projectId });
       } catch(err) {

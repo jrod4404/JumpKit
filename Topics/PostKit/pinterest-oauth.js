@@ -1,11 +1,12 @@
 // Pinterest OAuth 2.0 (PKCE) + Publishing for PostKit
 const https = require('https');
 const crypto = require('crypto');
+const connections = require('./connections');
 
 // ── Settings helpers ──────────────────────────────────────────────────────────
-// App-level credentials live in the settings table (client_id/secret). Project-
-// scoped tokens live in the channel config (passed as `projectId`). Legacy
-// fallback keeps the old settings-table keys working for project-less calls.
+// App-level credentials live in the settings table (client_id/secret). Account
+// tokens live in the GLOBAL connections table. Per-project channel configs hold
+// only references (which board a project publishes to).
 
 function getSetting(db, key) {
   const row = db.prepare('SELECT value FROM settings WHERE key = ?').get(key);
@@ -17,25 +18,14 @@ function setSetting(db, key, value) {
 }
 
 function getChannelConfig(db, projectId, platform) {
-  if (!projectId) {
-    const cfg = {};
-    const access = getSetting(db, `${platform}.access_token`);
-    const refresh = getSetting(db, `${platform}.refresh_token`);
-    if (access) cfg.access_token = access;
-    if (refresh) cfg.refresh_token = refresh;
-    return cfg;
-  }
+  if (!projectId) return {};
   const row = db.prepare('SELECT config FROM channels WHERE project_id = ? AND platform = ?').get(projectId, platform);
   if (!row) return {};
   try { return JSON.parse(row.config || '{}'); } catch { return {}; }
 }
 
 function setChannelConfig(db, projectId, platform, configObj) {
-  if (!projectId) {
-    if (configObj.access_token !== undefined) setSetting(db, `${platform}.access_token`, configObj.access_token);
-    if (configObj.refresh_token !== undefined) setSetting(db, `${platform}.refresh_token`, configObj.refresh_token);
-    return;
-  }
+  if (!projectId) return;
   const existing = getChannelConfig(db, projectId, platform);
   const merged = { ...existing, ...configObj };
   db.prepare(`UPDATE channels SET config = ?, updated_at = ? WHERE project_id = ? AND platform = ?`)
@@ -208,9 +198,9 @@ async function exchangeCodeForToken(db, code, redirectUri, verifier, projectId) 
   return result.json; // { access_token, refresh_token?, expires_in, token_type, ... }
 }
 
-async function refreshAccessToken(db, projectId) {
-  const creds = getChannelConfig(db, projectId, 'pinterest');
-  const refreshToken = creds.refresh_token;
+async function refreshAccessToken(db) {
+  const conn = connections.getConnection(db, 'pinterest');
+  const refreshToken = conn ? conn.refresh_token : null;
   const clientId = getSetting(db, 'pinterest.client_id');
   const clientSecret = getSetting(db, 'pinterest.client_secret');
   if (!refreshToken || !clientId) return null;
@@ -235,27 +225,26 @@ async function refreshAccessToken(db, projectId) {
   }
 
   const tokens = result.json;
-  setChannelConfig(db, projectId, 'pinterest', {
+  connections.saveConnection(db, 'pinterest', {
     access_token: tokens.access_token,
     ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
-    ...(tokens.expires_in ? { expiry: Date.now() + tokens.expires_in * 1000 } : {}),
+    ...(tokens.expires_in ? { token_expires_at: Date.now() + tokens.expires_in * 1000 } : {}),
   });
   return tokens.access_token;
 }
 
 // ── Get user boards ─────────────────────────────────────────────────────────
 
-async function getUserBoards(db, projectId) {
-  const creds = getChannelConfig(db, projectId, 'pinterest');
-  let accessToken = creds.access_token;
-  if (!accessToken) throw new Error('Pinterest not connected for this project. Connect your account in Channels.');
+async function getUserBoards(db) {
+  let accessToken = connections.getAccessToken(db, 'pinterest');
+  if (!accessToken) throw new Error('Pinterest not connected. Connect your account in App Settings.');
 
   const result = await httpsGet('https://api.pinterest.com/v5/boards', {
     'Authorization': `Bearer ${accessToken}`,
   });
 
   if (result.status === 401) {
-    const newToken = await refreshAccessToken(db, projectId);
+    const newToken = await refreshAccessToken(db);
     if (newToken) {
       const retry = await httpsGet('https://api.pinterest.com/v5/boards', {
         'Authorization': `Bearer ${newToken}`,
@@ -286,10 +275,9 @@ async function getUserBoards(db, projectId) {
  * @param {string} [link]    - optional destination link for the pin
  * @param {string} [title]   - optional pin title
  */
-async function publishPin(db, text, imageUrl, boardId, projectId, link, title) {
-  const creds = getChannelConfig(db, projectId, 'pinterest');
-  let accessToken = creds.access_token;
-  if (!accessToken) throw new Error('Pinterest not connected for this project. Connect your account in Channels.');
+async function publishPin(db, text, imageUrl, boardId, link, title) {
+  let accessToken = connections.getAccessToken(db, 'pinterest');
+  if (!accessToken) throw new Error('Pinterest not connected. Connect your account in App Settings.');
   if (!boardId) throw new Error('No Pinterest board configured. Pick a board in Channels.');
   if (!imageUrl) throw new Error('A Pinterest pin requires an image.');
 
@@ -308,7 +296,7 @@ async function publishPin(db, text, imageUrl, boardId, projectId, link, title) {
 
   if (result.status === 401) {
     // Token expired — try refresh once
-    const newToken = await refreshAccessToken(db, projectId);
+    const newToken = await refreshAccessToken(db);
     if (newToken) {
       const retry = await httpsPostJson('https://api.pinterest.com/v5/pins', pinBody, {
         'Authorization': `Bearer ${newToken}`,
@@ -358,7 +346,7 @@ function startSchedulerWorker(db) {
         }
 
         const imageUrl = `http://localhost:${getPort(db)}/media/${mediaPaths[0]}`;
-        const result = await publishPin(db, post.post_text, imageUrl, boardId, projectId, post.link || '', post.title || '');
+        const result = await publishPin(db, post.post_text, imageUrl, boardId, post.link || '', post.title || '');
         db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
           .run('posted', now, now, post.id);
         console.log(`[scheduler] Pinterest published: ${result.url}`);
