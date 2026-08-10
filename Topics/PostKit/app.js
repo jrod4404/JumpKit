@@ -14,10 +14,18 @@ const API = 'http://localhost:8788/api';
 const PLATFORM_COLORS = {
   x:        'var(--text)',
   linkedin: '#0077b5',
-  youtube:  '#c0392b'
+  youtube:  '#c0392b',
+  pinterest:'#E60023'
 };
 
-const PLATFORM_LABELS = { x: 'X', linkedin: 'LinkedIn', youtube: 'YouTube' };
+const PLATFORM_LABELS = { x: 'X', linkedin: 'LinkedIn', youtube: 'YouTube', pinterest: 'Pinterest' };
+
+const PLATFORM_ICONS_SVG = {
+  x: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
+  linkedin: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
+  youtube: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#fff" stroke="none"/></svg>',
+  pinterest:'<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 0C5.4 0 0 5.4 0 12c0 5.1 3.2 9.4 7.6 11.2-.1-.9-.2-2.4 0-3.4l1.1-4.7s-.3-.6-.3-1.4c0-1.3.8-2.3 1.7-2.3.8 0 1.2.6 1.2 1.3 0 .8-.5 2-.8 3.1-.2 1 .5 1.8 1.5 1.8 1.8 0 3.2-1.9 3.2-4.7 0-2.4-1.7-4.1-4.2-4.1-2.9 0-4.5 2.2-4.5 4.4 0 .9.3 1.8.8 2.3.1.1.1.2.1.3l-.3 1.2c0 .2-.2.2-.4.1-1.2-.6-2-2.4-2-3.9 0-3.2 2.3-6.1 6.7-6.1 3.5 0 6.2 2.5 6.2 5.8 0 3.5-2.2 6.3-5.2 6.3-1 0-2-.5-2.3-1.2l-.6 2.4c-.2.9-.8 2-1.2 2.6.9.3 1.9.4 2.9.4 6.6 0 12-5.4 12-12C24 5.4 18.6 0 12 0z"/></svg>',
+};
 
 // Global state used by inline onclick handlers in index.html
 window._currentSeedId   = null;
@@ -116,12 +124,7 @@ function escHtml(str) {
 function platformChip(platform) {
   const color = PLATFORM_COLORS[platform] || '#888';
   const label = PLATFORM_LABELS[platform] || platform;
-  const icons = {
-    x: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>',
-    linkedin: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>',
-    youtube: '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98" fill="#fff" stroke="none"/></svg>',
-  };
-  const icon = icons[platform] || '';
+  const icon = PLATFORM_ICONS_SVG[platform] || '';
   return `<span class="platform-chip" style="background:${color};color:#fff;padding:3px 5px;border-radius:3px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:inline-flex;align-items:center;justify-content:center;line-height:1">${icon}</span>`;
 }
 
@@ -683,7 +686,7 @@ function renderSeedsGrid(seeds) {
         <div class="tag-chips">
           ${tags.slice(0,3).map(t => `<span class="tag-chip">${escHtml(t)}</span>`).join('')}
           ${seed.platform_counts && Object.keys(seed.platform_counts).length ? `
-            ${ [['x','𝕏'],['linkedin','in'],['youtube','▶']].filter(([p]) => seed.platform_counts[p]).map(([p,icon]) =>
+            ${ [['x','𝕏'],['linkedin','in'],['youtube','▶'],['pinterest','P']].filter(([p]) => seed.platform_counts[p]).map(([p,icon]) =>
               `<span class="tag-chip platform-count-pill platform-pill-${p}" title="${seed.platform_counts[p]} ${p} post${seed.platform_counts[p]!==1?'s':''}">${
                 icon} ${seed.platform_counts[p]}</span>`).join('')}
           ` : ''}
@@ -1156,6 +1159,24 @@ async function refreshLinkedInConnection() {
   catch(_) { _liConnected = false; }
 }
 
+// Check if Pinterest is connected (cached)
+let _pinConnected = false;
+async function refreshPinterestConnection() {
+  try { _pinConnected = (await apiFetch(`/pinterest/status?project_id=${getActiveProjectId()}`)).connected; }
+  catch(_) { _pinConnected = false; }
+}
+
+async function publishPinterestNow(postId) {
+  try {
+    await apiFetch('/pinterest/publish', { method: 'POST', body: JSON.stringify({ post_id: postId }) });
+    showToast('Published to Pinterest ✓');
+    if (window._currentSeedId) openSeedDetail(window._currentSeedId);
+  } catch(err) {
+    showToast('Pinterest publish failed: ' + err.message, 'error');
+  }
+}
+window.publishPinterestNow = publishPinterestNow;
+
 async function publishLinkedInPostNow(postId) {
   try {
     await apiFetch('/linkedin/publish', { method: 'POST', body: JSON.stringify({ post_id: postId }) });
@@ -1198,7 +1219,7 @@ function renderSeedPosts(posts) {
   _cachedPosts = posts;
 
   // Update tab counts
-  const platforms = ['youtube', 'x', 'linkedin'];
+  const platforms = ['youtube', 'x', 'linkedin', 'pinterest'];
   platforms.forEach(p => {
     const countEl = document.getElementById(`tab-count-${p}`);
     const count = posts.filter(post => post.platform === p).length;
@@ -1220,6 +1241,7 @@ function renderPlatformTabContent(posts) {
     youtube: 'No YouTube posts yet. Finalize this seed to let Hermes generate content.',
     x:       'No X posts yet. Finalize this seed to let Hermes generate content.',
     linkedin:'No LinkedIn posts yet. Finalize this seed to let Hermes generate content.',
+    pinterest:'No Pinterest pins yet. Finalize this seed to let Hermes generate content.',
   };
 
   if (!platformPosts.length) {
@@ -1255,6 +1277,7 @@ function renderPlatformTabContent(posts) {
         ${!isScheduled && !isPosted ? `<button class="btn-schedule btn-sm" onclick="approveAndSchedule('${post.id}', ${post.scheduled_for || 'null'})">✓ Schedule</button>` : ''}
         ${isScheduled && _activePlatformTab === 'x' ? `<button class="btn-publish btn-sm" onclick="publishPostNow('${post.id}')">Publish Now</button>` : ''}
         ${isScheduled && _activePlatformTab === 'linkedin' ? `<button class="btn-publish btn-sm" onclick="publishLinkedInPostNow('${post.id}')">Publish Now</button>` : ''}
+        ${isScheduled && _activePlatformTab === 'pinterest' ? `<button class="btn-publish btn-sm" onclick="publishPinterestNow('${post.id}')">Publish Now</button>` : ''}
 
         <button class="btn-delete-chip" style="margin-left:auto" onclick="deleteGeneratedPost('${post.id}')" title="Delete post"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
       </div>
@@ -1853,7 +1876,7 @@ async function renderSettings() {
   let auriDefaults = {};
   try { auriDefaults = await apiFetch('/strategy/defaults'); } catch(_) {}
 
-  const PLATFORM_LABELS = { youtube: 'YouTube', x: 'X (Twitter)', linkedin: 'LinkedIn' };
+  const PLATFORM_LABELS = { youtube: 'YouTube', x: 'X (Twitter)', linkedin: 'LinkedIn', pinterest: 'Pinterest' };
 
   function buildPlatformCard(p) {
     const label    = PLATFORM_LABELS[p];
@@ -1872,7 +1895,7 @@ async function renderSettings() {
 
     // Resolve posts per root
     const storedRoot = _settings[`platform.${p}.posts_per_root`];
-    const displayRoot = storedRoot || (p === 'youtube' ? '1' : p === 'linkedin' ? '1' : '3');
+    const displayRoot = storedRoot || (p === 'youtube' ? '1' : p === 'linkedin' ? '1' : p === 'pinterest' ? '2' : '3');
 
     // Resolve current times
     const storedTimesOvr = _settings[`platform.${p}.times_override`] === 'true' || _settings[`platform.${p}.times_override`] === true;
@@ -1987,6 +2010,46 @@ async function renderSettings() {
         <div class="acct-control">
           <button class="btn-primary" id="btn-li-connect" onclick="connectLinkedIn()" style="display:none">Connect LinkedIn</button>
           <button class="btn-danger-solid" id="btn-li-disconnect" onclick="disconnectLinkedIn()" style="display:none">Disconnect</button>
+        </div>
+      </div>
+      ` : ''}
+      ${p === 'pinterest' ? `
+      <div class="acct-row acct-row-stacked">
+        <div class="acct-row-label">
+          <span>Pinterest App ID</span>
+          <span class="acct-row-hint">From developers.pinterest.com → App → OAuth</span>
+        </div>
+        <div class="acct-control" style="min-width:300px">
+          <input type="text" class="form-input" id="setting-pinterest-client-id" value="${get('pinterest.client_id') || ''}" placeholder="Paste Client ID..." oninput="markSettingDirty('pinterest.client_id', this.value)">
+        </div>
+      </div>
+      <div class="acct-row acct-row-stacked">
+        <div class="acct-row-label">
+          <span>Pinterest App Secret</span>
+          <span class="acct-row-hint">App secret for token exchange</span>
+        </div>
+        <div class="acct-control" style="min-width:300px">
+          <input type="password" class="form-input" id="setting-pinterest-client-secret" value="${get('pinterest.client_secret') || ''}" placeholder="Paste App Secret..." oninput="markSettingDirty('pinterest.client_secret', this.value)">
+        </div>
+      </div>
+      <div class="acct-row">
+        <div class="acct-row-label">
+          <span>Pinterest Connection</span>
+          <span class="acct-row-hint" id="pin-status-hint">Checking...</span>
+        </div>
+        <div class="acct-control">
+          <button class="btn-primary" id="btn-pin-connect" onclick="connectPinterest()" style="display:none">Connect Pinterest</button>
+          <button class="btn-danger-solid" id="btn-pin-disconnect" onclick="disconnectPinterest()" style="display:none">Disconnect</button>
+        </div>
+      </div>
+      <div class="acct-row acct-row-stacked" id="pin-board-wrap" style="display:none">
+        <div class="acct-row-label">
+          <span>Pinterest Board</span>
+          <span class="acct-row-hint">Pins are published to this board</span>
+        </div>
+        <div class="acct-control" style="gap:6px">
+          <select class="form-input" id="pin-board-select" style="flex:1;min-width:180px"><option value="">Loading boards…</option></select>
+          <button class="btn-secondary btn-sm" onclick="setPinterestBoard()">Set Board</button>
         </div>
       </div>
       ` : ''}
@@ -2139,7 +2202,7 @@ async function renderSettings() {
     <!-- Panel: Platform Settings -->
     <div class="settings-panel" id="settings-panel-platform" style="display:none">
     <div class="settings-row">
-    ${['x','linkedin','youtube'].map(p => `<div class="settings-col">${buildPlatformCard(p)}</div>`).join('')}
+    ${['x','linkedin','youtube','pinterest'].map(p => `<div class="settings-col">${buildPlatformCard(p)}</div>`).join('')}
     </div>
     </div><!-- /settings-panel-platform -->
 
@@ -2238,7 +2301,7 @@ function renderPlatformSettingsRows(platform, label, frequency, bestTimes) {
 }
 
 async function viewStrategy(platform) {
-  const labels = {youtube:'YouTube', x:'X (Twitter)', linkedin:'LinkedIn'};
+  const labels = {youtube:'YouTube', x:'X (Twitter)', linkedin:'LinkedIn', pinterest:'Pinterest'};
   const label = labels[platform] || platform;
   try {
     const data = await apiFetch(`/strategy/${platform}`);
@@ -2406,12 +2469,107 @@ async function checkLinkedInStatus() {
 }
 window.checkLinkedInStatus = checkLinkedInStatus;
 
+// ── Pinterest OAuth ──────────────────────────────────────────────────────
+async function checkPinterestStatus() {
+  try {
+    const status = await apiFetch(`/pinterest/status?project_id=${getActiveProjectId()}`);
+    const hint = document.getElementById('pin-status-hint');
+    const btnConnect = document.getElementById('btn-pin-connect');
+    const btnDisconnect = document.getElementById('btn-pin-disconnect');
+    const boardWrap = document.getElementById('pin-board-wrap');
+    if (status.connected) {
+      if (hint) hint.innerHTML = '<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected</span>';
+      if (btnConnect) btnConnect.style.display = 'none';
+      if (btnDisconnect) btnDisconnect.style.display = '';
+      if (boardWrap) boardWrap.style.display = '';
+      loadPinterestBoards();
+    } else {
+      if (hint) hint.innerHTML = '<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>';
+      if (btnConnect) btnConnect.style.display = '';
+      if (btnDisconnect) btnDisconnect.style.display = 'none';
+      if (boardWrap) boardWrap.style.display = 'none';
+    }
+  } catch(_) {
+    const hint = document.getElementById('pin-status-hint');
+    if (hint) hint.innerHTML = '<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600;border:1px solid var(--border)">Unknown</span>';
+  }
+}
+
+async function connectPinterest() {
+  try {
+    const { authUrl } = await apiFetch(`/pinterest/connect?project_id=${getActiveProjectId()}`);
+    window.open(authUrl, '_blank', 'width=600,height=750');
+    const poll = setInterval(async () => {
+      try {
+        const status = await apiFetch(`/pinterest/status?project_id=${getActiveProjectId()}`);
+        if (status.connected) {
+          clearInterval(poll);
+          checkPinterestStatus();
+          showToast('Pinterest account connected! ✓');
+        }
+      } catch(_) {}
+    }, 2000);
+    setTimeout(() => clearInterval(poll), 120000);
+  } catch(err) {
+    showToast('Failed to start Pinterest connection: ' + err.message, 'error');
+  }
+}
+window.connectPinterest = connectPinterest;
+
+async function disconnectPinterest() {
+  try {
+    await apiFetch('/pinterest/disconnect', {
+      method: 'POST',
+      body: JSON.stringify({ project_id: getActiveProjectId() })
+    });
+    checkPinterestStatus();
+    showToast('Pinterest account disconnected');
+  } catch(err) {
+    showToast('Disconnect failed: ' + err.message, 'error');
+  }
+}
+window.disconnectPinterest = disconnectPinterest;
+
+async function loadPinterestBoards(selectedBoardId) {
+  try {
+    const data = await apiFetch(`/pinterest/boards?project_id=${getActiveProjectId()}`);
+    const select = document.getElementById('pin-board-select');
+    if (!select) return;
+    const boards = data.boards || [];
+    if (!boards.length) {
+      select.innerHTML = '<option value="">No boards found</option>';
+      return;
+    }
+    select.innerHTML = boards.map(b =>
+      `<option value="${escHtml(b.id)}"${b.id === (selectedBoardId || data.board) ? ' selected' : ''}>${escHtml(b.name)}</option>`
+    ).join('');
+  } catch(err) {
+    showToast('Failed to load Pinterest boards: ' + err.message, 'error');
+  }
+}
+
+async function setPinterestBoard() {
+  const select = document.getElementById('pin-board-select');
+  if (!select || !select.value) return;
+  try {
+    await apiFetch(`/projects/${getActiveProjectId()}/channels/pinterest`, {
+      method: 'PUT',
+      body: JSON.stringify({ config: { board: select.value } })
+    });
+    showToast('Pinterest board set ✓');
+  } catch(err) {
+    showToast('Failed to set board: ' + err.message, 'error');
+  }
+}
+window.setPinterestBoard = setPinterestBoard;
+
 // Auto-check X + LinkedIn status when settings tab loads
 const _originalLoadSettings = loadSettings;
 loadSettings = function() {
   _originalLoadSettings();
   setTimeout(checkXStatus, 500);
   setTimeout(checkLinkedInStatus, 600);
+  setTimeout(checkPinterestStatus, 700);
 };
 
 async function saveSettings() {
@@ -2419,6 +2577,8 @@ async function saveSettings() {
   const xClientSecretEl = document.getElementById('setting-x-client-secret');
   const liClientIdEl = document.getElementById('setting-linkedin-client-id');
   const liClientSecretEl = document.getElementById('setting-linkedin-client-secret');
+  const pinClientIdEl = document.getElementById('setting-pinterest-client-id');
+  const pinClientSecretEl = document.getElementById('setting-pinterest-client-secret');
 
   const payload = {};
 
@@ -2427,6 +2587,8 @@ async function saveSettings() {
   if (liClientIdEl)    payload['linkedin.client_id']     = liClientIdEl.value.trim();
   if (liClientSecretEl) payload['linkedin.client_secret'] = liClientSecretEl.value.trim();
   if (xClientSecretEl) payload['x.client_secret'] = xClientSecretEl.value.trim();
+  if (pinClientIdEl)     payload['pinterest.client_id']     = pinClientIdEl.value.trim();
+  if (pinClientSecretEl) payload['pinterest.client_secret'] = pinClientSecretEl.value.trim();
 
   // Brand settings
   const brandNameEl = document.getElementById('setting-brand-name');
@@ -2441,7 +2603,7 @@ async function saveSettings() {
   if (autoGenEl)      payload['image.auto_generate'] = autoGenEl.checked ? 'true' : 'false';
 
   // Platform settings — always save whatever is in the inputs as overridden
-  for (const platform of ['x','linkedin','youtube']) {
+  for (const platform of ['x','linkedin','youtube','pinterest']) {
     const freqEl  = document.getElementById(`setting-${platform}-freq`);
     const timesEl = document.getElementById(`setting-${platform}-times`);
     const rootEl  = document.getElementById(`setting-${platform}-root`);

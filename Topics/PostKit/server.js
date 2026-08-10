@@ -8,6 +8,7 @@ const Database = require('better-sqlite3');
 // X OAuth + Publisher
 const xOAuth = require('./x-oauth');
 const linkedinOAuth = require('./linkedin-oauth');
+const pinterestOAuth = require('./pinterest-oauth');
 const { renderImage, DEFAULT_BRAND } = require('./lib/image-renderer');
 
 const PORT = 8788;
@@ -128,6 +129,9 @@ const defaultSettings = [
   ['platform.youtube.frequency', '1'],
   ['platform.youtube.posts_per_root', '1'],
   ['platform.youtube.best_times', JSON.stringify(['15:00','18:00'])],
+  ['platform.pinterest.frequency', '5'],
+  ['platform.pinterest.posts_per_root', '2'],
+  ['platform.pinterest.best_times', JSON.stringify(['09:00','13:00','18:00'])],
   ['x.client_id', ''],
   ['x.client_secret', ''],
   ['x.access_token', ''],
@@ -138,6 +142,9 @@ const defaultSettings = [
   ['linkedin.refresh_token', ''],
   ['linkedin.member_urn', ''],
   ['x.connected', 'false'],
+  ['pinterest.client_id', ''],
+  ['pinterest.client_secret', ''],
+  ['pinterest.connected', 'false'],
   ['image_gen.api_key', ''],
   ['image_gen.provider', 'openai'],
   ['brand.name', 'JumpKit'],
@@ -172,12 +179,27 @@ function ensureDefaultProject() {
   db.prepare('UPDATE seeds SET project_id = ? WHERE project_id IS NULL').run(id);
   db.prepare('UPDATE posts SET project_id = ? WHERE project_id IS NULL').run(id);
   // Default channels for the project (enabled placeholders; config via Channels tab)
-  for (const platform of ['x', 'linkedin', 'youtube']) {
+  for (const platform of ['x', 'linkedin', 'youtube', 'pinterest']) {
     db.prepare('INSERT OR IGNORE INTO channels (id, project_id, platform, enabled, config, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?, ?)')
       .run(`${id}_${platform}`, id, platform, '{}', now, now);
   }
 }
 ensureDefaultProject();
+
+// ── Channel backfill migration ─────────────────────────────────────────────
+// Ensure every existing project has rows for all supported platforms (x,
+// linkedin, youtube, pinterest). INSERT OR IGNORE makes this idempotent, so it
+// safely backfills Pinterest on pre-existing projects without touching others.
+(function backfillChannels() {
+  const now = Date.now();
+  const projects = db.prepare('SELECT id FROM projects').all();
+  const insert = db.prepare('INSERT OR IGNORE INTO channels (id, project_id, platform, enabled, config, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?, ?)');
+  for (const project of projects) {
+    for (const platform of ['x', 'linkedin', 'youtube', 'pinterest']) {
+      insert.run(`${project.id}_${platform}`, project.id, platform, '{}', now, now);
+    }
+  }
+})();
 
 // ── Project / Channel helpers ─────────────────────────────────────────────────
 
@@ -208,9 +230,9 @@ function activeProjectId(url, body) {
   return 'proj_default';
 }
 
-// Create the 3 default channels for a project.
+// Create the 4 default channels for a project.
 function createDefaultChannels(projectId, ts) {
-  for (const platform of ['x', 'linkedin', 'youtube']) {
+  for (const platform of ['x', 'linkedin', 'youtube', 'pinterest']) {
     db.prepare('INSERT OR IGNORE INTO channels (id, project_id, platform, enabled, config, created_at, updated_at) VALUES (?, ?, ?, 1, ?, ?, ?)')
       .run(`${projectId}_${platform}`, projectId, platform, '{}', ts, ts);
   }
@@ -799,7 +821,7 @@ function getHermesConfig(req, res) {
 }
 
 const STRATEGY_BASE = '/Users/jeffroder/.hermes/profiles/auri/skills/social-media/social_media_marketer/references';
-const STRATEGY_FILES = { youtube: 'youtube_strategy.md', x: 'x_strategy.md', linkedin: 'linkedin_strategy.md' };
+const STRATEGY_FILES = { youtube: 'youtube_strategy.md', x: 'x_strategy.md', linkedin: 'linkedin_strategy.md', pinterest: 'pinterest_strategy.md' };
 
 function getStrategyFile(req, res, platform) {
   const file = STRATEGY_FILES[platform];
@@ -816,7 +838,8 @@ function getStrategyDefaults(req, res) {
   const cfgs = {
     youtube: { file: 'youtube_strategy.md', freq: 5,  times: ['15:00','17:00'] },
     x:       { file: 'x_strategy.md',       freq: 28, times: ['09:00','13:00','18:00'] },
-    linkedin:{ file: 'linkedin_strategy.md', freq: 3,  times: ['09:00','12:00'] }
+    linkedin:{ file: 'linkedin_strategy.md', freq: 3,  times: ['09:00','12:00'] },
+    pinterest:{ file: 'pinterest_strategy.md', freq: 28, times: ['09:00','13:00','18:00'] }
   };
   const result = {};
   for (const [platform, cfg] of Object.entries(cfgs)) {
@@ -841,7 +864,7 @@ function getStrategyDefaults(req, res) {
 }
 
 function getPlatformSettings(req, res) {
-  const platforms = ['x', 'linkedin', 'youtube'];
+  const platforms = ['x', 'linkedin', 'youtube', 'pinterest'];
   const result = {};
   for (const p of platforms) {
     const freqOverride = getSettingVal(db, `platform.${p}.freq_override`) === 'true';
@@ -929,6 +952,7 @@ function getProjectChannels(req, res, id) {
     if (ch.platform === 'x') connected = !!(config.access_token);
     else if (ch.platform === 'linkedin') connected = !!(config.access_token);
     else if (ch.platform === 'youtube') connected = !!(config.access_token);
+    else if (ch.platform === 'pinterest') connected = !!(config.access_token);
     // Connected also requires the channel enabled
     return {
       ...ch,
@@ -1072,6 +1096,49 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  // ── OAuth Callback (Pinterest) ──────────────────────────────────────────
+  if (pathname === '/oauth/pinterest/callback') {
+    const code = query.get('code');
+    const state = query.get('state');
+    const error = query.get('error');
+    if (error) {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2>Pinterest Auth Cancelled</h2><p>' + error + '</p><script>setTimeout(()=>window.close(),3000)</script></body></html>');
+    }
+    const session = pinterestOAuth.consumeOAuthSession(state);
+    if (!code || !session) {
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2>Pinterest Auth Failed</h2><p>Invalid or expired session. Please try connecting again.</p><script>setTimeout(()=>window.close(),3000)</script></body></html>');
+    }
+    try {
+      const redirectUri = 'http://localhost:' + PORT + '/oauth/pinterest/callback';
+      const tokens = await pinterestOAuth.exchangeCodeForToken(db, code, redirectUri, session.verifier);
+      const projectId = session.projectId || 'proj_default';
+      pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', {
+        access_token: tokens.access_token || '',
+        ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
+        ...(tokens.expires_in ? { expiry: Date.now() + tokens.expires_in * 1000 } : {}),
+        token_type: tokens.token_type || 'bearer',
+      });
+      pinterestOAuth.setSetting(db, 'pinterest.connected', 'true');
+      // Default the board to the user's first board if not yet set, and record username
+      try {
+        const boards = await pinterestOAuth.getUserBoards(db, projectId);
+        const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
+        pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', {
+          boards,
+          board: cfg.board || (boards.length ? boards[0].id : null),
+        });
+      } catch(_) { /* boards fetch is best-effort */ }
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2 style="color:#4ade80">Connected to Pinterest!</h2><p>You can close this window.</p><script>setTimeout(()=>window.close(),1500)</script></body></html>');
+    } catch(err) {
+      console.error('[pinterest oauth] token exchange error:', err);
+      res.writeHead(200, { 'Content-Type': 'text/html' });
+      return res.end('<html><body style="font-family:sans-serif;padding:20px"><h2>Connection Failed</h2><p>' + err.message + '</p><script>setTimeout(()=>window.close(),4000)</script></body></html>');
+    }
+  }
+
   if (!pathname.startsWith('/api/')) {
     res.writeHead(404); return res.end('Not found');
   }
@@ -1161,7 +1228,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname === '/api/hermes/config' && method === 'GET') return getHermesConfig(req, res);
-    const strategyMatch = pathname.match(/^\/api\/strategy\/(youtube|x|linkedin)$/);
+    const strategyMatch = pathname.match(/^\/api\/strategy\/(youtube|x|linkedin|pinterest)$/);
     if (strategyMatch && method === 'GET') return getStrategyFile(req, res, strategyMatch[1]);
     if (pathname === '/api/strategy/defaults' && method === 'GET') return getStrategyDefaults(req, res);
     if (pathname === '/api/platform-settings' && method === 'GET') return getPlatformSettings(req, res);
@@ -1305,6 +1372,89 @@ const server = http.createServer(async (req, res) => {
       const projectId = activeProjectId(null, body);
       linkedinOAuth.setChannelConfig(db, projectId, 'linkedin', { access_token: '', refresh_token: '', member_urn: '' });
       send(res, 200, { ok: true, project_id: projectId });
+      return;
+    }
+
+    // ── Pinterest OAuth ─────────────────────────────────────────────────────
+    // Start OAuth flow
+    if (pathname === '/api/pinterest/connect' && method === 'GET') {
+      try {
+        const projectId = activeProjectId(urlObj, null);
+        const redirectUri = `http://localhost:${PORT}/oauth/pinterest/callback`;
+        const { state, challenge } = pinterestOAuth.createOAuthSession(projectId);
+        const authUrl = pinterestOAuth.buildAuthUrl(db, redirectUri, state, challenge);
+        send(res, 200, { authUrl, project_id: projectId });
+      } catch(err) {
+        send(res, 500, { error: err.message });
+      }
+      return;
+    }
+
+    // Publish a pin now
+    if (pathname === '/api/pinterest/publish' && method === 'POST') {
+      try {
+        const body = await parseBody(req);
+        let post, projectId, text, mediaPaths = [], boardId, link, title;
+        if (body.post_id) {
+          post = db.prepare('SELECT * FROM posts WHERE id = ?').get(body.post_id);
+          if (!post) return send(res, 404, { error: 'Post not found' });
+          projectId = post.project_id || activeProjectId(null, body);
+          try { mediaPaths = JSON.parse(post.media_paths || '[]'); } catch(_) {}
+          text = post.post_text || '';
+          link = post.link || '';
+          title = post.title || '';
+          const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
+          boardId = body.board_id || cfg.board;
+        } else {
+          projectId = activeProjectId(null, body);
+          text = body.text || '';
+          mediaPaths = body.media_paths || [];
+          boardId = body.board_id || pinterestOAuth.getChannelConfig(db, projectId, 'pinterest').board;
+          link = body.link || '';
+          title = body.title || '';
+        }
+        if (!mediaPaths.length) return send(res, 400, { error: 'A Pinterest pin requires an image. No media found.' });
+        const imageUrl = `http://localhost:${PORT}/media/${mediaPaths[0]}`;
+        const result = await pinterestOAuth.publishPin(db, text, imageUrl, boardId, projectId, link, title);
+        if (post) {
+          const now = Date.now();
+          db.prepare('UPDATE posts SET status = ?, posted_at = ?, updated_at = ? WHERE id = ?')
+            .run('posted', now, now, post.id);
+        }
+        send(res, 200, result);
+      } catch(err) {
+        send(res, 500, { error: err.message });
+      }
+      return;
+    }
+
+    // Check Pinterest connection status
+    if (pathname === '/api/pinterest/status' && method === 'GET') {
+      const projectId = activeProjectId(urlObj, null);
+      const config = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
+      send(res, 200, { connected: !!(config.access_token), project_id: projectId, board: config.board || null });
+      return;
+    }
+
+    // Disconnect
+    if (pathname === '/api/pinterest/disconnect' && method === 'POST') {
+      const body = await parseBody(req);
+      const projectId = activeProjectId(null, body);
+      pinterestOAuth.setChannelConfig(db, projectId, 'pinterest', { access_token: '', refresh_token: '', board: null });
+      send(res, 200, { ok: true, project_id: projectId });
+      return;
+    }
+
+    // Get user boards
+    if (pathname === '/api/pinterest/boards' && method === 'GET') {
+      try {
+        const projectId = activeProjectId(urlObj, null);
+        const boards = await pinterestOAuth.getUserBoards(db, projectId);
+        const cfg = pinterestOAuth.getChannelConfig(db, projectId, 'pinterest');
+        send(res, 200, { boards, board: cfg.board || null, project_id: projectId });
+      } catch(err) {
+        send(res, 500, { error: err.message });
+      }
       return;
     }
 
@@ -1557,4 +1707,5 @@ server.listen(PORT, () => {
   console.log(`PostKit running at http://localhost:${PORT}`);
   xOAuth.startSchedulerWorker(db);
 linkedinOAuth.startSchedulerWorker(db);
+pinterestOAuth.startSchedulerWorker(db);
 });
