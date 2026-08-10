@@ -83,12 +83,39 @@ html, body {
   overflow: hidden;
 }
 
+/* ── Custom title bar (macOS hiddenInset) ─────────────────────────────── */
+.app-titlebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  -webkit-app-region: drag;
+  background: var(--bg-surface);
+  user-select: none;
+}
+.app-titlebar-name {
+  margin-left: 86px; /* clear the macOS traffic lights (green btn is leftmost ~18px; name right of it) */
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.2px;
+  pointer-events: none;
+}
+.app-titlebar button,
+.app-titlebar a { -webkit-app-region: no-drag; }
+
 /* ── Sidebar ───────────────────────────────────────────────────────────── */
 .sidebar {
-  width: 175px;
-  min-width: 175px;
+  width: 210px;
+  min-width: 210px;
   height: 100vh;
   min-height: 100vh;
+  padding-top: 48px; /* room for custom title bar */
+  box-sizing: border-box;
   background: var(--bg-surface);
   display: flex;
   flex-direction: column;
@@ -318,11 +345,13 @@ html, body {
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  padding-top: 48px; /* room for custom title bar */
+  box-sizing: border-box;
 }
 
 .tab-pane {
   flex: 1;
-  height: 100vh;
+  height: calc(100vh - 48px);
   overflow-y: auto;
   padding: 12px 32px 28px;
 }

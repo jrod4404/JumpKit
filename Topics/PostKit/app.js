@@ -534,9 +534,17 @@ function switchTab(tab) {
     const pane = document.getElementById(`tab-${t}`);
     if (pane) pane.style.display = t === tab ? '' : 'none';
   });
-  // Highlight the active submenu item under the active project
+  // Highlight ONLY the single active submenu item — under the active project
+  // (or the global Dashboard submenu for global tabs). Never highlight the same
+  // page in multiple projects.
   document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.tab === tab);
+    const btnIsGlobal = !btn.dataset.projectId;
+    const isThisTab = btn.dataset.tab === tab;
+    if (GLOBAL_TABS.has(tab)) {
+      btn.classList.toggle('active', btnIsGlobal && isThisTab);
+    } else {
+      btn.classList.toggle('active', !btnIsGlobal && isThisTab && btn.dataset.projectId === getActiveProjectId());
+    }
   });
   // Update topbar
   const meta = TAB_META[tab] || {};
