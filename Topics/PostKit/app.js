@@ -38,7 +38,6 @@ window._analyticsRecord = null;       // {postId, recordId} for analytics modal
 let _projects = [];                       // array of {id, name, description, ...}
 let _activeProjectId = null;              // id of the currently active project
 let _expandedProjects = new Set();        // ids of projects whose submenu is independently expanded
-let _dashboardExpanded = true;            // whether the global Dashboard nav item is expanded
 
 function getActiveProjectId() {
   return _activeProjectId || 'proj_default';
@@ -205,12 +204,6 @@ const PROJECT_MENU_ITEMS = [
   { tab: 'settings',  label: 'Channels' },
 ];
 
-// Global (non-project) nav items under the Dashboard link
-const DASHBOARD_MENU_ITEMS = [
-  { tab: 'dashboard',   label: 'Overview' },
-  { tab: 'appsettings', label: 'Settings' },
-];
-
 // Icons for each submenu item (small, inline SVG)
 const PROJECT_SUB_ICONS = {
   content: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
@@ -223,38 +216,26 @@ const PROJECT_SUB_ICONS = {
 // Icons for global Dashboard submenu items
 const DASHBOARD_SUB_ICONS = {
   dashboard: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="6" height="6" rx="1"/><rect x="8.5" y="1.5" width="6" height="6" rx="1"/><rect x="1.5" y="8.5" width="6" height="6" rx="1"/><rect x="8.5" y="8.5" width="6" height="6" rx="1"/></svg>',
-  appsettings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
+  appsettings: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
 };
 
 function renderDashboardNav() {
   const el = document.getElementById('dashboard-nav');
   if (!el) return;
-  const isExpanded = _dashboardExpanded;
-  const subItems = DASHBOARD_MENU_ITEMS.map(m => {
-    const activeClass = _activeTab === m.tab ? ' active' : '';
-    return `<button class="nav-item project-submenu-item${activeClass}" data-tab="${m.tab}">
-      <span class="nav-icon">${DASHBOARD_SUB_ICONS[m.tab] || ''}</span>
-      <span class="nav-label">${m.label}</span>
-    </button>`;
-  }).join('');
-  const caret = isExpanded
-    ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>'
-    : '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+  const isDashboardActive = _activeTab === 'dashboard';
+  const isSettingsActive  = _activeTab === 'appsettings';
   el.innerHTML = `
-    <div class="project-item dashboard-item ${_activeTab === 'dashboard' || _activeTab === 'appsettings' ? 'active' : ''}" data-dashboard="1">
-      <div class="project-row" data-dashboard-row="1">
-        <span class="project-caret">${caret}</span>
-        <span class="project-caret-placeholder"></span>
-        <span class="project-name">Dashboard</span>
-      </div>
-      ${isExpanded ? `<div class="project-submenu">${subItems}</div>` : ''}
-    </div>`;
-}
-
-function toggleDashboardExpand() {
-  _dashboardExpanded = !_dashboardExpanded;
-  try { localStorage.setItem('pk_dashboard_expanded', _dashboardExpanded ? '1' : '0'); } catch(_e) {}
-  renderDashboardNav();
+    <div class="nav-section-header main-section-header">
+      <span class="nav-section-label">Main</span>
+    </div>
+    <button class="nav-item main-nav-item${isDashboardActive ? ' active' : ''}" data-tab="dashboard">
+      <span class="nav-icon">${DASHBOARD_SUB_ICONS.dashboard}</span>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button class="nav-item main-nav-item${isSettingsActive ? ' active' : ''}" data-tab="appsettings">
+      <span class="nav-icon">${DASHBOARD_SUB_ICONS.appsettings}</span>
+      <span class="nav-label">Settings</span>
+    </button>`;
 }
 
 function renderProjectList() {
@@ -312,7 +293,6 @@ async function loadProjects(selectFirstIfNone = false) {
       if (Array.isArray(stored)) stored.forEach(id => { if (id) _expandedProjects.add(id); });
     } catch (_e) { /* ignore malformed persisted state */ }
     if (target) _expandedProjects.add(target);
-    try { _dashboardExpanded = localStorage.getItem('pk_dashboard_expanded') !== '0'; } catch(_e) {}
     renderDashboardNav();
     renderProjectList();
     if (selectFirstIfNone || !_activeTab) {
@@ -582,13 +562,7 @@ function initNav() {
         openProjectMenu(menuBtn);
         return;
       }
-      // Dashboard header row -> toggle global dashboard expansion
-      const dashRow = e.target.closest('[data-dashboard-row]');
-      if (dashRow) {
-        toggleDashboardExpand();
-        e.stopPropagation();
-        return;
-      }
+      // Dashboard header row removed — Dashboard/Settings are flat nav links
       // Submenu item (Content / Schedule / Today / Analytics / Channels)
       const item = e.target.closest('.nav-item[data-tab]');
       if (item) {
@@ -1981,11 +1955,22 @@ function renderDashboard(data) {
   if (!pane) return;
   const t = data.totals || {};
   const PLATFORM_LABELS = { youtube: 'YouTube', x: 'X', linkedin: 'LinkedIn', pinterest: 'Pinterest' };
+  const PLATFORM_COLORS = { youtube: '#FF0000', x: '#111111', linkedin: '#0A66C2', pinterest: '#E60023' };
+  const brandLogo = data.brand_logo
+    ? `<img src="/${data.brand_logo}?t=${Date.now()}" class="dash-project-logo" alt="">`
+    : `<span class="dash-project-logo dash-project-logo-fallback"></span>`;
 
-  const projectRows = (data.projects || []).map(p => `
+  const projectRows = (data.projects || []).map(p => {
+    const connected = new Set(p.connected || []);
+    const chips = ['x', 'linkedin', 'youtube', 'pinterest'].map(pl => {
+      const isConnected = connected.has(pl);
+      const style = isConnected ? `background:${PLATFORM_COLORS[pl]};border-color:${PLATFORM_COLORS[pl]};color:#fff` : '';
+      return `<span class="dash-chip ${isConnected ? 'dash-chip-connected' : ''}" style="${style}">${PLATFORM_LABELS[pl]}</span>`;
+    }).join('');
+    return `
     <div class="dash-project-row">
       <div class="dash-project-main">
-        <div class="dash-project-name">${escHtml(p.name)}</div>
+        <div class="dash-project-title-row">${brandLogo}<div class="dash-project-name">${escHtml(p.name)}</div></div>
         <div class="dash-project-desc">${escHtml(p.description || 'No description')}</div>
       </div>
       <div class="dash-project-stat"><b>${p.seeds}</b><span>Seeds</span></div>
@@ -1993,8 +1978,9 @@ function renderDashboard(data) {
       <div class="dash-project-stat"><b>${p.scheduled}</b><span>Scheduled</span></div>
       <div class="dash-project-stat"><b>${p.posted}</b><span>Posted</span></div>
       <div class="dash-project-stat"><b>${p.channels_enabled}/${p.channels_total}</b><span>Channels</span></div>
-      <div class="dash-project-chips">${(p.platforms || []).map(pl => `<span class="dash-chip">${PLATFORM_LABELS[pl] || pl}</span>`).join('')}</div>
-    </div>`).join('') || `<div class="dash-empty">No projects yet.</div>`;
+      <div class="dash-project-chips">${chips}</div>
+    </div>`;
+  }).join('') || `<div class="dash-empty">No projects yet.</div>`;
 
   const upcomingRows = (data.upcoming || []).map(p => {
     const d = new Date(p.scheduled_for);

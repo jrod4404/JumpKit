@@ -2362,6 +2362,21 @@ select.form-input,
   border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
 }
+.dashboard-nav .main-section-header .nav-section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-size: 10.5px;
+}
+.dashboard-nav .main-nav-item {
+  padding: 9px 20px 9px 20px;
+}
+.dashboard-nav .main-nav-item .nav-icon {
+  width: 18px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .dashboard-item .project-row {
   font-weight: 700;
 }
@@ -2439,6 +2454,24 @@ select.form-input,
   flex: 1;
   min-width: 160px;
 }
+.dash-project-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.dash-project-logo {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  object-fit: contain;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+  padding: 2px;
+}
+.dash-project-logo-fallback {
+  background: var(--grad-soft);
+}
 .dash-project-name {
   font-size: 14px;
   font-weight: 700;
@@ -2481,12 +2514,15 @@ select.form-input,
 .dash-chip {
   font-size: 10px;
   font-weight: 600;
-  color: var(--accent-light);
-  background: var(--grad-soft);
+  color: var(--text-muted);
+  background: var(--bg-hover);
   border: 1px solid var(--border);
   border-radius: 99px;
   padding: 1px 7px;
   line-height: 1.5;
+}
+.dash-chip-connected {
+  color: #fff !important;
 }
 .dash-chip-platform {
   background: var(--bg-hover);

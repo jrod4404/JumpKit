@@ -913,7 +913,7 @@ function getDashboard(req, res) {
   const seedByProj   = db.prepare('SELECT project_id, COUNT(*) AS c FROM seeds GROUP BY project_id').all();
   const postByProj   = db.prepare('SELECT project_id, COUNT(*) AS c FROM posts GROUP BY project_id').all();
   const statusByProj = db.prepare('SELECT project_id, status, COUNT(*) AS c FROM posts GROUP BY project_id, status').all();
-  const chanByProj   = db.prepare('SELECT project_id, platform, enabled FROM channels').all();
+  const chanByProj   = db.prepare('SELECT project_id, platform, enabled, config FROM channels').all();
 
   const seedMap   = {}; seedByProj.forEach(r => seedMap[r.project_id] = r.c);
   const postMap   = {}; postByProj.forEach(r => postMap[r.project_id] = r.c);
@@ -924,11 +924,15 @@ function getDashboard(req, res) {
   });
   const chanMap = {};
   chanByProj.forEach(r => {
-    chanMap[r.project_id] = chanMap[r.project_id] || { enabled: 0, total: 0, platforms: [] };
+    chanMap[r.project_id] = chanMap[r.project_id] || { enabled: 0, total: 0, platforms: [], connected: [] };
     chanMap[r.project_id].total++;
     if (r.enabled) {
       chanMap[r.project_id].enabled++;
       chanMap[r.project_id].platforms.push(r.platform);
+      // Connected = channel enabled AND has an access token in its config
+      let cfg = {};
+      try { cfg = JSON.parse(r.config || '{}'); } catch(_) {}
+      if (cfg.access_token) chanMap[r.project_id].connected.push(r.platform);
     }
   });
 
@@ -942,7 +946,7 @@ function getDashboard(req, res) {
 
   const perProject = projects.map(p => {
     const st = statusMap[p.id] || { draft: 0, scheduled: 0, posted: 0 };
-    const ch = chanMap[p.id] || { enabled: 0, total: 0, platforms: [] };
+    const ch = chanMap[p.id] || { enabled: 0, total: 0, platforms: [], connected: [] };
     return {
       id: p.id,
       name: p.name,
@@ -955,6 +959,7 @@ function getDashboard(req, res) {
       channels_enabled: ch.enabled,
       channels_total: ch.total,
       platforms: ch.platforms,
+      connected: ch.connected,
     };
   });
 
@@ -969,7 +974,7 @@ function getDashboard(req, res) {
     return acc;
   }, { projects: 0, seeds: 0, posts: 0, draft: 0, scheduled: 0, posted: 0, channels_enabled: 0 });
 
-  send(res, 200, { totals, projects: perProject, upcoming: upcoming.map(p => ({ ...p, post_text: tryParse(p.post_text, '') })) });
+  send(res, 200, { totals, projects: perProject, upcoming: upcoming.map(p => ({ ...p, post_text: tryParse(p.post_text, '') })), brand_logo: getSettingVal(db, 'brand.logo_path') || null });
 }
 
 async function createProject(req, res) {
