@@ -1127,7 +1127,7 @@ const server = http.createServer(async (req, res) => {
       connections.saveConnection(db, 'x', {
         access_token: tokens.access_token || '',
         refresh_token: tokens.refresh_token || '',
-        account_name: 'X account',
+        account_name: tokens.access_token ? null : null,
       });
       // Keep legacy global key in sync for backward compat (read-only now)
       xOAuth.setSetting(db, 'x.connected', 'true');
@@ -1168,7 +1168,7 @@ const server = http.createServer(async (req, res) => {
       connections.saveConnection(db, 'linkedin', {
         access_token: tokens.access_token || '',
         ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
-        account_name: 'LinkedIn account',
+        account_name: tokens.access_token ? null : null,
       });
       linkedinOAuth.setSetting(db, 'linkedin.connected', 'true');
 
@@ -1213,7 +1213,7 @@ const server = http.createServer(async (req, res) => {
         access_token: tokens.access_token || '',
         ...(tokens.refresh_token ? { refresh_token: tokens.refresh_token } : {}),
         ...(tokens.expires_in ? { token_expires_at: Date.now() + tokens.expires_in * 1000 } : {}),
-        account_name: 'Pinterest account',
+        account_name: tokens.access_token ? null : null,
       });
       pinterestOAuth.setSetting(db, 'pinterest.connected', 'true');
       // Fetch user boards into the global connection meta — best-effort.

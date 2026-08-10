@@ -894,7 +894,7 @@ select.form-input,
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 8px;
-  margin-bottom: 12px;
+  margin-bottom: 0;
   overflow: visible;
 }
 
@@ -1542,6 +1542,7 @@ select.form-input,
   flex-direction: column;
 }
 .settings-col > .acct-section,
+#appSettingsViewPlatform .platform-settings-card,
 .settings-col > .platform-settings-card {
   flex: 1;
   display: flex;
