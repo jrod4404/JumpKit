@@ -197,11 +197,12 @@ function toggleTheme() {
 let _activeTab = 'content';
 
 const PROJECT_MENU_ITEMS = [
-  { tab: 'content',   label: 'Content' },
+  { tab: 'content',  label: 'Content' },
   { tab: 'calendar',  label: 'Schedule' },
   { tab: 'today',     label: 'Today' },
   { tab: 'analytics', label: 'Analytics' },
-  { tab: 'settings',  label: 'Channels' },
+  { tab: 'branding',  label: 'Branding' },
+  { tab: 'platform',  label: 'Platform Settings' },
 ];
 
 // Icons for each submenu item (small, inline SVG)
@@ -211,6 +212,8 @@ const PROJECT_SUB_ICONS = {
   today: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="8,4.5 8,8 10.5,9.5"/></svg>',
   analytics: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="2.5" height="4.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="6.75" y="5" width="2.5" height="8.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="11" y="2" width="2.5" height="11.5" fill="currentColor" opacity="0.8" stroke="none"/></svg>',
   settings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
+  branding: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4" fill="currentColor" stroke="none"/></svg>',
+  platform: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="3" cy="8" r="1.7"/><circle cx="8" cy="8" r="1.7"/><circle cx="13" cy="8" r="1.7"/></svg>',
 };
 
 // Icons for global Dashboard submenu items
@@ -470,7 +473,7 @@ function openProjectMenu(btn) {
 /* ---------------------------------------------------------
    Tab Navigation
    --------------------------------------------------------- */
-const TAB_PANES = ['dashboard', 'appsettings', 'content', 'calendar', 'today', 'analytics', 'settings'];
+const TAB_PANES = ['dashboard', 'appsettings', 'content', 'calendar', 'today', 'analytics', 'branding', 'platform'];
 
 const GLOBAL_TABS = new Set(['dashboard', 'appsettings']);
 
@@ -505,10 +508,15 @@ const TAB_META = {
     desc: 'Track performance metrics for your posted content',
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="3" height="5" fill="currentColor" opacity="0.7" stroke="none"/><rect x="6.5" y="5" width="3" height="9" fill="currentColor" opacity="0.7" stroke="none"/><rect x="11" y="2" width="3" height="12" fill="currentColor" opacity="0.7" stroke="none"/></svg>`
   },
-  settings:  {
-    title: 'Channels',
-    desc: 'Connect your platform accounts and configure per-platform channels for this project',
-    icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+  branding: {
+    title: 'Branding',
+    desc: 'Brand and image settings for this project',
+    icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M12 1a4 4 0 0 0 0 8"/><circle cx="8" cy="8" r="6"/></svg>`
+  },
+  platform: {
+    title: 'Platform Settings',
+    desc: 'Publishing strategy and account selection for this project',
+    icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="3" cy="8" r="1.7"/><circle cx="8" cy="8" r="1.7"/><circle cx="13" cy="8" r="1.7"/></svg>`
   },
 };
 
@@ -553,7 +561,8 @@ function switchTab(tab) {
     case 'calendar':  loadCalendar();  break;
     case 'today':     loadToday();     break;
     case 'analytics': loadAnalytics(); break;
-    case 'settings':  loadSettings();  break;
+    case 'branding':  loadBranding();  break;
+    case 'platform':  loadPlatformSettings(); break;
   }
 }
 
@@ -2057,56 +2066,87 @@ async function renderAppSettings(pane) {
   const get = key => escHtml(_settings[key] || '');
   pane.innerHTML = `
     <div class="settings-wrap">
-      <div class="settings-row">
-        <div class="acct-section settings-col">
-          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> App Settings</div>
-          <div class="acct-row">
-            <div class="acct-row-label">
-              <span>Server Port</span>
-              <span class="acct-row-hint">Restart server to change</span>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div class="jfb" id="appSettingsViewBar">
+          <div class="jfb-slider" id="appSettingsViewPill"></div>
+          <button class="jfb-tab active" data-panel="app" onclick="switchAppSettingsView('app')">App Settings</button>
+          <button class="jfb-tab" data-panel="platform" onclick="switchAppSettingsView('platform')">Platform Settings</button>
+        </div>
+      </div>
+
+      <!-- View: App Settings -->
+      <div class="settings-panel" id="appSettingsViewApp">
+        <div class="settings-row">
+          <div class="acct-section settings-col">
+            <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> App Settings</div>
+            <div class="acct-row">
+              <div class="acct-row-label">
+                <span>Server Port</span>
+                <span class="acct-row-hint">Restart server to change</span>
+              </div>
+              <div class="acct-control">
+                <input type="text" class="form-input" id="setting-port" value="${get('app.port') || '8788'}" readonly style="max-width:90px;text-align:center">
+              </div>
             </div>
-            <div class="acct-control">
-              <input type="text" class="form-input" id="setting-port" value="${get('app.port') || '8788'}" readonly style="max-width:90px;text-align:center">
+          </div>
+        </div>
+        <div class="settings-row">
+          <div class="acct-section settings-col">
+            <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Hermes Connection</div>
+            <div class="acct-row">
+              <div class="acct-row-label">
+                <span>Config path</span>
+                <span class="acct-row-hint">Where Hermes finds its profile</span>
+              </div>
+              <div class="acct-control">
+                <input type="text" class="form-input" id="hermes-config-path" value="${get('hermes.config_path')}" readonly style="flex:1;font-family:var(--font-mono,monospace);font-size:12px">
+                <button class="btn-secondary btn-sm" onclick="testHermesConnection()">Test</button>
+              </div>
+            </div>
+            <div class="acct-row acct-row-stacked" id="hermes-config-preview" style="display:none">
+              <div class="acct-row-label"><span>Config preview</span></div>
+              <pre id="hermes-config-json" class="strategy-pre" style="max-height:240px;overflow:auto"></pre>
             </div>
           </div>
         </div>
       </div>
-      <div class="settings-row">
-        <div class="acct-section settings-col">
-          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
-          <div class="acct-row">
-            <div class="acct-row-label">
-              <span>Global connections</span>
-              <span class="acct-row-hint">Enter app credentials + connect each platform once. All projects share it — then pick the account/board per project in Channels.</span>
+
+      <!-- View: Platform Settings -->
+      <div class="settings-panel" id="appSettingsViewPlatform" style="display:none">
+        <div class="settings-row">
+          <div class="acct-section settings-col">
+            <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
+            <div class="acct-row">
+              <div class="acct-row-label">
+                <span>Global connections</span>
+                <span class="acct-row-hint">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</span>
+              </div>
+              <div class="acct-control" style="flex-direction:column;align-items:stretch;gap:8px">
+                <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px">Loading…</div>
+              </div>
             </div>
-            <div class="acct-control" style="flex-direction:column;align-items:stretch;gap:8px">
-              <div id="global-connections-list" style="display:flex;flex-direction:column;gap:6px">Loading…</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="settings-row">
-        <div class="acct-section settings-col">
-          <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> Hermes Connection</div>
-          <div class="acct-row">
-            <div class="acct-row-label">
-              <span>Config path</span>
-              <span class="acct-row-hint">Where Hermes finds its profile</span>
-            </div>
-            <div class="acct-control">
-              <input type="text" class="form-input" id="hermes-config-path" value="${get('hermes.config_path')}" readonly style="flex:1;font-family:var(--font-mono,monospace);font-size:12px">
-              <button class="btn-secondary btn-sm" onclick="testHermesConnection()">Test</button>
-            </div>
-          </div>
-          <div class="acct-row acct-row-stacked" id="hermes-config-preview" style="display:none">
-            <div class="acct-row-label"><span>Config preview</span></div>
-            <pre id="hermes-config-json" class="strategy-pre" style="max-height:240px;overflow:auto"></pre>
           </div>
         </div>
       </div>
     </div>`;
   loadGlobalConnections();
 }
+
+function switchAppSettingsView(name) {
+  ['app','platform'].forEach(v => {
+    const panel = document.getElementById('appSettingsView' + (v === 'app' ? 'App' : 'Platform'));
+    if (panel) panel.style.display = v === name ? '' : 'none';
+    const btn = document.querySelector(`#appSettingsViewBar .jfb-tab[data-panel="${v}"]`);
+    if (btn) btn.classList.toggle('active', v === name);
+  });
+  const bar  = document.getElementById('appSettingsViewBar');
+  const pill = document.getElementById('appSettingsViewPill');
+  if (bar && pill) {
+    const active = bar.querySelector('.jfb-tab.active');
+    if (active) { pill.style.left = active.offsetLeft + 'px'; pill.style.width = active.offsetWidth + 'px'; }
+  }
+}
+window.switchAppSettingsView = switchAppSettingsView;
 
 // Render the global platform connections list (Option B) in App Settings.
 const GLOBAL_CONN_PLATFORMS = [
@@ -2117,26 +2157,27 @@ const GLOBAL_CONN_PLATFORMS = [
 ];
 
 async function loadGlobalConnections() {
-  const list = document.getElementById('global-connections-list');
-  if (!list) return;
-  list.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Checking…</span>';
+  const grid = document.getElementById('global-connections-grid');
+  if (!grid) return;
+  grid.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Checking…</span>';
   const rows = [];
   for (const p of GLOBAL_CONN_PLATFORMS) {
     let status = null;
     try { status = await apiFetch(`/${p.key}/status?project_id=${getActiveProjectId()}`); } catch(_) {}
     rows.push({ p, status });
   }
-  list.innerHTML = rows.map(({ p, status }) => {
+  grid.innerHTML = rows.map(({ p, status }) => {
     const connected = !!(status && status.connected);
     const badge = connected
-      ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected</span>`
-      : `<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>`;
-    const account = (status && status.account_name) ? `<span style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</span>` : '';
+      ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600">Connected</span>`
+      : `<span style="display:inline-block;background:var(--bg-hover);color:var(--text-muted);border-radius:99px;padding:2px 10px;font-size:10px;font-weight:600;border:1px solid var(--border)">Not connected</span>`;
+    const account = (status && status.account_name)
+      ? `<div style="font-size:11px;color:var(--text-muted)">${escHtml(status.account_name)}</div>` : '';
     const btn = connected
-      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,1000)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
-      : (p.connect ? `<button class="btn-primary btn-sm" style="height:26px;padding:0 10px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
+      ? (p.disconnect ? `<button class="btn-danger-solid btn-sm" style="height:28px;padding:0 12px;font-size:11px" onclick="${p.disconnect}();setTimeout(loadGlobalConnections,1000)">Disconnect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`)
+      : (p.connect ? `<button class="btn-primary btn-sm" style="height:28px;padding:0 12px;font-size:11px" onclick="${p.connect}()">Connect</button>` : `<span style="font-size:11px;color:var(--text-dim)">OAuth not yet implemented</span>`);
     const creds = p.clientIdKey ? `
-      <div style="display:flex;flex-direction:column;gap:4px;margin-top:6px">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
         <div style="display:flex;align-items:center;gap:6px">
           <span style="font-size:10px;color:var(--text-dim);min-width:64px">Client ID</span>
           <input type="text" class="form-input" id="conn-${p.key}-client-id" value="${escHtml(_settings[p.clientIdKey] || '')}" placeholder="Paste Client ID..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientIdKey}','conn-${p.key}-client-id')">
@@ -2146,12 +2187,15 @@ async function loadGlobalConnections() {
           <input type="password" class="form-input" id="conn-${p.key}-client-secret" value="${escHtml(_settings[p.clientSecretKey] || '')}" placeholder="Paste Client Secret..." style="flex:1;height:26px;font-size:11px" onchange="saveConnCredential('${p.key}','${p.clientSecretKey}','conn-${p.key}-client-secret')">
         </div>
       </div>` : '';
-    return `<div style="display:flex;flex-direction:column;padding:8px;border:1px solid var(--border);border-radius:6px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <span style="width:10px;height:10px;border-radius:50%;background:${p.color};flex-shrink:0"></span>
-        <span style="font-size:13px;font-weight:600;min-width:110px">${p.label}</span>
-        ${badge} ${account}
-        <span style="margin-left:auto">${btn}</span>
+    return `<div style="display:flex;flex-direction:column;padding:14px;border:1px solid var(--border);border-radius:10px;background:var(--bg-card)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:38px;height:38px;border-radius:10px;background:${p.color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px;font-weight:700;color:#fff">${p.label[0]}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:600">${p.label}</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px">${badge}</div>
+          ${account}
+        </div>
+        <div style="flex-shrink:0">${btn}</div>
       </div>
       ${creds}
     </div>`;
@@ -2175,34 +2219,34 @@ window.saveConnCredential = saveConnCredential;
 
 let _settings = {};
 
-function loadSettings() {
-  const pane = document.getElementById('tab-settings');
-  pane.innerHTML = `
-    <div id="settings-content"><div class="loading">Loading settings…</div></div>`;
-  fetchSettings();
+async function loadPlatformSettings() {
+  const pane = document.getElementById('tab-platform');
+  if (!pane) return;
+  pane.innerHTML = `<div id="platform-content"><div class="loading">Loading platform settings…</div></div>`;
+  await fetchSettingsFor('platform');
 }
 
-async function fetchSettings() {
+async function fetchSettingsFor(kind) {
   try {
     const settings = await apiFetch('/settings');
     _settings = settings || {};
-    // Load the active project's LinkedIn channel config so the company-page
-    // selector can preselect the project's chosen org (Option B).
     window._liOrgUrn = '';
     try {
       const chans = await apiFetch(`/projects/${getActiveProjectId()}/channels`);
       const li = (chans || []).find(c => c.platform === 'linkedin');
       if (li && li.config && li.config.org_urn) window._liOrgUrn = li.config.org_urn;
     } catch(_) {}
-    renderSettings();
+    if (kind === 'branding') renderBranding();
+    else renderPlatformSettings();
   } catch(err) {
-    const el = document.getElementById('settings-content');
+    const id = kind === 'branding' ? 'branding-content' : 'platform-content';
+    const el = document.getElementById(id);
     if (el) el.innerHTML = `<div class="error-msg">Failed to load settings: ${escHtml(err.message)}</div>`;
   }
 }
 
-async function renderSettings() {
-  const el = document.getElementById('settings-content');
+async function renderPlatformSettings() {
+  const el = document.getElementById('platform-content');
   if (!el) return;
 
   const get = key => escHtml(_settings[key] || '');
@@ -2335,22 +2379,41 @@ async function renderSettings() {
 
   el.innerHTML = `
   <div class="settings-wrap">
-
-    <!-- Segment toggle + Save row -->
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <div class="jfb" id="settingsViewBar">
-        <div class="jfb-slider" id="settingsViewPill"></div>
-        <button class="jfb-tab active" data-panel="brand" onclick="switchSettingsPanel('brand')">Brand Settings</button>
-        <button class="jfb-tab" data-panel="platform" onclick="switchSettingsPanel('platform')">Platform Settings</button>
-      </div>
-      <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0">
+      <span style="font-size:13px;font-weight:600">Platform Settings</span>
+      <span style="font-size:12px;color:var(--text-muted)">Publishing strategy & account selection for this project</span>
+      <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save Settings
       </button>
     </div>
+    <div class="settings-row">
+    ${['x','linkedin','youtube','pinterest'].map(p => `<div class="settings-col">${buildPlatformCard(p)}</div>`).join('')}
+    </div>
+  </div>`;
+  setTimeout(() => {
+    initCustomSelects(el);
+    setTimeout(checkXAccount, 300);
+    setTimeout(checkLinkedInAccount, 400);
+    setTimeout(checkPinterestAccount, 500);
+  }, 50);
+}
 
-    <!-- Panel: Brand Settings -->
-    <div class="settings-panel" id="settings-panel-brand">
+async function renderBranding() {
+  const el = document.getElementById('branding-content');
+  if (!el) return;
+  const get = key => escHtml(_settings[key] || '');
+
+  el.innerHTML = `
+  <div class="settings-wrap">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+      <span style="font-size:13px;font-weight:600">Branding</span>
+      <span style="font-size:12px;color:var(--text-muted)">Brand & image settings for this project</span>
+      <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Settings
+      </button>
+    </div>
     <div class="settings-row">
       <div class="acct-section settings-col">
         <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5" fill="currentColor" opacity="0.8"/><circle cx="17.5" cy="10.5" r="2.5" fill="currentColor" opacity="0.6"/><path d="M3 17l4-4 4 4 3-3 4 4 3-3"/></svg> Brand & Image Settings</div>
@@ -2425,6 +2488,7 @@ async function renderSettings() {
       </div>
 
       <!-- Template Preview -->
+      </div>
       <div class="acct-section settings-col">
         <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" fill="none"/><circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/><path d="M21 15l-5-5L5 21"/></svg> Template Preview</div>
         <div id="brand-preview-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px 16px">
@@ -2455,24 +2519,22 @@ async function renderSettings() {
         </div>
       </div>
     </div>
-    </div><!-- /settings-panel-brand -->
-
-    <!-- Panel: Platform Settings -->
-    <div class="settings-panel" id="settings-panel-platform" style="display:none">
-    <div class="settings-row">
-    ${['x','linkedin','youtube','pinterest'].map(p => `<div class="settings-col">${buildPlatformCard(p)}</div>`).join('')}
     </div>
-    </div><!-- /settings-panel-platform -->
-
   </div>`;
   setTimeout(() => {
     initCustomSelects(el);
-    // Sync color pickers with text inputs
     syncColorPicker('setting-brand-primary-color', 'setting-brand-primary-color-text');
     syncColorPicker('setting-brand-accent-color', 'setting-brand-accent-color-text');
     syncColorPicker('setting-brand-text-color', 'setting-brand-text-color-text');
-    positionSettingsPill();
   }, 50);
+}
+window.renderBranding = renderBranding;
+
+async function loadBranding() {
+  const pane = document.getElementById('tab-branding');
+  if (!pane) return;
+  pane.innerHTML = `<div id="branding-content"><div class="loading">Loading branding…</div></div>`;
+  await fetchSettingsFor('branding');
 }
 
 function markPlatformOverride(platform, field) {
@@ -2864,17 +2926,6 @@ async function setPinterestBoard() {
   }
 }
 window.setPinterestBoard = setPinterestBoard;
-
-// Auto-check platform account status when the Channels tab loads (global
-// connections are managed in App Settings; here we only show per-project
-// account/board selectors based on connection state).
-const _originalLoadSettings = loadSettings;
-loadSettings = function() {
-  _originalLoadSettings();
-  setTimeout(checkXAccount, 500);
-  setTimeout(checkLinkedInAccount, 600);
-  setTimeout(checkPinterestAccount, 700);
-};
 
 // Per-project account rows on the Channels page (Option B).
 // X: single global account — just show its status.
