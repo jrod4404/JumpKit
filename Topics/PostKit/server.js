@@ -598,14 +598,24 @@ function getCalendar(req, res) {
   const url = new URL(req.url, `http://localhost`);
   const from = parseInt(url.searchParams.get('from') || '0');
   const to = parseInt(url.searchParams.get('to') || String(Date.now() + 86400000 * 365));
-  const projectId = activeProjectId(url, null);
-  const posts = db.prepare(
-    `SELECT p.*, s.title as seed_title FROM posts p 
-     LEFT JOIN seeds s ON p.seed_id = s.id
-     WHERE p.project_id = ? AND p.scheduled_for >= ? AND p.scheduled_for <= ?
-     AND p.status = 'scheduled'
-     ORDER BY p.scheduled_for ASC`
-  ).all(projectId, from, to);
+  const all = url.searchParams.get('all') === '1';
+  const projectId = all ? null : activeProjectId(url, null);
+  const posts = all
+    ? db.prepare(
+        `SELECT p.*, s.title as seed_title, pr.name AS project_name FROM posts p
+         LEFT JOIN seeds s ON p.seed_id = s.id
+         LEFT JOIN projects pr ON p.project_id = pr.id
+         WHERE p.scheduled_for >= ? AND p.scheduled_for <= ?
+         AND p.status = 'scheduled'
+         ORDER BY p.scheduled_for ASC`
+      ).all(from, to)
+    : db.prepare(
+        `SELECT p.*, s.title as seed_title FROM posts p
+         LEFT JOIN seeds s ON p.seed_id = s.id
+         WHERE p.project_id = ? AND p.scheduled_for >= ? AND p.scheduled_for <= ?
+         AND p.status = 'scheduled'
+         ORDER BY p.scheduled_for ASC`
+      ).all(projectId, from, to);
   send(res, 200, posts.map(p => ({ ...p, media_paths: tryParse(p.media_paths, []) })));
 }
 

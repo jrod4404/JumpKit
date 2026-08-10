@@ -2576,3 +2576,267 @@ select.form-input,
   .dash-project-chips { display: none; }
   .dash-project-stat { min-width: 42px; }
 }
+
+/* ── Dashboard Calendar (all projects) ────────────────────────────────── */
+.dash-cal {
+  margin-top: 4px;
+}
+.dash-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.dash-cal-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.dash-cal-period {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  min-width: 180px;
+}
+
+/* view switch bar (reuse jfb look) */
+.dash-cal-viewbar {
+  display: flex;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+  position: relative;
+}
+.dash-cal-viewtab {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-cal-viewtab.active {
+  background: var(--bg-card);
+  color: var(--text);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* Month */
+.dash-month-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg-card);
+}
+.dash-month-header {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-align: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.dash-month-cell {
+  min-height: 84px;
+  padding: 6px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  cursor: pointer;
+  transition: background 0.1s;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.dash-month-cell:nth-child(7n) { border-right: none; }
+.dash-month-cell.empty { cursor: default; background: var(--bg); }
+.dash-month-cell:hover:not(.empty) { background: var(--bg-hover); }
+.dash-month-cell.today { background: color-mix(in srgb, var(--accent) 8%, var(--bg-card)); }
+.dash-month-num {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: 4px;
+}
+.dash-month-cell.today .dash-month-num {
+  background: var(--accent);
+  color: #fff;
+}
+.dash-month-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 2px;
+}
+.dash-cal-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.dash-month-more {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Week */
+.dash-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+.dash-week-col {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  min-height: 220px;
+}
+.dash-week-col.today { border-color: var(--accent); }
+.dash-week-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  margin-bottom: 2px;
+}
+.dash-week-num {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.dash-week-col.today .dash-week-num { color: var(--accent); }
+.dash-week-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.dash-week-post {
+  font-size: 10.5px;
+  line-height: 1.35;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border-left: 3px solid var(--border);
+  background: var(--bg-hover);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dash-week-post .dash-week-post-time { font-weight: 600; margin-right: 4px; }
+
+/* Day (today) */
+.dash-day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.dash-day-post {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.dash-day-post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.dash-day-post-text {
+  flex: 1;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text);
+  word-break: break-word;
+}
+.dash-day-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13px;
+  padding: 24px;
+}
+
+/* Day popover panel (click a month day) */
+.dash-cal-panel {
+  margin-top: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+}
+.dash-cal-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.dash-cal-panel-title { font-size: 13px; font-weight: 700; }
+.dash-cal-panel-close {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 8px;
+}
+.dash-cal-panel-post {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+.dash-cal-panel-post:first-of-type { border-top: none; padding-top: 0; }
+.dash-cal-panel-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 200px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.dash-cal-panel-text { flex: 1; font-size: 12.5px; line-height: 1.5; color: var(--text); word-break: break-word; }
+.dash-cal-project {
+  font-size: 10.5px;
+  color: var(--text-muted);
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 99px;
+  padding: 1px 8px;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .dash-week-grid { grid-template-columns: repeat(2, 1fr); }
+  .dash-month-grid { grid-template-columns: repeat(1, 1fr); }
+  .dash-day-post { flex-direction: column; }
+  .dash-day-post-meta { min-width: 0; }
+}
+

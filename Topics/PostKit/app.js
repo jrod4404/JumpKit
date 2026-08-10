@@ -199,7 +199,6 @@ let _activeTab = 'content';
 const PROJECT_MENU_ITEMS = [
   { tab: 'content',  label: 'Content' },
   { tab: 'calendar',  label: 'Schedule' },
-  { tab: 'today',     label: 'Today' },
   { tab: 'analytics', label: 'Analytics' },
   { tab: 'branding',  label: 'Branding' },
   { tab: 'platform',  label: 'Platform Settings' },
@@ -209,7 +208,6 @@ const PROJECT_MENU_ITEMS = [
 const PROJECT_SUB_ICONS = {
   content: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="1.5" width="5" height="5" rx="1"/><rect x="9.5" y="1.5" width="5" height="5" rx="1"/><rect x="1.5" y="9.5" width="5" height="5" rx="1"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/></svg>',
   calendar: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="11.5" rx="2"/><line x1="5" y1="1.5" x2="5" y2="5"/><line x1="11" y1="1.5" x2="11" y2="5"/><line x1="1.5" y1="6.5" x2="14.5" y2="6.5"/></svg>',
-  today: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="8,4.5 8,8 10.5,9.5"/></svg>',
   analytics: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="9" width="2.5" height="4.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="6.75" y="5" width="2.5" height="8.5" fill="currentColor" opacity="0.8" stroke="none"/><rect x="11" y="2" width="2.5" height="11.5" fill="currentColor" opacity="0.8" stroke="none"/></svg>',
   settings: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14M3.8 3.8l1 1M11.2 11.2l1 1M12.2 3.8l-1 1M4.8 11.2l-1 1"/></svg>',
   branding: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.4" fill="currentColor" stroke="none"/></svg>',
@@ -473,7 +471,7 @@ function openProjectMenu(btn) {
 /* ---------------------------------------------------------
    Tab Navigation
    --------------------------------------------------------- */
-const TAB_PANES = ['dashboard', 'appsettings', 'content', 'calendar', 'today', 'analytics', 'branding', 'platform'];
+const TAB_PANES = ['dashboard', 'appsettings', 'content', 'calendar', 'analytics', 'branding', 'platform'];
 
 const GLOBAL_TABS = new Set(['dashboard', 'appsettings']);
 
@@ -497,11 +495,6 @@ const TAB_META = {
     title: 'Schedule',
     desc: 'View and manage your scheduled posts across all platforms',
     icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="14" height="12" rx="2"/><line x1="5" y1="1" x2="5" y2="5"/><line x1="11" y1="1" x2="11" y2="5"/><line x1="1" y1="7" x2="15" y2="7"/></svg>`
-  },
-  today:     {
-    title: 'Today',
-    desc: 'Posts scheduled for today — copy, review, and mark as posted',
-    icon: `<svg width="18" height="18" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.5"/><polyline points="8,4 8,8 11,10"/></svg>`
   },
   analytics: {
     title: 'Analytics',
@@ -559,7 +552,6 @@ function switchTab(tab) {
     case 'appsettings': loadAppSettings(); break;
     case 'content':   loadContent();   break;
     case 'calendar':  loadCalendar();  break;
-    case 'today':     loadToday();     break;
     case 'analytics': loadAnalytics(); break;
     case 'branding':  loadBranding();  break;
     case 'platform':  loadPlatformSettings(); break;
@@ -1791,78 +1783,6 @@ function calShowDay(dateKey, posts) {
 window.calShowDay = calShowDay;
 
 /* =========================================================
-   TODAY TAB
-   ========================================================= */
-function loadToday() {
-  const pane = document.getElementById('tab-today');
-  pane.innerHTML = `
-
-    <div id="today-content"><div class="loading">Loading today's posts…</div></div>`;
-  fetchToday();
-}
-
-async function fetchToday() {
-  try {
-    const posts = await apiFetch(`/posts/today?project_id=${getActiveProjectId()}`);
-    renderToday(posts || []);
-  } catch(err) {
-    const el = document.getElementById('today-content');
-    if (el) el.innerHTML = `<div class="error-msg">Failed to load: ${escHtml(err.message)}</div>`;
-  }
-}
-
-function renderToday(posts) {
-  const el = document.getElementById('today-content');
-  if (!el) return;
-  if (!posts.length) {
-    el.innerHTML = `<div class="empty-state"><p>Nothing scheduled for today. Enjoy the day! 🎉</p></div>`;
-    return;
-  }
-
-  // Group by platform
-  const byPlatform = {};
-  posts.forEach(p => {
-    if (!byPlatform[p.platform]) byPlatform[p.platform] = [];
-    byPlatform[p.platform].push(p);
-  });
-
-  el.innerHTML = Object.entries(byPlatform).map(([platform, platformPosts]) => `
-    <div class="platform-section">
-      <div class="platform-section-header">${platformChip(platform)}</div>
-      <div class="today-posts-list">
-        ${platformPosts.map(post => `
-          <div class="card today-post-card" id="today-post-${escHtml(post.id)}">
-            <div class="today-post-meta">
-              ${statusBadge(post.status)}
-              <span class="text-muted" style="font-size:13px">${post.scheduled_for ? formatDatetime(post.scheduled_for) : 'Unscheduled'}</span>
-            </div>
-            <p class="post-text">${escHtml(post.post_text||'')}</p>
-            <div class="today-post-actions">
-              <button class="btn-secondary btn-sm" onclick="copyToClipboard(${JSON.stringify(post.post_text||'')})">Copy</button>
-              ${post.status !== 'posted'
-                ? `<button class="btn-primary btn-sm" onclick="markAsPosted('${escHtml(post.id)}')">Mark as Posted</button>`
-                : `<span class="badge badge-success">Posted</span>`}
-            </div>
-          </div>`).join('')}
-      </div>
-    </div>`).join('');
-}
-
-async function markAsPosted(postId) {
-  try {
-    await apiFetch(`/posts/${postId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ status: 'posted', posted_at: Date.now() })
-    });
-    showToast('Marked as posted!');
-    fetchToday();
-  } catch(err) {
-    showToast('Failed: ' + err.message, 'error');
-  }
-}
-window.markAsPosted = markAsPosted;
-
-/* =========================================================
    ANALYTICS TAB
    ========================================================= */
 function loadAnalytics() {
@@ -2043,8 +1963,243 @@ function renderDashboard(data) {
         <div class="dash-section-title">Upcoming Posts</div>
         <div class="dash-upcoming-list">${upcomingRows}</div>
       </div>
+
+      <div class="dash-section">
+        <div class="dash-section-title">Calendar</div>
+        <div class="dash-cal" id="dash-cal">
+          <div class="dash-cal-header">
+            <div class="dash-cal-controls">
+              <div class="dash-cal-viewbar">
+                <button class="dash-cal-viewtab${_dashCalView==='month'?' active':''}" data-dashview="month">Month</button>
+                <button class="dash-cal-viewtab${_dashCalView==='week'?' active':''}" data-dashview="week">Week</button>
+                <button class="dash-cal-viewtab${_dashCalView==='day'?' active':''}" data-dashview="day">Today</button>
+              </div>
+              <div class="dash-cal-nav">
+                <button class="btn-secondary btn-sm" onclick="dashCalNav(-1)">‹</button>
+                <span class="dash-cal-period" id="dash-cal-period"></span>
+                <button class="btn-secondary btn-sm" onclick="dashCalNav(1)">›</button>
+              </div>
+            </div>
+            <button class="btn-secondary btn-sm" onclick="dashCalToday()">Today</button>
+          </div>
+          <div id="dash-cal-grid"><div class="dash-day-empty">Loading calendar…</div></div>
+          <div id="dash-cal-panel" class="dash-cal-panel" style="display:none"></div>
+        </div>
+      </div>
     </div>`;
+  setTimeout(dashCalInit, 0);
 }
+
+/* ---------------------------------------------------------
+   Dashboard Calendar (All Projects) — self-contained instance
+   --------------------------------------------------------- */
+let _dashCalDate = new Date();
+let _dashCalView = 'month';
+
+function dashCalInit() {
+  _dashCalDate = new Date();
+  _dashCalView = 'month';
+  const bar = document.querySelector('.dash-cal-viewbar');
+  if (bar && !bar._wired) {
+    bar._wired = true;
+    bar.addEventListener('click', e => {
+      const tab = e.target.closest('.dash-cal-viewtab');
+      if (tab) dashCalSetView(tab.dataset.dashview);
+    });
+  }
+  dashCalFetch();
+}
+
+function dashCalViewTabs() {
+  document.querySelectorAll('.dash-cal-viewtab').forEach(b => {
+    b.classList.toggle('active', b.dataset.dashview === _dashCalView);
+  });
+}
+
+function dashCalSetView(view) {
+  _dashCalView = view;
+  dashCalViewTabs();
+  dashCalFetch();
+}
+
+function dashCalToday() {
+  _dashCalDate = new Date();
+  dashCalFetch();
+}
+
+function dashCalNav(dir) {
+  if (_dashCalView === 'month') {
+    _dashCalDate = new Date(_dashCalDate.getFullYear(), _dashCalDate.getMonth() + dir, 1);
+  } else if (_dashCalView === 'week') {
+    _dashCalDate = new Date(_dashCalDate.getTime() + dir * 7 * 86400000);
+  } else {
+    _dashCalDate = new Date(_dashCalDate.getTime() + dir * 86400000);
+  }
+  dashCalFetch();
+}
+
+function dashCalRange() {
+  if (_dashCalView === 'month') {
+    const first = new Date(_dashCalDate.getFullYear(), _dashCalDate.getMonth(), 1);
+    const last  = new Date(_dashCalDate.getFullYear(), _dashCalDate.getMonth() + 1, 0, 23, 59, 59);
+    return { from: first.getTime(), to: last.getTime() };
+  } else if (_dashCalView === 'week') {
+    const day = _dashCalDate.getDay();
+    const sun = new Date(_dashCalDate.getTime() - day * 86400000); sun.setHours(0,0,0,0);
+    const sat = new Date(sun.getTime() + 6 * 86400000); sat.setHours(23,59,59,999);
+    return { from: sun.getTime(), to: sat.getTime() };
+  } else {
+    const d = new Date(_dashCalDate); d.setHours(0,0,0,0);
+    const e = new Date(_dashCalDate); e.setHours(23,59,59,999);
+    return { from: d.getTime(), to: e.getTime() };
+  }
+}
+
+function dashCalPeriodLabel() {
+  const lbl = document.getElementById('dash-cal-period');
+  if (!lbl) return;
+  if (_dashCalView === 'month') {
+    lbl.textContent = _dashCalDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  } else if (_dashCalView === 'week') {
+    const { from, to } = dashCalRange();
+    const f = new Date(from), t = new Date(to);
+    lbl.textContent = `${f.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${t.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+  } else {
+    lbl.textContent = _dashCalDate.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  }
+}
+
+async function dashCalFetch() {
+  const { from, to } = dashCalRange();
+  dashCalPeriodLabel();
+  const grid = document.getElementById('dash-cal-grid');
+  if (grid) grid.innerHTML = '<div class="dash-day-empty">Loading…</div>';
+  try {
+    const posts = await apiFetch(`/calendar?from=${from}&to=${to}&all=1`);
+    dashCalRender(posts || []);
+  } catch(err) {
+    if (grid) grid.innerHTML = `<div class="error-msg">Failed to load calendar: ${escHtml(err.message)}</div>`;
+  }
+}
+
+function dashCalRender(posts) {
+  const grid = document.getElementById('dash-cal-grid');
+  const panel = document.getElementById('dash-cal-panel');
+  if (panel) panel.style.display = 'none';
+  if (!grid) return;
+  const postsByDate = {};
+  posts.forEach(p => {
+    if (!p.scheduled_for) return;
+    const d = new Date(p.scheduled_for);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (!postsByDate[key]) postsByDate[key] = [];
+    postsByDate[key].push(p);
+  });
+  if (_dashCalView === 'month') dashCalMonthGrid(postsByDate);
+  else if (_dashCalView === 'week') dashCalWeekGrid(postsByDate);
+  else dashCalDayList(posts);
+}
+
+function dashCalMonthGrid(postsByDate) {
+  const grid = document.getElementById('dash-cal-grid');
+  const year = _dashCalDate.getFullYear(), month = _dashCalDate.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = `<div class="dash-month-grid">`;
+  html += DAYS.map(d => `<div class="dash-month-header">${d}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) html += `<div class="dash-month-cell empty"></div>`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const dayPosts = postsByDate[key] || [];
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===day;
+    const dots = dayPosts.slice(0,5).map(p => {
+      const color = PLATFORM_COLORS[p.platform] || '#888';
+      return `<span class="dash-cal-dot" style="background:${color}" title="${escHtml((PLATFORM_LABELS[p.platform]||p.platform))}: ${escHtml((p.post_text||'').slice(0,40))}"></span>`;
+    }).join('');
+    const attr = JSON.stringify(dayPosts).replace(/"/g,'&quot;');
+    html += `<div class="dash-month-cell${isToday?' today':''}" onclick="dashCalShowDay('${key}',${attr})">
+      <span class="dash-month-num">${day}</span>
+      <div class="dash-month-dots">${dots}</div>
+      ${dayPosts.length > 5 ? `<span class="dash-month-more">+${dayPosts.length-5}</span>` : ''}
+    </div>`;
+  }
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+function dashCalWeekGrid(postsByDate) {
+  const grid = document.getElementById('dash-cal-grid');
+  const { from } = dashCalRange();
+  const today = new Date();
+  let html = `<div class="dash-week-grid">`;
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(from + i * 86400000);
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dayPosts = postsByDate[key] || [];
+    const isToday = today.toDateString() === d.toDateString();
+    html += `<div class="dash-week-col${isToday?' today':''}">
+      <div class="dash-week-label">${d.toLocaleDateString('en-US',{weekday:'short'})}</div>
+      <div class="dash-week-num">${d.getDate()}</div>
+      <div class="dash-week-posts">
+        ${dayPosts.length ? dayPosts.map(p => {
+          const t = new Date(p.scheduled_for);
+          const timeStr = isNaN(t) ? '' : t.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' });
+          const color = PLATFORM_COLORS[p.platform] || '#888';
+          return `<div class="dash-week-post" style="border-left-color:${color}">
+            <span class="dash-week-post-time" style="color:${color}">${timeStr}</span>
+            ${escHtml((PLATFORM_LABELS[p.platform]||p.platform))}${p.project_name ? ' · ' + escHtml(p.project_name) : ''}
+          </div>`;
+        }).join('') : '<div class="dash-week-post" style="color:var(--text-muted)">—</div>'}
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+function dashCalDayList(posts) {
+  const grid = document.getElementById('dash-cal-grid');
+  if (!posts.length) { grid.innerHTML = '<div class="dash-day-empty">Nothing scheduled for today.</div>'; return; }
+  const sorted = [...posts].sort((a,b) => (a.scheduled_for||0) - (b.scheduled_for||0));
+  grid.innerHTML = `<div class="dash-day-list">${sorted.map(p => `
+    <div class="dash-day-post">
+      <div class="dash-day-post-meta">
+        ${platformChip(p.platform)}
+        ${p.project_name ? `<span class="dash-cal-project">${escHtml(p.project_name)}</span>` : ''}
+        <span class="text-muted" style="font-size:12px">${p.scheduled_for ? formatDatetime(p.scheduled_for) : ''}</span>
+      </div>
+      <div class="dash-day-post-text">${escHtml(p.post_text||'')}</div>
+    </div>`).join('')}</div>`;
+}
+
+function dashCalShowDay(dateKey, posts) {
+  let dayPosts = posts;
+  if (typeof posts === 'string') { try { dayPosts = JSON.parse(posts); } catch(_) { dayPosts = []; } }
+  const panel = document.getElementById('dash-cal-panel');
+  if (!panel) return;
+  if (!dayPosts || !dayPosts.length) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  panel.innerHTML = `
+    <div class="dash-cal-panel-head">
+      <span class="dash-cal-panel-title">${dateKey}</span>
+      <button class="dash-cal-panel-close" onclick="document.getElementById('dash-cal-panel').style.display='none'">✕ Close</button>
+    </div>
+    ${dayPosts.map(p => `
+      <div class="dash-cal-panel-post">
+        <div class="dash-cal-panel-meta">
+          ${platformChip(p.platform)}
+          ${p.project_name ? `<span class="dash-cal-project">${escHtml(p.project_name)}</span>` : ''}
+          <span class="text-muted" style="font-size:12px">${p.scheduled_for ? formatDatetime(p.scheduled_for) : ''}</span>
+        </div>
+        <div class="dash-cal-panel-text">${escHtml(p.post_text||'')}</div>
+      </div>`).join('')}`;
+}
+window.dashCalNav = dashCalNav;
+window.dashCalToday = dashCalToday;
+window.dashCalSetView = dashCalSetView;
+window.dashCalShowDay = dashCalShowDay;
 
 /* ---------------------------------------------------------
    Global App Settings (under Dashboard → Settings)
