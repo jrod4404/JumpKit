@@ -201,7 +201,7 @@ const PROJECT_MENU_ITEMS = [
   { tab: 'calendar',  label: 'Schedule' },
   { tab: 'analytics', label: 'Analytics' },
   { tab: 'branding',  label: 'Branding' },
-  { tab: 'platform',  label: 'Platform Settings' },
+  { tab: 'platform',  label: 'Publish Settings' },
 ];
 
 // Icons for each submenu item (small, inline SVG)
@@ -507,7 +507,7 @@ const TAB_META = {
     icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>`
   },
   platform: {
-    title: 'Platform Settings',
+    title: 'Publish Settings',
     desc: 'Publishing strategy and account selection for this project',
     icon: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`
   },
@@ -1974,12 +1974,12 @@ function renderDashboard(data) {
                 <button class="dash-cal-viewtab${_dashCalView==='week'?' active':''}" data-dashview="week">Week</button>
                 <button class="dash-cal-viewtab${_dashCalView==='day'?' active':''}" data-dashview="day">Today</button>
               </div>
-              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
               <div class="dash-cal-nav">
                 <button class="btn-secondary btn-sm" onclick="dashCalNav(-1)">‹</button>
                 <span class="dash-cal-period" id="dash-cal-period"></span>
                 <button class="btn-secondary btn-sm" onclick="dashCalNav(1)">›</button>
               </div>
+              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
             </div>
             <button class="btn-secondary btn-sm" onclick="dashCalToday()">Today</button>
           </div>
@@ -2290,7 +2290,7 @@ async function renderAppSettings(pane) {
             <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
             <div style="padding:14px 20px 0">
               <div style="font-size:13px;font-weight:600">Global connections</div>
-              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</div>
+              <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Publish Settings.</div>
             </div>
             <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:stretch;padding:14px 20px 20px">Loading…</div>
           </div>
@@ -2400,7 +2400,7 @@ let _settings = {};
 async function loadPlatformSettings() {
   const pane = document.getElementById('tab-platform');
   if (!pane) return;
-  pane.innerHTML = `<div id="platform-content"><div class="loading">Loading platform settings…</div></div>`;
+  pane.innerHTML = `<div id="platform-content"><div class="loading">Loading publish settings…</div></div>`;
   await fetchSettingsFor('platform');
 }
 
@@ -2567,7 +2567,7 @@ async function renderPlatformSettings() {
   el.innerHTML = `
   <div class="settings-wrap">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <span style="font-size:13px;font-weight:600">Platform Settings</span>
+      <span style="font-size:13px;font-weight:600">Publish Settings</span>
       <span style="font-size:12px;color:var(--text-muted)">Publishing strategy & account selection for this project</span>
       <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
