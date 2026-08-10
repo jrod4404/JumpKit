@@ -1970,7 +1970,7 @@ function renderDashboard(data) {
           <div class="dash-cal-header">
             <div class="dash-cal-filter-row">
               <label class="dash-cal-filter-label" for="dash-cal-project-filter">Project</label>
-              <select id="dash-cal-project-filter" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
+              <div class="csel-mount" style="max-width:260px;flex:1"></div>
             </div>
             <div class="dash-cal-controls">
               <div class="dash-cal-viewbar">
@@ -2005,13 +2005,14 @@ function dashCalInit(projects) {
   _dashCalDate = new Date();
   _dashCalView = 'month';
   _dashCalProject = '';
-  const sel = document.getElementById('dash-cal-project-filter');
-  if (sel) {
-    const current = sel.value;
-    sel.innerHTML = '<option value="">All projects</option>' + (projects || []).map(p =>
-      `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`
-    ).join('');
-    sel.value = current;
+  const mount = document.querySelector('.csel-mount');
+  if (mount && typeof buildCustomSelect === 'function') {
+    const opts = [{ value: '', label: 'All projects' }].concat((projects || []).map(p => ({ value: p.name, label: p.name })));
+    mount.innerHTML = buildCustomSelect('dash-cal-project-filter', opts, _dashCalProject);
+    const csel = mount.querySelector('.csel');
+    if (csel) csel.classList.add('csel-full');
+    initCustomSelects(mount);
+    mount.addEventListener('csel:change', e => dashCalSetProject(e.detail.value));
   }
   const bar = document.querySelector('.dash-cal-viewbar');
   if (bar && !bar._wired) {
@@ -3377,9 +3378,12 @@ function initCustomSelects(container) {
     });
   });
 
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open'));
-  }, { once: false });
+  if (!document._csDocWired) {
+    document._csDocWired = true;
+    document.addEventListener('click', () => {
+      document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open'));
+    }, { once: false });
+  }
 }
 window.initCustomSelects = initCustomSelects;
 window.getCustomSelectValue = getCustomSelectValue;
