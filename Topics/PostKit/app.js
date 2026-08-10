@@ -315,7 +315,7 @@ function persistProjectExpansion() {
   } catch (_e) { /* ignore */ }
 }
 
-async function selectProject(pid) {
+async function selectProject(pid, tab) {
   if (!_projects.find(p => p.id === pid)) return;
   _activeProjectId = pid;
   localStorage.setItem('pk_active_project', pid);
@@ -325,10 +325,16 @@ async function selectProject(pid) {
     persistProjectExpansion();
   }
   renderProjectList();
-  // Reset in-tab state and reload
+  // Reset in-tab state and reload. If a specific tab was requested (e.g. user
+  // clicked a submenu item under this project), switch to it in the new project
+  // context; otherwise reload the current tab scoped to this project.
   _seedFilters = { search: '', status: '', campaign: '' };
   window._currentSeedId = null;
-  loadActiveTab();
+  if (tab) {
+    switchTab(tab);
+  } else {
+    loadActiveTab();
+  }
 }
 
 function toggleProjectExpand(pid) {
@@ -566,7 +572,15 @@ function initNav() {
       // Submenu item (Content / Schedule / Today / Analytics / Channels)
       const item = e.target.closest('.nav-item[data-tab]');
       if (item) {
-        switchTab(item.dataset.tab);
+        // If this submenu belongs to a project (not a global dashboard/settings item),
+        // select that project FIRST so the page loads in the right project context.
+        const pid = item.dataset.projectId;
+        const tab = item.dataset.tab;
+        if (pid) {
+          selectProject(pid, tab);
+        } else {
+          switchTab(tab);
+        }
         e.stopPropagation();
         return;
       }

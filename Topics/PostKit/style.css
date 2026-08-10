@@ -2370,6 +2370,11 @@ select.form-input,
 .dashboard-nav .main-nav-item {
   padding: 9px 20px 9px 20px;
 }
+.dashboard-nav .main-nav-item.active {
+  color: var(--accent-light);
+  background: var(--grad-soft);
+  font-weight: 600;
+}
 .dashboard-nav .main-nav-item .nav-icon {
   width: 18px;
   flex-shrink: 0;
