@@ -1969,12 +1969,12 @@ function renderDashboard(data) {
         <div class="dash-cal" id="dash-cal">
           <div class="dash-cal-header">
             <div class="dash-cal-controls">
-              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
               <div class="dash-cal-viewbar">
                 <button class="dash-cal-viewtab${_dashCalView==='month'?' active':''}" data-dashview="month">Month</button>
                 <button class="dash-cal-viewtab${_dashCalView==='week'?' active':''}" data-dashview="week">Week</button>
                 <button class="dash-cal-viewtab${_dashCalView==='day'?' active':''}" data-dashview="day">Today</button>
               </div>
+              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
               <div class="dash-cal-nav">
                 <button class="btn-secondary btn-sm" onclick="dashCalNav(-1)">‹</button>
                 <span class="dash-cal-period" id="dash-cal-period"></span>
