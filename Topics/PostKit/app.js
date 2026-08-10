@@ -2116,11 +2116,11 @@ async function renderAppSettings(pane) {
         <div class="settings-row">
           <div class="acct-section settings-col">
             <div class="acct-section-title"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Platform Connections</div>
-            <div style="margin-bottom:12px">
+            <div style="padding:14px 20px 0">
               <div style="font-size:13px;font-weight:600">Global connections</div>
               <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Enter app credentials + connect each platform once. All projects share them — then pick the account/board per project in each project's Platform Settings.</div>
             </div>
-            <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:stretch">Loading…</div>
+            <div id="global-connections-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:stretch;padding:14px 20px 20px">Loading…</div>
           </div>
         </div>
       </div>
