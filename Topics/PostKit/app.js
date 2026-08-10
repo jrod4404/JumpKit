@@ -655,7 +655,6 @@ function loadContent() {
         {value:'processing',label:'Processing'},{value:'done',label:'Done'},
         {value:'error',label:'Error'}
       ], _seedFilters.status)}
-      <input type="text" class="form-input filter-campaign" id="seed-campaign-filter" placeholder="Filter by campaign..." value="${escHtml(_seedFilters.campaign)}">
     </div>
     <div id="seeds-grid" class="card-grid">
       <div class="loading">Loading seeds…</div>
@@ -672,11 +671,6 @@ function loadContent() {
     _seedFilters.status = e.detail.value;
     fetchSeeds();
   });
-  pane.querySelector('#seed-campaign-filter').addEventListener('input', e => {
-    _seedFilters.campaign = e.target.value;
-    clearTimeout(debounce);
-    debounce = setTimeout(fetchSeeds, 300);
-  });
 
   initCustomSelects(pane);
   fetchSeeds();
@@ -687,7 +681,6 @@ async function fetchSeeds() {
   params.set('project_id', getActiveProjectId());
   if (_seedFilters.search)   params.set('search', _seedFilters.search);
   if (_seedFilters.status)   params.set('status', _seedFilters.status);
-  if (_seedFilters.campaign) params.set('campaign', _seedFilters.campaign);
   const qs = params.toString();
 
   try {
