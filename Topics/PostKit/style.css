@@ -2,7 +2,7 @@
 [data-theme="dark"] {
   --bg: #0d0d14;
   --bg-surface: #13131e;
-  --bg-titlebar: #1c1c2e; /* slightly lighter than surface for header contrast */
+  --bg-titlebar: #181828; /* slightly darker than surface for header contrast */
   --bg-card: #19192a;
   --bg-hover: #21213a;
   --border: #2a2a42;
@@ -31,7 +31,7 @@
 [data-theme="light"] {
   --bg: #f5f5fa;
   --bg-surface: #e9e9f0;
-  --bg-titlebar: #dddee8; /* slightly darker than surface for header contrast */
+  --bg-titlebar: #d6d7e2; /* slightly darker than surface for header contrast */
   --bg-card: #ffffff;
   --bg-hover: #f0f0f8;
   --border: #dddde8;
