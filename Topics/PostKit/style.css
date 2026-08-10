@@ -2360,8 +2360,10 @@ select.form-input,
 /* Dashboard nav item (global, above Projects) */
 .dashboard-nav {
   margin: 0 0 10px;
-  border-bottom: 1px solid var(--border);
   padding-bottom: 8px;
+}
+.dashboard-nav .main-section-header {
+  padding-top: 6px; /* MAIN section: reduced top margin (was 14px) */
 }
 .dashboard-nav .main-section-header .nav-section-label {
   text-transform: uppercase;
