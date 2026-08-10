@@ -1982,7 +1982,6 @@ function renderDashboard(data) {
                 <span class="dash-cal-period" id="dash-cal-period"></span>
                 <button class="btn-secondary btn-sm" onclick="dashCalNav(1)">›</button>
               </div>
-              <button class="btn-secondary btn-sm" onclick="dashCalToday()">Today</button>
             </div>
           </div>
           <div id="dash-cal-grid"><div class="dash-day-empty">Loading calendar…</div></div>
