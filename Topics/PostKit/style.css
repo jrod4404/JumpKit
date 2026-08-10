@@ -155,7 +155,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 36px 12px 8px; /* clear the app titlebar at top; room at bottom so logo is never clipped */
+  padding: 40px 12px 8px; /* clear the app titlebar at top; room at bottom so logo is never clipped */
   overflow: visible;
   flex-shrink: 0;
 }
