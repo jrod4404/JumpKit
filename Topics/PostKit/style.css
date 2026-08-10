@@ -2,7 +2,7 @@
 [data-theme="dark"] {
   --bg: #0d0d14;
   --bg-surface: #13131e;
-  --bg-titlebar: #181828; /* slightly darker than surface for header contrast */
+  --bg-titlebar: #1e1e30; /* slightly darker than surface for header contrast */
   --bg-card: #19192a;
   --bg-hover: #21213a;
   --border: #2a2a42;
