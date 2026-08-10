@@ -1969,6 +1969,7 @@ function renderDashboard(data) {
         <div class="dash-cal" id="dash-cal">
           <div class="dash-cal-header">
             <div class="dash-cal-controls">
+              <select class="form-input" id="dash-cal-project-filter" style="height:30px;font-size:12px;min-width:120px" onchange="dashCalSetProject(this.value)"><option value="">All projects</option></select>
               <div class="dash-cal-viewbar">
                 <button class="dash-cal-viewtab${_dashCalView==='month'?' active':''}" data-dashview="month">Month</button>
                 <button class="dash-cal-viewtab${_dashCalView==='week'?' active':''}" data-dashview="week">Week</button>
@@ -1987,7 +1988,7 @@ function renderDashboard(data) {
         </div>
       </div>
     </div>`;
-  setTimeout(dashCalInit, 0);
+  setTimeout(() => dashCalInit(data.projects || []), 0);
 }
 
 /* ---------------------------------------------------------
@@ -1995,10 +1996,20 @@ function renderDashboard(data) {
    --------------------------------------------------------- */
 let _dashCalDate = new Date();
 let _dashCalView = 'month';
+let _dashCalProject = ''; // '' = all projects, else project NAME
 
-function dashCalInit() {
+function dashCalInit(projects) {
   _dashCalDate = new Date();
   _dashCalView = 'month';
+  _dashCalProject = '';
+  const sel = document.getElementById('dash-cal-project-filter');
+  if (sel) {
+    const current = sel.value;
+    sel.innerHTML = '<option value="">All projects</option>' + (projects || []).map(p =>
+      `<option value="${escHtml(p.name)}">${escHtml(p.name)}</option>`
+    ).join('');
+    sel.value = current;
+  }
   const bar = document.querySelector('.dash-cal-viewbar');
   if (bar && !bar._wired) {
     bar._wired = true;
@@ -2007,6 +2018,11 @@ function dashCalInit() {
       if (tab) dashCalSetView(tab.dataset.dashview);
     });
   }
+  dashCalFetch();
+}
+
+function dashCalSetProject(name) {
+  _dashCalProject = name || '';
   dashCalFetch();
 }
 
@@ -2075,7 +2091,7 @@ async function dashCalFetch() {
   const grid = document.getElementById('dash-cal-grid');
   if (grid) grid.innerHTML = '<div class="dash-day-empty">Loading…</div>';
   try {
-    const posts = await apiFetch(`/calendar?from=${from}&to=${to}&all=1`);
+    const posts = await apiFetch(`/calendar?from=${from}&to=${to}&all=1&project=${encodeURIComponent(_dashCalProject)}`);
     dashCalRender(posts || []);
   } catch(err) {
     if (grid) grid.innerHTML = `<div class="error-msg">Failed to load calendar: ${escHtml(err.message)}</div>`;
@@ -2200,6 +2216,7 @@ window.dashCalNav = dashCalNav;
 window.dashCalToday = dashCalToday;
 window.dashCalSetView = dashCalSetView;
 window.dashCalShowDay = dashCalShowDay;
+window.dashCalSetProject = dashCalSetProject;
 
 /* ---------------------------------------------------------
    Global App Settings (under Dashboard → Settings)

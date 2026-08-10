@@ -599,16 +599,26 @@ function getCalendar(req, res) {
   const from = parseInt(url.searchParams.get('from') || '0');
   const to = parseInt(url.searchParams.get('to') || String(Date.now() + 86400000 * 365));
   const all = url.searchParams.get('all') === '1';
+  const projectFilter = url.searchParams.get('project') || ''; // project NAME filter (used with all=1)
   const projectId = all ? null : activeProjectId(url, null);
   const posts = all
-    ? db.prepare(
-        `SELECT p.*, s.title as seed_title, pr.name AS project_name FROM posts p
-         LEFT JOIN seeds s ON p.seed_id = s.id
-         LEFT JOIN projects pr ON p.project_id = pr.id
-         WHERE p.scheduled_for >= ? AND p.scheduled_for <= ?
-         AND p.status = 'scheduled'
-         ORDER BY p.scheduled_for ASC`
-      ).all(from, to)
+    ? (projectFilter
+        ? db.prepare(
+            `SELECT p.*, s.title as seed_title, pr.name AS project_name FROM posts p
+             LEFT JOIN seeds s ON p.seed_id = s.id
+             LEFT JOIN projects pr ON p.project_id = pr.id
+             WHERE pr.name = ? AND p.scheduled_for >= ? AND p.scheduled_for <= ?
+             AND p.status = 'scheduled'
+             ORDER BY p.scheduled_for ASC`
+          ).all(projectFilter, from, to)
+        : db.prepare(
+            `SELECT p.*, s.title as seed_title, pr.name AS project_name FROM posts p
+             LEFT JOIN seeds s ON p.seed_id = s.id
+             LEFT JOIN projects pr ON p.project_id = pr.id
+             WHERE p.scheduled_for >= ? AND p.scheduled_for <= ?
+             AND p.status = 'scheduled'
+             ORDER BY p.scheduled_for ASC`
+          ).all(from, to))
     : db.prepare(
         `SELECT p.*, s.title as seed_title FROM posts p
          LEFT JOIN seeds s ON p.seed_id = s.id
