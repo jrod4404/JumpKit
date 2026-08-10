@@ -2354,7 +2354,7 @@ async function renderPlatformSettings() {
           <button class="btn-secondary btn-sm" onclick="setLinkedInOrg()">Set Page</button>
         </div>
       </div>
-      <div class="acct-row" id="li-notconn-row">
+      <div class="acct-row" id="li-notconn-row" style="display:none">
         <div class="acct-row-label">
           <span>Company Page</span>
           <span class="acct-row-hint">Connect LinkedIn in App Settings → Platform Connections first</span>
