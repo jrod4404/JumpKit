@@ -2363,7 +2363,7 @@ select.form-input,
   padding-bottom: 8px;
 }
 .dashboard-nav .main-section-header {
-  padding-top: 6px; /* MAIN section: reduced top margin (was 14px) */
+  padding-top: 2px; /* MAIN section: reduced top margin */
 }
 .dashboard-nav .main-section-header .nav-section-label {
   text-transform: uppercase;
