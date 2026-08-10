@@ -1929,19 +1929,6 @@ function renderDashboard(data) {
     </div>`;
   }).join('') || `<div class="dash-empty">No projects yet.</div>`;
 
-  const upcomingRows = (data.upcoming || []).map(p => {
-    const d = new Date(p.scheduled_for);
-    const dateStr = isNaN(d) ? '—' : d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-    const text = (p.post_text || '').replace(/\s+/g, ' ').trim();
-    return `
-      <div class="dash-upcoming-row">
-        <span class="dash-chip dash-chip-platform">${PLATFORM_LABELS[p.platform] || p.platform}</span>
-        <span class="dash-upcoming-project">${escHtml(p.project_name || '')}</span>
-        <span class="dash-upcoming-text">${escHtml(text.length > 90 ? text.slice(0, 90) + '…' : text) || '—'}</span>
-        <span class="dash-upcoming-date">${dateStr}</span>
-      </div>`;
-  }).join('') || `<div class="dash-empty">No upcoming scheduled posts.</div>`;
-
   pane.innerHTML = `
     <div class="dashboard-wrap">
       <div class="dash-stats-grid">
@@ -1957,11 +1944,6 @@ function renderDashboard(data) {
       <div class="dash-section">
         <div class="dash-section-title">Projects</div>
         <div class="dash-project-list">${projectRows}</div>
-      </div>
-
-      <div class="dash-section">
-        <div class="dash-section-title">Upcoming Posts</div>
-        <div class="dash-upcoming-list">${upcomingRows}</div>
       </div>
 
       <div class="dash-section">
@@ -2569,8 +2551,6 @@ async function renderPlatformSettings() {
   el.innerHTML = `
   <div class="settings-wrap">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <span style="font-size:13px;font-weight:600">Publish Settings</span>
-      <span style="font-size:12px;color:var(--text-muted)">Publishing strategy & account selection for this project</span>
       <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save Settings
@@ -2596,8 +2576,6 @@ async function renderBranding() {
   el.innerHTML = `
   <div class="settings-wrap">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-      <span style="font-size:13px;font-weight:600">Branding</span>
-      <span style="font-size:12px;color:var(--text-muted)">Brand & image settings for this project</span>
       <button class="btn-primary" onclick="saveSettings()" style="height:34px;padding:0 16px;font-size:13px;display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:auto">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         Save Settings
