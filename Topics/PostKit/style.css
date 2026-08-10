@@ -99,6 +99,7 @@ html, body {
 }
 .app-titlebar-name {
   margin-left: 82px; /* clear the macOS traffic lights (green btn ~18px; 3 lights + spacing extend to ~72px) */
+  margin-top: 2px; /* nudge the title text down slightly */
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
@@ -166,7 +167,7 @@ html, body {
   height: auto;
   object-fit: contain;
   image-rendering: auto;
-  margin-top: 14px; /* keep logo clear of the app window header (titlebar) */
+  margin-top: 34px; /* keep logo clear of the app window header (titlebar) */
 }
 
 /* Expanded logos: theme-switched */
@@ -176,7 +177,7 @@ html, body {
 [data-theme="light"] .logo-light { display: block; }
 
 /* Collapsed logo: icon only */
-.logo-collapsed-img { display: none; width: 27px; max-width: 27px; margin-top: 10px; }
+.logo-collapsed-img { display: none; width: 27px; max-width: 27px; margin-top: 30px; }
 
 .sidebar.collapsed .logo-expanded     { display: none !important; }
 .sidebar.collapsed .logo-collapsed-img { display: block !important; }
