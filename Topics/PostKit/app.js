@@ -2344,6 +2344,15 @@ async function renderPlatformSettings() {
       </div>
       ` : ''}
       ${p === 'linkedin' ? `
+      <div class="acct-row">
+        <div class="acct-row-label">
+          <span>Connection</span>
+          <span class="acct-row-hint">Global LinkedIn connection (App Settings → Platform Connections)</span>
+        </div>
+        <div class="acct-control">
+          <span class="acct-row-hint" id="li-conn-hint">Checking…</span>
+        </div>
+      </div>
       <div class="acct-row acct-row-stacked" id="li-org-wrap" style="display:none">
         <div class="acct-row-label">
           <span>Company Page</span>
@@ -2947,8 +2956,15 @@ async function checkLinkedInAccount() {
   try { status = await apiFetch(`/linkedin/status?project_id=${getActiveProjectId()}`); } catch(_) {}
   const orgWrap = document.getElementById('li-org-wrap');
   const notRow  = document.getElementById('li-notconn-row');
+  const hint    = document.getElementById('li-conn-hint');
+  const connected = !!(status && status.connected);
+  if (hint) {
+    hint.innerHTML = connected
+      ? `<span style="display:inline-block;background:#15803d;color:#fff;border-radius:99px;padding:1px 8px;font-size:10px;font-weight:600">Connected${status.account_name ? ' — ' + escHtml(status.account_name) : ''}</span>`
+      : `<span style="opacity:.6">Not connected</span>`;
+  }
   if (orgWrap && notRow) {
-    if (status && status.connected) {
+    if (connected) {
       orgWrap.style.display = '';
       notRow.style.display  = 'none';
       loadLinkedInOrgs(status.orgs || []);
