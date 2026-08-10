@@ -2,6 +2,7 @@
 [data-theme="dark"] {
   --bg: #0d0d14;
   --bg-surface: #13131e;
+  --bg-titlebar: #1c1c2e; /* slightly lighter than surface for header contrast */
   --bg-card: #19192a;
   --bg-hover: #21213a;
   --border: #2a2a42;
@@ -30,6 +31,7 @@
 [data-theme="light"] {
   --bg: #f5f5fa;
   --bg-surface: #e9e9f0;
+  --bg-titlebar: #dddee8; /* slightly darker than surface for header contrast */
   --bg-card: #ffffff;
   --bg-hover: #f0f0f8;
   --border: #dddde8;
@@ -94,12 +96,13 @@ html, body {
   display: flex;
   align-items: center;
   -webkit-app-region: drag;
-  background: var(--bg-surface);
+  background: var(--bg-titlebar);
+  border-bottom: 1px solid var(--border);
   user-select: none;
 }
 .app-titlebar-name {
   margin-left: 82px; /* clear the macOS traffic lights (green btn ~18px; 3 lights + spacing extend to ~72px) */
-  margin-top: 2px; /* nudge the title text down slightly */
+  margin-top: 3px; /* nudge the title text down slightly */
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);
@@ -167,7 +170,7 @@ html, body {
   height: auto;
   object-fit: contain;
   image-rendering: auto;
-  margin-top: 34px; /* keep logo clear of the app window header (titlebar) */
+  margin-top: 54px; /* keep logo clear of the app window header (titlebar) */
 }
 
 /* Expanded logos: theme-switched */
@@ -177,7 +180,7 @@ html, body {
 [data-theme="light"] .logo-light { display: block; }
 
 /* Collapsed logo: icon only */
-.logo-collapsed-img { display: none; width: 27px; max-width: 27px; margin-top: 30px; }
+.logo-collapsed-img { display: none; width: 27px; max-width: 27px; margin-top: 50px; }
 
 .sidebar.collapsed .logo-expanded     { display: none !important; }
 .sidebar.collapsed .logo-collapsed-img { display: block !important; }
