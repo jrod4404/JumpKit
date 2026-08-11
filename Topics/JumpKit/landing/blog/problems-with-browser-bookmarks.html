@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>9 Problems with Browser Bookmarks (and How to Fix Them) | JumpKit</title>
+  <meta name="description" content="Browser bookmarks are broken — chaos, no sharing, no local files, sync issues, and zero insights. Here are the 9 biggest problems and the modern fix." />
+  <link rel="canonical" href="https://jumpkit.app/blog/problems-with-browser-bookmarks" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="9 Problems with Browser Bookmarks (and How to Fix Them)" />
+  <meta property="og:description" content="Browser bookmarks are broken — chaos, no sharing, no local files, sync issues, and zero insights. Here are the 9 biggest problems and the modern fix." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/blog/problems-with-browser-bookmarks" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="9 Problems with Browser Bookmarks (and How to Fix Them)" />
+  <meta name="twitter:description" content="Browser bookmarks are broken — chaos, no sharing, no local files, sync issues, and zero insights. Here are the 9 biggest problems and the modern fix." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "9 Problems with Browser Bookmarks (and How to Fix Them)",
+    "description": "Browser bookmarks are broken — chaos, no sharing, no local files, sync issues, and zero insights. Here are the 9 biggest problems and the modern fix.",
+    "url": "https://jumpkit.app/blog/problems-with-browser-bookmarks",
+    "image": "https://jumpkit.app/assets/Jumpkit-hero-light.png",
+    "author": {
+      "@type": "Organization",
+      "name": "JumpKit"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "JumpKit",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://jumpkit.app/assets/logo-light.png"
+      }
+    },
+    "datePublished": "2026-08-11",
+    "dateModified": "2026-08-11"
+  }
+  </script>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
+    /* ── Article styles ── */
+    .article-hero {
+      padding: 120px 24px 56px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .article-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turq);
+      background: rgba(0,194,199,0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+    .article-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .article-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1A4FD6, #00C2C7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .article-meta-divider { opacity: 0.4; }
+
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 12px 24px 100px;
+    }
+
+    /* Article typography */
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text);
+      margin-bottom: 1.4rem;
+    }
+    .article-body h2 {
+      font-size: 1.5rem;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+      color: var(--turq);
+      margin: 2.8rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 0.7rem;
+    }
+    .article-body ul, .article-body ol {
+      margin: 0 0 1.4rem 1.4rem;
+    }
+    .article-body li {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+    }
+    .article-body li strong {
+      color: var(--text);
+    }
+    .article-body strong { font-weight: 700; }
+
+    .article-body .callout {
+      background: rgba(0,194,199,0.07);
+      border-left: 3px solid var(--turq);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 1.6rem 0;
+    }
+    .article-body .callout p {
+      margin: 0;
+      font-size: 0.97rem;
+      color: var(--text);
+    }
+
+    .article-cta-box {
+      background: linear-gradient(135deg, rgba(26,79,214,0.15) 0%, rgba(0,194,199,0.1) 100%);
+      border: 1px solid rgba(0,194,199,0.25);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .article-cta-box h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      border: none;
+      padding: 0;
+    }
+    .article-cta-box p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+    }
+    .article-cta-box .btn {
+      background: linear-gradient(135deg,#50CACC,#1A4FD6);
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 28px;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .article-cta-box .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .article-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .article-back:hover { color: var(--turq); }
+
+    .pricing-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 1.4rem 0;
+    }
+    .pricing-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .pricing-table th, .pricing-table td {
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-table th {
+      background: rgba(0,194,199,0.07);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pricing-table tr:last-child td { border-bottom: none; }
+    .pricing-table td { color: var(--text-muted); }
+    .pricing-table td:first-child { font-weight: 600; color: var(--text); }
+    .price-highlight { color: var(--turq); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .article-body { padding: 40px 18px 80px; }
+      .article-hero { padding: 100px 18px 44px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;background:rgba(0,194,199,0.08)">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- OFFCANVAS -->
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="../assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="/#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="../assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="/#testimonialCarousel" class="offcanvas-link"><svg class="ti ti-quote"><use href="../assets/tabler-sprite.svg#tabler-quote"/></svg> Testimonials</a>
+      <a href="/#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="../assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="/#statistics" class="offcanvas-link"><svg class="ti ti-chart-bar"><use href="../assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Dashboard</a>
+      <a href="/#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="../assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</a>
+      <a href="/#pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- ARTICLE HERO -->
+  <div class="article-hero">
+    <span class="article-tag">
+      <svg class="ti ti-alert-triangle" style="width:.85em;height:.85em"><use href="../assets/tabler-sprite.svg#tabler-alert-triangle"/></svg>
+      Problem
+    </span>
+    <h1 class="article-title">9 Problems with Browser Bookmarks (and How to Fix Them)</h1>
+    <div class="article-meta">
+      <div class="article-avatar">JR</div>
+      <span><strong>Jeff R.</strong></span>
+      <span class="article-meta-divider">·</span>
+      <span>August 11, 2026</span>
+      <span class="article-meta-divider">·</span>
+      <span>6 min read</span>
+    </div>
+  </div>
+
+  <!-- ARTICLE BODY -->
+  <article class="article-body">
+    <a href="/blog" class="article-back">
+      <svg class="ti ti-arrow-left" style="width:.95em;height:.95em"><use href="../assets/tabler-sprite.svg#tabler-arrow-left"/></svg>
+      Back to Blog
+    </a>
+
+    <p>Browser bookmarks were invented in 1993. That's the same year the Mosaic browser popularized the graphical web. In the 33 years since, web browsers have evolved from simple document viewers to complex application platforms. Bookmarks? They've barely changed. You still get a flat list in a sidebar, folders that don't scale, and zero intelligence. The web has moved on — bookmarks haven't. Here are the nine biggest problems with browser bookmarks, and how to fix every single one of them.</p>
+
+    <h2>1. They Become a Chaotic Mess</h2>
+
+    <p>Browser bookmarks have no enforced structure. You can create folders, but nothing stops you from dumping links into the root bookmarks bar indefinitely. After a few months of casual use, you end up with hundreds of unsorted links, a folder called "Other Bookmarks" that contains everything and nothing, and a bookmarks bar so cluttered it's unusable. The problem isn't that bookmarks <em>can't</em> be organized — it's that browsers provide no incentive or structure to keep them organized. Compare that to a tool like JumpKit, where categories are visual columns, drag-and-drop is the default interaction, and stale links can be archived with one click.</p>
+
+    <h2>2. No Local File or Folder Support</h2>
+
+    <p>This is the most fundamental limitation: browser bookmarks only work with web URLs. You cannot bookmark <code>\\server\shared\clients</code> or <code>/Users/jeff/Documents/Projects</code> or <code>file:///C:/Templates/Proposal.docx</code> in any practical way. For professionals who work with local files, network drives, and shared folders — which is most professionals — this means bookmarks only solve half the problem. You can bookmark the web tool but not the local template. JumpKit solves this by treating web URLs and local paths as first-class citizens, side by side in the same interface.</p>
+
+    <h2>3. Browser Lock-In</h2>
+
+    <p>Your bookmarks live inside a specific browser. Chrome bookmarks don't talk to Firefox bookmarks. Edge bookmarks don't talk to Safari bookmarks. If you decide to switch browsers — or if your IT department switches them for you — your bookmarks are trapped. Yes, you can export and import, but the process is clunky, often loses folder structure, and creates duplicates. JumpKit sits outside the browser entirely. It's a desktop application that works regardless of which browser you use. Switch from Chrome to Firefox? Your JumpKit setup doesn't change.</p>
+
+    <h2>4. Sharing is Nearly Impossible</h2>
+
+    <p>There is no native "share my bookmarks with my team" feature in any browser. The closest you get is exporting an HTML file (which loses any custom organization) and emailing it to someone (who then has to import it, creating a static copy that never updates). For teams that need <a href="/blog/shared-bookmarks-for-teams">shared bookmarks</a>, this is a complete non-starter. JumpKit solves this with team creation and shared group jumps — add a jump to a team and every member instantly sees it.</p>
+
+    <h2>5. Sync Issues Across Devices</h2>
+
+    <p>Browser sync was supposed to solve the multi-device problem. In practice, it's unreliable. Users routinely report duplicate bookmarks after syncing, missing folders, sync conflicts when bookmarks are modified on two devices simultaneously, and partial syncs where some bookmarks appear and others don't. The underlying problem is that browser sync was designed for individual use across personal devices, not for reliability at scale. JumpKit avoids this entirely with local-first storage and optional backup — no sync conflicts, no duplicates, no mysterious disappearances.</p>
+
+    <h2>6. Zero Search Intelligence</h2>
+
+    <p>Try searching your bookmarks in Chrome. You get a simple text match against bookmark titles and URLs. No fuzzy matching, no tag-based filtering, no content search, no relevance ranking. If you bookmarked a site as "Dashboard" and search for "analytics," it won't find it. Most browsers don't even let you search within bookmark folders — it's all or nothing. JumpKit provides real-time search across every jump name, URL, and category. Type a few characters and instantly filter to what you need.</p>
+
+    <h2>7. No Usage Insights</h2>
+
+    <p>Browser bookmarks give you zero data. You have no idea which bookmarks you actually use, which ones haven't been clicked in two years, or how much time your bookmark organization is (or isn't) saving you. There are no analytics, no usage reports, no ROI calculations. For personal use, that's a missed opportunity. For teams, it's a blind spot — you have no way to measure whether your shared resources are actually being used. JumpKit's ROI dashboard tracks every launch, estimates time saved per jump (~10 seconds), and shows personal and team statistics over time.</p>
+
+    <h2>8. Privacy and Data Concerns</h2>
+
+    <p>When you sync bookmarks through Chrome, Firefox, or Safari, your bookmark data lives on someone else's servers. Google, Mozilla, and Apple can all see the URLs you've bookmarked. For personal reading lists, that might be acceptable. For sensitive internal URLs, client portals, server paths, and proprietary resources, it's a data governance problem. Cloud-based bookmark managers like Raindrop.io make this worse — every link you save is explicitly stored on their servers. JumpKit stores 100% of data locally on your machine by default. Nothing leaves unless you opt into optional backup.</p>
+
+    <h2>9. No Team or Onboarding Support</h2>
+
+    <p>Browser bookmarks are individual tools. They were never designed for team collaboration, and it shows. There's no concept of "teams," no shared categories, no onboarding packs, no per-team permissions. When a new employee starts, you can't hand them a pre-built set of bookmarks that every team member uses. You can't see which resources the team uses most. You can't ensure consistency across team members. For any team larger than one person, browser bookmarks are fundamentally inadequate. Learn more about <a href="/blog/team-bookmark-sharing-collaboration">collaborative link management</a> and why it matters.</p>
+
+    <h2>The Fix: A Modern Launcher Approach</h2>
+
+    <p>Every one of these nine problems has the same root cause: browser bookmarks were designed for a single user in 1993, and they haven't evolved. The fix isn't to add features to browser bookmarks — it's to use a tool built for modern workflows.</p>
+
+    <p><strong>JumpKit is that tool.</strong> It's a desktop launcher that addresses all nine problems:</p>
+
+    <ul>
+      <li><strong>Structure:</strong> Visual categories as columns, drag-and-drop, favorites, and archive.</li>
+      <li><strong>Local files:</strong> Web URLs, local folders, and files in the same interface.</li>
+      <li><strong>Browser-agnostic:</strong> Works outside any browser — switch browsers freely.</li>
+      <li><strong>Team sharing:</strong> Create teams, share group jumps, build onboarding packs.</li>
+      <li><strong>Local-first:</strong> 100% local data — no sync conflicts, no privacy concerns.</li>
+      <li><strong>Intelligent search:</strong> Real-time search across all jumps, categories, and URLs.</li>
+      <li><strong>ROI dashboard:</strong> Track every launch, measure time saved, see per-team stats.</li>
+      <li><strong>Privacy:</strong> Your data stays on your machine. No tracking, no cloud dependency.</li>
+      <li><strong>Hotkeys:</strong> Global keyboard shortcuts for instant access to any jump.</li>
+    </ul>
+
+    <div class="callout">
+      <p>Browser bookmarks have been broken for over 30 years. JumpKit fixes every problem on this list in a single, free desktop app. The question isn't whether you need a better bookmark tool — it's how much longer you're willing to put up with the one that doesn't work.</p>
+    </div>
+
+    <p>Want more? Read our <a href="/blog/bookmark-manager-ultimate-guide">ultimate guide to bookmark managers</a> or see how JumpKit compares to <a href="/blog/best-bookmark-manager-alternatives">other bookmark manager alternatives</a>.</p>
+
+    <div class="article-cta-box">
+      <h3>Fix Your Bookmark Problems Today</h3>
+      <p>Download JumpKit free — the modern launcher that replaces broken browser bookmarks. No credit card required.</p>
+      <a href="/#pricing" class="btn">
+        <svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+        Start Jumping Free!
+      </a>
+    </div>
+  </article>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark-mode.png" alt="JumpKit" width="1638" height="596" loading="lazy" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="/pricing" class="footer-page-link">Pricing</a>
+          <a href="/videos" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
+          <a href="/alternative" class="footer-page-link">Alternatives</a>
+          <a href="/use-cases" class="footer-page-link">Use Cases</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script>
+    // Theme
+    (function(){
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    // Offcanvas
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    // Scroll top button
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+  </script>
+</body>
+</html>
