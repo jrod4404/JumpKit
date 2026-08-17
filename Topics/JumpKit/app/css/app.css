@@ -291,7 +291,8 @@
 .home-section-hdr .home-section-chevron { transition: transform 0.18s ease; color: var(--text-dim); flex-shrink: 0; }
 .home-section-hdr.collapsed .home-section-chevron { transform: rotate(-90deg); }
 .home-section-hdr:hover .home-section-hdr-label { color: var(--text-muted); }
-.home-section-body { overflow: hidden; transition: none; }
+.home-section-body { overflow: hidden; padding-top: 2px; }
+.home-section-body .home-roi-grid, .home-section-body .home-teams-grid, .home-section-body .tips-grid { margin-top: 10px; }
 .home-section-body.collapsed { display: none; }
 /* All home-dash grids — 4 per row default, consistent 20px bottom gap */
 .home-roi-grid  { grid-template-columns: repeat(4, 1fr) !important; margin-bottom: 20px; }
@@ -416,6 +417,11 @@
 #jumpTooltip .tt-val { color: var(--text-muted); text-align: left; }
 #jumpTooltip .tt-row + .tt-row { margin-top: 4px; }
 .jump-item:last-child { border-bottom: none; }
+/* Favorite jumps: bold text; non-favorites: regular weight */
+.jump-item-fav .jump-name { font-weight: 700; }
+.jump-item:not(.jump-item-fav) .jump-name { font-weight: 400; }
+/* Hover: jump name turns bright turquoise */
+.jump-item:hover .jump-name { color: var(--turq); }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
 .jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

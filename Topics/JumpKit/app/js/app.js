@@ -1312,6 +1312,10 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Member Since</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
             </div>
+            <div class="acct-row" id="acctVersionRow" style="display:none">
+              <div class="acct-row-label"><span>App Version</span></div>
+              <span style="font-size:0.88rem;color:var(--text-muted)" id="acctVersionVal">-</span>
+            </div>
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-id-badge"><use href="img/tabler-sprite.min.svg#tabler-id-badge"/></svg> Account</div>
@@ -1348,6 +1352,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             <button class="btn btn-subtle" data-jaction="open-feedback-modal"><svg class="ti ti-message-circle"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg> Send Feedback</button>
           </div>
         </div>`;
+      if (window.electronAPI?.getAppVersion) {
+        window.electronAPI.getAppVersion().then(v => {
+          const row = document.getElementById('acctVersionRow');
+          const val = document.getElementById('acctVersionVal');
+          if (row && val) { val.textContent = 'v' + v; row.style.display = ''; row.style.borderBottom = 'none'; }
+        }).catch(() => {});
+      }
       _revealAcctPage();
     } else if (tab === 'teams') {
       el.innerHTML = `<div class="acct-teams-wrap"></div>`;
