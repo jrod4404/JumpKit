@@ -425,6 +425,11 @@
 /* Hover: no cell bg — name bolds + turns turquoise-blue, icon matches */
 .jump-item:hover .jump-name { color: var(--jump-hover); font-weight: 700; }
 .jump-item:hover .jump-icon svg { color: var(--jump-hover) !important; }
+/* When Show Hotkey OR Show Description is ON, also render a cell bg on hover */
+[data-jumphover="1"] .jump-item:hover { background: var(--bg-hover); }
+[data-jumphover="1"] .jump-item:hover .jump-desc,
+[data-jumphover="1"] .jump-item:hover .jump-hotkey-pill,
+[data-jumphover="1"] .jump-item:hover .jump-hotkey-inline { color: var(--jump-hover); }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
 .jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

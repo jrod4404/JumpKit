@@ -296,6 +296,8 @@ function renderColumns() {
 
   const _prefs = DB.getPrefs(currentUser.id);
   const _showColTeamName = _prefs.showColTeamName !== false;
+  // Activate jump cell bg hover when Show Hotkey and/or Show Description is ON
+  document.documentElement.dataset.jumphover = (_prefs.showHotkey || _prefs.showDescription) ? '1' : '0';
 
   // For non-active filters: same column structure, filtered jumps per column
   if (currentJumpFilter !== 'active') {
