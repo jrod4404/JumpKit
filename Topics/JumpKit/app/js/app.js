@@ -105,8 +105,6 @@ function _showUpdateBanner() {
         }
         window.electronAPI?.installUpdate?.();
       });
-      const closeBtn = document.getElementById('updateCloseBtn');
-      if (closeBtn) closeBtn.addEventListener('click', () => { banner.style.display = 'none'; });
     }
     banner.style.display = 'flex';
   }
