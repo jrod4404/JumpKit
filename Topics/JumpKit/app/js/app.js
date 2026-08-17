@@ -1393,6 +1393,12 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>
             </div>
             <div class="acct-row">
+              <div class="acct-row-label"><span>UI Contrast</span><span class="acct-row-hint">Contrast between background and controls</span></div>
+              <div class="jump-filter-bar" id="contrastSlider" style="padding:3px;min-height:0">
+                ${['low','med','high'].map(c=>`<button class="jfb-tab${(p.uiContrast||'low')===c?' active':''}" data-contrast-val="${c}" style="padding:4px 14px">${c==='low'?'Low':c==='med'?'Med':'High'}</button>`).join('')}
+              </div>
+            </div>
+            <div class="acct-row">
               <div class="acct-row-label"><span>Notifications</span><span class="acct-row-hint">Show or mute in-app notification alerts</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotif" ${p.notifications?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
@@ -1453,6 +1459,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
       wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
       wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
       if (document.getElementById('autoArchiveDrop')) wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
+      if (typeof window.wireContrastSlider === 'function') window.wireContrastSlider();
       _revealAcctPage();
     }
   }
@@ -1617,7 +1624,10 @@ window.saveAccountPrefs = function saveAccountPrefs() {
     showColTeamName:  document.getElementById('prefColTeamName')?.checked ?? true,
     autoArchive:         (window._supabaseProfile?.subscription_tier || 'free') !== 'free' ? (archSel ? archSel.dataset.value : cur.autoArchive) : 'never',
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
+    uiContrast:          document.querySelector('#contrastSlider .jfb-tab.active')?.dataset.contrastVal || cur.uiContrast || 'low',
   };
+  document.documentElement.dataset.contrast = prefs.uiContrast;
+  localStorage.setItem('jk_contrast', prefs.uiContrast);
   try {
     DB.savePrefs(currentUser.id, prefs);
     Toast.success('Preferences saved');
@@ -1629,6 +1639,21 @@ window.saveAccountPrefs = function saveAccountPrefs() {
   // Update notification badge immediately so notifications pref toggle takes effect live
   updateNotifBadge();
 }
+// Live UI-contrast control on the settings Preferences card
+window.wireContrastSlider = function wireContrastSlider() {
+  const bar = document.getElementById('contrastSlider');
+  if (!bar) return;
+  if (bar.dataset.wired) return;
+  bar.dataset.wired = '1';
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.jfb-tab');
+    if (!btn) return;
+    const v = btn.dataset.contrastVal || 'low';
+    bar.querySelectorAll('.jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.contrastVal === v));
+    document.documentElement.dataset.contrast = v;
+    localStorage.setItem('jk_contrast', v);
+  });
+};
 window.openFeedbackModal = function openFeedbackModal() {
   const body = `
     <div class="form-group">

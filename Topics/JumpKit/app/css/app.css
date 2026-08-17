@@ -377,7 +377,7 @@
   box-shadow: 0 1px 4px rgba(0,0,0,0.10), 0 0 0 0.5px rgba(0,0,0,0.06);
 }
 .col-header {
-  padding: 12px 14px; font-size: 0.75rem; font-weight: 700;
+  padding: 12px 14px; font-size: 0.92rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: 0.07em;
   background: var(--bg-sidebar); color: var(--text-muted);
   border-bottom: 1px solid var(--border);
@@ -390,7 +390,7 @@
 }
 .col-count {
   background: var(--bg-hover); color: var(--hover-accent);
-  border-radius: 10px; padding: 1px 8px; font-size: 0.75rem;
+  border-radius: 10px; padding: 1px 8px; font-size: 0.85rem;
 }
 .col-items { padding: 0; display: flex; flex-direction: column; gap: 0; }
 .jump-item {
@@ -400,7 +400,6 @@
   border-bottom: 1px solid transparent;
   user-select: none;
 }
-.jump-item:hover { background: var(--bg-hover); }
 /* ── Jump Tooltip ── */
 #jumpTooltip {
   position: fixed; z-index: 9998; pointer-events: none;
@@ -420,8 +419,12 @@
 /* Favorite jumps: bold text; non-favorites: regular weight */
 .jump-item-fav .jump-name { font-weight: 700; }
 .jump-item:not(.jump-item-fav) .jump-name { font-weight: 400; }
-/* Hover: jump name turns bright turquoise */
-.jump-item:hover .jump-name { color: var(--turq); }
+/* Hover: no cell bg — name bolds + turns turquoise, icon matches */
+.jump-item:hover .jump-name { color: var(--turq); font-weight: 700; }
+.jump-item:hover .jump-icon svg { color: var(--turq) !important; }
+/* Non-favorites: name uses the same gray as the icon */
+.jump-item:not(.jump-item-fav) .jump-name { color: var(--text-muted); }
+.jump-item:not(.jump-item-fav) .jump-icon svg { color: var(--text-muted); }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
 .jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -564,7 +567,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-status-badge {
   display: inline-flex; align-items: center; max-width: 100%; min-width: 0;
   padding: 3px 8px 3px 6px; border-radius: 20px;
-  font-size: 0.76rem; font-weight: 500; white-space: nowrap;
+  font-size: 0.86rem; font-weight: 500; white-space: nowrap;
   border: 1px solid var(--border-input);
 }
 .col-status-dir { flex-shrink: 0; font-weight: 500; color: var(--text-muted); }
@@ -572,7 +575,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-status-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .col-readonly-value {
   display: inline-flex; align-items: center;
-  min-height: 24px; padding: 3px 0; font-size: 0.78rem; font-weight: 500;
+  min-height: 24px; padding: 3px 0; font-size: 0.86rem; font-weight: 500;
   color: var(--text-dim); cursor: default; user-select: none;
 }
 .col-jump-count {

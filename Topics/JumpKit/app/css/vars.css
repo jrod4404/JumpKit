@@ -46,6 +46,33 @@
   --shadow-sm:    0 2px 12px rgba(0,0,0,0.06);
   --overlay:      rgba(0,0,0,0.4);
 }
+/* ── Contrast levels (data-contrast on <html>; low = defaults above) ── */
+[data-theme="dark"][data-contrast="med"] {
+  --border:       rgba(255,255,255,0.16);
+  --border-input: rgba(255,255,255,0.18);
+  --bg-card:      #101B2D;
+  --bg-sidebar:   #0F1B2E;
+  --bg-hover:     rgba(0,194,199,0.11);
+}
+[data-theme="dark"][data-contrast="high"] {
+  --border:       rgba(255,255,255,0.26);
+  --border-input: rgba(255,255,255,0.30);
+  --bg-card:      #142238;
+  --bg-sidebar:   #12203A;
+  --bg-hover:     rgba(0,194,199,0.16);
+}
+[data-theme="light"][data-contrast="med"] {
+  --border:       rgba(0,0,0,0.16);
+  --border-input: rgba(0,0,0,0.19);
+  --bg-sidebar:   #D7DFED;
+  --bg-hover:     rgba(26,79,214,0.09);
+}
+[data-theme="light"][data-contrast="high"] {
+  --border:       rgba(0,0,0,0.24);
+  --border-input: rgba(0,0,0,0.28);
+  --bg-sidebar:   #CFD9EA;
+  --bg-hover:     rgba(26,79,214,0.13);
+}
 @font-face { font-family: 'Inter'; font-weight: 400; font-style: normal; font-display: swap; src: url('../assets/fonts/inter-400.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 500; font-style: normal; font-display: swap; src: url('../assets/fonts/inter-500.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 600; font-style: normal; font-display: swap; src: url('../assets/fonts/inter-600.woff2') format('woff2'); }

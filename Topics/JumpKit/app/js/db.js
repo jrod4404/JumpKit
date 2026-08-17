@@ -39,6 +39,7 @@ const DB = (() => {
       subscriptionTier:   'free',
       role:               'team-member',
       navDefaultCollapsed: false,
+      uiContrast:        'low',
     };
   }
 
