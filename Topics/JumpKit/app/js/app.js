@@ -88,6 +88,21 @@ function _showUpdateBanner() {
       banner.dataset.wired = '1';
       const installBtn = document.getElementById('updateInstallBtn');
       if (installBtn) installBtn.addEventListener('click', () => {
+        // Show "Preparing to update…" modal — quitAndInstall can take a moment
+        let ov = document.getElementById('updatePrepOverlay');
+        if (!ov) {
+          ov = document.createElement('div');
+          ov.id = 'updatePrepOverlay';
+          ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:var(--overlay);display:flex;align-items:center;justify-content:center;';
+          ov.innerHTML = `<div class="modal-box sm" style="max-width:340px;padding:28px 24px;text-align:center">
+            <svg class="ti ti-loader-2 spin" style="width:2rem;height:2rem;color:var(--hover-accent);margin:0 auto 14px;display:block"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg>
+            <div style="font-size:1rem;font-weight:600;color:var(--text)">Preparing to update…</div>
+            <div style="font-size:0.82rem;color:var(--text-muted);margin-top:6px">JumpKit will restart in a moment.</div>
+          </div>`;
+          document.body.appendChild(ov);
+        } else {
+          ov.style.display = 'flex';
+        }
         window.electronAPI?.installUpdate?.();
       });
       const closeBtn = document.getElementById('updateCloseBtn');

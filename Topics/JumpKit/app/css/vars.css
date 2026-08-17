@@ -9,6 +9,7 @@
   --sidebar-w: 190px;
   --topbar-h:  56px;
   --transition: 0.2s ease;
+  --jump-hover:   #00A8D8;
 }
 [data-theme="dark"] {
   --team-header-bg: rgba(255,255,255,0.06);
