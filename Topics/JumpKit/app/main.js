@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, shell, nativeTheme } = require('electron');
 // safeStorage intentionally not imported - session tokens use localStorage until notarization is set up.
 // Re-add safeStorage to the destructure and restore the IPC handler bodies when notarization is ready.
 
@@ -1010,6 +1010,11 @@ ipcMain.handle('rename-file', (_e, oldPath, newPath) => {
 });
 
 ipcMain.handle('get-app-version', () => require('electron').app.getVersion());
+
+// Sync native window title bar color with the app theme (dark header in dark mode)
+ipcMain.on('set-native-theme', (_e, t) => {
+  nativeTheme.themeSource = (t === 'dark' || t === 'light') ? t : 'system';
+});
 
 // ── IPC: admin build guard ───────────────────────────────────────
 // Admin-only JS files must NOT be present in packaged builds.

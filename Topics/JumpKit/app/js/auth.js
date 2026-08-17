@@ -1,6 +1,7 @@
 // ── Theme ──────────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('jk_theme') || 'dark';
 document.documentElement.dataset.theme = savedTheme;
+window.electronAPI?.setNativeTheme?.(savedTheme);
 
 function updateAuthTheme(t) {
   document.getElementById('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
@@ -14,6 +15,7 @@ document.getElementById('themeBtn').addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   localStorage.setItem('jk_theme', next);
+  window.electronAPI?.setNativeTheme?.(next);
   updateAuthTheme(next);
 });
 

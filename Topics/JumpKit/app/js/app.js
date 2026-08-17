@@ -322,6 +322,7 @@ async function initApp() {
 // ── Theme ──────────────────────────────────────────────────────────
 const savedTheme = localStorage.getItem('jk_theme') || 'dark';
 document.documentElement.dataset.theme = savedTheme;
+window.electronAPI?.setNativeTheme?.(savedTheme);
 const themeBtn  = document.getElementById('themeBtn');
 const notifBtn  = document.getElementById('notifBtn');
 // ── Notification type config ────────────────────────────────────────────────
@@ -429,6 +430,7 @@ themeBtn.addEventListener('click', () => {
   const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
   document.documentElement.dataset.theme = next;
   localStorage.setItem('jk_theme', next);
+  window.electronAPI?.setNativeTheme?.(next);
   updateThemeIcon(next);
   // Re-render stats charts so axis/legend colors update immediately
   if (window.activePage === 'stats') {

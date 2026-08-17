@@ -53,6 +53,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeFileDirect: (filePath, content) => ipcRenderer.invoke('write-file-direct', filePath, content),
   renameFile:      (oldPath, newPath)  => ipcRenderer.invoke('rename-file', oldPath, newPath),
   getAppVersion:   ()                  => ipcRenderer.invoke('get-app-version'),
+  setNativeTheme:  (t)                 => ipcRenderer.send('set-native-theme', t),
   getLatestCommitId:          () => ipcRenderer.invoke('get-latest-commit-id'),
   listDistFiles:              () => ipcRenderer.invoke('list-dist-files'),
   checkAdminFilesExcluded:    () => ipcRenderer.invoke('check-admin-files-excluded'),
