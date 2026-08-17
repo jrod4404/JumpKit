@@ -82,7 +82,19 @@ async function initAuth() {
 // (2) startup poll in case download completed before app.html loaded.
 function _showUpdateBanner() {
   const banner = document.getElementById('updateBanner');
-  if (banner) banner.style.display = 'flex';
+  if (banner) {
+    // Wire buttons once (CSP blocks inline onclick handlers)
+    if (!banner.dataset.wired) {
+      banner.dataset.wired = '1';
+      const installBtn = document.getElementById('updateInstallBtn');
+      if (installBtn) installBtn.addEventListener('click', () => {
+        window.electronAPI?.installUpdate?.();
+      });
+      const closeBtn = document.getElementById('updateCloseBtn');
+      if (closeBtn) closeBtn.addEventListener('click', () => { banner.style.display = 'none'; });
+    }
+    banner.style.display = 'flex';
+  }
 }
 
 if (window.electronAPI?.onUpdateReady) {
