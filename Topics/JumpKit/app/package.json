@@ -1,7 +1,7 @@
 {
   "name": "jumpkit",
-  "version": "5.0.9",
-  "description": "JumpKit \u2014 Your instant jump launcher",
+  "version": "5.0.10",
+  "description": "JumpKit — Your instant jump launcher",
   "main": "main.js",
   "author": "Jeff",
   "scripts": {
@@ -17,7 +17,7 @@
   "build": {
     "appId": "com.jumpkit.app",
     "productName": "JumpKit",
-    "copyright": "Copyright \u00a9 2026 Jeff",
+    "copyright": "Copyright © 2026 Jeff",
     "afterPack": "./fuse.js",
     "afterSign": "./notarize.js",
     "files": [
@@ -89,6 +89,7 @@
     "electron-builder": "^26.8.1"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "better-sqlite3": "^12.8.0",
     "electron-updater": "^6.8.3",
     "express": "^4.22.1"
