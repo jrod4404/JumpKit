@@ -1479,13 +1479,13 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
           </div>
           <div class="acct-save-row">
-            <button class="btn btn-save" data-jaction="save-account-prefs"><svg class="ti ti-device-floppy"><use href="img/tabler-sprite.min.svg#tabler-device-floppy"/></svg> Save Settings</button>
           </div>
         </div>`;
       wireAcctDropdown('startPageDrop','startPageTrigger','startPageMenu','startPageLabel');
       wireAcctDropdown('navStateDrop','navStateTrigger','navStateMenu','navStateLabel');
       if (document.getElementById('autoArchiveDrop')) wireAcctDropdown('autoArchiveDrop','autoArchiveTrigger','autoArchiveMenu','autoArchiveLabel');
       if (typeof window.wireContrastSlider === 'function') window.wireContrastSlider();
+      if (typeof window.wireAutoSaveSettings === 'function') window.wireAutoSaveSettings();
       _revealAcctPage();
     }
   }
@@ -1634,37 +1634,68 @@ function wireAcctDropdown(dropId, triggerId, menuId, labelId) {
   wireDropdown({ dropId, triggerId, menuId, labelId });
 }
 
-window.saveAccountPrefs = function saveAccountPrefs() {
+window._collectSettingsPrefs = function _collectSettingsPrefs() {
   const cur = DB.getPrefs(currentUser.id);
   const startSel   = document.querySelector('#startPageMenu .custom-select-option.selected');
   const archSel    = document.querySelector('#autoArchiveMenu .custom-select-option.selected');
   const navStateSel = document.querySelector('#navStateMenu .custom-select-option.selected');
-  const prefs = {
+  const notifEl   = document.getElementById('prefNotif');
+  const descEl    = document.getElementById('prefDesc');
+  const hotkeyEl  = document.getElementById('prefHotkey');
+  const colTeamEl = document.getElementById('prefColTeamName');
+  const cloudEl   = document.getElementById('prefCloud');
+  const timeEl    = document.getElementById('prefTime');
+  const dollarEl  = document.getElementById('prefDollar');
+  const notUnlimited = (window._supabaseProfile?.subscription_tier || 'free') === 'free';
+  return {
     startPage:       startSel ? startSel.dataset.value : cur.startPage,
-    notifications:   document.getElementById('prefNotif').checked,
-    cloudBackup:     (window._supabaseProfile?.subscription_tier || 'free') !== 'free' && document.getElementById('prefCloud')?.checked,
-    timePerClick:    Math.max(1, parseInt(document.getElementById('prefTime').value)  || cur.timePerClick),
-    dollarsPerHour:  Math.max(1, parseInt(document.getElementById('prefDollar').value) || cur.dollarsPerHour),
-    showDescription:  document.getElementById('prefDesc').checked,
-    showHotkey:       document.getElementById('prefHotkey').checked,
-    showColTeamName:  document.getElementById('prefColTeamName')?.checked ?? true,
-    autoArchive:         (window._supabaseProfile?.subscription_tier || 'free') !== 'free' ? (archSel ? archSel.dataset.value : cur.autoArchive) : 'never',
+    notifications:   notifEl   ? notifEl.checked   : cur.notifications,
+    cloudBackup:     notUnlimited ? false : (cloudEl ? cloudEl.checked : cur.cloudBackup),
+    timePerClick:    timeEl   ? Math.max(1, parseInt(timeEl.value)   || cur.timePerClick) : cur.timePerClick,
+    dollarsPerHour:  dollarEl ? Math.max(1, parseInt(dollarEl.value) || cur.dollarsPerHour) : cur.dollarsPerHour,
+    showDescription: descEl   ? descEl.checked    : cur.showDescription,
+    showHotkey:      hotkeyEl ? hotkeyEl.checked  : cur.showHotkey,
+    showColTeamName: colTeamEl ? colTeamEl.checked : (cur.showColTeamName !== false),
+    autoArchive:     notUnlimited ? 'never' : (archSel ? archSel.dataset.value : cur.autoArchive),
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
-    uiContrast:          document.querySelector('#contrastSlider .jfb-tab.active')?.dataset.contrastVal || cur.uiContrast || 'low',
+    uiContrast:      document.querySelector('#contrastSlider .jfb-tab.active')?.dataset.contrastVal || cur.uiContrast || 'low',
   };
+};
+
+window.saveAccountPrefs = function saveAccountPrefs(showToast = true) {
+  const prefs = window._collectSettingsPrefs();
   document.documentElement.dataset.contrast = prefs.uiContrast;
   localStorage.setItem('jk_contrast', prefs.uiContrast);
   try {
     DB.savePrefs(currentUser.id, prefs);
-    Toast.success('Preferences saved');
+    if (showToast) Toast.success('Preferences saved');
   } catch (e) {
-    Toast.danger('Failed to save preferences');
+    if (showToast) Toast.danger('Failed to save preferences');
   }
   // Re-render jumps live if on jumps page so description/hotkey toggles apply immediately
   if (activePage === 'jumps' && typeof renderColumns === 'function') renderColumns();
   // Update notification badge immediately so notifications pref toggle takes effect live
   updateNotifBadge();
 }
+
+// Auto-save: persist settings whenever any control changes (no Save button needed)
+window.wireAutoSaveSettings = function wireAutoSaveSettings() {
+  const root = document.getElementById('acctTabContent');
+  if (!root || root.dataset.autosave) return;
+  root.dataset.autosave = '1';
+  const save = () => { saveAccountPrefs(false); };
+  // Checkboxes + number inputs → save on change
+  root.querySelectorAll('input[type="checkbox"], input[type="number"]').forEach(inp => {
+    inp.addEventListener('change', save);
+  });
+  // Custom select options (click to pick) → save after selection applies
+  root.querySelectorAll('.custom-select-option').forEach(opt => {
+    opt.addEventListener('click', save);
+  });
+  // Contrast tabs → save after active tab re-applies
+  const cslider = document.getElementById('contrastSlider');
+  if (cslider) cslider.addEventListener('click', save);
+};
 // Live UI-contrast control on the settings Preferences card
 window.wireContrastSlider = function wireContrastSlider() {
   const bar = document.getElementById('contrastSlider');
