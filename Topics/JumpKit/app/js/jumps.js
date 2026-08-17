@@ -317,7 +317,7 @@ function renderColumns() {
         <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
           <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
           <span class="col-count">${_colIsShared(col) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
-          ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
+          ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:1rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
         </div>
         <div class="col-items">${colJumps.map(j => jumpItemHTML(j, colIndex)).join('')}</div>`;
       area.appendChild(colEl);
@@ -363,7 +363,7 @@ function renderColumns() {
       <div class="col-header" style="flex-wrap:wrap;row-gap:2px">
         <span class="col-header-title" title="${esc(col.name)}" style="flex:1;min-width:0">${esc(col.name)}</span>
         <span class="col-count">${_colIsShared(col) ? `<svg class="ti ti-users" style="width:1.1em;height:1.1em;color:var(--hover-accent);vertical-align:-0.1em;margin-right:3px;margin-top:3px"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg>` : ''}${colJumps.length}</span>
-        ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:0.65rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);opacity:0.7;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
+        ${_showColTeamName ? `<span class="col-header-sub" style="width:100%;font-size:1rem;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_getColTeamLabel(col)}</span>` : ''}
       </div>
       <div class="col-items" id="col-${col.id}">
         ${colJumps.length === 0
@@ -438,7 +438,7 @@ function jumpItemHTML(j, colIndex) {
   const prefs = DB.getPrefs(currentUser.id);
   const isShared = j.isShared || j.teamId;
   const displayName = esc(j.name || j.url || 'Untitled');
-  return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
+  return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}${j.favorite ? ' jump-item-fav' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
     <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg></span>
     <div class="jump-info">
       <div class="jump-name">${displayName}</div>
