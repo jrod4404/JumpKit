@@ -389,8 +389,8 @@
   min-width: 0; flex: 1;
 }
 .col-count {
-  background: var(--bg-hover); color: var(--hover-accent);
-  border-radius: 10px; padding: 1px 8px; font-size: 0.85rem;
+  background: var(--bg-hover); color: var(--turq);
+  border-radius: 10px; padding: 1px 8px; font-size: 0.85rem; font-weight: 600;
 }
 .col-items { padding: 0; display: flex; flex-direction: column; gap: 0; }
 .jump-item {
@@ -424,9 +424,6 @@
 /* Hover: no cell bg — name bolds + turns turquoise, icon matches */
 .jump-item:hover .jump-name { color: var(--turq); font-weight: 700; }
 .jump-item:hover .jump-icon svg { color: var(--turq) !important; }
-/* Light mode: brighter hover turquoise */
-[data-theme="light"] .jump-item:hover .jump-name { color: #008B8F; }
-[data-theme="light"] .jump-item:hover .jump-icon svg { color: #008B8F !important; }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
 .jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -569,7 +566,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-status-badge {
   display: inline-flex; align-items: center; max-width: 100%; min-width: 0;
   padding: 3px 8px 3px 6px; border-radius: 20px;
-  font-size: 0.86rem; font-weight: 500; white-space: nowrap;
+  font-size: 0.95rem; font-weight: 500; white-space: nowrap;
   border: 1px solid var(--border-input);
 }
 .col-status-dir { flex-shrink: 0; font-weight: 500; color: var(--text-muted); }
@@ -577,7 +574,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .col-status-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .col-readonly-value {
   display: inline-flex; align-items: center;
-  min-height: 24px; padding: 3px 0; font-size: 0.86rem; font-weight: 500;
+  min-height: 24px; padding: 3px 0; font-size: 0.95rem; font-weight: 500;
   color: var(--text-dim); cursor: default; user-select: none;
 }
 .col-jump-count {

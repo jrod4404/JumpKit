@@ -1406,8 +1406,9 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
             </div>
             <div class="acct-row">
               <div class="acct-row-label"><span>UI Contrast</span><span class="acct-row-hint">Contrast between background and controls</span></div>
-              <div class="jump-filter-bar" id="contrastSlider" style="padding:3px;min-height:0">
-                ${['low','med','high'].map(c=>`<button class="jfb-tab${(p.uiContrast||'low')===c?' active':''}" data-contrast-val="${c}" style="padding:4px 14px">${c==='low'?'Low':c==='med'?'Med':'High'}</button>`).join('')}
+              <div class="jump-filter-bar" id="contrastSlider">
+                <div class="jfb-slider" id="contrastPill"></div>
+                ${['low','med','high'].map(c=>`<button class="jfb-tab${(p.uiContrast||'low')===c?' active':''}" data-contrast-val="${c}">${c==='low'?'Low':c==='med'?'Med':'High'}</button>`).join('')}
               </div>
             </div>
             <div class="acct-row">
@@ -1655,6 +1656,16 @@ window.saveAccountPrefs = function saveAccountPrefs() {
 window.wireContrastSlider = function wireContrastSlider() {
   const bar = document.getElementById('contrastSlider');
   if (!bar) return;
+  const movePill = () => {
+    const pill   = document.getElementById('contrastPill');
+    const active = bar.querySelector('.jfb-tab.active');
+    if (!pill || !active) return;
+    const tabs   = bar.querySelectorAll('.jfb-tab');
+    const isLast = active === tabs[tabs.length - 1];
+    pill.style.left   = active.offsetLeft + 'px';
+    pill.style.width  = isLast ? (bar.offsetWidth - active.offsetLeft) + 'px' : active.offsetWidth + 'px';
+  };
+  movePill();
   if (bar.dataset.wired) return;
   bar.dataset.wired = '1';
   bar.addEventListener('click', (e) => {
@@ -1662,6 +1673,7 @@ window.wireContrastSlider = function wireContrastSlider() {
     if (!btn) return;
     const v = btn.dataset.contrastVal || 'low';
     bar.querySelectorAll('.jfb-tab').forEach(b => b.classList.toggle('active', b.dataset.contrastVal === v));
+    movePill();
     document.documentElement.dataset.contrast = v;
     localStorage.setItem('jk_contrast', v);
   });
