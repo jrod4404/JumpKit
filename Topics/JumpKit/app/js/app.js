@@ -95,7 +95,7 @@ function _showUpdateBanner() {
           ov.id = 'updatePrepOverlay';
           ov.style.cssText = 'position:fixed;inset:0;z-index:10000;background:var(--overlay);display:flex;align-items:center;justify-content:center;';
           ov.innerHTML = `<div class="modal-box sm" style="max-width:340px;padding:28px 24px;text-align:center">
-            <svg class="ti ti-loader-2 spin" style="width:2rem;height:2rem;color:var(--hover-accent);margin:0 auto 14px;display:block"><use href="img/tabler-sprite.min.svg#tabler-loader-2"/></svg>
+            <div style="width:2.2rem;height:2.2rem;border:3px solid rgba(0,194,199,0.25);border-top-color:var(--hover-accent);border-radius:50%;margin:0 auto 16px;animation:spin 0.8s linear infinite"></div>
             <div style="font-size:1rem;font-weight:600;color:var(--text)">Preparing to update…</div>
             <div style="font-size:0.82rem;color:var(--text-muted);margin-top:6px">JumpKit will restart in a moment.</div>
           </div>`;
