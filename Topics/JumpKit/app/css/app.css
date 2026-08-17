@@ -419,12 +419,14 @@
 /* Favorite jumps: bold text; non-favorites: regular weight */
 .jump-item-fav .jump-name { font-weight: 700; }
 .jump-item:not(.jump-item-fav) .jump-name { font-weight: 400; }
+.jump-item:not(.jump-item-fav) .jump-name { color: var(--text-muted); }
+.jump-item:not(.jump-item-fav) .jump-icon svg { color: var(--text-muted); }
 /* Hover: no cell bg — name bolds + turns turquoise, icon matches */
 .jump-item:hover .jump-name { color: var(--turq); font-weight: 700; }
 .jump-item:hover .jump-icon svg { color: var(--turq) !important; }
-/* Non-favorites: name uses the same gray as the icon */
-.jump-item:not(.jump-item-fav) .jump-name { color: var(--text-muted); }
-.jump-item:not(.jump-item-fav) .jump-icon svg { color: var(--text-muted); }
+/* Light mode: brighter hover turquoise */
+[data-theme="light"] .jump-item:hover .jump-name { color: #008B8F; }
+[data-theme="light"] .jump-item:hover .jump-icon svg { color: #008B8F !important; }
 .jump-icon { font-size: 1.1rem; flex-shrink: 0; }
 .jump-info { flex: 1; min-width: 0; }
 .jump-name { font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
