@@ -47,7 +47,7 @@
 .sidebar.collapsed .sidebar-toggle-btn { margin-left: 1px; margin-right: 0; }
 .sidebar.collapsed .sidebar-toggle-btn .ti { margin-top: 2px; }
 .sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
-.nav-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; color: var(--text-dim); padding: 14px 20px 4px; text-transform: uppercase; }
+.nav-section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.09em; color: var(--text-dim); padding: 14px 20px 4px; text-transform: uppercase; }
 .nav-item {
   display: flex; align-items: center; gap: 9px;
   padding: 10px 20px; font-size: 1rem; font-weight: 500;
@@ -782,7 +782,7 @@ strong, b { color: inherit; }
 .notif-empty span { font-size: 0.82rem; color: var(--text-dim); }
 
 /* ── NoteKit (feature-flagged; styles harmless when hidden) ─────────────── */
-.nav-section-label { margin-top: 14px; padding: 6px 14px 2px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dim); text-transform: uppercase; }
+.nav-section-label { margin-top: 24px; padding: 6px 14px 2px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dim); text-transform: uppercase; }
 #notekitNavWrap { padding: 2px 8px 8px; }
 .nk-project { margin-bottom: 2px; }
 .nk-project-row { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; cursor: pointer; color: var(--text); font-size: 0.85rem; }
@@ -846,9 +846,9 @@ strong, b { color: inherit; }
 .nk-modal-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text); font-size: 0.95rem; outline: none; margin-bottom: 16px; }
 .nk-modal-input:focus { border-color: var(--turq); }
 .nk-modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
-.nk-btn { padding: 7px 14px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); font-size: 0.85rem; font-weight: 600; cursor: pointer; }
-.nk-btn:hover { background: var(--bg-hover); }
-.nk-btn-primary { background: var(--turq); border-color: var(--turq); color: #04231f; }
-.nk-btn-primary:hover { background: rgba(0,194,199,0.85); }
-.nk-btn-danger { background: transparent; border-color: rgba(248,113,113,0.5); color: #f87171; }
-.nk-btn-danger:hover { background: rgba(248,113,113,0.15); }
+.nk-btn { padding: 7px 16px; border-radius: var(--radius, 10px); border: 1px solid var(--border); background: var(--bg-card); color: var(--text); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity var(--transition), background var(--transition), border-color var(--transition); }
+.nk-btn:hover:not(:disabled) { background: var(--bg-hover); }
+.nk-btn-primary { background: var(--grad); border: none; color: #fff; box-shadow: 0 4px 16px rgba(0,194,199,0.25); }
+.nk-btn-primary:hover:not(:disabled) { opacity: 0.88; background: var(--grad); }
+.nk-btn-danger { background: transparent; border: 1px solid rgba(248,113,113,0.5); color: #f87171; }
+.nk-btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.15); }
