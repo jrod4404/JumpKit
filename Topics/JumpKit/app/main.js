@@ -146,6 +146,140 @@ function initDB() {
   }
 }
 
+// ── NoteKit: isolated SQLite (projects → pages → note_blocks) ─────────────
+// Feature-flagged (default OFF for regular users; ON for Jeff's test build).
+// NOTE: kept fully separate from the JumpKit `db` handle & Supabase sync.
+let notekitDb = null;
+function initNoteKitDB() {
+  try {
+    const Database = require('better-sqlite3');
+    const nkPath = path.join(app.getPath('userData'), 'notekit.db');
+    notekitDb = new Database(nkPath);
+    notekitDb.exec(`
+      CREATE TABLE IF NOT EXISTS nk_projects (
+        id         TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        sortOrder  INTEGER DEFAULT 0,
+        createdAt  INTEGER,
+        updatedAt  INTEGER,
+        deletedAt  INTEGER DEFAULT NULL
+      );
+      CREATE TABLE IF NOT EXISTS nk_pages (
+        id         TEXT PRIMARY KEY,
+        projectId  TEXT NOT NULL,
+        title      TEXT NOT NULL DEFAULT 'Untitled',
+        sortOrder  INTEGER DEFAULT 0,
+        createdAt  INTEGER,
+        updatedAt  INTEGER,
+        deletedAt  INTEGER DEFAULT NULL
+      );
+      CREATE TABLE IF NOT EXISTS nk_blocks (
+        id         TEXT PRIMARY KEY,
+        pageId     TEXT NOT NULL,
+        type       TEXT NOT NULL DEFAULT 'text',
+        content    TEXT DEFAULT '',
+        sortOrder  INTEGER DEFAULT 0,
+        createdAt  INTEGER,
+        updatedAt  INTEGER
+      );
+      CREATE INDEX IF NOT EXISTS idx_nk_pages_project ON nk_pages(projectId);
+      CREATE INDEX IF NOT EXISTS idx_nk_blocks_page   ON nk_blocks(pageId);
+    `);
+    console.log('[NoteKit] DB initialized at', nkPath);
+  } catch (e) {
+    console.error('[NoteKit] DB UNAVAILABLE:', e.message);
+    try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'notekit-error.log'), new Date().toISOString() + ' ' + e.message + '\n'); } catch (_) {}
+    notekitDb = null;
+  }
+}
+
+function nkNow() { return Date.now(); }
+function nkUid() { return (globalThis.crypto && globalThis.crypto.randomUUID) ? globalThis.crypto.randomUUID() : 'nk-' + nkNow() + '-' + Math.random().toString(36).slice(2, 10); }
+
+// ── IPC: NoteKit — projects ────────────────────────────────────────
+ipcMain.handle('notekit-list-projects', () => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_projects WHERE deletedAt IS NULL ORDER BY sortOrder, name').all();
+});
+
+ipcMain.handle('notekit-create-project', (_e, name) => {
+  if (!notekitDb) return { ok: false, reason: 'notekit db unavailable' };
+  const id = nkUid();
+  const now = nkNow();
+  notekitDb.prepare('INSERT INTO nk_projects (id, name, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)')
+    .run(id, String(name || 'Untitled').slice(0, 200), 0, now, now);
+  return { ok: true, id };
+});
+
+ipcMain.handle('notekit-rename-project', (_e, id, name) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_projects SET name = ?, updatedAt = ? WHERE id = ?')
+    .run(String(name || 'Untitled').slice(0, 200), nkNow(), id);
+  return { ok: true };
+});
+
+ipcMain.handle('notekit-delete-project', (_e, id) => {
+  if (!notekitDb) return { ok: false };
+  // Soft delete: mark project + its pages as deleted (blocks kept for recovery).
+  const now = nkNow();
+  notekitDb.prepare('UPDATE nk_projects SET deletedAt = ?, updatedAt = ? WHERE id = ?').run(now, now, id);
+  notekitDb.prepare('UPDATE nk_pages SET deletedAt = ? WHERE projectId = ? AND deletedAt IS NULL').run(now, id);
+  return { ok: true };
+});
+
+// ── IPC: NoteKit — pages ───────────────────────────────────────────
+ipcMain.handle('notekit-list-pages', (_e, projectId) => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_pages WHERE projectId = ? AND deletedAt IS NULL ORDER BY sortOrder, title').all(projectId);
+});
+
+ipcMain.handle('notekit-create-page', (_e, projectId, title) => {
+  if (!notekitDb) return { ok: false, reason: 'notekit db unavailable' };
+  const id = nkUid();
+  const now = nkNow();
+  const count = notekitDb.prepare('SELECT COUNT(*) c FROM nk_pages WHERE projectId = ? AND deletedAt IS NULL').get(projectId).c;
+  notekitDb.prepare('INSERT INTO nk_pages (id, projectId, title, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(id, projectId, String(title || 'Untitled').slice(0, 200), count, now, now);
+  return { ok: true, id };
+});
+
+ipcMain.handle('notekit-rename-page', (_e, id, title) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_pages SET title = ?, updatedAt = ? WHERE id = ?')
+    .run(String(title || 'Untitled').slice(0, 200), nkNow(), id);
+  return { ok: true };
+});
+
+ipcMain.handle('notekit-delete-page', (_e, id) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_pages SET deletedAt = ?, updatedAt = ? WHERE id = ?').run(nkNow(), nkNow(), id);
+  return { ok: true };
+});
+
+// ── IPC: NoteKit — blocks ──────────────────────────────────────────
+ipcMain.handle('notekit-list-blocks', (_e, pageId) => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_blocks WHERE pageId = ? ORDER BY sortOrder, createdAt').all(pageId);
+});
+
+ipcMain.handle('notekit-enabled', () => {
+  return process.env.NOTEKIT_ENABLED === 'true';
+});
+
+// Replace ALL blocks of a page (autosave-friendly: renderer sends full block list)
+ipcMain.handle('notekit-save-blocks', (_e, pageId, blocks) => {
+  if (!notekitDb) return { ok: false };
+  const now = nkNow();
+  const tx = notekitDb.transaction((rows) => {
+    notekitDb.prepare('DELETE FROM nk_blocks WHERE pageId = ?').run(pageId);
+    const ins = notekitDb.prepare('INSERT INTO nk_blocks (id, pageId, type, content, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    rows.forEach((b, i) => ins.run(b.id || nkUid(), pageId, b.type || 'text', typeof b.content === 'string' ? b.content : JSON.stringify(b.content), i, now, now));
+    notekitDb.prepare('UPDATE nk_pages SET updatedAt = ? WHERE id = ?').run(now, pageId);
+  });
+  try { tx(blocks || []); return { ok: true }; }
+  catch (e) { return { ok: false, reason: e.message }; }
+});
+
 // ── IPC: sync-jumps ────────────────────────────────────────────────
 function _scopedSyncKey(userId, key) {
   return userId ? `${userId}:${key}` : key;
@@ -1139,6 +1273,11 @@ app.whenReady().then(() => {
   }
 
   initDB();
+  initNoteKitDB();
+
+  // NoteKit feature flag: OFF for regular users. Flip to true for Jeff's test
+  // build (electron-builder --config … or env). Renderer reads via IPC.
+  process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'false';
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer
   const { session } = require('electron');

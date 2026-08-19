@@ -38,6 +38,11 @@
 
       <button class="nav-item"        data-page="stats">    <svg class="ti ti-chart-bar nav-icon"><use href="img/tabler-sprite.min.svg#tabler-chart-bar"/></svg><span class="nav-label"> Statistics</span></button>
       <button class="nav-item"        data-page="teams">   <svg class="ti ti-users nav-icon"><use href="img/tabler-sprite.min.svg#tabler-users"/></svg><span class="nav-label"> Teams</span></button>
+
+      <!-- NoteKit — feature-flagged; shown only when NOTEKIT_ENABLED=true -->
+      <div class="nav-section-label" id="notekitNavLabel" style="display:none">NOTEKIT</div>
+      <div id="notekitNavWrap" style="display:none"></div>
+
       <button class="nav-item"        data-page="settings"><svg class="ti ti-settings nav-icon"><use href="img/tabler-sprite.min.svg#tabler-settings"/></svg><span class="nav-label"> Settings</span></button>
       <button class="nav-item"        data-page="help">     <svg class="ti ti-help-circle nav-icon"><use href="img/tabler-sprite.min.svg#tabler-help-circle"/></svg><span class="nav-label"> Help</span></button>
       <div class="nav-section-label" id="adminNavLabel" style="display:none">ADMIN</div>
@@ -120,6 +125,8 @@
 <script src="js/teams.js?v=1779376933"></script>
 <script src="js/sync.js"></script>
 <script src="js/onboarding.js"></script>
+<!-- NoteKit (feature-flagged; no-op when disabled) -->
+<script src="js/notekit.js?v=1"></script>
 <!-- admin scripts: excluded from prod builds via package.json build.files exclusions -->
 <script src="js/admin.js"></script>
 <script src="js/deployment.js"></script>

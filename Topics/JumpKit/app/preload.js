@@ -59,4 +59,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   checkAdminFilesExcluded:    () => ipcRenderer.invoke('check-admin-files-excluded'),
   readBuildConfig:            () => ipcRenderer.invoke('read-build-config'),
   checkIconFiles:             () => ipcRenderer.invoke('check-icon-files'),
+
+  // ── NoteKit (feature-flagged, isolated store) ──
+  notekitEnabled:      ()       => ipcRenderer.invoke('notekit-enabled'),
+  notekitListProjects: ()       => ipcRenderer.invoke('notekit-list-projects'),
+  notekitCreateProject:(name)   => ipcRenderer.invoke('notekit-create-project', name),
+  notekitRenameProject:(id, name) => ipcRenderer.invoke('notekit-rename-project', id, name),
+  notekitDeleteProject:(id)     => ipcRenderer.invoke('notekit-delete-project', id),
+  notekitListPages:    (projectId) => ipcRenderer.invoke('notekit-list-pages', projectId),
+  notekitCreatePage:   (projectId, title) => ipcRenderer.invoke('notekit-create-page', projectId, title),
+  notekitRenamePage:   (id, title) => ipcRenderer.invoke('notekit-rename-page', id, title),
+  notekitDeletePage:   (id)       => ipcRenderer.invoke('notekit-delete-page', id),
+  notekitListBlocks:   (pageId)   => ipcRenderer.invoke('notekit-list-blocks', pageId),
+  notekitSaveBlocks:   (pageId, blocks) => ipcRenderer.invoke('notekit-save-blocks', pageId, blocks),
 });

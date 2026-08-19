@@ -628,14 +628,21 @@ const pages = {
     }
     catch (err) { console.error('[admin] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load Users page.</strong><br>Error: ${err.message}</div>`; }
   },
+  notekit:    async () => {
+    try {
+      if (window.NoteKit && typeof window.NoteKit.showEmpty === 'function') window.NoteKit.showEmpty();
+      else document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem">NoteKit is not enabled in this build.</div>`;
+    }
+    catch (err) { console.error('[notekit] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load NoteKit.</strong><br>Error: ${err.message}</div>`; }
+  },
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments', notekit:'NoteKit'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload'
+  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes'
 };
 let activePage = 'home';
 window.activePage = activePage;
