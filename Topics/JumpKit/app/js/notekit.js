@@ -118,31 +118,100 @@
     setTimeout(() => document.addEventListener('click', close), 0);
   }
 
+  // ── In-app modal dialogs (window.prompt/confirm are NOT supported in Electron) ──
+  function nkPrompt(title, defaultValue = '') {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'nk-modal-overlay';
+      overlay.innerHTML = `
+        <div class="nk-modal" role="dialog" aria-modal="true">
+          <div class="nk-modal-title">${esc(title)}</div>
+          <input class="nk-modal-input" type="text" value="${esc(defaultValue)}" placeholder="${esc(defaultValue)}"/>
+          <div class="nk-modal-btns">
+            <button class="nk-btn" data-nk-modal="cancel">Cancel</button>
+            <button class="nk-btn nk-btn-primary" data-nk-modal="ok">OK</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      const input = overlay.querySelector('.nk-modal-input');
+      input.focus();
+      input.select();
+      const close = (val) => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(val);
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') close(null);
+        if (e.key === 'Enter') { e.preventDefault(); close(input.value); }
+      };
+      document.addEventListener('keydown', onKey);
+      overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(null); });
+      overlay.querySelector('[data-nk-modal="ok"]').addEventListener('click', () => close(input.value));
+      overlay.querySelector('[data-nk-modal="cancel"]').addEventListener('click', () => close(null));
+    });
+  }
+
+  function nkConfirm(message, okText = 'Delete', danger = true) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'nk-modal-overlay';
+      overlay.innerHTML = `
+        <div class="nk-modal" role="dialog" aria-modal="true">
+          <div class="nk-modal-title">${esc('Confirm')}</div>
+          <div class="nk-modal-msg">${esc(message)}</div>
+          <div class="nk-modal-btns">
+            <button class="nk-btn" data-nk-modal="cancel">Cancel</button>
+            <button class="nk-btn ${danger ? 'nk-btn-danger' : 'nk-btn-primary'}" data-nk-modal="ok">${esc(okText)}</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      const close = (val) => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(val);
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') close(false);
+        if (e.key === 'Enter') { e.preventDefault(); close(true); }
+      };
+      document.addEventListener('keydown', onKey);
+      overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(false); });
+      overlay.querySelector('[data-nk-modal="ok"]').addEventListener('click', () => close(true));
+      overlay.querySelector('[data-nk-modal="cancel"]').addEventListener('click', () => close(false));
+    });
+  }
+
   function promptAddProject() {
-    const name = prompt('New project name:', 'Untitled');
-    if (name === null) return;
-    window.electronAPI.notekitCreateProject(name.trim() || 'Untitled').then(() => {
-      NK.activeProjectId = null; renderNav();
+    nkPrompt('New project name', 'Untitled').then((name) => {
+      if (name === null) return;
+      window.electronAPI.notekitCreateProject(name.trim() || 'Untitled').then(() => {
+        NK.activeProjectId = null; renderNav();
+      });
     });
   }
   function promptRenameProject(id) {
     const p = NK.projects.find(x => x.id === id);
-    const name = prompt('Rename project:', p ? p.name : '');
-    if (name === null || !name.trim()) return;
-    window.electronAPI.notekitRenameProject(id, name.trim()).then(() => renderNav());
+    nkPrompt('Rename project', p ? p.name : '').then((name) => {
+      if (name === null || !name.trim()) return;
+      window.electronAPI.notekitRenameProject(id, name.trim()).then(() => renderNav());
+    });
   }
   function confirmDeleteProject(id) {
-    if (!confirm('Delete this project and all its pages? (soft delete — recoverable in DB)')) return;
-    window.electronAPI.notekitDeleteProject(id).then(() => {
-      if (NK.activeProjectId === id) { NK.activeProjectId = null; NK.activePageId = null; showEmpty(); }
-      renderNav();
+    nkConfirm('Delete this project and all its pages? (soft delete — recoverable in DB)').then((ok) => {
+      if (!ok) return;
+      window.electronAPI.notekitDeleteProject(id).then(() => {
+        if (NK.activeProjectId === id) { NK.activeProjectId = null; NK.activePageId = null; showEmpty(); }
+        renderNav();
+      });
     });
   }
   function promptAddPage(projectId) {
-    const title = prompt('New page title:', 'Untitled');
-    if (title === null) return;
-    window.electronAPI.notekitCreatePage(projectId, title.trim() || 'Untitled').then((r) => {
-      if (r && r.ok) { NK.activeProjectId = projectId; NK.activePageId = r.id; renderNav(); openPage(r.id); }
+    nkPrompt('New page title', 'Untitled').then((title) => {
+      if (title === null) return;
+      window.electronAPI.notekitCreatePage(projectId, title.trim() || 'Untitled').then((r) => {
+        if (r && r.ok) { NK.activeProjectId = projectId; NK.activePageId = r.id; renderNav(); openPage(r.id); }
+      });
     });
   }
 
@@ -314,13 +383,14 @@
       e.preventDefault();
       removeBlock(idx);
     }
-    // "/" menu shortcut → simple type prompt (v1)
+    // "/" menu shortcut → simple type picker (v1)
     if (t.classList.contains('nk-text') && e.key === '/' && !e.shiftKey) {
       e.preventDefault();
-      const type = prompt('Block type: text, h1, h2, h3, checklist, bullet, numbered');
-      if (type && type.trim()) {
-        setBlockType(idx, normalizeType(type));
-      }
+      nkPrompt('Block type: text, h1, h2, h3, checklist, bullet, numbered').then((type) => {
+        if (type && type.trim()) {
+          setBlockType(idx, normalizeType(type));
+        }
+      });
     }
     // Ctrl/Cmd+Enter on any block input → new block below
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
