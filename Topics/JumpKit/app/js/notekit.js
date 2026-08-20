@@ -119,18 +119,46 @@
   }
 
   // ── Project / page menus (rename / delete — soft delete) ───────────
-  function showProjectMenu(anchorEl, id) {
+  // Single persistent outside-click closer (prevents a stale close handler
+  // from a previously closed menu instantly hiding a newly opened one).
+  let nkMenuAnchor = null;
+  function bindNkMenuClose() {
+    if (bindNkMenuClose.bound) return;
+    bindNkMenuClose.bound = true;
+    document.addEventListener('click', (ev) => {
+      const menu = document.getElementById('ctxMenu');
+      if (!menu || menu.style.display === 'none') return;
+      if (menu.contains(ev.target)) return;
+      if (nkMenuAnchor && nkMenuAnchor.contains(ev.target)) return;
+      menu.style.display = 'none';
+      nkMenuAnchor = null;
+    });
+  }
+  function openNkMenu(anchorEl, html) {
+    bindNkMenuClose();
     const menu = document.getElementById('ctxMenu');
     if (!menu) return;
-    menu.innerHTML = '';
+    nkMenuAnchor = anchorEl;
+    menu.innerHTML = html;
     menu.style.display = 'block';
     const rect = anchorEl.getBoundingClientRect();
-    menu.style.left = rect.left + 'px';
-    menu.style.top = (rect.bottom + 4) + 'px';
-    menu.innerHTML = `
+    const mw = menu.offsetWidth || 180;
+    let left = rect.left;
+    let top = rect.bottom + 4;
+    // Keep within viewport.
+    if (left + mw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - mw - 8);
+    if (top + menu.offsetHeight > window.innerHeight - 8) top = Math.max(8, rect.top - menu.offsetHeight - 4);
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+    return menu;
+  }
+
+  function showProjectMenu(anchorEl, id) {
+    const menu = openNkMenu(anchorEl, `
       <button class="ctx-item" data-nk-menu="rename-project" data-id="${id}">Rename project</button>
       <button class="ctx-item" data-nk-menu="project-icon" data-id="${id}">Change icon</button>
-      <button class="ctx-item danger" data-nk-menu="delete-project" data-id="${id}">Delete project</button>`;
+      <button class="ctx-item danger" data-nk-menu="delete-project" data-id="${id}">Delete project</button>`);
+    if (!menu) return;
     menu.onclick = (e) => {
       const b = e.target.closest('[data-nk-menu]');
       if (!b) return;
@@ -139,22 +167,15 @@
       if (b.dataset.nkMenu === 'project-icon') pickProjectIcon(i);
       if (b.dataset.nkMenu === 'delete-project') confirmDeleteProject(i);
       menu.style.display = 'none';
+      nkMenuAnchor = null;
     };
-    const close = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.style.display = 'none'; document.removeEventListener('click', close); } };
-    setTimeout(() => document.addEventListener('click', close), 0);
   }
 
   function showPageMenu(anchorEl, pageId, projectId) {
-    const menu = document.getElementById('ctxMenu');
-    if (!menu) return;
-    menu.innerHTML = '';
-    menu.style.display = 'block';
-    const rect = anchorEl.getBoundingClientRect();
-    menu.style.left = rect.left + 'px';
-    menu.style.top = (rect.bottom + 4) + 'px';
-    menu.innerHTML = `
+    const menu = openNkMenu(anchorEl, `
       <button class="ctx-item" data-nk-menu="rename-page" data-id="${pageId}">Rename page</button>
-      <button class="ctx-item danger" data-nk-menu="delete-page" data-id="${pageId}">Delete page</button>`;
+      <button class="ctx-item danger" data-nk-menu="delete-page" data-id="${pageId}">Delete page</button>`);
+    if (!menu) return;
     menu.onclick = (e) => {
       const b = e.target.closest('[data-nk-menu]');
       if (!b) return;
@@ -162,9 +183,8 @@
       if (b.dataset.nkMenu === 'rename-page') promptRenamePage(i, projectId);
       if (b.dataset.nkMenu === 'delete-page') confirmDeletePage(i, projectId);
       menu.style.display = 'none';
+      nkMenuAnchor = null;
     };
-    const close = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.style.display = 'none'; document.removeEventListener('click', close); } };
-    setTimeout(() => document.addEventListener('click', close), 0);
   }
 
   // ── Project / page icon picker ──────────────────────────────────────
@@ -362,13 +382,31 @@
         <span class="nk-tab-name">${esc(pg.title)}</span>
         <span class="nk-tab-more" data-action="page-menu" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="Page options">⋯</span>
       </div>`).join('');
-    return `<div class="nk-tabs" id="nkTabs"><span class="nk-tabs-project">${esc(projectName)}</span>${tabs}${addBtn}</div>`;
+    // Fix #5: label left of the + button = "{project name} Pages", bigger text.
+    return `<div class="nk-tabs" id="nkTabs"><span class="nk-tabs-project">${esc(projectName ? projectName + ' Pages' : 'Pages')}</span>${tabs}${addBtn}</div>`;
   }
 
   function renderTabs(pages) {
     const tabBar = document.getElementById('nkTabs');
     if (!tabBar) return;
     tabBar.outerHTML = tabsToHtml(pages);
+  }
+
+  // Fix #3+#4: breadcrumb header at top of the page view.
+  function pageHeaderHtml(pageTitle) {
+    const project = NK.projects.find(p => p.id === NK.activeProjectId);
+    const projectName = project ? project.name : '';
+    const name = pageTitle || '';
+    return `
+      <div class="nk-page-header">
+        <div class="nk-crumb">
+          <svg class="ti ti-notes nk-crumb-icon"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>
+          <span class="nk-crumb-app">Notekit</span><span class="nk-crumb-sep">—</span>
+          <span class="nk-crumb-proj">${esc(projectName)}</span><span class="nk-crumb-sep">—</span>
+          <span class="nk-crumb-page">${esc(name)}</span>
+        </div>
+        <div class="nk-help">Create and update notes below</div>
+      </div>`;
   }
 
   async function openPage(pageId, _pages) {
@@ -388,9 +426,10 @@
     }
     document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === 'notekit'));
 
-    setTopbar('NoteKit — ' + page.title, 'Projects → Pages → Notes');
+    setTopbar('NoteKit', page.title);
 
     content.innerHTML = `
+      ${pageHeaderHtml(page.title)}
       ${tabsToHtml(pages)}
       <div class="nk-page-view">
         <div class="nk-page-title-wrap">
@@ -406,6 +445,9 @@
       api.notekitRenamePage(pageId, titleInput.value.trim() || 'Untitled');
       renderNav();
       renderTabs(pages);
+      // update breadcrumb page label live
+      const crumb = document.querySelector('.nk-crumb-page');
+      if (crumb) crumb.textContent = titleInput.value.trim() || 'Untitled';
     }, 600));
 
     const blocksEl = document.getElementById('nkBlocks');
@@ -425,8 +467,9 @@
     const pages = (await api.notekitListPages(projectId)) || [];
     if (pages.length > 0) { await openPage(pages[0].id, pages); return; }
     const project = NK.projects.find(p => p.id === projectId);
-    setTopbar('NoteKit', 'Projects → Pages → Notes');
+    setTopbar('NoteKit', project ? project.name : '');
     content.innerHTML = `
+      ${pageHeaderHtml('')}
       ${tabsToHtml([])}
       <div class="nk-empty">
         <svg class="ti ti-notes" style="font-size:2.5rem;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>
@@ -447,10 +490,10 @@
   function showEmpty() {
     const content = document.getElementById('pageContent');
     if (!content) return;
-    setTopbar('NoteKit', 'Projects → Pages → Notes');
+    setTopbar('NoteKit', '');
     content.innerHTML = `<div class="nk-empty">
       <svg class="ti ti-notes" style="font-size:2.5rem;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>
-      <p>Select a page from the sidebar, or create a project to get started.</p>
+      <p>Select a project from the sidebar, or create one to get started.</p>
     </div>`;
   }
 
