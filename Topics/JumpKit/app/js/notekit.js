@@ -395,6 +395,54 @@
     });
   }
 
+  // ── Rich-text floating format bar ────────────────────────────────────
+  function wireFmtBar() {
+    const bar = document.getElementById('nkFmtBar');
+    if (!bar) return;
+    bar.querySelectorAll('button[data-fmt]').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault()); // keep selection
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        const kind = btn.dataset.fmt;
+        if (kind === 'bold') document.execCommand('bold');
+        else if (kind === 'italic') document.execCommand('italic');
+        else if (kind === 'code') wrapInlineCode();
+        else if (kind === 'link') promptLink();
+        else return;
+        if (kind === 'bold' || kind === 'italic') {
+          const t = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('nk-text') ? document.activeElement : null;
+          syncRichInput(t);
+        }
+        hideFmtBar();
+      });
+    });
+    // Show the bar when a non-collapsed selection exists inside a text block.
+    document.addEventListener('selectionchange', debounce(() => {
+      const sel = window.getSelection();
+      if (!sel || sel.isCollapsed || !sel.rangeCount) { hideFmtBar(); return; }
+      const node = sel.anchorNode;
+      const el = node && node.nodeType === 3 ? node.parentElement : node;
+      if (!el || !el.closest('.nk-text')) { hideFmtBar(); return; }
+      let rect = null;
+      try { rect = sel.getRangeAt(0).getBoundingClientRect(); } catch { rect = null; }
+      if (!rect || (rect.width === 0 && rect.height === 0)) { hideFmtBar(); return; }
+      const barEl = document.getElementById('nkFmtBar');
+      if (!barEl) return;
+      barEl.style.display = 'flex';
+      barEl.style.left = Math.max(8, rect.left + rect.width / 2 - 110) + 'px';
+      barEl.style.top = (rect.top - barEl.offsetHeight - 8) + 'px';
+    }, 120));
+    // Hide when clicking anywhere outside the bar.
+    document.addEventListener('mousedown', (e) => {
+      if (!e.target.closest || !e.target.closest('#nkFmtBar')) hideFmtBar();
+    });
+  }
+  function hideFmtBar() {
+    const bar = document.getElementById('nkFmtBar');
+    if (bar) bar.style.display = 'none';
+  }
+
   const HELP_TEXT = 'Create and update pages and notes';
 
   async function openPage(pageId, _pages) {
@@ -422,15 +470,27 @@
       <div class="nk-page-view">
         <div class="nk-blocks" id="nkBlocks"></div>
         <div class="nk-add-block" id="nkAddBlock">+ Add a block</div>
+      </div>
+      <div class="nk-fmt-bar" id="nkFmtBar" style="display:none">
+        <button type="button" data-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
+        <button type="button" data-fmt="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button type="button" data-fmt="code" title="Inline code (Ctrl+E)"><code>&lt;/&gt;</code></button>
+        <button type="button" data-fmt="link" title="Link (Ctrl+K)">🔗</button>
       </div>`;
     wireTabMoreButtons();
+    wireFmtBar();
 
     const blocksEl = document.getElementById('nkBlocks');
     const addBtn = document.getElementById('nkAddBlock');
     renderBlocks();
     blocksEl.addEventListener('input', onBlocksInput);
     blocksEl.addEventListener('keydown', onBlocksKeydown);
-    addBtn.addEventListener('click', () => addBlockAt(NK.blocks.length));
+    addBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+      const rect = addBtn.getBoundingClientRect();
+      openBlockPicker(rect.left, rect.bottom + 4, (type) => addBlockAt(NK.blocks.length, type));
+    });
     document.addEventListener('keydown', onPageKeydown);
     scheduleSave();
   }
@@ -515,8 +575,47 @@
         </div>`;
       }
       default:
-        return `<div class="nk-block nk-block-text" ${base}>${remove}<div class="nk-text" contenteditable="true" data-plain="true">${esc(b.content)}</div></div>`;
+        return `<div class="nk-block nk-block-text" ${base}>${remove}<div class="nk-text" contenteditable="true">${sanitizeRich(b.content)}</div></div>`;
     }
+  }
+
+  // Whitelist sanitizer for rich text: keeps bold/italic/underline/inline code/links/line-breaks.
+  const RICH_ALLOWED = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'CODE', 'A', 'BR']);
+  function sanitizeRich(html) {
+    if (!html) return '';
+    const doc = new DOMParser().parseFromString(`<div id="nk-rich">${html}</div>`, 'text/html');
+    const root = doc.getElementById('nk-rich');
+    if (!root) return '';
+    const walk = (node) => {
+      [...node.childNodes].forEach((child) => {
+        if (child.nodeType === 1) {
+          const tag = child.tagName.toUpperCase();
+          if (RICH_ALLOWED.has(tag)) {
+            if (tag === 'A') {
+              const href = child.getAttribute('href') || '';
+              if (!/^(https?:\/\/|mailto:)/i.test(href)) {
+                child.removeAttribute('href');
+              } else {
+                child.setAttribute('target', '_blank');
+                child.setAttribute('rel', 'noopener noreferrer');
+              }
+            }
+            // strip all other attributes (keep href only for <a>)
+            [...child.attributes].forEach((a) => {
+              if (!(tag === 'A' && a.name === 'href')) child.removeAttribute(a.name);
+            });
+            walk(child);
+          } else {
+            // unwrap disallowed element, keep its text children
+            const parent = child.parentNode;
+            while (child.firstChild) parent.insertBefore(child.firstChild, child);
+            parent.removeChild(child);
+          }
+        }
+      });
+    };
+    walk(root);
+    return root.innerHTML;
   }
 
   function parseList(content) {
@@ -535,7 +634,7 @@
     const b = NK.blocks[idx];
     if (!b) return;
     if (t.classList.contains('nk-text')) {
-      b.content = t.innerText;
+      b.content = sanitizeRich(t.innerHTML);
     } else if (t.classList.contains('nk-h')) {
       b.content = t.value;
     } else if (t.classList.contains('nk-list-text') || t.classList.contains('nk-check-text')) {
@@ -559,30 +658,41 @@
     if (!blockEl) return;
     const idx = parseInt(blockEl.dataset.idx, 10);
     const b = NK.blocks[idx];
-    // Enter on a text block → split at cursor or new block below
-    if (t.classList.contains('nk-text') && e.key === 'Enter' && !e.shiftKey) {
+    const inText = t.classList.contains('nk-text');
+    // Rich-text shortcuts (only inside a text block)
+    if (inText && (e.metaKey || e.ctrlKey) && !e.altKey) {
+      const k = e.key.toLowerCase();
+      if (k === 'b') { e.preventDefault(); document.execCommand('bold'); syncRichInput(t); return; }
+      if (k === 'i') { e.preventDefault(); document.execCommand('italic'); syncRichInput(t); return; }
+      if (k === 'e') { e.preventDefault(); wrapInlineCode(); return; }
+      if (k === 'k') { e.preventDefault(); promptLink(); return; }
+    }
+    // Enter on a text block → split at cursor or new block below (not when Ctrl/Cmd held — that's handled below)
+    if (inText && e.key === 'Enter' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
       e.preventDefault();
-      const sel = window.getSelection();
-      const offset = sel && sel.anchorNode ? sel.anchorOffset : t.innerText.length;
-      if (t.innerText.trim() === '') {
+      if ((t.textContent || '').trim() === '') {
         addBlockAt(idx + 1);
       } else {
-        b_content_split(idx, offset);
+        b_content_split(idx);
       }
     }
     // Backspace on empty text block → remove it
-    if (t.classList.contains('nk-text') && e.key === 'Backspace' && t.innerText.trim() === '') {
+    if (inText && e.key === 'Backspace' && (t.textContent || '').trim() === '') {
       e.preventDefault();
       removeBlock(idx);
     }
-    // "/" menu shortcut → simple type picker (v1)
-    if (t.classList.contains('nk-text') && e.key === '/' && !e.shiftKey) {
+    // "/" menu shortcut → block type picker at caret
+    if (inText && e.key === '/' && !e.shiftKey) {
       e.preventDefault();
-      nkPrompt('Block type: text, h1, h2, h3, checklist, bullet, numbered').then((type) => {
-        if (type && type.trim()) {
-          setBlockType(idx, normalizeType(type));
+      const sel = window.getSelection();
+      let x = t.getBoundingClientRect().left, y = t.getBoundingClientRect().top;
+      try {
+        if (sel && sel.rangeCount) {
+          const r = sel.getRangeAt(0).getBoundingClientRect();
+          if (r && (r.width || r.height)) { x = r.left; y = r.bottom; }
         }
-      });
+      } catch { /* fall back to block position */ }
+      openBlockPicker(x, y + 4, (type) => setBlockType(idx, type));
     }
     // Ctrl/Cmd+Enter on any block input → new block below
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
@@ -592,10 +702,73 @@
     void b;
   }
 
-  function b_content_split(idx, offset) {
+  // Persist rich text after execCommand edits (they don't fire input reliably).
+  function syncRichInput(t) {
+    if (t && t.isConnected) t.dispatchEvent(new Event('input', { bubbles: true }));
+    hideFmtBar();
+  }
+
+  // Wrap the current selection in <code> (with text-based fallback).
+  function wrapInlineCode() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+    const text = sel.toString();
+    if (!text) return;
+    const t = sel.anchorNode && sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+    try {
+      const code = document.createElement('code');
+      code.textContent = text;
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      range.insertNode(code);
+      range.selectNodeContents(code);
+      sel.removeAllRanges(); sel.addRange(range);
+    } catch {
+      document.execCommand('insertHTML', false, '<code>' + esc(text) + '</code>');
+    }
+    syncRichInput(t);
+  }
+
+  // Link the current selection (prompt for URL, restore selection afterwards).
+  function promptLink() {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed || !sel.rangeCount) return;
+    const savedRange = sel.getRangeAt(0).cloneRange();
+    const savedEl = sel.anchorNode && sel.anchorNode.nodeType === 3 ? sel.anchorNode.parentElement : sel.anchorNode;
+    nkPrompt('Link URL', 'https://').then((url) => {
+      if (!url || !url.trim()) return;
+      const el = savedEl && savedEl.isConnected ? savedEl : null;
+      if (!el) return;
+      el.focus();
+      const s = window.getSelection();
+      s.removeAllRanges(); s.addRange(savedRange);
+      const href = /^(https?:\/\/|mailto:)/i.test(url.trim()) ? url.trim() : 'https://' + url.trim();
+      document.execCommand('createLink', false, href);
+      syncRichInput(el);
+    });
+  }
+
+  function b_content_split(idx) {
     const b = NK.blocks[idx];
-    const before = b.content.slice(0, offset);
-    const after = b.content.slice(offset);
+    const el = document.querySelector(`.nk-block[data-idx="${idx}"] .nk-text`);
+    if (!el) return;
+    const sel = window.getSelection();
+    let before = b.content, after = '';
+    if (sel && sel.rangeCount && el.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      const pre = document.createRange();
+      pre.setStart(el, 0);
+      pre.setEnd(range.startContainer, range.startOffset);
+      const post = document.createRange();
+      post.setStart(range.startContainer, range.startOffset);
+      post.setEnd(el, el.childNodes.length);
+      const tmp = document.createElement('div');
+      tmp.appendChild(pre.cloneContents());
+      before = sanitizeRich(tmp.innerHTML);
+      tmp.innerHTML = '';
+      tmp.appendChild(post.cloneContents());
+      after = sanitizeRich(tmp.innerHTML);
+    }
     b.content = before;
     const nb = { id: uid(), type: 'text', content: after };
     NK.blocks.splice(idx + 1, 0, nb);
@@ -633,6 +806,29 @@
     renderBlocks();
     scheduleSave();
     focusBlock(idx);
+  }
+
+  // Block type picker (Tier 1): reuse the app's CtxMenu with our block options.
+  const BLOCK_PICKER_ITEMS = [
+    { label: 'Text', icon: '<svg class="ti ti-text-size" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-text-size"/></svg>', action: null },
+    { label: 'Heading 1', icon: '<svg class="ti ti-h-1" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-1"/></svg>', action: null },
+    { label: 'Heading 2', icon: '<svg class="ti ti-h-2" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-2"/></svg>', action: null },
+    { label: 'Heading 3', icon: '<svg class="ti ti-h-3" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-3"/></svg>', action: null },
+    { label: 'Bulleted list', icon: '<svg class="ti ti-list" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-list"/></svg>', action: null },
+    { label: 'Numbered list', icon: '<svg class="ti ti-list-numbers" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-list-numbers"/></svg>', action: null },
+    { label: 'Checklist', icon: '<svg class="ti ti-checkbox" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-checkbox"/></svg>', action: null },
+  ];
+  const BLOCK_PICKER_TYPES = ['text', 'heading', 'heading2', 'heading3', 'bullet', 'numbered', 'checklist'];
+  function openBlockPicker(x, y, onPick) {
+    const items = BLOCK_PICKER_ITEMS.map((it, i) => ({ ...it, action: () => onPick(BLOCK_PICKER_TYPES[i]) }));
+    if (window.CtxMenu && typeof window.CtxMenu.show === 'function') {
+      window.CtxMenu.show(x, y, items);
+    } else {
+      // Fallback: simple text prompt (older context without CtxMenu).
+      nkPrompt('Block type: text, h1, h2, h3, bullet, numbered, checklist').then((type) => {
+        if (type && type.trim()) onPick(normalizeType(type));
+      });
+    }
   }
 
   function removeBlock(idx) {

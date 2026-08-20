@@ -834,6 +834,19 @@ strong, b { color: inherit; }
 .nk-add-block { margin-top: 12px; padding: 9px 16px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 10px; border: 1px dashed var(--border); background: transparent; transition: background var(--transition), color var(--transition), border-color var(--transition); }
 .nk-add-block:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
 
+/* Rich-text floating format bar */
+.nk-fmt-bar { position: fixed; z-index: 9500; display: none; align-items: center; gap: 2px; padding: 4px; background: var(--bg-modal); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.nk-fmt-bar button { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; border: none; background: transparent; color: var(--text-muted); font-size: 0.85rem; border-radius: 6px; cursor: pointer; transition: background var(--transition), color var(--transition); }
+.nk-fmt-bar button:hover { background: var(--bg-hover); color: var(--hover-accent); }
+.nk-fmt-bar button code { font-size: 0.8rem; }
+
+/* Rich text inside blocks */
+.nk-text b, .nk-text strong { font-weight: 700; }
+.nk-text i, .nk-text em { font-style: italic; }
+.nk-text u { text-decoration: underline; }
+.nk-text code { background: var(--bg-hover); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; }
+.nk-text a { color: var(--hover-accent); text-decoration: underline; }
+
 /* ── NoteKit tab bar (pages as tabs) ─────────────────────────────── */
 .nk-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px 8px 5px; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 5; }
 .nk-tabs-label { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); margin-right: 10px; flex-shrink: 0; }

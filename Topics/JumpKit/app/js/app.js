@@ -799,9 +799,9 @@ window.buildChord = function buildChord(e) {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { CtxMenu.hide(); Modal.close(); return; }
-  // Skip if user is typing in any input/textarea (except the hotkey recorder which handles itself)
+  // Skip if user is typing in any input/textarea/contenteditable (except the hotkey recorder which handles itself)
   const tag = document.activeElement?.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || document.activeElement?.isContentEditable) return;
   if (!currentUser) return;
   const chord = buildChord(e);
   if (!chord) return;
