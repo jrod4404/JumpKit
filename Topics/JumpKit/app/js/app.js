@@ -655,6 +655,10 @@ window.navigateTo = function navigateTo(page) {
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.page === page);
   });
+  // When leaving NoteKit for another page, clear the NoteKit sidebar highlight.
+  if (page !== 'notekit' && window.NoteKit && typeof window.NoteKit.clearSelection === 'function') {
+    try { window.NoteKit.clearSelection(); } catch { /* non-critical */ }
+  }
   document.getElementById('topbarTitle').textContent = pageTitles[page] || page;
   const iconEl = document.getElementById('topbarIcon');
   if (page === 'jumps') {

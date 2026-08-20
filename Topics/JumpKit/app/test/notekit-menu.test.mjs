@@ -102,3 +102,56 @@ if (ctxMenu.style.display === 'block') {
 const firstItem = ctxMenu.querySelector('.ctx-item');
 console.log('first menu item label:', firstItem.textContent.trim());
 console.log('ALL TESTS PASSED ✔');
+
+// ── Test 2: navigateTo to a non-Notekit page clears the NoteKit highlight ──
+async function test2_clearSelection() {
+  const dom2 = new JSDOM(`<html><body>
+    <nav class="sidebar"><div id="notekitNavLabel"></div><div id="notekitNavWrap"></div></nav>
+    <div class="ctx-menu" id="ctxMenu" style="display:none"></div>
+  </body></html>`, { runScripts: 'dangerously', pretendToBeVisual: true });
+  const { window: w } = dom2;
+  const { document: doc } = w;
+  w.electronAPI = {
+    notekitEnabled: async () => true,
+    notekitListProjects: async () => [{ id: 'p1', name: 'Work', icon: 'rocket' }],
+    notekitListPages: async () => [],
+    notekitListBlocks: async () => [],
+    notekitCreateProject: async () => ({}), notekitRenameProject: async () => ({}),
+    notekitSetProjectIcon: async () => ({}), notekitDeleteProject: async () => ({}),
+  };
+  w.eval(src);
+  await w.NoteKit.init();
+  await new Promise((r) => setTimeout(r, 50));
+  const row = doc.querySelector('.nk-project-row');
+  // simulate selecting it (openProject via click)
+  row.dispatchEvent(new w.MouseEvent('click', { bubbles: true, cancelable: true }));
+  await new Promise((r) => setTimeout(r, 100));
+  let hasActive = doc.querySelector('.nk-project-row.active') !== null;
+  console.log('project active after select:', hasActive, '(expect true)');
+  // navigate away (home) -> router calls NoteKit.clearSelection()
+  w.NoteKit.clearSelection();
+  const stillActive = doc.querySelector('.nk-project-row.active') !== null;
+  console.log('project active after clearSelection:', stillActive, '(expect false)');
+  if (hasActive && !stillActive) console.log('PASS: leaving NoteKit clears the sidebar highlight ✔');
+  else { console.log('FAIL: highlight not cleared'); process.exitCode = 1; }
+}
+
+// ── Test 3: Settings & Help appear directly under Teams (before NOTEKIT) ──
+function test3_navOrder() {
+  // Parse app.html sidebar nav item order
+  const html = fs.readFileSync(new URL('../app.html', import.meta.url), 'utf8');
+  const navBlock = html.slice(html.indexOf('class="nav-section-label" style="margin-top:0"'), html.indexOf('id="adminNavLabel"'));
+  const pages = [...navBlock.matchAll(/data-page="([a-z]+)"/g)].map((m) => m[1]);
+  console.log('sidebar page order:', pages.join(', '));
+  const ti = pages.indexOf('teams'), si = pages.indexOf('settings'), hi = pages.indexOf('help'), ni = navBlock.indexOf('notekitNavWrap');
+  if (si > ti && hi > ti && si < ni && hi < ni) {
+    console.log('PASS: Settings & Help are after Teams and before the NOTEKIT section ✔');
+  } else {
+    console.log('FAIL: Settings/Help ordering wrong (teams idx=%d settings idx=%d help idx=%d)', ti, si, hi);
+    process.exitCode = 1;
+  }
+}
+
+await test2_clearSelection();
+test3_navOrder();
+console.log('EXTENDED TESTS DONE');

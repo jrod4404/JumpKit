@@ -744,6 +744,15 @@
     showEmpty,
     isEnabled: () => NK.enabled,
     openPage,
+    clearSelection: () => {
+      // Called by the router when navigating to a non-Notekit page, so the
+      // last-selected project no longer stays highlighted in the sidebar.
+      if (!NK.enabled) return;
+      NK.activeProjectId = null;
+      NK.activePageId = null;
+      const wrap = document.getElementById('notekitNavWrap');
+      if (wrap) wrap.querySelectorAll('.nk-project-row').forEach(r => r.classList.remove('active'));
+    },
   };
 
   // Auto-init after DOM ready (app.js loads after DOM).
