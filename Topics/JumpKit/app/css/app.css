@@ -1,6 +1,6 @@
 .nav-section-label#notekitNavLabel { display: flex; align-items: center; justify-content: flex-start; gap: 0; width: 100%; position: relative; padding-top: 6px; padding-bottom: 2px; padding-left: 6px; padding-right: 8px; white-space: nowrap; flex-wrap: nowrap; }
 .nk-label-row { display: flex; align-items: center; justify-content: flex-start; }
-.nk-add-project-btn { background: none; border: none; color: var(--text-dim); font-size: 1.25rem; font-weight: 700; cursor: pointer; padding: 0 0 0 4px; margin-left: 85px; flex-shrink: 1; border-radius: 6px; line-height: 1; white-space: nowrap; transition: color var(--transition), background var(--transition); }
+.nk-add-project-btn { background: none; border: none; color: var(--text-dim); font-size: 1.25rem; font-weight: 700; cursor: pointer; padding: 0 0 0 4px; margin-left: 87px; flex-shrink: 1; border-radius: 6px; line-height: 1; white-space: nowrap; transition: color var(--transition), background var(--transition); }
 .nk-add-project-btn:hover { color: var(--hover-accent); background: var(--bg-hover); }
 
 /* ── Layout ── */
