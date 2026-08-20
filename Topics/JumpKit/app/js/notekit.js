@@ -395,7 +395,7 @@
 
   // Fix: centered help line at the top of the page view (no breadcrumb row).
   function pageHeaderHtml() {
-    return `<div class="nk-page-header"><div class="nk-help">Create and updated pages and notes below</div></div>`;
+    return `<div class="nk-page-header"><div class="nk-help">Create and update pages and notes</div></div>`;
   }
 
   async function openPage(pageId, _pages) {
@@ -490,7 +490,7 @@
     const el = document.getElementById('nkBlocks');
     if (!el) return;
     if (NK.blocks.length === 0) {
-      el.innerHTML = `<div class="nk-blocks-empty">This page is empty. Click “+ Add a block” below.</div>`;
+      el.innerHTML = '';
       return;
     }
     el.innerHTML = NK.blocks.map((b, i) => blockToHtml(b, i)).join('');
