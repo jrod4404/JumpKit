@@ -30,6 +30,17 @@
     if (label) label.style.display = 'block';
     if (wrap) { wrap.style.display = 'block'; renderNav(); }
 
+    // Plus button to the right of the NOTEKIT label → create a new project.
+    const addBtn = document.getElementById('nkAddProjectBtn');
+    if (addBtn) {
+      addBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        promptAddProject();
+      });
+      // Show only when NoteKit is enabled (the whole section is gated above).
+    }
+
     // Wire the nav item click (we render project tree inside #notekitNavWrap).
     document.addEventListener('click', onNavClick);
   }
@@ -73,7 +84,6 @@
           </div>
         </div>`;
     }
-    html += `<div class="nk-add-project" data-action="add-project">+ Add project</div>`;
     wrap.innerHTML = html;
     // Wire a DIRECT click handler on each ⋯ so the app's global
     // document-click `CtxMenu.hide()` never hides the menu on the same event.
@@ -95,8 +105,6 @@
     const projectId = el.dataset.project;
     if (action === 'open-project') {
       openProject(id);
-    } else if (action === 'add-project') {
-      promptAddProject();
     } else if (action === 'tab-page') {
       if (projectId) NK.activeProjectId = projectId;
       openPage(id);
@@ -385,21 +393,9 @@
     });
   }
 
-  // Fix #3+#4: breadcrumb header at top of the page view.
-  function pageHeaderHtml(pageTitle) {
-    const project = NK.projects.find(p => p.id === NK.activeProjectId);
-    const projectName = project ? project.name : '';
-    const name = pageTitle || '';
-    return `
-      <div class="nk-page-header">
-        <div class="nk-crumb">
-          <svg class="ti ti-notes nk-crumb-icon"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>
-          <span class="nk-crumb-app">Notekit</span><span class="nk-crumb-sep">—</span>
-          <span class="nk-crumb-proj">${esc(projectName)}</span><span class="nk-crumb-sep">—</span>
-          <span class="nk-crumb-page">${esc(name)}</span>
-        </div>
-        <div class="nk-help">Create and update notes below</div>
-      </div>`;
+  // Fix: centered help line at the top of the page view (no breadcrumb row).
+  function pageHeaderHtml() {
+    return `<div class="nk-page-header"><div class="nk-help">Create and updated pages and notes below</div></div>`;
   }
 
   async function openPage(pageId, _pages) {
@@ -422,7 +418,7 @@
     setTopbar('NoteKit', page.title);
 
     content.innerHTML = `
-      ${pageHeaderHtml(page.title)}
+      ${pageHeaderHtml()}
       ${tabsToHtml(pages)}
       <div class="nk-page-view">
         <div class="nk-page-title-wrap">
@@ -439,9 +435,6 @@
       api.notekitRenamePage(pageId, titleInput.value.trim() || 'Untitled');
       renderNav();
       renderTabs(pages);
-      // update breadcrumb page label live
-      const crumb = document.querySelector('.nk-crumb-page');
-      if (crumb) crumb.textContent = titleInput.value.trim() || 'Untitled';
     }, 600));
 
     const blocksEl = document.getElementById('nkBlocks');
@@ -463,7 +456,7 @@
     const project = NK.projects.find(p => p.id === projectId);
     setTopbar('NoteKit', project ? project.name : '');
     content.innerHTML = `
-      ${pageHeaderHtml('')}
+      ${pageHeaderHtml()}
       ${tabsToHtml([])}
       <div class="nk-empty">
         <svg class="ti ti-notes" style="font-size:2.5rem;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>

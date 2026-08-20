@@ -1,3 +1,8 @@
+.nav-section-label#notekitNavLabel { display: flex; align-items: center; gap: 6px; }
+.nk-label-row { display: flex; align-items: center; justify-content: space-between; }
+.nk-add-project-btn { background: none; border: none; color: var(--text-dim); font-size: 1rem; font-weight: 700; cursor: pointer; padding: 0 6px; border-radius: 6px; line-height: 1; transition: color var(--transition), background var(--transition); }
+.nk-add-project-btn:hover { color: var(--hover-accent); background: var(--bg-hover); }
+
 /* ── Layout ── */
 .app-shell { display: flex; height: 100vh; overflow: hidden; }
 
@@ -799,13 +804,10 @@ strong, b { color: inherit; }
 .nk-page-row:hover { color: var(--hover-accent); background: var(--bg-hover); }
 .nk-page-row.active { color: var(--hover-accent); background: var(--bg-hover); }
 .nk-page-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nk-add-page { padding: 3px 6px; font-size: 0.78rem; color: var(--text-dim); cursor: pointer; }
-.nk-add-page:hover { color: var(--turq); }
-.nk-add-project { padding: 10px 20px; font-size: 1rem; color: var(--text-dim); cursor: pointer; margin-top: 2px; }
-.nk-add-project:hover { color: var(--hover-accent); }
+.nk-add-page:hover { color: var(--hover-accent); }
 
 /* Page view */
-.nk-page-view { max-width: 820px; margin: 0 auto; padding: 24px 28px 80px; }
+.nk-page-view { padding: 24px 28px 80px; }
 .nk-page-title-wrap { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
 .nk-page-title { flex: 1; font-size: 1.9rem; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; border-bottom: 2px solid transparent; }
 .nk-page-title:focus { border-bottom-color: var(--turq); }
@@ -850,14 +852,8 @@ strong, b { color: inherit; }
 .nk-tab-add:hover { color: var(--turq); border-color: var(--turq); background: rgba(45,212,191,0.10); }
 
 /* ── NoteKit page header (breadcrumb + help) ─────────────────────── */
-.nk-page-header { padding: 16px 20px 6px; border-bottom: 1px solid var(--border); background: var(--bg-card, rgba(255,255,255,0.03)); }
-.nk-crumb { display: flex; align-items: center; gap: 8px; font-size: 1.02rem; font-weight: 600; color: var(--text); }
-.nk-crumb-icon { font-size: 1.2rem; color: var(--turq); flex-shrink: 0; }
-.nk-crumb-app { font-weight: 800; text-transform: capitalize; color: var(--text); }
-.nk-crumb-proj { color: var(--text-muted); }
-.nk-crumb-page { color: var(--turq); }
-.nk-crumb-sep { color: var(--text-dim); }
-.nk-help { margin-top: 6px; font-size: 0.85rem; color: var(--text-dim); }
+.nk-page-header { padding: 14px 20px 4px; }
+.nk-help { text-align: center; font-size: 0.88rem; color: var(--text-dim); }
 
 /* ── NoteKit icon picker ──────────────────────────────────────────── */
 .nk-modal-icon { width: 420px; }
