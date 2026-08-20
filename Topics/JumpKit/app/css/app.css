@@ -505,6 +505,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
   border: none; background: none; width: 100%; text-align: left;
 }
 .ctx-item .ti { font-size: 1.1rem; color: var(--text-muted); transition: color var(--transition); }
+.ctx-item span:first-child { font-size: 1.1rem; line-height: 1; }
 .ctx-item:hover { background: var(--bg-hover); color: var(--hover-accent); }
 .ctx-item:hover .ti { color: var(--hover-accent); }
 .ctx-item.danger:hover .ti { color: #e53e3e; }

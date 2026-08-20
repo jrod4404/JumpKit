@@ -810,13 +810,13 @@
 
   // Block type picker (Tier 1): reuse the app's CtxMenu with our block options.
   const BLOCK_PICKER_ITEMS = [
-    { label: 'Text', icon: '<svg class="ti ti-text-size" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-text-size"/></svg>', action: null },
-    { label: 'Heading 1', icon: '<svg class="ti ti-h-1" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-1"/></svg>', action: null },
-    { label: 'Heading 2', icon: '<svg class="ti ti-h-2" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-2"/></svg>', action: null },
-    { label: 'Heading 3', icon: '<svg class="ti ti-h-3" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-h-3"/></svg>', action: null },
-    { label: 'Bulleted list', icon: '<svg class="ti ti-list" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-list"/></svg>', action: null },
-    { label: 'Numbered list', icon: '<svg class="ti ti-list-numbers" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-list-numbers"/></svg>', action: null },
-    { label: 'Checklist', icon: '<svg class="ti ti-checkbox" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-checkbox"/></svg>', action: null },
+    { label: 'Text', icon: '✍️', action: null },
+    { label: 'Heading 1', icon: '🔠', action: null },
+    { label: 'Heading 2', icon: '🅰️', action: null },
+    { label: 'Heading 3', icon: '🔤', action: null },
+    { label: 'Bulleted list', icon: '•️', action: null },
+    { label: 'Numbered list', icon: '🔢', action: null },
+    { label: 'Checklist', icon: '✅', action: null },
   ];
   const BLOCK_PICKER_TYPES = ['text', 'heading', 'heading2', 'heading3', 'bullet', 'numbered', 'checklist'];
   function openBlockPicker(x, y, onPick) {
