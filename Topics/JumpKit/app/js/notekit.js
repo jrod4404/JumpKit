@@ -422,7 +422,7 @@
       ${tabsToHtml(pages)}
       <div class="nk-page-view">
         <div class="nk-page-title-wrap">
-          <input class="nk-page-title" id="nkPageTitle" value="${esc(page.title)}" placeholder="Untitled"/>
+          <input class="nk-page-title" id="nkPageTitle" value="${esc(page.title)}" placeholder="Create and update pages and notes"/>
           <span class="nk-save-state" id="nkSaveState"></span>
         </div>
         <div class="nk-blocks" id="nkBlocks"></div>

@@ -1,6 +1,6 @@
-.nav-section-label#notekitNavLabel { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; }
+.nav-section-label#notekitNavLabel { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; position: relative; padding-top: 6px; padding-bottom: 2px; padding-left: 14px; padding-right: 20px; }
 .nk-label-row { display: flex; align-items: center; justify-content: space-between; }
-.nk-add-project-btn { background: none; border: none; color: var(--text-dim); font-size: 1.3rem; font-weight: 700; cursor: pointer; padding: 0 8px; margin-left: auto; border-radius: 6px; line-height: 1; transition: color var(--transition), background var(--transition); }
+.nk-add-project-btn { background: none; border: none; color: var(--text-dim); font-size: 1.25rem; font-weight: 700; cursor: pointer; padding: 0 6px; margin-left: auto; border-radius: 6px; line-height: 1; transition: color var(--transition), background var(--transition); }
 .nk-add-project-btn:hover { color: var(--hover-accent); background: var(--bg-hover); }
 
 /* ── Layout ── */
@@ -807,10 +807,9 @@ strong, b { color: inherit; }
 .nk-add-page:hover { color: var(--hover-accent); }
 
 /* Page view */
-.nk-page-view { padding: 24px 28px 80px; }
-.nk-page-title-wrap { display: flex; align-items: baseline; gap: 12px; margin-bottom: 18px; }
-.nk-page-title { flex: 1; font-size: 1.9rem; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; border-bottom: 2px solid transparent; }
-.nk-page-title:focus { border-bottom-color: var(--turq); }
+.nk-page-view { padding: 20px 28px 80px; }
+.nk-page-title-wrap { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; }
+.nk-page-title { flex: 1; font-size: 1.5rem; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; }
 .nk-save-state { font-size: 0.75rem; color: var(--text-dim); white-space: nowrap; }
 .nk-blocks-empty { color: var(--text-dim); font-size: 0.9rem; padding: 18px 0; text-align: center; }
 .nk-empty { text-align: center; padding: 80px 20px; color: var(--text-muted); }
@@ -833,23 +832,23 @@ strong, b { color: inherit; }
 .nk-block-list ul, .nk-block-list ol { margin: 0; padding-left: 22px; }
 .nk-block-list li { padding: 1px 0; }
 .nk-list-text { font-size: 0.98rem; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
-.nk-add-item { background: transparent; border: none; color: var(--text-dim); font-size: 0.8rem; cursor: pointer; padding: 2px 4px; }
-.nk-add-item:hover { color: var(--turq); }
-.nk-add-block { margin-top: 10px; padding: 8px 10px; color: var(--text-dim); font-size: 0.88rem; cursor: pointer; border-radius: 6px; }
-.nk-add-block:hover { background: rgba(128,128,128,0.08); color: var(--turq); }
+.nk-add-item { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; padding: 4px 12px; border-radius: 10px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-add-item:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+.nk-add-block { margin-top: 12px; padding: 9px 16px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 10px; border: 1px dashed var(--border); background: transparent; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-add-block:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
 
 /* ── NoteKit tab bar (pages as tabs) ─────────────────────────────── */
-.nk-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--border); background: var(--bg-card, rgba(255,255,255,0.03)); overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 5; }
-.nk-tabs-project { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.03em; color: var(--text); margin-right: 14px; flex-shrink: 0; }
-.nk-tab { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 8px; cursor: pointer; color: var(--text-muted); font-size: 0.83rem; border: 1px solid transparent; flex-shrink: 0; max-width: 180px; }
+.nk-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px; border-bottom: 1px solid var(--border); background: transparent; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 5; }
+.nk-tabs-project { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); margin-right: 12px; flex-shrink: 0; }
+.nk-tab { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border-radius: 10px; cursor: pointer; color: var(--text-muted); font-size: 0.82rem; border: 1px solid transparent; flex-shrink: 0; max-width: 180px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
 .nk-tab:hover { background: var(--bg-hover); color: var(--text); }
-.nk-tab.active { background: rgba(45,212,191,0.12); color: var(--turq); border-color: rgba(45,212,191,0.35); }
+.nk-tab.active { background: var(--bg-card); color: var(--hover-accent); border-color: var(--border); font-weight: 600; }
 .nk-tab-name { overflow: hidden; text-overflow: ellipsis; }
 .nk-tab-more { color: var(--text-dim); font-weight: 700; padding: 0 2px; }
-.nk-tab-more:hover { color: var(--text); }
-/* Add-page button: theme-aware (visible in dark AND light mode) */
-.nk-tab-add { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; border-radius: 7px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); font-size: 1.05rem; font-weight: 700; line-height: 1; transition: background var(--transition), color var(--transition), border-color var(--transition); }
-.nk-tab-add:hover { color: var(--turq); border-color: var(--turq); background: rgba(45,212,191,0.10); }
+.nk-tab-more:hover { color: var(--hover-accent); }
+/* Add-page button: app-style control (matches jumps filter-bar buttons) */
+.nk-tab-add { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); font-size: 1.05rem; font-weight: 700; line-height: 1; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-tab-add:hover { color: var(--hover-accent); border-color: var(--hover-accent); background: var(--bg-hover); }
 
 /* ── NoteKit page header (breadcrumb + help) ─────────────────────── */
 .nk-page-header { padding: 14px 20px 4px; }
