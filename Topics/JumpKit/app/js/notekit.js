@@ -34,10 +34,27 @@
     document.addEventListener('click', onNavClick);
   }
 
-  // ── Sidebar tree ────────────────────────────────────────────────────
+  // ── Sidebar tree (projects only — pages render as tabs) ────────────
   async function refreshProjects() {
     const api = window.electronAPI;
     NK.projects = (await api.notekitListProjects()) || [];
+  }
+
+  const PROJECT_ICONS = [
+    'folder', 'notes', 'clipboard', 'clipboard-list', 'checklist', 'list-check',
+    'brain', 'bulb', 'star', 'star-filled', 'tag', 'rocket', 'tool', 'settings',
+    'bell', 'bell-off', 'building', 'home', 'users', 'users-group', 'user', 'user-circle',
+    'lock', 'search', 'sun', 'moon', 'package', 'keyboard', 'layout', 'layout-grid',
+    'layout-columns', 'mail', 'message-circle', 'mouse', 'id-badge', 'link', 'send',
+    'sparkles', 'heart', 'flag', 'cloud-off', 'clock-dollar', 'headset', 'apple',
+    'brand-apple', 'device-floppy', 'database-export', 'download', 'file-check',
+    'archive', 'refresh', 'restore', 'rotate', 'share', 'sort-ascending', 'git-commit',
+    'rosette-discount-check', 'help-circle', 'info-circle', 'alert-circle', 'alert-triangle',
+  ];
+
+  function projectIconHtml(icon) {
+    const name = PROJECT_ICONS.includes(icon) ? icon : 'folder';
+    return `<svg class="ti ti-${name} nav-icon" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-${name}"/></svg>`;
   }
 
   async function renderNav() {
@@ -46,23 +63,14 @@
     await refreshProjects();
     let html = '';
     for (const p of NK.projects) {
-      const pages = (await window.electronAPI.notekitListPages(p.id)) || [];
-      const open = NK.activeProjectId === p.id;
+      const active = NK.activeProjectId === p.id;
       html += `
         <div class="nk-project" data-project-id="${p.id}">
-          <div class="nk-project-row ${open ? 'active' : ''}" data-action="toggle-project" data-id="${p.id}">
-            <svg class="ti ti-folder nav-icon" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-folder"/></svg>
+          <div class="nk-project-row ${active ? 'active' : ''}" data-action="open-project" data-id="${p.id}" title="${esc(p.name)}">
+            ${projectIconHtml(p.icon)}
             <span class="nk-project-name">${esc(p.name)}</span>
             <span class="nk-project-more" data-action="project-menu" data-id="${p.id}" title="Project options">⋯</span>
           </div>
-          ${open ? `<div class="nk-pages">
-            ${pages.map(pg => `
-              <div class="nk-page-row ${NK.activePageId === pg.id ? 'active' : ''}" data-action="open-page" data-id="${pg.id}" data-project="${p.id}">
-                <svg class="ti ti-file-text nav-icon" style="font-size:0.9rem"><use href="img/tabler-sprite.min.svg#tabler-file-text"/></svg>
-                <span class="nk-page-name">${esc(pg.title)}</span>
-              </div>`).join('')}
-            <div class="nk-add-page" data-action="add-page" data-project="${p.id}">+ Add page</div>
-          </div>` : ''}
         </div>`;
     }
     html += `<div class="nk-add-project" data-action="add-project">+ Add project</div>`;
@@ -75,22 +83,38 @@
     const action = el.dataset.action;
     const id = el.dataset.id;
     const projectId = el.dataset.project;
-    if (action === 'toggle-project') {
-      NK.activeProjectId = (NK.activeProjectId === id) ? null : id;
-      if (NK.activeProjectId) NK.activePageId = null;
-      renderNav();
+    if (action === 'open-project') {
+      openProject(id);
     } else if (action === 'add-project') {
       promptAddProject();
     } else if (action === 'project-menu') {
       e.stopPropagation();
       showProjectMenu(el, id);
-    } else if (action === 'add-page') {
-      promptAddPage(projectId);
-    } else if (action === 'open-page') {
-      NK.activeProjectId = projectId;
-      NK.activePageId = id;
-      renderNav();
+    } else if (action === 'tab-page') {
+      e.stopPropagation();
+      if (projectId) NK.activeProjectId = projectId;
       openPage(id);
+    } else if (action === 'page-menu') {
+      e.stopPropagation();
+      if (projectId) NK.activeProjectId = projectId;
+      showPageMenu(el, id, projectId);
+    } else if (action === 'add-page') {
+      if (projectId) { NK.activeProjectId = projectId; promptAddPage(projectId); }
+    }
+  }
+
+  async function openProject(projectId) {
+    const api = window.electronAPI;
+    NK.activeProjectId = projectId;
+    NK.activePageId = null;
+    NK.blocks = [];
+    // If the project has pages, open the first one; otherwise show the empty project state.
+    const pages = (await api.notekitListPages(projectId)) || [];
+    renderNav();
+    if (pages.length > 0) {
+      await openPage(pages[0].id, pages);
+    } else {
+      renderProjectEmpty(projectId);
     }
   }
 
@@ -105,17 +129,86 @@
     menu.style.top = (rect.bottom + 4) + 'px';
     menu.innerHTML = `
       <button class="ctx-item" data-nk-menu="rename-project" data-id="${id}">Rename project</button>
+      <button class="ctx-item" data-nk-menu="project-icon" data-id="${id}">Change icon</button>
       <button class="ctx-item danger" data-nk-menu="delete-project" data-id="${id}">Delete project</button>`;
     menu.onclick = (e) => {
       const b = e.target.closest('[data-nk-menu]');
       if (!b) return;
       const i = b.dataset.id;
       if (b.dataset.nkMenu === 'rename-project') promptRenameProject(i);
+      if (b.dataset.nkMenu === 'project-icon') pickProjectIcon(i);
       if (b.dataset.nkMenu === 'delete-project') confirmDeleteProject(i);
       menu.style.display = 'none';
     };
     const close = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.style.display = 'none'; document.removeEventListener('click', close); } };
     setTimeout(() => document.addEventListener('click', close), 0);
+  }
+
+  function showPageMenu(anchorEl, pageId, projectId) {
+    const menu = document.getElementById('ctxMenu');
+    if (!menu) return;
+    menu.innerHTML = '';
+    menu.style.display = 'block';
+    const rect = anchorEl.getBoundingClientRect();
+    menu.style.left = rect.left + 'px';
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.innerHTML = `
+      <button class="ctx-item" data-nk-menu="rename-page" data-id="${pageId}">Rename page</button>
+      <button class="ctx-item danger" data-nk-menu="delete-page" data-id="${pageId}">Delete page</button>`;
+    menu.onclick = (e) => {
+      const b = e.target.closest('[data-nk-menu]');
+      if (!b) return;
+      const i = b.dataset.id;
+      if (b.dataset.nkMenu === 'rename-page') promptRenamePage(i, projectId);
+      if (b.dataset.nkMenu === 'delete-page') confirmDeletePage(i, projectId);
+      menu.style.display = 'none';
+    };
+    const close = (ev) => { if (!menu.contains(ev.target) && !anchorEl.contains(ev.target)) { menu.style.display = 'none'; document.removeEventListener('click', close); } };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+
+  // ── Project / page icon picker ──────────────────────────────────────
+  function nkIconPicker(title, currentIcon) {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'nk-modal-overlay';
+      overlay.innerHTML = `
+        <div class="nk-modal nk-modal-icon" role="dialog" aria-modal="true">
+          <div class="nk-modal-title">${esc(title)}</div>
+          <div class="nk-icon-grid">
+            ${PROJECT_ICONS.map(ic => `
+              <button type="button" class="nk-icon-opt ${ic === (currentIcon || 'folder') ? 'selected' : ''}" data-icon="${ic}" title="${ic}">
+                <svg class="ti ti-${ic}" style="font-size:1.15rem"><use href="img/tabler-sprite.min.svg#tabler-${ic}"/></svg>
+              </button>`).join('')}
+          </div>
+          <div class="nk-modal-btns">
+            <button class="nk-btn" data-nk-modal="cancel">Cancel</button>
+            <button class="nk-btn nk-btn-primary" data-nk-modal="ok">OK</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      let chosen = PROJECT_ICONS.includes(currentIcon) ? currentIcon : 'folder';
+      const onPick = (e) => {
+        const btn = e.target.closest('.nk-icon-opt');
+        if (!btn) return;
+        chosen = btn.dataset.icon;
+        overlay.querySelectorAll('.nk-icon-opt').forEach(b => b.classList.toggle('selected', b === btn));
+      };
+      const close = (val) => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(val);
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') close(null);
+        if (e.key === 'Enter') { e.preventDefault(); close(chosen); }
+      };
+      document.addEventListener('keydown', onKey);
+      overlay.addEventListener('click', onPick);
+      overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(null); });
+      overlay.querySelector('[data-nk-modal="ok"]').addEventListener('click', () => close(chosen));
+      overlay.querySelector('[data-nk-modal="cancel"]').addEventListener('click', () => close(null));
+    });
   }
 
   // ── In-app modal dialogs (window.prompt/confirm are NOT supported in Electron) ──
@@ -185,9 +278,24 @@
   function promptAddProject() {
     nkPrompt('New project name', 'Untitled').then((name) => {
       if (name === null) return;
-      window.electronAPI.notekitCreateProject(name.trim() || 'Untitled').then(() => {
-        NK.activeProjectId = null; renderNav();
+      const projectName = name.trim() || 'Untitled';
+      nkIconPicker('Choose a project icon', 'folder').then((icon) => {
+        window.electronAPI.notekitCreateProject(projectName, icon || 'folder').then((r) => {
+          NK.activeProjectId = null;
+          renderNav();
+          if (r && r.id) {
+            NK.activeProjectId = r.id;
+            openProject(r.id);
+          }
+        });
       });
+    });
+  }
+  function pickProjectIcon(id) {
+    const p = NK.projects.find(x => x.id === id);
+    nkIconPicker('Choose a project icon', p ? p.icon : 'folder').then((icon) => {
+      if (icon === null) return;
+      window.electronAPI.notekitSetProjectIcon(id, icon).then(() => renderNav());
     });
   }
   function promptRenameProject(id) {
@@ -214,13 +322,60 @@
       });
     });
   }
+  function promptRenamePage(pageId, projectId) {
+    const api = window.electronAPI;
+    api.notekitListPages(projectId).then((pages) => {
+      const pg = (pages || []).find(p => p.id === pageId);
+      nkPrompt('Rename page', pg ? pg.title : '').then((title) => {
+        if (title === null || !title.trim()) return;
+        api.notekitRenamePage(pageId, title.trim()).then(() => {
+          renderNav();
+          // Refresh open page if it's the one being renamed.
+          if (NK.activePageId === pageId) openPage(pageId);
+        });
+      });
+    });
+  }
+  function confirmDeletePage(pageId, projectId) {
+    nkConfirm('Delete this page? (soft delete — recoverable in DB)').then((ok) => {
+      if (!ok) return;
+      window.electronAPI.notekitDeletePage(pageId).then(() => {
+        if (NK.activePageId === pageId) {
+          NK.activePageId = null;
+          openProject(projectId); // falls back to first page or empty state
+        } else {
+          renderNav();
+        }
+      });
+    });
+  }
 
   // ── Page view (Notion-like blocks) ──────────────────────────────────
-  async function openPage(pageId) {
+  // ── Page tab bar ───────────────────────────────────────────────────
+  function tabsToHtml(pages) {
+    const project = NK.projects.find(p => p.id === NK.activeProjectId);
+    const projectName = project ? project.name : '';
+    const addBtn = `<button class="nk-tab nk-tab-add" data-action="add-page" data-project="${esc(NK.activeProjectId || '')}" title="Add page">+</button>`;
+    const tabs = (pages || []).map(pg => `
+      <div class="nk-tab ${NK.activePageId === pg.id ? 'active' : ''}" data-action="tab-page" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="${esc(pg.title)}">
+        <svg class="ti ti-file-text" style="font-size:0.85rem"><use href="img/tabler-sprite.min.svg#tabler-file-text"/></svg>
+        <span class="nk-tab-name">${esc(pg.title)}</span>
+        <span class="nk-tab-more" data-action="page-menu" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="Page options">⋯</span>
+      </div>`).join('');
+    return `<div class="nk-tabs" id="nkTabs"><span class="nk-tabs-project">${esc(projectName)}</span>${tabs}${addBtn}</div>`;
+  }
+
+  function renderTabs(pages) {
+    const tabBar = document.getElementById('nkTabs');
+    if (!tabBar) return;
+    tabBar.outerHTML = tabsToHtml(pages);
+  }
+
+  async function openPage(pageId, _pages) {
     const content = document.getElementById('pageContent');
     if (!content) return;
     const api = window.electronAPI;
-    const pages = (await api.notekitListPages(NK.activeProjectId)) || [];
+    const pages = _pages || (await api.notekitListPages(NK.activeProjectId)) || [];
     const page = pages.find(p => p.id === pageId);
     if (!page) return;
     NK.activePageId = pageId;
@@ -236,6 +391,7 @@
     setTopbar('NoteKit — ' + page.title, 'Projects → Pages → Notes');
 
     content.innerHTML = `
+      ${tabsToHtml(pages)}
       <div class="nk-page-view">
         <div class="nk-page-title-wrap">
           <input class="nk-page-title" id="nkPageTitle" value="${esc(page.title)}" placeholder="Untitled"/>
@@ -249,6 +405,7 @@
     titleInput.addEventListener('input', debounce(() => {
       api.notekitRenamePage(pageId, titleInput.value.trim() || 'Untitled');
       renderNav();
+      renderTabs(pages);
     }, 600));
 
     const blocksEl = document.getElementById('nkBlocks');
@@ -259,6 +416,23 @@
     addBtn.addEventListener('click', () => addBlockAt(NK.blocks.length));
     document.addEventListener('keydown', onPageKeydown);
     scheduleSave();
+  }
+
+  async function renderProjectEmpty(projectId) {
+    const content = document.getElementById('pageContent');
+    if (!content) return;
+    const api = window.electronAPI;
+    const pages = (await api.notekitListPages(projectId)) || [];
+    if (pages.length > 0) { await openPage(pages[0].id, pages); return; }
+    const project = NK.projects.find(p => p.id === projectId);
+    setTopbar('NoteKit', 'Projects → Pages → Notes');
+    content.innerHTML = `
+      ${tabsToHtml([])}
+      <div class="nk-empty">
+        <svg class="ti ti-notes" style="font-size:2.5rem;color:var(--text-muted)"><use href="img/tabler-sprite.min.svg#tabler-notes"/></svg>
+        <p>This project has no pages yet.</p>
+        <button class="nk-btn nk-btn-primary nk-empty-add" data-action="add-page" data-project="${esc(projectId)}" style="margin-top:14px">+ Add page</button>
+      </div>`;
   }
 
   function setTopbar(title, subtitle) {

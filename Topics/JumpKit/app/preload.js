@@ -63,7 +63,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // ── NoteKit (feature-flagged, isolated store) ──
   notekitEnabled:      ()       => ipcRenderer.invoke('notekit-enabled'),
   notekitListProjects: ()       => ipcRenderer.invoke('notekit-list-projects'),
-  notekitCreateProject:(name)   => ipcRenderer.invoke('notekit-create-project', name),
+  notekitCreateProject:(name, icon) => ipcRenderer.invoke('notekit-create-project', name, icon),
+  notekitSetProjectIcon:(id, icon) => ipcRenderer.invoke('notekit-set-project-icon', id, icon),
   notekitRenameProject:(id, name) => ipcRenderer.invoke('notekit-rename-project', id, name),
   notekitDeleteProject:(id)     => ipcRenderer.invoke('notekit-delete-project', id),
   notekitListPages:    (projectId) => ipcRenderer.invoke('notekit-list-pages', projectId),

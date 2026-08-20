@@ -159,6 +159,7 @@ function initNoteKitDB() {
       CREATE TABLE IF NOT EXISTS nk_projects (
         id         TEXT PRIMARY KEY,
         name       TEXT NOT NULL,
+        icon       TEXT DEFAULT 'folder',
         sortOrder  INTEGER DEFAULT 0,
         createdAt  INTEGER,
         updatedAt  INTEGER,
@@ -185,6 +186,12 @@ function initNoteKitDB() {
       CREATE INDEX IF NOT EXISTS idx_nk_pages_project ON nk_pages(projectId);
       CREATE INDEX IF NOT EXISTS idx_nk_blocks_page   ON nk_blocks(pageId);
     `);
+    // Migration: add icon column if missing (existing notekit.db files).
+    const cols = notekitDb.prepare("PRAGMA table_info(nk_projects)").all().map(c => c.name);
+    if (!cols.includes('icon')) {
+      notekitDb.exec("ALTER TABLE nk_projects ADD COLUMN icon TEXT DEFAULT 'folder'");
+      console.log('[NoteKit] Migration: added icon column to nk_projects');
+    }
     console.log('[NoteKit] DB initialized at', nkPath);
   } catch (e) {
     console.error('[NoteKit] DB UNAVAILABLE:', e.message);
@@ -202,13 +209,20 @@ ipcMain.handle('notekit-list-projects', () => {
   return notekitDb.prepare('SELECT * FROM nk_projects WHERE deletedAt IS NULL ORDER BY sortOrder, name').all();
 });
 
-ipcMain.handle('notekit-create-project', (_e, name) => {
+ipcMain.handle('notekit-create-project', (_e, name, icon) => {
   if (!notekitDb) return { ok: false, reason: 'notekit db unavailable' };
   const id = nkUid();
   const now = nkNow();
-  notekitDb.prepare('INSERT INTO nk_projects (id, name, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?)')
-    .run(id, String(name || 'Untitled').slice(0, 200), 0, now, now);
+  notekitDb.prepare('INSERT INTO nk_projects (id, name, icon, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(id, String(name || 'Untitled').slice(0, 200), String(icon || 'folder').slice(0, 50), 0, now, now);
   return { ok: true, id };
+});
+
+ipcMain.handle('notekit-set-project-icon', (_e, id, icon) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_projects SET icon = ?, updatedAt = ? WHERE id = ?')
+    .run(String(icon || 'folder').slice(0, 50), nkNow(), id);
+  return { ok: true };
 });
 
 ipcMain.handle('notekit-rename-project', (_e, id, name) => {
