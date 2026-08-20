@@ -215,7 +215,11 @@ ipcMain.handle('notekit-create-project', (_e, name, icon) => {
   const now = nkNow();
   notekitDb.prepare('INSERT INTO nk_projects (id, name, icon, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
     .run(id, String(name || 'Untitled').slice(0, 200), String(icon || 'folder').slice(0, 50), 0, now, now);
-  return { ok: true, id };
+  // Every new project starts with one default page: "Page 1".
+  const pageId = nkUid();
+  notekitDb.prepare('INSERT INTO nk_pages (id, projectId, title, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(pageId, id, 'Page 1', 0, now, now);
+  return { ok: true, id, pageId };
 });
 
 ipcMain.handle('notekit-set-project-icon', (_e, id, icon) => {

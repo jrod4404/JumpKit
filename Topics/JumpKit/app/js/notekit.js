@@ -351,6 +351,10 @@
           openProject(projectId); // falls back to first page or empty state
         } else {
           renderNav();
+          // Refresh the tab row too so the deleted page's tab disappears.
+          window.electronAPI.notekitListPages(projectId).then((pages) => {
+            renderTabs(pages || []);
+          });
         }
       });
     });
