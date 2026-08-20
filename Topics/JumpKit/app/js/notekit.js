@@ -368,8 +368,8 @@
         <span class="nk-tab-name">${esc(pg.title)}</span>
         <span class="nk-tab-more" data-kind="page" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="Page options">⋯</span>
       </div>`).join('');
-    // Fix #5: label left of the + button = "{project name} Pages", bigger text.
-    return `<div class="nk-tabs" id="nkTabs"><span class="nk-tabs-project">${esc(projectName ? projectName + ' Pages' : 'Pages')}</span>${tabs}${addBtn}</div>`;
+    // Project name now lives in the topbar (upper-left). Tab row shows only page tabs + add.
+    return `<div class="nk-tabs" id="nkTabs">${tabs}${addBtn}</div>`;
   }
 
   function renderTabs(pages) {
@@ -415,27 +415,18 @@
     }
     document.querySelectorAll('.nav-item[data-page]').forEach(b => b.classList.toggle('active', b.dataset.page === 'notekit'));
 
-    setTopbar('NoteKit', page.title);
+    const proj = NK.projects.find(p => p.id === NK.activeProjectId);
+    setTopbar(proj ? proj.name : 'NoteKit', '');
 
     content.innerHTML = `
       ${pageHeaderHtml()}
       ${tabsToHtml(pages)}
       <div class="nk-page-view">
-        <div class="nk-page-title-wrap">
-          <input class="nk-page-title" id="nkPageTitle" value="${esc(page.title)}" placeholder="Create and update pages and notes"/>
-          <span class="nk-save-state" id="nkSaveState"></span>
-        </div>
+        <div class="nk-page-title-wrap"><h2 class="nk-page-title" id="nkPageTitle">Create and update pages and notes</h2></div>
         <div class="nk-blocks" id="nkBlocks"></div>
         <div class="nk-add-block" id="nkAddBlock">+ Add a block</div>
       </div>`;
     wireTabMoreButtons();
-
-    const titleInput = document.getElementById('nkPageTitle');
-    titleInput.addEventListener('input', debounce(() => {
-      api.notekitRenamePage(pageId, titleInput.value.trim() || 'Untitled');
-      renderNav();
-      renderTabs(pages);
-    }, 600));
 
     const blocksEl = document.getElementById('nkBlocks');
     const addBtn = document.getElementById('nkAddBlock');
@@ -454,7 +445,7 @@
     const pages = (await api.notekitListPages(projectId)) || [];
     if (pages.length > 0) { await openPage(pages[0].id, pages); return; }
     const project = NK.projects.find(p => p.id === projectId);
-    setTopbar('NoteKit', project ? project.name : '');
+    setTopbar(project ? project.name : 'NoteKit', '');
     content.innerHTML = `
       ${pageHeaderHtml()}
       ${tabsToHtml([])}
