@@ -54,7 +54,7 @@
 
   function projectIconHtml(icon) {
     const name = PROJECT_ICONS.includes(icon) ? icon : 'folder';
-    return `<svg class="ti ti-${name} nav-icon" style="font-size:1rem"><use href="img/tabler-sprite.min.svg#tabler-${name}"/></svg>`;
+    return `<svg class="ti ti-${name} nav-icon"><use href="img/tabler-sprite.min.svg#tabler-${name}"/></svg>`;
   }
 
   async function renderNav() {

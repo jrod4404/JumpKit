@@ -783,16 +783,16 @@ strong, b { color: inherit; }
 
 /* ── NoteKit (feature-flagged; styles harmless when hidden) ─────────────── */
 .nav-section-label { margin-top: 24px; padding: 6px 14px 2px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dim); text-transform: uppercase; }
-#notekitNavWrap { padding: 2px 8px 8px; }
+#notekitNavWrap { padding: 0 0 8px; }
 .nk-project { margin-bottom: 2px; }
-.nk-project-row { display: flex; align-items: center; gap: 6px; padding: 5px 8px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-size: 0.85rem; }
-.nk-project-row .nav-icon { color: var(--text-dim); transition: color var(--transition); }
+.nk-project-row { display: flex; align-items: center; gap: 9px; padding: 10px 20px; font-size: 1rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-radius: 0; transition: all var(--transition); border: none; background: none; width: 100%; text-align: left; }
+.nk-project-row .nav-icon { font-size: 1.3rem; width: 24px; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
 .nk-project-row:hover { background: var(--bg-hover); color: var(--hover-accent); }
 .nk-project-row:hover .nav-icon { color: var(--hover-accent); }
 .nk-project-row.active { background: var(--bg-hover); color: var(--hover-accent); font-weight: 600; }
 .nk-project-row.active .nav-icon { color: var(--hover-accent); }
 .nk-project-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nk-project-more { color: var(--text-dim); padding: 0 2px; font-weight: 700; }
+.nk-project-more { color: var(--text-dim); padding: 0 4px; font-weight: 700; }
 .nk-project-more:hover { color: var(--hover-accent); }
 .nk-pages { margin: 2px 0 4px 14px; border-left: 1px solid rgba(128,128,128,0.25); padding-left: 6px; }
 .nk-page-row { display: flex; align-items: center; gap: 5px; padding: 4px 6px; border-radius: 5px; cursor: pointer; color: var(--text-muted); font-size: 0.82rem; }
@@ -801,8 +801,8 @@ strong, b { color: inherit; }
 .nk-page-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nk-add-page { padding: 3px 6px; font-size: 0.78rem; color: var(--text-dim); cursor: pointer; }
 .nk-add-page:hover { color: var(--turq); }
-.nk-add-project { padding: 6px 8px; font-size: 0.8rem; color: var(--text-dim); cursor: pointer; margin-top: 4px; }
-.nk-add-project:hover { color: var(--turq); }
+.nk-add-project { padding: 10px 20px; font-size: 1rem; color: var(--text-dim); cursor: pointer; margin-top: 2px; }
+.nk-add-project:hover { color: var(--hover-accent); }
 
 /* Page view */
 .nk-page-view { max-width: 820px; margin: 0 auto; padding: 24px 28px 80px; }
