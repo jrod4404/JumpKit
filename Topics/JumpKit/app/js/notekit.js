@@ -69,12 +69,22 @@
           <div class="nk-project-row ${active ? 'active' : ''}" data-action="open-project" data-id="${p.id}" title="${esc(p.name)}">
             ${projectIconHtml(p.icon)}
             <span class="nk-project-name">${esc(p.name)}</span>
-            <span class="nk-project-more" data-action="project-menu" data-id="${p.id}" title="Project options">⋯</span>
+            <span class="nk-project-more" data-id="${p.id}" title="Project options">⋯</span>
           </div>
         </div>`;
     }
     html += `<div class="nk-add-project" data-action="add-project">+ Add project</div>`;
     wrap.innerHTML = html;
+    // Wire a DIRECT click handler on each ⋯ so the app's global
+    // document-click `CtxMenu.hide()` never hides the menu on the same event.
+    wrap.querySelectorAll('.nk-project-more').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        openNkMenuFromBtn(btn);
+      });
+    });
   }
 
   function onNavClick(e) {
@@ -87,17 +97,9 @@
       openProject(id);
     } else if (action === 'add-project') {
       promptAddProject();
-    } else if (action === 'project-menu') {
-      e.stopPropagation();
-      showProjectMenu(el, id);
     } else if (action === 'tab-page') {
-      e.stopPropagation();
       if (projectId) NK.activeProjectId = projectId;
       openPage(id);
-    } else if (action === 'page-menu') {
-      e.stopPropagation();
-      if (projectId) NK.activeProjectId = projectId;
-      showPageMenu(el, id, projectId);
     } else if (action === 'add-page') {
       if (projectId) { NK.activeProjectId = projectId; promptAddPage(projectId); }
     }
@@ -119,73 +121,49 @@
   }
 
   // ── Project / page menus (rename / delete — soft delete) ───────────
-  // Single persistent outside-click closer (prevents a stale close handler
-  // from a previously closed menu instantly hiding a newly opened one).
-  let nkMenuAnchor = null;
-  function bindNkMenuClose() {
-    if (bindNkMenuClose.bound) return;
-    bindNkMenuClose.bound = true;
-    document.addEventListener('click', (ev) => {
-      const menu = document.getElementById('ctxMenu');
-      if (!menu || menu.style.display === 'none') return;
-      if (menu.contains(ev.target)) return;
-      if (nkMenuAnchor && nkMenuAnchor.contains(ev.target)) return;
-      menu.style.display = 'none';
-      nkMenuAnchor = null;
-    });
+  // Use the app's canonical CtxMenu (same #ctxMenu element the app controls),
+  // and open via a DIRECT click handler on the ⋯ button that fully stops
+  // propagation so the app's global document-click `CtxMenu.hide()` never
+  // clobbers the freshly opened menu on the same event.
+  function openNkMenuFromBtn(btn) {
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const anchor = btn;
+    const rect = anchor.getBoundingClientRect();
+    const x = rect.left;
+    const y = rect.bottom + 4;
+    let html;
+    if (btn.dataset.kind === 'page') {
+      const projectId = btn.dataset.project;
+      html = [
+        { label: 'Rename page', action: () => promptRenamePage(id, projectId) },
+        { label: 'Delete page', danger: true, action: () => confirmDeletePage(id, projectId) },
+      ];
+    } else {
+      html = [
+        { label: 'Rename project', action: () => promptRenameProject(id) },
+        { label: 'Change icon', action: () => pickProjectIcon(id) },
+        { label: 'Delete project', danger: true, action: () => confirmDeleteProject(id) },
+      ];
+    }
+    if (window.CtxMenu && typeof window.CtxMenu.show === 'function') {
+      window.CtxMenu.show(x, y, html);
+    } else {
+      openNkMenuFallback(anchor, btn.dataset.kind === 'page'
+        ? `<button class="ctx-item" data-nk="${id}">Rename page</button>`
+        : `<button class="ctx-item" data-nk="${id}">Rename project</button>`);
+    }
   }
-  function openNkMenu(anchorEl, html) {
-    bindNkMenuClose();
+  function openNkMenuFallback(anchorEl, html) {
     const menu = document.getElementById('ctxMenu');
     if (!menu) return;
-    nkMenuAnchor = anchorEl;
     menu.innerHTML = html;
     menu.style.display = 'block';
     const rect = anchorEl.getBoundingClientRect();
-    const mw = menu.offsetWidth || 180;
-    let left = rect.left;
-    let top = rect.bottom + 4;
-    // Keep within viewport.
-    if (left + mw > window.innerWidth - 8) left = Math.max(8, window.innerWidth - mw - 8);
-    if (top + menu.offsetHeight > window.innerHeight - 8) top = Math.max(8, rect.top - menu.offsetHeight - 4);
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
-    return menu;
+    menu.style.left = rect.left + 'px';
+    menu.style.top = (rect.bottom + 4) + 'px';
   }
 
-  function showProjectMenu(anchorEl, id) {
-    const menu = openNkMenu(anchorEl, `
-      <button class="ctx-item" data-nk-menu="rename-project" data-id="${id}">Rename project</button>
-      <button class="ctx-item" data-nk-menu="project-icon" data-id="${id}">Change icon</button>
-      <button class="ctx-item danger" data-nk-menu="delete-project" data-id="${id}">Delete project</button>`);
-    if (!menu) return;
-    menu.onclick = (e) => {
-      const b = e.target.closest('[data-nk-menu]');
-      if (!b) return;
-      const i = b.dataset.id;
-      if (b.dataset.nkMenu === 'rename-project') promptRenameProject(i);
-      if (b.dataset.nkMenu === 'project-icon') pickProjectIcon(i);
-      if (b.dataset.nkMenu === 'delete-project') confirmDeleteProject(i);
-      menu.style.display = 'none';
-      nkMenuAnchor = null;
-    };
-  }
-
-  function showPageMenu(anchorEl, pageId, projectId) {
-    const menu = openNkMenu(anchorEl, `
-      <button class="ctx-item" data-nk-menu="rename-page" data-id="${pageId}">Rename page</button>
-      <button class="ctx-item danger" data-nk-menu="delete-page" data-id="${pageId}">Delete page</button>`);
-    if (!menu) return;
-    menu.onclick = (e) => {
-      const b = e.target.closest('[data-nk-menu]');
-      if (!b) return;
-      const i = b.dataset.id;
-      if (b.dataset.nkMenu === 'rename-page') promptRenamePage(i, projectId);
-      if (b.dataset.nkMenu === 'delete-page') confirmDeletePage(i, projectId);
-      menu.style.display = 'none';
-      nkMenuAnchor = null;
-    };
-  }
 
   // ── Project / page icon picker ──────────────────────────────────────
   function nkIconPicker(title, currentIcon) {
@@ -380,7 +358,7 @@
       <div class="nk-tab ${NK.activePageId === pg.id ? 'active' : ''}" data-action="tab-page" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="${esc(pg.title)}">
         <svg class="ti ti-file-text" style="font-size:0.85rem"><use href="img/tabler-sprite.min.svg#tabler-file-text"/></svg>
         <span class="nk-tab-name">${esc(pg.title)}</span>
-        <span class="nk-tab-more" data-action="page-menu" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="Page options">⋯</span>
+        <span class="nk-tab-more" data-kind="page" data-id="${esc(pg.id)}" data-project="${esc(NK.activeProjectId || '')}" title="Page options">⋯</span>
       </div>`).join('');
     // Fix #5: label left of the + button = "{project name} Pages", bigger text.
     return `<div class="nk-tabs" id="nkTabs"><span class="nk-tabs-project">${esc(projectName ? projectName + ' Pages' : 'Pages')}</span>${tabs}${addBtn}</div>`;
@@ -390,6 +368,21 @@
     const tabBar = document.getElementById('nkTabs');
     if (!tabBar) return;
     tabBar.outerHTML = tabsToHtml(pages);
+    wireTabMoreButtons();
+  }
+
+  // Direct click handlers for the page-tab ⋯ (avoids global CtxMenu.hide clobber).
+  function wireTabMoreButtons() {
+    const bar = document.getElementById('nkTabs');
+    if (!bar) return;
+    bar.querySelectorAll('.nk-tab-more').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        openNkMenuFromBtn(btn);
+      });
+    });
   }
 
   // Fix #3+#4: breadcrumb header at top of the page view.
@@ -439,6 +432,7 @@
         <div class="nk-blocks" id="nkBlocks"></div>
         <div class="nk-add-block" id="nkAddBlock">+ Add a block</div>
       </div>`;
+    wireTabMoreButtons();
 
     const titleInput = document.getElementById('nkPageTitle');
     titleInput.addEventListener('input', debounce(() => {
@@ -476,6 +470,7 @@
         <p>This project has no pages yet.</p>
         <button class="nk-btn nk-btn-primary nk-empty-add" data-action="add-page" data-project="${esc(projectId)}" style="margin-top:14px">+ Add page</button>
       </div>`;
+    wireTabMoreButtons();
   }
 
   function setTopbar(title, subtitle) {
