@@ -371,6 +371,151 @@ ipcMain.handle('notekit-store-image-data', (_e, dataUrl) => {
   }
 });
 
+// ══════════════════════════════════════════════════════════════════
+// CLIPKIT — screen capture tool (third sidebar section)
+// Click "New Capture" → transparent fullscreen overlay → drag a region
+// → on release, capture that region → save PNG to captures/ + clipboard + history.
+// Cross-platform (Win+Mac) via desktopCapturer + capturePage.
+// ══════════════════════════════════════════════════════════════════
+ipcMain.handle('clipkit-enabled', () => {
+  return process.env.CLIPKIT_ENABLED === 'true';
+});
+
+function ckDir() {
+  const dir = path.join(app.getPath('userData'), 'clipkit');
+  try { fs.mkdirSync(path.join(dir, 'captures'), { recursive: true }); } catch (_) {}
+  return dir;
+}
+function ckHistoryPath() { return path.join(ckDir(), 'history.json'); }
+
+function ckLoadHistory() {
+  try {
+    const raw = fs.readFileSync(ckHistoryPath(), 'utf8');
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (_) { return []; }
+}
+function ckSaveHistory(list) {
+  try { fs.writeFileSync(ckHistoryPath(), JSON.stringify(list, null, 2)); } catch (_) {}
+}
+
+// Start an interactive region capture. Resolves with the capture record on
+// success, {cancelled:true} if the user dismissed, or {error}.
+ipcMain.handle('clipkit-capture', async () => {
+  try {
+    const { desktopCapturer, screen } = require('electron');
+    const display = screen.getPrimaryDisplay();
+    const { width, height } = display.size;
+
+    // 1) Snapshot the primary screen as a data URL.
+    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width, height } });
+    const src = sources.find((s) => s.display_id === String(display.id)) || sources[0];
+    if (!src) return { error: 'no screen source' };
+    const imgData = src.thumbnail.toDataURL();
+
+    // 2) Open a frameless, always-on-top, fullscreen overlay showing the frozen screen.
+    const overlay = new BrowserWindow({
+      x: display.bounds.x,
+      y: display.bounds.y,
+      width,
+      height,
+      frame: false,
+      transparent: true,
+      alwaysOnTop: true,
+      resizable: false,
+      movable: false,
+      skipTaskbar: true,
+      fullscreen: true,
+      hasShadow: false,
+      webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'capture-preload.js') },
+    });
+    overlay.setAlwaysOnTop(true, 'screen-saver');
+    overlay.setMenuBarVisibility(false);
+    const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
+      #bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
+      #box{position:fixed;display:none;border:2px solid #e11d48;background:rgba(225,29,72,0.14);box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;z-index:2}
+      #dim{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1}
+      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.75);color:#fff;padding:8px 16px;border-radius:20px;font:600 13px/1 system-ui,sans-serif;pointer-events:none}
+    </style></head><body>
+      <div id="dim"></div>
+      <div id="box"></div>
+      <div id="hint">Drag to select a region · Esc to cancel</div>
+      <script>
+        const box=document.getElementById('box'),dim=document.getElementById('dim');
+        let sx=0,sy=0,drawing=false;
+        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
+        document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
+        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.close();return} try{window.captureBridge.region(x,y,w,h)}catch(_){window.close()}});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.close()});
+      </script>
+    </body></html>`;
+    await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+
+    // 3) On region selection, the overlay script calls captureRegion via IPC.
+    const result = await new Promise((resolve) => {
+      const onCapture = async (e, rect) => {
+        ipcMain.removeListener('clipkit-region', onCapture);
+        const { x, y, w, h } = rect;
+        try {
+          const img = await overlay.capturePage({ x, y, width: w, height: h });
+          const rec = await ckPersistCapture(img.toPNG(), w, h);
+          overlay.close();
+          resolve(rec);
+        } catch (err) {
+          overlay.close();
+          resolve({ error: err.message });
+        }
+      };
+      const onClosed = () => {
+        ipcMain.removeListener('clipkit-region', onCapture);
+        resolve({ cancelled: true });
+      };
+      ipcMain.on('clipkit-region', onCapture);
+      overlay.on('closed', onClosed);
+    });
+    return result;
+  } catch (e) {
+    return { error: e.message };
+  }
+});
+
+// Save PNG bytes, copy to clipboard, write history, return {id, path, sec, width, height, ts}.
+async function ckPersistCapture(pngBuf, w, h) {
+  const dir = path.join(ckDir(), 'captures');
+  const id = 'cap-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const file = path.join(dir, id + '.png');
+  fs.writeFileSync(file, pngBuf);
+  const { clipboard, nativeImage } = require('electron');
+  clipboard.writeImage(nativeImage.createFromBuffer(pngBuf));
+  const rec = { id, path: file, width: w || 0, height: h || 0, ts: Date.now() };
+  const list = ckLoadHistory();
+  list.unshift(rec);
+  ckSaveHistory(list.slice(0, 200)); // keep last 200
+  return rec;
+}
+
+ipcMain.handle('clipkit-history', () => ckLoadHistory());
+
+ipcMain.handle('clipkit-copy', (_e, id) => {
+  const rec = ckLoadHistory().find((r) => r.id === id);
+  if (!rec || !fs.existsSync(rec.path)) return { ok: false, reason: 'not found' };
+  try {
+    const { clipboard, nativeImage } = require('electron');
+    clipboard.writeImage(nativeImage.createFromPath(rec.path));
+    return { ok: true };
+  } catch (e) { return { ok: false, reason: e.message }; }
+});
+
+ipcMain.handle('clipkit-delete', (_e, id) => {
+  const list = ckLoadHistory();
+  const rec = list.find((r) => r.id === id);
+  const next = list.filter((r) => r.id !== id);
+  ckSaveHistory(next);
+  if (rec && rec.path) { try { fs.unlinkSync(rec.path); } catch (_) {} }
+  return { ok: true };
+});
+
 // ── IPC: sync-jumps ────────────────────────────────────────────────
 function _scopedSyncKey(userId, key) {
   return userId ? `${userId}:${key}` : key;
@@ -1369,6 +1514,8 @@ app.whenReady().then(() => {
   // NoteKit feature flag: OFF for regular users. Flip to true for Jeff's test
   // build (electron-builder --config … or env). Renderer reads via IPC.
   process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'true';
+  // ClipKit feature flag (screen capture tool).
+  process.env.CLIPKIT_ENABLED = process.env.CLIPKIT_ENABLED || 'true';
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer
   const { session } = require('electron');

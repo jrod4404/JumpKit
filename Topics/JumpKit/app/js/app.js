@@ -635,14 +635,21 @@ const pages = {
     }
     catch (err) { console.error('[notekit] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load NoteKit.</strong><br>Error: ${err.message}</div>`; }
   },
+  clipkit:    async () => {
+    try {
+      if (window.ClipKit && typeof window.ClipKit.render === 'function') window.ClipKit.render();
+      else document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem">ClipKit is not enabled in this build.</div>`;
+    }
+    catch (err) { console.error('[clipkit] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load ClipKit.</strong><br>Error: ${err.message}</div>`; }
+  },
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments', notekit:'NoteKit'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments', notekit:'NoteKit', clipkit:'Captures'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes'
+  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes', clipkit:'ti-photo'
 };
 let activePage = 'home';
 window.activePage = activePage;

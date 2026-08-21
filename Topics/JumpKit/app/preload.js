@@ -76,4 +76,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   notekitPickImage:    ()         => ipcRenderer.invoke('notekit-pick-image'),
   notekitStoreImage:   (srcPath)  => ipcRenderer.invoke('notekit-store-image', srcPath),
   notekitStoreImageData: (dataUrl) => ipcRenderer.invoke('notekit-store-image-data', dataUrl),
+  clipkitEnabled:      ()         => ipcRenderer.invoke('clipkit-enabled'),
+  clipkitCapture:      ()         => ipcRenderer.invoke('clipkit-capture'),
+  clipkitHistory:      ()         => ipcRenderer.invoke('clipkit-history'),
+  clipkitCopy:         (id)       => ipcRenderer.invoke('clipkit-copy', id),
+  clipkitDelete:       (id)       => ipcRenderer.invoke('clipkit-delete', id),
 });
