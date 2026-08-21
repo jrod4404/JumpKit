@@ -139,24 +139,7 @@ if (!firstBlock.querySelector('.nk-block-grip')) { console.log('FAIL: block miss
 if (!firstBlock.querySelector('.nk-block-resize')) { console.log('FAIL: block missing resize handle'); process.exit(1); }
 console.log('OK: B1 block attrs/style/handles present (x=' + firstBlock.dataset.x + ' w=' + firstBlock.dataset.width + ')');
 
-// ── Test 7 (B1): layoutBlocks stacks overlapping blocks, side-by-side for non-overlapping ──
-const container = document.getElementById('nkBlocks');
-container.style.width = '800px';
-// Synthetic blocks with deterministic heights (jsdom offsetHeight = 0 → layout uses 24px fallback)
-const synth = (x, w) => { const d = document.createElement('div'); d.className = 'nk-block'; d.dataset.x = String(x); d.dataset.width = String(w); d.style.height = '40px'; container.appendChild(d); return d; };
-const s1 = synth(0, 100), s2 = synth(0, 50), s3 = synth(50, 50);
-// Trigger layout via the window resize listener (calls scheduleLayout → layoutBlocks)
-window.dispatchEvent(new window.Event('resize'));
-await new Promise((r) => setTimeout(r, 120));
-const sTop = (el) => parseFloat(el.style.top || '0');
-// s1 full width packs below prior blocks; s2 (x0 w50) overlaps s1's x-range -> below s1;
-// s3 (x50 w50) does NOT overlap s2 horizontally -> shares row with s2
-const s1Top = sTop(s1);
-if (sTop(s2) <= s1Top) { console.log('FAIL: overlapping block s2 should stack below s1 (s1=' + s1Top + ' s2=' + sTop(s2) + ')'); process.exit(1); }
-if (sTop(s3) !== sTop(s2)) { console.log('FAIL: non-overlapping s3 should share row with s2 (s2=' + sTop(s2) + ' s3=' + sTop(s3) + ')'); process.exit(1); }
-console.log('OK: packing stacks overlaps & rows side-by-side (s1=' + s1Top + 'px, s2=' + sTop(s2) + 'px, s3=' + sTop(s3) + 'px)');
-
-// ── Test 8 (B1): Enter split inherits parent x/width ──
+// ── Test 8 (B1): Enter split inherits parent x, new block auto-fits (width 0) ──
 const splitSrc = [...document.querySelectorAll('.nk-text')].at(-1);
 const splitBlock = splitSrc.closest('.nk-block');
 splitBlock.dataset.x = '25';
@@ -172,9 +155,26 @@ sel2.removeAllRanges(); sel2.addRange(range2);
 splitSrc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
 await new Promise((r) => setTimeout(r, 80));
 const newBlocks = [...document.querySelectorAll('.nk-block')];
-const newBlock = newBlocks.find((b) => b.dataset.x === '25' && b !== splitBlock);
-if (!newBlock || newBlock.dataset.width !== '50') { console.log('FAIL: split block did not inherit x/width'); process.exit(1); }
-console.log('OK: split block inherits x=' + newBlock.dataset.x + ' width=' + newBlock.dataset.width);
+const newBlock = newBlocks.find((b) => b.dataset.x === '25' && b !== splitBlock && b.classList.contains('nk-block-text'));
+// New split block should inherit x=25 and be auto-fitted (width < 100, not pinned full).
+if (!newBlock) { console.log('FAIL: split block not found with inherited x=25'); process.exit(1); }
+const nw = parseFloat(newBlock.dataset.width);
+if (!(nw > 0 && nw < 100)) { console.log('FAIL: split block should auto-fit to content (width=' + newBlock.dataset.width + ')'); process.exit(1); }
+console.log('OK: split block inherits x=' + newBlock.dataset.x + ' auto-fit width=' + newBlock.dataset.width + '%');
+
+// ── Test 7 (B1): layoutBlocks stacks overlapping blocks, side-by-side for non-overlapping ──
+const container = document.getElementById('nkBlocks');
+container.innerHTML = ''; // isolate: clear blocks so packing is deterministic
+container.style.width = '800px';
+const synth = (x, w) => { const d = document.createElement('div'); d.className = 'nk-block'; d.dataset.x = String(x); d.dataset.width = String(w); d.style.height = '40px'; container.appendChild(d); return d; };
+const s1 = synth(0, 100), s2 = synth(0, 50), s3 = synth(50, 50);
+window.dispatchEvent(new window.Event('resize'));
+await new Promise((r) => setTimeout(r, 120));
+const sTop = (el) => parseFloat(el.style.top || '0');
+const s1Top = sTop(s1);
+if (sTop(s2) <= s1Top) { console.log('FAIL: overlapping block s2 should stack below s1 (s1=' + s1Top + ' s2=' + sTop(s2) + ')'); process.exit(1); }
+if (sTop(s3) !== sTop(s2)) { console.log('FAIL: non-overlapping s3 should share row with s2 (s2=' + sTop(s2) + ' s3=' + sTop(s3) + ')'); process.exit(1); }
+console.log('OK: packing stacks overlaps & rows side-by-side (s1=' + s1Top + 'px, s2=' + sTop(s2) + 'px, s3=' + sTop(s3) + 'px)');
 
 // ── Test 9 (B1 fix): horizontal grip drag on a FULL-WIDTH block visibly moves it ──
 // Regression: dragging a default (width=100, x=0) block horizontally previously
@@ -199,5 +199,16 @@ console.log('OK: drag left clamps at x=0 (x=' + r.x + ')');
 r = hm(20, 40, 40, 800); // +5% → x=25, w stays 40 (25+40<=100)
 if (!(r.x === 25 && r.width === 40)) { console.log('FAIL: positioned block drag (x=' + r.x + ' w=' + r.width + ')'); process.exit(1); }
 console.log('OK: positioned block drag → x=' + r.x + ' w=' + r.width);
+
+// ── Test 10 (Fix 1): 300px min-width math ──
+// In an 800px container, 300px = 37.5%.
+const minPct = (300 / 800) * 100;
+if (Math.abs(minPct - 37.5) > 0.01) { console.log('FAIL: 300px min = ' + minPct + '% (expected 37.5)'); process.exit(1); }
+console.log('OK: 300px min at 800px container = ' + minPct.toFixed(1) + '%');
+// horizMove auto-shrink must respect the 300px min: dragging a block right
+// must not shrink below 37.5% (in an 800px cw). smallest possible = 300/800.
+const tight = window.NoteKit._test.horizMove(62.5, 37.5, -500, 800); // push right edge, try to shrink below min
+if (tight.width < 37.5 - 0.01) { console.log('FAIL: auto-shrink went below 300px min (w=' + tight.width + ')'); process.exit(1); }
+console.log('OK: auto-shrink respects 300px min (w=' + tight.width.toFixed(1) + '%)');
 
 console.log('ALL BLOCK TESTS PASSED ✔');

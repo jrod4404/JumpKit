@@ -22,3 +22,10 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 ## 2026-03-13
 
 - Installed MacWhisper via Homebrew (cask) so Jeff can send voice memos for local transcription
+
+## 2026-08-21 — NoteKit B1 block layout (v5.1.27)
+
+- Implemented B1: blocks horizontally resizable (right-edge handle), horizontally positionable (grip drag x), vertically positionable (grip drag up/down = reorder)
+- Side-by-side via packing (non-overlapping x-ranges share a row)
+- nk_blocks x/width columns (migration), spec updated, 3 new tests, 30/30 pass
+- Released v5.1.27 (tag → build-win → published Latest on jumpkit-releases)

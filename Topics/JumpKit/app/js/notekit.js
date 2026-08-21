@@ -549,8 +549,10 @@
 
   function blockToHtml(b, i) {
     const x = clampNum(b.x, 0, 85, 0);
-    const w = clampNum(b.width, 15, 100, 100);
-    const base = `data-id="${esc(b.id)}" data-idx="${i}" data-x="${x}" data-width="${w}" style="left:${x}%;width:${w}%"`;
+    const autoFit = !(b.width > 0); // width <= 0/undefined → fit to content
+    const w = autoFit ? 100 : clampNum(b.width, 15, 100, 100);
+    const lw = autoFit ? 'auto' : (w + '%');
+    const base = `data-id="${esc(b.id)}" data-idx="${i}" data-x="${x}" data-width="${autoFit ? 0 : w}" style="left:${x}%;width:${lw}"`;
     const grip = `<span class="nk-block-grip" title="Drag to move / reorder">⋮⋮</span>`;
     const resize = `<span class="nk-block-resize" title="Drag to resize width"></span>`;
     const remove = `<span class="nk-block-del" data-action="del-block" title="Delete block">✕</span>`;
@@ -611,14 +613,32 @@
   function layoutBlocks() {
     const container = document.getElementById('nkBlocks');
     if (!container) return;
+    const cw = container.clientWidth || 800;
     const els = Array.from(container.querySelectorAll('.nk-block'));
     if (els.length === 0) { container.style.height = ''; return; }
+    // Fix 3: auto-fit blocks (data-width=0) to their widest content.
+    els.forEach((el) => {
+      if (parseFloat(el.dataset.width || '100') === 0) {
+        el.style.width = 'auto';
+        el.style.maxWidth = '100%';
+        // reset children that force 100% so content can size naturally
+        el.style.display = 'inline-block';
+        el.style.whiteSpace = 'normal';
+        // measure widest content element
+        const fit = fitContentWidth(el);
+        const wPct = Math.min(100, (fit / cw) * 100);
+        const w = Math.max(300 / cw * 100, wPct);
+        el.style.display = '';
+        el.style.width = w + '%';
+        el.dataset.width = String(w);
+      }
+    });
     const placed = []; // { x, w, top, h }
     els.forEach((el) => {
       const x = parseFloat(el.dataset.x || 0);
       const w = parseFloat(el.dataset.width || 100);
       el.style.left = x + '%';
-      el.style.width = w + '%';
+      if ((el.dataset.width || '0') !== '0') el.style.width = w + '%';
       const h = el.offsetHeight || 24;
       let top = 0;
       let guard = 0;
@@ -644,6 +664,20 @@
     container.style.height = (maxBottom + 24) + 'px';
   }
 
+  // Measure the pixel width a block's content needs (widest child). Returns
+  // a px value, clamped to the container width.
+  function fitContentWidth(blockEl) {
+    const cw = (blockEl.closest('#nkBlocks') || blockEl.parentElement || blockEl.offsetParent);
+    const maxW = cw ? cw.clientWidth : 1200;
+    // Make the block measure naturally without clipping.
+    blockEl.style.width = 'max-content';
+    blockEl.style.maxWidth = 'none';
+    const w = blockEl.scrollWidth || blockEl.getBoundingClientRect().width || 200;
+    blockEl.style.width = '';
+    blockEl.style.maxWidth = '';
+    return Math.min(w, maxW || 1200);
+  }
+
   let nkSizeObserver = null;
   let layoutTimer = null;
   function scheduleLayout() {
@@ -660,8 +694,36 @@
     container.querySelectorAll('.nk-block').forEach((el) => nkSizeObserver.observe(el));
   }
 
-  // ── Drag: grip = move horizontally / reorder vertically ─────────────
+  // ── Drag: move anywhere on the block (horizontal move / vertical reorder) ──
   let drag = null;
+
+  // A block can be moved by pointer-dragging anywhere on it. To avoid fighting
+  // text selection / editing, we only commit to a move once the pointer drags
+  // past a threshold; a plain click (no drag) behaves normally.
+
+  function onBlockPointerDown(e) {
+    if (e.button !== 0) return;
+    const blockEl = e.target && e.target.closest ? e.target.closest('.nk-block') : null;
+    if (!blockEl) return;
+    // Never intercept our own controls (grip uses its own handler; resize, delete).
+    if (e.target.closest('.nk-block-grip') || e.target.closest('.nk-block-resize') || e.target.closest('.nk-block-del')) return;
+    drag = {
+      kind: 'move',
+      blockEl,
+      blockId: blockEl.dataset.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      startXval: parseFloat(blockEl.dataset.x || 0),
+      startW: parseFloat(blockEl.dataset.width || 100),
+      mode: null, // 'x' | 'reorder' — decided after first movement
+      moved: false,
+      fromBlock: true,
+      onInput: !!(e.target.closest('input, textarea, select, button, [contenteditable], .nk-add-item, .nk-check-box')),
+    };
+    window.addEventListener('pointermove', onDragPointerMove);
+    window.addEventListener('pointerup', onDragPointerUp);
+    window.addEventListener('pointercancel', onDragPointerUp);
+  }
 
   function onGripPointerDown(e) {
     if (e.button !== 0) return;
@@ -721,6 +783,9 @@
       if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       d.mode = (d.kind === 'resize' || Math.abs(dx) >= Math.abs(dy)) ? 'x' : 'reorder';
       d.moved = true;
+      // Once we commit to a move/resize, drop any native selection & cursor.
+      try { window.getSelection && window.getSelection().removeAllRanges && window.getSelection().removeAllRanges(); } catch (_) {}
+      document.body.classList.add('nk-dragging');
     }
     const el = document.querySelector(`.nk-block[data-id="${CSS.escape(d.blockId)}"]`);
     if (!el) return;
@@ -729,7 +794,7 @@
     if (!b) return;
     const cw = containerWidth() || 1;
     if (d.kind === 'resize') {
-      const minW = 15;
+      const minW = Math.min(300 / cw * 100, 100); // 300px min (as %)
       const maxW = 100 - d.startXval;
       const w = clampNum(d.startW + (dx / cw) * 100, minW, maxW, d.startW);
       b.width = w;
@@ -764,10 +829,11 @@
   // shrink its width to keep the right edge at/below 100%, giving immediate
   // visible movement even for default (full-width) blocks.
   function horizMove(startXval, startW, dxPx, cwPx) {
+    const minW = Math.min(300 / cwPx * 100, 100); // 300px min (as %)
     const rawX = clampNum(startXval + (dxPx / cwPx) * 100, 0, 100, startXval);
     let width = startW;
     const maxW = 100 - rawX;
-    if (width > maxW) width = Math.max(15, maxW);
+    if (width > maxW) width = Math.max(minW, maxW);
     return { x: rawX, width };
   }
 
@@ -796,6 +862,7 @@
     if (!drag) return;
     const d = drag;
     drag = null;
+    document.body.classList.remove('nk-dragging');
     window.removeEventListener('pointermove', onDragPointerMove);
     window.removeEventListener('pointerup', onDragPointerUp);
     window.removeEventListener('pointercancel', onDragPointerUp);
@@ -805,6 +872,10 @@
   function wireBlockHandles() {
     const container = document.getElementById('nkBlocks');
     if (!container) return;
+    container.querySelectorAll('.nk-block').forEach((b) => {
+      b.removeEventListener('pointerdown', onBlockPointerDown);
+      b.addEventListener('pointerdown', onBlockPointerDown);
+    });
     container.querySelectorAll('.nk-block-grip').forEach((h) => {
       h.removeEventListener('pointerdown', onGripPointerDown);
       h.addEventListener('pointerdown', onGripPointerDown);
@@ -1007,7 +1078,8 @@
     }
     b.content = before;
     const parentBlock = el.closest('.nk-block');
-    const nb = { id: uid(), type: 'text', x: parseFloat(parentBlock?.dataset.x || 0) || 0, width: parseFloat(parentBlock?.dataset.width || 100) || 100, content: after };
+    // New split block auto-fits to its content (width 0 sentinel), same x as parent.
+    const nb = { id: uid(), type: 'text', x: parseFloat(parentBlock?.dataset.x || 0) || 0, width: 0, content: after };
     NK.blocks.splice(idx + 1, 0, nb);
     renderBlocks();
     scheduleSave();
@@ -1038,7 +1110,8 @@
   }
 
   function addBlockAt(idx, type = 'text') {
-    const nb = { id: uid(), type, x: 0, width: 100, content: type === 'checklist' ? JSON.stringify([{ text: '', done: false }]) : (type === 'bullet' || type === 'numbered' ? JSON.stringify([{ text: '' }]) : '') };
+    // width 0 = auto-fit to content (Fix 3); explicit resize/move pins it.
+    const nb = { id: uid(), type, x: 0, width: 0, content: type === 'checklist' ? JSON.stringify([{ text: '', done: false }]) : (type === 'bullet' || type === 'numbered' ? JSON.stringify([{ text: '' }]) : '') };
     NK.blocks.splice(idx, 0, nb);
     renderBlocks();
     scheduleSave();
