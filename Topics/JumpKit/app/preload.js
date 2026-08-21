@@ -73,4 +73,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   notekitDeletePage:   (id)       => ipcRenderer.invoke('notekit-delete-page', id),
   notekitListBlocks:   (pageId)   => ipcRenderer.invoke('notekit-list-blocks', pageId),
   notekitSaveBlocks:   (pageId, blocks) => ipcRenderer.invoke('notekit-save-blocks', pageId, blocks),
+  notekitPickImage:    ()         => ipcRenderer.invoke('notekit-pick-image'),
+  notekitStoreImage:   (srcPath)  => ipcRenderer.invoke('notekit-store-image', srcPath),
+  notekitStoreImageData: (dataUrl) => ipcRenderer.invoke('notekit-store-image-data', dataUrl),
 });

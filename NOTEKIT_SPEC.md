@@ -23,12 +23,14 @@ Test whether note-taking inside JumpKit feels right. Isolated from the JumpKit a
 
 ### 3. Page → Note elements (Notion-like, on the page)
 Element types for v1:
-- Text block (title + body)
+- Text block (title + body) — WYSIWYG: bold, italic, underline, inline code, links, text color (format bar + Ctrl/Cmd+B/I/U/E/K)
 - Heading (H1/H2/H3)
 - Checklist (toggleable)
 - Bulleted / numbered list
+- **Table** (added 2026-08-21): initial cols/rows selector (1-10 each) on insert; editable cells; toolbar: insert row above / insert col left / delete row / delete col (relative to selected cell; insert BEFORE selected)
+- **Image** (added 2026-08-21): choose via file dialog (button) or paste from clipboard; image COPIED into userData/notekit-media/, block stores the file path (option 1 storage); Change image / Remove buttons
 
-Explicitly OUT of v1 (big cost, low test value): databases/tables, embeds, images, code blocks, toggles/columns, nested pages.
+Explicitly OUT of v1 (big cost, low test value): databases/tables (rich), embeds, code blocks, toggles/columns, nested pages.
 
 ### 3b. Block layout (B1 — added 2026-08-21, Jeff-approved)
 Blocks keep the vertical document flow (sortOrder), but each block is **free in x/width** (percent of the page width):

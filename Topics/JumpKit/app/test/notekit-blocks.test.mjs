@@ -61,12 +61,12 @@ const clickCtxItem = (label) => {
   btn.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 };
 
-// ── Test 1: + Add a block opens a picker with 7 block types ──
+// ── Test 1: + Add a block opens a picker with 9 block types ──
 document.getElementById('nkAddBlock').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 await new Promise((r) => setTimeout(r, 40));
 const pickerItems = [...window.CtxMenu.el.querySelectorAll('.ctx-item')].map((b) => b.textContent.trim());
-if (pickerItems.length !== 7) { console.log('FAIL: picker should have 7 items, got', pickerItems.length); process.exit(1); }
-console.log('OK: picker has 7 items:', pickerItems.join(', '));
+if (pickerItems.length !== 9) { console.log('FAIL: picker should have 9 items, got', pickerItems.length); process.exit(1); }
+console.log('OK: picker has 9 items:', pickerItems.join(', '));
 
 // ── Test 2: pick Checklist → checklist block created ──
 clickCtxItem('Checklist');
@@ -124,7 +124,7 @@ if (!splitOk) process.exit(1);
 const lastText = texts[texts.length - 1];
 lastText.dispatchEvent(new window.KeyboardEvent('keydown', { key: '/', bubbles: true, cancelable: true }));
 await new Promise((r) => setTimeout(r, 40));
-if (window.CtxMenu.el.querySelectorAll('.ctx-item').length !== 7) { console.log('FAIL: "/" picker should have 7 items'); process.exit(1); }
+if (window.CtxMenu.el.querySelectorAll('.ctx-item').length !== 9) { console.log('FAIL: "/" picker should have 9 items'); process.exit(1); }
 clickCtxItem('Heading 2');
 await new Promise((r) => setTimeout(r, 80));
 if (!document.querySelector('.nk-block-heading2 .nk-h')) { console.log('FAIL: block not converted to H2'); process.exit(1); }
@@ -210,5 +210,53 @@ console.log('OK: 300px min at 800px container = ' + minPct.toFixed(1) + '%');
 const tight = window.NoteKit._test.horizMove(62.5, 37.5, -500, 800); // push right edge, try to shrink below min
 if (tight.width < 37.5 - 0.01) { console.log('FAIL: auto-shrink went below 300px min (w=' + tight.width + ')'); process.exit(1); }
 console.log('OK: auto-shrink respects 300px min (w=' + tight.width.toFixed(1) + '%)');
+
+// ── Test 11: Table block — parseTable/tableToHtml grid + row/col ops via exposed helpers ──
+const pt = window.NoteKit._test.parseTable;
+const th = window.NoteKit._test.tableToHtml;
+const t2 = pt(JSON.stringify({ cols: 3, rows: 2, cells: [['A1', 'B1', 'C1'], ['A2', 'B2', 'C2']] }));
+const html = th(t2);
+if (!html.includes('nk-table')) { console.log('FAIL: tableToHtml missing table'); process.exit(1); }
+if ((html.match(/nk-tcell/g) || []).length !== 6) { console.log('FAIL: expected 6 cells, got', (html.match(/nk-tcell/g) || []).length); process.exit(1); }
+console.log('OK: table renders 2x3 grid (6 cells)');
+// row/col insert + delete via the block mutation helpers
+const ops = window.NoteKit._test.tableOps;
+let t3 = ops(pt(JSON.stringify({ cols: 2, rows: 2, cells: [['a', 'b'], ['c', 'd']] })), 'insert-row', 0);
+if (t3.cells.length !== 3 || t3.cells[0].length !== 2) { console.log('FAIL: insert-row'); process.exit(1); }
+t3 = ops(t3, 'insert-col', 0);
+if (t3.cells[0].length !== 3 || t3.cells.length !== 3) { console.log('FAIL: insert-col'); process.exit(1); }
+t3 = ops(t3, 'del-row', 0);
+if (t3.cells.length !== 2) { console.log('FAIL: del-row'); process.exit(1); }
+t3 = ops(t3, 'del-col', 0);
+if (t3.cells[0].length !== 2) { console.log('FAIL: del-col'); process.exit(1); }
+console.log('OK: table row/col insert + delete (before selected)');
+
+// ── Test 12: WYSIWYG color preserved by sanitizer, disallowed tags stripped ──
+// sanitizeRich is closure-private; exercise it through the rich-text input path used in Test 3.
+// Container was cleared in Test 7, so create a fresh text block via the picker.
+document.getElementById('nkAddBlock').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 40));
+clickCtxItem('Text');
+await new Promise((r) => setTimeout(r, 80));
+const colorTxt = [...document.querySelectorAll('.nk-text')].at(-1);
+if (!colorTxt) { console.log('FAIL: could not create text block for color test'); process.exit(1); }
+colorTxt.innerHTML = '<font color="#e11d48">red</font><span style="color:rgb(16, 185, 129)">green</span><script>bad()</script>';
+colorTxt.dispatchEvent(new window.Event('input', { bubbles: true }));
+await new Promise((r) => setTimeout(r, 60));
+// Re-render (Ctrl+Enter adds a block → renderBlocks) to see sanitized DOM, like Test 3.
+colorTxt.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 80));
+const colorTxt2 = [...document.querySelectorAll('.nk-text')].find((t) => t.innerHTML.includes('e11d48')) || [...document.querySelectorAll('.nk-text')].at(-1);
+const colorChecks = {
+  'font color kept': !!colorTxt2.querySelector('font[color="#e11d48"]'),
+  'span style color kept': !!colorTxt2.querySelector('span[color="rgb(16, 185, 129)"]'),
+  'script stripped': !colorTxt2.querySelector('script'),
+};
+let cok = true;
+for (const [k, v] of Object.entries(colorChecks)) {
+  if (!v) { console.log('FAIL:', k); cok = false; }
+  else console.log('OK:', k);
+}
+if (!cok) process.exit(1);
 
 console.log('ALL BLOCK TESTS PASSED ✔');

@@ -29,3 +29,6 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 - Side-by-side via packing (non-overlapping x-ranges share a row)
 - nk_blocks x/width columns (migration), spec updated, 3 new tests, 30/30 pass
 - Released v5.1.27 (tag → build-win → published Latest on jumpkit-releases)
+## 2026-08-21 — NoteKit 3 UX fixes (v5.1.29)
+- 300px min block width; move by holding anywhere on block; default width auto-fits content
+- 30/30 tests; released v5.1.29 (tag → build-win → Latest)

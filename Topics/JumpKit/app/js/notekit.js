@@ -396,6 +396,18 @@
   }
 
   // ── Rich-text floating format bar ────────────────────────────────────
+  const COLOR_SWATCHES = ['#e11d48', '#f59e0b', '#10b981', '#0ea5e9', '#6366f1', '#a855f7', '#ef4444', '#3b82f6', '#84cc16', '#14b8a6', '#f43f5e', '#8b5cf6', '#78716c', '#111827'];
+
+  function applyFmt(kind) {
+    if (kind === 'bold') document.execCommand('bold');
+    else if (kind === 'italic') document.execCommand('italic');
+    else if (kind === 'underline') document.execCommand('underline');
+    else if (kind === 'code') wrapInlineCode();
+    else if (kind === 'link') promptLink();
+    else return false;
+    return true;
+  }
+
   function wireFmtBar() {
     const bar = document.getElementById('nkFmtBar');
     if (!bar) return;
@@ -405,16 +417,15 @@
         e.stopPropagation();
         e.stopImmediatePropagation();
         const kind = btn.dataset.fmt;
-        if (kind === 'bold') document.execCommand('bold');
-        else if (kind === 'italic') document.execCommand('italic');
-        else if (kind === 'code') wrapInlineCode();
-        else if (kind === 'link') promptLink();
-        else return;
-        if (kind === 'bold' || kind === 'italic') {
-          const t = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('nk-text') ? document.activeElement : null;
-          syncRichInput(t);
+        if (kind === 'color') {
+          showColorPicker(btn);
+          return;
         }
-        hideFmtBar();
+        if (applyFmt(kind)) {
+          const t = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('nk-text') ? document.activeElement : null;
+          if (t && (kind === 'bold' || kind === 'italic' || kind === 'underline')) syncRichInput(t);
+          hideFmtBar();
+        }
       });
     });
     // Show the bar when a non-collapsed selection exists inside a text block.
@@ -430,17 +441,39 @@
       const barEl = document.getElementById('nkFmtBar');
       if (!barEl) return;
       barEl.style.display = 'flex';
-      barEl.style.left = Math.max(8, rect.left + rect.width / 2 - 110) + 'px';
+      barEl.style.left = Math.max(8, rect.left + rect.width / 2 - 130) + 'px';
       barEl.style.top = (rect.top - barEl.offsetHeight - 8) + 'px';
     }, 120));
     // Hide when clicking anywhere outside the bar.
     document.addEventListener('mousedown', (e) => {
-      if (!e.target.closest || !e.target.closest('#nkFmtBar')) hideFmtBar();
+      if (!e.target.closest || (!e.target.closest('#nkFmtBar') && !e.target.closest('.nk-color-pop'))) hideFmtBar();
+    });
+  }
+
+  // Small color-swatch popover attached below the color button.
+  function showColorPicker(anchorBtn) {
+    document.querySelectorAll('.nk-color-pop').forEach((p) => p.remove());
+    const pop = document.createElement('div');
+    pop.className = 'nk-color-pop';
+    pop.innerHTML = COLOR_SWATCHES.map((c) => `<button type="button" data-color="${c}" style="background:${c}" title="${c}"></button>`).join('') +
+      `<button type="button" class="nk-color-none" title="Default color">↺</button>`;
+    anchorBtn.parentElement.appendChild(pop);
+    pop.addEventListener('mousedown', (e) => e.preventDefault()); // keep selection
+    pop.addEventListener('click', (e) => {
+      const sw = e.target.closest('[data-color]');
+      if (sw) document.execCommand('foreColor', false, sw.dataset.color);
+      else if (e.target.closest('.nk-color-none')) document.execCommand('foreColor', false, 'inherit');
+      else return;
+      const t = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('nk-text') ? document.activeElement : null;
+      syncRichInput(t);
+      pop.remove();
+      hideFmtBar();
     });
   }
   function hideFmtBar() {
     const bar = document.getElementById('nkFmtBar');
     if (bar) bar.style.display = 'none';
+    document.querySelectorAll('.nk-color-pop').forEach((p) => p.remove());
   }
 
   const HELP_TEXT = 'Create and update pages and notes';
@@ -474,8 +507,11 @@
       <div class="nk-fmt-bar" id="nkFmtBar" style="display:none">
         <button type="button" data-fmt="bold" title="Bold (Ctrl+B)"><b>B</b></button>
         <button type="button" data-fmt="italic" title="Italic (Ctrl+I)"><i>I</i></button>
+        <button type="button" data-fmt="underline" title="Underline (Ctrl+U)"><u>U</u></button>
         <button type="button" data-fmt="code" title="Inline code (Ctrl+E)"><code>&lt;/&gt;</code></button>
         <button type="button" data-fmt="link" title="Link (Ctrl+K)">🔗</button>
+        <span class="nk-fmt-sep"></span>
+        <button type="button" class="nk-fmt-color" data-fmt="color" title="Text color" style="color:var(--text-color,#e11d48)">A</button>
       </div>`;
     wireTabMoreButtons();
     wireFmtBar();
@@ -591,10 +627,90 @@
           <button class="nk-add-item" data-action="add-item">+ item</button>`;
         break;
       }
+      case 'table': {
+        cls = 'nk-block-table';
+        const t = parseTable(b.content);
+        inner = tableToHtml(t);
+        break;
+      }
+      case 'image': {
+        cls = 'nk-block-image';
+        const src = (b.content || '').trim();
+        inner = src
+          ? `<img class="nk-img" src="${esc(imgSrc(src))}" alt="note image" draggable="false"/>
+             <div class="nk-img-actions"><button class="nk-btn" data-action="change-image">Change image</button><button class="nk-btn" data-action="remove-image">Remove</button></div>`
+          : `<div class="nk-img-empty">
+               <button class="nk-btn nk-btn-primary" data-action="pick-image">📷 Choose image</button>
+               <span class="nk-img-hint">or paste (Ctrl/Cmd+V)</span>
+             </div>`;
+        break;
+      }
       default:
         inner = `<div class="nk-text" contenteditable="true">${sanitizeRich(b.content)}</div>`;
     }
     return `<div class="nk-block ${cls}" ${base}>${grip}${remove}${inner}${resize}</div>`;
+  }
+
+  // ── Table helpers ────────────────────────────────────────────────────
+  // content JSON: { cols: N, rows: N, cells: [[str,...],...] }
+  function parseTable(content) {
+    try {
+      const t = JSON.parse(content || '');
+      if (t && Array.isArray(t.cells) && t.cells.length > 0) return t;
+    } catch (_) {}
+    return { cols: 2, rows: 2, cells: [['', ''], ['', '']] };
+  }
+
+  function tableToHtml(t) {
+    const cells = t.cells || [];
+    const rowsHtml = cells.map((row, r) => `
+      <tr>${row.map((c, ci) => `
+        <td><input type="text" class="nk-tcell" value="${esc(c)}" data-r="${r}" data-c="${ci}" placeholder=""/></td>`).join('')}</tr>`).join('');
+    return `<div class="nk-table-wrap">
+      <div class="nk-table-toolbar">
+        <button type="button" class="nk-btn nk-btn-sm" data-action="table-insert-row">＋ row above</button>
+        <button type="button" class="nk-btn nk-btn-sm" data-action="table-insert-col">＋ col left</button>
+        <button type="button" class="nk-btn nk-btn-sm" data-action="table-del-row">− row</button>
+        <button type="button" class="nk-btn nk-btn-sm" data-action="table-del-col">− col</button>
+        <span class="nk-table-sel"></span>
+      </div>
+      <table class="nk-table"><tbody>${rowsHtml}</tbody></table>
+    </div>`;
+  }
+
+  // Convert a stored/local path or file URL to an <img src>-safe URL.
+  function imgSrc(p) {
+    if (/^(https?:|data:)/i.test(p)) return p;
+    if (/^file:\/\//i.test(p)) return p;
+    // Windows: C:\Users\... → C:/Users/... ; mac/linux: /Users/...
+    const norm = p.replace(/\\/g, '/');
+    return 'file://' + (norm.startsWith('/') ? norm : '/' + norm);
+  }
+
+  // Pure table mutation: returns a NEW table object with the op applied.
+  // Ops: 'insert-row' | 'del-row' | 'insert-col' | 'del-col' (before selected index).
+  function tableOps(tb, op, sr, sc) {
+    const t = { cols: tb.cols, rows: tb.rows, cells: tb.cells.map((r) => r.slice()) };
+    if (op === 'insert-row') {
+      const at = Math.min(Math.max(sr || 0, 0), t.cells.length);
+      t.cells.splice(at, 0, Array(t.cols).fill(''));
+      t.rows = t.cells.length;
+    } else if (op === 'del-row') {
+      if (t.cells.length <= 1) return t;
+      const at = Math.min(Math.max(sr || 0, 0), t.cells.length - 1);
+      t.cells.splice(at, 1);
+      t.rows = t.cells.length;
+    } else if (op === 'insert-col') {
+      const at = Math.min(Math.max(sc || 0, 0), t.cols);
+      t.cells.forEach((row) => row.splice(at, 0, ''));
+      t.cols = (t.cells[0] || []).length;
+    } else if (op === 'del-col') {
+      if (t.cols <= 1) return t;
+      const at = Math.min(Math.max(sc || 0, 0), t.cols - 1);
+      t.cells.forEach((row) => row.splice(at, 1));
+      t.cols = (t.cells[0] || []).length;
+    }
+    return t;
   }
 
   // ── B1 layout: free x/width within the vertical flow ────────────────
@@ -887,7 +1003,7 @@
   }
 
   // Whitelist sanitizer for rich text: keeps bold/italic/underline/inline code/links/line-breaks.
-  const RICH_ALLOWED = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'CODE', 'A', 'BR']);
+  const RICH_ALLOWED = new Set(['B', 'STRONG', 'I', 'EM', 'U', 'CODE', 'A', 'BR', 'FONT', 'SPAN']);
   function sanitizeRich(html) {
     if (!html) return '';
     const doc = new DOMParser().parseFromString(`<div id="nk-rich">${html}</div>`, 'text/html');
@@ -907,10 +1023,25 @@
                 child.setAttribute('rel', 'noopener noreferrer');
               }
             }
-            // strip all other attributes (keep href only for <a>)
+            // Keep only: href on <a>; color on <font>/<span> (text color).
             [...child.attributes].forEach((a) => {
-              if (!(tag === 'A' && a.name === 'href')) child.removeAttribute(a.name);
+              const keep = (tag === 'A' && a.name === 'href')
+                || ((tag === 'FONT' || tag === 'SPAN') && a.name === 'color')
+                || ((tag === 'SPAN') && a.name === 'style' && /^color:\s*[^;]+/i.test(a.value));
+              if (!keep) child.removeAttribute(a.name);
             });
+            // Normalize span style color to a plain color attribute for stability.
+            if (tag === 'SPAN' && child.getAttribute('style')) {
+              const m = /color:\s*([^;]+)/i.exec(child.getAttribute('style'));
+              if (m) { child.setAttribute('color', m[1].trim()); child.removeAttribute('style'); }
+            }
+            // Drop empty font/span wrappers (no color) to keep content clean.
+            if ((tag === 'FONT' || tag === 'SPAN') && !child.getAttribute('color')) {
+              const parent = child.parentNode;
+              while (child.firstChild) parent.insertBefore(child.firstChild, child);
+              parent.removeChild(child);
+              return;
+            }
             walk(child);
           } else {
             // unwrap disallowed element, keep its text children
@@ -954,6 +1085,13 @@
       const k = parseInt(t.dataset.k, 10);
       items[k] = { ...items[k], done: t.checked };
       b.content = JSON.stringify(items);
+    } else if (t.classList.contains('nk-tcell')) {
+      const tb = parseTable(b.content);
+      const r = parseInt(t.dataset.r, 10), c = parseInt(t.dataset.c, 10);
+      if (tb.cells[r] && tb.cells[r][c] !== undefined) {
+        tb.cells[r][c] = t.value;
+        b.content = JSON.stringify(tb);
+      }
     }
     NK.dirty = true;
     scheduleSave();
@@ -971,6 +1109,7 @@
       const k = e.key.toLowerCase();
       if (k === 'b') { e.preventDefault(); document.execCommand('bold'); syncRichInput(t); return; }
       if (k === 'i') { e.preventDefault(); document.execCommand('italic'); syncRichInput(t); return; }
+      if (k === 'u') { e.preventDefault(); document.execCommand('underline'); syncRichInput(t); return; }
       if (k === 'e') { e.preventDefault(); wrapInlineCode(); return; }
       if (k === 'k') { e.preventDefault(); promptLink(); return; }
     }
@@ -1092,6 +1231,10 @@
     b.type = type;
     if (type === 'checklist' || type === 'bullet' || type === 'numbered') {
       b.content = JSON.stringify(prev ? [{ text: prev, done: false }] : [{ text: '', done: false }]);
+    } else if (type === 'table') {
+      b.content = JSON.stringify({ cols: 2, rows: 2, cells: [['', ''], ['', '']] });
+    } else if (type === 'image') {
+      b.content = '';
     }
     renderBlocks();
     scheduleSave();
@@ -1106,16 +1249,77 @@
     if (s.startsWith('check')) return 'checklist';
     if (s.startsWith('bullet') || s.startsWith('ul')) return 'bullet';
     if (s.startsWith('num') || s.startsWith('ol')) return 'numbered';
+    if (s.startsWith('tab')) return 'table';
+    if (s.startsWith('img') || s.startsWith('pic') || s.startsWith('photo')) return 'image';
     return 'text';
   }
 
   function addBlockAt(idx, type = 'text') {
     // width 0 = auto-fit to content (Fix 3); explicit resize/move pins it.
-    const nb = { id: uid(), type, x: 0, width: 0, content: type === 'checklist' ? JSON.stringify([{ text: '', done: false }]) : (type === 'bullet' || type === 'numbered' ? JSON.stringify([{ text: '' }]) : '') };
+    let content = '';
+    if (type === 'checklist') content = JSON.stringify([{ text: '', done: false }]);
+    else if (type === 'bullet' || type === 'numbered') content = JSON.stringify([{ text: '' }]);
+    else if (type === 'table') content = JSON.stringify({ cols: 2, rows: 2, cells: [['', ''], ['', '']] });
+    const nb = { id: uid(), type, x: 0, width: 0, content };
+    if (type === 'table') {
+      // Ask for initial cols/rows before inserting.
+      nkTableSizePrompt().then((dims) => {
+        if (!dims) return;
+        const cells = Array.from({ length: dims.rows }, () => Array(dims.cols).fill(''));
+        nb.content = JSON.stringify({ cols: dims.cols, rows: dims.rows, cells });
+        NK.blocks.splice(idx, 0, nb);
+        renderBlocks();
+        scheduleSave();
+        focusBlock(idx);
+      });
+      return;
+    }
     NK.blocks.splice(idx, 0, nb);
     renderBlocks();
     scheduleSave();
     focusBlock(idx);
+  }
+
+  // Modal asking for initial table cols & rows (1-10 each).
+  function nkTableSizePrompt() {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'nk-modal-overlay';
+      overlay.innerHTML = `
+        <div class="nk-modal" role="dialog" aria-modal="true">
+          <div class="nk-modal-title">Insert table</div>
+          <div class="nk-table-size">
+            <label>Columns <input class="nk-modal-input nk-ts-cols" type="number" min="1" max="10" value="2"/></label>
+            <label>Rows <input class="nk-modal-input nk-ts-rows" type="number" min="1" max="10" value="2"/></label>
+          </div>
+          <div class="nk-modal-btns">
+            <button class="nk-btn" data-nk-modal="cancel">Cancel</button>
+            <button class="nk-btn nk-btn-primary" data-nk-modal="ok">Insert</button>
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      const colsI = overlay.querySelector('.nk-ts-cols');
+      const rowsI = overlay.querySelector('.nk-ts-rows');
+      colsI.focus();
+      const close = (val) => {
+        overlay.remove();
+        document.removeEventListener('keydown', onKey);
+        resolve(val);
+      };
+      const onKey = (e) => {
+        if (e.key === 'Escape') close(null);
+        if (e.key === 'Enter') { e.preventDefault(); submit(); }
+      };
+      const submit = () => {
+        const cols = Math.min(10, Math.max(1, parseInt(colsI.value, 10) || 2));
+        const rows = Math.min(10, Math.max(1, parseInt(rowsI.value, 10) || 2));
+        close({ cols, rows });
+      };
+      document.addEventListener('keydown', onKey);
+      overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) close(null); });
+      overlay.querySelector('[data-nk-modal="ok"]').addEventListener('click', submit);
+      overlay.querySelector('[data-nk-modal="cancel"]').addEventListener('click', () => close(null));
+    });
   }
 
   // Block type picker (Tier 1): reuse the app's CtxMenu with our block options.
@@ -1127,8 +1331,10 @@
     { label: 'Bulleted list', icon: '•️', action: null },
     { label: 'Numbered list', icon: '🔢', action: null },
     { label: 'Checklist', icon: '✅', action: null },
+    { label: 'Table', icon: '⬛', action: null },
+    { label: 'Image', icon: '🖼️', action: null },
   ];
-  const BLOCK_PICKER_TYPES = ['text', 'heading', 'heading2', 'heading3', 'bullet', 'numbered', 'checklist'];
+  const BLOCK_PICKER_TYPES = ['text', 'heading', 'heading2', 'heading3', 'bullet', 'numbered', 'checklist', 'table', 'image'];
   function openBlockPicker(x, y, onPick) {
     const items = BLOCK_PICKER_ITEMS.map((it, i) => ({ ...it, action: () => onPick(BLOCK_PICKER_TYPES[i]) }));
     if (window.CtxMenu && typeof window.CtxMenu.show === 'function') {
@@ -1164,7 +1370,7 @@
     }
   }
 
-  // Delegate for block delete / add-item buttons (static listeners on blocksEl)
+  // Delegate for block delete / add-item / table / image actions
   document.addEventListener('click', (e) => {
     const del = e.target.closest('[data-action="del-block"]');
     if (del) {
@@ -1186,6 +1392,105 @@
       scheduleSave();
       const inputs = blockEl.querySelectorAll('input[type="text"]');
       if (inputs.length) inputs[inputs.length - 1].focus();
+      return;
+    }
+
+    // ── Table actions ──
+    const tableAction = e.target.closest('[data-action^="table-"]');
+    if (tableAction) {
+      const blockEl = tableAction.closest('.nk-block');
+      if (!blockEl) return;
+      const idx = parseInt(blockEl.dataset.idx, 10);
+      const b = NK.blocks[idx];
+      if (!b) return;
+      const tb = parseTable(b.content);
+      // selection = the cell the user last clicked (data-r/data-c), default (0,0)
+      const selCell = blockEl.querySelector('.nk-tcell.selected');
+      const sr = selCell ? parseInt(selCell.dataset.r, 10) : 0;
+      const sc = selCell ? parseInt(selCell.dataset.c, 10) : 0;
+      const act = tableAction.dataset.action;
+      const next = tableOps(tb, act, sr, sc);
+      b.content = JSON.stringify(next);
+      renderBlocks();
+      scheduleSave();
+      return;
+    }
+
+    // ── Image actions ──
+    const pickImg = e.target.closest('[data-action="pick-image"]');
+    const changeImg = e.target.closest('[data-action="change-image"]');
+    const removeImg = e.target.closest('[data-action="remove-image"]');
+    if (pickImg || changeImg) {
+      const blockEl = (pickImg || changeImg).closest('.nk-block');
+      if (!blockEl) return;
+      const idx = parseInt(blockEl.dataset.idx, 10);
+      const b = NK.blocks[idx];
+      if (!b) return;
+      pickImageForBlock(idx);
+      return;
+    }
+    if (removeImg) {
+      const blockEl = removeImg.closest('.nk-block');
+      if (!blockEl) return;
+      const idx = parseInt(blockEl.dataset.idx, 10);
+      const b = NK.blocks[idx];
+      if (!b) return;
+      b.content = '';
+      renderBlocks();
+      scheduleSave();
+      return;
+    }
+  });
+
+  // Track the currently selected table cell (highlight on click).
+  document.addEventListener('click', (e) => {
+    const cell = e.target.closest('.nk-tcell');
+    if (!cell) return;
+    const blockEl = cell.closest('.nk-block');
+    if (!blockEl) return;
+    blockEl.querySelectorAll('.nk-tcell').forEach((c) => c.classList.remove('selected'));
+    cell.classList.add('selected');
+  });
+
+  async function pickImageForBlock(idx) {
+    const b = NK.blocks[idx];
+    if (!b) return;
+    try {
+      const r = await window.electronAPI.notekitPickImage();
+      if (r && r.ok && r.path) {
+        b.content = r.path;
+        renderBlocks();
+        scheduleSave();
+      }
+    } catch (_) {}
+  }
+
+  // Paste an image into an image block (Ctrl/Cmd+V while an image block is focused).
+  document.addEventListener('paste', async (e) => {
+    const t = e.target;
+    const blockEl = t && t.closest ? t.closest('.nk-block') : null;
+    if (!blockEl || !blockEl.classList.contains('nk-block-image')) return;
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    for (const it of items) {
+      if (it.type && it.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = it.getAsFile();
+        if (!file) return;
+        const idx = parseInt(blockEl.dataset.idx, 10);
+        const b = NK.blocks[idx];
+        if (!b) return;
+        const reader = new FileReader();
+        reader.onload = async () => {
+          const r = await window.electronAPI.notekitStoreImageData(reader.result);
+          if (r && r.ok && r.path) {
+            b.content = r.path;
+            renderBlocks();
+            scheduleSave();
+          }
+        };
+        reader.readAsDataURL(file);
+        return;
+      }
     }
   });
 
@@ -1230,7 +1535,7 @@
     showEmpty,
     isEnabled: () => NK.enabled,
     openPage,
-    _test: { wireBlockHandles, renderBlocks, horizMove },
+    _test: { wireBlockHandles, renderBlocks, horizMove, parseTable, tableToHtml, tableOps, sanitizeRich },
     clearSelection: () => {
       // Called by the router when navigating to a non-Notekit page, so the
       // last-selected project no longer stays highlighted in the sidebar.

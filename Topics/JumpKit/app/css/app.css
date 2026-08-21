@@ -864,6 +864,39 @@ body.nk-dragging .nk-block, body.nk-dragging .nk-block * { cursor: grabbing; }
 .nk-text u { text-decoration: underline; }
 .nk-text code { background: var(--bg-hover); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; }
 .nk-text a { color: var(--hover-accent); text-decoration: underline; }
+.nk-text font[color], .nk-text span[color] { color: inherit; }
+
+/* Format bar extras */
+.nk-fmt-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.nk-fmt-color { font-weight: 800; }
+.nk-color-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 9600; display: grid; grid-template-columns: repeat(7, 22px); gap: 4px; padding: 8px; background: var(--bg-modal); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.nk-color-pop button { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; padding: 0; }
+.nk-color-pop button:hover { transform: scale(1.15); }
+.nk-color-pop .nk-color-none { background: #fff; color: #444; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Table blocks */
+.nk-block-table { padding-left: 6px; }
+.nk-table-wrap { width: 100%; }
+.nk-table-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.nk-btn-sm { font-size: 0.75rem; padding: 3px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-btn-sm:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+.nk-table-sel { font-size: 0.75rem; color: var(--text-dim); margin-left: auto; }
+.nk-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.nk-table td { border: 1px solid var(--border); padding: 0; min-width: 60px; position: relative; }
+.nk-table td.selected { outline: 2px solid var(--turq); outline-offset: -1px; background: rgba(45,212,191,0.06); }
+.nk-tcell { width: 100%; border: none; outline: none; background: transparent; color: var(--text); font-size: 0.9rem; padding: 5px 8px; box-sizing: border-box; }
+.nk-table-size { display: flex; gap: 14px; margin: 10px 0 4px; }
+.nk-table-size label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dim); }
+.nk-table-size .nk-modal-input { width: 70px; }
+
+/* Image blocks */
+.nk-block-image { padding-left: 6px; }
+.nk-img { display: block; max-width: 100%; height: auto; border-radius: 10px; }
+.nk-img-empty { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg-card); }
+.nk-img-hint { font-size: 0.8rem; color: var(--text-dim); }
+.nk-img-actions { display: flex; gap: 8px; margin-top: 6px; }
+.nk-img-actions .nk-btn { font-size: 0.78rem; padding: 3px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-img-actions .nk-btn:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
 
 /* ── NoteKit tab bar (pages as tabs) ─────────────────────────────── */
 .nk-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px 8px 5px; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 5; }

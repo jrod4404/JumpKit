@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, nativeTheme } = require('electron');
+const fs = require('fs');
 // safeStorage intentionally not imported - session tokens use localStorage until notarization is set up.
 // Re-add safeStorage to the destructure and restore the IPC handler bodies when notarization is ready.
 
@@ -309,6 +310,65 @@ ipcMain.handle('notekit-save-blocks', (_e, pageId, blocks) => {
   });
   try { tx(blocks || []); return { ok: true }; }
   catch (e) { return { ok: false, reason: e.message }; }
+});
+
+// ── IPC: NoteKit — images (media folder copy) ───────────────────────
+// Option 1 storage: images are COPIED into userData/notekit-media/ and the
+// note stores the path (keeps notes.db small; image tied to this machine).
+function nkMediaDir() {
+  const dir = path.join(app.getPath('userData'), 'notekit-media');
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  return dir;
+}
+
+ipcMain.handle('notekit-pick-image', async () => {
+  const { dialog } = require('electron');
+  const r = await dialog.showOpenDialog({
+    title: 'Choose an image',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'] },
+    ],
+  });
+  if (r.canceled || !r.filePaths || !r.filePaths[0]) return { ok: false, path: null };
+  return nkStoreImage(r.filePaths[0]);
+});
+
+// Copy a source file into the media folder with a unique name; returns {ok, path}.
+ipcMain.handle('notekit-store-image', (_e, srcPath) => {
+  if (!srcPath || typeof srcPath !== 'string') return { ok: false, path: null };
+  return nkStoreImage(srcPath);
+});
+
+function nkStoreImage(srcPath) {
+  try {
+    const ext = (path.extname(srcPath) || '.png').toLowerCase();
+    const dir = nkMediaDir();
+    const name = 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+    const dest = path.join(dir, name);
+    fs.copyFileSync(srcPath, dest);
+    return { ok: true, path: dest };
+  } catch (e) {
+    return { ok: false, path: null, reason: e.message };
+  }
+}
+
+// Save a base64 data URL (e.g. pasted clipboard image) to the media folder.
+ipcMain.handle('notekit-store-image-data', (_e, dataUrl) => {
+  if (!dataUrl || typeof dataUrl !== 'string') return { ok: false, path: null };
+  try {
+    const m = /^data:image\/([a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+    if (!m) return { ok: false, path: null, reason: 'not a base64 image data URL' };
+    const extMap = { png: '.png', jpeg: '.jpg', jpg: '.jpg', gif: '.gif', webp: '.webp', 'svg+xml': '.svg', 'x-icon': '.ico', bmp: '.bmp' };
+    const ext = extMap[m[1].toLowerCase()] || '.png';
+    const dir = nkMediaDir();
+    const name = 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+    const dest = path.join(dir, name);
+    fs.writeFileSync(dest, Buffer.from(m[2], 'base64'));
+    return { ok: true, path: dest };
+  } catch (e) {
+    return { ok: false, path: null, reason: e.message };
+  }
 });
 
 // ── IPC: sync-jumps ────────────────────────────────────────────────
