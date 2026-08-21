@@ -2,4 +2,5 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('captureBridge', {
   region: (x, y, w, h) => ipcRenderer.send('clipkit-region', { x, y, w, h }),
+  cancel: () => ipcRenderer.send('clipkit-cancel'),
 });

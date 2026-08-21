@@ -402,80 +402,110 @@ function ckSaveHistory(list) {
 // Start an interactive region capture. Resolves with the capture record on
 // success, {cancelled:true} if the user dismissed, or {error}.
 ipcMain.handle('clipkit-capture', async () => {
+  let overlay = null;
   try {
     const { desktopCapturer, screen } = require('electron');
-    const display = screen.getPrimaryDisplay();
-    const { width, height } = display.size;
 
-    // 1) Snapshot the primary screen as a data URL.
-    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width, height } });
+    // 1) Snapshot the primary screen at native (device) resolution for a crisp crop.
+    const display = screen.getPrimaryDisplay();
+    const dW = display.size.width;   // DIP
+    const dH = display.size.height;
+    const scaleF = display.scaleFactor || 1; // device px per CSS px
+    const sources = await desktopCapturer.getSources({
+      types: ['screen'],
+      thumbnailSize: { width: Math.round(dW * scaleF), height: Math.round(dH * scaleF) },
+    });
     const src = sources.find((s) => s.display_id === String(display.id)) || sources[0];
     if (!src) return { error: 'no screen source' };
-    const imgData = src.thumbnail.toDataURL();
+    const fullThumb = src.thumbnail; // nativeImage kept in main for cropping
 
-    // 2) Open a frameless, always-on-top, fullscreen overlay showing the frozen screen.
-    const overlay = new BrowserWindow({
+    // 2) A scaled-down copy for the overlay display so the data URL stays small
+    //    (avoids a giant base64 string that freezes the main process on 4K/5K).
+    const fw = fullThumb.getSize().width || Math.round(dW * scaleF);
+    const smallW = Math.min(fw, 1600);
+    const smallThumb = smallW < fw
+      ? fullThumb.resize({ width: smallW, quality: 'good' })
+      : fullThumb;
+    const imgData = smallThumb.toDataURL();
+    // Map overlay CSS px → full-res source px for the crop.
+    const cropScale = fw / (screen.getPrimaryDisplay().size.width || dW || 1);
+
+    // 3) Open the frameless, always-on-top, fullscreen overlay showing the frozen screen.
+    overlay = new BrowserWindow({
       x: display.bounds.x,
       y: display.bounds.y,
-      width,
-      height,
+      width: dW,
+      height: dH,
       frame: false,
-      transparent: true,
+      transparent: false,
+      backgroundColor: '#000000',
       alwaysOnTop: true,
       resizable: false,
       movable: false,
       skipTaskbar: true,
-      fullscreen: true,
+      fullscreen: false,
       hasShadow: false,
       webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'capture-preload.js') },
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
-      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
-      #bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
-      #box{position:fixed;display:none;border:2px solid #e11d48;background:rgba(225,29,72,0.14);box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none;z-index:2}
-      #dim{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:1}
-      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.75);color:#fff;padding:8px 16px;border-radius:20px;font:600 13px/1 system-ui,sans-serif;pointer-events:none}
+      html,body{margin:0;padding:0;overflow:hidden;background:#000;cursor:crosshair;-webkit-user-select:none;user-select:none}
+      #bg{position:fixed;inset:0;background:#000;background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
+      #dim{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1}
+      #box{position:fixed;display:none;border:2px solid #fff;background:transparent;z-index:2;pointer-events:none}
+      #box::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:2px solid #e11d48;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.3)}
+      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.85);color:#fff;padding:8px 18px;border-radius:20px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.15)}
     </style></head><body>
       <div id="dim"></div>
       <div id="box"></div>
       <div id="hint">Drag to select a region · Esc to cancel</div>
       <script>
-        const box=document.getElementById('box'),dim=document.getElementById('dim');
+        const box=document.getElementById('box');
         let sx=0,sy=0,drawing=false;
         document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
-        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.close();return} try{window.captureBridge.region(x,y,w,h)}catch(_){window.close()}});
-        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.close()});
+        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.captureBridge.cancel();return} window.captureBridge.region(x,y,w,h)});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.captureBridge.cancel()});
       </script>
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
 
-    // 3) On region selection, the overlay script calls captureRegion via IPC.
+    // 4) On region selection, crop from the full-res nativeImage (NOT capturePage, which
+    //    fails on scaled displays). Coordinates are overlay CSS px → multiply by cropScale.
     const result = await new Promise((resolve) => {
-      const onCapture = async (e, rect) => {
-        ipcMain.removeListener('clipkit-region', onCapture);
-        const { x, y, w, h } = rect;
+      let settled = false;
+      const done = (v) => { if (!settled) { settled = true; resolve(v); } };
+      const onRegion = async (e, rect) => {
+        ipcMain.removeListener('clipkit-region', onRegion);
+        ipcMain.removeListener('clipkit-cancel', onCancel);
         try {
-          const img = await overlay.capturePage({ x, y, width: w, height: h });
-          const rec = await ckPersistCapture(img.toPNG(), w, h);
-          overlay.close();
-          resolve(rec);
+          const crop = fullThumb.crop({
+            x: Math.round(rect.x * cropScale),
+            y: Math.round(rect.y * cropScale),
+            width: Math.max(1, Math.round(rect.w * cropScale)),
+            height: Math.max(1, Math.round(rect.h * cropScale)),
+          });
+          const rec = await ckPersistCapture(crop.toPNG(), Math.round(rect.w), Math.round(rect.h));
+          try { overlay.close(); } catch (_) {}
+          done(rec);
         } catch (err) {
-          overlay.close();
-          resolve({ error: err.message });
+          try { overlay.close(); } catch (_) {}
+          done({ error: err.message });
         }
       };
-      const onClosed = () => {
-        ipcMain.removeListener('clipkit-region', onCapture);
-        resolve({ cancelled: true });
+      const onCancel = () => {
+        ipcMain.removeListener('clipkit-region', onRegion);
+        try { overlay.close(); } catch (_) {}
+        done({ cancelled: true });
       };
-      ipcMain.on('clipkit-region', onCapture);
-      overlay.on('closed', onClosed);
+      ipcMain.on('clipkit-region', onRegion);
+      ipcMain.on('clipkit-cancel', onCancel);
+      overlay.on('closed', () => done({ cancelled: true }));
     });
     return result;
   } catch (e) {
+    try { if (overlay) overlay.close(); } catch (_) {}
     return { error: e.message };
   }
 });

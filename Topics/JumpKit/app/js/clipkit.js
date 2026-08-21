@@ -75,9 +75,12 @@
     const msg = document.getElementById('ckMessage');
     const api = window.electronAPI;
     if (!api) return;
-    // Hide the capture button state, then start.
     if (msg) msg.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem">Select a region on screen… (Esc to cancel)</div>`;
-    const r = await api.clipkitCapture();
+    // Defensive timeout so the UI can't hang forever if the capture IPC stalls.
+    const timeout = new Promise((res) => setTimeout(() => res({ error: 'Capture timed out waiting for the overlay.' }), 120000));
+    let r;
+    try { r = await Promise.race([api.clipkitCapture(), timeout]); }
+    catch (err) { r = { error: err.message }; }
     if (r && r.error) {
       if (msg) msg.innerHTML = `<div style="color:#f87171;font-size:0.85rem">Capture failed: ${esc(r.error)}</div>`;
     } else if (r && r.id) {
