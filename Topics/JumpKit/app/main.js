@@ -452,18 +452,24 @@ ipcMain.handle('clipkit-capture', async () => {
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
       html,body{margin:0;padding:0;overflow:hidden;background:#000;cursor:crosshair;-webkit-user-select:none;user-select:none}
       #bg{position:fixed;inset:0;background:#000;background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
-      #dim{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1}
-      #box{position:fixed;display:none;border:2px solid #fff;background:transparent;z-index:2;pointer-events:none}
-      #box::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:2px solid #e11d48;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.3)}
-      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.85);color:#fff;padding:8px 18px;border-radius:20px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.15)}
+      #box{position:fixed;display:none;border:2px solid #fff;background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
+      #box::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:2px solid #e11d48}
+      /* big plus icon that follows the cursor to signal 'select a region' */
+      #plus{position:fixed;left:0;top:0;z-index:4;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0.9}
+      #plus::before,#plus::after{content:'';position:absolute;background:#fff;border-radius:3px;box-shadow:0 0 8px rgba(0,0,0,0.6)}
+      #plus::before{left:25px;top:4px;width:6px;height:48px}
+      #plus::after{left:4px;top:25px;width:48px;height:6px}
+      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:#fff;padding:9px 20px;border-radius:22px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);box-shadow:0 4px 16px rgba(0,0,0,0.35)}
     </style></head><body>
-      <div id="dim"></div>
+      <div id="bg"></div>
       <div id="box"></div>
-      <div id="hint">Drag to select a region · Esc to cancel</div>
+      <div id="plus"></div>
+      <div id="hint">✦ Drag to select a region · Esc to cancel</div>
       <script>
-        const box=document.getElementById('box');
+        const box=document.getElementById('box'),plus=document.getElementById('plus');
         let sx=0,sy=0,drawing=false;
-        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
+        document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
+        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
         document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.captureBridge.cancel();return} window.captureBridge.region(x,y,w,h)});
         document.addEventListener('keydown',e=>{if(e.key==='Escape')window.captureBridge.cancel()});

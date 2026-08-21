@@ -790,6 +790,9 @@ strong, b { color: inherit; }
 /* ── NoteKit (feature-flagged; styles harmless when hidden) ─────────────── */
 .nav-section-label { margin-top: 24px; padding: 6px 14px 2px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dim); text-transform: uppercase; }
 #notekitNavWrap { padding: 0 0 8px; }
+/* ClipKit label: offset the 8px bottom padding of the notekit wrap above it so
+   the visual gap above CLIPKIT matches the 24px gap above NOTEKIT. */
+#clipkitNavLabel { margin-top: 16px; }
 .nk-project { margin-bottom: 2px; }
 .nk-project-row { display: flex; align-items: center; gap: 9px; padding: 10px 20px; font-size: 1rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-radius: 0; transition: all var(--transition); border: none; background: none; width: 100%; text-align: left; }
 .nk-project-row .nav-icon { font-size: 1.3rem; width: 24px; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }

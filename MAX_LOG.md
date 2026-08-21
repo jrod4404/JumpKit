@@ -42,3 +42,4 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 - Captures page: thumbnails, click-to-copy, ✕ delete; history capped 200
 - Spec CLIPKIT_SPEC.md; 31/31 tests; released v5.1.31
 ## 2026-08-21 — ClipKit nav icon fix (v5.1.32): tabler-photo didn't exist → switched to tabler-clipboard; fixed nav item, topbar, New Capture button. Feed 5.1.32.
+## 2026-08-21 — ClipKit capture freeze/error fix (v5.1.33): solid overlay (no transparent/fullscreen), scaled display thumb, nativeImage.crop for high-DPI, cancel channel + 'closed' guard + renderer timeout. Feed 5.1.33.
