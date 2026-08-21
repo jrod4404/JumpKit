@@ -727,7 +727,7 @@
     const idx = parseInt(el.dataset.idx, 10);
     const b = NK.blocks[idx];
     if (!b) return;
-    const cw = containerWidth();
+    const cw = containerWidth() || 1;
     if (d.kind === 'resize') {
       const minW = 15;
       const maxW = 100 - d.startXval;
@@ -737,11 +737,13 @@
       el.style.width = w + '%';
       layoutBlocks();
     } else if (d.mode === 'x') {
-      const maxX = 100 - d.startW;
-      const x = clampNum(d.startXval + (dx / cw) * 100, 0, maxX, d.startXval);
+      const { x, width } = horizMove(d.startXval, d.startW, dx, cw);
       b.x = x;
+      b.width = width;
       el.dataset.x = x;
+      el.dataset.width = width;
       el.style.left = x + '%';
+      el.style.width = width + '%';
       layoutBlocks();
     } else if (d.mode === 'reorder') {
       const target = reorderTargetIndex(el, e.clientY);
@@ -755,6 +757,18 @@
         if (nel) d.blockEl = nel;
       }
     }
+  }
+
+  // Pure math for horizontal drag: move the block's left edge (x). If the
+  // block is (near) full-width, dragging right can't displace it — so auto-
+  // shrink its width to keep the right edge at/below 100%, giving immediate
+  // visible movement even for default (full-width) blocks.
+  function horizMove(startXval, startW, dxPx, cwPx) {
+    const rawX = clampNum(startXval + (dxPx / cwPx) * 100, 0, 100, startXval);
+    let width = startW;
+    const maxW = 100 - rawX;
+    if (width > maxW) width = Math.max(15, maxW);
+    return { x: rawX, width };
   }
 
   // Which index should the dragged block land at, given pointer Y?
@@ -1143,6 +1157,7 @@
     showEmpty,
     isEnabled: () => NK.enabled,
     openPage,
+    _test: { wireBlockHandles, renderBlocks, horizMove },
     clearSelection: () => {
       // Called by the router when navigating to a non-Notekit page, so the
       // last-selected project no longer stays highlighted in the sidebar.

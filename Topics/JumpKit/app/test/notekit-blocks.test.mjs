@@ -176,4 +176,28 @@ const newBlock = newBlocks.find((b) => b.dataset.x === '25' && b !== splitBlock)
 if (!newBlock || newBlock.dataset.width !== '50') { console.log('FAIL: split block did not inherit x/width'); process.exit(1); }
 console.log('OK: split block inherits x=' + newBlock.dataset.x + ' width=' + newBlock.dataset.width);
 
+// ── Test 9 (B1 fix): horizontal grip drag on a FULL-WIDTH block visibly moves it ──
+// Regression: dragging a default (width=100, x=0) block horizontally previously
+// did nothing because x was clamped to 0. Fix: horizontal drag moves the left
+// edge and auto-shrinks the width so a full-width block moves right with
+// immediate visual feedback.
+const hm = window.NoteKit._test.horizMove;
+// full-width block, drag right 80px in an 800px container → +10%
+let r = hm(0, 100, 80, 800);
+if (!(r.x > 0)) { console.log('FAIL: full-width block did not move horizontally (x=' + r.x + ')'); process.exit(1); }
+if (!(r.width < 100)) { console.log('FAIL: full-width block width did not auto-shrink (w=' + r.width + ')'); process.exit(1); }
+console.log('OK: full-width drag right → x=' + r.x.toFixed(1) + ' w=' + r.width.toFixed(1) + ' (clamped to right edge 100)');
+// already-narrow block, drag right within range stays same width
+r = hm(0, 50, 40, 800); // +5% → x=5, width stays 50 (5+50<=100)
+if (!(r.width === 50 && r.x === 5)) { console.log('FAIL: narrow block drag should keep width (x=' + r.x + ' w=' + r.width + ')'); process.exit(1); }
+console.log('OK: narrow block drag keeps width (x=' + r.x + ' w=' + r.width + ')');
+// drag left from x=0 → stays at left edge, no negative
+r = hm(0, 50, -40, 800);
+if (!(r.x === 0)) { console.log('FAIL: drag left should clamp at x=0 (x=' + r.x + ')'); process.exit(1); }
+console.log('OK: drag left clamps at x=0 (x=' + r.x + ')');
+// block already positioned, drag right → moves, keeps width if room
+r = hm(20, 40, 40, 800); // +5% → x=25, w stays 40 (25+40<=100)
+if (!(r.x === 25 && r.width === 40)) { console.log('FAIL: positioned block drag (x=' + r.x + ' w=' + r.width + ')'); process.exit(1); }
+console.log('OK: positioned block drag → x=' + r.x + ' w=' + r.width);
+
 console.log('ALL BLOCK TESTS PASSED ✔');
