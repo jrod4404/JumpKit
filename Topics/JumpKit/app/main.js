@@ -399,15 +399,21 @@ function ckSaveHistory(list) {
   try { fs.writeFileSync(ckHistoryPath(), JSON.stringify(list, null, 2)); } catch (_) {}
 }
 
+// Holds the active capture's cancel callback while the overlay is open, so Esc
+// (from any screen / focus state) can cancel reliably.
+let ckCurrentCancel = null;
+
 // Start an interactive region capture. Resolves with the capture record on
 // success, {cancelled:true} if the user dismissed, or {error}.
 ipcMain.handle('clipkit-capture', async () => {
   let overlay = null;
+  let cancelTimer = null;
   try {
     const { desktopCapturer, screen } = require('electron');
 
-    // 1) Snapshot the primary screen at native (device) resolution for a crisp crop.
-    const display = screen.getPrimaryDisplay();
+    // Target the display the cursor is currently on, so capture works on any screen.
+    const cursorPoint = screen.getCursorScreenPoint();
+    const display = screen.getDisplayNearestPoint(cursorPoint);
     const dW = display.size.width;   // DIP
     const dH = display.size.height;
     const scaleF = display.scaleFactor || 1; // device px per CSS px
@@ -415,7 +421,7 @@ ipcMain.handle('clipkit-capture', async () => {
       types: ['screen'],
       thumbnailSize: { width: Math.round(dW * scaleF), height: Math.round(dH * scaleF) },
     });
-    const src = sources.find((s) => s.display_id === String(display.id)) || sources[0];
+    const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
     if (!src) return { error: 'no screen source' };
     const fullThumb = src.thumbnail; // nativeImage kept in main for cropping
 
@@ -428,7 +434,7 @@ ipcMain.handle('clipkit-capture', async () => {
       : fullThumb;
     const imgData = smallThumb.toDataURL();
     // Map overlay CSS px → full-res source px for the crop.
-    const cropScale = fw / (screen.getPrimaryDisplay().size.width || dW || 1);
+    const cropScale = fw / (dW || 1);
 
     // 3) Open the frameless, always-on-top, fullscreen overlay showing the frozen screen.
     overlay = new BrowserWindow({
@@ -449,6 +455,10 @@ ipcMain.handle('clipkit-capture', async () => {
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
+    // Global Esc so cancellation works even if the overlay does not hold keyboard focus.
+    const { globalShortcut } = require('electron');
+    try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
+    const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
       html,body{margin:0;padding:0;overflow:hidden;background:#000;cursor:crosshair;-webkit-user-select:none;user-select:none}
       #bg{position:fixed;inset:0;background:#000;background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
@@ -476,12 +486,24 @@ ipcMain.handle('clipkit-capture', async () => {
       </script>
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
-
+    // Make sure the overlay actually receives keyboard input: give it focus and
+    // blur the app window, and catch Esc at the webContents level (reliable even
+    // if focus is elsewhere / clicking another screen).
+    try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
+    const mainWin = BrowserWindow.getAllWindows().find((w) => w !== overlay);
+    if (mainWin) { try { mainWin.blur(); } catch (_) {} }
+    overlay.webContents.on('before-input-event', (e, input) => {
+      if (input.type === 'keyDown' && (input.key === 'Escape' || input.key === 'Esc')) {
+        e.preventDefault();
+        if (typeof ckCurrentCancel === 'function') ckCurrentCancel();
+      }
+    });
+    overlay.webContents.on('closed', () => { try { overlay.webContents.removeAllListeners('before-input-event'); } catch (_) {} });
     // 4) On region selection, crop from the full-res nativeImage (NOT capturePage, which
     //    fails on scaled displays). Coordinates are overlay CSS px → multiply by cropScale.
     const result = await new Promise((resolve) => {
       let settled = false;
-      const done = (v) => { if (!settled) { settled = true; resolve(v); } };
+      const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
       const onRegion = async (e, rect) => {
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
@@ -507,11 +529,13 @@ ipcMain.handle('clipkit-capture', async () => {
       };
       ipcMain.on('clipkit-region', onRegion);
       ipcMain.on('clipkit-cancel', onCancel);
+      ckCurrentCancel = onCancel;
       overlay.on('closed', () => done({ cancelled: true }));
     });
     return result;
   } catch (e) {
     try { if (overlay) overlay.close(); } catch (_) {}
+    try { if (typeof unregisterEsc === 'function') unregisterEsc(); } catch (_) {}
     return { error: e.message };
   }
 });
