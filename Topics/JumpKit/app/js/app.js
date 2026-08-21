@@ -649,7 +649,7 @@ const pageTitles = {
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes', clipkit:'ti-photo'
+  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes', clipkit:'ti-clipboard'
 };
 let activePage = 'home';
 window.activePage = activePage;

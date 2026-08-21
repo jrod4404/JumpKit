@@ -34,7 +34,7 @@
           <p style="margin:4px 0 0;color:var(--text-muted);font-size:0.85rem">Grab a region of your screen — it's copied to your clipboard and saved here.</p>
         </div>
         <button id="ckNewCapture" class="btn" style="display:inline-flex;align-items:center;gap:7px;background:var(--grad);color:#fff;border:none;border-radius:10px;padding:9px 18px;font-size:0.88rem;font-weight:700;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,0.18)">
-          <svg class="ti ti-photo" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-photo"/></svg>
+          <svg class="ti ti-clipboard" style="width:1rem;height:1rem"><use href="img/tabler-sprite.min.svg#tabler-clipboard"/></svg>
           New Capture
         </button>
       </div>
