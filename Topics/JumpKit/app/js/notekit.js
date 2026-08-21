@@ -538,45 +538,267 @@
     if (!el) return;
     if (NK.blocks.length === 0) {
       el.innerHTML = '';
+      el.style.height = '';
       return;
     }
     el.innerHTML = NK.blocks.map((b, i) => blockToHtml(b, i)).join('');
+    layoutBlocks();
+    observeBlockSizes();
+    wireBlockHandles();
   }
 
   function blockToHtml(b, i) {
-    const base = `data-id="${b.id}" data-idx="${i}"`;
+    const x = clampNum(b.x, 0, 85, 0);
+    const w = clampNum(b.width, 15, 100, 100);
+    const base = `data-id="${esc(b.id)}" data-idx="${i}" data-x="${x}" data-width="${w}" style="left:${x}%;width:${w}%"`;
+    const grip = `<span class="nk-block-grip" title="Drag to move / reorder">⋮⋮</span>`;
+    const resize = `<span class="nk-block-resize" title="Drag to resize width"></span>`;
     const remove = `<span class="nk-block-del" data-action="del-block" title="Delete block">✕</span>`;
+    let cls = 'nk-block-text', inner = '';
     switch (b.type) {
       case 'heading':
-        return `<div class="nk-block nk-block-heading" ${base}>${remove}<input class="nk-h" data-h="1" value="${esc(b.content)}" placeholder="Heading"/></div>`;
+        cls = 'nk-block-heading';
+        inner = `<input class="nk-h" data-h="1" value="${esc(b.content)}" placeholder="Heading"/>`;
+        break;
       case 'heading2':
-        return `<div class="nk-block nk-block-heading2" ${base}>${remove}<input class="nk-h" data-h="2" value="${esc(b.content)}" placeholder="Heading 2"/></div>`;
+        cls = 'nk-block-heading2';
+        inner = `<input class="nk-h" data-h="2" value="${esc(b.content)}" placeholder="Heading 2"/>`;
+        break;
       case 'heading3':
-        return `<div class="nk-block nk-block-heading3" ${base}>${remove}<input class="nk-h" data-h="3" value="${esc(b.content)}" placeholder="Heading 3"/></div>`;
+        cls = 'nk-block-heading3';
+        inner = `<input class="nk-h" data-h="3" value="${esc(b.content)}" placeholder="Heading 3"/>`;
+        break;
       case 'checklist': {
+        cls = 'nk-block-checklist';
         const items = parseList(b.content);
-        return `<div class="nk-block nk-block-checklist" ${base}>${remove}
-          ${items.map((it, k) => `
+        inner = `${items.map((it, k) => `
             <div class="nk-check-item">
               <input type="checkbox" class="nk-check-box" ${it.done ? 'checked' : ''} data-k="${k}"/>
               <input type="text" class="nk-check-text" value="${esc(it.text)}" data-k="${k}" placeholder="To-do item"/>
             </div>`).join('')}
-          <button class="nk-add-item" data-action="add-item">+ item</button>
-        </div>`;
+          <button class="nk-add-item" data-action="add-item">+ item</button>`;
+        break;
       }
       case 'bullet':
       case 'numbered': {
+        cls = 'nk-block-list';
         const items = parseList(b.content);
         const tag = b.type === 'numbered' ? 'ol' : 'ul';
-        return `<div class="nk-block nk-block-list" ${base}>${remove}
-          <${tag}>${items.map((it, k) => `
+        inner = `<${tag}>${items.map((it, k) => `
             <li><input type="text" class="nk-list-text" value="${esc(it.text)}" data-k="${k}" placeholder="List item"/></li>`).join('')}</${tag}>
-          <button class="nk-add-item" data-action="add-item">+ item</button>
-        </div>`;
+          <button class="nk-add-item" data-action="add-item">+ item</button>`;
+        break;
       }
       default:
-        return `<div class="nk-block nk-block-text" ${base}>${remove}<div class="nk-text" contenteditable="true">${sanitizeRich(b.content)}</div></div>`;
+        inner = `<div class="nk-text" contenteditable="true">${sanitizeRich(b.content)}</div>`;
     }
+    return `<div class="nk-block ${cls}" ${base}>${grip}${remove}${inner}${resize}</div>`;
+  }
+
+  // ── B1 layout: free x/width within the vertical flow ────────────────
+  // Blocks keep sortOrder (vertical document order). Each block's x/width
+  // are free (%). Blocks whose x-ranges don't overlap share a visual row
+  // (side-by-side); blocks that overlap are stacked vertically below the
+  // last conflicting block. Container height grows to fit.
+  const BLOCK_GAP = 12; // px vertical gap between stacked blocks
+
+  function clampNum(v, min, max, dflt) {
+    const n = parseFloat(v);
+    if (!Number.isFinite(n)) return dflt;
+    return Math.min(max, Math.max(min, n));
+  }
+
+  function layoutBlocks() {
+    const container = document.getElementById('nkBlocks');
+    if (!container) return;
+    const els = Array.from(container.querySelectorAll('.nk-block'));
+    if (els.length === 0) { container.style.height = ''; return; }
+    const placed = []; // { x, w, top, h }
+    els.forEach((el) => {
+      const x = parseFloat(el.dataset.x || 0);
+      const w = parseFloat(el.dataset.width || 100);
+      el.style.left = x + '%';
+      el.style.width = w + '%';
+      const h = el.offsetHeight || 24;
+      let top = 0;
+      let guard = 0;
+      let collides = true;
+      while (collides && guard++ < 500) {
+        collides = false;
+        for (const p of placed) {
+          // horizontal overlap? (strict edges → flush columns don't collide)
+          if (x < p.x + p.w && x + w > p.x) {
+            // vertical overlap at candidate top?
+            if (top < p.top + p.h + BLOCK_GAP && top + h > p.top) {
+              top = p.top + p.h + BLOCK_GAP;
+              collides = true;
+              break;
+            }
+          }
+        }
+      }
+      el.style.top = top + 'px';
+      placed.push({ x, w, top, h });
+    });
+    const maxBottom = placed.reduce((m, p) => Math.max(m, p.top + p.h), 0);
+    container.style.height = (maxBottom + 24) + 'px';
+  }
+
+  let nkSizeObserver = null;
+  let layoutTimer = null;
+  function scheduleLayout() {
+    clearTimeout(layoutTimer);
+    layoutTimer = setTimeout(layoutBlocks, 60);
+  }
+
+  function observeBlockSizes() {
+    const container = document.getElementById('nkBlocks');
+    if (!container) return;
+    if (nkSizeObserver) { nkSizeObserver.disconnect(); nkSizeObserver = null; }
+    if (typeof ResizeObserver === 'undefined') return;
+    nkSizeObserver = new ResizeObserver(scheduleLayout);
+    container.querySelectorAll('.nk-block').forEach((el) => nkSizeObserver.observe(el));
+  }
+
+  // ── Drag: grip = move horizontally / reorder vertically ─────────────
+  let drag = null;
+
+  function onGripPointerDown(e) {
+    if (e.button !== 0) return;
+    const handle = e.currentTarget;
+    const blockEl = handle.closest('.nk-block');
+    if (!blockEl) return;
+    e.preventDefault();
+    drag = {
+      kind: 'move',
+      blockEl,
+      blockId: blockEl.dataset.id,
+      startX: e.clientX,
+      startY: e.clientY,
+      startXval: parseFloat(blockEl.dataset.x || 0),
+      startW: parseFloat(blockEl.dataset.width || 100),
+      mode: null, // 'x' | 'reorder' — decided after first movement
+      moved: false,
+    };
+    window.addEventListener('pointermove', onDragPointerMove);
+    window.addEventListener('pointerup', onDragPointerUp);
+    window.addEventListener('pointercancel', onDragPointerUp);
+  }
+
+  function onResizePointerDown(e) {
+    if (e.button !== 0) return;
+    const handle = e.currentTarget;
+    const blockEl = handle.closest('.nk-block');
+    if (!blockEl) return;
+    e.preventDefault();
+    drag = {
+      kind: 'resize',
+      blockEl,
+      blockId: blockEl.dataset.id,
+      startX: e.clientX,
+      startXval: parseFloat(blockEl.dataset.x || 0),
+      startW: parseFloat(blockEl.dataset.width || 100),
+      mode: 'resize',
+      moved: false,
+    };
+    window.addEventListener('pointermove', onDragPointerMove);
+    window.addEventListener('pointerup', onDragPointerUp);
+    window.addEventListener('pointercancel', onDragPointerUp);
+  }
+
+  function containerWidth() {
+    const c = document.getElementById('nkBlocks');
+    return c ? c.clientWidth : 800;
+  }
+
+  function onDragPointerMove(e) {
+    if (!drag) return;
+    const d = drag;
+    const dx = e.clientX - d.startX;
+    const dy = e.clientY - d.startY;
+    if (!d.mode) {
+      // Decide axis after crossing a small threshold.
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+      d.mode = (d.kind === 'resize' || Math.abs(dx) >= Math.abs(dy)) ? 'x' : 'reorder';
+      d.moved = true;
+    }
+    const el = document.querySelector(`.nk-block[data-id="${CSS.escape(d.blockId)}"]`);
+    if (!el) return;
+    const idx = parseInt(el.dataset.idx, 10);
+    const b = NK.blocks[idx];
+    if (!b) return;
+    const cw = containerWidth();
+    if (d.kind === 'resize') {
+      const minW = 15;
+      const maxW = 100 - d.startXval;
+      const w = clampNum(d.startW + (dx / cw) * 100, minW, maxW, d.startW);
+      b.width = w;
+      el.dataset.width = w;
+      el.style.width = w + '%';
+      layoutBlocks();
+    } else if (d.mode === 'x') {
+      const maxX = 100 - d.startW;
+      const x = clampNum(d.startXval + (dx / cw) * 100, 0, maxX, d.startXval);
+      b.x = x;
+      el.dataset.x = x;
+      el.style.left = x + '%';
+      layoutBlocks();
+    } else if (d.mode === 'reorder') {
+      const target = reorderTargetIndex(el, e.clientY);
+      if (target !== null && target !== idx) {
+        const [moved] = NK.blocks.splice(idx, 1);
+        NK.blocks.splice(target, 0, moved);
+        renderBlocks();
+        scheduleSave();
+        // keep dragging on the re-rendered element
+        const nel = document.querySelector(`.nk-block[data-id="${CSS.escape(d.blockId)}"]`);
+        if (nel) d.blockEl = nel;
+      }
+    }
+  }
+
+  // Which index should the dragged block land at, given pointer Y?
+  // Blocks whose vertical center is above the pointer stay above; the first
+  // block whose center is below the pointer becomes the insertion point.
+  function reorderTargetIndex(blockEl, clientY) {
+    const container = document.getElementById('nkBlocks');
+    if (!container) return null;
+    const crect = container.getBoundingClientRect();
+    const y = clientY - crect.top;
+    const els = Array.from(container.querySelectorAll('.nk-block'));
+    const cur = parseInt(blockEl.dataset.idx, 10);
+    let insert = els.length; // default: end
+    for (let i = 0; i < els.length; i++) {
+      if (i === cur) continue;
+      const el = els[i];
+      const center = el.offsetTop + el.offsetHeight / 2;
+      if (y < center) { insert = i; break; }
+    }
+    // account for removing the dragged block before re-inserting
+    return insert > cur ? insert - 1 : insert;
+  }
+
+  function onDragPointerUp() {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    window.removeEventListener('pointermove', onDragPointerMove);
+    window.removeEventListener('pointerup', onDragPointerUp);
+    window.removeEventListener('pointercancel', onDragPointerUp);
+    if (d.moved) scheduleSave();
+  }
+
+  function wireBlockHandles() {
+    const container = document.getElementById('nkBlocks');
+    if (!container) return;
+    container.querySelectorAll('.nk-block-grip').forEach((h) => {
+      h.removeEventListener('pointerdown', onGripPointerDown);
+      h.addEventListener('pointerdown', onGripPointerDown);
+    });
+    container.querySelectorAll('.nk-block-resize').forEach((h) => {
+      h.removeEventListener('pointerdown', onResizePointerDown);
+      h.addEventListener('pointerdown', onResizePointerDown);
+    });
   }
 
   // Whitelist sanitizer for rich text: keeps bold/italic/underline/inline code/links/line-breaks.
@@ -770,7 +992,8 @@
       after = sanitizeRich(tmp.innerHTML);
     }
     b.content = before;
-    const nb = { id: uid(), type: 'text', content: after };
+    const parentBlock = el.closest('.nk-block');
+    const nb = { id: uid(), type: 'text', x: parseFloat(parentBlock?.dataset.x || 0) || 0, width: parseFloat(parentBlock?.dataset.width || 100) || 100, content: after };
     NK.blocks.splice(idx + 1, 0, nb);
     renderBlocks();
     scheduleSave();
@@ -801,7 +1024,7 @@
   }
 
   function addBlockAt(idx, type = 'text') {
-    const nb = { id: uid(), type, content: type === 'checklist' ? JSON.stringify([{ text: '', done: false }]) : (type === 'bullet' || type === 'numbered' ? JSON.stringify([{ text: '' }]) : '') };
+    const nb = { id: uid(), type, x: 0, width: 100, content: type === 'checklist' ? JSON.stringify([{ text: '', done: false }]) : (type === 'bullet' || type === 'numbered' ? JSON.stringify([{ text: '' }]) : '') };
     NK.blocks.splice(idx, 0, nb);
     renderBlocks();
     scheduleSave();
@@ -937,4 +1160,10 @@
   } else {
     setTimeout(init, 300);
   }
+
+  // Re-pack when the window is resized (block widths are % of container).
+  window.addEventListener('resize', () => {
+    if (!NK.enabled || !NK.activePageId) return;
+    scheduleLayout();
+  });
 })();

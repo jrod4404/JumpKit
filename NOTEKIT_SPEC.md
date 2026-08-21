@@ -28,7 +28,18 @@ Element types for v1:
 - Checklist (toggleable)
 - Bulleted / numbered list
 
-Explicitly OUT of v1 (big cost, low test value): databases/tables, embeds, images, code blocks, toggles/columns, drag-to-reorder blocks, nested pages.
+Explicitly OUT of v1 (big cost, low test value): databases/tables, embeds, images, code blocks, toggles/columns, nested pages.
+
+### 3b. Block layout (B1 — added 2026-08-21, Jeff-approved)
+Blocks keep the vertical document flow (sortOrder), but each block is **free in x/width** (percent of the page width):
+- **Horizontally resizable** — drag the right-edge resize handle to change width (min 15%, max = 100% − x).
+- **Horizontally positionable** — drag the ⋮⋮ grip left/right to move x (0..100−width).
+- **Vertically positionable** — drag the grip up/down to reorder (changes sortOrder; live reorder while dragging).
+- **Side-by-side:** blocks whose x-ranges don't overlap share a visual row (e.g. two 50%-wide blocks at x=0 and x=50).
+- Packing: on render, each block is placed at the lowest y where it doesn't collide (vertically) with any earlier block whose x-range it overlaps. Container height grows to fit; blocks never overlap.
+- Persisted via new `x` / `width` columns on `nk_blocks` (migration in main.js). Enter-split inherits parent x/width.
+
+Explicitly OUT for B1: free y / overlap (full freeform canvas), column containers, drag-to-resize rows of multiple blocks as a group.
 
 ## Persistence
 - New isolated SQLite file `notes.db` (user data dir), separate from JumpKit's `db.json` / Supabase

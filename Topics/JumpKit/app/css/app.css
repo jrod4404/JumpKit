@@ -813,17 +813,31 @@ strong, b { color: inherit; }
 .nk-empty { text-align: center; padding: 80px 20px; color: var(--text-muted); }
 .nk-empty p { margin-top: 10px; font-size: 0.95rem; }
 
-/* Blocks */
-.nk-block { position: relative; padding: 2px 28px 2px 6px; border-radius: 6px; }
+/* Blocks — B1 freeform: blocks keep sortOrder (vertical flow) but have
+   free x/width (%). Blocks whose x-ranges don't overlap share a row
+   (side-by-side). Container height is set by layoutBlocks(). */
+.nk-blocks { position: relative; }
+.nk-block { position: absolute; top: 0; left: 0; width: 100%; padding: 2px 28px 2px 26px; border-radius: 6px; }
 .nk-block:hover { background: rgba(128,128,128,0.06); }
-.nk-block .nk-block-del { position: absolute; right: 4px; top: 6px; display: none; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; padding: 0 4px; }
+.nk-block .nk-block-del { position: absolute; right: 12px; top: 6px; display: none; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; padding: 0 4px; z-index: 3; }
 .nk-block:hover .nk-block-del { display: block; }
 .nk-block .nk-block-del:hover { color: #f87171; }
+/* Drag grip (left edge): move horizontally / reorder vertically */
+.nk-block .nk-block-grip { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); display: none; align-items: center; justify-content: center; width: 20px; height: 24px; color: var(--text-dim); font-size: 0.8rem; letter-spacing: -2px; cursor: grab; user-select: none; z-index: 2; border-radius: 4px; }
+.nk-block:hover .nk-block-grip { display: flex; }
+.nk-block .nk-block-grip:hover { color: var(--hover-accent); background: rgba(128,128,128,0.08); }
+.nk-block .nk-block-grip:active { cursor: grabbing; }
+/* Resize handle (right edge): horizontal width drag */
+.nk-block .nk-block-resize { position: absolute; right: 0; top: 4px; bottom: 4px; width: 10px; display: none; cursor: ew-resize; z-index: 2; border-radius: 0 6px 6px 0; }
+.nk-block:hover .nk-block-resize { display: block; }
+.nk-block .nk-block-resize:hover { background: rgba(45,212,191,0.22); }
+.nk-block .nk-block-resize::after { content: ''; position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 3px; height: 22px; border-radius: 2px; background: var(--text-dim); opacity: 0.6; }
+.nk-block .nk-block-resize:hover::after { background: var(--hover-accent); opacity: 1; }
 .nk-text { min-height: 1.4em; font-size: 1rem; line-height: 1.6; color: var(--text); outline: none; white-space: pre-wrap; word-break: break-word; }
 .nk-block-heading .nk-h { font-size: 1.45rem; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
 .nk-block-heading2 .nk-h { font-size: 1.2rem; font-weight: 650; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
 .nk-block-heading3 .nk-h { font-size: 1.05rem; font-weight: 600; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
-.nk-block-checklist { padding-left: 4px; }
+.nk-block-checklist { padding-left: 26px; }
 .nk-check-item { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
 .nk-check-box { accent-color: var(--turq); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
 .nk-check-text { flex: 1; font-size: 0.98rem; color: var(--text); background: transparent; border: none; outline: none; }

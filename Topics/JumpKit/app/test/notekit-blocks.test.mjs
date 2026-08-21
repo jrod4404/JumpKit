@@ -130,4 +130,50 @@ await new Promise((r) => setTimeout(r, 80));
 if (!document.querySelector('.nk-block-heading2 .nk-h')) { console.log('FAIL: block not converted to H2'); process.exit(1); }
 console.log('OK: "/" picker converts block to Heading 2');
 
+// ── Test 6 (B1): blocks render with x/width attrs + inline style + handles ──
+const blocksAll = [...document.querySelectorAll('.nk-block')];
+const firstBlock = blocksAll[0];
+if (firstBlock.dataset.x === undefined || firstBlock.dataset.width === undefined) { console.log('FAIL: block missing data-x/data-width'); process.exit(1); }
+if (firstBlock.style.left === '' || firstBlock.style.width === '') { console.log('FAIL: block missing inline left/width style'); process.exit(1); }
+if (!firstBlock.querySelector('.nk-block-grip')) { console.log('FAIL: block missing grip handle'); process.exit(1); }
+if (!firstBlock.querySelector('.nk-block-resize')) { console.log('FAIL: block missing resize handle'); process.exit(1); }
+console.log('OK: B1 block attrs/style/handles present (x=' + firstBlock.dataset.x + ' w=' + firstBlock.dataset.width + ')');
+
+// ── Test 7 (B1): layoutBlocks stacks overlapping blocks, side-by-side for non-overlapping ──
+const container = document.getElementById('nkBlocks');
+container.style.width = '800px';
+// Synthetic blocks with deterministic heights (jsdom offsetHeight = 0 → layout uses 24px fallback)
+const synth = (x, w) => { const d = document.createElement('div'); d.className = 'nk-block'; d.dataset.x = String(x); d.dataset.width = String(w); d.style.height = '40px'; container.appendChild(d); return d; };
+const s1 = synth(0, 100), s2 = synth(0, 50), s3 = synth(50, 50);
+// Trigger layout via the window resize listener (calls scheduleLayout → layoutBlocks)
+window.dispatchEvent(new window.Event('resize'));
+await new Promise((r) => setTimeout(r, 120));
+const sTop = (el) => parseFloat(el.style.top || '0');
+// s1 full width packs below prior blocks; s2 (x0 w50) overlaps s1's x-range -> below s1;
+// s3 (x50 w50) does NOT overlap s2 horizontally -> shares row with s2
+const s1Top = sTop(s1);
+if (sTop(s2) <= s1Top) { console.log('FAIL: overlapping block s2 should stack below s1 (s1=' + s1Top + ' s2=' + sTop(s2) + ')'); process.exit(1); }
+if (sTop(s3) !== sTop(s2)) { console.log('FAIL: non-overlapping s3 should share row with s2 (s2=' + sTop(s2) + ' s3=' + sTop(s3) + ')'); process.exit(1); }
+console.log('OK: packing stacks overlaps & rows side-by-side (s1=' + s1Top + 'px, s2=' + sTop(s2) + 'px, s3=' + sTop(s3) + 'px)');
+
+// ── Test 8 (B1): Enter split inherits parent x/width ──
+const splitSrc = [...document.querySelectorAll('.nk-text')].at(-1);
+const splitBlock = splitSrc.closest('.nk-block');
+splitBlock.dataset.x = '25';
+splitBlock.dataset.width = '50';
+splitSrc.innerHTML = 'split me';
+splitSrc.dispatchEvent(new window.Event('input', { bubbles: true }));
+await new Promise((r) => setTimeout(r, 40));
+const sel2 = window.getSelection();
+const range2 = document.createRange();
+range2.setStart(splitSrc.firstChild, 5);
+range2.collapse(true);
+sel2.removeAllRanges(); sel2.addRange(range2);
+splitSrc.dispatchEvent(new window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 80));
+const newBlocks = [...document.querySelectorAll('.nk-block')];
+const newBlock = newBlocks.find((b) => b.dataset.x === '25' && b !== splitBlock);
+if (!newBlock || newBlock.dataset.width !== '50') { console.log('FAIL: split block did not inherit x/width'); process.exit(1); }
+console.log('OK: split block inherits x=' + newBlock.dataset.x + ' width=' + newBlock.dataset.width);
+
 console.log('ALL BLOCK TESTS PASSED ✔');

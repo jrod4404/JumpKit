@@ -180,6 +180,8 @@ function initNoteKitDB() {
         type       TEXT NOT NULL DEFAULT 'text',
         content    TEXT DEFAULT '',
         sortOrder  INTEGER DEFAULT 0,
+        x          REAL DEFAULT 0,
+        width      REAL DEFAULT 100,
         createdAt  INTEGER,
         updatedAt  INTEGER
       );
@@ -192,6 +194,16 @@ function initNoteKitDB() {
       notekitDb.exec("ALTER TABLE nk_projects ADD COLUMN icon TEXT DEFAULT 'folder'");
       console.log('[NoteKit] Migration: added icon column to nk_projects');
     }
+    // Migration: add x/width (block position/size) to nk_blocks if missing.
+    const bcols = notekitDb.prepare("PRAGMA table_info(nk_blocks)").all().map(c => c.name);
+    if (!bcols.includes('x')) {
+      notekitDb.exec("ALTER TABLE nk_blocks ADD COLUMN x REAL DEFAULT 0");
+      console.log('[NoteKit] Migration: added x column to nk_blocks');
+    }
+    if (!bcols.includes('width')) {
+      notekitDb.exec("ALTER TABLE nk_blocks ADD COLUMN width REAL DEFAULT 100");
+      console.log('[NoteKit] Migration: added width column to nk_blocks');
+    }
     console.log('[NoteKit] DB initialized at', nkPath);
   } catch (e) {
     console.error('[NoteKit] DB UNAVAILABLE:', e.message);
@@ -202,6 +214,7 @@ function initNoteKitDB() {
 
 function nkNow() { return Date.now(); }
 function nkUid() { return (globalThis.crypto && globalThis.crypto.randomUUID) ? globalThis.crypto.randomUUID() : 'nk-' + nkNow() + '-' + Math.random().toString(36).slice(2, 10); }
+function numOr(v, d) { const n = parseFloat(v); return Number.isFinite(n) ? n : d; }
 
 // ── IPC: NoteKit — projects ────────────────────────────────────────
 ipcMain.handle('notekit-list-projects', () => {
@@ -290,8 +303,8 @@ ipcMain.handle('notekit-save-blocks', (_e, pageId, blocks) => {
   const now = nkNow();
   const tx = notekitDb.transaction((rows) => {
     notekitDb.prepare('DELETE FROM nk_blocks WHERE pageId = ?').run(pageId);
-    const ins = notekitDb.prepare('INSERT INTO nk_blocks (id, pageId, type, content, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?)');
-    rows.forEach((b, i) => ins.run(b.id || nkUid(), pageId, b.type || 'text', typeof b.content === 'string' ? b.content : JSON.stringify(b.content), i, now, now));
+    const ins = notekitDb.prepare('INSERT INTO nk_blocks (id, pageId, type, content, sortOrder, x, width, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    rows.forEach((b, i) => ins.run(b.id || nkUid(), pageId, b.type || 'text', typeof b.content === 'string' ? b.content : JSON.stringify(b.content), i, numOr(b.x, 0), numOr(b.width, 100), now, now));
     notekitDb.prepare('UPDATE nk_pages SET updatedAt = ? WHERE id = ?').run(now, pageId);
   });
   try { tx(blocks || []); return { ok: true }; }
