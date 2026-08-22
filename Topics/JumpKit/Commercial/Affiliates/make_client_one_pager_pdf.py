@@ -227,7 +227,7 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
     cx_center = (x0 + x1)//2
     sub_w = (col_w - 60 - 24)//2  # two cols inside card
     TITLE_H = 30
-    ROW_START = card_top + 178     # 12px + 16px extra = 28px below the card title
+    ROW_START = card_top + 188     # 12px + 16px + 10px = 38px below the card title
 
     # ── dry run: measure stacked row heights to size the card ──
     col_h = [ROW_START, ROW_START]
@@ -235,8 +235,8 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
         c = idx // 4
         lines = _wrap_count(b, F['tiny'], sub_w - 72)
         block_h = TITLE_H + lines*(F['tiny'].size + 2)
-        col_h[c] += block_h + 8
-    card_bot = max(col_h) - 8 + 34   # 34px below last row (75% less than before)
+        col_h[c] += block_h + 18
+    card_bot = max(col_h) - 18 + 34   # 34px below last row (75% less than before)
 
     # ── soft card shadow: rounded rect matching the card's radius (45), offset down ──
     shw, shh = x1-x0, card_bot-card_top
@@ -273,11 +273,11 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
         desc_y = cy + TITLE_H
         end_y = draw_wrapped(d, b, (cx+66, desc_y), F['tiny'], MUTED, sub_w-72, line_gap=2)
-        col_y[c] = end_y + 8
+        col_y[c] = end_y + 18   # 8px gap + 10px more margin above next tile row
     return card_bot
 
-ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS, (200, 60, 60))
-_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80))
+ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS, (200, 60, 60, 70))
+_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80, 70))
 
 # rollout/pricing row
 row_y=1915
