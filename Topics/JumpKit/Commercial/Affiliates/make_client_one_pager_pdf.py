@@ -204,7 +204,7 @@ SOLUTION_ITEMS = [
 # subtle tinted card borders
 PROB_BORDER = (245, 178, 178)   # soft red (subtle but visible)
 SOL_BORDER = (172, 228, 184)   # soft green (subtle but visible)
-PS_BG = (247, 248, 250)        # very subtle gray card bg
+PS_BG = (240, 242, 245)        # subtle gray card bg (visible but soft)
 
 def _wrap_count(text, fnt, width):
     words = text.split()
@@ -234,11 +234,11 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
         col_h[c] += block_h + 8
     card_bot = max(col_h) - 8 + 34   # 34px below last row (75% less than before)
 
-    # ── soft card shadow (subtle, offset down) ──
+    # ── soft card shadow (extends below + sides of the card) ──
     shw, shh = x1-x0, card_bot-card_top
-    sh = Image.new('RGBA', (shw, shh), (0,0,0,0))
-    ImageDraw.Draw(sh).rounded_rectangle([0,0,shw-1,shh-1], radius=45, fill=(20,30,50,26))
-    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(30)), (x0, card_top+10))
+    sh = Image.new('RGBA', (shw+120, shh+120), (0,0,0,0))
+    ImageDraw.Draw(sh).rounded_rectangle([50,42,shw+70,shh+78], radius=45, fill=(14,24,42,55))
+    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(26)), (x0-45, card_top-35))
 
     # very subtle gray card bg + tinted border
     rect(d, [x0, card_top, x1, card_bot], fill=PS_BG, outline=border, radius=45, width=3)
