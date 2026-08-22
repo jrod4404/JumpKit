@@ -203,7 +203,7 @@ SOLUTION_ITEMS = [
 def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
     # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
-    card_bot = ps_y + 512
+    card_bot = ps_y + 560
     rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=LINE, radius=45)
     d.rounded_rectangle([x0+45, card_top+42, x0+45+272, card_top+90], radius=25, fill=ibg)
     d.text((x0+60, card_top+53), label, font=F['tiny_b'], fill=ic)
@@ -214,7 +214,7 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
         c = idx // 4   # 0=left col, 1=right col
         r = idx % 4
         cx = x0 + 45 + c*(sub_w+24)
-        cy = card_top + 160 + r*87
+        cy = card_top + 155 + r*100
         _chip_icon(page, cx, cy, 54, ibg, icon)
         # chip + title next to it; description below title
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
