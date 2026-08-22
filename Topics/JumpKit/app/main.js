@@ -409,6 +409,16 @@ function ckLog(msg) {
   try { console.log('[clipkit]', msg); } catch (_) {}
 }
 
+// Always-on listener for overlay debug/log messages (registered once at module
+// load so early renderer messages during loadURL are never missed).
+ipcMain.on('clipkit-dbg', (_e, msg) => {
+  try { ckLog(String(msg)); } catch (_) {}
+  try {
+    const mw = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents && w.webContents.getURL().startsWith('file:'));
+    if (mw && mw.webContents) mw.webContents.executeJavaScript('console.log(' + JSON.stringify(String(msg)) + ')').catch(() => {});
+  } catch (_) {}
+});
+
 // Holds the active capture's cancel callback while the overlay is open, so Esc
 // (from any screen / focus state) can cancel reliably.
 let ckCurrentCancel = null;
@@ -497,13 +507,15 @@ ipcMain.handle('clipkit-capture', async () => {
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
         document.addEventListener('mouseup',e=>{if(!drawing){dbg('mouseup but not drawing');return}dbg('mouseup @'+e.clientX+','+e.clientY);drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){dbg('region too small -> cancel');window.captureBridge.cancel();return} dbg('region '+w+'x'+h);window.captureBridge.region(x,y,w,h)});
         document.addEventListener('keydown',e=>{if(e.key==='Escape'){dbg('Esc');window.captureBridge.cancel()}});
+        // Heartbeat: pings main every second so the debug.log proves this
+        // renderer is alive even if no mouse events ever arrive.
+        let hb=0; setInterval(()=>{ try{ hb++; window.captureBridge&&window.captureBridge.dbg('hb '+hb); }catch(_){} },1000);
       </script>
     </body></html>`;
-    await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
-    ckLog('overlay: loadURL done');
-    // Capture the overlay renderer's own console output into debug.log — this
-    // works even if the captureBridge IPC bridge is broken, and always tells us
-    // whether the overlay script actually ran (look for 'overlay ready').
+    // Register capture/diagnostic listeners BEFORE loadURL — the overlay script
+    // runs during loadURL and sends its early messages immediately, so a
+    // listener added after loadURL would miss them (that's why 'overlay ready'
+    // never appeared in debug.log before).
     overlay.webContents.on('console-message', (_e, _lvl, message) => {
       ckLog('renderer> ' + message);
     });
@@ -511,7 +523,10 @@ ipcMain.handle('clipkit-capture', async () => {
       ckLog('overlay: did-finish-load');
       try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
     });
+    await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+    ckLog('overlay: loadURL done');
     try { overlay.show(); overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
+    ckLog('overlay: shown');
     // Make sure the overlay actually receives keyboard input: give it focus and
     // blur the app window, and catch Esc at the webContents level (reliable even
     // if focus is elsewhere / clicking another screen).
@@ -539,20 +554,9 @@ ipcMain.handle('clipkit-capture', async () => {
     const result = await new Promise((resolve) => {
       let settled = false;
       const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
-      // Debug/log forwarding from the overlay: print to terminal AND mirror into
-      // the main app window's DevTools console (where Jeff is watching).
-      const onDbg = (_e, msg) => {
-        try { ckLog(String(msg)); } catch (_) {}
-        try {
-          const mw = BrowserWindow.getAllWindows().find((w) => w !== overlay && !w.isDestroyed());
-          if (mw && mw.webContents) mw.webContents.executeJavaScript('console.log(' + JSON.stringify(msg) + ')').catch(() => {});
-        } catch (_) {}
-      };
-      let stopDbg = () => {};
       const onRegion = async (e, rect) => {
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
-        stopDbg();
         try {
           // Hide the overlay so it doesn't appear in the capture. On Windows,
           // setOpacity(0) is more reliable than hide() for removing a
@@ -595,16 +599,13 @@ ipcMain.handle('clipkit-capture', async () => {
       };
       const onCancel = () => {
         ipcMain.removeListener('clipkit-region', onRegion);
-        stopDbg();
         try { overlay.close(); } catch (_) {}
         done({ cancelled: true });
       };
       ipcMain.on('clipkit-region', onRegion);
       ipcMain.on('clipkit-cancel', onCancel);
-      ipcMain.on('clipkit-dbg', onDbg);
-      stopDbg = () => { try { ipcMain.removeListener('clipkit-dbg', onDbg); } catch (_) {} };
       ckCurrentCancel = onCancel;
-      overlay.on('closed', () => { stopDbg(); done({ cancelled: true }); });
+      overlay.on('closed', () => done({ cancelled: true }));
     });
     return result;
   } catch (e) {
