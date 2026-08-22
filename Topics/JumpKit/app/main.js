@@ -441,13 +441,20 @@ ipcMain.handle('clipkit-capture', async () => {
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
-    try { overlay.setIgnoreMouseEvents(false); } catch (_) {}
+    // Ensure clicks land on the overlay on every platform. forward:false means
+    // events are NOT forwarded to windows behind it — critical on macOS where
+    // a transparent window can otherwise be click-through.
+    try { overlay.setIgnoreMouseEvents(false, { forward: false }); } catch (_) {}
     // Global Esc so cancellation works even if the overlay does not hold keyboard focus.
     const { globalShortcut } = require('electron');
     try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
     const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
-      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
+      /* body has a barely-perceptible 5% black fill so macOS hit-tests the
+         full screen and forwards mouse events to this window. A fully
+         transparent (alpha≈0) surface is click-through on macOS — the
+         crosshair would render but clicks would pass to the app behind it. */
+      html,body{margin:0;padding:0;overflow:hidden;background:rgba(0,0,0,0.05);cursor:crosshair;-webkit-user-select:none;user-select:none}
       #box{position:fixed;display:none;border:2px dashed rgba(255,255,255,0.9);background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
       #box::after{content:'';position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border:2px dashed rgba(225,29,72,0.85);border-radius:2px}
       /* big plus icon that follows the cursor to signal 'select a region' */
@@ -476,6 +483,13 @@ ipcMain.handle('clipkit-capture', async () => {
     // blur the app window, and catch Esc at the webContents level (reliable even
     // if focus is elsewhere / clicking another screen).
     try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
+    // Re-assert click + focus once the overlay DOM has finished loading so the
+    // window is guaranteed key (fixes first-click passthrough on macOS).
+    try {
+      overlay.webContents.once('did-finish-load', () => {
+        try { overlay.focus(); overlay.focusOnWebView(); overlay.setIgnoreMouseEvents(false, { forward: false }); } catch (_) {}
+      });
+    } catch (_) {}
     const mainWin = BrowserWindow.getAllWindows().find((w) => w !== overlay);
     if (mainWin) { try { mainWin.blur(); } catch (_) {} }
     overlay.webContents.on('before-input-event', (e, input) => {
