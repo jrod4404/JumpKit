@@ -1243,9 +1243,17 @@ function createWindow() {
       ) {
         event.preventDefault();
       }
+      // Debug aid: Ctrl+Alt+J opens DevTools even in production builds, so a
+      // broken UI can be inspected without the normal F12/Ctrl+Shift+I (which
+      // stay blocked). 
+      if (input.control && input.alt && input.key === 'J' && !event.isAutoRepeat) {
+        win.webContents.openDevTools({ mode: 'detach' });
+      }
     });
     win.webContents.on('devtools-opened', () => {
-      win.webContents.closeDevTools();
+      if (!(process.env.JK_KEEP_DEVTOOLS === '1')) {
+        // keep devtools open (allow inspection) — do NOT auto-close
+      }
     });
   }
 
@@ -1256,15 +1264,32 @@ function createWindow() {
 
   // Persistent renderer diagnostics: capture main-window console errors to a
   // disk log so UI failures are diagnosable without DevTools open.
+  // NOTE: Electron 40's 'console-message' delivers a single event object
+  // {level, message, lineNumber, sourceId}. Handle both old (e,lvl,msg) and new
+  // (event) signatures defensively.
   try {
     const fs = require('fs');
     const errLog = path.join(app.getPath('userData'), 'app-error.log');
-    win.webContents.on('console-message', (_e, level, message) => {
-      if ((level === 3 || (level !== undefined && String(message).includes('Uncaught'))) && message) {
-        try { fs.appendFileSync(errLog, new Date().toISOString() + ' [err] ' + message + '\n'); } catch (_) {}
+    const writeErr = (msgTxt) => {
+      if (!msgTxt) return;
+      try { fs.appendFileSync(errLog, new Date().toISOString() + ' [err] ' + msgTxt + '\n'); } catch (_) {}
+    };
+    win.webContents.on('console-message', (...args) => {
+      // New Electron 40 signature: single event object arg.
+      if (args.length === 1 && args[0] && typeof args[0] === 'object') {
+        const ev = args[0];
+        const lvl = Number(ev.level);
+        const msg = String(ev.message || '');
+        if (lvl === 3 || /Uncaught|Unhandled|TypeError|ReferenceError|SyntaxError/.test(msg)) writeErr(msg);
+      } else {
+        // Legacy signature: (event, level, message, line, sourceId)
+        const lvl = Number(args[1]);
+        const msg = String(args[2] || '');
+        if (lvl === 3 || /Uncaught|Unhandled|TypeError|ReferenceError|SyntaxError/.test(msg)) writeErr(msg);
       }
     });
-    win.webContents.on('render-process-gone', (_e, d) => {
+    win.webContents.on('render-process-gone', (ev) => {
+      const d = (ev && ev.reason) ? { reason: ev.reason, exitCode: ev.exitCode } : ev;
       try { fs.appendFileSync(errLog, new Date().toISOString() + ' [gone] ' + JSON.stringify(d) + '\n'); } catch (_) {}
     });
   } catch (_) {}

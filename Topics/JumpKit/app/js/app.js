@@ -293,7 +293,9 @@ async function initApp() {
     }
   }
   // Show/hide NoteKit + ClipKit sidebar sections from saved prefs
-  applySidebarModulePrefs();
+  // (explicit window. reference — a bare call throws ReferenceError in strict
+  // mode because it's only assigned to window, not declared as a bare binding)
+  if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();
   runAutoArchive();
   await runCloudBackup();
   // Check backup reminder: notify if no backup in 7+ days and auto-backup is off

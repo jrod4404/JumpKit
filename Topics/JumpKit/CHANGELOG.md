@@ -2,6 +2,16 @@
 
 ---
 
+## v5.1.48 — August 22, 2026
+
+### CRITICAL FIX — dead UI after boot
+- **Fixed the root cause of the 'nothing responds / no UI works' bug.** In `initApp()`, a call to `applySidebarModulePrefs()` was made as a bare identifier even though the function is only assigned to `window` (not declared as a lexical binding). In strict mode this throws `ReferenceError: applySidebarModulePrefs is not defined`, which aborted the rest of `initApp()` — leaving the router, nav, and UI uninitialized (dead UI). Now called via `window.applySidebarModulePrefs()` with a guard.
+  - This is why the app appeared completely non-interactive after update.
+- **Fixed renderer error logging** — the diagnostic logger now uses the correct Electron 40 `console-message` event signature, so errors are captured to `app-error.log` reliably.
+- **Debug aid:** `Ctrl+Alt+J` now opens DevTools even in production builds (F12 / Ctrl+Shift+I remain blocked) for inspecting a broken UI.
+
+---
+
 ## v5.1.47 — August 22, 2026
 
 ### Diagnostics & stability
