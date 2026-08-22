@@ -156,14 +156,14 @@ y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
-hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
-_hx0, _hy0, _hx1, _hy1 = 1290, 315, 2390, 875
+hero_img = contain_on_bg(HERO, (1100, 484), bg=(255,255,255))
+_hx0, _hy0, _hx1, _hy1 = 1290, 315, 2390, 799
 hsh = Image.new('RGBA', (1100+40, 560+40), (0,0,0,0))
 ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+560], radius=58, fill=(14, 24, 42, 60))
 page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
 paste_rounded(page, hero_img, (_hx0, _hy0, _hx1, _hy1), radius=58, shadow=False)
 # image badge (light theme: soft turquoise bg, dark teal text) — BELOW the hero image, centered
-_bx0, _by0, _bx1, _by1 = 1543, 895, 2138, 975
+_bx0, _by0, _bx1, _by1 = 1543, 833, 2138, 913
 rect(d, [_bx0, _by0, _bx1, _by1], fill=(232,249,252), radius=34)
 _bw = d.textbbox((0,0), 'Windows + macOS desktop app', font=F['small_b'])[2]
 d.text((_bx0 + ((_bx1-_bx0) - _bw)//2, _by0+22), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
@@ -189,7 +189,7 @@ def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 1000   # cards start below the hero badge (hero bottom 875, badge 895-975)
+ps_y = 948   # cards start below the hero badge (hero 799, badge 833-913)
 col_w = (W - 2*M - 40)//2
 PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
@@ -275,12 +275,12 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
     total = pil_s + 6 + lw
     tart_x = cx_center - total//2
     # bolder: composite the line-icon with small offsets to thicken the strokes
-    # 6px bottom padding on the pill text: shift icon+text up 6px together (keeps alignment)
+    # pill text bottom padding was 6px (icon center -2); reduced 2px -> icon center 0
     _bold_off = [(-1,0),(1,0),(0,-1),(0,1)]
     for (ox, oy) in _bold_off:
-        page.alpha_composite(pil, (tart_x + ox, pill_cy - pil_s//2 - 2 + oy))
-    page.alpha_composite(pil, (tart_x, pill_cy - pil_s//2 - 2))
-    d.text((tart_x+pil_s+6, pill_cy - lh//2 - 6), label, font=F['tiny_b'], fill=ic)
+        page.alpha_composite(pil, (tart_x + ox, pill_cy - pil_s//2 + oy))
+    page.alpha_composite(pil, (tart_x, pill_cy - pil_s//2))
+    d.text((tart_x+pil_s+6, pill_cy - lh//2 - 4), label, font=F['tiny_b'], fill=ic)
     # centered title — Arial Bold (same section-header font as the rest of the doc)
     tw = d.textbbox((0,0), title, font=font(44, True))[2]
     d.text((cx_center-tw//2, card_top+104), title, font=font(44, True), fill=INK)
