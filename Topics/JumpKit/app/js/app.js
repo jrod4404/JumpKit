@@ -507,14 +507,23 @@ themeBtn.addEventListener('click', () => {
   });
   toggleBtn.addEventListener('mouseleave', hideTip);
 
-  // Nav item tooltips (collapsed only)
-  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      if (!sidebar.classList.contains('collapsed')) return;
-      const label = btn.querySelector('.nav-label')?.textContent?.trim() || btn.dataset.page;
-      showTip(label, btn.getBoundingClientRect());
-    });
-    btn.addEventListener('mouseleave', hideTip);
+  // Nav item + NoteKit project tooltips (collapsed only) — event delegation so
+  // dynamically-added NoteKit project rows get the SAME custom tooltip as nav items.
+  sidebar.addEventListener('mouseover', (e) => {
+    if (!sidebar.classList.contains('collapsed')) return;
+    let el = e.target.closest('.nav-item[data-page], .nk-project-row');
+    if (!el) return;
+    let text;
+    if (el.classList.contains('nk-project-row')) {
+      text = el.querySelector('.nk-project-name')?.textContent?.trim() || el.dataset.id || '';
+    } else {
+      text = el.querySelector('.nav-label')?.textContent?.trim() || el.dataset.page;
+    }
+    if (!text) return;
+    showTip(text, el.getBoundingClientRect());
+  });
+  sidebar.addEventListener('mouseout', (e) => {
+    if (e.target.closest('.nav-item[data-page], .nk-project-row')) hideTip();
   });
 })();
 

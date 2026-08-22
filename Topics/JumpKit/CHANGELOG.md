@@ -2,6 +2,14 @@
 
 ---
 
+## v5.1.43 — August 22, 2026
+
+### Sidebar — consistent tooltips
+- **NoteKit project rows now use the same custom tooltip as the other sidebar nav items.** When the sidebar is collapsed, hovering a NoteKit project shows the same styled `nav-tooltip` (project name) that Home/Captures/Help show, instead of the native OS tooltip.
+- Tooltip wiring moved to event delegation so both static nav items and dynamically-added NoteKit project rows get identical tooltips; removed the native `title` from project rows to avoid a double/OS tooltip.
+
+---
+
 ## v5.1.42 — August 22, 2026
 
 ### Capture — card actions + NoteKit icons

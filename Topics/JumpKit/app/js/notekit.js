@@ -77,7 +77,7 @@
       const active = NK.activeProjectId === p.id;
       html += `
         <div class="nk-project" data-project-id="${p.id}">
-          <div class="nk-project-row ${active ? 'active' : ''}" data-action="open-project" data-id="${p.id}" title="${esc(p.name)}">
+          <div class="nk-project-row ${active ? 'active' : ''}" data-action="open-project" data-id="${p.id}">
             ${projectIconHtml(p.icon)}
             <span class="nk-project-name">${esc(p.name)}</span>
             <span class="nk-project-more" data-id="${p.id}" title="Project options">⋯</span>
