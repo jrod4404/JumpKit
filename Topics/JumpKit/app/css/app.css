@@ -952,6 +952,7 @@ body.nk-dragging .nk-block, body.nk-dragging .nk-block * { cursor: grabbing; }
 .ck-size { font-size: 0.78rem; color: var(--text-dim); }
 .ck-actions { display: flex; gap: 8px; }
 .ck-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.ck-btn svg.ti { width: 0.95rem; height: 0.95rem; stroke: currentColor; fill: none; flex-shrink: 0; }
 .ck-btn:hover { border-color: var(--hover-accent); color: var(--hover-accent); background: var(--bg-hover); }
 .ck-btn[data-ck-del]:hover { border-color: #f87171; color: #f87171; background: rgba(248,113,113,0.1); }
 .ck-del { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; border-radius: 6px; background: transparent; color: var(--text-dim); font-size: 0.8rem; cursor: pointer; display: none; align-items: center; justify-content: center; }

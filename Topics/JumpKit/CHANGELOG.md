@@ -2,6 +2,14 @@
 
 ---
 
+## v5.1.44 — August 22, 2026
+
+### Capture — button polish + toast feedback
+- **Copy / Delete buttons now use tabler icons instead of emojis** (📋/🗑 replaced with `tabler-copy` / `tabler-trash` SVGs) on the capture cards, the full-screen viewer, and the right-click context menu. Consistent icon style across all capture actions.
+- **Copy feedback now uses a toast** instead of the inline green text — clicking Copy shows a toast notification ("Copied to clipboard") using the app's standard toast system; failures show a red danger toast.
+
+---
+
 ## v5.1.43 — August 22, 2026
 
 ### Sidebar — consistent tooltips

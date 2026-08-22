@@ -78,8 +78,8 @@
           <span class="ck-size">${rec.width}×${rec.height} px</span>
         </div>
         <div class="ck-actions">
-          <button class="ck-btn" data-ck-copy="${esc(rec.id)}" title="Copy to clipboard">📋 Copy</button>
-          <button class="ck-btn" data-ck-del="${esc(rec.id)}" title="Delete capture">🗑 Delete</button>
+          <button class="ck-btn" data-ck-copy="${esc(rec.id)}" title="Copy to clipboard"><svg class="ti ti-copy" aria-hidden="true"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>Copy</button>
+          <button class="ck-btn" data-ck-del="${esc(rec.id)}" title="Delete capture"><svg class="ti ti-trash" aria-hidden="true"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>Delete</button>
         </div>
       </div>
     </div>`;
@@ -93,8 +93,8 @@
     v.style.display = 'flex';
     v.innerHTML = `<div style="position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:900;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px" onclick="if(event.target===this)ClipKit.closeViewer()">
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-        <button class="btn" style="background:rgba(255,255,255,0.14);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:700;cursor:pointer" onclick="ClipKit.copyFromViewer()">📋 Copy to clipboard</button>
-        <button class="btn" style="background:rgba(239,68,68,0.85);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:700;cursor:pointer" onclick="ClipKit.delFromViewer()">🗑 Delete</button>
+        <button class="btn" style="background:rgba(255,255,255,0.14);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px" onclick="ClipKit.copyFromViewer()"><svg class="ti ti-copy" style="width:1rem;height:1rem;color:#fff;stroke:currentColor;fill:none"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>Copy to clipboard</button>
+        <button class="btn" style="background:rgba(239,68,68,0.85);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px" onclick="ClipKit.delFromViewer()"><svg class="ti ti-trash" style="width:1rem;height:1rem;color:#fff;stroke:currentColor;fill:none"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>Delete</button>
         <button class="btn" style="background:rgba(255,255,255,0.14);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:700;cursor:pointer" onclick="ClipKit.closeViewer()">✕ Close</button>
       </div>
       <img src="${fileUrl(rec.path)}" data-ck-copy-id="${esc(rec.id)}" style="max-width:100%;max-height:calc(100vh - 110px);border-radius:6px;box-shadow:0 10px 40px rgba(0,0,0,0.6);background:#fff" alt="capture"/>
@@ -128,8 +128,8 @@
     if (!m) return;
     m.style.display = 'block';
     m.innerHTML = `<div style="position:fixed;z-index:950;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.35);overflow:hidden;min-width:170px" onclick="event.stopPropagation()">
-      <button data-ck-menu-copy="${esc(id)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:0.83rem;font-weight:600;cursor:pointer;text-align:left">📋 Copy to clipboard</button>
-      <button data-ck-menu-del="${esc(id)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;color:#f87171;font-size:0.83rem;font-weight:600;cursor:pointer;text-align:left">🗑 Delete</button>
+      <button data-ck-menu-copy="${esc(id)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;border-bottom:1px solid var(--border);color:var(--text);font-size:0.83rem;font-weight:600;cursor:pointer;text-align:left"><svg class="ti ti-copy" style="width:1rem;height:1rem;stroke:currentColor;fill:none"><use href="img/tabler-sprite.min.svg#tabler-copy"/></svg>Copy to clipboard</button>
+      <button data-ck-menu-del="${esc(id)}" style="display:flex;align-items:center;gap:9px;width:100%;padding:10px 14px;background:none;border:none;color:#f87171;font-size:0.83rem;font-weight:600;cursor:pointer;text-align:left"><svg class="ti ti-trash" style="width:1rem;height:1rem;stroke:currentColor;fill:none"><use href="img/tabler-sprite.min.svg#tabler-trash"/></svg>Delete</button>
     </div>`;
     const box = m.firstElementChild;
     box.style.left = Math.min(x, window.innerWidth - 190) + 'px';
@@ -177,10 +177,11 @@
     const api = window.electronAPI;
     if (!api) return;
     const r = await api.clipkitCopy(id);
-    const msg = document.getElementById('ckMessage');
-    if (msg) msg.innerHTML = r && r.ok
-      ? `<div style="color:#34d399;font-size:0.85rem">✓ Copied to clipboard.</div>`
-      : `<div style="color:#f87171;font-size:0.85rem">Could not copy (file may have been deleted).</div>`;
+    if (r && r.ok) {
+      if (window.Toast) Toast.success('Copied to clipboard');
+    } else if (window.Toast) {
+      Toast.danger('Could not copy — file may have been deleted');
+    }
   }
 
   async function del(id) {
