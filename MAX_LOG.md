@@ -45,3 +45,4 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 ## 2026-08-21 — ClipKit capture freeze/error fix (v5.1.33): solid overlay (no transparent/fullscreen), scaled display thumb, nativeImage.crop for high-DPI, cancel channel + 'closed' guard + renderer timeout. Feed 5.1.33.
 ## 2026-08-21 — ClipKit UX (v5.1.34): overlay shows screen + big plus cursor (removed black dim); icon color = text color; CLIPKIT label spacing matches NOTEKIT. Feed 5.1.34.
 ## 2026-08-21 — ClipKit (v5.1.35): capture targets cursor's screen (any monitor); Esc cancel fixed via globalShortcut + before-input-event + overlay focus. Feed 5.1.35.
+## 2026-08-21 — ClipKit (v5.1.36): transparent live-screen overlay (no frozen image on click; capture happens at drag-release) + click-to-view full size + right-click copy/delete menu. Feed 5.1.36.

@@ -1,6 +1,6 @@
 {
   "name": "jumpkit",
-  "version": "5.1.36",
+  "version": "5.1.37",
   "description": "JumpKit — Your instant jump launcher",
   "main": "main.js",
   "author": "Jeff",
@@ -12,7 +12,8 @@
     "build:all": "electron-builder --mac --win",
     "build:test": "electron-builder --mac --config electron-builder.test.json",
     "build:test:win": "electron-builder --win --config electron-builder.test.json",
-    "build:test:all": "electron-builder --mac --win --config electron-builder.test.json"
+    "build:test:all": "electron-builder --mac --win --config electron-builder.test.json",
+    "test:overlay": "electron test-electron/overlay-interaction.mjs"
   },
   "build": {
     "appId": "com.jumpkit.app",

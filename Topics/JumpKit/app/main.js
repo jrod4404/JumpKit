@@ -427,7 +427,10 @@ ipcMain.handle('clipkit-capture', async () => {
       height: dH,
       frame: false,
       transparent: true,
-      backgroundColor: '#00000000',
+      // alpha=1 (not 0): invisible on screen but guarantees the window still
+      // receives mouse events on Windows (fully alpha-0 windows can be
+      // click-through / skip hit-testing there).
+      backgroundColor: '#01000000',
       alwaysOnTop: true,
       resizable: false,
       movable: false,
@@ -438,14 +441,15 @@ ipcMain.handle('clipkit-capture', async () => {
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
+    try { overlay.setIgnoreMouseEvents(false); } catch (_) {}
     // Global Esc so cancellation works even if the overlay does not hold keyboard focus.
     const { globalShortcut } = require('electron');
     try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
     const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
       html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
-      #box{position:fixed;display:none;border:2px solid #fff;background:rgba(225,29,72,0.10);z-index:2;pointer-events:none}
-      #box::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:2px solid #e11d48}
+      #box{position:fixed;display:none;border:2px dashed rgba(255,255,255,0.9);background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
+      #box::after{content:'';position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border:2px dashed rgba(225,29,72,0.85);border-radius:2px}
       /* big plus icon that follows the cursor to signal 'select a region' */
       #plus{position:fixed;left:0;top:0;z-index:4;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0.9}
       #plus::before,#plus::after{content:'';position:absolute;background:#fff;border-radius:3px;box-shadow:0 0 8px rgba(0,0,0,0.6)}
@@ -467,6 +471,7 @@ ipcMain.handle('clipkit-capture', async () => {
       </script>
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+    try { overlay.show(); overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
     // Make sure the overlay actually receives keyboard input: give it focus and
     // blur the app window, and catch Esc at the webContents level (reliable even
     // if focus is elsewhere / clicking another screen).
@@ -474,6 +479,7 @@ ipcMain.handle('clipkit-capture', async () => {
     const mainWin = BrowserWindow.getAllWindows().find((w) => w !== overlay);
     if (mainWin) { try { mainWin.blur(); } catch (_) {} }
     overlay.webContents.on('before-input-event', (e, input) => {
+      // Esc always cancels, even if the overlay doesn't hold keyboard focus.
       if (input.type === 'keyDown' && (input.key === 'Escape' || input.key === 'Esc')) {
         e.preventDefault();
         if (typeof ckCurrentCancel === 'function') ckCurrentCancel();
@@ -490,19 +496,28 @@ ipcMain.handle('clipkit-capture', async () => {
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
         try {
-          // Hide the overlay so it doesn't appear in the capture.
+          // Hide the overlay so it doesn't appear in the capture. On Windows,
+          // setOpacity(0) is more reliable than hide() for removing a
+          // transparent always-on-top window from the composited frame.
+          try { overlay.setOpacity(0); } catch (_) {}
           try { overlay.hide(); } catch (_) {}
           // Give the compositor a moment to drop the overlay, then grab the screen.
-          await new Promise((r) => setTimeout(r, 120));
+          await new Promise((r) => setTimeout(r, 150));
           const { desktopCapturer } = require('electron');
+          // Cap the requested thumbnail size: very large requests (4K/5K at
+          // high scale) can return empty thumbnails on some Windows setups.
+          const tw = Math.min(Math.round(dW * scaleF), 3840);
+          const th = Math.min(Math.round(dH * scaleF), 3840);
           const sources = await desktopCapturer.getSources({
             types: ['screen'],
-            thumbnailSize: { width: Math.round(dW * scaleF), height: Math.round(dH * scaleF) },
+            thumbnailSize: { width: tw, height: th },
           });
           const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
           if (!src) throw new Error('no screen source');
           const img = src.thumbnail;
-          const cropScale = img.getSize().width / (dW || 1);
+          const tSize = img.getSize();
+          if (!tSize || !tSize.width || !tSize.height) throw new Error('empty screen thumbnail');
+          const cropScale = tSize.width / (dW || 1);
           const crop = img.crop({
             x: Math.round(rect.x * cropScale),
             y: Math.round(rect.y * cropScale),
@@ -510,11 +525,14 @@ ipcMain.handle('clipkit-capture', async () => {
             height: Math.max(1, Math.round(rect.h * cropScale)),
           });
           const rec = await ckPersistCapture(crop.toPNG(), Math.round(rect.w), Math.round(rect.h));
-          try { overlay.close(); } catch (_) {}
+          // Resolve FIRST so the closed event (fired by overlay.close()) can't
+          // win the race and mark this successful capture as cancelled.
           done(rec);
-        } catch (err) {
           try { overlay.close(); } catch (_) {}
+        } catch (err) {
+          console.error('[clipkit] capture failed:', err && err.message ? err.message : err);
           done({ error: err.message });
+          try { overlay.close(); } catch (_) {}
         }
       };
       const onCancel = () => {
