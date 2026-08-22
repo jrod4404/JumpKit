@@ -205,35 +205,45 @@ SOLUTION_ITEMS = [
 PROB_BORDER = (245, 178, 178)   # soft red (subtle but visible)
 SOL_BORDER = (172, 228, 184)   # soft green (subtle but visible)
 
-def _draw_ps_card(x0, x1, label, title, ic, ibg, border, items):
+def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
     # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
     card_bot = ps_y + 680
     cx_center = (x0 + x1)//2
     rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=border, radius=45, width=3)
-    # centered label pill
-    pill_w = 272
-    d.rounded_rectangle([cx_center-pill_w//2, card_top+42, cx_center+pill_w//2, card_top+90], radius=25, fill=ibg)
+    # centered label pill (icon + label)
+    pill_w = 300
+    pill_x0, pill_x1 = cx_center-pill_w//2, cx_center+pill_w//2
+    d.rounded_rectangle([pill_x0, card_top+42, pill_x1, card_top+90], radius=25, fill=ibg)
+    pil = _load_icon(pill_icon).resize((22, 22), Image.LANCZOS)
     lw = d.textbbox((0,0), label, font=F['tiny_b'])[2]
-    d.text((cx_center-lw//2, card_top+53), label, font=F['tiny_b'], fill=ic)
+    total = 22 + 6 + lw
+    tart_x = cx_center - total//2
+    page.alpha_composite(pil, (tart_x, card_top+52))
+    d.text((tart_x+22+6, card_top+53), label, font=F['tiny_b'], fill=ic)
     # centered title
     tw = d.textbbox((0,0), title, font=font(44, black=True))[2]
     d.text((cx_center-tw//2, card_top+104), title, font=font(44, black=True), fill=INK)
     # 2 columns x 4 rows
     sub_w = (col_w - 60 - 24)//2  # two cols inside card
+    # per column stack rows with 8px gap between grey-description bottom and next black title
+    col_y = [card_top + 150, card_top + 150]  # current y in each column
+    TITLE_H = 30
     for idx, (icon, t, b) in enumerate(items):
-        c = idx // 4   # 0=left col, 1=right col
-        r = idx % 4
+        c = idx // 4
         cx = x0 + 45 + c*(sub_w+24)
-        cy = card_top + 150 + r*112
+        cy = col_y[c]
+        # black title (top), grey description below it
         _chip_icon(page, cx, cy, 54, ibg, icon)
-        # chip + title next to it; description below title with 8px top+bottom margins per line
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
-        draw_wrapped(d, b, (cx+66, cy+34), F['tiny'], MUTED, sub_w-72, line_gap=16)
+        desc_y = cy + TITLE_H
+        end_y = draw_wrapped(d, b, (cx+66, desc_y), F['tiny'], MUTED, sub_w-72, line_gap=2)
+        # next row starts 8px below the grey text block (gap between grey text and next black title)
+        col_y[c] = end_y + 8
     return card_bot
 
-ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, PROBLEM_ITEMS)
-_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, SOLUTION_ITEMS)
+ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS)
+_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS)
 
 # rollout/pricing row
 row_y=1915
