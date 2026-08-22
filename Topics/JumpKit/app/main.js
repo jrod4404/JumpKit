@@ -501,6 +501,16 @@ ipcMain.handle('clipkit-capture', async () => {
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
     ckLog('overlay: loadURL done');
+    // Capture the overlay renderer's own console output into debug.log — this
+    // works even if the captureBridge IPC bridge is broken, and always tells us
+    // whether the overlay script actually ran (look for 'overlay ready').
+    overlay.webContents.on('console-message', (_e, _lvl, message) => {
+      ckLog('renderer> ' + message);
+    });
+    overlay.webContents.once('did-finish-load', () => {
+      ckLog('overlay: did-finish-load');
+      try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
+    });
     try { overlay.show(); overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
     // Make sure the overlay actually receives keyboard input: give it focus and
     // blur the app window, and catch Esc at the webContents level (reliable even
