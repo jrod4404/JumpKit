@@ -133,8 +133,13 @@ logo = Image.open(LOGO).convert('RGBA')
 logo_w = 460
 logo_h = int(logo.height * logo_w / logo.width)
 page.alpha_composite(logo.resize((logo_w, logo_h), Image.LANCZOS), (M, 110))
-rect(d, [W-820, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radius=40)
-d.text((W-730, 148), 'Product Brief', font=F['tiny_b'], fill=(0,105,126))
+# top-right 'Product Brief' pill — width matches text + standard padding
+_pb_label = 'Product Brief'
+_pb_lw = d.textbbox((0,0), _pb_label, font=F['tiny_b'])[2]
+_pb_pad = 42
+_pb_x0 = W - M - _pb_lw - 2*_pb_pad
+rect(d, [_pb_x0, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radius=40)
+d.text((_pb_x0+_pb_pad, 148), _pb_label, font=F['tiny_b'], fill=(0,105,126))
 
 # hero text (landing page H1 + description, verbatim)
 y = 275
@@ -149,9 +154,9 @@ desc = ('JumpKit displays your navigation links in one place — web links, loca
         'and macOS, and keeps your data local — fast, private, and always yours.')
 y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
-# hero image right (no dark shadow — clean light card, thin light divider only)
+# hero image right — shadow in the same tight/soft style as the problem tiles
 hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
-paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True, sh_alpha=60, sh_blur=22, sh_dx=0, sh_dy=26)
+paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True, sh_alpha=70, sh_blur=10, sh_dx=0, sh_dy=16)
 # image badge (light theme: soft turquoise bg, dark teal text)
 rect(d, [1355, 770, 1950, 850], fill=(232,249,252), radius=34)
 d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
