@@ -1254,6 +1254,21 @@ function createWindow() {
 
   win.on('closed', () => { win = null; });
 
+  // Persistent renderer diagnostics: capture main-window console errors to a
+  // disk log so UI failures are diagnosable without DevTools open.
+  try {
+    const fs = require('fs');
+    const errLog = path.join(app.getPath('userData'), 'app-error.log');
+    win.webContents.on('console-message', (_e, level, message) => {
+      if ((level === 3 || (level !== undefined && String(message).includes('Uncaught'))) && message) {
+        try { fs.appendFileSync(errLog, new Date().toISOString() + ' [err] ' + message + '\n'); } catch (_) {}
+      }
+    });
+    win.webContents.on('render-process-gone', (_e, d) => {
+      try { fs.appendFileSync(errLog, new Date().toISOString() + ' [gone] ' + JSON.stringify(d) + '\n'); } catch (_) {}
+    });
+  } catch (_) {}
+
   // Prevent new BrowserWindows from being opened (e.g. via window.open or target=_blank)
   // Redirect to system browser instead - keeps preload out of uncontrolled windows
   // Only allow http/https URLs; block javascript:, data:, file:, etc.

@@ -2,6 +2,14 @@
 
 ---
 
+## v5.1.47 — August 22, 2026
+
+### Diagnostics & stability
+- **Persistent renderer error logging** — any console error or renderer crash in the main window is now written to a disk log (`app-error.log` in the app's user data folder) with timestamps. If the UI ever appears non-responsive, the exact error is captured for debugging without needing DevTools open.
+- **Cache-busting on `app.js`** — the dashboard now loads `js/app.js?v=…` (versioned) so a stale cached copy can never cause a broken UI after an in-app update.
+
+---
+
 ## v5.1.46 — August 22, 2026
 
 ### Settings — Sidebar Modules note
