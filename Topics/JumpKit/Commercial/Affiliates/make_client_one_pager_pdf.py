@@ -202,13 +202,13 @@ SOLUTION_ITEMS = [
 ]
 
 # subtle tinted card borders
-PROB_BORDER = (252, 224, 224)   # soft red
-SOL_BORDER = (220, 245, 226)   # soft green
+PROB_BORDER = (245, 178, 178)   # soft red (subtle but visible)
+SOL_BORDER = (172, 228, 184)   # soft green (subtle but visible)
 
 def _draw_ps_card(x0, x1, label, title, ic, ibg, border, items):
     # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
-    card_bot = ps_y + 560
+    card_bot = ps_y + 680
     cx_center = (x0 + x1)//2
     rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=border, radius=45, width=3)
     # centered label pill
@@ -225,11 +225,11 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, items):
         c = idx // 4   # 0=left col, 1=right col
         r = idx % 4
         cx = x0 + 45 + c*(sub_w+24)
-        cy = card_top + 155 + r*100
+        cy = card_top + 150 + r*112
         _chip_icon(page, cx, cy, 54, ibg, icon)
-        # chip + title next to it; description below title (8px line spacing)
+        # chip + title next to it; description below title with 8px top+bottom margins per line
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
-        draw_wrapped(d, b, (cx+66, cy+30), F['tiny'], MUTED, sub_w-72, line_gap=8)
+        draw_wrapped(d, b, (cx+66, cy+34), F['tiny'], MUTED, sub_w-72, line_gap=16)
     return card_bot
 
 ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, PROBLEM_ITEMS)
