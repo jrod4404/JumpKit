@@ -399,6 +399,16 @@ function ckSaveHistory(list) {
   try { fs.writeFileSync(ckHistoryPath(), JSON.stringify(list, null, 2)); } catch (_) {}
 }
 
+// Append a debug line to userData/clipkit/debug.log (also echoes to terminal).
+// Used to diagnose capture issues even when DevTools/console isn't visible.
+function ckLog(msg) {
+  try {
+    const f = path.join(ckDir(), 'debug.log');
+    fs.appendFileSync(f, new Date().toISOString() + '  ' + msg + '\n');
+  } catch (_) {}
+  try { console.log('[clipkit]', msg); } catch (_) {}
+}
+
 // Holds the active capture's cancel callback while the overlay is open, so Esc
 // (from any screen / focus state) can cancel reliably.
 let ckCurrentCancel = null;
@@ -409,6 +419,7 @@ ipcMain.handle('clipkit-capture', async () => {
   let overlay = null;
   try {
     const { screen } = require('electron');
+    ckLog('capture: start');
 
     // Target the display the cursor is currently on, so capture works on any screen.
     const cursorPoint = screen.getCursorScreenPoint();
@@ -416,6 +427,7 @@ ipcMain.handle('clipkit-capture', async () => {
     const dW = display.size.width;   // DIP
     const dH = display.size.height;
     const scaleF = display.scaleFactor || 1; // device px per CSS px
+    ckLog('capture: display ' + JSON.stringify(display.bounds) + ' scale=' + scaleF);
 
     // 1) Open a fully TRANSPARENT, always-on-top overlay over the LIVE screen.
     //    No frozen screenshot, no image at all — just the crosshair + selection
@@ -441,6 +453,7 @@ ipcMain.handle('clipkit-capture', async () => {
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
+    ckLog('overlay: window created ' + dW + 'x' + dH);
     // Do NOT ignore mouse events. (v5.1.37 baseline; this is the config that
     // previously rendered the selection box + captured on release.)
     try { overlay.setIgnoreMouseEvents(false); } catch (_) {}
@@ -458,21 +471,25 @@ ipcMain.handle('clipkit-capture', async () => {
       #plus::before{left:25px;top:4px;width:6px;height:48px}
       #plus::after{left:4px;top:25px;width:48px;height:6px}
       #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:#fff;padding:9px 20px;border-radius:22px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);box-shadow:0 4px 16px rgba(0,0,0,0.35)}
+      /* on-screen debug HUD: shows the last event so capture can be diagnosed
+         with NO console at all — visible directly on the overlay */
+      #dbg{position:fixed;left:10px;bottom:10px;z-index:9;background:rgba(0,0,0,0.75);color:#4f6;font:11px/1.5 Menlo,monospace;padding:5px 9px;border-radius:5px;pointer-events:none;white-space:pre;border:1px solid rgba(0,255,100,0.3);display:none}
     </style></head><body>
       <div id="box"></div>
       <div id="plus"></div>
       <div id="hint">✦ Drag to select a region · Esc to cancel</div>
+      <div id="dbg"></div>
       <script>
-        const box=document.getElementById('box'),plus=document.getElementById('plus');
+        const box=document.getElementById('box'),plus=document.getElementById('plus'),dbgEl=document.getElementById('dbg');
         let sx=0,sy=0,drawing=false;
-        // Diagnostics: forward every interaction to main so it shows in the
-        // terminal AND in the main app window's DevTools console (send via the
-        // captureBridge IPC). Also log to this overlay's own console as fallback.
+        // Diagnostics: show on-screen HUD + forward to main (terminal + DevTools
+        // + debug.log file) via the captureBridge IPC. Fallback: local console.
         function dbg(k){
+          try { dbgEl.style.display='block'; dbgEl.textContent='[clipkit] '+k; } catch(_){}
           try { console.log('[clipkit-overlay]', k); } catch(_){}
           try { window.captureBridge && window.captureBridge.dbg('[clipkit-overlay] ' + k); } catch(_){}
         }
-        dbg('overlay fontloaded / ready');
+        dbg('overlay ready');
         // Log the very first mousemove (cursor over overlay) even before mousedown,
         // so we can tell if macOS delivers ANY pointer events to this window.
         document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
@@ -483,6 +500,7 @@ ipcMain.handle('clipkit-capture', async () => {
       </script>
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+    ckLog('overlay: loadURL done');
     try { overlay.show(); overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
     // Make sure the overlay actually receives keyboard input: give it focus and
     // blur the app window, and catch Esc at the webContents level (reliable even
@@ -514,7 +532,7 @@ ipcMain.handle('clipkit-capture', async () => {
       // Debug/log forwarding from the overlay: print to terminal AND mirror into
       // the main app window's DevTools console (where Jeff is watching).
       const onDbg = (_e, msg) => {
-        try { console.log('[clipkit-dbg]', msg); } catch (_) {}
+        try { ckLog(String(msg)); } catch (_) {}
         try {
           const mw = BrowserWindow.getAllWindows().find((w) => w !== overlay && !w.isDestroyed());
           if (mw && mw.webContents) mw.webContents.executeJavaScript('console.log(' + JSON.stringify(msg) + ')').catch(() => {});
