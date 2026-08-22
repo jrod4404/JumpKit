@@ -159,7 +159,7 @@ y = 275
 h1a = 'Your One-Click Link Launcher'
 h1b = 'for Windows & Mac'
 d.text((M, y), h1a, font=font(62, black=True), fill=INK)
-d.text((M, y+66), h1b, font=font(62, black=True), fill=ROYAL)
+d.text((M, y+66), h1b, font=font(62, black=True), fill=INK)
 desc = ('JumpKit displays your navigation links in one place — web links, local directories, shared resources — '
         'organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. '
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
@@ -182,16 +182,25 @@ _bsh = Image.new('RGBA', (595+60, 100), (0,0,0,0))
 ImageDraw.Draw(_bsh).rounded_rectangle([30, 22, 30+595, 22+80], radius=34, fill=(14, 24, 42, 42))
 page.alpha_composite(_bsh.filter(ImageFilter.GaussianBlur(10)), (_bx0-30, _by0-22+12))
 rect(d, [_bx0, _by0, _bx1, _by1], fill=(232,249,252), radius=34)
-# Windows + Apple icons (landing-page Tabler brand icons) + text, centered
-_wi = _load_icon('brand-windows').resize((30, 30), Image.LANCZOS)
-_ai = _load_icon('brand-apple').resize((30, 30), Image.LANCZOS)
-_btext = 'Windows + macOS desktop app'
-_bw = d.textbbox((0,0), _btext, font=F['small_b'])[2]
-_btotal = 30 + 8 + 30 + 10 + _bw
+# Windows + Apple icons (landing-page Tabler brand icons), each in front of its platform text
+_wi = _load_icon('brand-windows').resize((28, 28), Image.LANCZOS)
+_ai = _load_icon('brand-apple').resize((28, 28), Image.LANCZOS)
+_ptxt = 'Windows + macOS desktop app'
+_gap = 6
+_ww = d.textbbox((0,0), 'Windows', font=F['small_b'])[2]
+_pw = d.textbbox((0,0), '+', font=F['small_b'])[2]
+_mw = d.textbbox((0,0), 'macOS', font=F['small_b'])[2]
+_tw = d.textbbox((0,0), ' desktop app', font=F['small_b'])[2]
+# total width: [wicon]Windows[gap]+[gap][micon]macOS[tw]
+_btotal = 28 + _gap + _ww + _gap + _pw + _gap + 28 + _gap + _mw + _tw
 _bstart = _bx0 + (595 - _btotal)//2
-page.alpha_composite(_wi, (_bstart, _by0 + 25))
-page.alpha_composite(_ai, (_bstart + 38, _by0 + 25))
-d.text((_bstart + 78, _by0 + 21), _btext, font=F['small_b'], fill=(0,105,126))
+_cx = _bstart
+page.alpha_composite(_wi, (_cx, _by0 + 26)); _cx += 28 + _gap
+d.text((_cx, _by0 + 21), 'Windows', font=F['small_b'], fill=(0,105,126)); _cx += _ww + _gap
+d.text((_cx, _by0 + 21), '+', font=F['small_b'], fill=(0,105,126)); _cx += _pw + _gap
+page.alpha_composite(_ai, (_cx, _by0 + 26)); _cx += 28 + _gap
+d.text((_cx, _by0 + 21), 'macOS', font=F['small_b'], fill=(0,105,126)); _cx += _mw
+d.text((_cx, _by0 + 21), ' desktop app', font=F['small_b'], fill=(0,105,126))
 
 # Problem → Solution section (light theme, matches landing page)
 
