@@ -61,19 +61,27 @@
       grid.querySelectorAll('[data-ck-del]').forEach((node) => {
         node.addEventListener('click', (e) => { e.stopPropagation(); del(node.dataset.ckDel); });
       });
+      grid.querySelectorAll('[data-ck-copy]').forEach((node) => {
+        node.addEventListener('click', (e) => { e.stopPropagation(); reCopy(node.dataset.ckCopy); });
+      });
     }
   }
 
   function ckCard(rec) {
     const d = new Date(rec.ts);
     const stamp = d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    return `<div class="ck-card" data-ck-id="${esc(rec.id)}" title="Click to view · Right-click for options">
+    return `<div class="ck-card" data-ck-id="${esc(rec.id)}">
       <div class="ck-thumb" style="background-image:url('${fileUrl(rec.path)}')"></div>
-      <div class="ck-meta">
-        <span class="ck-time">${esc(stamp)}</span>
-        <span class="ck-size">${rec.width}×${rec.height}</span>
+      <div class="ck-main">
+        <div class="ck-meta">
+          <span class="ck-time">${esc(stamp)}</span>
+          <span class="ck-size">${rec.width}×${rec.height} px</span>
+        </div>
+        <div class="ck-actions">
+          <button class="ck-btn" data-ck-copy="${esc(rec.id)}" title="Copy to clipboard">📋 Copy</button>
+          <button class="ck-btn" data-ck-del="${esc(rec.id)}" title="Delete capture">🗑 Delete</button>
+        </div>
       </div>
-      <button class="ck-del" data-ck-del="${esc(rec.id)}" title="Delete capture">✕</button>
     </div>`;
   }
 
@@ -194,6 +202,9 @@
       });
       grid.querySelectorAll('[data-ck-del]').forEach((node) => {
         node.addEventListener('click', (e) => { e.stopPropagation(); del(node.dataset.ckDel); });
+      });
+      grid.querySelectorAll('[data-ck-copy]').forEach((node) => {
+        node.addEventListener('click', (e) => { e.stopPropagation(); reCopy(node.dataset.ckCopy); });
       });
     }
   }

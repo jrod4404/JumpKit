@@ -2,6 +2,15 @@
 
 ---
 
+## v5.1.42 — August 22, 2026
+
+### Capture — card actions + NoteKit icons
+- **Capture cards now show Copy + Delete buttons** directly on every capture on the Captures page (previously Copy only existed in the full-screen viewer, and Delete was a tiny hover-only ✕). Both buttons work: Copy sends the image to the clipboard, Delete removes the capture + file.
+- **Copy + Delete now reliably functional from the card** — wired to the existing clipboard/delete IPC handlers.
+- **NoteKit project icons use the same toolkit style as the other sidebar nav icons** — identical 24×24 centered tabler-icon slot, same color + hover/active states as the main nav icons.
+
+---
+
 ## v5.1.41 — August 22, 2026
 
 ### Capture
