@@ -8,7 +8,7 @@ import fs from 'fs';
 const dom = new JSDOM(`<!DOCTYPE html><html><body>
   <div id="pageContent"></div>
   <nav class="sidebar">
-    <div class="nav-section-label" id="clipkitNavLabel" style="display:none">CLIPKIT</div>
+    <div class="nav-section-label" id="clipkitNavLabel" style="display:none">ClipKit</div>
     <button class="nav-item" data-page="clipkit" id="clipkitNavBtn" style="display:none">Captures</button>
   </nav>
 </body></html>`, { runScripts: 'dangerously', pretendToBeVisual: true });

@@ -2,6 +2,20 @@
 
 ---
 
+## v5.1.39 — August 22, 2026
+
+### New / Fixed — ClipKit Screen Capture
+- **FIXED (root cause): screen capture was broken** — the app's Content-Security-Policy blocked the capture overlay's inline JavaScript. The crosshair rendered (CSS) but the entire click/drag/region/save logic never ran, so no bounding box appeared and no image saved. Added `'unsafe-inline'` to the CSP `script-src` so the overlay's script executes. Now the bounding box draws on drag and captures save to ClipKit's Captures panel + clipboard on release (verified end-to-end: PNG written to `captures/`, history updated, UI thumbnail renders).
+- **Diagnostics added** — capture activity logs to `userData/clipkit/debug.log` (heartbeat + step-by-step `onRegion` trace) for future troubleshooting.
+
+### UI — Sidebar
+- **Nav section labels** now use normal casing: `JumpKit`, `NoteKit`, `ClipKit`, `Admin` (were all-caps `JUMPKIT`/`NOTEKIT`/`CLIPKIT`/`ADMIN`).
+- **NoteKit label left alignment** now matches JumpKit/ClipKit labels (same left padding).
+- **Collapsed sidebar** now reliably hides all section labels (including NoteKit, which had a higher-specificity display rule).
+- **Collapsed sidebar** no longer shows the blue update-banner sliver above the collapse/expand button.
+
+---
+
 ## v1.0.0-rc2 — June 16, 2026 (Release Testing Improvements)
 
 ### Testing / QA

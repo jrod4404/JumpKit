@@ -8,7 +8,7 @@ const dom = new JSDOM(`<!DOCTYPE html><html><body>
   <div id="pageContent"></div>
   <div class="ctx-menu" id="ctxMenu" style="display:none;position:fixed"></div>
   <div class="topbar"><span class="topbar-title"><span id="topbarIcon"></span><span id="topbarTitle">Home</span></span><span class="topbar-subtitle" id="topbarSubtitle"></span></div>
-  <nav class="sidebar"><div class="nav-section-label nk-label-row" id="notekitNavLabel"><span>NOTEKIT</span><button class="nk-add-project-btn" id="nkAddProjectBtn">+</button></div><div id="notekitNavWrap"></div></nav>
+  <nav class="sidebar"><div class="nav-section-label nk-label-row" id="notekitNavLabel"><span>NoteKit</span><button class="nk-add-project-btn" id="nkAddProjectBtn">+</button></div><div id="notekitNavWrap"></div></nav>
 </body></html>`, { runScripts: 'dangerously', pretendToBeVisual: true });
 
 const { window } = dom;
