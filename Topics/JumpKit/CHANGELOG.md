@@ -2,6 +2,17 @@
 
 ---
 
+## v5.1.45 — August 22, 2026
+
+### Settings — Sidebar Modules card
+- **New "Sidebar Modules" card added to the Settings page** with two switches:
+  - **NoteKit in Sidebar** — show/hide the NoteKit project list in the sidebar navigation
+  - **ClipKit in Sidebar** — show/hide the ClipKit/Captures entry in the sidebar navigation
+- Each switch applies **live** (sidebar updates immediately) and persists across restarts via preferences.
+- Both default to ON; toggling off hides the module until re-enabled.
+
+---
+
 ## v5.1.44 — August 22, 2026
 
 ### Capture — button polish + toast feedback

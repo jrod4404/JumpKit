@@ -29,6 +29,8 @@
     const wrap = document.getElementById('notekitNavWrap');
     if (label) label.style.display = 'block';
     if (wrap) { wrap.style.display = 'block'; renderNav(); }
+    // Respect the user's show/hide preference for the sidebar section.
+    if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();
 
     // Plus button to the right of the NOTEKIT label → create a new project.
     const addBtn = document.getElementById('nkAddProjectBtn');

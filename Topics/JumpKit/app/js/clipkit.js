@@ -20,6 +20,8 @@
     const btn = document.getElementById('clipkitNavBtn');
     if (label) label.style.display = 'block';
     if (btn) btn.style.display = 'flex';
+    // Respect the user's show/hide preference for the sidebar section.
+    if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();
   }
 
   // Render the CAPTURES page (called by the router).

@@ -292,6 +292,8 @@ async function initApp() {
       localStorage.setItem('jk_sidebar_collapsed', '0');
     }
   }
+  // Show/hide NoteKit + ClipKit sidebar sections from saved prefs
+  applySidebarModulePrefs();
   runAutoArchive();
   await runCloudBackup();
   // Check backup reminder: notify if no backup in 7+ days and auto-backup is off
@@ -1505,6 +1507,17 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>`}
             </div>
           </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>NoteKit in Sidebar</span><span class="acct-row-hint">Show or hide the NoteKit project list in the sidebar navigation</span></div>
+              <label class="toggle"><input type="checkbox" id="prefNotekit" ${p.showNotekit!==false?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>ClipKit in Sidebar</span><span class="acct-row-hint">Show or hide the ClipKit/Captures entry in the sidebar navigation</span></div>
+              <label class="toggle"><input type="checkbox" id="prefClipkit" ${p.showClipkit!==false?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
           <div class="acct-save-row">
           </div>
         </div>`;
@@ -1673,6 +1686,8 @@ window._collectSettingsPrefs = function _collectSettingsPrefs() {
   const cloudEl   = document.getElementById('prefCloud');
   const timeEl    = document.getElementById('prefTime');
   const dollarEl  = document.getElementById('prefDollar');
+  const notekitEl = document.getElementById('prefNotekit');
+  const clipkitEl = document.getElementById('prefClipkit');
   const notUnlimited = (window._supabaseProfile?.subscription_tier || 'free') === 'free';
   return {
     startPage:       startSel ? startSel.dataset.value : cur.startPage,
@@ -1686,6 +1701,8 @@ window._collectSettingsPrefs = function _collectSettingsPrefs() {
     autoArchive:     notUnlimited ? 'never' : (archSel ? archSel.dataset.value : cur.autoArchive),
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
     uiContrast:      document.querySelector('#contrastSlider .jfb-tab.active')?.dataset.contrastVal || cur.uiContrast || 'low',
+    showNotekit:     notekitEl ? notekitEl.checked : (cur.showNotekit !== false),
+    showClipkit:     clipkitEl ? clipkitEl.checked : (cur.showClipkit !== false),
   };
 };
 
@@ -1705,6 +1722,38 @@ window.saveAccountPrefs = function saveAccountPrefs(showToast = true) {
   updateNotifBadge();
 }
 
+// Show/hide the NoteKit + ClipKit sidebar sections based on saved prefs.
+// Each module's init reveals its section first (if enabled in this build), then
+// calls this to respect the user's show/hide preference. Loaded after db.js so
+// DB + currentUser are available.
+window.applySidebarModulePrefs = function applySidebarModulePrefs() {
+  if (!currentUser) return;
+  let prefs;
+  try { prefs = DB.getPrefs(currentUser.id) || {}; } catch (e) { prefs = {}; }
+
+  const showNK = prefs.showNotekit !== false;
+  const showCK = prefs.showClipkit !== false;
+
+  const nkLabel  = document.getElementById('notekitNavLabel');
+  const nkWrap   = document.getElementById('notekitNavWrap');
+  const ckLabel  = document.getElementById('clipkitNavLabel');
+  const ckBtn    = document.getElementById('clipkitNavBtn');
+
+  // NoteKit: only hide if the feature is actually enabled (init reveals it);
+  // if disabled in this build, leave it hidden as init would.
+  const nkActive = nkLabel && nkLabel.style.display !== 'none';
+  if (nkActive) {
+    nkLabel.style.display  = showNK ? 'block' : 'none';
+    if (nkWrap) nkWrap.style.display = showNK ? 'block' : 'none';
+  }
+
+  const ckActive = ckBtn && ckBtn.style.display !== 'none';
+  if (ckActive) {
+    if (ckLabel) ckLabel.style.display = showCK ? 'block' : 'none';
+    if (ckBtn)   ckBtn.style.display   = showCK ? 'flex'  : 'none';
+  }
+};
+
 // Auto-save: persist settings whenever any control changes (no Save button needed)
 window.wireAutoSaveSettings = function wireAutoSaveSettings() {
   const root = document.getElementById('acctTabContent');
@@ -1718,6 +1767,14 @@ window.wireAutoSaveSettings = function wireAutoSaveSettings() {
   // Custom select options (click to pick) → save after selection applies
   root.querySelectorAll('.custom-select-option').forEach(opt => {
     opt.addEventListener('click', save);
+  });
+  // NoteKit/ClipKit sidebar toggles → re-apply sidebar visibility live + save
+  ['prefNotekit', 'prefClipkit'].forEach(id => {
+    const t = document.getElementById(id);
+    if (t) t.addEventListener('change', () => {
+      save();
+      if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();
+    });
   });
   // Contrast tabs → save after active tab re-applies
   const cslider = document.getElementById('contrastSlider');

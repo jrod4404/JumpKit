@@ -40,6 +40,8 @@ const DB = (() => {
       role:               'team-member',
       navDefaultCollapsed: false,
       uiContrast:        'low',
+      showNotekit:       true,
+      showClipkit:       true,
     };
   }
 
