@@ -154,9 +154,14 @@ desc = ('JumpKit displays your navigation links in one place — web links, loca
         'and macOS, and keeps your data local — fast, private, and always yours.')
 y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
-# hero image right — shadow in the same tight/soft style as the problem tiles
+# hero image right — shadow in the SAME tight/soft style as the problem tiles:
+# a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
 hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
-paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True, sh_alpha=70, sh_blur=10, sh_dx=0, sh_dy=16)
+_hx0, _hy0, _hx1, _hy1 = 1290, 315, 2390, 875
+hsh = Image.new('RGBA', (1100+40, 560+40), (0,0,0,0))
+ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+560], radius=58, fill=(14, 24, 42, 60))
+page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
+paste_rounded(page, hero_img, (_hx0, _hy0, _hx1, _hy1), radius=58, shadow=False)
 # image badge (light theme: soft turquoise bg, dark teal text)
 rect(d, [1355, 770, 1950, 850], fill=(232,249,252), radius=34)
 d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
@@ -261,12 +266,16 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
     ImageDraw.Draw(psh).rounded_rectangle([25,20,pill_w+25,54], radius=25, fill=(18,50,90,42))
     page.alpha_composite(psh.filter(ImageFilter.GaussianBlur(14)), (pill_x0-25, card_top+40))
     d.rounded_rectangle([pill_x0, card_top+42, pill_x1, card_top+90], radius=25, fill=ibg)
-    pil_s = round(22 * 1.05)          # 5% bigger
+    pil_s = round(22 * 1.10)          # 10% bigger
     pil = _load_icon(pill_icon).resize((pil_s, pil_s), Image.LANCZOS)
     lw = d.textbbox((0,0), label, font=F['tiny_b'])[2]
     lh = d.textbbox((0,0), label, font=F['tiny_b'])[3] - d.textbbox((0,0), label, font=F['tiny_b'])[1]
     total = pil_s + 6 + lw
     tart_x = cx_center - total//2
+    # bolder: composite the line-icon with small offsets to thicken the strokes
+    _bold_off = [(-1,0),(1,0),(0,-1),(0,1)]
+    for (ox, oy) in _bold_off:
+        page.alpha_composite(pil, (tart_x + ox, pill_cy - pil_s//2 + 4 + oy))
     page.alpha_composite(pil, (tart_x, pill_cy - pil_s//2 + 4))
     d.text((tart_x+pil_s+6, pill_cy - lh//2), label, font=F['tiny_b'], fill=ic)
     # centered title
