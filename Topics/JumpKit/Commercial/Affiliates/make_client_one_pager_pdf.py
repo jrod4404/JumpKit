@@ -201,12 +201,16 @@ SOLUTION_ITEMS = [
     ('chart-dots', 'ROI tracking and notes', 'Automatically track the time and money you save.'),
 ]
 
-def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
+# subtle tinted card borders
+PROB_BORDER = (252, 224, 224)   # soft red
+SOL_BORDER = (220, 245, 226)   # soft green
+
+def _draw_ps_card(x0, x1, label, title, ic, ibg, border, items):
     # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
     card_bot = ps_y + 560
     cx_center = (x0 + x1)//2
-    rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=LINE, radius=45)
+    rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=border, radius=45, width=3)
     # centered label pill
     pill_w = 272
     d.rounded_rectangle([cx_center-pill_w//2, card_top+42, cx_center+pill_w//2, card_top+90], radius=25, fill=ibg)
@@ -223,13 +227,13 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
         cx = x0 + 45 + c*(sub_w+24)
         cy = card_top + 155 + r*100
         _chip_icon(page, cx, cy, 54, ibg, icon)
-        # chip + title next to it; description below title
+        # chip + title next to it; description below title (8px line spacing)
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
-        draw_wrapped(d, b, (cx+66, cy+30), F['tiny'], MUTED, sub_w-72, line_gap=3)
+        draw_wrapped(d, b, (cx+66, cy+30), F['tiny'], MUTED, sub_w-72, line_gap=8)
     return card_bot
 
-ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Don't Cut It", PROB_ICON, PROB_BG, PROBLEM_ITEMS)
-_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'Meet JumpKit — Your Launchpad', SOL_ICON, SOL_BG, SOLUTION_ITEMS)
+ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, PROBLEM_ITEMS)
+_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, SOLUTION_ITEMS)
 
 # rollout/pricing row
 row_y=1915
