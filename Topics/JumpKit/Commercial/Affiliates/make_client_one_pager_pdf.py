@@ -165,7 +165,7 @@ desc = ('JumpKit displays your navigation links in one place — web links, loca
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
         'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
         'and macOS, and keeps your data local — fast, private, and always yours.')
-y2 = draw_wrapped(d, desc, (M, y+152), F['body'], (58,78,99), 1040, line_gap=12)  # 24px total margin below h1
+y2 = draw_wrapped(d, desc, (M, y+164), F['body'], (58,78,99), 1040, line_gap=12)  # 36px total margin below h1
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
