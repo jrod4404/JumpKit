@@ -7,8 +7,8 @@ OUT_DIR = ROOT / 'Commercial' / 'affiliates'
 OUT_PDF = OUT_DIR / 'JumpKit_Client_Facing_One_Pager.pdf'
 OUT_PNG = OUT_DIR / 'JumpKit_Client_Facing_One_Pager_preview.png'
 LOGO = ROOT / 'landing' / 'logo-light.png'
-HERO = ROOT / 'landing' / 'assets' / 'hero-mac-dark.jpg'
-WIN = ROOT / 'landing' / 'assets' / 'hero-windows-dark.jpg'
+HERO = ROOT / 'landing' / 'assets' / 'hero-mac-light.jpg'
+WIN = ROOT / 'landing' / 'assets' / 'hero-windows-light.jpg'
 ICON = ROOT / 'landing' / 'icon-512.png'
 
 W, H = 2550, 3300  # Letter at 300dpi-ish ratio; saved as one-page PDF image
@@ -136,19 +136,24 @@ page.alpha_composite(logo.resize((logo_w, logo_h), Image.LANCZOS), (M, 110))
 rect(d, [W-820, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radius=40)
 d.text((W-780, 148), 'CLIENT PRODUCTIVITY BRIEF', font=F['tiny_b'], fill=(0,105,126))
 
-# hero text
-y = 290
-d.text((M,y), 'Stop searching.', font=F['h1'], fill=INK)
-d.text((M,y+110), 'Start jumping.', font=F['h1b'], fill=ROYAL)
-lead = 'JumpKit gives your team one organized desktop launchpad for the web links, folders, shared drives, portals, and project resources they open every day.'
-y2 = draw_wrapped(d, lead, (M, y+245), F['body'], (58,78,99), 1040, line_gap=12)
+# hero text (landing page H1 + description, verbatim)
+y = 275
+h1a = 'Your One-Click Link Launcher'
+h1b = 'for Windows & Mac'
+d.text((M, y), h1a, font=font(62, black=True), fill=INK)
+d.text((M, y+66), h1b, font=font(62, black=True), fill=ROYAL)
+desc = ('JumpKit displays your navigation links in one place — web links, local directories, shared resources — '
+        'organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. '
+        'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
+        'Available for single users and shareable among teams.')
+y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right
-hero_img = contain_on_bg(HERO, (1100, 560))
+hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
 paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True)
-# image badge
-rect(d, [1355, 770, 1950, 850], fill=(7,22,38,235), radius=34)
-d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=WHITE)
+# image badge (light theme: soft turquoise bg, dark teal text)
+rect(d, [1355, 770, 1950, 850], fill=(232,249,252), radius=34)
+d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
 
 # pain cards
 card_y = 970
