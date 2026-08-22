@@ -407,9 +407,8 @@ let ckCurrentCancel = null;
 // success, {cancelled:true} if the user dismissed, or {error}.
 ipcMain.handle('clipkit-capture', async () => {
   let overlay = null;
-  let cancelTimer = null;
   try {
-    const { desktopCapturer, screen } = require('electron');
+    const { screen } = require('electron');
 
     // Target the display the cursor is currently on, so capture works on any screen.
     const cursorPoint = screen.getCursorScreenPoint();
@@ -417,34 +416,18 @@ ipcMain.handle('clipkit-capture', async () => {
     const dW = display.size.width;   // DIP
     const dH = display.size.height;
     const scaleF = display.scaleFactor || 1; // device px per CSS px
-    const sources = await desktopCapturer.getSources({
-      types: ['screen'],
-      thumbnailSize: { width: Math.round(dW * scaleF), height: Math.round(dH * scaleF) },
-    });
-    const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
-    if (!src) return { error: 'no screen source' };
-    const fullThumb = src.thumbnail; // nativeImage kept in main for cropping
 
-    // 2) A scaled-down copy for the overlay display so the data URL stays small
-    //    (avoids a giant base64 string that freezes the main process on 4K/5K).
-    const fw = fullThumb.getSize().width || Math.round(dW * scaleF);
-    const smallW = Math.min(fw, 1600);
-    const smallThumb = smallW < fw
-      ? fullThumb.resize({ width: smallW, quality: 'good' })
-      : fullThumb;
-    const imgData = smallThumb.toDataURL();
-    // Map overlay CSS px → full-res source px for the crop.
-    const cropScale = fw / (dW || 1);
-
-    // 3) Open the frameless, always-on-top, fullscreen overlay showing the frozen screen.
+    // 1) Open a fully TRANSPARENT, always-on-top overlay over the LIVE screen.
+    //    No frozen screenshot, no image at all — just the crosshair + selection
+    //    box. The actual capture happens on drag-release (see onRegion below).
     overlay = new BrowserWindow({
       x: display.bounds.x,
       y: display.bounds.y,
       width: dW,
       height: dH,
       frame: false,
-      transparent: false,
-      backgroundColor: '#000000',
+      transparent: true,
+      backgroundColor: '#00000000',
       alwaysOnTop: true,
       resizable: false,
       movable: false,
@@ -460,9 +443,8 @@ ipcMain.handle('clipkit-capture', async () => {
     try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
     const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
-      html,body{margin:0;padding:0;overflow:hidden;background:#000;cursor:crosshair;-webkit-user-select:none;user-select:none}
-      #bg{position:fixed;inset:0;background:#000;background-image:url('${imgData}');background-size:100% 100%;background-repeat:no-repeat}
-      #box{position:fixed;display:none;border:2px solid #fff;background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
+      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
+      #box{position:fixed;display:none;border:2px solid #fff;background:rgba(225,29,72,0.10);z-index:2;pointer-events:none}
       #box::after{content:'';position:absolute;left:0;top:0;right:0;bottom:0;border:2px solid #e11d48}
       /* big plus icon that follows the cursor to signal 'select a region' */
       #plus{position:fixed;left:0;top:0;z-index:4;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0.9}
@@ -471,7 +453,6 @@ ipcMain.handle('clipkit-capture', async () => {
       #plus::after{left:4px;top:25px;width:48px;height:6px}
       #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:#fff;padding:9px 20px;border-radius:22px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);box-shadow:0 4px 16px rgba(0,0,0,0.35)}
     </style></head><body>
-      <div id="bg"></div>
       <div id="box"></div>
       <div id="plus"></div>
       <div id="hint">✦ Drag to select a region · Esc to cancel</div>
@@ -499,8 +480,9 @@ ipcMain.handle('clipkit-capture', async () => {
       }
     });
     overlay.webContents.on('closed', () => { try { overlay.webContents.removeAllListeners('before-input-event'); } catch (_) {} });
-    // 4) On region selection, crop from the full-res nativeImage (NOT capturePage, which
-    //    fails on scaled displays). Coordinates are overlay CSS px → multiply by cropScale.
+    // 2) On region selection: hide the overlay FIRST (so it's not in the shot),
+    //    then capture the live screen and crop the chosen rectangle. Coordinates
+    //    are overlay CSS px → multiply by cropScale (thumbnail px per DIP).
     const result = await new Promise((resolve) => {
       let settled = false;
       const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
@@ -508,7 +490,20 @@ ipcMain.handle('clipkit-capture', async () => {
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
         try {
-          const crop = fullThumb.crop({
+          // Hide the overlay so it doesn't appear in the capture.
+          try { overlay.hide(); } catch (_) {}
+          // Give the compositor a moment to drop the overlay, then grab the screen.
+          await new Promise((r) => setTimeout(r, 120));
+          const { desktopCapturer } = require('electron');
+          const sources = await desktopCapturer.getSources({
+            types: ['screen'],
+            thumbnailSize: { width: Math.round(dW * scaleF), height: Math.round(dH * scaleF) },
+          });
+          const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
+          if (!src) throw new Error('no screen source');
+          const img = src.thumbnail;
+          const cropScale = img.getSize().width / (dW || 1);
+          const crop = img.crop({
             x: Math.round(rect.x * cropScale),
             y: Math.round(rect.y * cropScale),
             width: Math.max(1, Math.round(rect.w * cropScale)),

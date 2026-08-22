@@ -1,7 +1,7 @@
 // ClipKit renderer tests:
 //  - init shows the CLIPKIT sidebar section when enabled
 //  - render() builds the Captures page with New Capture button + history cards
-//  - New Capture calls clipkitCapture; clicking a card calls clipkitCopy
+//  - New Capture calls clipkitCapture; clicking a card opens the full-size viewer; right-click shows the copy/delete menu
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 
@@ -48,10 +48,33 @@ const cards = content.querySelectorAll('.ck-card');
 if (cards.length !== 2) { console.log('FAIL: expected 2 history cards, got', cards.length); process.exit(1); }
 console.log('OK: render shows New Capture + ' + cards.length + ' history cards');
 
-// clicking a card re-copies
+// clicking a card opens the full-size viewer (not a copy)
 cards[0].dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
 await new Promise((r) => setTimeout(r, 40));
-if (calls.copy.length !== 1 || calls.copy[0] !== 'cap-1') { console.log('FAIL: card click did not re-copy', JSON.stringify(calls.copy)); process.exit(1); }
-console.log('OK: clicking a capture re-copies it to clipboard');
+const viewer = document.getElementById('ckViewer');
+if (!viewer || viewer.style.display !== 'flex') { console.log('FAIL: card click did not open the full-size viewer'); process.exit(1); }
+if (!viewer.innerHTML.includes('cap-1')) { console.log('FAIL: viewer does not show the clicked capture'); process.exit(1); }
+if (calls.copy.length !== 0) { console.log('FAIL: card click should not copy directly', JSON.stringify(calls.copy)); process.exit(1); }
+console.log('OK: clicking a capture opens the full-size viewer');
+
+// viewer copy button copies the capture
+await window.ClipKit.copyFromViewer();
+await new Promise((r) => setTimeout(r, 40));
+if (calls.copy.length !== 1 || calls.copy[0] !== 'cap-1') { console.log('FAIL: viewer copy did not copy', JSON.stringify(calls.copy)); process.exit(1); }
+console.log('OK: viewer Copy to clipboard works');
+
+// right-click on a card shows the context menu with Copy + Delete
+cards[0].dispatchEvent(new window.MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: 100, clientY: 100 }));
+await new Promise((r) => setTimeout(r, 40));
+const menu = document.getElementById('ckMenu');
+if (!menu || menu.style.display !== 'block') { console.log('FAIL: right-click did not open the context menu'); process.exit(1); }
+if (!menu.innerHTML.includes('Copy to clipboard') || !menu.innerHTML.includes('Delete')) { console.log('FAIL: context menu missing Copy/Delete options'); process.exit(1); }
+console.log('OK: right-click shows Copy/Delete context menu');
+
+// menu Delete removes the capture
+menu.querySelector('[data-ck-menu-del]').dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+await new Promise((r) => setTimeout(r, 60));
+if (calls.delete.length !== 1 || calls.delete[0] !== 'cap-1') { console.log('FAIL: menu delete did not delete', JSON.stringify(calls.delete)); process.exit(1); }
+console.log('OK: context menu Delete works');
 
 console.log('ALL CLIPKIT TESTS PASSED ✔');
