@@ -116,6 +116,15 @@ def check_item(draw, x, y, text, maxw, fill=MUTED, check_fill=(229,250,252)):
 page = Image.new('RGBA', (W,H), WHITE)
 d = ImageDraw.Draw(page)
 
+# ── Real Tabler icons (same as landing page, pre-rendered to PNG) ───
+import os as _os
+_ICON_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '_icons')
+_icon_cache = {}
+def _load_icon(name):
+    if name not in _icon_cache:
+        _icon_cache[name] = Image.open(_os.path.join(_ICON_DIR, name + '.png')).convert('RGBA')
+    return _icon_cache[name]
+
 # subtle background
 bg = Image.new('RGBA',(W,H),(255,255,255,255))
 # left accent
@@ -138,6 +147,10 @@ _pb_label = 'Product Brief'
 _pb_lw = d.textbbox((0,0), _pb_label, font=F['tiny_b'])[2]
 _pb_pad = 42
 _pb_x0 = W - M - _pb_lw - 2*_pb_pad
+# same tight shadow style as the tiles: rounded-rect shape, blur 10, small down offset
+_pbsh = Image.new('RGBA', (_pb_lw + 2*_pb_pad + 60, 100), (0,0,0,0))
+ImageDraw.Draw(_pbsh).rounded_rectangle([30, 22, 30 + _pb_lw + 2*_pb_pad, 22 + 79], radius=40, fill=(14, 24, 42, 42))
+page.alpha_composite(_pbsh.filter(ImageFilter.GaussianBlur(10)), (_pb_x0 - 30, 126 - 22 + 12))
 rect(d, [_pb_x0, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radius=40)
 d.text((_pb_x0+_pb_pad, 148), _pb_label, font=F['tiny_b'], fill=(0,105,126))
 
@@ -158,24 +171,29 @@ y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
 hero_img = contain_on_bg(HERO, (1100, 484), bg=(255,255,255))
 _hx0, _hy0, _hx1, _hy1 = 1290, 315, 2390, 799
-hsh = Image.new('RGBA', (1100+40, 560+40), (0,0,0,0))
-ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+560], radius=58, fill=(14, 24, 42, 60))
+hsh = Image.new('RGBA', (1100+40, 484+40), (0,0,0,0))
+ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+484], radius=58, fill=(14, 24, 42, 60))
 page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
 paste_rounded(page, hero_img, (_hx0, _hy0, _hx1, _hy1), radius=58, shadow=False)
-# image badge (light theme: soft turquoise bg, dark teal text) — BELOW the hero image, centered
-_bx0, _by0, _bx1, _by1 = 1543, 833, 2138, 913
+# image badge (light theme: soft turquoise bg, dark teal text) — directly below the hero image, centered
+_bx0, _by0, _bx1, _by1 = 1543, 813, 2138, 893
+# same tight shadow style as the tiles
+_bsh = Image.new('RGBA', (595+60, 100), (0,0,0,0))
+ImageDraw.Draw(_bsh).rounded_rectangle([30, 22, 30+595, 22+80], radius=34, fill=(14, 24, 42, 42))
+page.alpha_composite(_bsh.filter(ImageFilter.GaussianBlur(10)), (_bx0-30, _by0-22+12))
 rect(d, [_bx0, _by0, _bx1, _by1], fill=(232,249,252), radius=34)
-_bw = d.textbbox((0,0), 'Windows + macOS desktop app', font=F['small_b'])[2]
-d.text((_bx0 + ((_bx1-_bx0) - _bw)//2, _by0+22), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
+# Windows + Apple icons (landing-page Tabler brand icons) + text, centered
+_wi = _load_icon('brand-windows').resize((30, 30), Image.LANCZOS)
+_ai = _load_icon('brand-apple').resize((30, 30), Image.LANCZOS)
+_btext = 'Windows + macOS desktop app'
+_bw = d.textbbox((0,0), _btext, font=F['small_b'])[2]
+_btotal = 30 + 8 + 30 + 10 + _bw
+_bstart = _bx0 + (595 - _btotal)//2
+page.alpha_composite(_wi, (_bstart, _by0 + 25))
+page.alpha_composite(_ai, (_bstart + 38, _by0 + 25))
+d.text((_bstart + 78, _by0 + 21), _btext, font=F['small_b'], fill=(0,105,126))
 
-# ── Real Tabler icons (same as landing page, pre-rendered to PNG) ───
-import os as _os
-_ICON_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '_icons')
-_icon_cache = {}
-def _load_icon(name):
-    if name not in _icon_cache:
-        _icon_cache[name] = Image.open(_os.path.join(_ICON_DIR, name + '.png')).convert('RGBA')
-    return _icon_cache[name]
+# Problem → Solution section (light theme, matches landing page)
 
 def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     if shadow:
