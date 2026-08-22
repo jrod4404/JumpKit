@@ -156,18 +156,16 @@ d.text((_pb_x0+_pb_pad, 148), _pb_label, font=F['tiny_b'], fill=(0,105,126))
 
 # hero text (landing page H1 + description, verbatim)
 y = 275
-h1a = 'Your One-Click Link &'
-h1b = 'Directory Launcher'
-h1c = 'for Windows & Mac'
+h1a = 'The Best One-Click Link'
+h1b = 'Launcher for Windows & Mac'
 d.text((M, y), h1a, font=font(62, black=True), fill=INK)
 d.text((M, y+66), h1b, font=font(62, black=True), fill=INK)
-d.text((M, y+132), h1c, font=font(62, black=True), fill=INK)
 desc = ('JumpKit displays your navigation links in one place — web links, local directories, shared resources — '
         'organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. '
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
         'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
         'and macOS, and keeps your data local — fast, private, and always yours.')
-y2 = draw_wrapped(d, desc, (M, y+206), F['body'], (58,78,99), 1040, line_gap=12)
+y2 = draw_wrapped(d, desc, (M, y+132), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
@@ -178,7 +176,7 @@ ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+484], radius=58, fill
 page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
 paste_rounded(page, hero_img, (_hx0, _hy0, _hx1, _hy1), radius=58, shadow=False)
 # image badge (light theme: soft turquoise bg, dark teal text) — directly below the hero image, centered
-_bx0, _by0, _bx1, _by1 = 1543, 848, 2138, 928
+_bx0, _by0, _bx1, _by1 = 1543, 800, 2138, 880
 # same tight shadow style as the tiles
 _bsh = Image.new('RGBA', (595+60, 100), (0,0,0,0))
 ImageDraw.Draw(_bsh).rounded_rectangle([30, 22, 30+595, 22+80], radius=34, fill=(14, 24, 42, 42))
@@ -218,7 +216,7 @@ def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 968   # cards start below the hero badge (desc ends ~822, badge 848-928)
+ps_y = 940   # cards start just below the hero badge (badge 800-880, desc ends ~696)
 col_w = (W - 2*M - 40)//2
 PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
