@@ -204,41 +204,70 @@ SOLUTION_ITEMS = [
 # subtle tinted card borders
 PROB_BORDER = (245, 178, 178)   # soft red (subtle but visible)
 SOL_BORDER = (172, 228, 184)   # soft green (subtle but visible)
+PS_BG = (247, 248, 250)        # very subtle gray card bg
+
+def _wrap_count(text, fnt, width):
+    words = text.split()
+    lines = 0; cur = ''
+    for w in words:
+        test = w if not cur else cur + ' ' + w
+        if d.textbbox((0,0), test, font=fnt)[2] <= width:
+            cur = test
+        else:
+            lines += 1; cur = w
+    if cur: lines += 1
+    return lines
 
 def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
-    # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
-    card_bot = ps_y + 680
     cx_center = (x0 + x1)//2
-    rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=border, radius=45, width=3)
-    # centered label pill (icon + label)
+    sub_w = (col_w - 60 - 24)//2  # two cols inside card
+    TITLE_H = 30
+    ROW_START = card_top + 162     # 12px margin below the card title
+
+    # ── dry run: measure stacked row heights to size the card ──
+    col_h = [ROW_START, ROW_START]
+    for idx, (icon, t, b) in enumerate(items):
+        c = idx // 4
+        lines = _wrap_count(b, F['tiny'], sub_w - 72)
+        block_h = TITLE_H + lines*(F['tiny'].size + 2)
+        col_h[c] += block_h + 8
+    card_bot = max(col_h) - 8 + 34   # 34px below last row (75% less than before)
+
+    # ── soft card shadow (subtle, offset down) ──
+    shw, shh = x1-x0, card_bot-card_top
+    sh = Image.new('RGBA', (shw, shh), (0,0,0,0))
+    ImageDraw.Draw(sh).rounded_rectangle([0,0,shw-1,shh-1], radius=45, fill=(20,30,50,26))
+    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(30)), (x0, card_top+10))
+
+    # very subtle gray card bg + tinted border
+    rect(d, [x0, card_top, x1, card_bot], fill=PS_BG, outline=border, radius=45, width=3)
+
+    # centered label pill (icon + label, icon vertically centered with text)
     pill_w = 300
     pill_x0, pill_x1 = cx_center-pill_w//2, cx_center+pill_w//2
+    pill_cy = card_top + 66
     d.rounded_rectangle([pill_x0, card_top+42, pill_x1, card_top+90], radius=25, fill=ibg)
     pil = _load_icon(pill_icon).resize((22, 22), Image.LANCZOS)
     lw = d.textbbox((0,0), label, font=F['tiny_b'])[2]
+    lh = d.textbbox((0,0), label, font=F['tiny_b'])[3] - d.textbbox((0,0), label, font=F['tiny_b'])[1]
     total = 22 + 6 + lw
     tart_x = cx_center - total//2
-    page.alpha_composite(pil, (tart_x, card_top+52))
-    d.text((tart_x+22+6, card_top+53), label, font=F['tiny_b'], fill=ic)
+    page.alpha_composite(pil, (tart_x, pill_cy - 11))
+    d.text((tart_x+22+6, pill_cy - lh//2), label, font=F['tiny_b'], fill=ic)
     # centered title
     tw = d.textbbox((0,0), title, font=font(44, black=True))[2]
     d.text((cx_center-tw//2, card_top+104), title, font=font(44, black=True), fill=INK)
-    # 2 columns x 4 rows
-    sub_w = (col_w - 60 - 24)//2  # two cols inside card
-    # per column stack rows with 8px gap between grey-description bottom and next black title
-    col_y = [card_top + 150, card_top + 150]  # current y in each column
-    TITLE_H = 30
+    # 2 columns x 4 rows; 8px gap between grey-description bottom and next black title
+    col_y = [ROW_START, ROW_START]
     for idx, (icon, t, b) in enumerate(items):
         c = idx // 4
         cx = x0 + 45 + c*(sub_w+24)
         cy = col_y[c]
-        # black title (top), grey description below it
         _chip_icon(page, cx, cy, 54, ibg, icon)
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
         desc_y = cy + TITLE_H
         end_y = draw_wrapped(d, b, (cx+66, desc_y), F['tiny'], MUTED, sub_w-72, line_gap=2)
-        # next row starts 8px below the grey text block (gap between grey text and next black title)
         col_y[c] = end_y + 8
     return card_bot
 
