@@ -422,173 +422,136 @@ ipcMain.on('clipkit-dbg', (_e, msg) => {
 // Holds the active capture's cancel callback while the overlay is open, so Esc
 // (from any screen / focus state) can cancel reliably.
 let ckCurrentCancel = null;
+// Module-scope reference to the active capture's resolve-fn, so a wiped-out
+// overlay's 'closed' event can settle the capture as cancelled.
+let doneRef = null;
 
 // Start an interactive region capture. Resolves with the capture record on
 // success, {cancelled:true} if the user dismissed, or {error}.
 ipcMain.handle('clipkit-capture', async () => {
-  let overlay = null;
+  let overlays = [];
+  let activeDisplay = null;
+  const { screen, globalShortcut } = require('electron');
+  const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
   try {
-    const { screen } = require('electron');
     ckLog('capture: start');
 
-    // Target the display the cursor is currently on, so capture works on any screen.
-    const cursorPoint = screen.getCursorScreenPoint();
-    const display = screen.getDisplayNearestPoint(cursorPoint);
-    const dW = display.size.width;   // DIP
-    const dH = display.size.height;
-    const scaleF = display.scaleFactor || 1; // device px per CSS px
-    ckLog('capture: display ' + JSON.stringify(display.bounds) + ' scale=' + scaleF);
-
-    // 1) Open a fully TRANSPARENT, always-on-top overlay over the LIVE screen.
-    //    No frozen screenshot, no image at all — just the crosshair + selection
-    //    box. The actual capture happens on drag-release (see onRegion below).
-    overlay = new BrowserWindow({
-      x: display.bounds.x,
-      y: display.bounds.y,
-      width: dW,
-      height: dH,
-      frame: false,
-      transparent: true,
-      // alpha=1 (not 0): invisible on screen but guarantees the window still
-      // receives mouse events on Windows (fully alpha-0 windows can be
-      // click-through / skip hit-testing there).
-      backgroundColor: '#01000000',
-      alwaysOnTop: true,
-      resizable: false,
-      movable: false,
-      skipTaskbar: true,
-      fullscreen: false,
-      hasShadow: false,
-      webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'capture-preload.js') },
-    });
-    overlay.setAlwaysOnTop(true, 'screen-saver');
-    overlay.setMenuBarVisibility(false);
-    ckLog('overlay: window created ' + dW + 'x' + dH);
-    // Do NOT ignore mouse events. (v5.1.37 baseline; this is the config that
-    // previously rendered the selection box + captured on release.)
-    try { overlay.setIgnoreMouseEvents(false); } catch (_) {}
-    // Global Esc so cancellation works even if the overlay does not hold keyboard focus.
-    const { globalShortcut } = require('electron');
-    try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
-    const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
+    // Create one transparent overlay per display so the crosshair + selection
+    // work on EVERY screen, with no dead zones. Each overlay covers its own
+    // display's full bounds and reports regions in SCREEN coordinates.
+    const displays = screen.getAllDisplays();
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
       html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
       #box{position:fixed;display:none;border:2px dashed rgba(255,255,255,0.9);background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
       #box::after{content:'';position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border:2px dashed rgba(225,29,72,0.85);border-radius:2px}
-      /* big plus icon that follows the cursor to signal 'select a region' */
       #plus{position:fixed;left:0;top:0;z-index:4;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0.9}
       #plus::before,#plus::after{content:'';position:absolute;background:#fff;border-radius:3px;box-shadow:0 0 8px rgba(0,0,0,0.6)}
       #plus::before{left:25px;top:4px;width:6px;height:48px}
       #plus::after{left:4px;top:25px;width:48px;height:6px}
       #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:#fff;padding:9px 20px;border-radius:22px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);box-shadow:0 4px 16px rgba(0,0,0,0.35)}
-      /* on-screen debug HUD: shows the last event so capture can be diagnosed
-         with NO console at all — visible directly on the overlay */
-      #dbg{position:fixed;left:10px;bottom:10px;z-index:9;background:rgba(0,0,0,0.75);color:#4f6;font:11px/1.5 Menlo,monospace;padding:5px 9px;border-radius:5px;pointer-events:none;white-space:pre;border:1px solid rgba(0,255,100,0.3);display:none}
     </style></head><body>
       <div id="box"></div>
       <div id="plus"></div>
       <div id="hint">✦ Drag to select a region · Esc to cancel</div>
-      <div id="dbg"></div>
       <script>
-        const box=document.getElementById('box'),plus=document.getElementById('plus'),dbgEl=document.getElementById('dbg');
+        const box=document.getElementById('box'),plus=document.getElementById('plus');
         let sx=0,sy=0,drawing=false;
-        // Diagnostics: show on-screen HUD + forward to main (terminal + DevTools
-        // + debug.log file) via the captureBridge IPC. Fallback: local console.
-        function dbg(k){
-          try { dbgEl.style.display='block'; dbgEl.textContent='[clipkit] '+k; } catch(_){}
-          try { console.log('[clipkit-overlay]', k); } catch(_){}
-          try { window.captureBridge && window.captureBridge.dbg('[clipkit-overlay] ' + k); } catch(_){}
-        }
-        dbg('overlay ready');
-        // Log the very first mousemove (cursor over overlay) even before mousedown,
-        // so we can tell if macOS delivers ANY pointer events to this window.
+        // Quiet diagnostics go to the main-process debug.log only (no on-screen HUD).
+        function dbg(k){ try { console.log('[clipkit-overlay]', k); } catch(_){} try { window.captureBridge && window.captureBridge.dbg('[clipkit-overlay] '+k); } catch(_){} }
+        // Convert this overlay's local (clientX/Y) coords to SCREEN coords by
+        // adding the display bounds offset injected below.
+        const OX = window.__dispOffset ? window.__dispOffset.x : 0;
+        const OY = window.__dispOffset ? window.__dispOffset.y : 0;
         document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
-        document.addEventListener('mousedown',e=>{dbg('mousedown @'+e.clientX+','+e.clientY);sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block';dbg('box shown, drawing=true')});
+        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
-        document.addEventListener('mouseup',e=>{if(!drawing){dbg('mouseup but not drawing');return}dbg('mouseup @'+e.clientX+','+e.clientY);drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){dbg('region too small -> cancel');window.captureBridge.cancel();return} dbg('region '+w+'x'+h);window.captureBridge.region(x,y,w,h)});
-        document.addEventListener('keydown',e=>{if(e.key==='Escape'){dbg('Esc');window.captureBridge.cancel()}});
-        // Heartbeat: pings main every second so the debug.log proves this
-        // renderer is alive even if no mouse events ever arrive.
-        let hb=0; setInterval(()=>{ try{ hb++; window.captureBridge&&window.captureBridge.dbg('hb '+hb); }catch(_){} },1000);
+        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.captureBridge.cancel();return} // screen coords
+          window.captureBridge.region(x+OX,y+OY,w,h)});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.captureBridge.cancel()});
       </script>
     </body></html>`;
-    // Register capture/diagnostic listeners BEFORE loadURL — the overlay script
-    // runs during loadURL and sends its early messages immediately, so a
-    // listener added after loadURL would miss them (that's why 'overlay ready'
-    // never appeared in debug.log before).
-    overlay.webContents.on('console-message', (_e, _lvl, message) => {
-      ckLog('renderer> ' + message);
-    });
-    overlay.webContents.once('did-finish-load', () => {
-      ckLog('overlay: did-finish-load');
-      try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
-    });
-    await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
-    ckLog('overlay: loadURL done');
-    try { overlay.show(); overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
-    ckLog('overlay: shown');
-    // Make sure the overlay actually receives keyboard input: give it focus and
-    // blur the app window, and catch Esc at the webContents level (reliable even
-    // if focus is elsewhere / clicking another screen).
-    try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
-    // Re-assert focus once the overlay DOM has finished loading so the window
-    // is key (standard macOS first-click passthrough fix). Added for .38.
-    try {
-      overlay.webContents.once('did-finish-load', () => {
-        try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
+
+    // Build every overlay.
+    for (const disp of displays) {
+      const dB = disp.bounds;
+      const dW = disp.size.width, dH = disp.size.height;
+      const win = new BrowserWindow({
+        x: dB.x, y: dB.y, width: dW, height: dH,
+        frame: false, transparent: true,
+        backgroundColor: '#01000000',
+        alwaysOnTop: true, resizable: false, movable: false, skipTaskbar: true,
+        fullscreen: false, hasShadow: false,
+        webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'capture-preload.js') },
       });
-    } catch (_) {}
-    const mainWin = BrowserWindow.getAllWindows().find((w) => w !== overlay);
-    if (mainWin) { try { mainWin.blur(); } catch (_) {} }
-    overlay.webContents.on('before-input-event', (e, input) => {
-      // Esc always cancels, even if the overlay doesn't hold keyboard focus.
-      if (input.type === 'keyDown' && (input.key === 'Escape' || input.key === 'Esc')) {
-        e.preventDefault();
-        if (typeof ckCurrentCancel === 'function') ckCurrentCancel();
-      }
-    });
-    overlay.webContents.on('closed', () => { try { overlay.webContents.removeAllListeners('before-input-event'); } catch (_) {} });
-    // 2) On region selection: hide the overlay FIRST (so it's not in the shot),
-    //    then capture the live screen and crop the chosen rectangle. Coordinates
-    //    are overlay CSS px → multiply by cropScale (thumbnail px per DIP).
+      win.setAlwaysOnTop(true, 'screen-saver');
+      win.setMenuBarVisibility(false);
+      try { win.setIgnoreMouseEvents(false); } catch (_) {}
+      overlays.push({ win, display: disp });
+      // Inject this display's screen offset into the renderer before scripts run.
+      win.webContents.on('did-finish-load', () => {
+        try {
+          win.webContents.executeJavaScript('window.__dispOffset={x:' + dB.x + ',y:' + dB.y + '};').catch(()=>{});
+        } catch (_) {}
+        try { win.focus(); win.focusOnWebView(); } catch (_) {}
+      });
+      win.webContents.on('console-message', (_e, _lvl, message) => { ckLog('renderer> ' + message); });
+      win.webContents.on('closed', () => {
+        // If this overlay closes for any reason, settle as cancelled (unless already done).
+        doneRef && doneRef({ cancelled: true });
+      });
+      await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+      ckLog('overlay: created for display ' + disp.id + ' at ' + dB.x + ',' + dB.y + ' ' + dW + 'x' + dH);
+      try { win.show(); win.focus(); win.focusOnWebView(); } catch (_) {}
+    }
+    ckLog('overlay: ' + overlays.length + ' overlays shown');
+
+    // Global Esc cancels from any screen / focus state.
+    try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
+
+    const closeAll = (skip) => { for (const o of overlays) { if (o.win && o.win !== skip) { try { o.win.close(); } catch (_) {} } } };
+    const hideAllOpacity = () => { for (const o of overlays) { try { o.win.setOpacity(0); } catch (_) {} } };
+
     const result = await new Promise((resolve) => {
       let settled = false;
       const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
+      // Module-scope doneRef lets the closed handler settle as cancelled.
+      doneRef = done;
       const onRegion = async (e, rect) => {
-        ckLog('onRegion: received ' + JSON.stringify(rect));
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
         try {
-          ckLog('onRegion: hiding overlay');
-          // Hide the overlay so it doesn't appear in the capture. On Windows,
-          // setOpacity(0) is more reliable than hide() for removing a
-          // transparent always-on-top window from the composited frame.
-          try { overlay.setOpacity(0); } catch (_) {}
-          try { overlay.hide(); } catch (_) {}
-          // Give the compositor a moment to drop the overlay, then grab the screen.
-          await new Promise((r) => setTimeout(r, 150));
+          ckLog('onRegion: received ' + JSON.stringify(rect));
+          // Identify which display this region is on via the sender webContents.
+          const sender = e.sender;
+          const pair = overlays.find((o) => o.win.webContents === sender);
+          const disp = (pair && pair.display) || screen.getDisplayNearestPoint({ x: rect.x, y: rect.y });
+          const displayId = (disp && disp.id) || screen.getPrimaryDisplay().id;
+          const dW = disp.size.width, dH = disp.size.height, scaleF = disp.scaleFactor || 1;
+          const dB = disp.bounds;
+          ckLog('onRegion: display ' + displayId + ' scale=' + scaleF);
+          // Hide ALL overlays (so none appear in the shot) and detach our
+          // resolve-ref BEFORE the awaited screenshot, so a wiped-out overlay's
+          // 'closed' event can't race and settle this as cancelled.
+          hideAllOpacity();
+          closeAll();
+          doneRef = null;
+          await new Promise((r) => setTimeout(r, 180));
           const { desktopCapturer } = require('electron');
-          // Cap the requested thumbnail size: very large requests (4K/5K at
-          // high scale) can return empty thumbnails on some Windows setups.
           const tw = Math.min(Math.round(dW * scaleF), 3840);
           const th = Math.min(Math.round(dH * scaleF), 3840);
-          ckLog('onRegion: requesting desktopCapturer ' + tw + 'x' + th);
-          const sources = await desktopCapturer.getSources({
-            types: ['screen'],
-            thumbnailSize: { width: tw, height: th },
-          });
-          ckLog('onRegion: got ' + sources.length + ' sources');
-          const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
+          const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: tw, height: th } });
+          const src = sources.find((s) => s.display_id === String(displayId)) || sources.find((s) => s.display_id) || sources[0];
           if (!src) throw new Error('no screen source');
           const img = src.thumbnail;
           const tSize = img.getSize();
-          ckLog('onRegion: source=' + (src && src.id) + ' thumb=' + JSON.stringify(tSize));
           if (!tSize || !tSize.width || !tSize.height) throw new Error('empty screen thumbnail');
           const cropScale = tSize.width / (dW || 1);
-          ckLog('onRegion: cropScale=' + cropScale + ' rect=' + JSON.stringify(rect));
+          // rect is in SCREEN coords; convert to display-local before cropping.
+          const localX = rect.x - dB.x;
+          const localY = rect.y - dB.y;
           const crop = img.crop({
-            x: Math.round(rect.x * cropScale),
-            y: Math.round(rect.y * cropScale),
+            x: Math.round(localX * cropScale),
+            y: Math.round(localY * cropScale),
             width: Math.max(1, Math.round(rect.w * cropScale)),
             height: Math.max(1, Math.round(rect.h * cropScale)),
           });
@@ -596,32 +559,30 @@ ipcMain.handle('clipkit-capture', async () => {
           ckLog('onRegion: cropped PNG bytes=' + png.length);
           const rec = await ckPersistCapture(png, Math.round(rect.w), Math.round(rect.h));
           ckLog('onRegion: saved ' + rec.id);
-          // Resolve FIRST so the closed event (fired by overlay.close()) can't
-          // win the race and mark this successful capture as cancelled.
+          doneRef = null;
           done(rec);
-          ckLog('onRegion: done resolved');
-          try { overlay.close(); } catch (_) {}
         } catch (err) {
           console.error('[clipkit] capture failed:', err && err.message ? err.message : err);
           ckLog('onRegion: ERROR ' + (err && err.message ? err.message : err));
+          doneRef = null;
           done({ error: err.message });
-          try { overlay.close(); } catch (_) {}
+          closeAll();
         }
       };
       const onCancel = () => {
         ipcMain.removeListener('clipkit-region', onRegion);
-        try { overlay.close(); } catch (_) {}
+        doneRef = null;
+        closeAll();
         done({ cancelled: true });
       };
       ipcMain.on('clipkit-region', onRegion);
       ipcMain.on('clipkit-cancel', onCancel);
       ckCurrentCancel = onCancel;
-      overlay.on('closed', () => done({ cancelled: true }));
     });
     return result;
   } catch (e) {
-    try { if (overlay) overlay.close(); } catch (_) {}
-    try { if (typeof unregisterEsc === 'function') unregisterEsc(); } catch (_) {}
+    try { closeAll(); } catch (_) {}
+    try { unregisterEsc(); } catch (_) {}
     return { error: e.message };
   }
 });

@@ -2,6 +2,19 @@
 
 ---
 
+## v5.1.40 — August 22, 2026
+
+### Capture — multi-display + cleanup
+- **Crosshair now works on every connected display** — capture opens a transparent overlay on each screen (previously only the screen the app was on).
+- **No more dead zone / enter-blocked box** — each overlay covers its display's full bounds; regions are mapped via screen coordinates, so dragging works edge-to-edge.
+- **Removed the green on-screen debug text/pill** from the capture overlay (crosshair/hint only). Quiet diagnostics remain in `debug.log` for troubleshooting.
+
+### UI — Sidebar
+- **No horizontal scrollbar when collapsed** — added `overflow-x: hidden` to the collapsed sidebar + nav.
+- **Nav icons + links aligned identically** — icons normalized to a fixed 24×24 centered slot (removed the Jumps icon's offset margin); label leading spaces removed so all labels start at the same horizontal position.
+
+---
+
 ## v5.1.39 — August 22, 2026
 
 ### New / Fixed — ClipKit Screen Capture
