@@ -435,6 +435,19 @@ ipcMain.handle('clipkit-capture', async () => {
   const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
   try {
     ckLog('capture: start');
+    // Auto-minimize the main app window so it doesn't block the capture area or
+    // appear in the shot; we restore it when capture completes/cancels.
+    const mainWin = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents && w.webContents.getURL().startsWith('file:'));
+    const mainWasMaximized = !!(mainWin && mainWin.isMaximized());
+    const restoreMain = () => {
+      try {
+        if (!mainWin || mainWin.isDestroyed()) return;
+        mainWin.show();
+        mainWin.focus();
+        if (mainWasMaximized) { try { mainWin.maximize(); } catch (_) {} }
+      } catch (_) {}
+    };
+    if (mainWin) { try { mainWin.minimize(); } catch (_) {} }
 
     // Create one transparent overlay per display so the crosshair + selection
     // work on EVERY screen, with no dead zones. Each overlay covers its own
@@ -513,7 +526,7 @@ ipcMain.handle('clipkit-capture', async () => {
 
     const result = await new Promise((resolve) => {
       let settled = false;
-      const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
+      const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} restoreMain(); };
       // Module-scope doneRef lets the closed handler settle as cancelled.
       doneRef = done;
       const onRegion = async (e, rect) => {
@@ -583,6 +596,7 @@ ipcMain.handle('clipkit-capture', async () => {
   } catch (e) {
     try { closeAll(); } catch (_) {}
     try { unregisterEsc(); } catch (_) {}
+    try { restoreMain(); } catch (_) {}
     return { error: e.message };
   }
 });

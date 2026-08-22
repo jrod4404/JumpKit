@@ -2,6 +2,18 @@
 
 ---
 
+## v5.1.41 — August 22, 2026
+
+### Capture
+- **App auto-minimizes during capture** — clicking New Capture minimizes the JumpKit window so it never blocks the selection area or appears in the shot; the window automatically restores (and re-maximizes if it was maximized) after you select, cancel, or press Esc.
+- (Fixes the JumpKit window still showing / "walls" during crosshair capture.)
+
+### UI — Sidebar
+- **Captures icon color now matches Home** — removed the `color:inherit` override on the ClipKit captures icon so it uses the same icon color + active highlight as Home.
+- **NoteKit project icons align perfectly when collapsed** — project rows now center their icons (matching the Help icon) and hide the name/overflow controls when the sidebar is collapsed.
+
+---
+
 ## v5.1.40 — August 22, 2026
 
 ### Capture — multi-display + cleanup

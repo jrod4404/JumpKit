@@ -34,6 +34,8 @@
 .sidebar.collapsed .sidebar-logo-img { display: none; }
 .sidebar.collapsed .sidebar-logo-circle { display: block; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 12px 0; gap: 0; }
+.sidebar.collapsed .nk-project-row { justify-content: center; padding: 8px 0; gap: 0; }
+.sidebar.collapsed .nk-project-name, .sidebar.collapsed .nk-project-more { display: none; }
 .sidebar.collapsed .nav-label { display: none; }
 .sidebar.collapsed .nav-section-label { display: none; }
 .sidebar.collapsed .nav-section-label#notekitNavLabel { display: none !important; }
@@ -796,7 +798,7 @@ strong, b { color: inherit; }
 #clipkitNavLabel { margin-top: 16px; }
 .nk-project { margin-bottom: 2px; }
 .nk-project-row { display: flex; align-items: center; gap: 9px; padding: 10px 20px; font-size: 1rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-radius: 0; transition: all var(--transition); border: none; background: none; width: 100%; text-align: left; }
-.nk-project-row .nav-icon { font-size: 1.3rem; width: 24px; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
+.nk-project-row .nav-icon { font-size: 1.3rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
 .nk-project-row:hover { background: var(--bg-hover); color: var(--hover-accent); }
 .nk-project-row:hover .nav-icon { color: var(--hover-accent); }
 .nk-project-row.active { background: var(--bg-hover); color: var(--hover-accent); font-weight: 600; }
