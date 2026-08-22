@@ -465,13 +465,18 @@ ipcMain.handle('clipkit-capture', async () => {
       <script>
         const box=document.getElementById('box'),plus=document.getElementById('plus');
         let sx=0,sy=0,drawing=false;
-        // Diagnostics: log every interaction to the main-process console (visible
-        // in the terminal that launched the app). Confirms whether macOS is
-        // delivering mouse events to this window at all.
-        function dbg(k){ try { console.log('[clipkit-overlay]', k); } catch(_){} }
-        dbg('loaded');
+        // Diagnostics: forward every interaction to main so it shows in the
+        // terminal AND in the main app window's DevTools console (send via the
+        // captureBridge IPC). Also log to this overlay's own console as fallback.
+        function dbg(k){
+          try { console.log('[clipkit-overlay]', k); } catch(_){}
+          try { window.captureBridge && window.captureBridge.dbg('[clipkit-overlay] ' + k); } catch(_){}
+        }
+        dbg('overlay fontloaded / ready');
+        // Log the very first mousemove (cursor over overlay) even before mousedown,
+        // so we can tell if macOS delivers ANY pointer events to this window.
         document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
-        document.addEventListener('mousedown',e=>{dbg('mousedown @'+e.clientX+','+e.clientY);sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
+        document.addEventListener('mousedown',e=>{dbg('mousedown @'+e.clientX+','+e.clientY);sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block';dbg('box shown, drawing=true')});
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
         document.addEventListener('mouseup',e=>{if(!drawing){dbg('mouseup but not drawing');return}dbg('mouseup @'+e.clientX+','+e.clientY);drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){dbg('region too small -> cancel');window.captureBridge.cancel();return} dbg('region '+w+'x'+h);window.captureBridge.region(x,y,w,h)});
         document.addEventListener('keydown',e=>{if(e.key==='Escape'){dbg('Esc');window.captureBridge.cancel()}});
@@ -506,9 +511,20 @@ ipcMain.handle('clipkit-capture', async () => {
     const result = await new Promise((resolve) => {
       let settled = false;
       const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
+      // Debug/log forwarding from the overlay: print to terminal AND mirror into
+      // the main app window's DevTools console (where Jeff is watching).
+      const onDbg = (_e, msg) => {
+        try { console.log('[clipkit-dbg]', msg); } catch (_) {}
+        try {
+          const mw = BrowserWindow.getAllWindows().find((w) => w !== overlay && !w.isDestroyed());
+          if (mw && mw.webContents) mw.webContents.executeJavaScript('console.log(' + JSON.stringify(msg) + ')').catch(() => {});
+        } catch (_) {}
+      };
+      let stopDbg = () => {};
       const onRegion = async (e, rect) => {
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
+        stopDbg();
         try {
           // Hide the overlay so it doesn't appear in the capture. On Windows,
           // setOpacity(0) is more reliable than hide() for removing a
@@ -551,13 +567,16 @@ ipcMain.handle('clipkit-capture', async () => {
       };
       const onCancel = () => {
         ipcMain.removeListener('clipkit-region', onRegion);
+        stopDbg();
         try { overlay.close(); } catch (_) {}
         done({ cancelled: true });
       };
       ipcMain.on('clipkit-region', onRegion);
       ipcMain.on('clipkit-cancel', onCancel);
+      ipcMain.on('clipkit-dbg', onDbg);
+      stopDbg = () => { try { ipcMain.removeListener('clipkit-dbg', onDbg); } catch (_) {} };
       ckCurrentCancel = onCancel;
-      overlay.on('closed', () => done({ cancelled: true }));
+      overlay.on('closed', () => { stopDbg(); done({ cancelled: true }); });
     });
     return result;
   } catch (e) {
