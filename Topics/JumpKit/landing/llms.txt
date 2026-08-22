@@ -23,6 +23,16 @@ JumpKit is a desktop productivity app that replaces scattered bookmarks, folder 
 - [Terms](https://jumpkit.app/terms): Terms of service
 - [Privacy](https://jumpkit.app/privacy): Privacy policy
 
+## Blog
+- [JumpKit vs Browser Bookmarks](https://jumpkit.app/compare/bookmarks): Why jumps beat bookmarks
+- [Best Bookmark Manager Alternatives 2026](https://jumpkit.app/blog/best-bookmark-manager-alternatives): Compare JumpKit, Papaly, Raindrop, and others
+- [Bookmark Manager Ultimate Guide](https://jumpkit.app/blog/bookmark-manager-ultimate-guide): What to look for in a bookmark manager
+- [How to Organize Links](https://jumpkit.app/blog/bookmark-organizer-organize-links): Complete bookmark organizer guide
+- [Problems with Browser Bookmarks](https://jumpkit.app/blog/problems-with-browser-bookmarks): Why native bookmarks fail
+- [Shared Bookmarks for Teams](https://jumpkit.app/blog/shared-bookmarks-for-teams): Team favorites done right
+- [Team Bookmark Sharing](https://jumpkit.app/blog/team-bookmark-sharing-collaboration): Collaborative link management
+- [Introducing JumpKit](https://jumpkit.app/blog/introducing-jumpkit): Product launch post
+
 ## Optional Info
 - Download: available for Windows and macOS (see homepage quick start / download buttons)
 

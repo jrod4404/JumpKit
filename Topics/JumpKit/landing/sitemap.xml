@@ -51,6 +51,36 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://jumpkit.app/blog/best-bookmark-manager-alternatives</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/blog/bookmark-manager-ultimate-guide</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/blog/bookmark-organizer-organize-links</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/blog/problems-with-browser-bookmarks</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/blog/shared-bookmarks-for-teams</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://jumpkit.app/blog/team-bookmark-sharing-collaboration</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://jumpkit.app/videos</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
