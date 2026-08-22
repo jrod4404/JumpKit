@@ -441,20 +441,15 @@ ipcMain.handle('clipkit-capture', async () => {
     });
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setMenuBarVisibility(false);
-    // Ensure clicks land on the overlay on every platform. forward:false means
-    // events are NOT forwarded to windows behind it — critical on macOS where
-    // a transparent window can otherwise be click-through.
-    try { overlay.setIgnoreMouseEvents(false, { forward: false }); } catch (_) {}
+    // Do NOT ignore mouse events. (v5.1.37 baseline; this is the config that
+    // previously rendered the selection box + captured on release.)
+    try { overlay.setIgnoreMouseEvents(false); } catch (_) {}
     // Global Esc so cancellation works even if the overlay does not hold keyboard focus.
     const { globalShortcut } = require('electron');
     try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
     const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
     const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
-      /* body has a barely-perceptible 5% black fill so macOS hit-tests the
-         full screen and forwards mouse events to this window. A fully
-         transparent (alpha≈0) surface is click-through on macOS — the
-         crosshair would render but clicks would pass to the app behind it. */
-      html,body{margin:0;padding:0;overflow:hidden;background:rgba(0,0,0,0.05);cursor:crosshair;-webkit-user-select:none;user-select:none}
+      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
       #box{position:fixed;display:none;border:2px dashed rgba(255,255,255,0.9);background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
       #box::after{content:'';position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border:2px dashed rgba(225,29,72,0.85);border-radius:2px}
       /* big plus icon that follows the cursor to signal 'select a region' */
@@ -470,11 +465,16 @@ ipcMain.handle('clipkit-capture', async () => {
       <script>
         const box=document.getElementById('box'),plus=document.getElementById('plus');
         let sx=0,sy=0,drawing=false;
+        // Diagnostics: log every interaction to the main-process console (visible
+        // in the terminal that launched the app). Confirms whether macOS is
+        // delivering mouse events to this window at all.
+        function dbg(k){ try { console.log('[clipkit-overlay]', k); } catch(_){} }
+        dbg('loaded');
         document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
-        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
+        document.addEventListener('mousedown',e=>{dbg('mousedown @'+e.clientX+','+e.clientY);sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
         document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
-        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.captureBridge.cancel();return} window.captureBridge.region(x,y,w,h)});
-        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.captureBridge.cancel()});
+        document.addEventListener('mouseup',e=>{if(!drawing){dbg('mouseup but not drawing');return}dbg('mouseup @'+e.clientX+','+e.clientY);drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){dbg('region too small -> cancel');window.captureBridge.cancel();return} dbg('region '+w+'x'+h);window.captureBridge.region(x,y,w,h)});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape'){dbg('Esc');window.captureBridge.cancel()}});
       </script>
     </body></html>`;
     await overlay.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
@@ -483,11 +483,11 @@ ipcMain.handle('clipkit-capture', async () => {
     // blur the app window, and catch Esc at the webContents level (reliable even
     // if focus is elsewhere / clicking another screen).
     try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
-    // Re-assert click + focus once the overlay DOM has finished loading so the
-    // window is guaranteed key (fixes first-click passthrough on macOS).
+    // Re-assert focus once the overlay DOM has finished loading so the window
+    // is key (standard macOS first-click passthrough fix). Added for .38.
     try {
       overlay.webContents.once('did-finish-load', () => {
-        try { overlay.focus(); overlay.focusOnWebView(); overlay.setIgnoreMouseEvents(false, { forward: false }); } catch (_) {}
+        try { overlay.focus(); overlay.focusOnWebView(); } catch (_) {}
       });
     } catch (_) {}
     const mainWin = BrowserWindow.getAllWindows().find((w) => w !== overlay);
