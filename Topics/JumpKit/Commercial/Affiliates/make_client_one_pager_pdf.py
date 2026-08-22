@@ -165,7 +165,11 @@ def _load_icon(name):
         _icon_cache[name] = Image.open(_os.path.join(_ICON_DIR, name + '.png')).convert('RGBA')
     return _icon_cache[name]
 
-def _chip_icon(target, x, y, s, bg, icon_name):
+def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
+    if shadow:
+        sh = Image.new('RGBA', (s+40, s+40), (0,0,0,0))
+        ImageDraw.Draw(sh).rounded_rectangle([16,16,16+s,16+s], radius=20, fill=shadow)
+        target.alpha_composite(sh.filter(ImageFilter.GaussianBlur(10)), (x-20, y-16))
     d.rounded_rectangle([x, y, x+s, y+s], radius=20, fill=bg)
     im = _load_icon(icon_name).resize((int(s*0.62), int(s*0.62)), Image.LANCZOS)
     ix = x + int((s - int(s*0.62))/2)
@@ -218,12 +222,12 @@ def _wrap_count(text, fnt, width):
     if cur: lines += 1
     return lines
 
-def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
+def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_shadow):
     card_top = ps_y
     cx_center = (x0 + x1)//2
     sub_w = (col_w - 60 - 24)//2  # two cols inside card
     TITLE_H = 30
-    ROW_START = card_top + 162     # 12px margin below the card title
+    ROW_START = card_top + 178     # 12px + 16px extra = 28px below the card title
 
     # ── dry run: measure stacked row heights to size the card ──
     col_h = [ROW_START, ROW_START]
@@ -234,27 +238,28 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
         col_h[c] += block_h + 8
     card_bot = max(col_h) - 8 + 34   # 34px below last row (75% less than before)
 
-    # ── soft card shadow (extends below + sides of the card) ──
+    # ── soft card shadow: rounded rect matching the card's radius (45), offset down ──
     shw, shh = x1-x0, card_bot-card_top
-    sh = Image.new('RGBA', (shw+120, shh+120), (0,0,0,0))
-    ImageDraw.Draw(sh).rounded_rectangle([50,42,shw+70,shh+78], radius=45, fill=(14,24,42,55))
-    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(26)), (x0-45, card_top-35))
+    sh = Image.new('RGBA', (shw+80, shh+70), (0,0,0,0))
+    ImageDraw.Draw(sh).rounded_rectangle([40,30,shw+40,shh+30], radius=45, fill=(14,24,42,58))
+    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (x0-40, card_top-30))
 
     # very subtle gray card bg + tinted border
     rect(d, [x0, card_top, x1, card_bot], fill=PS_BG, outline=border, radius=45, width=3)
 
-    # centered label pill (icon + label, icon vertically centered with text)
+    # centered label pill (icon + label); icon 5% bigger + 4px top margin
     pill_w = 300
     pill_x0, pill_x1 = cx_center-pill_w//2, cx_center+pill_w//2
     pill_cy = card_top + 66
     d.rounded_rectangle([pill_x0, card_top+42, pill_x1, card_top+90], radius=25, fill=ibg)
-    pil = _load_icon(pill_icon).resize((22, 22), Image.LANCZOS)
+    pil_s = round(22 * 1.05)          # 5% bigger
+    pil = _load_icon(pill_icon).resize((pil_s, pil_s), Image.LANCZOS)
     lw = d.textbbox((0,0), label, font=F['tiny_b'])[2]
     lh = d.textbbox((0,0), label, font=F['tiny_b'])[3] - d.textbbox((0,0), label, font=F['tiny_b'])[1]
-    total = 22 + 6 + lw
+    total = pil_s + 6 + lw
     tart_x = cx_center - total//2
-    page.alpha_composite(pil, (tart_x, pill_cy - 11))
-    d.text((tart_x+22+6, pill_cy - lh//2), label, font=F['tiny_b'], fill=ic)
+    page.alpha_composite(pil, (tart_x, pill_cy - pil_s//2 + 4))
+    d.text((tart_x+pil_s+6, pill_cy - lh//2), label, font=F['tiny_b'], fill=ic)
     # centered title
     tw = d.textbbox((0,0), title, font=font(44, black=True))[2]
     d.text((cx_center-tw//2, card_top+104), title, font=font(44, black=True), fill=INK)
@@ -264,15 +269,15 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items):
         c = idx // 4
         cx = x0 + 45 + c*(sub_w+24)
         cy = col_y[c]
-        _chip_icon(page, cx, cy, 54, ibg, icon)
+        _chip_icon(page, cx, cy, 54, ibg, icon, shadow=chip_shadow)
         d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
         desc_y = cy + TITLE_H
         end_y = draw_wrapped(d, b, (cx+66, desc_y), F['tiny'], MUTED, sub_w-72, line_gap=2)
         col_y[c] = end_y + 8
     return card_bot
 
-ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS)
-_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS)
+ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS, (200, 60, 60))
+_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80))
 
 # rollout/pricing row
 row_y=1915
