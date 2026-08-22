@@ -13,7 +13,8 @@
     "build:test": "electron-builder --mac --config electron-builder.test.json",
     "build:test:win": "electron-builder --win --config electron-builder.test.json",
     "build:test:all": "electron-builder --mac --win --config electron-builder.test.json",
-    "test:overlay": "electron test-electron/overlay-interaction.mjs"
+    "test:overlay": "electron test-electron/overlay-interaction.mjs",
+    "test:real-overlay": "electron test-electron/real-overlay-path.mjs"
   },
   "build": {
     "appId": "com.jumpkit.app",
