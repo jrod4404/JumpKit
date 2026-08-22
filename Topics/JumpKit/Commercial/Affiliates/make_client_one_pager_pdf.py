@@ -52,14 +52,14 @@ def rounded_mask(size, radius):
     d.rounded_rectangle([0,0,size[0]-1,size[1]-1], radius=radius, fill=255)
     return m
 
-def paste_rounded(base, img, box, radius=48, shadow=True):
+def paste_rounded(base, img, box, radius=48, shadow=True, sh_alpha=80, sh_blur=24, sh_dx=18, sh_dy=22):
     x1,y1,x2,y2 = box
     img = img.resize((x2-x1, y2-y1), Image.LANCZOS).convert('RGBA')
     mask = rounded_mask(img.size, radius)
     if shadow:
-        sh = Image.new('RGBA', img.size, (0,0,0,80))
-        sh.putalpha(mask.filter(ImageFilter.GaussianBlur(24)))
-        base.alpha_composite(sh, (x1+18, y1+22))
+        sh = Image.new('RGBA', img.size, (0,0,0,sh_alpha))
+        sh.putalpha(mask.filter(ImageFilter.GaussianBlur(sh_blur)))
+        base.alpha_composite(sh, (x1+sh_dx, y1+sh_dy))
     img.putalpha(mask)
     base.alpha_composite(img, (x1,y1))
 
@@ -148,120 +148,81 @@ desc = ('JumpKit displays your navigation links in one place — web links, loca
         'Available for single users and shareable among teams.')
 y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
-# hero image right
+# hero image right (no dark shadow — clean light card, thin light divider only)
 hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
-paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True)
+paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=False)
 # image badge (light theme: soft turquoise bg, dark teal text)
 rect(d, [1355, 770, 1950, 850], fill=(232,249,252), radius=34)
 d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
 
-# ── Light-theme icon glyphs (Problem red / Solution green) ───────────
-def _chip(d, x, y, s, bg, color, glyph):
-    d.rounded_rectangle([x, y, x+s, y+s], radius=18, fill=bg)
-    glyph(d, x+s*0.22, y+s*0.22, s*0.56, color)
+# ── Real Tabler icons (same as landing page, pre-rendered to PNG) ───
+import os as _os
+_ICON_DIR = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), '_icons')
+_icon_cache = {}
+def _load_icon(name):
+    if name not in _icon_cache:
+        _icon_cache[name] = Image.open(_os.path.join(_ICON_DIR, name + '.png')).convert('RGBA')
+    return _icon_cache[name]
 
-def _g_mess(d, x, y, s, c):
-    q = s*0.30
-    d.rounded_rectangle([x, y, x+q, y+q], radius=5, fill=c)
-    d.rounded_rectangle([x+s*0.42, y+s*0.10, x+s*0.72, y+s*0.40], radius=5, fill=c)
-    d.rounded_rectangle([x+s*0.06, y+s*0.52, x+s*0.36, y+s*0.82], radius=5, fill=c)
-    d.rounded_rectangle([x+s*0.50, y+s*0.58, x+s*0.80, y+s*0.88], radius=5, fill=c)
-
-def _g_grid(d, x, y, s, c):
-    q = s*0.36
-    d.rounded_rectangle([x, y, x+q, y+q], radius=5, fill=c)
-    d.rounded_rectangle([x+s*0.5, y, x+s*0.5+q, y+q], radius=5, fill=c)
-    d.rounded_rectangle([x, y+s*0.5, x+q, y+s*0.5+q], radius=5, fill=c)
-    d.rounded_rectangle([x+s*0.5, y+s*0.5, x+s*0.5+q, y+s*0.5+q], radius=5, fill=c)
-
-def _g_folder(d, x, y, s, c):
-    w, h = s*0.86, s*0.56
-    fx, fy = x+(s-w)/2, y+(s-h)/2
-    d.rounded_rectangle([fx, fy+h*0.30, fx+w, fy+h], radius=5, fill=c)
-    d.rounded_rectangle([fx, fy+h*0.30, fx+w*0.48, fy+h*0.52], radius=4, fill=c)
-
-def _g_folder_launch(d, x, y, s, c):
-    _g_folder(d, x, y+s*0.10, s*0.78, c)
-    ax, ay = x+s*0.42, y+s*0.04
-    lw = max(4, int(s*0.14))
-    d.line([ax, ay+s*0.36, ax+s*0.36, ay], fill=c, width=lw)
-    d.line([ax, ay, ax+s*0.36, ay], fill=c, width=lw)
-    d.line([ax+s*0.36, ay, ax+s*0.36, ay+s*0.36], fill=c, width=lw)
-
-def _g_person(d, x, y, s, c, off=0):
-    cx = x + s/2 + off
-    r = s*0.17
-    d.ellipse([cx-r, y+s*0.04, cx+r, y+s*0.04+2*r], fill=c)
-    d.pieslice([cx-s*0.24, y+s*0.32, cx+s*0.24, y+s*0.94], 180, 360, fill=c)
-
-def _g_users(d, x, y, s, c):
-    _g_person(d, x, y, s, c, off=-s*0.17)
-    _g_person(d, x, y, s, c, off=s*0.17)
-
-def _g_search(d, x, y, s, c):
-    cx, cy, r = x+s*0.40, y+s*0.38, s*0.27
-    lw = max(3, int(s*0.09))
-    d.ellipse([cx-r, cy-r, cx+r, cy+r], outline=c, width=lw)
-    d.line([cx+r*0.7, cy+r*0.7, x+s*0.82, y+s*0.82], fill=c, width=lw)
-
-def _g_search_check(d, x, y, s, c):
-    _g_search(d, x, y, s, c)
-    cx, cy, r = x+s*0.62, y+s*0.70, s*0.20
-    d.ellipse([cx-r, cy-r, cx+r, cy+r], fill=c)
-    lw = max(2, int(s*0.05))
-    d.line([cx-r*0.42, cy, cx-r*0.02, cy+r*0.38], fill=(255,255,255), width=lw)
-    d.line([cx-r*0.02, cy+r*0.38, cx+r*0.5, cy-r*0.42], fill=(255,255,255), width=lw)
-
-def _g_chart(d, x, y, s, c, up=False):
-    bw = s*0.18
-    base = y+s*0.92
-    d.rounded_rectangle([x, base-s*0.30, x+bw, base], radius=3, fill=c)
-    d.rounded_rectangle([x+s*0.34, base-s*0.52, x+s*0.34+bw, base], radius=3, fill=c)
-    d.rounded_rectangle([x+s*0.68, base-s*0.76, x+s*0.68+bw, base], radius=3, fill=c)
-    if up:
-        ax, ay = x+s*0.10, y+s*0.02
-        lw = max(4, int(s*0.14))
-        d.line([ax, ay+s*0.30, ax+s*0.30, ay], fill=c, width=lw)
-        d.line([ax, ay, ax+s*0.30, ay], fill=c, width=lw)
-        d.line([ax+s*0.30, ay, ax+s*0.30, ay+s*0.30], fill=c, width=lw)
+def _chip_icon(target, x, y, s, bg, icon_name):
+    d.rounded_rectangle([x, y, x+s, y+s], radius=20, fill=bg)
+    im = _load_icon(icon_name).resize((int(s*0.62), int(s*0.62)), Image.LANCZOS)
+    ix = x + int((s - int(s*0.62))/2)
+    iy = y + int((s - int(s*0.62))/2)
+    target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 960
+ps_y = 955
 col_w = (W - 2*M - 40)//2
-PROB_ICON = (224, 85, 85)    # red
+PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
-SOL_ICON  = (34, 197, 94)    # green
+SOL_ICON  = (34, 197, 94)    # green #22c55e
 SOL_BG    = (240, 253, 244)  # soft green
-cols = [
-    ('THE PROBLEM', "Bookmarks Don't Cut It", PROB_ICON, PROB_BG, [
-        ('They get disorganized', 'Scattered bookmarks and shortcuts drift out of sync.', _g_mess),
-        ('Can\'t launch directories', 'No way to open local folders or shared drives.', _g_folder),
-        ('Can\'t be shared with teammates', 'No easy way to pass resources to your team.', _g_person),
-        ('Hard to search or filter', 'Finding a link means scrolling and hunting.', _g_search),
-        ('No usage stats or notes', 'No visibility into what actually saves time.', _g_chart),
-    ]),
-    ('THE SOLUTION', 'Meet JumpKit — Your Launchpad', SOL_ICON, SOL_BG, [
-        ('Organized by categories', 'Clean columns by department, client, or workflow.', _g_grid),
-        ('Launch directories in one click', 'Open links, folders, and shared drives instantly.', _g_folder_launch),
-        ('Shared instantly across your team', 'Team collections anyone can use — no tribal knowledge.', _g_users),
-        ('Instant search and filter', 'Type-and-go search across every jump.', _g_search_check),
-        ('ROI tracking and notes', 'Automatically track the time and money you save.', _g_chart),
-    ]),
+
+PROBLEM_ITEMS = [
+    ('mood-sad-dizzy', 'They get disorganized', 'Bookmarks and shortcuts drift out of sync.'),
+    ('folder', 'Can\'t launch directories', 'No way to open local folders or shared drives.'),
+    ('share', 'Can\'t be shared with teammates', 'No easy way to pass resources to your team.'),
+    ('database', 'Difficult to back up or migrate', 'Hard to move to a new machine or browser.'),
+    ('search', 'Hard to search or filter', 'Finding a link means scrolling and hunting.'),
+    ('browser', 'Locked to one browser', 'Your links don\'t follow you everywhere.'),
+    ('refresh-alert', 'Browser updates break layout', 'Your carefully organized bar keeps breaking.'),
+    ('chart-bar', 'No usage stats or notes', 'No visibility into what actually saves time.'),
 ]
-for ci, (label, title, ic, ibg, rows) in enumerate(cols):
-    x0 = M + ci*(col_w+40)
-    x1 = x0 + col_w
-    rect(d, [x0, ps_y, x1, ps_y+660], fill=WHITE, outline=LINE, radius=45)
-    # section label pill
-    d.rounded_rectangle([x0+55, ps_y+50, x0+55+290, ps_y+100], radius=25, fill=ibg)
-    d.text((x0+70, ps_y+61), label, font=F['tiny_b'], fill=ic)
-    d.text((x0+55, ps_y+118), title, font=font(50, black=True), fill=INK)
-    ry = ps_y+185
-    for (t, b, glyph) in rows:
-        _chip(d, x0+55, ry, 64, ibg, ic, glyph)
-        d.text((x0+140, ry+2), t, font=F['small_b'], fill=INK)
-        draw_wrapped(d, b, (x0+140, ry+44), F['tiny'], MUTED, col_w-215, line_gap=4)
-        ry += 96
+SOLUTION_ITEMS = [
+    ('layout-grid', 'Organized by categories', 'Clean columns by department, client, or workflow.'),
+    ('folder-check', 'Launch directories', 'Open links, folders, and shared drives instantly.'),
+    ('users', 'Shared instantly across your team', 'Team collections anyone can use — no tribal knowledge.'),
+    ('database-export', 'Easy backup and migration', 'Move your setup to any machine in one step.'),
+    ('zoom-check', 'Instant search and filter', 'Type-and-go search across every jump.'),
+    ('device-desktop', 'Browser independent', 'A dedicated desktop app that works everywhere.'),
+    ('shield-check', 'No UI changes ever', 'Your layout never breaks on an update.'),
+    ('chart-dots', 'ROI tracking and notes', 'Automatically track the time and money you save.'),
+]
+
+def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
+    # taller card to fit 8 rows in a 2x4 grid
+    card_top = ps_y
+    card_bot = ps_y + 512
+    rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=LINE, radius=45)
+    d.rounded_rectangle([x0+45, card_top+42, x0+45+272, card_top+90], radius=25, fill=ibg)
+    d.text((x0+60, card_top+53), label, font=F['tiny_b'], fill=ic)
+    d.text((x0+45, card_top+104), title, font=font(44, black=True), fill=INK)
+    # 2 columns x 4 rows
+    sub_w = (col_w - 60 - 24)//2  # two cols inside card
+    for idx, (icon, t, b) in enumerate(items):
+        c = idx // 4   # 0=left col, 1=right col
+        r = idx % 4
+        cx = x0 + 45 + c*(sub_w+24)
+        cy = card_top + 160 + r*87
+        _chip_icon(page, cx, cy, 54, ibg, icon)
+        # chip + title next to it; description below title
+        d.text((cx+66, cy+2), t, font=font(25, True), fill=INK)
+        draw_wrapped(d, b, (cx+66, cy+30), F['tiny'], MUTED, sub_w-72, line_gap=3)
+    return card_bot
+
+ps_bot = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Don't Cut It", PROB_ICON, PROB_BG, PROBLEM_ITEMS)
+_draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'Meet JumpKit — Your Launchpad', SOL_ICON, SOL_BG, SOLUTION_ITEMS)
 
 # rollout/pricing row
 row_y=1915
