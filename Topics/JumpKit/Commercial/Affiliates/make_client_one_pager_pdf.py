@@ -134,7 +134,7 @@ logo_w = 460
 logo_h = int(logo.height * logo_w / logo.width)
 page.alpha_composite(logo.resize((logo_w, logo_h), Image.LANCZOS), (M, 110))
 rect(d, [W-820, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radius=40)
-d.text((W-780, 148), 'CLIENT PRODUCTIVITY BRIEF', font=F['tiny_b'], fill=(0,105,126))
+d.text((W-730, 148), 'Product Brief', font=F['tiny_b'], fill=(0,105,126))
 
 # hero text (landing page H1 + description, verbatim)
 y = 275
@@ -151,7 +151,7 @@ y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right (no dark shadow — clean light card, thin light divider only)
 hero_img = contain_on_bg(HERO, (1100, 560), bg=(255,255,255))
-paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=False)
+paste_rounded(page, hero_img, (1290, 315, 2390, 875), radius=58, shadow=True, sh_alpha=60, sh_blur=22, sh_dx=0, sh_dy=26)
 # image badge (light theme: soft turquoise bg, dark teal text)
 rect(d, [1355, 770, 1950, 850], fill=(232,249,252), radius=34)
 d.text((1390, 792), 'Windows + macOS desktop app', font=F['small_b'], fill=(0,105,126))
@@ -251,6 +251,10 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, border, pill_icon, items, chip_
     pill_w = 300
     pill_x0, pill_x1 = cx_center-pill_w//2, cx_center+pill_w//2
     pill_cy = card_top + 66
+    # soft shadow behind the pill
+    psh = Image.new('RGBA', (pill_w+50, 74), (0,0,0,0))
+    ImageDraw.Draw(psh).rounded_rectangle([25,20,pill_w+25,54], radius=25, fill=(18,50,90,42))
+    page.alpha_composite(psh.filter(ImageFilter.GaussianBlur(14)), (pill_x0-25, card_top+40))
     d.rounded_rectangle([pill_x0, card_top+42, pill_x1, card_top+90], radius=25, fill=ibg)
     pil_s = round(22 * 1.05)          # 5% bigger
     pil = _load_icon(pill_icon).resize((pil_s, pil_s), Image.LANCZOS)
