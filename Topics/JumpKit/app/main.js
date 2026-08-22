@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, nativeTheme } = require('electron');
+const fs = require('fs');
 // safeStorage intentionally not imported - session tokens use localStorage until notarization is set up.
 // Re-add safeStorage to the destructure and restore the IPC handler bodies when notarization is ready.
 
@@ -145,6 +146,496 @@ function initDB() {
     db = null;
   }
 }
+
+// ── NoteKit: isolated SQLite (projects → pages → note_blocks) ─────────────
+// Feature-flagged (default OFF for regular users; ON for Jeff's test build).
+// NOTE: kept fully separate from the JumpKit `db` handle & Supabase sync.
+let notekitDb = null;
+function initNoteKitDB() {
+  try {
+    const Database = require('better-sqlite3');
+    const nkPath = path.join(app.getPath('userData'), 'notekit.db');
+    notekitDb = new Database(nkPath);
+    notekitDb.exec(`
+      CREATE TABLE IF NOT EXISTS nk_projects (
+        id         TEXT PRIMARY KEY,
+        name       TEXT NOT NULL,
+        icon       TEXT DEFAULT 'folder',
+        sortOrder  INTEGER DEFAULT 0,
+        createdAt  INTEGER,
+        updatedAt  INTEGER,
+        deletedAt  INTEGER DEFAULT NULL
+      );
+      CREATE TABLE IF NOT EXISTS nk_pages (
+        id         TEXT PRIMARY KEY,
+        projectId  TEXT NOT NULL,
+        title      TEXT NOT NULL DEFAULT 'Untitled',
+        sortOrder  INTEGER DEFAULT 0,
+        createdAt  INTEGER,
+        updatedAt  INTEGER,
+        deletedAt  INTEGER DEFAULT NULL
+      );
+      CREATE TABLE IF NOT EXISTS nk_blocks (
+        id         TEXT PRIMARY KEY,
+        pageId     TEXT NOT NULL,
+        type       TEXT NOT NULL DEFAULT 'text',
+        content    TEXT DEFAULT '',
+        sortOrder  INTEGER DEFAULT 0,
+        x          REAL DEFAULT 0,
+        width      REAL DEFAULT 100,
+        createdAt  INTEGER,
+        updatedAt  INTEGER
+      );
+      CREATE INDEX IF NOT EXISTS idx_nk_pages_project ON nk_pages(projectId);
+      CREATE INDEX IF NOT EXISTS idx_nk_blocks_page   ON nk_blocks(pageId);
+    `);
+    // Migration: add icon column if missing (existing notekit.db files).
+    const cols = notekitDb.prepare("PRAGMA table_info(nk_projects)").all().map(c => c.name);
+    if (!cols.includes('icon')) {
+      notekitDb.exec("ALTER TABLE nk_projects ADD COLUMN icon TEXT DEFAULT 'folder'");
+      console.log('[NoteKit] Migration: added icon column to nk_projects');
+    }
+    // Migration: add x/width (block position/size) to nk_blocks if missing.
+    const bcols = notekitDb.prepare("PRAGMA table_info(nk_blocks)").all().map(c => c.name);
+    if (!bcols.includes('x')) {
+      notekitDb.exec("ALTER TABLE nk_blocks ADD COLUMN x REAL DEFAULT 0");
+      console.log('[NoteKit] Migration: added x column to nk_blocks');
+    }
+    if (!bcols.includes('width')) {
+      notekitDb.exec("ALTER TABLE nk_blocks ADD COLUMN width REAL DEFAULT 100");
+      console.log('[NoteKit] Migration: added width column to nk_blocks');
+    }
+    console.log('[NoteKit] DB initialized at', nkPath);
+  } catch (e) {
+    console.error('[NoteKit] DB UNAVAILABLE:', e.message);
+    try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'notekit-error.log'), new Date().toISOString() + ' ' + e.message + '\n'); } catch (_) {}
+    notekitDb = null;
+  }
+}
+
+function nkNow() { return Date.now(); }
+function nkUid() { return (globalThis.crypto && globalThis.crypto.randomUUID) ? globalThis.crypto.randomUUID() : 'nk-' + nkNow() + '-' + Math.random().toString(36).slice(2, 10); }
+function numOr(v, d) { const n = parseFloat(v); return Number.isFinite(n) ? n : d; }
+
+// ── IPC: NoteKit — projects ────────────────────────────────────────
+ipcMain.handle('notekit-list-projects', () => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_projects WHERE deletedAt IS NULL ORDER BY sortOrder, name').all();
+});
+
+ipcMain.handle('notekit-create-project', (_e, name, icon) => {
+  if (!notekitDb) return { ok: false, reason: 'notekit db unavailable' };
+  const id = nkUid();
+  const now = nkNow();
+  notekitDb.prepare('INSERT INTO nk_projects (id, name, icon, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(id, String(name || 'Untitled').slice(0, 200), String(icon || 'folder').slice(0, 50), 0, now, now);
+  // Every new project starts with one default page: "Page 1".
+  const pageId = nkUid();
+  notekitDb.prepare('INSERT INTO nk_pages (id, projectId, title, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(pageId, id, 'Page 1', 0, now, now);
+  return { ok: true, id, pageId };
+});
+
+ipcMain.handle('notekit-set-project-icon', (_e, id, icon) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_projects SET icon = ?, updatedAt = ? WHERE id = ?')
+    .run(String(icon || 'folder').slice(0, 50), nkNow(), id);
+  return { ok: true };
+});
+
+ipcMain.handle('notekit-rename-project', (_e, id, name) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_projects SET name = ?, updatedAt = ? WHERE id = ?')
+    .run(String(name || 'Untitled').slice(0, 200), nkNow(), id);
+  return { ok: true };
+});
+
+ipcMain.handle('notekit-delete-project', (_e, id) => {
+  if (!notekitDb) return { ok: false };
+  // Soft delete: mark project + its pages as deleted (blocks kept for recovery).
+  const now = nkNow();
+  notekitDb.prepare('UPDATE nk_projects SET deletedAt = ?, updatedAt = ? WHERE id = ?').run(now, now, id);
+  notekitDb.prepare('UPDATE nk_pages SET deletedAt = ? WHERE projectId = ? AND deletedAt IS NULL').run(now, id);
+  return { ok: true };
+});
+
+// ── IPC: NoteKit — pages ───────────────────────────────────────────
+ipcMain.handle('notekit-list-pages', (_e, projectId) => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_pages WHERE projectId = ? AND deletedAt IS NULL ORDER BY sortOrder, title').all(projectId);
+});
+
+ipcMain.handle('notekit-create-page', (_e, projectId, title) => {
+  if (!notekitDb) return { ok: false, reason: 'notekit db unavailable' };
+  const id = nkUid();
+  const now = nkNow();
+  const count = notekitDb.prepare('SELECT COUNT(*) c FROM nk_pages WHERE projectId = ? AND deletedAt IS NULL').get(projectId).c;
+  notekitDb.prepare('INSERT INTO nk_pages (id, projectId, title, sortOrder, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?)')
+    .run(id, projectId, String(title || 'Untitled').slice(0, 200), count, now, now);
+  return { ok: true, id };
+});
+
+ipcMain.handle('notekit-rename-page', (_e, id, title) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_pages SET title = ?, updatedAt = ? WHERE id = ?')
+    .run(String(title || 'Untitled').slice(0, 200), nkNow(), id);
+  return { ok: true };
+});
+
+ipcMain.handle('notekit-delete-page', (_e, id) => {
+  if (!notekitDb) return { ok: false };
+  notekitDb.prepare('UPDATE nk_pages SET deletedAt = ?, updatedAt = ? WHERE id = ?').run(nkNow(), nkNow(), id);
+  return { ok: true };
+});
+
+// ── IPC: NoteKit — blocks ──────────────────────────────────────────
+ipcMain.handle('notekit-list-blocks', (_e, pageId) => {
+  if (!notekitDb) return [];
+  return notekitDb.prepare('SELECT * FROM nk_blocks WHERE pageId = ? ORDER BY sortOrder, createdAt').all(pageId);
+});
+
+ipcMain.handle('notekit-enabled', () => {
+  return process.env.NOTEKIT_ENABLED === 'true';
+});
+
+// Replace ALL blocks of a page (autosave-friendly: renderer sends full block list)
+ipcMain.handle('notekit-save-blocks', (_e, pageId, blocks) => {
+  if (!notekitDb) return { ok: false };
+  const now = nkNow();
+  const tx = notekitDb.transaction((rows) => {
+    notekitDb.prepare('DELETE FROM nk_blocks WHERE pageId = ?').run(pageId);
+    const ins = notekitDb.prepare('INSERT INTO nk_blocks (id, pageId, type, content, sortOrder, x, width, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)');
+    rows.forEach((b, i) => ins.run(b.id || nkUid(), pageId, b.type || 'text', typeof b.content === 'string' ? b.content : JSON.stringify(b.content), i, numOr(b.x, 0), numOr(b.width, 100), now, now));
+    notekitDb.prepare('UPDATE nk_pages SET updatedAt = ? WHERE id = ?').run(now, pageId);
+  });
+  try { tx(blocks || []); return { ok: true }; }
+  catch (e) { return { ok: false, reason: e.message }; }
+});
+
+// ── IPC: NoteKit — images (media folder copy) ───────────────────────
+// Option 1 storage: images are COPIED into userData/notekit-media/ and the
+// note stores the path (keeps notes.db small; image tied to this machine).
+function nkMediaDir() {
+  const dir = path.join(app.getPath('userData'), 'notekit-media');
+  try { fs.mkdirSync(dir, { recursive: true }); } catch (_) {}
+  return dir;
+}
+
+ipcMain.handle('notekit-pick-image', async () => {
+  const { dialog } = require('electron');
+  const r = await dialog.showOpenDialog({
+    title: 'Choose an image',
+    properties: ['openFile'],
+    filters: [
+      { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'] },
+    ],
+  });
+  if (r.canceled || !r.filePaths || !r.filePaths[0]) return { ok: false, path: null };
+  return nkStoreImage(r.filePaths[0]);
+});
+
+// Copy a source file into the media folder with a unique name; returns {ok, path}.
+ipcMain.handle('notekit-store-image', (_e, srcPath) => {
+  if (!srcPath || typeof srcPath !== 'string') return { ok: false, path: null };
+  return nkStoreImage(srcPath);
+});
+
+function nkStoreImage(srcPath) {
+  try {
+    const ext = (path.extname(srcPath) || '.png').toLowerCase();
+    const dir = nkMediaDir();
+    const name = 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+    const dest = path.join(dir, name);
+    fs.copyFileSync(srcPath, dest);
+    return { ok: true, path: dest };
+  } catch (e) {
+    return { ok: false, path: null, reason: e.message };
+  }
+}
+
+// Save a base64 data URL (e.g. pasted clipboard image) to the media folder.
+ipcMain.handle('notekit-store-image-data', (_e, dataUrl) => {
+  if (!dataUrl || typeof dataUrl !== 'string') return { ok: false, path: null };
+  try {
+    const m = /^data:image\/([a-zA-Z0-9.+-]+);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl);
+    if (!m) return { ok: false, path: null, reason: 'not a base64 image data URL' };
+    const extMap = { png: '.png', jpeg: '.jpg', jpg: '.jpg', gif: '.gif', webp: '.webp', 'svg+xml': '.svg', 'x-icon': '.ico', bmp: '.bmp' };
+    const ext = extMap[m[1].toLowerCase()] || '.png';
+    const dir = nkMediaDir();
+    const name = 'img-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8) + ext;
+    const dest = path.join(dir, name);
+    fs.writeFileSync(dest, Buffer.from(m[2], 'base64'));
+    return { ok: true, path: dest };
+  } catch (e) {
+    return { ok: false, path: null, reason: e.message };
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// CLIPKIT — screen capture tool (third sidebar section)
+// Click "New Capture" → transparent fullscreen overlay → drag a region
+// → on release, capture that region → save PNG to captures/ + clipboard + history.
+// Cross-platform (Win+Mac) via desktopCapturer + capturePage.
+// ══════════════════════════════════════════════════════════════════
+ipcMain.handle('clipkit-enabled', () => {
+  return process.env.CLIPKIT_ENABLED === 'true';
+});
+
+function ckDir() {
+  const dir = path.join(app.getPath('userData'), 'clipkit');
+  try { fs.mkdirSync(path.join(dir, 'captures'), { recursive: true }); } catch (_) {}
+  return dir;
+}
+function ckHistoryPath() { return path.join(ckDir(), 'history.json'); }
+
+function ckLoadHistory() {
+  try {
+    const raw = fs.readFileSync(ckHistoryPath(), 'utf8');
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (_) { return []; }
+}
+function ckSaveHistory(list) {
+  try { fs.writeFileSync(ckHistoryPath(), JSON.stringify(list, null, 2)); } catch (_) {}
+}
+
+// Append a debug line to userData/clipkit/debug.log (also echoes to terminal).
+// Used to diagnose capture issues even when DevTools/console isn't visible.
+function ckLog(msg) {
+  try {
+    const f = path.join(ckDir(), 'debug.log');
+    fs.appendFileSync(f, new Date().toISOString() + '  ' + msg + '\n');
+  } catch (_) {}
+  try { console.log('[clipkit]', msg); } catch (_) {}
+}
+
+// Always-on listener for overlay debug/log messages (registered once at module
+// load so early renderer messages during loadURL are never missed).
+ipcMain.on('clipkit-dbg', (_e, msg) => {
+  try { ckLog(String(msg)); } catch (_) {}
+  try {
+    const mw = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents && w.webContents.getURL().startsWith('file:'));
+    if (mw && mw.webContents) mw.webContents.executeJavaScript('console.log(' + JSON.stringify(String(msg)) + ')').catch(() => {});
+  } catch (_) {}
+});
+
+// Holds the active capture's cancel callback while the overlay is open, so Esc
+// (from any screen / focus state) can cancel reliably.
+let ckCurrentCancel = null;
+// Module-scope reference to the active capture's resolve-fn, so a wiped-out
+// overlay's 'closed' event can settle the capture as cancelled.
+let doneRef = null;
+
+// Start an interactive region capture. Resolves with the capture record on
+// success, {cancelled:true} if the user dismissed, or {error}.
+ipcMain.handle('clipkit-capture', async () => {
+  let overlays = [];
+  let activeDisplay = null;
+  const { screen, globalShortcut } = require('electron');
+  const unregisterEsc = () => { try { globalShortcut.unregister('Escape'); } catch (_) {} };
+  try {
+    ckLog('capture: start');
+    // Auto-minimize the main app window so it doesn't block the capture area or
+    // appear in the shot; we restore it when capture completes/cancels.
+    const mainWin = BrowserWindow.getAllWindows().find((w) => !w.isDestroyed() && w.webContents && w.webContents.getURL().startsWith('file:'));
+    const mainWasMaximized = !!(mainWin && mainWin.isMaximized());
+    const restoreMain = () => {
+      try {
+        if (!mainWin || mainWin.isDestroyed()) return;
+        mainWin.show();
+        mainWin.focus();
+        if (mainWasMaximized) { try { mainWin.maximize(); } catch (_) {} }
+      } catch (_) {}
+    };
+    if (mainWin) { try { mainWin.minimize(); } catch (_) {} }
+
+    // Create one transparent overlay per display so the crosshair + selection
+    // work on EVERY screen, with no dead zones. Each overlay covers its own
+    // display's full bounds and reports regions in SCREEN coordinates.
+    const displays = screen.getAllDisplays();
+    const overlayHtml = `<!doctype html><html><head><meta charset="utf-8"><style>
+      html,body{margin:0;padding:0;overflow:hidden;background:transparent;cursor:crosshair;-webkit-user-select:none;user-select:none}
+      #box{position:fixed;display:none;border:2px dashed rgba(255,255,255,0.9);background:rgba(225,29,72,0.08);z-index:2;pointer-events:none}
+      #box::after{content:'';position:absolute;left:-2px;top:-2px;right:-2px;bottom:-2px;border:2px dashed rgba(225,29,72,0.85);border-radius:2px}
+      #plus{position:fixed;left:0;top:0;z-index:4;pointer-events:none;width:56px;height:56px;margin:-28px 0 0 -28px;opacity:0.9}
+      #plus::before,#plus::after{content:'';position:absolute;background:#fff;border-radius:3px;box-shadow:0 0 8px rgba(0,0,0,0.6)}
+      #plus::before{left:25px;top:4px;width:6px;height:48px}
+      #plus::after{left:4px;top:25px;width:48px;height:6px}
+      #hint{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:3;background:rgba(0,0,0,0.8);color:#fff;padding:9px 20px;border-radius:22px;font:600 13px/1 system-ui,sans-serif;pointer-events:none;white-space:nowrap;border:1px solid rgba(255,255,255,0.18);box-shadow:0 4px 16px rgba(0,0,0,0.35)}
+    </style></head><body>
+      <div id="box"></div>
+      <div id="plus"></div>
+      <div id="hint">✦ Drag to select a region · Esc to cancel</div>
+      <script>
+        const box=document.getElementById('box'),plus=document.getElementById('plus');
+        let sx=0,sy=0,drawing=false;
+        // Quiet diagnostics go to the main-process debug.log only (no on-screen HUD).
+        function dbg(k){ try { console.log('[clipkit-overlay]', k); } catch(_){} try { window.captureBridge && window.captureBridge.dbg('[clipkit-overlay] '+k); } catch(_){} }
+        // Convert this overlay's local (clientX/Y) coords to SCREEN coords by
+        // adding the display bounds offset injected below.
+        const OX = window.__dispOffset ? window.__dispOffset.x : 0;
+        const OY = window.__dispOffset ? window.__dispOffset.y : 0;
+        document.addEventListener('mousemove',e=>{if(!drawing){plus.style.left=e.clientX+'px';plus.style.top=e.clientY+'px'}});
+        document.addEventListener('mousedown',e=>{sx=e.clientX;sy=e.clientY;drawing=true;plus.style.display='none';box.style.left=sx+'px';box.style.top=sy+'px';box.style.width='0px';box.style.height='0px';box.style.display='block'});
+        document.addEventListener('mousemove',e=>{if(!drawing)return;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);box.style.left=x+'px';box.style.top=y+'px';box.style.width=w+'px';box.style.height=h+'px'});
+        document.addEventListener('mouseup',e=>{if(!drawing)return;drawing=false;const x=Math.min(sx,e.clientX),y=Math.min(sy,e.clientY),w=Math.abs(e.clientX-sx),h=Math.abs(e.clientY-sy);if(w<3||h<3){window.captureBridge.cancel();return} // screen coords
+          window.captureBridge.region(x+OX,y+OY,w,h)});
+        document.addEventListener('keydown',e=>{if(e.key==='Escape')window.captureBridge.cancel()});
+      </script>
+    </body></html>`;
+
+    // Build every overlay.
+    for (const disp of displays) {
+      const dB = disp.bounds;
+      const dW = disp.size.width, dH = disp.size.height;
+      const win = new BrowserWindow({
+        x: dB.x, y: dB.y, width: dW, height: dH,
+        frame: false, transparent: true,
+        backgroundColor: '#01000000',
+        alwaysOnTop: true, resizable: false, movable: false, skipTaskbar: true,
+        fullscreen: false, hasShadow: false,
+        webPreferences: { nodeIntegration: false, contextIsolation: true, sandbox: true, preload: path.join(__dirname, 'capture-preload.js') },
+      });
+      win.setAlwaysOnTop(true, 'screen-saver');
+      win.setMenuBarVisibility(false);
+      try { win.setIgnoreMouseEvents(false); } catch (_) {}
+      overlays.push({ win, display: disp });
+      // Inject this display's screen offset into the renderer before scripts run.
+      win.webContents.on('did-finish-load', () => {
+        try {
+          win.webContents.executeJavaScript('window.__dispOffset={x:' + dB.x + ',y:' + dB.y + '};').catch(()=>{});
+        } catch (_) {}
+        try { win.focus(); win.focusOnWebView(); } catch (_) {}
+      });
+      win.webContents.on('console-message', (_e, _lvl, message) => { ckLog('renderer> ' + message); });
+      win.webContents.on('closed', () => {
+        // If this overlay closes for any reason, settle as cancelled (unless already done).
+        doneRef && doneRef({ cancelled: true });
+      });
+      await win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(overlayHtml));
+      ckLog('overlay: created for display ' + disp.id + ' at ' + dB.x + ',' + dB.y + ' ' + dW + 'x' + dH);
+      try { win.show(); win.focus(); win.focusOnWebView(); } catch (_) {}
+    }
+    ckLog('overlay: ' + overlays.length + ' overlays shown');
+
+    // Global Esc cancels from any screen / focus state.
+    try { globalShortcut.register('Escape', () => { if (typeof ckCurrentCancel === 'function') ckCurrentCancel(); }); } catch (_) {}
+
+    const closeAll = (skip) => { for (const o of overlays) { if (o.win && o.win !== skip) { try { o.win.close(); } catch (_) {} } } };
+    const hideAllOpacity = () => { for (const o of overlays) { try { o.win.setOpacity(0); } catch (_) {} } };
+
+    const result = await new Promise((resolve) => {
+      let settled = false;
+      const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} restoreMain(); };
+      // Module-scope doneRef lets the closed handler settle as cancelled.
+      doneRef = done;
+      const onRegion = async (e, rect) => {
+        ipcMain.removeListener('clipkit-region', onRegion);
+        ipcMain.removeListener('clipkit-cancel', onCancel);
+        try {
+          ckLog('onRegion: received ' + JSON.stringify(rect));
+          // Identify which display this region is on via the sender webContents.
+          const sender = e.sender;
+          const pair = overlays.find((o) => o.win.webContents === sender);
+          const disp = (pair && pair.display) || screen.getDisplayNearestPoint({ x: rect.x, y: rect.y });
+          const displayId = (disp && disp.id) || screen.getPrimaryDisplay().id;
+          const dW = disp.size.width, dH = disp.size.height, scaleF = disp.scaleFactor || 1;
+          const dB = disp.bounds;
+          ckLog('onRegion: display ' + displayId + ' scale=' + scaleF);
+          // Hide ALL overlays (so none appear in the shot) and detach our
+          // resolve-ref BEFORE the awaited screenshot, so a wiped-out overlay's
+          // 'closed' event can't race and settle this as cancelled.
+          hideAllOpacity();
+          closeAll();
+          doneRef = null;
+          await new Promise((r) => setTimeout(r, 180));
+          const { desktopCapturer } = require('electron');
+          const tw = Math.min(Math.round(dW * scaleF), 3840);
+          const th = Math.min(Math.round(dH * scaleF), 3840);
+          const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: tw, height: th } });
+          const src = sources.find((s) => s.display_id === String(displayId)) || sources.find((s) => s.display_id) || sources[0];
+          if (!src) throw new Error('no screen source');
+          const img = src.thumbnail;
+          const tSize = img.getSize();
+          if (!tSize || !tSize.width || !tSize.height) throw new Error('empty screen thumbnail');
+          const cropScale = tSize.width / (dW || 1);
+          // rect is in SCREEN coords; convert to display-local before cropping.
+          const localX = rect.x - dB.x;
+          const localY = rect.y - dB.y;
+          const crop = img.crop({
+            x: Math.round(localX * cropScale),
+            y: Math.round(localY * cropScale),
+            width: Math.max(1, Math.round(rect.w * cropScale)),
+            height: Math.max(1, Math.round(rect.h * cropScale)),
+          });
+          const png = crop.toPNG();
+          ckLog('onRegion: cropped PNG bytes=' + png.length);
+          const rec = await ckPersistCapture(png, Math.round(rect.w), Math.round(rect.h));
+          ckLog('onRegion: saved ' + rec.id);
+          doneRef = null;
+          done(rec);
+        } catch (err) {
+          console.error('[clipkit] capture failed:', err && err.message ? err.message : err);
+          ckLog('onRegion: ERROR ' + (err && err.message ? err.message : err));
+          doneRef = null;
+          done({ error: err.message });
+          closeAll();
+        }
+      };
+      const onCancel = () => {
+        ipcMain.removeListener('clipkit-region', onRegion);
+        doneRef = null;
+        closeAll();
+        done({ cancelled: true });
+      };
+      ipcMain.on('clipkit-region', onRegion);
+      ipcMain.on('clipkit-cancel', onCancel);
+      ckCurrentCancel = onCancel;
+    });
+    return result;
+  } catch (e) {
+    try { closeAll(); } catch (_) {}
+    try { unregisterEsc(); } catch (_) {}
+    try { restoreMain(); } catch (_) {}
+    return { error: e.message };
+  }
+});
+
+// Save PNG bytes, copy to clipboard, write history, return {id, path, sec, width, height, ts}.
+async function ckPersistCapture(pngBuf, w, h) {
+  const dir = path.join(ckDir(), 'captures');
+  const id = 'cap-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  const file = path.join(dir, id + '.png');
+  fs.writeFileSync(file, pngBuf);
+  const { clipboard, nativeImage } = require('electron');
+  clipboard.writeImage(nativeImage.createFromBuffer(pngBuf));
+  const rec = { id, path: file, width: w || 0, height: h || 0, ts: Date.now() };
+  const list = ckLoadHistory();
+  list.unshift(rec);
+  ckSaveHistory(list.slice(0, 200)); // keep last 200
+  return rec;
+}
+
+ipcMain.handle('clipkit-history', () => ckLoadHistory());
+
+ipcMain.handle('clipkit-copy', (_e, id) => {
+  const rec = ckLoadHistory().find((r) => r.id === id);
+  if (!rec || !fs.existsSync(rec.path)) return { ok: false, reason: 'not found' };
+  try {
+    const { clipboard, nativeImage } = require('electron');
+    clipboard.writeImage(nativeImage.createFromPath(rec.path));
+    return { ok: true };
+  } catch (e) { return { ok: false, reason: e.message }; }
+});
+
+ipcMain.handle('clipkit-delete', (_e, id) => {
+  const list = ckLoadHistory();
+  const rec = list.find((r) => r.id === id);
+  const next = list.filter((r) => r.id !== id);
+  ckSaveHistory(next);
+  if (rec && rec.path) { try { fs.unlinkSync(rec.path); } catch (_) {} }
+  return { ok: true };
+});
 
 // ── IPC: sync-jumps ────────────────────────────────────────────────
 function _scopedSyncKey(userId, key) {
@@ -1139,6 +1630,13 @@ app.whenReady().then(() => {
   }
 
   initDB();
+  initNoteKitDB();
+
+  // NoteKit feature flag: OFF for regular users. Flip to true for Jeff's test
+  // build (electron-builder --config … or env). Renderer reads via IPC.
+  process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'true';
+  // ClipKit feature flag (screen capture tool).
+  process.env.CLIPKIT_ENABLED = process.env.CLIPKIT_ENABLED || 'true';
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer
   const { session } = require('electron');
@@ -1147,7 +1645,7 @@ app.whenReady().then(() => {
       responseHeaders: {
         ...details.responseHeaders,
         'Content-Security-Policy': [
-          "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'"
+          "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.supabase.in https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'"
         ]
       }
     });

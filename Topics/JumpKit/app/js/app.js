@@ -292,6 +292,8 @@ async function initApp() {
       localStorage.setItem('jk_sidebar_collapsed', '0');
     }
   }
+  // Show/hide NoteKit + ClipKit sidebar sections from saved prefs
+  applySidebarModulePrefs();
   runAutoArchive();
   await runCloudBackup();
   // Check backup reminder: notify if no backup in 7+ days and auto-backup is off
@@ -507,14 +509,23 @@ themeBtn.addEventListener('click', () => {
   });
   toggleBtn.addEventListener('mouseleave', hideTip);
 
-  // Nav item tooltips (collapsed only)
-  document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-      if (!sidebar.classList.contains('collapsed')) return;
-      const label = btn.querySelector('.nav-label')?.textContent?.trim() || btn.dataset.page;
-      showTip(label, btn.getBoundingClientRect());
-    });
-    btn.addEventListener('mouseleave', hideTip);
+  // Nav item + NoteKit project tooltips (collapsed only) — event delegation so
+  // dynamically-added NoteKit project rows get the SAME custom tooltip as nav items.
+  sidebar.addEventListener('mouseover', (e) => {
+    if (!sidebar.classList.contains('collapsed')) return;
+    let el = e.target.closest('.nav-item[data-page], .nk-project-row');
+    if (!el) return;
+    let text;
+    if (el.classList.contains('nk-project-row')) {
+      text = el.querySelector('.nk-project-name')?.textContent?.trim() || el.dataset.id || '';
+    } else {
+      text = el.querySelector('.nav-label')?.textContent?.trim() || el.dataset.page;
+    }
+    if (!text) return;
+    showTip(text, el.getBoundingClientRect());
+  });
+  sidebar.addEventListener('mouseout', (e) => {
+    if (e.target.closest('.nav-item[data-page], .nk-project-row')) hideTip();
   });
 })();
 
@@ -628,14 +639,28 @@ const pages = {
     }
     catch (err) { console.error('[admin] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load Users page.</strong><br>Error: ${err.message}</div>`; }
   },
+  notekit:    async () => {
+    try {
+      if (window.NoteKit && typeof window.NoteKit.showEmpty === 'function') window.NoteKit.showEmpty();
+      else document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem">NoteKit is not enabled in this build.</div>`;
+    }
+    catch (err) { console.error('[notekit] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load NoteKit.</strong><br>Error: ${err.message}</div>`; }
+  },
+  clipkit:    async () => {
+    try {
+      if (window.ClipKit && typeof window.ClipKit.render === 'function') window.ClipKit.render();
+      else document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem">ClipKit is not enabled in this build.</div>`;
+    }
+    catch (err) { console.error('[clipkit] load error:', err); document.getElementById('pageContent').innerHTML = `<div style="padding:40px 24px;color:var(--text-muted);font-size:0.95rem"><strong style="color:var(--text)">Unable to load ClipKit.</strong><br>Error: ${err.message}</div>`; }
+  },
 };
 const pageTitles = {
   home:'Home', jumps:'Jumps', archive:'Archive',
-  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments'
+  stats:'Statistics', settings:'Settings', help:'Help', account:'My Account', feedback:'Feedback', teams:'Teams', admin:'Users', tests:'Testing', deployment:'Deployments', notekit:'NoteKit', clipkit:'Captures'
 };
 const pageIcons = {
   home:'ti-home', jumps:'ti-run', archive:'ti-archive',
-  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload'
+  stats:'ti-chart-bar', settings:'ti-settings', help:'ti-help-circle', account:'ti-user-circle', feedback:'ti-message-circle', teams:'ti-users', admin:'ti-users', tests:'ti-test-pipe', deployment:'ti-world-upload', notekit:'ti-notes', clipkit:'ti-clipboard'
 };
 let activePage = 'home';
 window.activePage = activePage;
@@ -648,6 +673,10 @@ window.navigateTo = function navigateTo(page) {
   document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.page === page);
   });
+  // When leaving NoteKit for another page, clear the NoteKit sidebar highlight.
+  if (page !== 'notekit' && window.NoteKit && typeof window.NoteKit.clearSelection === 'function') {
+    try { window.NoteKit.clearSelection(); } catch { /* non-critical */ }
+  }
   document.getElementById('topbarTitle').textContent = pageTitles[page] || page;
   const iconEl = document.getElementById('topbarIcon');
   if (page === 'jumps') {
@@ -788,9 +817,9 @@ window.buildChord = function buildChord(e) {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { CtxMenu.hide(); Modal.close(); return; }
-  // Skip if user is typing in any input/textarea (except the hotkey recorder which handles itself)
+  // Skip if user is typing in any input/textarea/contenteditable (except the hotkey recorder which handles itself)
   const tag = document.activeElement?.tagName;
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || document.activeElement?.isContentEditable) return;
   if (!currentUser) return;
   const chord = buildChord(e);
   if (!chord) return;
@@ -1478,6 +1507,18 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>`}
             </div>
           </div>
+          <div class="acct-section">
+            <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
+            <div class="acct-row" style="border:none;padding:0 16px 10px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
+            <div class="acct-row">
+              <div class="acct-row-label"><span>NoteKit in Sidebar</span><span class="acct-row-hint">Show or hide the NoteKit project list in the sidebar navigation</span></div>
+              <label class="toggle"><input type="checkbox" id="prefNotekit" ${p.showNotekit!==false?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+            <div class="acct-row" style="border-bottom:none">
+              <div class="acct-row-label"><span>ClipKit in Sidebar</span><span class="acct-row-hint">Show or hide the ClipKit/Captures entry in the sidebar navigation</span></div>
+              <label class="toggle"><input type="checkbox" id="prefClipkit" ${p.showClipkit!==false?'checked':''}/><span class="toggle-slider"></span></label>
+            </div>
+          </div>
           <div class="acct-save-row">
           </div>
         </div>`;
@@ -1646,6 +1687,8 @@ window._collectSettingsPrefs = function _collectSettingsPrefs() {
   const cloudEl   = document.getElementById('prefCloud');
   const timeEl    = document.getElementById('prefTime');
   const dollarEl  = document.getElementById('prefDollar');
+  const notekitEl = document.getElementById('prefNotekit');
+  const clipkitEl = document.getElementById('prefClipkit');
   const notUnlimited = (window._supabaseProfile?.subscription_tier || 'free') === 'free';
   return {
     startPage:       startSel ? startSel.dataset.value : cur.startPage,
@@ -1659,6 +1702,8 @@ window._collectSettingsPrefs = function _collectSettingsPrefs() {
     autoArchive:     notUnlimited ? 'never' : (archSel ? archSel.dataset.value : cur.autoArchive),
     navDefaultCollapsed: navStateSel ? navStateSel.dataset.value === 'collapsed' : cur.navDefaultCollapsed,
     uiContrast:      document.querySelector('#contrastSlider .jfb-tab.active')?.dataset.contrastVal || cur.uiContrast || 'low',
+    showNotekit:     notekitEl ? notekitEl.checked : (cur.showNotekit !== false),
+    showClipkit:     clipkitEl ? clipkitEl.checked : (cur.showClipkit !== false),
   };
 };
 
@@ -1678,6 +1723,38 @@ window.saveAccountPrefs = function saveAccountPrefs(showToast = true) {
   updateNotifBadge();
 }
 
+// Show/hide the NoteKit + ClipKit sidebar sections based on saved prefs.
+// Each module's init reveals its section first (if enabled in this build), then
+// calls this to respect the user's show/hide preference. Loaded after db.js so
+// DB + currentUser are available.
+window.applySidebarModulePrefs = function applySidebarModulePrefs() {
+  if (!currentUser) return;
+  let prefs;
+  try { prefs = DB.getPrefs(currentUser.id) || {}; } catch (e) { prefs = {}; }
+
+  const showNK = prefs.showNotekit !== false;
+  const showCK = prefs.showClipkit !== false;
+
+  const nkLabel  = document.getElementById('notekitNavLabel');
+  const nkWrap   = document.getElementById('notekitNavWrap');
+  const ckLabel  = document.getElementById('clipkitNavLabel');
+  const ckBtn    = document.getElementById('clipkitNavBtn');
+
+  // NoteKit: only hide if the feature is actually enabled (init reveals it);
+  // if disabled in this build, leave it hidden as init would.
+  const nkActive = nkLabel && nkLabel.style.display !== 'none';
+  if (nkActive) {
+    nkLabel.style.display  = showNK ? 'block' : 'none';
+    if (nkWrap) nkWrap.style.display = showNK ? 'block' : 'none';
+  }
+
+  const ckActive = ckBtn && ckBtn.style.display !== 'none';
+  if (ckActive) {
+    if (ckLabel) ckLabel.style.display = showCK ? 'block' : 'none';
+    if (ckBtn)   ckBtn.style.display   = showCK ? 'flex'  : 'none';
+  }
+};
+
 // Auto-save: persist settings whenever any control changes (no Save button needed)
 window.wireAutoSaveSettings = function wireAutoSaveSettings() {
   const root = document.getElementById('acctTabContent');
@@ -1691,6 +1768,14 @@ window.wireAutoSaveSettings = function wireAutoSaveSettings() {
   // Custom select options (click to pick) → save after selection applies
   root.querySelectorAll('.custom-select-option').forEach(opt => {
     opt.addEventListener('click', save);
+  });
+  // NoteKit/ClipKit sidebar toggles → re-apply sidebar visibility live + save
+  ['prefNotekit', 'prefClipkit'].forEach(id => {
+    const t = document.getElementById(id);
+    if (t) t.addEventListener('change', () => {
+      save();
+      if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();
+    });
   });
   // Contrast tabs → save after active tab re-applies
   const cslider = document.getElementById('contrastSlider');

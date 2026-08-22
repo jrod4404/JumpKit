@@ -1,3 +1,8 @@
+.nav-section-label#notekitNavLabel { display: flex; align-items: center; justify-content: flex-start; gap: 0; width: 100%; position: relative; padding-top: 6px; padding-bottom: 2px; padding-left: 14px; padding-right: 8px; white-space: nowrap; flex-wrap: nowrap; }
+.nk-label-row { display: flex; align-items: center; justify-content: flex-start; }
+.nk-add-project-btn { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; padding: 0; background: none; border: none; color: var(--text-dim); font-size: 1.25rem; font-weight: 700; cursor: pointer; margin-left: 85px; flex-shrink: 0; border-radius: 6px; line-height: 1; white-space: nowrap; transition: color var(--transition), background var(--transition); }
+.nk-add-project-btn:hover { color: var(--hover-accent); background: var(--bg-hover); }
+
 /* ── Layout ── */
 .app-shell { display: flex; height: 100vh; overflow: hidden; }
 
@@ -24,13 +29,17 @@
 .sidebar.collapsed #sidebarToggleIcon { transform: rotate(0deg); }
 
 /* Collapsed sidebar */
-.sidebar.collapsed { width: 56px; min-width: 56px; max-width: 56px; }
+.sidebar.collapsed { width: 56px; min-width: 56px; max-width: 56px; overflow-x: hidden; }
 .sidebar.collapsed .sidebar-logo { justify-content: center; padding: 0; }
 .sidebar.collapsed .sidebar-logo-img { display: none; }
 .sidebar.collapsed .sidebar-logo-circle { display: block; }
 .sidebar.collapsed .nav-item { justify-content: center; padding: 12px 0; gap: 0; }
+.sidebar.collapsed .nk-project-row { justify-content: center; padding: 8px 0; gap: 0; }
+.sidebar.collapsed .nk-project-name, .sidebar.collapsed .nk-project-more { display: none; }
 .sidebar.collapsed .nav-label { display: none; }
 .sidebar.collapsed .nav-section-label { display: none; }
+.sidebar.collapsed .nav-section-label#notekitNavLabel { display: none !important; }
+.sidebar.collapsed #notekitNavLabel, .sidebar.collapsed #clipkitNavLabel, .sidebar.collapsed #adminNavLabel { display: none !important; }
 .sidebar.collapsed .sidebar-bottom { display: flex; justify-content: center; }
 .sidebar.collapsed #updateBanner { display: none !important; }
 /* Single toggle button — sits at bottom of nav, visible in both states */
@@ -46,8 +55,8 @@
 .sidebar-toggle-btn:hover { color: var(--hover-accent); background: var(--bg-hover); border-color: var(--border); opacity: 1; }
 .sidebar.collapsed .sidebar-toggle-btn { margin-left: 1px; margin-right: 0; }
 .sidebar.collapsed .sidebar-toggle-btn .ti { margin-top: 2px; }
-.sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; }
-.nav-section-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.09em; color: var(--text-dim); padding: 14px 20px 4px; text-transform: uppercase; }
+.sidebar-nav { flex: 1; padding: 10px 0; overflow-y: auto; overflow-x: hidden; }
+.nav-section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.09em; color: var(--text-dim); padding: 14px 20px 4px; }
 .nav-item {
   display: flex; align-items: center; gap: 9px;
   padding: 10px 20px; font-size: 1rem; font-weight: 500;
@@ -58,8 +67,8 @@
 .nav-item:hover { background: var(--bg-hover); color: var(--hover-accent); }
 .nav-item:hover .nav-icon { color: var(--hover-accent); }
 .nav-item.active { background: var(--bg-hover); color: var(--hover-accent); font-weight: 600; }
-.nav-item .nav-icon { font-size: 1.3rem; width: 24px; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
-.jump-man-icon { display: block; width: 24px; height: 24px; flex-shrink: 0; margin-right: -2px; }
+.nav-item .nav-icon { font-size: 1.3rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
+.jump-man-icon { display: block; width: 24px; height: 24px; flex-shrink: 0; margin-right: 0; }
 .nav-item:hover .nav-icon { color: var(--hover-accent); }
 .nav-item.active .nav-icon { color: var(--hover-accent); }
 .sidebar-bottom { padding: 10px 0; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; align-items: stretch; }
@@ -67,8 +76,7 @@
 .sidebar-cta { margin: 0 18px; font-size: 0.63rem; padding: 6px 8px; white-space: nowrap; overflow: hidden; }
 .sidebar.collapsed .sidebar-cta { display: none; }
 
-.jump-cta-icon { width: 16px; height: 16px; fill: currentColor; }
-.unlock-btn {
+.jump-cta-icon { width: 16px; height: 16px; fill: currentColor; }.unlock-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -500,6 +508,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
   border: none; background: none; width: 100%; text-align: left;
 }
 .ctx-item .ti { font-size: 1.1rem; color: var(--text-muted); transition: color var(--transition); }
+.ctx-item span:first-child { font-size: 1.1rem; line-height: 1; }
 .ctx-item:hover { background: var(--bg-hover); color: var(--hover-accent); }
 .ctx-item:hover .ti { color: var(--hover-accent); }
 .ctx-item.danger:hover .ti { color: #e53e3e; }
@@ -780,3 +789,172 @@ strong, b { color: inherit; }
 .notif-empty .ti { width: 2.4rem; height: 2.4rem; display: block; margin: 0 auto 12px; color: var(--text-dim); }
 .notif-empty p { font-size: 0.95rem; font-weight: 600; color: var(--text-muted); margin-bottom: 4px; }
 .notif-empty span { font-size: 0.82rem; color: var(--text-dim); }
+
+/* ── NoteKit (feature-flagged; styles harmless when hidden) ─────────────── */
+.nav-section-label { margin-top: 24px; padding: 6px 14px 2px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; color: var(--text-dim); }
+#notekitNavWrap { padding: 0 0 8px; }
+/* ClipKit label: offset the 8px bottom padding of the notekit wrap above it so
+   the visual gap above CLIPKIT matches the 24px gap above NOTEKIT. */
+#clipkitNavLabel { margin-top: 16px; }
+.nk-project { margin-bottom: 2px; }
+.nk-project-row { display: flex; align-items: center; gap: 9px; padding: 10px 20px; font-size: 1rem; font-weight: 500; color: var(--text-muted); cursor: pointer; border-radius: 0; transition: all var(--transition); border: none; background: none; width: 100%; text-align: left; }
+.nk-project-row .nav-icon { font-size: 1.3rem; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; text-align: center; color: var(--text-dim); transition: color var(--transition); -webkit-font-smoothing: antialiased; flex-shrink: 0; }
+.nk-project-row:hover { background: var(--bg-hover); color: var(--hover-accent); }
+.nk-project-row:hover .nav-icon { color: var(--hover-accent); }
+.nk-project-row.active { background: var(--bg-hover); color: var(--hover-accent); font-weight: 600; }
+.nk-project-row.active .nav-icon { color: var(--hover-accent); }
+.nk-project-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nk-project-more { color: var(--text-dim); padding: 0 4px; font-weight: 700; }
+.nk-project-more:hover { color: var(--hover-accent); }
+.nk-pages { margin: 2px 0 4px 14px; border-left: 1px solid rgba(128,128,128,0.25); padding-left: 6px; }
+.nk-page-row { display: flex; align-items: center; gap: 5px; padding: 4px 6px; border-radius: 5px; cursor: pointer; color: var(--text-muted); font-size: 0.82rem; }
+.nk-page-row:hover { color: var(--hover-accent); background: var(--bg-hover); }
+.nk-page-row.active { color: var(--hover-accent); background: var(--bg-hover); }
+.nk-page-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nk-add-page:hover { color: var(--hover-accent); }
+
+/* Page view */
+.nk-page-view { padding: 20px 28px 80px; }
+.nk-blocks-empty { color: var(--text-dim); font-size: 0.9rem; padding: 18px 0; text-align: center; }
+.nk-empty { text-align: center; padding: 80px 20px; color: var(--text-muted); }
+.nk-empty p { margin-top: 10px; font-size: 0.95rem; }
+
+/* Blocks — B1 freeform: blocks keep sortOrder (vertical flow) but have
+   free x/width (%). Blocks whose x-ranges don't overlap share a row
+   (side-by-side). Container height is set by layoutBlocks(). */
+.nk-blocks { position: relative; }
+.nk-block { position: absolute; top: 0; left: 0; width: 100%; min-width: 300px; padding: 2px 28px 2px 26px; border-radius: 6px; }
+.nk-block:hover { background: rgba(128,128,128,0.06); }
+.nk-block .nk-block-del { position: absolute; right: 12px; top: 6px; display: none; color: var(--text-dim); cursor: pointer; font-size: 0.8rem; padding: 0 4px; z-index: 3; }
+.nk-block:hover .nk-block-del { display: block; }
+.nk-block .nk-block-del:hover { color: #f87171; }
+/* Drag grip (left edge): move horizontally / reorder vertically */
+.nk-block .nk-block-grip { position: absolute; left: 2px; top: 50%; transform: translateY(-50%); display: none; align-items: center; justify-content: center; width: 20px; height: 24px; color: var(--text-dim); font-size: 0.8rem; letter-spacing: -2px; cursor: grab; user-select: none; z-index: 2; border-radius: 4px; }
+.nk-block:hover .nk-block-grip { display: flex; }
+.nk-block .nk-block-grip:hover { color: var(--hover-accent); background: rgba(128,128,128,0.08); }
+.nk-block .nk-block-grip:active { cursor: grabbing; }
+/* Move-anywhere: while a block is being dragged, prevent text selection */
+body.nk-dragging, body.nk-dragging * { user-select: none !important; -webkit-user-select: none !important; }
+body.nk-dragging .nk-block, body.nk-dragging .nk-block * { cursor: grabbing; }
+/* Resize handle (right edge): horizontal width drag */
+.nk-block .nk-block-resize { position: absolute; right: 0; top: 4px; bottom: 4px; width: 10px; display: none; cursor: ew-resize; z-index: 2; border-radius: 0 6px 6px 0; }
+.nk-block:hover .nk-block-resize { display: block; }
+.nk-block .nk-block-resize:hover { background: rgba(45,212,191,0.22); }
+.nk-block .nk-block-resize::after { content: ''; position: absolute; right: 3px; top: 50%; transform: translateY(-50%); width: 3px; height: 22px; border-radius: 2px; background: var(--text-dim); opacity: 0.6; }
+.nk-block .nk-block-resize:hover::after { background: var(--hover-accent); opacity: 1; }
+.nk-text { min-height: 1.4em; font-size: 1rem; line-height: 1.6; color: var(--text); outline: none; white-space: pre-wrap; word-break: break-word; }
+.nk-block-heading .nk-h { font-size: 1.45rem; font-weight: 700; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
+.nk-block-heading2 .nk-h { font-size: 1.2rem; font-weight: 650; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
+.nk-block-heading3 .nk-h { font-size: 1.05rem; font-weight: 600; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
+.nk-block-checklist { padding-left: 26px; }
+.nk-check-item { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+.nk-check-box { accent-color: var(--turq); width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; }
+.nk-check-text { flex: 1; font-size: 0.98rem; color: var(--text); background: transparent; border: none; outline: none; }
+.nk-block-list ul, .nk-block-list ol { margin: 0; padding-left: 22px; }
+.nk-block-list li { padding: 1px 0; }
+.nk-list-text { font-size: 0.98rem; color: var(--text); background: transparent; border: none; outline: none; width: 100%; }
+.nk-add-item { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-size: 0.8rem; cursor: pointer; padding: 4px 12px; border-radius: 10px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-add-item:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+.nk-add-block { margin-top: 12px; padding: 9px 16px; color: var(--text-muted); font-size: 0.85rem; font-weight: 600; cursor: pointer; border-radius: 10px; border: 1px dashed var(--border); background: transparent; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-add-block:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+
+/* Rich-text floating format bar */
+.nk-fmt-bar { position: fixed; z-index: 9500; display: none; align-items: center; gap: 2px; padding: 4px; background: var(--bg-modal); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.nk-fmt-bar button { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 26px; padding: 0 8px; border: none; background: transparent; color: var(--text-muted); font-size: 0.85rem; border-radius: 6px; cursor: pointer; transition: background var(--transition), color var(--transition); }
+.nk-fmt-bar button:hover { background: var(--bg-hover); color: var(--hover-accent); }
+.nk-fmt-bar button code { font-size: 0.8rem; }
+
+/* Rich text inside blocks */
+.nk-text b, .nk-text strong { font-weight: 700; }
+.nk-text i, .nk-text em { font-style: italic; }
+.nk-text u { text-decoration: underline; }
+.nk-text code { background: var(--bg-hover); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.85em; }
+.nk-text a { color: var(--hover-accent); text-decoration: underline; }
+.nk-text font[color], .nk-text span[color] { color: inherit; }
+
+/* Format bar extras */
+.nk-fmt-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.nk-fmt-color { font-weight: 800; }
+.nk-color-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 9600; display: grid; grid-template-columns: repeat(7, 22px); gap: 4px; padding: 8px; background: var(--bg-modal); border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow); }
+.nk-color-pop button { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; padding: 0; }
+.nk-color-pop button:hover { transform: scale(1.15); }
+.nk-color-pop .nk-color-none { background: #fff; color: #444; font-size: 0.85rem; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Table blocks */
+.nk-block-table { padding-left: 6px; }
+.nk-table-wrap { width: 100%; }
+.nk-table-toolbar { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; flex-wrap: wrap; }
+.nk-btn-sm { font-size: 0.75rem; padding: 3px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-btn-sm:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+.nk-table-sel { font-size: 0.75rem; color: var(--text-dim); margin-left: auto; }
+.nk-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.nk-table td { border: 1px solid var(--border); padding: 0; min-width: 60px; position: relative; }
+.nk-table td.selected { outline: 2px solid var(--turq); outline-offset: -1px; background: rgba(45,212,191,0.06); }
+.nk-tcell { width: 100%; border: none; outline: none; background: transparent; color: var(--text); font-size: 0.9rem; padding: 5px 8px; box-sizing: border-box; }
+.nk-table-size { display: flex; gap: 14px; margin: 10px 0 4px; }
+.nk-table-size label { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-dim); }
+.nk-table-size .nk-modal-input { width: 70px; }
+
+/* Image blocks */
+.nk-block-image { padding-left: 6px; }
+.nk-img { display: block; max-width: 100%; height: auto; border-radius: 10px; }
+.nk-img-empty { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1px dashed var(--border); border-radius: 12px; background: var(--bg-card); }
+.nk-img-hint { font-size: 0.8rem; color: var(--text-dim); }
+.nk-img-actions { display: flex; gap: 8px; margin-top: 6px; }
+.nk-img-actions .nk-btn { font-size: 0.78rem; padding: 3px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-img-actions .nk-btn:hover { background: var(--bg-hover); color: var(--hover-accent); border-color: var(--hover-accent); }
+
+/* ── NoteKit tab bar (pages as tabs) ─────────────────────────────── */
+.nk-tabs { display: flex; align-items: center; gap: 4px; padding: 8px 16px 8px 5px; overflow-x: auto; white-space: nowrap; position: sticky; top: 0; z-index: 5; }
+.nk-tabs-label { font-size: 0.82rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); margin-right: 10px; flex-shrink: 0; }
+.nk-tab { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 12px; border-radius: 10px; cursor: pointer; color: var(--text-muted); font-size: 0.82rem; border: 1px solid transparent; flex-shrink: 0; max-width: 180px; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-tab:hover { background: var(--bg-hover); color: var(--text); }
+.nk-tab.active { background: var(--bg-card); color: var(--hover-accent); border-color: var(--border); font-weight: 600; }
+.nk-tab-name { overflow: hidden; text-overflow: ellipsis; }
+.nk-tab-more { color: var(--text-dim); font-weight: 700; padding: 0 2px; }
+.nk-tab-more:hover { color: var(--hover-accent); }
+/* Add-page button: app-style control (matches jumps filter-bar buttons) */
+.nk-tab-add { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0; border-radius: 10px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); font-size: 1.05rem; font-weight: 700; line-height: 1; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.nk-tab-add:hover { color: var(--hover-accent); border-color: var(--hover-accent); background: var(--bg-hover); }
+
+/* ── NoteKit page header (breadcrumb + help) ─────────────────────── */
+/* ── NoteKit icon picker ──────────────────────────────────────────── */
+.nk-modal-icon { width: 420px; }
+.nk-icon-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-bottom: 16px; max-height: 220px; overflow-y: auto; padding: 4px; }
+.nk-icon-opt { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-card); color: var(--text-muted); cursor: pointer; transition: border-color var(--transition), color var(--transition), background var(--transition); }
+.nk-icon-opt:hover { border-color: var(--turq); color: var(--turq); }
+.nk-icon-opt.selected { border-color: var(--turq); color: var(--turq); background: rgba(45,212,191,0.12); box-shadow: 0 0 0 1px var(--turq); }
+
+/* Context menu (reuse global #ctxMenu / .ctx-item styles) */
+
+/* In-app modal (replaces window.prompt/confirm — unsupported in Electron) */
+.nk-modal-overlay { position: fixed; inset: 0; background: var(--overlay, rgba(0,0,0,0.7)); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.nk-modal { background: var(--bg-modal); border: 1px solid var(--border); border-radius: var(--radius-lg, 16px); padding: 20px 22px; width: 340px; max-width: 90vw; box-shadow: var(--shadow); }
+.nk-modal-title { font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+.nk-modal-msg { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 14px; line-height: 1.5; }
+.nk-modal-input { width: 100%; box-sizing: border-box; padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border-input); background: var(--bg-input); color: var(--text); font-size: 0.95rem; outline: none; margin-bottom: 16px; }
+.nk-modal-input:focus { border-color: var(--turq); }
+.nk-modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+.nk-btn { padding: 7px 16px; border-radius: var(--radius, 10px); border: 1px solid var(--border); background: var(--bg-card); color: var(--text); font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: opacity var(--transition), background var(--transition), border-color var(--transition); }
+.nk-btn:hover:not(:disabled) { background: var(--bg-hover); }
+.nk-btn-primary { background: var(--grad); border: none; color: #fff; box-shadow: 0 4px 16px rgba(0,194,199,0.25); }
+.nk-btn-primary:hover:not(:disabled) { opacity: 0.88; background: var(--grad); }
+.nk-btn-danger { background: transparent; border: 1px solid rgba(248,113,113,0.5); color: #f87171; }
+.nk-btn-danger:hover:not(:disabled) { background: rgba(248,113,113,0.15); }
+
+/* ── ClipKit (screen captures) ─────────────────────────────────────── */
+.ck-card { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); margin-bottom: 10px; cursor: pointer; transition: border-color var(--transition), background var(--transition), transform var(--transition); }
+.ck-card:hover { border-color: var(--hover-accent); background: var(--bg-hover); transform: translateY(-1px); }
+.ck-thumb { width: 132px; height: 78px; border-radius: 8px; background-size: cover; background-position: center; background-color: var(--bg-hover); border: 1px solid var(--border); flex-shrink: 0; }
+.ck-main { display: flex; flex-direction: column; gap: 8px; min-width: 0; flex: 1; }
+.ck-meta { display: flex; flex-direction: column; gap: 3px; }
+.ck-time { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.ck-size { font-size: 0.78rem; color: var(--text-dim); }
+.ck-actions { display: flex; gap: 8px; }
+.ck-btn { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; font-size: 0.78rem; font-weight: 700; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-card); color: var(--text); cursor: pointer; transition: background var(--transition), color var(--transition), border-color var(--transition); }
+.ck-btn svg.ti { width: 0.95rem; height: 0.95rem; stroke: currentColor; fill: none; flex-shrink: 0; }
+.ck-btn:hover { border-color: var(--hover-accent); color: var(--hover-accent); background: var(--bg-hover); }
+.ck-btn[data-ck-del]:hover { border-color: #f87171; color: #f87171; background: rgba(248,113,113,0.1); }
+.ck-del { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; border-radius: 6px; background: transparent; color: var(--text-dim); font-size: 0.8rem; cursor: pointer; display: none; align-items: center; justify-content: center; }
+.ck-card:hover .ck-del { display: flex; }
+.ck-del:hover { color: #f87171; background: rgba(248,113,113,0.12); }

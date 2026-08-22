@@ -2,6 +2,88 @@
 
 ---
 
+## v5.1.46 — August 22, 2026
+
+### Settings — Sidebar Modules note
+- Added a **Beta notice** to the Settings → Sidebar Modules card clarifying that NoteKit and ClipKit are in beta, with a blue "BETA" badge.
+
+---
+
+## v5.1.45 — August 22, 2026
+
+### Settings — Sidebar Modules card
+- **New "Sidebar Modules" card added to the Settings page** with two switches:
+  - **NoteKit in Sidebar** — show/hide the NoteKit project list in the sidebar navigation
+  - **ClipKit in Sidebar** — show/hide the ClipKit/Captures entry in the sidebar navigation
+- Each switch applies **live** (sidebar updates immediately) and persists across restarts via preferences.
+- Both default to ON; toggling off hides the module until re-enabled.
+
+---
+
+## v5.1.44 — August 22, 2026
+
+### Capture — button polish + toast feedback
+- **Copy / Delete buttons now use tabler icons instead of emojis** (📋/🗑 replaced with `tabler-copy` / `tabler-trash` SVGs) on the capture cards, the full-screen viewer, and the right-click context menu. Consistent icon style across all capture actions.
+- **Copy feedback now uses a toast** instead of the inline green text — clicking Copy shows a toast notification ("Copied to clipboard") using the app's standard toast system; failures show a red danger toast.
+
+---
+
+## v5.1.43 — August 22, 2026
+
+### Sidebar — consistent tooltips
+- **NoteKit project rows now use the same custom tooltip as the other sidebar nav items.** When the sidebar is collapsed, hovering a NoteKit project shows the same styled `nav-tooltip` (project name) that Home/Captures/Help show, instead of the native OS tooltip.
+- Tooltip wiring moved to event delegation so both static nav items and dynamically-added NoteKit project rows get identical tooltips; removed the native `title` from project rows to avoid a double/OS tooltip.
+
+---
+
+## v5.1.42 — August 22, 2026
+
+### Capture — card actions + NoteKit icons
+- **Capture cards now show Copy + Delete buttons** directly on every capture on the Captures page (previously Copy only existed in the full-screen viewer, and Delete was a tiny hover-only ✕). Both buttons work: Copy sends the image to the clipboard, Delete removes the capture + file.
+- **Copy + Delete now reliably functional from the card** — wired to the existing clipboard/delete IPC handlers.
+- **NoteKit project icons use the same toolkit style as the other sidebar nav icons** — identical 24×24 centered tabler-icon slot, same color + hover/active states as the main nav icons.
+
+---
+
+## v5.1.41 — August 22, 2026
+
+### Capture
+- **App auto-minimizes during capture** — clicking New Capture minimizes the JumpKit window so it never blocks the selection area or appears in the shot; the window automatically restores (and re-maximizes if it was maximized) after you select, cancel, or press Esc.
+- (Fixes the JumpKit window still showing / "walls" during crosshair capture.)
+
+### UI — Sidebar
+- **Captures icon color now matches Home** — removed the `color:inherit` override on the ClipKit captures icon so it uses the same icon color + active highlight as Home.
+- **NoteKit project icons align perfectly when collapsed** — project rows now center their icons (matching the Help icon) and hide the name/overflow controls when the sidebar is collapsed.
+
+---
+
+## v5.1.40 — August 22, 2026
+
+### Capture — multi-display + cleanup
+- **Crosshair now works on every connected display** — capture opens a transparent overlay on each screen (previously only the screen the app was on).
+- **No more dead zone / enter-blocked box** — each overlay covers its display's full bounds; regions are mapped via screen coordinates, so dragging works edge-to-edge.
+- **Removed the green on-screen debug text/pill** from the capture overlay (crosshair/hint only). Quiet diagnostics remain in `debug.log` for troubleshooting.
+
+### UI — Sidebar
+- **No horizontal scrollbar when collapsed** — added `overflow-x: hidden` to the collapsed sidebar + nav.
+- **Nav icons + links aligned identically** — icons normalized to a fixed 24×24 centered slot (removed the Jumps icon's offset margin); label leading spaces removed so all labels start at the same horizontal position.
+
+---
+
+## v5.1.39 — August 22, 2026
+
+### New / Fixed — ClipKit Screen Capture
+- **FIXED (root cause): screen capture was broken** — the app's Content-Security-Policy blocked the capture overlay's inline JavaScript. The crosshair rendered (CSS) but the entire click/drag/region/save logic never ran, so no bounding box appeared and no image saved. Added `'unsafe-inline'` to the CSP `script-src` so the overlay's script executes. Now the bounding box draws on drag and captures save to ClipKit's Captures panel + clipboard on release (verified end-to-end: PNG written to `captures/`, history updated, UI thumbnail renders).
+- **Diagnostics added** — capture activity logs to `userData/clipkit/debug.log` (heartbeat + step-by-step `onRegion` trace) for future troubleshooting.
+
+### UI — Sidebar
+- **Nav section labels** now use normal casing: `JumpKit`, `NoteKit`, `ClipKit`, `Admin` (were all-caps `JUMPKIT`/`NOTEKIT`/`CLIPKIT`/`ADMIN`).
+- **NoteKit label left alignment** now matches JumpKit/ClipKit labels (same left padding).
+- **Collapsed sidebar** now reliably hides all section labels (including NoteKit, which had a higher-specificity display rule).
+- **Collapsed sidebar** no longer shows the blue update-banner sliver above the collapse/expand button.
+
+---
+
 ## v1.0.0-rc2 — June 16, 2026 (Release Testing Improvements)
 
 ### Testing / QA

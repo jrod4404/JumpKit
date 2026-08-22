@@ -1,4 +1,6 @@
 node_modules/
+node_modules
+Topics/JumpKit/app/node_modules
 *.log
 .DS_Store
 dist/
