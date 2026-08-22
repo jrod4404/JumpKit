@@ -555,9 +555,11 @@ ipcMain.handle('clipkit-capture', async () => {
       let settled = false;
       const done = (v) => { if (!settled) { settled = true; resolve(v); } ckCurrentCancel = null; try { unregisterEsc(); } catch (_) {} };
       const onRegion = async (e, rect) => {
+        ckLog('onRegion: received ' + JSON.stringify(rect));
         ipcMain.removeListener('clipkit-region', onRegion);
         ipcMain.removeListener('clipkit-cancel', onCancel);
         try {
+          ckLog('onRegion: hiding overlay');
           // Hide the overlay so it doesn't appear in the capture. On Windows,
           // setOpacity(0) is more reliable than hide() for removing a
           // transparent always-on-top window from the composited frame.
@@ -570,29 +572,38 @@ ipcMain.handle('clipkit-capture', async () => {
           // high scale) can return empty thumbnails on some Windows setups.
           const tw = Math.min(Math.round(dW * scaleF), 3840);
           const th = Math.min(Math.round(dH * scaleF), 3840);
+          ckLog('onRegion: requesting desktopCapturer ' + tw + 'x' + th);
           const sources = await desktopCapturer.getSources({
             types: ['screen'],
             thumbnailSize: { width: tw, height: th },
           });
+          ckLog('onRegion: got ' + sources.length + ' sources');
           const src = sources.find((s) => s.display_id === String(display.id)) || sources.find((s) => s.display_id) || sources[0];
           if (!src) throw new Error('no screen source');
           const img = src.thumbnail;
           const tSize = img.getSize();
+          ckLog('onRegion: source=' + (src && src.id) + ' thumb=' + JSON.stringify(tSize));
           if (!tSize || !tSize.width || !tSize.height) throw new Error('empty screen thumbnail');
           const cropScale = tSize.width / (dW || 1);
+          ckLog('onRegion: cropScale=' + cropScale + ' rect=' + JSON.stringify(rect));
           const crop = img.crop({
             x: Math.round(rect.x * cropScale),
             y: Math.round(rect.y * cropScale),
             width: Math.max(1, Math.round(rect.w * cropScale)),
             height: Math.max(1, Math.round(rect.h * cropScale)),
           });
-          const rec = await ckPersistCapture(crop.toPNG(), Math.round(rect.w), Math.round(rect.h));
+          const png = crop.toPNG();
+          ckLog('onRegion: cropped PNG bytes=' + png.length);
+          const rec = await ckPersistCapture(png, Math.round(rect.w), Math.round(rect.h));
+          ckLog('onRegion: saved ' + rec.id);
           // Resolve FIRST so the closed event (fired by overlay.close()) can't
           // win the race and mark this successful capture as cancelled.
           done(rec);
+          ckLog('onRegion: done resolved');
           try { overlay.close(); } catch (_) {}
         } catch (err) {
           console.error('[clipkit] capture failed:', err && err.message ? err.message : err);
+          ckLog('onRegion: ERROR ' + (err && err.message ? err.message : err));
           done({ error: err.message });
           try { overlay.close(); } catch (_) {}
         }
