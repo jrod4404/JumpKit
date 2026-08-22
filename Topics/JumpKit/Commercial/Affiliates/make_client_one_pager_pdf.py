@@ -145,7 +145,8 @@ d.text((M, y+66), h1b, font=font(62, black=True), fill=ROYAL)
 desc = ('JumpKit displays your navigation links in one place — web links, local directories, shared resources — '
         'organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. '
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
-        'Available for single users and shareable among teams.')
+        'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
+        'and macOS, and keeps your data local — fast, private, and always yours.')
 y2 = draw_wrapped(d, desc, (M, y+160), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right (no dark shadow — clean light card, thin light divider only)
@@ -204,10 +205,16 @@ def _draw_ps_card(x0, x1, label, title, ic, ibg, items):
     # taller card to fit 8 rows in a 2x4 grid
     card_top = ps_y
     card_bot = ps_y + 560
+    cx_center = (x0 + x1)//2
     rect(d, [x0, card_top, x1, card_bot], fill=WHITE, outline=LINE, radius=45)
-    d.rounded_rectangle([x0+45, card_top+42, x0+45+272, card_top+90], radius=25, fill=ibg)
-    d.text((x0+60, card_top+53), label, font=F['tiny_b'], fill=ic)
-    d.text((x0+45, card_top+104), title, font=font(44, black=True), fill=INK)
+    # centered label pill
+    pill_w = 272
+    d.rounded_rectangle([cx_center-pill_w//2, card_top+42, cx_center+pill_w//2, card_top+90], radius=25, fill=ibg)
+    lw = d.textbbox((0,0), label, font=F['tiny_b'])[2]
+    d.text((cx_center-lw//2, card_top+53), label, font=F['tiny_b'], fill=ic)
+    # centered title
+    tw = d.textbbox((0,0), title, font=font(44, black=True))[2]
+    d.text((cx_center-tw//2, card_top+104), title, font=font(44, black=True), fill=INK)
     # 2 columns x 4 rows
     sub_w = (col_w - 60 - 24)//2  # two cols inside card
     for idx, (icon, t, b) in enumerate(items):
