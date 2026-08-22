@@ -1509,6 +1509,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
+            <div class="acct-row" style="border:none;padding:0 16px 10px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
             <div class="acct-row">
               <div class="acct-row-label"><span>NoteKit in Sidebar</span><span class="acct-row-hint">Show or hide the NoteKit project list in the sidebar navigation</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotekit" ${p.showNotekit!==false?'checked':''}/><span class="toggle-slider"></span></label>

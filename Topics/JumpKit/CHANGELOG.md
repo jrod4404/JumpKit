@@ -2,6 +2,13 @@
 
 ---
 
+## v5.1.46 — August 22, 2026
+
+### Settings — Sidebar Modules note
+- Added a **Beta notice** to the Settings → Sidebar Modules card clarifying that NoteKit and ClipKit are in beta, with a blue "BETA" badge.
+
+---
+
 ## v5.1.45 — August 22, 2026
 
 ### Settings — Sidebar Modules card
