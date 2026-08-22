@@ -1511,7 +1511,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
           </div>
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
-            <div class="acct-row" style="border:none;padding:0 16px 10px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
+            <div class="acct-row" style="border:none;padding:12px 16px 10px;margin-top:4px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
             <div class="acct-row">
               <div class="acct-row-label"><span>NoteKit in Sidebar</span><span class="acct-row-hint">Show or hide the NoteKit project list in the sidebar navigation</span></div>
               <label class="toggle"><input type="checkbox" id="prefNotekit" ${p.showNotekit!==false?'checked':''}/><span class="toggle-slider"></span></label>
@@ -1742,15 +1742,17 @@ window.applySidebarModulePrefs = function applySidebarModulePrefs() {
   const ckLabel  = document.getElementById('clipkitNavLabel');
   const ckBtn    = document.getElementById('clipkitNavBtn');
 
-  // NoteKit: only hide if the feature is actually enabled (init reveals it);
-  // if disabled in this build, leave it hidden as init would.
-  const nkActive = nkLabel && nkLabel.style.display !== 'none';
+  // NoteKit: only hide if the feature is actually enabled in this build (init
+  // sets data-enabled='1' when it reveals the section). Checking the live
+  // display style here would lock the section hidden once the user turns it
+  // off (display stays 'none' → looks 'inactive' on the next call).
+  const nkActive = nkLabel && nkLabel.dataset.enabled === '1';
   if (nkActive) {
     nkLabel.style.display  = showNK ? 'block' : 'none';
     if (nkWrap) nkWrap.style.display = showNK ? 'block' : 'none';
   }
 
-  const ckActive = ckBtn && ckBtn.style.display !== 'none';
+  const ckActive = ckLabel && ckLabel.dataset.enabled === '1';
   if (ckActive) {
     if (ckLabel) ckLabel.style.display = showCK ? 'block' : 'none';
     if (ckBtn)   ckBtn.style.display   = showCK ? 'flex'  : 'none';

@@ -18,7 +18,7 @@
     if (!CK.enabled) return;
     const label = document.getElementById('clipkitNavLabel');
     const btn = document.getElementById('clipkitNavBtn');
-    if (label) label.style.display = 'block';
+    if (label) { label.style.display = 'block'; label.dataset.enabled = '1'; }
     if (btn) btn.style.display = 'flex';
     // Respect the user's show/hide preference for the sidebar section.
     if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();

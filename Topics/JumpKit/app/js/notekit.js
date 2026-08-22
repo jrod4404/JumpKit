@@ -27,7 +27,7 @@
     // Show the sidebar section.
     const label = document.getElementById('notekitNavLabel');
     const wrap = document.getElementById('notekitNavWrap');
-    if (label) label.style.display = 'block';
+    if (label) { label.style.display = 'block'; label.dataset.enabled = '1'; }
     if (wrap) { wrap.style.display = 'block'; renderNav(); }
     // Respect the user's show/hide preference for the sidebar section.
     if (typeof window.applySidebarModulePrefs === 'function') window.applySidebarModulePrefs();

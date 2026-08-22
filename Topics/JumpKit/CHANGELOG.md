@@ -2,6 +2,14 @@
 
 ---
 
+## v5.1.49 — August 22, 2026
+
+### Fixes
+- **Sidebar Module toggles now re-show correctly.** Turning NoteKit (or ClipKit) off hid the section, but turning it back on didn't restore it. Root cause: `applySidebarModulePrefs` checked the element's live `display` style to decide whether the feature was active — but hiding sets that same style to `none`, so the next toggle saw it as "inactive" and skipped re-showing. Now the enabled-in-build state is tracked via a persistent `data-enabled` attribute set at module init, independent of the user's show/hide pref. Hide → show now works for both NoteKit and ClipKit.
+- **Settings page:** added margin above the Beta pill + text in the Sidebar Modules card so it's no longer cut off by the card header.
+
+---
+
 ## v5.1.48 — August 22, 2026
 
 ### CRITICAL FIX — dead UI after boot
