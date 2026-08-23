@@ -1,6 +1,4 @@
 node_modules/
-node_modules
-Topics/JumpKit/app/node_modules
 *.log
 .DS_Store
 dist/
@@ -13,10 +11,17 @@ out/
 *.rpm
 .vercel
 
+# Local secrets and Supabase CLI temp files
+.env
+.env.*
+app/.env
+app/.env.*
+app/supabase/.temp/
+
 # Backup folders — large, don't commit
-Topics/JumpKit/app_backups/
-Topics/JumpKit/landing_backups/
-Topics/JumpKit/app_backup*/
-Topics/JumpKit/landing_backup*/
+app_backups/
+landing_backups/
+app_backup*/
+landing_backup*/
 *.tar.gz
 *.tar.bz2

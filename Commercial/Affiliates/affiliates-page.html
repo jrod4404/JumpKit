@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit Affiliates — MSP Partner Program</title>
+  <style>
+    :root { --royal:#1A4FD6; --turq:#00C2C7; --bg:#07111f; --card:#0f1d31; --text:#e8f2ff; --muted:#9fb0c7; --border:rgba(0,194,199,.22); --grad:linear-gradient(135deg,#1A4FD6,#00C2C7); }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:radial-gradient(circle at top left, rgba(0,194,199,.18), transparent 36%), var(--bg); color:var(--text); line-height:1.55; }
+    a { color:inherit; }
+    .wrap { width:min(1120px, calc(100% - 32px)); margin:0 auto; }
+    .nav { position:sticky; top:0; backdrop-filter:blur(18px); background:rgba(7,17,31,.78); border-bottom:1px solid var(--border); z-index:10; }
+    .nav-inner { height:68px; display:flex; align-items:center; justify-content:space-between; }
+    .brand { font-size:1.25rem; font-weight:800; letter-spacing:.02em; }
+    .brand span { background:var(--grad); -webkit-background-clip:text; background-clip:text; color:transparent; }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; border:1px solid var(--border); border-radius:12px; padding:12px 18px; text-decoration:none; font-weight:700; transition:.18s ease; }
+    .btn-primary { background:var(--grad); border:0; color:white; box-shadow:0 10px 26px rgba(0,194,199,.18); }
+    .btn:hover { transform:translateY(-1px); }
+    .hero { padding:84px 0 56px; text-align:center; }
+    .eyebrow { display:inline-flex; border:1px solid var(--border); border-radius:999px; padding:6px 12px; color:var(--turq); font-weight:700; font-size:.82rem; margin-bottom:22px; }
+    h1 { font-size:clamp(2.3rem, 6vw, 4.8rem); line-height:1.03; margin:0 auto 20px; max-width:900px; }
+    .sub { max-width:790px; margin:0 auto 28px; color:var(--muted); font-size:1.12rem; }
+    .cta-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:34px 0; }
+    .card { background:linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02)); border:1px solid var(--border); border-radius:20px; padding:24px; box-shadow:0 16px 40px rgba(0,0,0,.18); }
+    .card h3 { margin:0 0 10px; font-size:1.08rem; }
+    .card p, .card li { color:var(--muted); }
+    section { padding:48px 0; }
+    h2 { font-size:clamp(1.8rem, 3vw, 2.6rem); margin:0 0 12px; text-align:center; }
+    .section-sub { max-width:760px; margin:0 auto 28px; color:var(--muted); text-align:center; }
+    .steps { counter-reset:step; display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .step { position:relative; }
+    .step:before { counter-increment:step; content:counter(step); width:34px; height:34px; border-radius:50%; display:grid; place-items:center; background:var(--grad); color:white; font-weight:800; margin-bottom:12px; }
+    .demo-box { display:grid; grid-template-columns:1.15fr .85fr; gap:20px; align-items:center; }
+    .demo-thumb { min-height:260px; border-radius:22px; border:1px solid var(--border); background:linear-gradient(135deg, rgba(26,79,214,.36), rgba(0,194,199,.18)), url('https://jumpkit.app/assets/hero-mac-dark.jpg?v=1') center/cover; display:grid; place-items:center; }
+    .play { width:76px; height:76px; border-radius:50%; background:rgba(0,0,0,.55); display:grid; place-items:center; font-size:2rem; box-shadow:0 10px 30px rgba(0,0,0,.28); }
+    .faq { max-width:860px; margin:0 auto; display:grid; gap:14px; }
+    .faq details { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px 20px; }
+    .faq summary { cursor:pointer; font-weight:800; }
+    .faq p { color:var(--muted); margin-bottom:0; }
+    .final { text-align:center; padding:64px 0 90px; }
+    .placeholder { color:#ffd166; font-weight:800; }
+    @media (max-width:860px){ .grid,.steps,.demo-box{grid-template-columns:1fr;} .nav-inner{height:auto; padding:16px 0; gap:12px; flex-direction:column;} }
+  </style>
+</head>
+<body>
+  <nav class="nav"><div class="wrap nav-inner"><div class="brand">Jump<span>Kit</span> Affiliates</div><a class="btn btn-primary" href="[AFFILIATE_SIGNUP_URL]">Become an Affiliate</a></div></nav>
+
+  <main>
+    <section class="hero wrap">
+      <div class="eyebrow">MSP Partner Program</div>
+      <h1>Help clients stop searching. Earn commission when they start jumping.</h1>
+      <p class="sub">JumpKit gives clients one organized launchpad for links, folders, shared drives, portals, and team resources — and gives MSPs a simple productivity product to recommend.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="[AFFILIATE_SIGNUP_URL]">Become an Affiliate</a>
+        <a class="btn" href="https://jumpkit.app/#solution">Watch the Demo</a>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2>Why MSPs recommend JumpKit</h2>
+      <p class="section-sub">It solves a daily problem clients instantly understand: too much time wasted hunting for the same resources.</p>
+      <div class="grid">
+        <div class="card"><h3>Cleaner client workflows</h3><p>Organize recurring web links, file shares, local folders, portals, and project resources into one launcher.</p></div>
+        <div class="card"><h3>Faster onboarding</h3><p>Give new users a starter resource hub instead of relying on tribal knowledge and scattered bookmark lists.</p></div>
+        <div class="card"><h3>Less support friction</h3><p>Reduce repetitive “where is that link/folder?” questions and give clients a standard place to go.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="demo-box card">
+        <a class="demo-thumb" href="https://jumpkit.app/#solution" aria-label="Watch JumpKit demo"><div class="play">▶</div></a>
+        <div>
+          <h2 style="text-align:left">Show JumpKit in 2 minutes</h2>
+          <p style="color:var(--muted)">Use the existing JumpKit demo to show the one-click launcher, Windows/macOS support, team sharing, search/filtering, and ROI dashboard.</p>
+          <p><strong>Demo link:</strong><br><a href="https://jumpkit.app/#solution">https://jumpkit.app/#solution</a></p>
+          <p><strong>Current Supademo ID:</strong><br><code>cmopzrg0m0510xa0jfqglvrfv</code></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <h2>How the affiliate program works</h2>
+      <p class="section-sub">Final commercial terms still need Jeff approval before publishing.</p>
+      <div class="steps">
+        <div class="card step"><h3>Apply</h3><p>Sign up through the JumpKit affiliate application link.</p></div>
+        <div class="card step"><h3>Get your link</h3><p>Use your unique Lemon Squeezy referral link once approved.</p></div>
+        <div class="card step"><h3>Share JumpKit</h3><p>Send clients the demo, one-pager, or your referral link.</p></div>
+        <div class="card step"><h3>Earn commission</h3><p>Receive commission on qualified JumpKit Unlimited purchases.</p></div>
+      </div>
+      <p class="section-sub" style="margin-top:20px"><span class="placeholder">Publishing placeholders:</span> [COMMISSION_RATE], [COOKIE_WINDOW], [PAYOUT_TERMS], [AFFILIATE_SIGNUP_URL]</p>
+    </section>
+
+    <section class="wrap">
+      <h2>Affiliate FAQ</h2>
+      <div class="faq">
+        <details open><summary>Who is JumpKit for?</summary><p>Teams and individuals who repeatedly open web links, local folders, shared drives, customer portals, project resources, or internal tools.</p></details>
+        <details><summary>Does JumpKit replace browser bookmarks?</summary><p>It can replace or supplement bookmarks. JumpKit is stronger when users need browser links plus local folders, shared paths, team resources, search, filters, and ROI tracking.</p></details>
+        <details><summary>Can teams share resources?</summary><p>Yes. JumpKit supports team jump collections, making it useful for onboarding and common client/team resource sets.</p></details>
+        <details><summary>How do affiliates get credit?</summary><p>Affiliates should use their Lemon Squeezy referral link once JumpKit’s affiliate program is enabled and approved.</p></details>
+      </div>
+    </section>
+
+    <section class="final wrap">
+      <h2>Ready to recommend a tool clients immediately understand?</h2>
+      <p class="section-sub">Help clients stop searching and start jumping.</p>
+      <a class="btn btn-primary" href="[AFFILIATE_SIGNUP_URL]">Apply to Become a Partner</a>
+    </section>
+  </main>
+</body>
+</html>

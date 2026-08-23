@@ -1,0 +1,101 @@
+Return-Path: <0100019edb0684a3-3ba96757-b9c6-41ca-b900-95b8551427f6-000000@mail.iresearch.dnb.com>
+X-Original-To: jeff@jumpkit.app
+Delivered-To: jeff@jumpkit.app
+Authentication-Results: mail.protonmail.ch; dkim=pass (Good 2048 bit
+    rsa-sha256 signature) header.d=iresearch.dnb.com header.a=rsa-sha256;
+    dkim=pass (Good 1024 bit rsa-sha256 signature) header.d=amazonses.com
+    header.a=rsa-sha256
+Authentication-Results: mail.protonmail.ch; dmarc=pass (p=reject dis=none)
+ header.from=iresearch.dnb.com
+Authentication-Results: mail.protonmail.ch; spf=pass smtp.mailfrom=mail.iresearch.dnb.com
+Authentication-Results: mail.protonmail.ch; arc=none smtp.remote-ip=54.240.48.91
+Authentication-Results: mail.protonmail.ch; dkim=pass (2048-bit key)
+ header.d=iresearch.dnb.com header.i=@iresearch.dnb.com header.b="jvPvOI9k"; dkim=pass
+ (1024-bit key) header.d=amazonses.com header.i=@amazonses.com header.b="gqgCqJjR"
+Received: from a48-91.smtp-out.amazonses.com (a48-91.smtp-out.amazonses.com
+ [54.240.48.91]) (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+  key-exchange X25519 server-signature RSA-PSS (4096 bits) server-digest SHA256) (No
+ client certificate requested) by mailin049.protonmail.ch (Postfix) with ESMTPS id
+ 4gh2PR2wk0z3B for <jeff@jumpkit.app>; Thu, 18 Jun 2026 13:58:19 +0000 (UTC)
+Dkim-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+ s=lktivwpn7zsmz4ocduhrb7tzpmeelom5; d=iresearch.dnb.com; t=1781791098;
+ h=Date:From:To:Message-ID:Subject:MIME-Version:Content-Type;
+ bh=tdUL5E5Cq+DgIg4lupo1phq1RJxnmHjRSHBpR2uXtcg=;
+ b=jvPvOI9ko8Spj0MmfRwlGwyk2OOrJkOF2XPicdmJ3NfC3kZy9IdjiIQ44w95SoUH
+ q5hlBb8D+bC363sYnD7vesRs05auo3uv5Hs+xXmTPm0JlxxvYa6zdmX1uaHC9QjHqam
+ QMhnNdefuhfTlYvhbBkOT9taXgGuP4azcjbwRkCdjF9di8NpzI/CXM8U16y4w7CZN/F
+ AtBWbDhzLNZ7hv4eFSDMH/yjnZlqJooLaFOpUHD894EvFGMxf6i8fQ2EpJ5qT/tsUMH
+ Cwg954K5IBUTG+1ur4g6//SOrtVGV3qpYB5hajXhQqHBu18+rnRj0XPMeSUleYEdpCj wVbp9DPXrg==
+Dkim-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/simple;
+ s=224i4yxa5dv7c2xz3womw6peuasteono; d=amazonses.com; t=1781791098;
+ h=Date:From:To:Message-ID:Subject:MIME-Version:Content-Type:Feedback-ID;
+ bh=tdUL5E5Cq+DgIg4lupo1phq1RJxnmHjRSHBpR2uXtcg=;
+ b=gqgCqJjRrHXq38OTEp9/hYb0kr6O++aH3dD1HZd9tAogcqnsERBuZSyRE+nkQuxH
+ jpT0IfqtKmgAeFPJXzVs+EYP54N3/maeY/6GwkC5RH+he9Mq6i/971IwRzIu2q2Ik49
+ Xytzl0HpsTROmb6IQOJ5fWc1QnBXcLvrm1TMOZTY=
+Date: Thu, 18 Jun 2026 13:58:18 +0000
+From: donotreply@iresearch.dnb.com
+To: jeff@jumpkit.app
+Message-Id: <0100019edb0684a3-3ba96757-b9c6-41ca-b900-95b8551427f6-000000@email.amazonses.com>
+Subject: DO NOT REPLY: Resolved Inquiry # 10475567 (Case # 10541522) - Update for JumpKit
+ LLC
+Mime-Version: 1.0
+Content-Type: multipart/mixed;boundary=---------------------962238a090921e770004aa2d56929cd2
+Feedback-Id: ::1.us-east-1.Yt8W7jbCl7CYWKZagyS1q4JpHgj3Fg97uAzWYlsD9XI=:AmazonSES
+X-Ses-Outgoing: 2026.06.18-54.240.48.91
+X-Pm-Spam: 0yezJI6YSpyJec91ztFGcjIwoJyLCvXBZcQniisnOERJt9TTVOUdSRQUiwslOjLdFJEL
+ CN0lSXZ1BElETjIbpAuLTsV0MIRkLf1USkVMFRfSUiVUQOsltx4CMSXiwRNSFNF9TRNVTFdUQjIbp0
+ sMFJk1ITVUfNRFSFTP9xZTkbjpIM4CxiwSXVTHNRfSUPlJRT9VNfFEVESBVVSREbjpIM0FsDJlIkVf
+ R5fSUQVNTStUFzg0XjIbpwiMCuTQNMQjw4QjLjLxkxpIGl3RcZBCp3BibCbt5lsYWp3BcaU2u0Vmbl
+ Is0JDIlfkRVS5UfQNVTUSFtdMX1bjpIM0FsQNlIlRI9xPRUP05XTUkiwslOSXiwBGU1B1BXUM1itsl
+ OFM91JzLCy29YZIS6iwCM2cvNVkcmwjoIfwSiiI3cnOisN0YWuW9aIojii5Wa3bigJtLCzF9bY92y6
+ ISZyeQJ9EUktjoIMczsSBlI0TfRJFUFDElRVlEP6IiTCMiwMiUlujAOMYjsBNlIjIwoJfLCiGVZddW
+ fm5Wayb6IJQeyEk9UIpj7tlmIWYld5hX2iWUbOJiohR3c2YftluZm0V9Zd5Wlw9FZVdy8I2MDwDMMM
+ Iysh1mIWafxByM3v21XZVGsiojIWbpFNwbDti0cMAjyxAjNDMuYQicHtCJLYlWswNzXlcw99icmwjo
+ ILAjwxMDMDNwAAwMDzDQNNgjy1cDMCLtJlsYW4GVdd9FllJWbGZpRdfbmkW9bZwWipJiOnbmR9hbGt
+ C9ddxW0pxWamb1dwtYWtTUZc12hiwGbCLwJNwX3iW0YOAju5ADMzM2MUyMj2jkNOEDyzUTMCLwJNwX
+ 3fW1YYFmz6ISZCMw4kzMDyzYMNIT24YTOTMxIMsNTfnBIcd3poNGd3XvRBoX3oXNaa5WnwojIjLwAQ
+ 3NzyjcNNAzx0UjMDN3gJyLCfW5dbFmt6ISZmIsF1mbC0WFZdJXlw1ycVdz9l0d2i2gYf1X9zJCLmck
+ loiIjzmENMY25lN2NTMllIyMzyGUNMQWxyAjZnI91
+X-Pm-Origin: external
+X-Pm-Transfer-Encryption: TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+X-Pm-Content-Encryption: on-delivery
+X-Pm-Spamscore: 0
+X-Pm-Spam-Action: inbox
+
+-----------------------962238a090921e770004aa2d56929cd2
+Content-Type: multipart/related;boundary=---------------------70392f47c7aaf1c71a4eba09a91f7357
+
+-----------------------70392f47c7aaf1c71a4eba09a91f7357
+Content-Type: text/html;charset=utf-8
+Content-Transfer-Encoding: base64
+
+PGh0bWw+CjxoZWFkPgo8c3R5bGU+CjxzdHlsZT4KLmhpZ2hsaWdodCB7CmJhY2tncm91bmQtY29s
+b3I6IHllbGxvdzsKfQo8L3N0eWxlPgo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5Pgo8cHJlIFNUWUxF
+PSJmb250LWZhbWlseTogQ2FsaWJyaTsgZm9udC1zaXplOiAxMnB0OyBjb2xvcjogYmxhY2s7Ij4K
+PEI+UGxlYXNlIGRvIG5vdCByZXNwb25kIHRvIHRoaXMgbWVzc2FnZS4gVGhpcyBpcyBhIHN5c3Rl
+bSBnZW5lcmF0ZWQgZW1haWwuPC9CPjxCUj5DYXNlICMgMTA1NDE1MjIgaGFzIGJlZW4gcmVzb2x2
+ZWQuIDxCUj4KPEI+VHJhY2tpbmcgSWQ6PC9CPiAxMDQ3NTU2Nwo8Qj5DYXNlIE51bWJlcjo8L0I+
+IDEwNTQxNTIyCjxCPlJlc29sdXRpb24gRGF0ZS9UaW1lOjwvQj4gSnVuZSAxOCwgMjAyNiwgMDE6
+NTggUE0gKFVUQykKPEI+QnVzaW5lc3MgbmFtZTo8L0I+IEp1bXBLaXQgTExDCjxCPkxvY2F0aW9u
+OjwvQj4gQnJpZ2h0b24gTUkgVVMKPEI+UmVxdWVzdGVyJ3MgT3duIFJlcXVlc3QgS2V5OjwvQj4g
+OUY5OUNDUE44VAo8QlI+PEI+Q29uY2VybiBjYXRlZ29yeTo8L0I+IEFkZCBidXNpbmVzcyAtIE1p
+bmkgSW5xdWlyeSAtIElkZW50aXR5IERhdGEgT25seQo8Qj5SZXNvbHV0aW9uOjwvQj4gRC1VLU4t
+UyBOdW1iZXIgY3JlYXRlZAo8Qj5TdWItUmVzb2x1dGlvbjo8L0I+IFZlcmlmaWVkIHRocm91Z2gg
+YSBjb21wYW55IHNwb2tlc3BlcnNvbgo8QlI+PEI+UmVzb2x1dGlvbiBjb21tZW50OjwvQj4gQ29u
+ZmlybWVkIHRocm91Z2ggdGhlIE1pY2hpZ2FuIFNlY3JldGFyeSBvZiBTdGF0ZSBhbmQgdmlhIGVt
+YWlsIGJ5IEplZmZyZXkgUm9kZXIsIE1uZyBNYnIsIG9uIEp1bmUgMTgsIDIwMjYsIHRoZSBidXNp
+bmVzcyBuYW1lIEp1bXBraXQgTExDIGxvY2F0ZWQgYXQgNjMzNSBQaW5lbW9udCBEciwgQnJpZ2h0
+b24sIE1JIDQ4MTE2IFVTLiBUaGVyZWZvcmUsIGEgRFVOUyBudW1iZXIgaGFzIGJlZW4gZ2VuZXJh
+dGVkIGZvciB0aGUgYnVzaW5lc3MuIEl0IGNhbiB0YWtlIHVwIHRvIDI04oCTNDggaG91cnMgZm9y
+IHRoZSBEVU5TIG51bWJlciB0byBiZSBhdmFpbGFibGUuCjxCUj48Qj5VcGRhdGVkIEluZm9ybWF0
+aW9uOjwvQj4KPHNwYW4gY2xhc3M9ImhpZ2hsaWdodCI+PEI+UmVzb2x1dGlvbiBEdW5zOjwvQj4g
+MTQ1MDQ2NjcxPC9zcGFuPgo8Qj5CdXNpbmVzcyBOYW1lOjwvQj4gSnVtcGtpdCBMTEMKPEI+QWRk
+cmVzczwvQj4KNjMzNSBQaW5lbW9udCBEcgpCcmlnaHRvbiBNSSA0ODExNgo8Qj5DRU8gb3IgUHJp
+bWFyeSBQcmluY2lwYWw6PC9CPiBKZWZmcmV5IFJvZGVyCjxCPkxlZ2FsIEZvcm06PC9CPiBDb3Jw
+b3JhdGlvbgo8Qj5TdGFydCBZZWFyOjwvQj4gMjAyNgo8QlI+ClNpbmNlcmVseSwKRCZCIGlSZXNl
+YXJjaCBUZWFtPEJSPgo8Qj5QbGVhc2UgZG8gbm90IHJlc3BvbmQgdG8gdGhpcyBtZXNzYWdlLiBU
+aGlzIGlzIGEgc3lzdGVtIGdlbmVyYXRlZCBlbWFpbC48L0I+CjxwIHN0eWxlPSJ0ZXh0LWFsaWdu
+OmNlbnRlciI+UHVibGljPC9wPgo8L3ByZT4KPC9ib2R5Pgo8L2h0bWw+
+-----------------------70392f47c7aaf1c71a4eba09a91f7357--
+-----------------------962238a090921e770004aa2d56929cd2--

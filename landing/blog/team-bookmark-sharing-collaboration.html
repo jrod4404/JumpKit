@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Bookmark Sharing: How Collaborative Link Management Boosts Productivity | JumpKit</title>
+  <meta name="description" content="Shared bookmarks for teams done right. Learn how collaborative link management eliminates onboarding friction and keeps everyone on the same page." />
+  <link rel="canonical" href="https://jumpkit.app/blog/team-bookmark-sharing-collaboration" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Team Bookmark Sharing: How Collaborative Link Management Boosts Productivity" />
+  <meta property="og:description" content="Shared bookmarks for teams done right. Learn how collaborative link management eliminates onboarding friction and keeps everyone on the same page." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/blog/team-bookmark-sharing-collaboration" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Team Bookmark Sharing: How Collaborative Link Management Boosts Productivity" />
+  <meta name="twitter:description" content="Shared bookmarks for teams done right. Learn how collaborative link management eliminates onboarding friction and keeps everyone on the same page." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Team Bookmark Sharing: The Missing Piece in Your Collaboration Stack",
+    "description": "Shared bookmarks for teams done right. Learn how collaborative link management eliminates onboarding friction and keeps everyone on the same page.",
+    "url": "https://jumpkit.app/blog/team-bookmark-sharing-collaboration",
+    "image": "https://jumpkit.app/assets/Jumpkit-hero-light.png",
+    "author": {
+      "@type": "Organization",
+      "name": "JumpKit"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "JumpKit",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://jumpkit.app/assets/logo-light.png"
+      }
+    },
+    "datePublished": "2026-08-11",
+    "dateModified": "2026-08-11"
+  }
+  </script>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
+    /* ── Article styles ── */
+    .article-hero {
+      padding: 120px 24px 56px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .article-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turq);
+      background: rgba(0,194,199,0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+    .article-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .article-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1A4FD6, #00C2C7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .article-meta-divider { opacity: 0.4; }
+
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 12px 24px 100px;
+    }
+
+    /* Article typography */
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text);
+      margin-bottom: 1.4rem;
+    }
+    .article-body h2 {
+      font-size: 1.5rem;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+      color: var(--turq);
+      margin: 2.8rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 0.7rem;
+    }
+    .article-body ul, .article-body ol {
+      margin: 0 0 1.4rem 1.4rem;
+    }
+    .article-body li {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+    }
+    .article-body li strong {
+      color: var(--text);
+    }
+    .article-body strong { font-weight: 700; }
+
+    .article-body .callout {
+      background: rgba(0,194,199,0.07);
+      border-left: 3px solid var(--turq);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 1.6rem 0;
+    }
+    .article-body .callout p {
+      margin: 0;
+      font-size: 0.97rem;
+      color: var(--text);
+    }
+
+    .article-cta-box {
+      background: linear-gradient(135deg, rgba(26,79,214,0.15) 0%, rgba(0,194,199,0.1) 100%);
+      border: 1px solid rgba(0,194,199,0.25);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .article-cta-box h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      border: none;
+      padding: 0;
+    }
+    .article-cta-box p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+    }
+    .article-cta-box .btn {
+      background: linear-gradient(135deg,#50CACC,#1A4FD6);
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 28px;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .article-cta-box .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .article-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .article-back:hover { color: var(--turq); }
+
+    .pricing-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 1.4rem 0;
+    }
+    .pricing-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .pricing-table th, .pricing-table td {
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-table th {
+      background: rgba(0,194,199,0.07);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pricing-table tr:last-child td { border-bottom: none; }
+    .pricing-table td { color: var(--text-muted); }
+    .pricing-table td:first-child { font-weight: 600; color: var(--text); }
+    .price-highlight { color: var(--turq); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .article-body { padding: 40px 18px 80px; }
+      .article-hero { padding: 100px 18px 44px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;background:rgba(0,194,199,0.08)">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- OFFCANVAS -->
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="../assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="/#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="../assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="/#testimonialCarousel" class="offcanvas-link"><svg class="ti ti-quote"><use href="../assets/tabler-sprite.svg#tabler-quote"/></svg> Testimonials</a>
+      <a href="/#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="../assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="/#statistics" class="offcanvas-link"><svg class="ti ti-chart-bar"><use href="../assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Dashboard</a>
+      <a href="/#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="../assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</a>
+      <a href="/#pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- ARTICLE HERO -->
+  <div class="article-hero">
+    <span class="article-tag">
+      <svg class="ti ti-users" style="width:.85em;height:.85em"><use href="../assets/tabler-sprite.svg#tabler-users"/></svg>
+      Teamwork
+    </span>
+    <h1 class="article-title">Team Bookmark Sharing: The Missing Piece in Your Collaboration Stack</h1>
+    <div class="article-meta">
+      <div class="article-avatar">JR</div>
+      <span><strong>Jeff R.</strong></span>
+      <span class="article-meta-divider">·</span>
+      <span>August 11, 2026</span>
+      <span class="article-meta-divider">·</span>
+      <span>6 min read</span>
+    </div>
+  </div>
+
+  <!-- ARTICLE BODY -->
+  <article class="article-body">
+    <a href="/blog" class="article-back">
+      <svg class="ti ti-arrow-left" style="width:.95em;height:.95em"><use href="../assets/tabler-sprite.svg#tabler-arrow-left"/></svg>
+      Back to Blog
+    </a>
+
+    <p>Every team has the same problem: critical resources scattered across individual browsers, Slack messages, email threads, and sticky notes. New hires spend their first week asking "where's the CRM link?" or "what's the path to the shared proposals folder?" — and nobody has a centralized answer. Collaborative bookmark sharing should solve this, but most teams don't have the right tool for it. Let's fix that.</p>
+
+    <h2>Why Browser Bookmarks Don't Work for Teams</h2>
+
+    <p>Browser bookmarks are inherently individual tools. They were never designed for collaboration:</p>
+
+    <ul>
+      <li><strong>Individual silos:</strong> Every person has their own bookmark set. There's no shared space where everyone contributes.</li>
+      <li><strong>No sharing mechanism:</strong> The only way to "share" a bookmark is to paste a URL into Slack or email — which then gets buried and lost.</li>
+      <li><strong>No centralization:</strong> Important links live in different places for different people. When someone leaves, their knowledge walks out the door.</li>
+      <li><strong>No local network paths:</strong> Teams that work with shared drives, network folders, or internal servers can't bookmark those paths in a browser.</li>
+    </ul>
+
+    <p>The result is onboarding friction, inconsistent access to resources, and wasted time searching for things that should be one click away. For a deeper look at the root issues, see our post on <a href="/blog/shared-bookmarks-for-teams">shared bookmarks for teams</a>.</p>
+
+    <h2>What Teams Actually Need</h2>
+
+    <p>A proper team bookmark sharing solution should provide:</p>
+
+    <ul>
+      <li><strong>Centralized shared links:</strong> One place where the team's collective resources live — web URLs, internal tools, dashboards, and documentation.</li>
+      <li><strong>Onboarding sets:</strong> Pre-built collections of links that get new hires productive on day one instead of day five.</li>
+      <li><strong>Permission control:</strong> Not everyone needs access to everything. Different teams need different resource sets.</li>
+      <li><strong>Cross-platform:</strong> Works regardless of which browser or OS team members use.</li>
+      <li><strong>Local network share support:</strong> The ability to share paths to network drives, shared folders, and internal servers — not just web URLs.</li>
+    </ul>
+
+    <h2>How JumpKit Solves Team Link Sharing</h2>
+
+    <p>JumpKit was built from the ground up with team collaboration in mind. Here's how it addresses each of those needs:</p>
+
+    <ul>
+      <li><strong>Team creation:</strong> Create teams within JumpKit (e.g., "Sales," "Engineering," "Onboarding") and organize shared jumps by team.</li>
+      <li><strong>Group jumps:</strong> Share specific jumps or entire categories with team members. Everyone sees the same links, organized the same way.</li>
+      <li><strong>Shared categories:</strong> Teams get their own category columns. Sales sees CRM links, proposal templates, and client folders. Engineering sees server dashboards, documentation, and code repos.</li>
+      <li><strong>Onboarding packs:</strong> Build a "New Hire" team with all the essential links, folders, and files a new employee needs. They join the team and instantly have everything organized.</li>
+      <li><strong>Per-team ROI:</strong> JumpKit's dashboard tracks usage per team, so you can see which resources are actually being used and how much time your team is saving collectively.</li>
+    </ul>
+
+    <h2>Real-World Use Cases</h2>
+
+    <h3>IT/DevOps Teams</h3>
+    <p>IT teams juggle server dashboards, monitoring tools, documentation wikis, and local network paths. With JumpKit, an IT team can share a "DevOps" category with links to Grafana dashboards, Confluence pages, SSH shortcuts to server folders, and log file directories — all in one place. A new ops engineer joins the team, gets added to the JumpKit team, and immediately has every critical resource organized and ready.</p>
+
+    <h3>Sales Teams</h3>
+    <p>Sales teams need CRM links, proposal templates, pricing sheets, competitor battle cards, and client folders. Instead of each rep maintaining their own bookmark list (and inevitably missing something), JumpKit lets the sales manager create a shared "Sales" team with all resources in categorized columns. The CRM URL sits right next to the local proposal template folder — web and local, side by side.</p>
+
+    <h3>Consulting Teams</h3>
+    <p>Consultants work across multiple clients, each with their own set of resources: client folders, project trackers, shared documents, and internal tools. JumpKit teams can be organized per client, per project, or per practice area — whatever structure makes sense. When a consultant rolls off a project, their replacement gets the same JumpKit team setup and knows exactly where everything is.</p>
+
+    <h2>Best Practices for Team Link Management</h2>
+
+    <ol>
+      <li><strong>Start with structure:</strong> Before adding links, agree on your category structure. What are the main buckets? (e.g., Internal Tools, Client Resources, Documentation, Templates)</li>
+      <li><strong>Assign ownership:</strong> One person should "own" each category and be responsible for keeping it current. Crowdsourcing without ownership leads to chaos.</li>
+      <li><strong>Archive, don't delete:</strong> When a project ends or a link becomes stale, archive it instead of deleting. You might need it again.</li>
+      <li><strong>Include local paths:</strong> Don't forget network drives, shared folders, and file templates. These are often more valuable than web links.</li>
+      <li><strong>Build onboarding packs:</strong> Every new hire should get a pre-built JumpKit team on day one. It's the fastest way to ramp productivity.</li>
+      <li><strong>Review quarterly:</strong> Every quarter, review your shared jumps. Remove what's unused, add what's missing, and reorganize if the structure isn't working.</li>
+    </ol>
+
+    <div class="callout">
+      <p>Team link sharing isn't just about convenience — it's about <strong>continuity</strong>. When resources are centralized and shared, knowledge doesn't walk out the door when someone leaves. Your team's collective intelligence stays organized and accessible.</p>
+    </div>
+
+    <div class="article-cta-box">
+      <h3>Get Your Team on the Same Page</h3>
+      <p>JumpKit makes team bookmark sharing effortless. Create teams, share jumps, and build onboarding packs — all with 100% local data.</p>
+      <a href="/#pricing" class="btn">
+        <svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+        Start Jumping Free!
+      </a>
+    </div>
+  </article>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark-mode.png" alt="JumpKit" width="1638" height="596" loading="lazy" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="/pricing" class="footer-page-link">Pricing</a>
+          <a href="/videos" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
+          <a href="/alternative" class="footer-page-link">Alternatives</a>
+          <a href="/use-cases" class="footer-page-link">Use Cases</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script>
+    // Theme
+    (function(){
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    // Offcanvas
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    // Scroll top button
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+  </script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+{
+  "name": "jumpkit",
+  "version": "5.1.49",
+  "description": "JumpKit — Your instant jump launcher",
+  "main": "main.js",
+  "author": "Jeff",
+  "scripts": {
+    "test": "node --test test/**/*.mjs",
+    "start": "electron .",
+    "build": "electron-builder --mac",
+    "build:win": "electron-builder --win",
+    "build:all": "electron-builder --mac --win",
+    "build:test": "electron-builder --mac --config electron-builder.test.json",
+    "build:test:win": "electron-builder --win --config electron-builder.test.json",
+    "build:test:all": "electron-builder --mac --win --config electron-builder.test.json",
+    "test:overlay": "electron test-electron/overlay-interaction.mjs",
+    "test:real-overlay": "electron test-electron/real-overlay-path.mjs"
+  },
+  "build": {
+    "appId": "com.jumpkit.app",
+    "productName": "JumpKit",
+    "copyright": "Copyright © 2026 Jeff",
+    "afterPack": "./fuse.js",
+    "afterSign": "./notarize.js",
+    "files": [
+      "**/*",
+      "!node_modules/.bin",
+      "!**/*.map",
+      "!server.js",
+      "!data/db.json",
+      "!dist",
+      "!deploy",
+      "!js/tests.js",
+      "!js/deployment.js",
+      "!js/admin.js"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "assets/icon.icns",
+      "identity": "Jumpkit LLC (ZDJSH728ND)",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "darkModeSupport": true,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "hardenedRuntime": true,
+      "notarize": false
+    },
+    "dmg": {
+      "title": "JumpKit",
+      "background": null,
+      "window": {
+        "width": 540,
+        "height": 380
+      }
+    },
+    "win": {
+      "executableName": "JumpKit",
+      "icon": "assets/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "jrod4404",
+      "repo": "jumpkit-releases"
+    },
+    "artifactName": "JumpKit-Setup-${version}-Prod-${arch}.${ext}",
+    "nsis": {
+      "oneClick": true,
+      "include": "build/installer.nsh"
+    }
+  },
+  "devDependencies": {
+    "@electron/notarize": "^3.1.1",
+    "dotenv": "^17.4.2",
+    "electron": "^40.8.0",
+    "electron-builder": "^26.8.1",
+    "jsdom": "^30.0.1"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1",
+    "better-sqlite3": "^12.8.0",
+    "electron-updater": "^6.8.3",
+    "express": "^4.22.1"
+  }
+}

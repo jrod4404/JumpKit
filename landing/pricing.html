@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JumpKit Pricing — Free &amp; Paid Plans for Windows &amp; Mac</title>
+  <meta name="description" content="Simple per-user pricing. Start free on Windows or Mac, or upgrade to JumpKit Unlimited for unlimited jumps, team sharing, and auto-backup. $10/mo or $99/yr." />
+  <link rel="canonical" href="https://jumpkit.app/pricing" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="JumpKit Pricing — Free &amp; Paid Plans for Windows &amp; Mac" />
+  <meta property="og:description" content="Simple per-user pricing. Start free or upgrade to JumpKit Unlimited for unlimited jumps, teams, and auto-backup." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/pricing" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="JumpKit Pricing — Free &amp; Paid Plans for Windows &amp; Mac" />
+  <meta name="twitter:description" content="Simple per-user pricing. Start free or upgrade to JumpKit Unlimited." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
+    /* ── Pricing page styles ── */
+    .pricing-hero {
+      padding: 120px 24px 40px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .pricing-hero .section-label { margin-bottom: 16px; }
+    .pricing-hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .pricing-hero p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 620px;
+      margin: 0 auto;
+    }
+    .pricing-body { padding: 40px 24px 80px; }
+    .pricing-body .section-inner { max-width: 1060px; margin: 0 auto; }
+    .pricing-note { color: var(--text-muted); font-size: 0.92rem; max-width: 760px; margin: 0 auto; text-align: center; line-height: 1.7; }
+    .compare-link-box {
+      background: var(--card-bg, rgba(255,255,255,0.02));
+      border: 1px solid var(--border, rgba(255,255,255,0.08));
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin-top: 32px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      text-align: center;
+    }
+    .compare-link-box a { color: var(--turq); font-weight: 600; text-decoration: none; }
+    .compare-link-box a:hover { text-decoration: underline; }
+  </style>
+
+  <!-- JSON-LD: Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JumpKit",
+    "url": "https://jumpkit.app",
+    "logo": "https://jumpkit.app/assets/logo-light.png",
+    "sameAs": [
+      "https://x.com/jumpkitapp",
+      "https://youtube.com/@jumpkitapp",
+      "https://linkedin.com/company/jumpkitapp"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "email": "support@jumpkit.app"
+    }
+  }
+  </script>
+
+  <!-- JSON-LD: WebPage + Offers -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "JumpKit Pricing",
+    "url": "https://jumpkit.app/pricing",
+    "description": "Simple per-user pricing for JumpKit, the one-click link launcher for Windows and Mac.",
+    "isPartOf": { "@type": "WebSite", "name": "JumpKit", "url": "https://jumpkit.app" },
+    "about": {
+      "@type": "SoftwareApplication",
+      "name": "JumpKit",
+      "operatingSystem": "Windows, macOS",
+      "applicationCategory": "ProductivityApplication",
+      "url": "https://jumpkit.app",
+      "offers": [
+        {
+          "@type": "Offer",
+          "name": "JumpKit Free",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock"
+        },
+        {
+          "@type": "Offer",
+          "name": "JumpKit Unlimited (Monthly)",
+          "price": "10",
+          "priceCurrency": "USD",
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "price": "10",
+            "priceCurrency": "USD",
+            "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "MON" }
+          },
+          "billingDuration": "P1M",
+          "availability": "https://schema.org/InStock"
+        },
+        {
+          "@type": "Offer",
+          "name": "JumpKit Unlimited (Annual)",
+          "price": "99",
+          "priceCurrency": "USD",
+          "priceSpecification": {
+            "@type": "PriceSpecification",
+            "price": "99",
+            "priceCurrency": "USD",
+            "referenceQuantity": { "@type": "QuantitativeValue", "value": 1, "unitCode": "YR" }
+          },
+          "billingDuration": "P1Y",
+          "availability": "https://schema.org/InStock"
+        }
+      ]
+    }
+  }
+  </script>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="logo-dark-mode.png" alt="JumpKit" width="120" height="44" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="/#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="/#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="/#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="assets/tabler-sprite.svg#tabler-list-check"/></svg> Quick Start</a>
+      <a href="/pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- HERO -->
+  <div class="pricing-hero">
+    <div class="section-label"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> JumpKit Pricing</div>
+    <h1>JumpKit Pricing — Free &amp; Paid Plans for Windows &amp; Mac</h1>
+    <p>Simple, per-user pricing. Start free with all the core features, or upgrade to JumpKit Unlimited for unlimited jumps and team sharing. No hidden fees, no per-seat minimums.</p>
+  </div>
+
+  <!-- PRICING CARDS -->
+  <section class="section pricing-body" id="pricing">
+    <div class="section-inner">
+      <div class="section-label"><svg class="ti ti-tag"><use href="assets/tabler-sprite.svg#tabler-tag"/></svg> Plans</div>
+      <h2 class="section-title">Simple, per-user pricing</h2>
+      <p class="section-sub">Get started with <strong style="color:var(--text)">JumpKit Free</strong> or signup for <strong style="color:var(--text)">JumpKit Unlimited</strong> for full unlimited access.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Free</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:0px">
+            <li>✅ Web links &amp; local folders</li>
+            <li>✅ 250 jump launches</li>
+            <li>✅ 2 teams &middot; 5 members &middot; 10 jumps / team</li>
+            <li>✅ Personal ROI dashboard</li>
+            <li>✅ Hotkey launcher</li>
+            <li>✅ Filters &amp; search</li>
+            <li>✅ Windows &amp; Mac</li>
+          </ul>
+          <div class="plan-price-main" style="margin:0 0 14px">
+            <div class="price-line"><strong>$0</strong></div>
+            <div class="price-line" style="margin-bottom:10px">Free forever</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v5.1.49/JumpKit-Setup-5.1.49-Prod-x64.exe" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg class="ti ti-brand-windows" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-windows"/></svg>
+              Download for Windows
+            </a>
+            <a href="https://github.com/jrod4404/jumpkit-releases/releases/download/v5.1.49/JumpKit-Setup-5.1.49-Prod-arm64.dmg" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px">
+              <svg class="ti ti-brand-apple" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-brand-apple"/></svg>
+              Download for Mac
+            </a>
+          </div>
+        </div>
+        <div class="pricing-card">
+          <div class="plan-name" style="text-align:center">JumpKit Unlimited</div>
+          <div class="plan-availability">Available</div>
+          <ul class="plan-features" style="padding-bottom:0px">
+            <li>✅ Everything in JumpKit Free</li>
+            <li>✅ Unlimited jump launches</li>
+            <li>✅ Unlimited teams, members &amp; jumps</li>
+            <li>✅ Personal &amp; team ROI dashboard</li>
+            <li>✅ Auto-archive</li>
+            <li>✅ Auto-backup</li>
+            <li>✅ Early access to new features</li>
+          </ul>
+          <div class="plan-price-main" style="margin:0 0 14px">
+            <div class="price-line"><strong>$10</strong> / month</div>
+            <div class="price-line" style="margin-bottom:10px">or $99 / year</div>
+          </div>
+          <a href="https://jumpkit.lemonsqueezy.com/checkout/buy/d6fee6da-901c-4c1d-b474-c5eb23ee03fb" class="btn btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="assets/tabler-sprite.svg#tabler-rocket"/></svg>Get JumpKit Unlimited</a>
+        </div>
+      </div>
+
+      <p class="pricing-note" style="margin-top:28px">
+        All plans are <strong style="color:var(--text)">per user</strong>, with no per-seat minimums and no training or setup fees. Pricing is the same whether you use Windows or macOS. Billing for JumpKit Unlimited is handled securely by Lemon Squeezy. Cancel anytime — your jumps and data stay yours.
+      </p>
+
+      <div class="compare-link-box">
+        <strong style="color:var(--text)">Not sure why JumpKit beats plain browser bookmarks?</strong> Read our honest side-by-side comparison at <a href="/compare/bookmarks">JumpKit vs Browser Bookmarks</a>, or see how JumpKit fits different roles in our <a href="/use-cases">Use Cases</a> guide.
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section section-dark" id="faq" style="margin-top:-40px">
+    <div class="section-inner">
+      <span class="section-label"><svg class="ti ti-help-circle" style="width:1.1em;height:1.1em;vertical-align:-0.15em;margin-right:0.15em"><use href="assets/tabler-sprite.svg#tabler-help-circle"/></svg>FAQ</span>
+      <h2 class="section-title" style="text-align:center">Pricing questions, answered.</h2>
+      <div class="faq-list" style="max-width:760px;margin:0 auto">
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Is JumpKit really free?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. JumpKit Free includes the core launcher: web links, local folders, categories, search, filters, hotkeys, and a personal ROI dashboard. It's free to download and use, with no credit card required.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            What is the difference between Free and Unlimited?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">JumpKit Free gives you 250 jump launches, 2 teams, 5 members, and 10 jumps per team. JumpKit Unlimited removes all limits — unlimited launches, unlimited teams and members, plus auto-archive, auto-backup, and team ROI dashboards.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Is pricing the same for Windows and Mac?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. Pricing is per user regardless of platform. A JumpKit Unlimited license works on the machine you install it on, whether that's Windows or macOS.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Can I cancel my subscription anytime?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">Yes. Billing is handled by Lemon Squeezy, and you can cancel anytime. Your jumps and data remain on your machine — JumpKit stores 100% locally, so there's no lock-in.</p>
+        </details>
+        <details class="faq-item" style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:18px 24px;margin-bottom:12px;background:var(--card-bg,rgba(255,255,255,0.02))">
+          <summary style="cursor:pointer;font-weight:600;font-size:1.05rem;color:var(--text,#C8D6E8);list-style:none;display:flex;justify-content:space-between;align-items:center">
+            Is there a team or volume discount?
+            <svg class="ti ti-chevron-down" style="flex-shrink:0;transition:transform .2s"><use href="assets/tabler-sprite.svg#tabler-chevron-down"/></svg>
+          </summary>
+          <p style="margin-top:12px;color:var(--text-muted,#7A93B4);line-height:1.7;font-size:0.95rem">JumpKit is per user and affordable per seat, so most small teams simply buy Unlimited per person. For larger teams, contact us via <a href="/contact" style="color:var(--turq);font-weight:600">Contact</a> and we'll discuss volume pricing.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark-mode.png" alt="JumpKit" width="1638" height="596" loading="lazy" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="/pricing" class="footer-page-link">Pricing</a>
+          <a href="/videos" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
+          <a href="/alternative" class="footer-page-link">Alternatives</a>
+          <a href="/use-cases" class="footer-page-link">Use Cases</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script src="script.js"></script>
+  <script>
+    (function () {
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? 'logo-dark-mode.png' : 'logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? 'logo-dark-mode.png' : 'logo-light.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

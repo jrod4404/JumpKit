@@ -1,0 +1,47 @@
+# JumpKit
+
+> One-click launcher for Windows and Mac. Stop searching, start jumping: organize web links, local folders, and shared files into searchable, shareable categories — and track time saved automatically.
+
+JumpKit is a desktop productivity app that replaces scattered bookmarks, folder trees, and chat-history links with a single searchable "jump" launcher. Organized into categories ("jumps"), it opens any link, local folder, or network share in one click, works fully offline (no cloud, no data leakage), and automatically tracks time saved.
+
+## Key Facts
+- Product: JumpKit — one-click link launcher for Windows & macOS
+- Core value: organize links/folders/shared files, launch in one click, track time saved
+- Privacy: fully offline desktop app; no data leaves your machine
+- Platforms: Windows, macOS
+- Pricing: Free tier + paid (per-user)
+- Owner/builder: JumpKit team (see about)
+
+## Important Pages
+- [Home](https://jumpkit.app/): Product overview, features, pricing, FAQ
+- [About](https://jumpkit.app/about): Story and team
+- [Blog](https://jumpkit.app/blog): Guides, updates, success stories
+- [Videos](https://jumpkit.app/videos): Explainer + tutorial videos
+- [Pricing](https://jumpkit.app/pricing): Plans and per-user pricing
+- [Affiliates](https://jumpkit.app/affiliates): 35% lifetime commission program
+- [Contact](https://jumpkit.app/contact): Support, partnerships, inquiries
+- [Terms](https://jumpkit.app/terms): Terms of service
+- [Privacy](https://jumpkit.app/privacy): Privacy policy
+
+## Blog
+- [JumpKit vs Browser Bookmarks](https://jumpkit.app/compare/bookmarks): Why jumps beat bookmarks
+- [Link Organizer Guide](https://jumpkit.app/blog/link-organizer-guide): How to organize links, files & folders in 2026
+- [Bookmark Alternatives by Browser](https://jumpkit.app/blog/bookmark-alternatives-for-browser): Best bookmark alternative for Safari, Chrome, Firefox & Edge
+- [Best Bookmark Manager Alternatives 2026](https://jumpkit.app/blog/best-bookmark-manager-alternatives): Compare JumpKit, Papaly, Raindrop, and others
+- [Bookmark Manager Ultimate Guide](https://jumpkit.app/blog/bookmark-manager-ultimate-guide): What to look for in a bookmark manager
+- [How to Organize Links](https://jumpkit.app/blog/bookmark-organizer-organize-links): Complete bookmark organizer guide
+- [Problems with Browser Bookmarks](https://jumpkit.app/blog/problems-with-browser-bookmarks): Why native bookmarks fail
+- [Shared Bookmarks for Teams](https://jumpkit.app/blog/shared-bookmarks-for-teams): Team favorites done right
+- [Team Bookmark Sharing](https://jumpkit.app/blog/team-bookmark-sharing-collaboration): Collaborative link management
+- [Introducing JumpKit](https://jumpkit.app/blog/introducing-jumpkit): Product launch post
+
+## Optional Info
+- Download: available for Windows and macOS (see homepage quick start / download buttons)
+
+## FAQ
+- Q: What is JumpKit? A: A desktop app for organizing web links, local folders, and shared files into searchable, shareable categories and launching them in one click.
+- Q: How is JumpKit different from browser bookmarks? A: Bookmarks are locked in one browser and unstructured. Jumps are cross-app, categorized, searchable, and shareable with your team.
+- Q: Is JumpKit free? A: Yes — JumpKit has a free tier; paid plans add per-user features.
+- Q: What platforms does JumpKit support? A: Windows and macOS.
+- Q: Can I share links with my team? A: Yes — the team/shared category feature lets you share jumps.
+- Q: Does JumpKit work offline? A: Yes — it's a desktop app; works fully offline with no data leakage.

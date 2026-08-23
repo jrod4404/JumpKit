@@ -1,0 +1,28 @@
+{
+  "productName": "JumpKit",
+  "files": [
+    "**/*",
+    "!node_modules/.bin",
+    "!**/*.map",
+    "!server.js",
+    "!data/db.json",
+    "!dist",
+    "!deploy"
+  ],
+  "extraMetadata": {
+    "jkTestBuild": true
+  },
+  "win": {
+    "executableName": "jumpkit-test",
+    "icon": "assets/icon.ico",
+    "target": [
+      { "target": "nsis", "arch": ["x64"] }
+    ]
+  },
+  "nsis": {
+    "oneClick": true,
+    "perMachine": false,
+    "include": "build/installer.nsh"
+  },
+  "artifactName": "JumpKit-Setup-${version}-Test-${arch}.${ext}"
+}
