@@ -165,7 +165,7 @@ desc = ('JumpKit organizes your navigation links in one place — web links, loc
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically in a built-in ROI calculator and statistics page. '
         'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
         'and macOS, and keeps your data local — fast, private, and always yours. ')
-desc = desc + ('Stop searching or navigation links, start jumping with JumpKit.')
+desc = desc + ('Stop searching for navigation links, start jumping with JumpKit.')
 y2 = draw_wrapped(d, desc, (M, y+188), F['body'], (58,78,99), 1040, line_gap=12)  # 60px total margin below h1
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
@@ -218,7 +218,7 @@ def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 1040   # cards start below the longer description (desc ends ~1004)
+ps_y = 1056   # cards start with +16px more top margin (desc ends ~1024)
 col_w = (W - 2*M - 40)//2
 PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
