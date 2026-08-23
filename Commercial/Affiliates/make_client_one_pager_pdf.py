@@ -390,32 +390,38 @@ def build_page1():
         x = M + i*(scw+36)
         _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
     yh += scH + 36
-    # row 2: Top 10 card (under cards 1-2) + weekly bar chart (under cards 3-4)
-    row2_w = (W - 2*M - 36)//2
-    top10_h = 340
-    box = [M, yh, M+row2_w, yh+top10_h]
+    # row 2: Top 10 card (under card 1) + weekly bar chart (under cards 2-4)
+    top10_w = scw
+    chart_x0 = M + scw + 36          # aligns with card 2's left edge
+    chart_w = (W - M) - chart_x0     # spans to the right margin (under cards 2-4)
+    chart_img = Image.open(WEEKLY_CHART).convert('RGB')
+    cw, ch = chart_img.size
+    disp_w = chart_w
+    disp_h = round(disp_w * ch / cw)
+    row2_h = disp_h
+    box = [M, yh, M+top10_w, yh+row2_h]
     _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
-    d.text((M+45, yh+34), 'Top 10 Jumps', font=font(40, True), fill=INK)
+    d.text((M+45, yh+36), 'Top 10 Jumps', font=font(40, True), fill=INK)
     TOP10 = [
         ('Outlook Mail', 46), ('ERP Portal', 38), ('Confluence', 23), ('Salesforce', 21),
         ('Jira', 20), ('SharePoint', 19), ('Team Drive', 16), ('Design Assets', 15),
         ('HR Portal', 14), ('Time Tracking', 10),
     ]
-    ry = yh + 94
+    ry = yh + 96
     for i,(name,ct) in enumerate(TOP10):
-        d.text((M+45, ry), str(i+1), font=font(22, True), fill=TURQ)
-        draw_wrapped(d, name, (M+95, ry), font(22), INK, row2_w-95-110, line_gap=2)
-        tw = d.textbbox((0,0), str(ct), font=font(22, True))[2]
-        d.text((M+row2_w-45-tw, ry), str(ct), font=font(22, True), fill=INK)
-        ry += 23
-    # weekly bar chart (bigger axis labels, same chart as the landing page)
-    chart_img = Image.open(WEEKLY_CHART).convert('RGB')
-    cw, ch = chart_img.size
-    disp_w = row2_w
-    disp_h = round(disp_w * ch / cw)
-    dx = M + row2_w + 36
-    dy = yh + (top10_h - disp_h)//2
-    paste_rounded(page, chart_img, (dx, dy, dx+disp_w, dy+disp_h), radius=34, sh_alpha=45, sh_blur=10, sh_dx=10, sh_dy=12)
+        d.text((M+45, ry), str(i+1), font=font(26, True), fill=TURQ)
+        draw_wrapped(d, name, (M+95, ry), font(26), INK, top10_w-95-100, line_gap=2)
+        tw = d.textbbox((0,0), str(ct), font=font(26, True))[2]
+        d.text((M+top10_w-45-tw, ry), str(ct), font=font(26, True), fill=INK)
+        ry += 30
+    # weekly bar chart — same shadow style as the doc's cards (tight 3px blur)
+    dx = chart_x0
+    dy = yh
+    shw2, shh2 = disp_w, disp_h
+    sh = Image.new('RGBA', (disp_w+80, disp_h+70), (0,0,0,0))
+    ImageDraw.Draw(sh).rounded_rectangle([40, 30, disp_w+40, disp_h+30], radius=45, fill=(14,24,42,58))
+    page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (dx-40, dy-30))
+    paste_rounded(page, chart_img, (dx, dy, dx+disp_w, dy+disp_h), radius=45, shadow=False)
 
     # footer
     fy=3198
