@@ -379,24 +379,43 @@ def build_page1():
         'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
     scw = (W - 2*M - 3*36)//4
-    scH = 400
+    scH = 280
     stats = [
-        ('activity', '59.0', INK, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
-        ('chart-bar-teal', '236', INK, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
-        ('clock', '0.7 hrs', INK, 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
-        ('coins', '$32.78', INK, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
+        ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
+        ('chart-bar-teal', '236', TURQ, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
+        ('clock', '0.7 hrs', TURQ, 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
+        ('coins', '$32.78', TURQ, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
     ]
     for i,(icon,big,bc,lab,sub) in enumerate(stats):
         x = M + i*(scw+36)
         _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
     yh += scH + 36
-    # weekly bar chart (same chart as the landing page weekly view)
+    # row 2: Top 10 card (under cards 1-2) + weekly bar chart (under cards 3-4)
+    row2_w = (W - 2*M - 36)//2
+    top10_h = 340
+    box = [M, yh, M+row2_w, yh+top10_h]
+    _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
+    d.text((M+45, yh+34), 'Top 10 Jumps', font=font(40, True), fill=INK)
+    TOP10 = [
+        ('Outlook Mail', 46), ('ERP Portal', 38), ('Confluence', 23), ('Salesforce', 21),
+        ('Jira', 20), ('SharePoint', 19), ('Team Drive', 16), ('Design Assets', 15),
+        ('HR Portal', 14), ('Time Tracking', 10),
+    ]
+    ry = yh + 94
+    for i,(name,ct) in enumerate(TOP10):
+        d.text((M+45, ry), str(i+1), font=font(22, True), fill=TURQ)
+        draw_wrapped(d, name, (M+95, ry), font(22), INK, row2_w-95-110, line_gap=2)
+        tw = d.textbbox((0,0), str(ct), font=font(22, True))[2]
+        d.text((M+row2_w-45-tw, ry), str(ct), font=font(22, True), fill=INK)
+        ry += 23
+    # weekly bar chart (bigger axis labels, same chart as the landing page)
     chart_img = Image.open(WEEKLY_CHART).convert('RGB')
     cw, ch = chart_img.size
-    disp_w = 1900
+    disp_w = row2_w
     disp_h = round(disp_w * ch / cw)
-    dx = M + (W - 2*M - disp_w)//2
-    paste_rounded(page, chart_img, (dx, yh, dx+disp_w, yh+disp_h), radius=34, sh_alpha=45, sh_blur=10, sh_dx=10, sh_dy=12)
+    dx = M + row2_w + 36
+    dy = yh + (top10_h - disp_h)//2
+    paste_rounded(page, chart_img, (dx, dy, dx+disp_w, dy+disp_h), radius=34, sh_alpha=45, sh_blur=10, sh_dx=10, sh_dy=12)
 
     # footer
     fy=3198
@@ -411,10 +430,10 @@ def build_page1():
 def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     x1,y1,x2,y2 = box
     _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
-    # big number (tile icon removed per Jeff)
-    d2.text((x1+40, y1+60), big, font=font(58, black=True), fill=big_color)
-    draw_wrapped(d2, label, (x1+40, y1+140), font(32, True), INK, (x2-x1)-80, line_gap=4)
-    draw_wrapped(d2, sub, (x1+40, y1+202), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
+    # big number (tile icon removed per Jeff; teal value per Jeff)
+    d2.text((x1+40, y1+30), big, font=font(58, black=True), fill=big_color)
+    draw_wrapped(d2, label, (x1+40, y1+100), font(32, True), INK, (x2-x1)-80, line_gap=4)
+    draw_wrapped(d2, sub, (x1+40, y1+148), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
 
 def build_page2():
     page = Image.new('RGBA', (W,H), WHITE)
