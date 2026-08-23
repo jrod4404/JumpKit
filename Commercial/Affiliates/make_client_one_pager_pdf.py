@@ -439,7 +439,7 @@ def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     # big number (tile icon removed per Jeff; teal value per Jeff)
     d2.text((x1+40, y1+30), big, font=font(58, black=True), fill=big_color)
     big_bottom = d2.textbbox((0,0), big, font=font(58, black=True))[3]
-    label_y = y1 + 30 + big_bottom + 10   # 16px visual margin below the teal stat text (label glyphs start 6px below origin)
+    label_y = y1 + 30 + big_bottom + 42   # 48px visual margin below the teal stat text (16 + 32 added; label glyphs start 6px below origin)
     draw_wrapped(d2, label, (x1+40, label_y), font(32, True), INK, (x2-x1)-80, line_gap=4)
     draw_wrapped(d2, sub, (x1+40, label_y+48), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
 
