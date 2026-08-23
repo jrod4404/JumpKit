@@ -508,75 +508,101 @@ def build_page2():
     _page_background(page, d)
     _header(page, d, 'Product Overview')
 
-    # ── Section: Weekly View (dashboard cards now live on page 1) ──
-    yh = _section_header(page, d, 285, 'WEEKLY VIEW', 'chart-bar-teal', M, 'Weekly View — Last 4 Weeks at a Glance', icon_color=(0,105,126))
-    WEEKLY_STATS = [
-        ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
-        ('chart-bar-teal', '236', ROYAL, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
-        ('clock', '0.7 hrs', (16,142,120), 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
-        ('coins', '$32.78', INK, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
-    ]
-    # left: real weekly-view chart from the JumpKit dashboard (light mode)
-    chart_w, chart_h = 1250, 360
-    paste_rounded(page, Image.open(WEEKLY_CHART).convert('RGB'), (M, yh, M+chart_w, yh+chart_h), radius=34, sh_alpha=60, sh_blur=18, sh_dx=14, sh_dy=16)
-    # right: 2x2 mini stat cards
-    rx0 = M + chart_w + 40
-    rx1 = W - M
-    mcw = (rx1 - rx0 - 30)//2
-    mcH = 150
-    for i,(icon,big,bc,lab,sub) in enumerate(WEEKLY_STATS):
-        col = i % 2; row = i // 2
-        x = rx0 + col*(mcw+30)
-        yy = yh + row*(mcH+18)
-        box = [x, yy, x+mcw, yy+mcH]
-        _soft_card(page, d, box, radius=30, fill=WHITE, outline=LINE, sh_alpha=38, sh_y=16)
-        _chip_icon(page, x+22, yy+14, 40, (232,249,252), icon, shadow=(18,50,90,28))
-        d.text((x+76, yy+14), big, font=font(40, black=True), fill=bc)
-        d.text((x+76, yy+62), lab, font=font(24, True), fill=INK)
-        draw_wrapped(d, sub, (x+76, yy+90), font(21), MUTED, mcw-90, line_gap=3)
-    yh += 2*mcH + 18 + 56
-
-    # ── Section: Teams ────────────────────────────────────────
-    yh = _section_header(page, d, yh, 'TEAMS', 'users', M, 'One Team. One Layout. Everyone Jumps.',
-        'Create teams, add members, and share jumps so everyone starts from the same page.', icon_color=(0,105,126))
-    team_cards = [
-        ('users', 'Shared team jumps', 'Define jumps to share with your teams. Everyone uses one consistent resource set.'),
-        ('share', 'Instant sharing', 'Pass a full layout to a new member — no tribal knowledge, no DM chains.'),
-        ('user-plus', 'Fast onboarding', 'Hand a new hire the JumpKit layout and all key info is there in one step.'),
-        ('building-community', '100% local', 'Your data never leaves the team\'s machines — private and secure.'),
-    ]
-    tcw = (W - 2*M - 3*36)//4
-    tcH = 360
-    for i,(icon,title,body) in enumerate(team_cards):
-        x = M + i*(tcw+36)
-        box = [x, yh, x+tcw, yh+tcH]
-        _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=50, sh_y=26)
-        _chip_icon(page, x+40, yh+32, 70, (232,249,252), icon, shadow=(18,50,90,40))
-        d.text((x+40, yh+130), title, font=F['h3'], fill=INK)
-        draw_wrapped(d, body, (x+40, yh+205), F['tiny'], MUTED, tcw-80, line_gap=6)
-    yh += tcH + 56
-
-    # ── Section: IT & Helpdesk Use Cases ──────────────────────
-    yh = _section_header(page, d, yh, 'IT & HELPDESK', 'briefcase', M, 'Built for Teams, IT, Sales & Engineering',
-        'An IT tech supports countless internal tools, admin consoles, KB pages, and shared drives every day.', icon_color=(0,105,126))
-    it_cards = [
+    # ── 1. USE CASES ────────────────────────────────────────────
+    yh = _section_header(page, d, 285, 'USE CASES', 'briefcase', M, 'Built for Teams, IT, Sales & Engineering',
+        'Real-world ways teams put JumpKit to work every day.', icon_color=(0,105,126))
+    use_cards = [
         ('settings', 'Launch admin consoles & KB pages', 'Every internal tool, KB article, and admin page is one jump away — tickets resolve faster and browser-juggling disappears.'),
-        ('database-teal', 'Jump to network shares & drives', 'Shared drives and local folders or repos open instantly, alongside docs, CI dashboards, and issue trackers.'),
-        ('users', 'Team jumps, same resources', 'A shared, consistent set of resources across the whole helpdesk — no more one-off "here\'s the link" DMs.'),
+        ('database-teal', 'Jump to network shares & drives', 'Shared drives, local folders, and repos open instantly — alongside docs, CI dashboards, and issue trackers.'),
+        ('users', 'Team jumps, same resources', 'A shared, consistent resource set across the whole team — no more one-off "here\'s the link" DMs.'),
         ('chart-bar-teal', 'Faster resolution time', 'Less hunting through the wiki and one source of truth for every tool — measured automatically as saved time.'),
     ]
-    icw = (W - 2*M - 36)//2
-    icH = 360
-    for i,(icon,title,body) in enumerate(it_cards):
+    ucw = (W - 2*M - 36)//2
+    ucH = 290
+    for i,(icon,title,body) in enumerate(use_cards):
         col = i % 2; row = i // 2
-        x = M + col*(icw+36)
-        yy = yh + row*(icH+36)
-        box = [x, yy, x+icw, yy+icH]
-        _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=50, sh_y=26)
-        _chip_icon(page, x+45, yy+50, 84, (232,249,252), icon, shadow=(18,50,90,40))
-        d.text((x+165, yy+66), title, font=F['h3'], fill=INK)
-        draw_wrapped(d, body, (x+165, yy+142), F['small'], MUTED, icw-210, line_gap=7)
-    yh += 2*(icH+36) - 36
+        x = M + col*(ucw+36)
+        yy = yh + row*(ucH+36)
+        box = [x, yy, x+ucw, yy+ucH]
+        _soft_card(page, d, box, radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
+        _chip_icon(page, x+45, yy+44, 80, (232,249,252), icon, shadow=(18,50,90,40))
+        d.text((x+155, yy+60), title, font=F['h3'], fill=INK)
+        draw_wrapped(d, body, (x+155, yy+128), F['small'], MUTED, ucw-200, line_gap=7)
+    yh += 2*(ucH+36) - 36 + 48
+
+    # ── 2. GETTING STARTED ──────────────────────────────────────
+    yh = _section_header(page, d, yh, 'GETTING STARTED', 'layout-grid', M, 'Up and Running in Minutes',
+        'Download, install, and start jumping — no training, no setup fees.', icon_color=(0,105,126))
+    gs_steps = [
+        ('01', 'Define Your Categories', 'Download, install, and define your column category names and set their order.'),
+        ('02', 'Add Your Jumps', 'Create a jump: name it, pick a category, then paste in a web URL, local folder path, or file location.'),
+        ('03', 'Jump!', 'Click any jump and you are there instantly. Watch your time savings and ROI add up in your dashboard.'),
+    ]
+    gw = (W - 2*M - 2*44)//3
+    gH = 300
+    for i,(num,title,body) in enumerate(gs_steps):
+        x = M + i*(gw+44)
+        _soft_card(page, d, [x, yh, x+gw, yh+gH], radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
+        d.ellipse([x+45, yh+32, x+45+76, yh+108], fill=ROYAL if i==0 else TURQ)
+        d.text((x+45+21, yh+46), num, font=F['h3'], fill=WHITE)
+        d.text((x+45, yh+130), title, font=F['h3'], fill=INK)
+        draw_wrapped(d, body, (x+45, yh+196), F['small'], MUTED, gw-90, line_gap=6)
+    yh += gH + 48
+
+    # ── 3. PRICING ─────────────────────────────────────────────
+    yh = _section_header(page, d, yh, 'PRICING', 'coins', M, 'Simple, Per-User Pricing',
+        'Start free with core features, or upgrade to Unlimited for teams.', icon_color=(0,105,126))
+    pw = (W - 2*M - 2*36)//3
+    priceH = 430
+    plans = [
+        ('JumpKit Free', '$0', 'Free', ['Web links & local folders', '250 jump launches', '2 teams · 5 members · 10 jumps/team', 'Personal ROI dashboard', 'Hotkey launcher', 'Filters & search'], 'START FREE', INK, LINE, False),
+        ('JumpKit Unlimited', '$10', '/ user / mo', ['Unlimited jump launches', 'Unlimited teams, members & jumps', 'Personal & team ROI dashboard', 'Auto-archive', 'Auto-backup', 'Early access to new features'], 'BEST FOR TEAMS', (255,255,255), (150,231,238), True),
+        ('JumpKit + Jet AI', '$39', '/ user / mo', ['Everything in Unlimited +', 'Locally-run AI (no cloud)', 'Personal Agentic Assistant', 'Shareable agent workflows', 'MS Office automation', 'Audit logging'], 'COMING SOON', INK, LINE, False),
+    ]
+    for i,(name,price,per,feats,badge,fcol,border,is_feat) in enumerate(plans):
+        x = M + i*(pw+36)
+        box = [x, yh, x+pw, yh+priceH]
+        _soft_card(page, d, box, radius=45, fill=PS_BG, outline=border, sh_alpha=(60 if is_feat else 58), sh_y=30)
+        rect(d, [x+40, yh+26, x+pw-40, yh+76], fill=(232,249,252) if not is_feat else ROYAL, radius=25, width=0)
+        bw = d.textbbox((0,0), badge, font=F['tiny_b'])[2]
+        d.text((x + (pw-80)//2 - bw//2, yh+38), badge, font=F['tiny_b'], fill=(0,105,126) if not is_feat else WHITE)
+        d.text((x+40, yh+90), name, font=F['h3'], fill=INK)
+        d.text((x+40, yh+152), price, font=font(56, black=True), fill=ROYAL)
+        d.text((x+40 + (120 if len(price)<4 else 150), yh+200), per, font=F['tiny'], fill=MUTED)
+        d.line([x+40, yh+236, x+pw-40, yh+236], fill=LINE, width=2)
+        fy = yh + 252
+        for ft in feats:
+            check_item(d, x+40, fy, ft, pw-70, fill=INK, check_fill=(229,250,252) if not is_feat else (214,239,255))
+            fy += 30
+    yh += priceH + 48
+
+    # ── 4. AFFILIATE PROGRAM ───────────────────────────────────
+    yh = _section_header(page, d, yh, 'AFFILIATE PROGRAM', 'coins', M, 'Earn 35% for Life', icon_color=(0,105,126))
+    ban = [M, yh, W-M, yh+120]
+    _soft_card(page, d, ban, radius=45, fill=ROYAL, sh_alpha=70, sh_y=28)
+    d.text((M+55, yh+30), 'Earn 35% for Life. On Every User You Refer.', font=F['h3'], fill=WHITE)
+    d.text((M+55, yh+82), '$0 cost to join · 35% commission per sale · Lifetime while subscribed', font=F['small'], fill=(235,250,255))
+    yh += 120 + 40
+    af_steps = [
+        ('01', 'Apply by Email', 'Send a quick intro to affiliates@jumpkit.app — who you are and how you\'ll promote JumpKit.'),
+        ('02', 'Get Your Affiliate Link', 'A unique link tracked through LemonSqueezy — every click and purchase attributed to you.'),
+        ('03', 'Share & Earn Forever', 'Every Unlimited user you bring earns 35% of their subscription — monthly, while subscribed.'),
+    ]
+    aw = (W - 2*M - 2*44)//3
+    aH = 300
+    for i,(num,title,body) in enumerate(af_steps):
+        x = M + i*(aw+44)
+        _soft_card(page, d, [x, yh, x+aw, yh+aH], radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
+        d.ellipse([x+45, yh+30, x+45+76, yh+106], fill=ROYAL if i==1 else TURQ)
+        d.text((x+45+21, yh+44), num, font=F['h3'], fill=WHITE)
+        d.text((x+45, yh+126), title, font=F['h3'], fill=INK)
+        draw_wrapped(d, body, (x+45, yh+192), F['small'], MUTED, aw-90, line_gap=6)
+    yh += aH + 28
+    # closing CTA
+    rect(d, [M, yh, W-M, yh+110], fill=ROYAL, outline=None, radius=44)
+    over = gradient((W-2*M,110), ROYAL, TURQ, True).convert('RGBA'); over.putalpha(255); over.putalpha(rounded_mask((W-2*M,110),44)); page.alpha_composite(over,(M,yh))
+    d.text((M+55, yh+30), 'Ready to partner?  Apply to Become an Affiliate', font=F['h3'], fill=WHITE)
+    draw_wrapped(d, 'Send a quick email introducing yourself. We review applications within 1–2 business days.  affiliates@jumpkit.app', (M+55, yh+66), F['small'], (235,250,255), W-2*M-110, line_gap=6)
 
     _footer(page, d)
     return page
@@ -693,7 +719,7 @@ def build_page3():
 # ═══════════════════════════════════════════════════════════════════
 #  BUILD + SAVE ALL PAGES
 # ═══════════════════════════════════════════════════════════════════
-pages = [build_page1(), build_page2(), build_page3()]
+pages = [build_page1(), build_page2()]
 rgb_list = [p.convert('RGB') for p in pages]
 
 # preview PNG = page 1 (keeps existing preview contract)
