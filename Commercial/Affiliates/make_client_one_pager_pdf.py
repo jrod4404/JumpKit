@@ -381,9 +381,9 @@ def build_page1():
     scw = (W - 2*M - 3*36)//4
     scH = 400
     stats = [
-        ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
-        ('chart-bar-teal', '236', ROYAL, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
-        ('clock', '0.7 hrs', (16,142,120), 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
+        ('activity', '59.0', INK, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
+        ('chart-bar-teal', '236', INK, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
+        ('clock', '0.7 hrs', INK, 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
         ('coins', '$32.78', INK, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
     ]
     for i,(icon,big,bc,lab,sub) in enumerate(stats):
@@ -411,12 +411,10 @@ def build_page1():
 def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     x1,y1,x2,y2 = box
     _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
-    iw = 70
-    _chip_icon(page, x1+40, y1+30, iw, (232,249,252), icon, shadow=(18,50,90,40))
-    # big number
-    d2.text((x1+40, y1+128), big, font=font(58, black=True), fill=big_color)
-    d2.text((x1+40, y1+206), label, font=F['h3'], fill=INK)
-    draw_wrapped(d2, sub, (x1+40, y1+264), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
+    # big number (tile icon removed per Jeff)
+    d2.text((x1+40, y1+60), big, font=font(58, black=True), fill=big_color)
+    draw_wrapped(d2, label, (x1+40, y1+140), font(32, True), INK, (x2-x1)-80, line_gap=4)
+    draw_wrapped(d2, sub, (x1+40, y1+202), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
 
 def build_page2():
     page = Image.new('RGBA', (W,H), WHITE)
