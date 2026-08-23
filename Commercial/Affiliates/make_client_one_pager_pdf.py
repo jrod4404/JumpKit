@@ -289,7 +289,7 @@ def build_page1():
     d.text((_cx, _by0 + 21), ' desktop app', font=F['small_b'], fill=(0,105,126))
 
     # Problem → Solution
-    ps_y = 1056
+    ps_y = 1300
     col_w = (W - 2*M - 40)//2
     PROB_ICON = (224, 85, 85)
     PROB_BG   = (254, 242, 242)
@@ -374,7 +374,7 @@ def build_page1():
     ps_bot = max(ps_b1, ps_b2)
 
     # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
-    yh = ps_bot + 32
+    yh = ps_bot + 96
     yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
         'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
