@@ -132,7 +132,7 @@
     const ranges = {
       summary: [0, Infinity],
       daily:   [startOf('day') - 6 * 86400000, startOf('day') + 86400000],
-      weekly:  [startOf('week') - 51 * 7 * 86400000, startOf('week') + 7 * 86400000],
+      weekly:  [startOf('week') - 3 * 7 * 86400000, startOf('week') + 7 * 86400000],
       monthly: [startOf('year'), new Date(new Date().getFullYear() + 1, 0, 1).getTime()],
       yearly:  [new Date(new Date().getFullYear() - 4, 0, 1).getTime(), new Date(new Date().getFullYear() + 1, 0, 1).getTime()],
     };
@@ -240,9 +240,9 @@
         chartData.push(clicks.filter(x => x.ts >= ds && x.ts < de).length);
       }
     } else if (currentStatView === 'weekly') {
-      chartTitle = 'Launches by Week - Last 52 Weeks';
-      const weekStart = startOf('week') - 51 * 7 * 86400000;
-      for (let w = 0; w < 52; w++) {
+      chartTitle = 'Launches by Week - Last 4 Weeks';
+      const weekStart = startOf('week') - 3 * 7 * 86400000;
+      for (let w = 0; w < 4; w++) {
         const ws = weekStart + w * 7 * 86400000;
         const we = ws + 7 * 86400000;
         chartLabels.push(w % 4 === 0 ? new Date(ws).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
@@ -283,7 +283,7 @@
     const periodTotal = chartData.reduce((a, b) => a + b, 0);
     const totalLabelMap = {
       daily:   'Last 7 Days',
-      weekly:  'Last 52 Weeks',
+      weekly:  'Last 4 Weeks',
       monthly: 'Last 12 Months',
       yearly:  'All-Time',
     };
@@ -292,15 +292,16 @@
     const pHours = (pSec / 3600).toFixed(1);
     const pDollars = fmtUSD((pSec / 3600) * PREFS.dollarsPerHour);
 
-    // Legend for views that mix current + previous year bars
-    const legendHtml = (currentStatView === 'monthly' || currentStatView === 'weekly')
+    // Legend only when the view actually mixes current + previous year bars
+    const hasPrevYearBars = chartColors.some(c => c === 'rgba(245,158,11,0.85)');
+    const legendHtml = hasPrevYearBars
       ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year (Sep\u2013Dec)' : 'Last year') + '</div>'
       : '';
 
     // Upper-left stat card: average jumps per bucket for the active period
     const avgMap = {
       daily:   { label: 'Avg Jumps / Day',   denom: 7  },
-      weekly:  { label: 'Avg Jumps / Week',  denom: 52 },
+      weekly:  { label: 'Avg Jumps / Week',  denom: 4  },
       monthly: { label: 'Avg Jumps / Month', denom: 12 },
       yearly:  { label: 'Avg Jumps / Year',  denom: 5  },
     };
