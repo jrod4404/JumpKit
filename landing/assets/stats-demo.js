@@ -137,11 +137,11 @@
       const jump = SAMPLE_JUMPS.find(j => j.id === c.jumpId);
       return sum + (jump && jump.timeSaved != null ? jump.timeSaved : PREFS.timePerClick);
     }, 0);
-    const mins = (totalSecondsSaved / 60).toFixed(1);
+    const hours = (totalSecondsSaved / 3600).toFixed(1);
     const dollars = ((totalSecondsSaved / 3600) * PREFS.dollarsPerHour).toFixed(2);
 
     const chartOpts = extra => Object.assign({
-      responsive: true, maintainAspectRatio: false,
+      responsive: true, maintainAspectRatio: false, animation: false,
       plugins: { legend: { display: false } },
       scales: {
         x: { ticks: { color: tc, font: { size: 11 } }, grid: { color: gc } },
@@ -199,7 +199,7 @@
         <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
         <div class="stats-cards stats-cards-4">
           <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
-          <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
+          <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
           <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
           <div class="stat-card"><div class="stat-card-value">${SAMPLE_JUMPS.length}</div><div class="stat-card-label">Active Jumps</div></div>
         </div>
@@ -224,7 +224,7 @@
     }
 
     /* ── Period views ─────────────────────────────────────────── */
-    let chartLabels = [], chartData = [], chartTitle = '';
+    let chartLabels = [], chartData = [], chartTitle = '', chartColors = [];
     if (currentStatView === 'daily') {
       chartTitle = 'Launches by Day - Last 7 Days';
       for (let i = 6; i >= 0; i--) {
@@ -244,12 +244,22 @@
         chartData.push(LOG.filter(x => x.ts >= ws && x.ts < we).length);
       }
     } else if (currentStatView === 'monthly') {
-      chartTitle = `Launches by Month - ${new Date().getFullYear()}`;
+      const yr = new Date().getFullYear();
+      chartTitle = `Launches by Month - ${yr}`;
       MONTHS.forEach((_, i) => {
-        const ms = new Date(new Date().getFullYear(), i, 1).getTime();
-        const me = new Date(new Date().getFullYear(), i + 1, 1).getTime();
+        const ms = new Date(yr, i, 1).getTime();
+        const me = new Date(yr, i + 1, 1).getTime();
         chartLabels.push(MONTHS[i]);
-        chartData.push(LOG.filter(x => x.ts >= ms && x.ts < me).length);
+        if (i >= 8) {
+          // Sep–Dec: same period last year (amber) so the view isn't empty
+          const lms = new Date(yr - 1, i, 1).getTime();
+          const lme = new Date(yr - 1, i + 1, 1).getTime();
+          chartData.push(LOG.filter(x => x.ts >= lms && x.ts < lme).length);
+          chartColors.push('rgba(245,158,11,0.85)');
+        } else {
+          chartData.push(LOG.filter(x => x.ts >= ms && x.ts < me).length);
+          chartColors.push(barClr);
+        }
       });
     } else if (currentStatView === 'yearly') {
       chartTitle = `Launches by Year - ${new Date().getFullYear() - 4} to ${new Date().getFullYear()}`;
@@ -275,11 +285,11 @@
     dash.innerHTML = `
       <div class="stats-cards">
         <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
-        <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
+        <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
       </div>
       <div class="stats-chart-row">
-        <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div></div>
+        <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${currentStatView === 'monthly' ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> Same period last year (Sep\u2013Dec)</div>' : ''}</div>
       </div>
       <div class="stats-chart-row">
         <div class="stats-chart-box">
@@ -293,7 +303,7 @@
       </div>`;
 
     requestAnimationFrame(() => {
-      mkChart('chPeriod', 'bar', { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: barClr, borderRadius: 3 }] });
+      mkChart('chPeriod', 'bar', { labels: chartLabels, datasets: [{ data: chartData, backgroundColor: chartColors.length ? chartColors : barClr, borderRadius: 3 }] });
       mkDoughnut('chColP', colEntriesP);
     });
   }
