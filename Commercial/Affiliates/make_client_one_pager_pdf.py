@@ -438,8 +438,10 @@ def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
     # big number (tile icon removed per Jeff; teal value per Jeff)
     d2.text((x1+40, y1+30), big, font=font(58, black=True), fill=big_color)
-    draw_wrapped(d2, label, (x1+40, y1+100), font(32, True), INK, (x2-x1)-80, line_gap=4)
-    draw_wrapped(d2, sub, (x1+40, y1+148), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
+    big_bottom = d2.textbbox((0,0), big, font=font(58, black=True))[3]
+    label_y = y1 + 30 + big_bottom + 10   # 16px visual margin below the teal stat text (label glyphs start 6px below origin)
+    draw_wrapped(d2, label, (x1+40, label_y), font(32, True), INK, (x2-x1)-80, line_gap=4)
+    draw_wrapped(d2, sub, (x1+40, label_y+48), F['tiny'], MUTED, (x2-x1)-80, line_gap=4)
 
 def build_page2():
     page = Image.new('RGBA', (W,H), WHITE)
