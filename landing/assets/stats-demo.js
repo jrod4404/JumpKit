@@ -81,7 +81,7 @@
   const STAT_VIEWS = ['daily', 'weekly', 'monthly', 'yearly'];
   const doughColors = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#9254de', '#eb2f96', '#69c0ff', '#389e0d'];
   const WORK_COLOR = '#9254de'; // distinct purple for the Work slice
-  const OTHER_COLORS = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#eb2f96', '#69c0ff', '#389e0d'];
+  const OTHER_COLORS = ['#00C2C7', '#1A4FD6', '#ff7a45', '#faad14', '#a0d911', '#eb2f96', '#69c0ff', '#389e0d'];
   const colorsFor = entries => {
     let idx = 0;
     return entries.map(([name]) => name === 'Work' ? WORK_COLOR : OTHER_COLORS[idx++ % OTHER_COLORS.length]);
@@ -272,7 +272,7 @@
     dash.innerHTML = `
       <div class="stats-cards stats-cards-4">
         <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
-        <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jump \u00b7 ${totalLabelMap[currentStatView]}</div></div>
+        <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jumps \u00b7 ${totalLabelMap[currentStatView]}</div></div>
         <div class="stat-card"><div class="stat-card-value">${pHours} hrs</div><div class="stat-card-label">Time Saved \u00b7 ${totalLabelMap[currentStatView]}</div></div>
         <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label">Dollars Saved \u00b7 ${totalLabelMap[currentStatView]}</div></div>
       </div>
