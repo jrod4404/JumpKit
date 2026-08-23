@@ -262,9 +262,19 @@
     }
     const colEntriesP = byColFor(clicks).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
+    // Upper-left stat card: average jumps per bucket for the active period
+    const avgMap = {
+      daily:   { label: 'Avg Jumps / Day',   denom: 7  },
+      weekly:  { label: 'Avg Jumps / Week',  denom: 52 },
+      monthly: { label: 'Avg Jumps / Month', denom: 12 },
+      yearly:  { label: 'Avg Jumps / Year',  denom: 5  },
+    };
+    const avg = avgMap[currentStatView];
+    const avgVal = (n / avg.denom).toFixed(1);
+
     dash.innerHTML = `
       <div class="stats-cards">
-        <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Jumps Clicked</div></div>
+        <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
         <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
       </div>
