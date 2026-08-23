@@ -217,7 +217,7 @@ def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 990   # cards start below desc (desc ends ~938) + hero badge
+ps_y = 1006   # cards start with 16px added top margin above them (desc ends ~956)
 col_w = (W - 2*M - 40)//2
 PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
