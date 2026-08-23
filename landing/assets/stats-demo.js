@@ -279,6 +279,15 @@
     }
     const colEntriesP = byColFor(clicks).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
+    // Total jumps shown in the period (sum of the chart bars — monthly includes last-year Sep–Dec)
+    const periodTotal = chartData.reduce((a, b) => a + b, 0);
+    const totalLabelMap = {
+      daily:   'Last 7 Days',
+      weekly:  'Last 52 Weeks',
+      monthly: 'Last 12 Months',
+      yearly:  'All-Time',
+    };
+
     // Legend for views that mix current + previous year bars
     const legendHtml = (currentStatView === 'monthly' || currentStatView === 'weekly')
       ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year (Sep\u2013Dec)' : 'Last year') + '</div>'
@@ -295,8 +304,9 @@
     const avgVal = (n / avg.denom).toFixed(1);
 
     dash.innerHTML = `
-      <div class="stats-cards">
+      <div class="stats-cards stats-cards-4">
         <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
+        <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total \u00b7 ${totalLabelMap[currentStatView]}</div></div>
         <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
       </div>
