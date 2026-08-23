@@ -401,7 +401,7 @@ def build_page1():
     # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
     yh = ps_bot + 32
     yh = _section_header(page, d, yh, 'AUTOMATIC STATISTICS', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M, show_title=False, pill_w=455, hero_style=True, icon_tint=(0,194,199))
+        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M, show_title=False, pill_w=523, hero_style=True, icon_tint=(0,194,199))
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
     scw = (W - 2*M - 3*36)//4
     scH = 268   # bottom whitespace cut ~35% (was 280)
@@ -455,7 +455,7 @@ def build_page1():
 
     # ── Section: Testimonials (fills the page-1 bottom, matching the landing page) ──
     yh = dy + disp_h + 20
-    yh = _section_header(page, d, yh, 'WHAT OUR USERS SAY', 'users', M, 'What Our Users Say', icon_color=(0,105,126), show_title=False, pill_w=455, hero_style=True, icon_tint=(0,194,199))
+    yh = _section_header(page, d, yh, 'WHAT OUR USERS SAY', 'users', M, 'What Our Users Say', icon_color=(0,105,126), show_title=False, pill_w=523, hero_style=True, icon_tint=(0,194,199))
     TW = (W - 2*M - 2*36)//3
     TH = 244
     def _star(draw, cx, cy, r, fill):
