@@ -162,7 +162,7 @@ d.text((M, y), h1a, font=font(62, black=True), fill=INK)
 d.text((M, y+66), h1b, font=font(62, black=True), fill=INK)
 desc = ('JumpKit organizes your navigation links in one place — web links, local directories, shared resources — '
         'saved in categories and launched in a single click. No more clicking through folders. No more lost tabs. '
-        'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
+        'No more bookmarks. Just jump. Save time, save money, and track the savings automatically in a built-in ROI calculator and statistics page. '
         'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
         'and macOS, and keeps your data local — fast, private, and always yours.')
 y2 = draw_wrapped(d, desc, (M, y+188), F['body'], (58,78,99), 1040, line_gap=12)  # 60px total margin below h1
@@ -217,7 +217,7 @@ def _chip_icon(target, x, y, s, bg, icon_name, shadow=None):
     target.alpha_composite(im, (ix, iy))
 
 # Problem → Solution section (light theme, matches landing page)
-ps_y = 940   # cards start just below the hero badge (badge 800-880, desc ends ~696)
+ps_y = 990   # cards start below desc (desc ends ~938) + hero badge
 col_w = (W - 2*M - 40)//2
 PROB_ICON = (224, 85, 85)    # red #e05555
 PROB_BG   = (254, 242, 242)  # soft red
