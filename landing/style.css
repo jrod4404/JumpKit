@@ -1458,9 +1458,10 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 }
 .stats-demo .stat-card-value { font-size: 1.6rem; font-weight: 800; color: var(--text); }
 .stats-demo .stat-card-label {
-  font-size: 0.75rem; font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.06em;
+  font-size: 0.62rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 0.04em;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 .stats-demo .stats-chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
 .stats-demo .stats-chart-box {

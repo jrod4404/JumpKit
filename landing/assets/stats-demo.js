@@ -272,7 +272,7 @@
     dash.innerHTML = `
       <div class="stats-cards stats-cards-4">
         <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
-        <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total \u00b7 ${totalLabelMap[currentStatView]}</div></div>
+        <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jump \u00b7 ${totalLabelMap[currentStatView]}</div></div>
         <div class="stat-card"><div class="stat-card-value">${pHours} hrs</div><div class="stat-card-label">Time Saved \u00b7 ${totalLabelMap[currentStatView]}</div></div>
         <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label">Dollars Saved \u00b7 ${totalLabelMap[currentStatView]}</div></div>
       </div>
