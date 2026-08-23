@@ -1295,28 +1295,6 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .chart-caption { font-size: 0.82rem; color: var(--text-muted); }
 
 /* ─── STATS BAR INLINE (inside insights) ──────────────────────────── */
-.stats-bar-inline {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0;
-  padding: 24px 0;
-  margin-bottom: 12px;
-  flex-wrap: wrap;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-.stats-bar-inline:hover {
-  border-color: var(--turq);
-  box-shadow: 0 8px 32px rgba(0,194,199,0.12);
-  transform: translateY(-4px);
-}
-.stats-bar-inline .stat { padding: 8px 36px; }
-.stats-bar-inline .stat-divider { width: 1px; height: 40px; background: var(--border); }
-
 /* ─── MOCK WINDOW (updated hero) ──────────────────────────────────── */
 .mock-window {
   background: var(--bg-mock);
@@ -1432,8 +1410,6 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .section-label { text-align: center; }
   .section-sub { text-align: center; margin-left: auto; margin-right: auto; }
   .footer-inner { display: flex; flex-direction: column; align-items: center; }
-  .stats-bar-inline .stat { padding: 8px 18px; }
-  .stats-bar-inline .stat-divider { display: none; }
   .mock-sidebar { display: none; }
   .mock-window { max-width: 100%; }
   #scrollTopBtn { bottom: 4px; right: 20px; }
