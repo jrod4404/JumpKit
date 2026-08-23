@@ -1548,6 +1548,9 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 /* ===== Statistics dashboard screenshots (real app captures) ===== */
 .stats-screenshots {
   margin-top: 28px;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid var(--border);
@@ -1620,4 +1623,5 @@ picture.stats-screenshot-light { display: none; }
 }
 @media (max-width: 520px) {
   .stats-feature-grid { grid-template-columns: 1fr; }
+  .stats-screenshots { max-width: 100%; }
 }
