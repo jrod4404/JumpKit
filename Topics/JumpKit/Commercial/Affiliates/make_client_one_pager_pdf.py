@@ -139,7 +139,7 @@ for cx,cy,r,col in [(300,250,430,(0,194,199,32)), (2260,300,360,(26,79,214,25)),
 
 # header
 logo = Image.open(LOGO).convert('RGBA')
-logo_w = 460
+logo_w = round(460 * 1.15)   # 15% bigger
 logo_h = int(logo.height * logo_w / logo.width)
 page.alpha_composite(logo.resize((logo_w, logo_h), Image.LANCZOS), (M, 110))
 # top-right 'Product Brief' pill — width matches text + standard padding
@@ -165,12 +165,13 @@ desc = ('JumpKit displays your navigation links in one place — web links, loca
         'No more bookmarks. Just jump. Save time, save money, and track the savings automatically. '
         'Available for single users and shareable among teams. Getting started takes minutes, works on both Windows '
         'and macOS, and keeps your data local — fast, private, and always yours.')
-y2 = draw_wrapped(d, desc, (M, y+176), F['body'], (58,78,99), 1040, line_gap=12)  # 48px total margin below h1
+y2 = draw_wrapped(d, desc, (M, y+188), F['body'], (58,78,99), 1040, line_gap=12)  # 60px total margin below h1
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
+# hero top aligned with h1 top (y=275)
 hero_img = contain_on_bg(HERO, (1100, 484), bg=(255,255,255))
-_hx0, _hy0, _hx1, _hy1 = 1290, 315, 2390, 799
+_hx0, _hy0, _hx1, _hy1 = 1290, 275, 2390, 759
 hsh = Image.new('RGBA', (1100+40, 484+40), (0,0,0,0))
 ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+484], radius=58, fill=(14, 24, 42, 60))
 page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
