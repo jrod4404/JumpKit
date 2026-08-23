@@ -177,8 +177,9 @@ def _header(page, d2, pill_label='Product Overview'):
 def _footer(page, d2, full=True):
     fy = 3198
     d2.line([M, fy, W-M, fy], fill=LINE, width=2)
-    d2.text((M, fy+30), 'JumpKit Client-Facing One-Pager', font=F['tiny'], fill=(126,144,162))
-    d2.text((W-M-495, fy+30), 'Stop searching. Start jumping.', font=F['tiny_b'], fill=(126,144,162))
+    _ft = 'Stop Searching. Start Jumping.'
+    _fw = d2.textbbox((0,0), _ft, font=F['small_b'])[2]
+    d2.text(((W-_fw)//2, fy+28), _ft, font=F['small_b'], fill=(126,144,162))
 
 # ═══════════════════════════════════════════════════════════════════
 #  REUSABLE CARD DRAWERS
@@ -191,11 +192,10 @@ def _soft_card(page, d2, box, radius=45, fill=PS_BG, outline=None, sh_alpha=58, 
     page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (x1-40, y1-30))
     rect(d2, box, fill=fill, outline=outline, radius=radius, width=3 if outline else 2)
 
-def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252), intro_width=1800, show_title=True):
+def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252), intro_width=1800, show_title=True, pill_w=360):
     """Centered section header: pill (icon+label) then Arial-Bold title. Returns end y."""
     cx = (ptext_x + W - M)//2
     # pill
-    pill_w = 360
     px0, px1 = cx - pill_w//2, cx + pill_w//2
     _psh = Image.new('RGBA', (pill_w+50, 74), (0,0,0,0))
     ImageDraw.Draw(_psh).rounded_rectangle([25,20,pill_w+25,54], radius=25, fill=(18,50,90,42))
@@ -207,6 +207,9 @@ def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, i
     lh = d2.textbbox((0,0), label, font=F['tiny_b'])[3] - d2.textbbox((0,0), label, font=F['tiny_b'])[1]
     total = pil_s + 6 + lw
     tart_x = cx - total//2
+    _bold_off = [(-1,0),(1,0),(0,-1),(0,1)]   # offset-blink the icon to make it bolder
+    for (ox, oy) in _bold_off:
+        page.alpha_composite(pil, (tart_x + ox, y+30 - pil_s//2 + oy))
     page.alpha_composite(pil, (tart_x, y+30 - pil_s//2))
     d2.text((tart_x+pil_s+6, y+30 - lh//2 - 4), label, font=F['tiny_b'], fill=icon_color)
     # title (optional — pill can carry the heading alone)
@@ -380,7 +383,7 @@ def build_page1():
     # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
     yh = ps_bot + 32
     yh = _section_header(page, d, yh, 'AUTOMATIC STATISTICS', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M, show_title=False)
+        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M, show_title=False, pill_w=414)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
     scw = (W - 2*M - 3*36)//4
     scH = 268   # bottom whitespace cut ~35% (was 280)
@@ -429,7 +432,7 @@ def build_page1():
 
     # ── Section: Testimonials (fills the page-1 bottom, matching the landing page) ──
     yh = dy + disp_h + 20
-    yh = _section_header(page, d, yh, 'WHAT OUR USERS SAY', 'users', M, 'What Our Users Say', icon_color=(0,105,126), show_title=False)
+    yh = _section_header(page, d, yh, 'WHAT OUR USERS SAY', 'users', M, 'What Our Users Say', icon_color=(0,105,126), show_title=False, pill_w=414)
     TW = (W - 2*M - 2*36)//3
     TH = 270
     def _star(draw, cx, cy, r, fill):
@@ -458,8 +461,9 @@ def build_page1():
     # footer
     fy=3198
     d.line([M,fy,W-M,fy],fill=LINE,width=2)
-    d.text((M,fy+30),'JumpKit Client-Facing One-Pager',font=F['tiny'],fill=(126,144,162))
-    d.text((W-M-495,fy+30),'Stop searching. Start jumping.',font=F['tiny_b'],fill=(126,144,162))
+    _ft = 'Stop Searching. Start Jumping.'
+    _fw = d.textbbox((0,0), _ft, font=F['small_b'])[2]
+    d.text(((W-_fw)//2, fy+28), _ft, font=F['small_b'], fill=(126,144,162))
     return page
 
 # ═══════════════════════════════════════════════════════════════════
