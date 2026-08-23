@@ -369,45 +369,25 @@ def build_page1():
             col_y[c] = end_y + 18
         return card_bot
 
-    _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS, (200, 60, 60, 70))
-    _draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80, 70))
+    ps_b1 = _draw_ps_card(M, M+col_w, 'THE PROBLEM', "Bookmarks Stink", PROB_ICON, PROB_BG, PROB_BORDER, 'alert-circle', PROBLEM_ITEMS, (200, 60, 60, 70))
+    ps_b2 = _draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80, 70))
+    ps_bot = max(ps_b1, ps_b2)
 
-    # rollout row
-    row_y=1915
-    rect(d,[M,row_y,W-M,row_y+560],fill=SOFT,outline=LINE,radius=45)
-    d.text((M+55,row_y+45),'Recommended starter rollout',font=F['h2'],fill=INK)
-    steps=[('1','Pick resource sets','Identify the top links, folders, portals, and drives users open repeatedly.'),('2','Create starter columns','Group by department, client, project, workflow, or onboarding role.'),('3','Share and improve','Roll out, track launches, and adjust what saves the most time.')]
-    sw=(W-2*M-130)//3
-    for i,(num,title,body) in enumerate(steps):
-        x=M+55+i*(sw+40); y=row_y+140
-        d.ellipse([x,y,x+72,y+72], fill=ROYAL if i==0 else TURQ)
-        d.text((x+24,y+15),num,font=F['h3'],fill=WHITE)
-        d.text((x,y+95),title,font=F['h3'],fill=INK)
-        draw_wrapped(d,body,(x,y+155),F['small'],MUTED,sw,line_gap=5)
-
-    # pricing + CTA (keep the original 2-tier row on page 1; detailed pricing on page 3)
-    price_y=2535
-    pw=(W-2*M-36)//2
-    for i,(name,price,desc,badge) in enumerate([
-        ('JumpKit Free','$0','Web links/local folders, 250 launches, limited teams, ROI dashboard, hotkey launcher, search/filter.','START HERE'),
-        ('JumpKit Unlimited','$10 / user / month','Unlimited launches, teams, members, jumps, team ROI, auto-backup, auto-archive.','BEST FOR TEAMS')]):
-        x=M+i*(pw+36)
-        rect(d,[x,price_y,x+pw,price_y+325],fill=WHITE,outline=(150,231,238) if i else LINE,radius=42,width=5 if i else 2)
-        d.text((x+45,price_y+42),name,font=F['h3'],fill=INK)
-        rect(d,[x+pw-300,price_y+40,x+pw-45,price_y+92],fill=(232,249,252),outline=None,radius=26)
-        tw=d.textbbox((0,0),badge,font=F['tiny_b'])[2]
-        d.text((x+pw-172-tw/2,price_y+53),badge,font=F['tiny_b'],fill=(0,105,126))
-        d.text((x+45,price_y+118),price,font=F['price'],fill=ROYAL if i else INK)
-        draw_wrapped(d,desc,(x+45,price_y+212),F['small'],MUTED,pw-90,line_gap=5)
-
-    # CTA pointer to detailed pricing on page 3
-    cta_y=2905
-    rect(d,[M,cta_y,W-M,cta_y+210],fill=ROYAL,outline=None,radius=48)
-    over=gradient((W-2*M,210),ROYAL,TURQ,True).convert('RGBA'); over.putalpha(255); over.putalpha(rounded_mask((W-2*M,210),48)); page.alpha_composite(over,(M,cta_y))
-    d.text((M+55,cta_y+42),'Suggested next step',font=F['h2'],fill=WHITE)
-    draw_wrapped(d,'Ask your MSP or IT partner to set up a pilot JumpKit workspace with your top 20 recurring destinations.',(M+55,cta_y+112),F['body'],(235,250,255),1390,line_gap=8)
-    rect(d,[W-M-545,cta_y+55,W-M-55,cta_y+155],fill=(255,255,255,235),outline=(255,255,255,255),radius=30)
-    d.text((W-M-465,cta_y+83),'jumpkit.app',font=F['h3'],fill=ROYAL)
+    # ── Dashboard section (moved up from page 2) ────────────────
+    yh = ps_bot + 32
+    yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
+        'JumpKit counts every jump launched and shows exactly how much time and money you\'re saving.', icon_color=(0,105,126))
+    scw = (W - 2*M - 3*36)//4
+    scH = 400
+    stats = [
+        ('clock', '~10s', TURQ, 'saved per jump', 'Every launch is timing-tracked automatically.'),
+        ('activity', '174', ROYAL, 'jumps this week', 'Launches counted across your whole workspace.'),
+        ('coins', '$72', (16,142,120), 'Weekly ROI recovered', 'From the time your jumps save every week.'),
+        ('wallet', '∞', INK, 'links, folders & files', '1-click to any resource — stays local.'),
+    ]
+    for i,(icon,big,bc,lab,sub) in enumerate(stats):
+        x = M + i*(scw+36)
+        _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
 
     # footer
     fy=3198
@@ -421,7 +401,7 @@ def build_page1():
 # ═══════════════════════════════════════════════════════════════════
 def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     x1,y1,x2,y2 = box
-    _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=50, sh_y=26)
+    _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
     iw = 70
     _chip_icon(page, x1+40, y1+30, iw, (232,249,252), icon, shadow=(18,50,90,40))
     # big number
@@ -435,24 +415,8 @@ def build_page2():
     _page_background(page, d)
     _header(page, d, 'Product Overview')
 
-    # ── Section: Automatic Statistics (Dashboard) ──────────────
-    yh = _section_header(page, d, 285, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows exactly how much time and money you\'re saving.', icon_color=(0,105,126))
-    scw = (W - 2*M - 3*36)//4
-    scH = 400
-    stats = [
-        ('clock', '~10s', TURQ, 'saved per jump', 'Every launch is timing-tracked automatically.'),
-        ('activity', '174', ROYAL, 'jumps this week', 'Launches counted across your whole workspace.'),
-        ('coins', '$72', (16,142,120), 'Weekly ROI recovered', 'From the time your jumps save every week.'),
-        ('wallet', '∞', INK, 'links, folders & files', '1-click to any resource — stays local.'),
-    ]
-    for i,(icon,big,bc,lab,sub) in enumerate(stats):
-        x = M + i*(scw+36)
-        _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
-    yh += scH + 44
-
-    # ── Section: Weekly View (replaces the old Weekly ROI banner) ──
-    yh = _section_header(page, d, yh, 'WEEKLY VIEW', 'chart-bar-teal', M, 'Weekly View — Last 4 Weeks at a Glance', icon_color=(0,105,126))
+    # ── Section: Weekly View (dashboard cards now live on page 1) ──
+    yh = _section_header(page, d, 285, 'WEEKLY VIEW', 'chart-bar-teal', M, 'Weekly View — Last 4 Weeks at a Glance', icon_color=(0,105,126))
     WEEKLY_STATS = [
         ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
         ('chart-bar-teal', '236', ROYAL, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
