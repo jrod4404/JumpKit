@@ -11,7 +11,6 @@ HERO = ROOT / 'landing' / 'assets' / 'hero-mac-light.jpg'
 WIN = ROOT / 'landing' / 'assets' / 'hero-windows-light.jpg'
 ICON = ROOT / 'landing' / 'icon-512.png'
 WEEKLY_CHART = Path(__file__).resolve().parent / 'weekly-chart.png'
-WEEKLY_DASH = Path(__file__).resolve().parent / 'weekly-view-dashboard.png'
 
 W, H = 2550, 3300  # Letter at 300dpi-ish ratio; multi-page PDF
 M = 150
@@ -192,7 +191,7 @@ def _soft_card(page, d2, box, radius=45, fill=PS_BG, outline=None, sh_alpha=58, 
     page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (x1-40, y1-30))
     rect(d2, box, fill=fill, outline=outline, radius=radius, width=3 if outline else 2)
 
-def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252)):
+def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252), intro_width=1800):
     """Centered section header: pill (icon+label) then Arial-Bold title. Returns end y."""
     cx = (ptext_x + W - M)//2
     # pill
@@ -215,7 +214,7 @@ def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, i
     d2.text((cx-tw//2, y+80), title, font=font(52, True), fill=INK)
     ey = y + 80 + 56
     if intro:
-        iw = 1800
+        iw = intro_width
         iw2 = d2.textbbox((0,0), intro, font=F['body'])[2]
         ix = cx - min(iw2, iw)//2
         iy = ey + 10
@@ -374,17 +373,30 @@ def build_page1():
     ps_b2 = _draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80, 70))
     ps_bot = max(ps_b1, ps_b2)
 
-    # ── Dashboard section — copy + weekly view, replicated from the landing page ──
+    # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
     yh = ps_bot + 32
     yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126))
-    # the actual weekly view from jumpkit.app (tab bar, 4 stat cards, bar chart)
-    dash_img = Image.open(WEEKLY_DASH).convert('RGB')
-    dw, dh = dash_img.size
-    disp_w = 1920
-    disp_h = round(disp_w * dh / dw)
+        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
+    # 4 weekly stat cards (same values/labels as the landing page weekly view)
+    scw = (W - 2*M - 3*36)//4
+    scH = 400
+    stats = [
+        ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
+        ('chart-bar-teal', '236', ROYAL, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
+        ('clock', '0.7 hrs', (16,142,120), 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
+        ('coins', '$32.78', INK, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
+    ]
+    for i,(icon,big,bc,lab,sub) in enumerate(stats):
+        x = M + i*(scw+36)
+        _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
+    yh += scH + 36
+    # weekly bar chart (same chart as the landing page weekly view)
+    chart_img = Image.open(WEEKLY_CHART).convert('RGB')
+    cw, ch = chart_img.size
+    disp_w = 1900
+    disp_h = round(disp_w * ch / cw)
     dx = M + (W - 2*M - disp_w)//2
-    paste_rounded(page, dash_img, (dx, yh, dx+disp_w, yh+disp_h), radius=34, sh_alpha=60, sh_blur=18, sh_dx=14, sh_dy=16)
+    paste_rounded(page, chart_img, (dx, yh, dx+disp_w, yh+disp_h), radius=34, sh_alpha=45, sh_blur=10, sh_dx=10, sh_dy=12)
 
     # footer
     fy=3198
