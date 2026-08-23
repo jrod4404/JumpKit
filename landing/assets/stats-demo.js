@@ -196,7 +196,6 @@
         data30.push(LOG.filter(x => new Date(x.ts).toISOString().slice(0, 10) === key).length);
       }
       dash.innerHTML = `
-        <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
         <div class="stats-cards stats-cards-4">
           <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
           <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
