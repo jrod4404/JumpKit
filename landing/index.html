@@ -391,35 +391,16 @@
         <div class="stat-divider"></div>
         <div class="stat"><span class="stat-num">∞</span><span class="stat-label">links, folders &amp; files</span></div>
       </div>
-      <div class="stats-screenshots">
-        <picture class="stats-screenshot-dark">
-          <img src="assets/StatsPage_Dark.jpg" alt="JumpKit statistics dashboard — dark mode" class="stats-screenshot" loading="lazy" width="740" height="671" />
-        </picture>
-        <picture class="stats-screenshot-light">
-          <img src="assets/StatsPage_Light.jpg" alt="JumpKit statistics dashboard — light mode" class="stats-screenshot" loading="lazy" width="734" height="669" />
-        </picture>
-      </div>
-      <div class="stats-feature-grid">
-        <div class="stats-feature-card fc-time">
-          <div class="fc-icon"><svg class="ti ti-clock"><use href="assets/tabler-sprite.svg#tabler-clock"/></svg></div>
-          <div class="fc-title">Time saved, auto-calculated</div>
-          <div class="fc-desc">Every jump adds to your total time saved — no manual tracking, ever.</div>
+      <div class="stats-demo" id="statsDemo">
+        <div class="jump-filter-bar" id="statsBarDemo">
+          <div class="jfb-slider" id="statsPillDemo"></div>
+          <button class="jfb-tab active" data-sv="summary">Summary</button>
+          <button class="jfb-tab" data-sv="daily">Daily</button>
+          <button class="jfb-tab" data-sv="weekly">Weekly</button>
+          <button class="jfb-tab" data-sv="monthly">Monthly</button>
+          <button class="jfb-tab" data-sv="yearly">Yearly</button>
         </div>
-        <div class="stats-feature-card fc-money">
-          <div class="fc-icon"><svg class="ti ti-cash"><use href="assets/tabler-sprite.svg#tabler-cash"/></svg></div>
-          <div class="fc-title">Money saved / ROI, auto-calculated</div>
-          <div class="fc-desc">Your hourly value is applied automatically to show real savings and ROI.</div>
-        </div>
-        <div class="stats-feature-card fc-top">
-          <div class="fc-icon"><svg class="ti ti-trophy"><use href="assets/tabler-sprite.svg#tabler-trophy"/></svg></div>
-          <div class="fc-title">Top 10 jumps listed</div>
-          <div class="fc-desc">Your most-used jumps, ranked at a glance.</div>
-        </div>
-        <div class="stats-feature-card fc-range">
-          <div class="fc-icon"><svg class="ti ti-calendar-stats"><use href="assets/tabler-sprite.svg#tabler-calendar-stats"/></svg></div>
-          <div class="fc-title">Daily, weekly, monthly &amp; yearly stats</div>
-          <div class="fc-desc">Zoom from today's activity to your full-year impact.</div>
-        </div>
+        <div id="statsDashDemo"></div>
       </div>
     </div>
   </section>
@@ -749,6 +730,8 @@
   </button>
 
   <script src="script.js"></script>
+  <script src="assets/chart.min.js"></script>
+  <script src="assets/stats-demo.js"></script>
   <script src="https://script.supademo.com/supademo.js"></script>
   <script>
     (function () {
