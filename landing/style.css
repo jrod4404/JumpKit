@@ -693,6 +693,19 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   box-shadow: 0 8px 32px rgba(0,194,199,0.12);
   transform: translateY(-4px);
 }
+.faq-item {
+  background: var(--card-bg, rgba(255,255,255,0.02));
+  border: 1px solid var(--border, rgba(255,255,255,0.08));
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-bottom: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+.faq-item:hover {
+  border-color: var(--turq);
+  box-shadow: 0 8px 32px rgba(0,194,199,0.12);
+  transform: translateY(-4px);
+}
 .jet-card h3 { font-size: var(--card-title-size); font-weight: 700; margin: 0; background: var(--grad-text); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; display: inline-flex; align-items: center; gap: 8px; }
 .jet-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin: 0; word-wrap: break-word; overflow-wrap: break-word; }
 .jet-badge {
