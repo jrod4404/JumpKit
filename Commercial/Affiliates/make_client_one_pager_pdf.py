@@ -419,13 +419,18 @@ def build_page1():
     top10_w = scw
     chart_x0 = M + scw + 36          # aligns with card 2's left edge
     chart_w = (W - M) - chart_x0     # spans to the right margin (under cards 2-4)
-    chart_img = Image.open(WEEKLY_CHART).convert('RGB')
+    chart_img = Image.open(WEEKLY_CHART).convert('RGBA')
+    # recolor the screenshot's white panel bg to the doc's card gray (PS_BG)
+    _data = list(chart_img.getdata())
+    _data = [PS_BG + (a,) if (r > 245 and g > 245 and b > 245) else (r, g, b, a) for (r, g, b, a) in _data]
+    chart_img.putdata(_data)
+    chart_img = chart_img.convert('RGB')
     cw, ch = chart_img.size
     disp_w = chart_w
     disp_h = round(disp_w * ch / cw)
     row2_h = disp_h
     box = [M, yh, M+top10_w, yh+row2_h]
-    _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
+    _soft_card(page, d, box, radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
     d.text((M+45, yh+36), 'Top 10 Jumps', font=font(40, True), fill=INK)
     TOP10 = [
         ('Outlook Mail', 46), ('ERP Portal', 38), ('Confluence', 23), ('Salesforce', 21),
@@ -469,7 +474,7 @@ def build_page1():
     for i,(nm, role, qt) in enumerate(TESTS):
         x = M + i*(TW+36)
         box = [x, yh, x+TW, yh+TH]
-        _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
+        _soft_card(page, d, box, radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
         for s in range(5):
             _star(d, x+58 + s*31, yh+36, 11, (245,158,11))
         draw_wrapped(d, '\u201c' + qt + '\u201d', (x+58, yh+74), ImageFont.truetype(FONT_ITAL, 20), MUTED, TW-116, line_gap=8)
@@ -489,7 +494,7 @@ def build_page1():
 # ═══════════════════════════════════════════════════════════════════
 def _stat_card(page, d2, box, icon, big, big_color, label, sub):
     x1,y1,x2,y2 = box
-    _soft_card(page, d2, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
+    _soft_card(page, d2, box, radius=45, fill=PS_BG, outline=LINE, sh_alpha=58, sh_y=30)
     # big number (tile icon removed per Jeff; teal value per Jeff)
     d2.text((x1+40, y1+30), big, font=font(58, black=True), fill=big_color)
     big_bottom = d2.textbbox((0,0), big, font=font(58, black=True))[3]
