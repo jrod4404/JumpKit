@@ -78,8 +78,7 @@
 
   /* ── App-faithful rendering ──────────────────────────────────── */
   const PREFS = { timePerClick: 10, dollarsPerHour: 50 };
-  const STAT_VIEWS = ['summary', 'daily', 'weekly', 'monthly', 'yearly'];
-  const STAT_LABELS = { summary: 'Summary', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
+  const STAT_VIEWS = ['daily', 'weekly', 'monthly', 'yearly'];
   const doughColors = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#9254de', '#eb2f96', '#69c0ff', '#389e0d'];
   const WORK_COLOR = '#9254de'; // distinct purple for the Work slice
   const OTHER_COLORS = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#eb2f96', '#69c0ff', '#389e0d'];
@@ -90,7 +89,7 @@
   const barClr = 'rgba(0,194,199,0.75)';
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  let currentStatView = 'summary';
+  let currentStatView = 'daily';
   const charts = [];
 
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -130,7 +129,6 @@
       return d.getTime();
     }
     const ranges = {
-      summary: [0, Infinity],
       daily:   [startOf('day') - 6 * 86400000, startOf('day') + 86400000],
       weekly:  [startOf('week') - 3 * 7 * 86400000, startOf('week') + 7 * 86400000],
       monthly: [startOf('year'), new Date(new Date().getFullYear() + 1, 0, 1).getTime()],
@@ -189,43 +187,6 @@
       mkChart(id, 'doughnut',
         { labels: entries.map(x => x[0]), datasets: [{ data: entries.map(x => x[1]), backgroundColor: colorsFor(entries), borderWidth: 0 }] },
         { scales: {}, plugins: { legend: { display: true, position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 11 }, padding: 10 } } } });
-    }
-
-    /* ── Summary view ─────────────────────────────────────────── */
-    if (currentStatView === 'summary') {
-      const colEntries = byColFor(LOG);
-      const labels30 = [], data30 = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(); d.setDate(d.getDate() - i);
-        const key = d.toISOString().slice(0, 10);
-        labels30.push(i === 0 ? 'Today' : i % 5 === 0 ? d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
-        data30.push(LOG.filter(x => new Date(x.ts).toISOString().slice(0, 10) === key).length);
-      }
-      dash.innerHTML = `
-        <div class="stats-cards stats-cards-4">
-          <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
-          <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
-          <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
-          <div class="stat-card"><div class="stat-card-value">${SAMPLE_JUMPS.length}</div><div class="stat-card-label">Active Jumps</div></div>
-        </div>
-        <div class="stats-chart-row">
-          <div class="stats-chart-box full"><div class="stats-chart-title">Last 30 Days</div><div style="height:190px"><canvas id="chLine"></canvas></div></div>
-        </div>
-        <div class="stats-chart-row">
-          <div class="stats-chart-box">
-            <div class="stats-chart-title">Top 10 Jumps</div>
-            <div>${topRowsFor(LOG)}</div>
-          </div>
-          <div class="stats-chart-box">
-            <div class="stats-chart-title">Launches by Column</div>
-            <div style="height:310px"><canvas id="chCol"></canvas></div>
-          </div>
-        </div>`;
-      requestAnimationFrame(() => {
-        mkChart('chLine', 'bar', { labels: labels30, datasets: [{ data: data30, backgroundColor: barClr, borderRadius: 3 }] });
-        mkDoughnut('chCol', colEntries);
-      });
-      return;
     }
 
     /* ── Period views ─────────────────────────────────────────── */
