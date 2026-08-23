@@ -1510,3 +1510,11 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
 .video-poster-pic.demo-thumb-light { display: none; }
 [data-theme="light"] .video-poster-pic.demo-thumb-light { display: block; }
 [data-theme="light"] .video-poster-pic.demo-thumb-dark { display: none; }
+
+/* ===== Stats demo card sub-line (e.g., "last 7 days") ===== */
+.stats-demo .stat-card-sub {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-top: 2px;
+}

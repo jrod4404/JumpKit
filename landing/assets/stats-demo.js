@@ -146,6 +146,13 @@
     const hours = (totalSecondsSaved / 3600).toFixed(1);
     const dollars = ((totalSecondsSaved / 3600) * PREFS.dollarsPerHour).toFixed(2);
 
+    // Last-7-days figures for the Time/Dollars saved cards (matches the daily view's calendar-day window)
+    const d7Start = startOf('day') - 6 * 86400000;
+    const last7Clicks = LOG.filter(x => x.ts >= d7Start && x.ts < startOf('day') + 86400000).length;
+    const last7sec = last7Clicks * PREFS.timePerClick;
+    const last7hrs = (last7sec / 3600).toFixed(1);
+    const last7dollars = fmtUSD((last7sec / 3600) * PREFS.dollarsPerHour);
+
     const chartOpts = extra => Object.assign({
       responsive: true, maintainAspectRatio: false, animation: false,
       plugins: { legend: { display: false } },
@@ -204,8 +211,8 @@
       dash.innerHTML = `
         <div class="stats-cards stats-cards-4">
           <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Total Launches</div></div>
-          <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
-          <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
+          <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div><div class="stat-card-sub">${last7hrs} hrs in last 7 days</div></div>
+          <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div><div class="stat-card-sub">${last7dollars} in last 7 days</div></div>
           <div class="stat-card"><div class="stat-card-value">${SAMPLE_JUMPS.length}</div><div class="stat-card-label">Active Jumps</div></div>
         </div>
         <div class="stats-chart-row">
@@ -307,8 +314,8 @@
       <div class="stats-cards stats-cards-4">
         <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
         <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total \u00b7 ${totalLabelMap[currentStatView]}</div></div>
-        <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div></div>
-        <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
+        <div class="stat-card"><div class="stat-card-value">${hours} hrs</div><div class="stat-card-label">Time Saved</div><div class="stat-card-sub">${last7hrs} hrs in last 7 days</div></div>
+        <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div><div class="stat-card-sub">${last7dollars} in last 7 days</div></div>
       </div>
       <div class="stats-chart-row">
         <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${legendHtml}</div>
