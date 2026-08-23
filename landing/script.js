@@ -158,3 +158,12 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+// ─── SOLUTION VIDEO POSTER (theme-aware thumb → play) ────────────
+function playSolutionVideo() {
+  const v = document.getElementById('solutionVideo');
+  const layer = document.getElementById('videoPosterLayer');
+  if (!v) return;
+  v.play().then(() => { if (layer) layer.style.display = 'none'; }).catch(() => {});
+  v.addEventListener('ended', () => { if (layer) layer.style.display = ''; });
+}

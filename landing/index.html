@@ -143,7 +143,7 @@
   <section class="hero">
   <div class="hero-inner-wrap">
     <div class="hero-inner">
-      <h1 class="hero-title">Your One-Click Link Launcher for Windows &amp; Mac</h1>
+      <h1 class="hero-title">The Best One-Click Link Launcher for Windows &amp; Mac</h1>
       <p class="hero-sub">Stop searching. Start jumping — to any link, folder, or file in one click.</p>
       <p class="hero-desc">JumpKit displays your navigation links in one place — web links, local directories, shared resources — organized in categories and launched in a single click. No more clicking through folders. No more lost tabs. No more bookmarks. Just jump. Save time, save money, and track the savings automatically. Available for single users and shareable among teams.</p>
       <div class="hero-platforms">Available for <span class="hero-platform-pair"><svg class="ti ti-brand-windows hero-platform-icon"><use href="assets/tabler-sprite.svg#tabler-brand-windows"/></svg><strong>Windows</strong></span> &amp; <span class="hero-platform-pair"><svg class="ti ti-brand-apple hero-platform-icon"><use href="assets/tabler-sprite.svg#tabler-brand-apple"/></svg><strong>macOS</strong></span></div>
@@ -256,14 +256,28 @@
         </div>
       </div>
 
-      <div class="demo-video-wrap" style="margin-top:2rem">
-        <video controls playsinline preload="metadata" poster="assets/jumpkit-demo-thumb.jpg" style="width:100%;max-width:900px;border-radius:16px;box-shadow:0 8px 48px rgba(0,0,0,0.5);display:block;margin:0 auto;" aria-label="JumpKit 60-second explainer video">
+          <div class="demo-video-wrap" style="margin-top:2rem">
+      <div style="position:relative;width:100%;max-width:900px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 48px rgba(0,0,0,0.5);aspect-ratio:16/9;">
+        <div id="videoPosterLayer" style="position:absolute;inset:0;z-index:2;cursor:pointer;" onclick="playSolutionVideo()" aria-label="Play the JumpKit 60-second explainer video">
+          <picture class="demo-thumb-dark video-poster-pic">
+            <img src="assets/jumpkit-demo-thumb-dark.jpg" alt="JumpKit 60-second explainer video" class="demo-thumb-img" width="1920" height="1080" loading="lazy" />
+          </picture>
+          <picture class="demo-thumb-light video-poster-pic">
+            <img src="assets/jumpkit-demo-thumb-light.jpg" alt="JumpKit 60-second explainer video" class="demo-thumb-img" width="1920" height="1080" loading="lazy" />
+          </picture>
+          <div class="demo-play-overlay">
+            <div class="demo-play-btn"><svg class="ti ti-player-play"><use href="assets/tabler-sprite.svg#tabler-player-play"/></svg></div>
+            <div class="demo-play-label">Watch the 60-second explainer</div>
+          </div>
+        </div>
+        <video id="solutionVideo" controls playsinline preload="none" style="width:100%;height:100%;display:block;background:#000;" aria-label="JumpKit 60-second explainer video">
           <source src="assets/jumpkit-demo.mp4" type="video/mp4" />
           <source src="assets/jumpkit-demo.mp4" type="video/mp4; codecs=avc1.42E01E,mp4a.40.2" />
           <p style="color:var(--text-muted);padding:1rem;text-align:center">Your browser doesn't support inline video. <a href="assets/jumpkit-demo.mp4" style="color:var(--turq);font-weight:600" download>Download the video</a> to watch it.</p>
         </video>
-        <p style="color:var(--text-muted);font-size:0.95rem;margin-top:1rem;"><svg class="ti ti-player-play" style="color:var(--turq);width:1.1em;height:1.1em;vertical-align:-0.15em;margin-right:.35em"><use href="assets/tabler-sprite.svg#tabler-player-play"/></svg> Watch the 60-second explainer above — see exactly how JumpKit works.</p>
       </div>
+      <p style="color:var(--text-muted);font-size:0.95rem;margin-top:1rem;"><svg class="ti ti-player-play" style="color:var(--turq);width:1.1em;height:1.1em;vertical-align:-0.15em;margin-right:.35em"><use href="assets/tabler-sprite.svg#tabler-player-play"/></svg> Watch the 60-second explainer above — see exactly how JumpKit works.</p>
+    </div>
     </div>
   </section>
 

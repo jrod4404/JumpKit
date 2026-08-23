@@ -1526,3 +1526,11 @@ svg.ti.section-label-icon { width: 1.3rem; height: 1.3rem; }
   .stats-demo .stats-cards-4 { grid-template-columns: 1fr; }
   .stats-demo .stats-chart-row { grid-template-columns: 1fr; }
 }
+
+/* ===== Solution video poster (theme-aware) ===== */
+.video-poster-pic { position: absolute; inset: 0; }
+.video-poster-pic .demo-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+.video-poster-pic { display: block; }
+.video-poster-pic.demo-thumb-light { display: none; }
+[data-theme="light"] .video-poster-pic.demo-thumb-light { display: block; }
+[data-theme="light"] .video-poster-pic.demo-thumb-dark { display: none; }
