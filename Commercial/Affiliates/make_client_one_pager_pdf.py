@@ -11,6 +11,7 @@ HERO = ROOT / 'landing' / 'assets' / 'hero-mac-light.jpg'
 WIN = ROOT / 'landing' / 'assets' / 'hero-windows-light.jpg'
 ICON = ROOT / 'landing' / 'icon-512.png'
 WEEKLY_CHART = Path(__file__).resolve().parent / 'weekly-chart.png'
+WEEKLY_DASH = Path(__file__).resolve().parent / 'weekly-view-dashboard.png'
 
 W, H = 2550, 3300  # Letter at 300dpi-ish ratio; multi-page PDF
 M = 150
@@ -373,21 +374,17 @@ def build_page1():
     ps_b2 = _draw_ps_card(M+col_w+40, W-M, 'THE SOLUTION', 'JumpKit — Your Clean Launchpad', SOL_ICON, SOL_BG, SOL_BORDER, 'bulb', SOLUTION_ITEMS, (22, 160, 80, 70))
     ps_bot = max(ps_b1, ps_b2)
 
-    # ── Dashboard section (moved up from page 2) ────────────────
+    # ── Dashboard section — copy + weekly view, replicated from the landing page ──
     yh = ps_bot + 32
     yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows exactly how much time and money you\'re saving.', icon_color=(0,105,126))
-    scw = (W - 2*M - 3*36)//4
-    scH = 400
-    stats = [
-        ('clock', '~10s', TURQ, 'saved per jump', 'Every launch is timing-tracked automatically.'),
-        ('activity', '174', ROYAL, 'jumps this week', 'Launches counted across your whole workspace.'),
-        ('coins', '$72', (16,142,120), 'Weekly ROI recovered', 'From the time your jumps save every week.'),
-        ('wallet', '∞', INK, 'links, folders & files', '1-click to any resource — stays local.'),
-    ]
-    for i,(icon,big,bc,lab,sub) in enumerate(stats):
-        x = M + i*(scw+36)
-        _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
+        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126))
+    # the actual weekly view from jumpkit.app (tab bar, 4 stat cards, bar chart)
+    dash_img = Image.open(WEEKLY_DASH).convert('RGB')
+    dw, dh = dash_img.size
+    disp_w = 1920
+    disp_h = round(disp_w * dh / dw)
+    dx = M + (W - 2*M - disp_w)//2
+    paste_rounded(page, dash_img, (dx, yh, dx+disp_w, yh+disp_h), radius=34, sh_alpha=60, sh_blur=18, sh_dx=14, sh_dy=16)
 
     # footer
     fy=3198
