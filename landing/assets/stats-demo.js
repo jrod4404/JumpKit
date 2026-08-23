@@ -206,7 +206,7 @@
       for (let w = 0; w < 4; w++) {
         const ws = weekStart + w * 7 * 86400000;
         const we = ws + 7 * 86400000;
-        chartLabels.push(w % 4 === 0 ? new Date(ws).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
+        chartLabels.push(new Date(ws).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         chartData.push(LOG.filter(x => x.ts >= ws && x.ts < we).length);
         // previous-year weeks in amber, matching the monthly view
         chartColors.push(new Date(ws).getFullYear() < new Date().getFullYear() ? 'rgba(245,158,11,0.85)' : barClr);

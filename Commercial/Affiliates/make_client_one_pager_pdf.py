@@ -10,6 +10,7 @@ LOGO = ROOT / 'landing' / 'logo-light.png'
 HERO = ROOT / 'landing' / 'assets' / 'hero-mac-light.jpg'
 WIN = ROOT / 'landing' / 'assets' / 'hero-windows-light.jpg'
 ICON = ROOT / 'landing' / 'icon-512.png'
+WEEKLY_CHART = Path(__file__).resolve().parent / 'weekly-chart.png'
 
 W, H = 2550, 3300  # Letter at 300dpi-ish ratio; multi-page PDF
 M = 150
@@ -450,14 +451,33 @@ def build_page2():
         _stat_card(page, d, [x, yh, x+scw, yh+scH], icon, big, bc, lab, sub)
     yh += scH + 44
 
-    # Weekly ROI banner
-    panel = [M, yh, W-M, yh+240]
-    _soft_card(page, d, panel, radius=45, fill=SOFT, outline=LINE, sh_alpha=45, sh_y=26)
-    d.text((M+55, yh+40), 'Weekly ROI • 29.0 min saved • $72 recovered', font=F['h3'], fill=INK)
-    draw_wrapped(d, 'Personal ROI dashboard: Mon 4.7m · $12, Tue 5.8m · $15, Wed 6.5m · $16, Thu 5.2m · $13, Fri 3.7m · $9, Sat 2.0m · $5, Sun 1.2m · $3.',
-                 (M+55, yh+104), F['small'], MUTED, W-2*M-110, line_gap=7)
-    check_item(d, M+55, yh+176, 'Personal ROI dashboard', 1400, fill=MUTED)
-    yh += 240 + 56
+    # ── Section: Weekly View (replaces the old Weekly ROI banner) ──
+    yh = _section_header(page, d, yh, 'WEEKLY VIEW', 'chart-bar-teal', M, 'Weekly View — Last 4 Weeks at a Glance', icon_color=(0,105,126))
+    WEEKLY_STATS = [
+        ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
+        ('chart-bar-teal', '236', ROYAL, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
+        ('clock', '0.7 hrs', (16,142,120), 'Time Saved · Last 4 Weeks', '~10s saved per jump — tracked automatically.'),
+        ('coins', '$32.78', INK, 'Dollars Saved · Last 4 Weeks', 'Recovered time valued at $50 per hour.'),
+    ]
+    # left: real weekly-view chart from the JumpKit dashboard (light mode)
+    chart_w, chart_h = 1250, 360
+    paste_rounded(page, Image.open(WEEKLY_CHART).convert('RGB'), (M, yh, M+chart_w, yh+chart_h), radius=34, sh_alpha=60, sh_blur=18, sh_dx=14, sh_dy=16)
+    # right: 2x2 mini stat cards
+    rx0 = M + chart_w + 40
+    rx1 = W - M
+    mcw = (rx1 - rx0 - 30)//2
+    mcH = 150
+    for i,(icon,big,bc,lab,sub) in enumerate(WEEKLY_STATS):
+        col = i % 2; row = i // 2
+        x = rx0 + col*(mcw+30)
+        yy = yh + row*(mcH+18)
+        box = [x, yy, x+mcw, yy+mcH]
+        _soft_card(page, d, box, radius=30, fill=WHITE, outline=LINE, sh_alpha=38, sh_y=16)
+        _chip_icon(page, x+22, yy+14, 40, (232,249,252), icon, shadow=(18,50,90,28))
+        d.text((x+76, yy+14), big, font=font(40, black=True), fill=bc)
+        d.text((x+76, yy+62), lab, font=font(24, True), fill=INK)
+        draw_wrapped(d, sub, (x+76, yy+90), font(21), MUTED, mcw-90, line_gap=3)
+    yh += 2*mcH + 18 + 56
 
     # ── Section: Teams ────────────────────────────────────────
     yh = _section_header(page, d, yh, 'TEAMS', 'users', M, 'One Team. One Layout. Everyone Jumps.',
