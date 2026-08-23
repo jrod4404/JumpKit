@@ -191,7 +191,7 @@ def _soft_card(page, d2, box, radius=45, fill=PS_BG, outline=None, sh_alpha=58, 
     page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (x1-40, y1-30))
     rect(d2, box, fill=fill, outline=outline, radius=radius, width=3 if outline else 2)
 
-def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252), intro_width=1800):
+def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, icon_color=(0,105,126), pill_bg=(232,249,252), intro_width=1800, show_title=True):
     """Centered section header: pill (icon+label) then Arial-Bold title. Returns end y."""
     cx = (ptext_x + W - M)//2
     # pill
@@ -209,10 +209,14 @@ def _section_header(page, d2, y, label, icon_name, ptext_x, title, intro=None, i
     tart_x = cx - total//2
     page.alpha_composite(pil, (tart_x, y+30 - pil_s//2))
     d2.text((tart_x+pil_s+6, y+30 - lh//2 - 4), label, font=F['tiny_b'], fill=icon_color)
-    # title
-    tw = d2.textbbox((0,0), title, font=font(52, True))[2]
-    d2.text((cx-tw//2, y+80), title, font=font(52, True), fill=INK)
+    # title (optional — pill can carry the heading alone)
     ey = y + 80 + 56
+    if show_title:
+        tw = d2.textbbox((0,0), title, font=font(52, True))[2]
+        d2.text((cx-tw//2, y+80), title, font=font(52, True), fill=INK)
+        ey = y + 80 + 56
+    else:
+        ey = y + 78
     if intro:
         iw = intro_width
         iw2 = d2.textbbox((0,0), intro, font=F['body'])[2]
@@ -375,8 +379,8 @@ def build_page1():
 
     # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
     yh = ps_bot + 32
-    yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
-        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
+    yh = _section_header(page, d, yh, 'AUTOMATIC STATISTICS', 'chart-bar-teal', M, 'Automatic Statistics',
+        'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M, show_title=False)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
     scw = (W - 2*M - 3*36)//4
     scH = 268   # bottom whitespace cut ~35% (was 280)
@@ -425,9 +429,9 @@ def build_page1():
 
     # ── Section: Testimonials (fills the page-1 bottom, matching the landing page) ──
     yh = dy + disp_h + 20
-    yh = _section_header(page, d, yh, 'TESTIMONIALS', 'users', M, 'What Our Users Say', icon_color=(0,105,126))
+    yh = _section_header(page, d, yh, 'WHAT OUR USERS SAY', 'users', M, 'What Our Users Say', icon_color=(0,105,126), show_title=False)
     TW = (W - 2*M - 2*36)//3
-    TH = 168
+    TH = 270
     def _star(draw, cx, cy, r, fill):
         pts = []
         for i in range(10):
@@ -446,10 +450,10 @@ def build_page1():
         box = [x, yh, x+TW, yh+TH]
         _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
         for s in range(5):
-            _star(d, x+58 + s*31, yh+22, 10, (245,158,11))
-        draw_wrapped(d, '\u201c' + qt + '\u201d', (x+58, yh+46), ImageFont.truetype(FONT_ITAL, 20), MUTED, TW-116, line_gap=5)
-        d.text((x+58, yh+110), nm, font=font(23, True), fill=INK)
-        d.text((x+58, yh+140), role, font=font(17), fill=MUTED)
+            _star(d, x+58 + s*31, yh+40, 11, (245,158,11))
+        draw_wrapped(d, '\u201c' + qt + '\u201d', (x+58, yh+84), ImageFont.truetype(FONT_ITAL, 20), MUTED, TW-116, line_gap=8)
+        d.text((x+58, yh+196), nm, font=font(24, True), fill=INK)
+        d.text((x+58, yh+230), role, font=font(18), fill=MUTED)
 
     # footer
     fy=3198
