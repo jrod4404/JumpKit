@@ -41,7 +41,7 @@
   ];
   const JUMP_WEIGHTS = [20, 14, 12, 10, 9, 8, 7, 6, 5, 4, 3, 2]; // sums to 100
   const WEEKDAY_WEIGHTS = [0.55, 1.25, 1.30, 1.25, 1.15, 0.80, 0.35]; // Sun..Sat
-  const THIS_WEEK_DAILY = [15, 19, 21, 16, 11, 6, 4]; // Mon..Sun, sums to 92
+  const THIS_WEEK_DAILY = [10, 12, 14, 10, 7, 4, 3]; // Mon..Sun, sums to 60 (35% below the original 92)
 
   /* ── Build deterministic click log (260 weeks back) ──────────── */
   const LOG = [];
@@ -61,7 +61,7 @@
     if (w === 0) {
       daily = THIS_WEEK_DAILY.slice(); // current week = exactly 92 jumps
     } else {
-      const base = Math.round(92 * (0.30 + 0.70 * (1 - w / 260)) * (0.75 + 0.5 * rng()));
+      const base = Math.round(92 * 0.65 * (0.30 + 0.70 * (1 - w / 260)) * (0.75 + 0.5 * rng()));
       const tot = WEEKDAY_WEIGHTS.reduce((a, b) => a + b, 0);
       daily = WEEKDAY_WEIGHTS.map(x => Math.max(0, Math.round((base * x) / tot)));
     }
@@ -81,6 +81,12 @@
   const STAT_VIEWS = ['summary', 'daily', 'weekly', 'monthly', 'yearly'];
   const STAT_LABELS = { summary: 'Summary', daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
   const doughColors = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#9254de', '#eb2f96', '#69c0ff', '#389e0d'];
+  const WORK_COLOR = '#9254de'; // distinct purple for the Work slice
+  const OTHER_COLORS = ['#00C2C7', '#1A4FD6', '#2B9ED8', '#ff7a45', '#faad14', '#a0d911', '#eb2f96', '#69c0ff', '#389e0d'];
+  const colorsFor = entries => {
+    let idx = 0;
+    return entries.map(([name]) => name === 'Work' ? WORK_COLOR : OTHER_COLORS[idx++ % OTHER_COLORS.length]);
+  };
   const barClr = 'rgba(0,194,199,0.75)';
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
@@ -181,7 +187,7 @@
 
     function mkDoughnut(id, entries) {
       mkChart(id, 'doughnut',
-        { labels: entries.map(x => x[0]), datasets: [{ data: entries.map(x => x[1]), backgroundColor: doughColors.slice(0, entries.length), borderWidth: 0 }] },
+        { labels: entries.map(x => x[0]), datasets: [{ data: entries.map(x => x[1]), backgroundColor: colorsFor(entries), borderWidth: 0 }] },
         { scales: {}, plugins: { legend: { display: true, position: 'bottom', labels: { color: tc, boxWidth: 10, font: { size: 11 }, padding: 10 } } } });
     }
 
@@ -241,6 +247,8 @@
         const we = ws + 7 * 86400000;
         chartLabels.push(w % 4 === 0 ? new Date(ws).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '');
         chartData.push(LOG.filter(x => x.ts >= ws && x.ts < we).length);
+        // previous-year weeks in amber, matching the monthly view
+        chartColors.push(new Date(ws).getFullYear() < new Date().getFullYear() ? 'rgba(245,158,11,0.85)' : barClr);
       }
     } else if (currentStatView === 'monthly') {
       const yr = new Date().getFullYear();
@@ -271,6 +279,11 @@
     }
     const colEntriesP = byColFor(clicks).sort((a, b) => b[1] - a[1]).slice(0, 6);
 
+    // Legend for views that mix current + previous year bars
+    const legendHtml = (currentStatView === 'monthly' || currentStatView === 'weekly')
+      ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year (Sep\u2013Dec)' : 'Last year') + '</div>'
+      : '';
+
     // Upper-left stat card: average jumps per bucket for the active period
     const avgMap = {
       daily:   { label: 'Avg Jumps / Day',   denom: 7  },
@@ -288,7 +301,7 @@
         <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
       </div>
       <div class="stats-chart-row">
-        <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${currentStatView === 'monthly' ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> Same period last year (Sep\u2013Dec)</div>' : ''}</div>
+        <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${legendHtml}</div>
       </div>
       <div class="stats-chart-row">
         <div class="stats-chart-box">
