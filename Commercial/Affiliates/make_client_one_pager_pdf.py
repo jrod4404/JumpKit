@@ -289,7 +289,7 @@ def build_page1():
     d.text((_cx, _by0 + 21), ' desktop app', font=F['small_b'], fill=(0,105,126))
 
     # Problem → Solution
-    ps_y = 1300
+    ps_y = 1056
     col_w = (W - 2*M - 40)//2
     PROB_ICON = (224, 85, 85)
     PROB_BG   = (254, 242, 242)
@@ -374,7 +374,7 @@ def build_page1():
     ps_bot = max(ps_b1, ps_b2)
 
     # ── Dashboard section — copy + weekly stats, replicated from the landing page ──
-    yh = ps_bot + 96
+    yh = ps_bot + 32
     yh = _section_header(page, d, yh, 'DASHBOARD', 'chart-bar-teal', M, 'Automatic Statistics',
         'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
@@ -422,6 +422,34 @@ def build_page1():
     ImageDraw.Draw(sh).rounded_rectangle([40, 30, disp_w+40, disp_h+30], radius=45, fill=(14,24,42,58))
     page.alpha_composite(sh.filter(ImageFilter.GaussianBlur(3)), (dx-40, dy-30))
     paste_rounded(page, chart_img, (dx, dy, dx+disp_w, dy+disp_h), radius=45, shadow=False)
+
+    # ── Section: Testimonials (fills the page-1 bottom, matching the landing page) ──
+    yh = dy + disp_h + 20
+    yh = _section_header(page, d, yh, 'TESTIMONIALS', 'users', M, 'What Our Users Say', icon_color=(0,105,126))
+    TW = (W - 2*M - 2*36)//3
+    TH = 168
+    def _star(draw, cx, cy, r, fill):
+        pts = []
+        for i in range(10):
+            ang = -math.pi/2 + i*math.pi/5
+            rad = r if i % 2 == 0 else r*0.45
+            pts.append((cx + rad*math.cos(ang), cy + rad*math.sin(ang)))
+        draw.polygon(pts, fill=fill)
+    FONT_ITAL = '/System/Library/Fonts/Supplemental/Arial Italic.ttf'
+    TESTS = [
+        ('Dana K.', 'IT Manager, MSP', 'We rolled JumpKit out to our whole client base in under a week. Onboarding new users went from hours to minutes.'),
+        ('Andrew D.', 'IT Consultant', 'JumpKit is the tool that makes my clients happy. It\u2019s easy and it works.'),
+        ('Chris R.', 'Operations Lead', 'I used to hunt through five different tools just to start my day. Now everything I need is one click away.'),
+    ]
+    for i,(nm, role, qt) in enumerate(TESTS):
+        x = M + i*(TW+36)
+        box = [x, yh, x+TW, yh+TH]
+        _soft_card(page, d, box, radius=45, fill=WHITE, outline=LINE, sh_alpha=58, sh_y=30)
+        for s in range(5):
+            _star(d, x+58 + s*31, yh+22, 10, (245,158,11))
+        draw_wrapped(d, '\u201c' + qt + '\u201d', (x+58, yh+46), ImageFont.truetype(FONT_ITAL, 20), MUTED, TW-116, line_gap=5)
+        d.text((x+58, yh+110), nm, font=font(23, True), fill=INK)
+        d.text((x+58, yh+140), role, font=font(17), fill=MUTED)
 
     # footer
     fy=3198
