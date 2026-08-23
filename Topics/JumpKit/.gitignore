@@ -1,7 +1,0 @@
-
-# Local secrets and Supabase CLI temp files
-.env
-.env.*
-app/.env
-app/.env.*
-app/supabase/.temp/
