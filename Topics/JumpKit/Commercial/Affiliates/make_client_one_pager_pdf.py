@@ -155,7 +155,7 @@ rect(d, [_pb_x0, 126, W-M, 205], fill=(232,249,252), outline=(171,232,238), radi
 d.text((_pb_x0+_pb_pad, 148), _pb_label, font=F['tiny_b'], fill=(0,105,126))
 
 # hero text (landing page H1 + description, verbatim)
-y = 275
+y = 285   # 10px top margin added above the h1
 h1a = 'The Best One-Click Link'
 h1b = 'Launcher for Windows & Mac'
 d.text((M, y), h1a, font=font(62, black=True), fill=INK)
@@ -169,9 +169,9 @@ y2 = draw_wrapped(d, desc, (M, y+188), F['body'], (58,78,99), 1040, line_gap=12)
 
 # hero image right — shadow in the SAME tight/soft style as the problem tiles:
 # a rounded-rect shadow shape hugging the image's rounded corners, low blur, small offset
-# hero top aligned with h1 top (y=275)
+# hero top aligned with h1 top (y=285)
 hero_img = contain_on_bg(HERO, (1100, 484), bg=(255,255,255))
-_hx0, _hy0, _hx1, _hy1 = 1290, 275, 2390, 759
+_hx0, _hy0, _hx1, _hy1 = 1290, 285, 2390, 769
 hsh = Image.new('RGBA', (1100+40, 484+40), (0,0,0,0))
 ImageDraw.Draw(hsh).rounded_rectangle([16, 12, 16+1100, 12+484], radius=58, fill=(14, 24, 42, 60))
 page.alpha_composite(hsh.filter(ImageFilter.GaussianBlur(10)), (_hx0-16, _hy0-12+14))
