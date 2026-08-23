@@ -379,7 +379,7 @@ def build_page1():
         'JumpKit counts every jump launched and shows you exactly how much time and money you\'re saving. All data stays local in an automatic dashboard. Time saved is calculated automatically — every jump carries a time-per-jump value, so each launch adds to your running total in real time. ROI is calculated from that same data: your time saved is multiplied by the hourly rate you set, turning minutes back into dollars you can actually see. No spreadsheets, no guesswork.', icon_color=(0,105,126), intro_width=W-2*M)
     # 4 weekly stat cards (same values/labels as the landing page weekly view)
     scw = (W - 2*M - 3*36)//4
-    scH = 280
+    scH = 268   # bottom whitespace cut ~35% (was 280)
     stats = [
         ('activity', '59.0', TURQ, 'Avg Jumps / Week', 'Average launches per week over the last 4 weeks.'),
         ('chart-bar-teal', '236', TURQ, 'Total Jumps · Last 4 Weeks', 'All launches counted across your workspace.'),
