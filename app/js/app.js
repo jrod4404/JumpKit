@@ -2482,6 +2482,7 @@ function renderStatsDash() {
   const avgVal = (n / avg.denom).toFixed(1);
 
   dash.innerHTML = `
+    <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
     <div class="stats-cards stats-cards-4">
       <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
       <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jumps · ${totalLabelMap[currentStatView]}</div></div>
