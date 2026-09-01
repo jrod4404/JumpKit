@@ -1025,9 +1025,9 @@ async function renderHome() {
       ${_hdr('help','ti-help-circle','Help & Feedback')}
       ${_bOpen('help')}
       <div class="tips-grid" style="margin-bottom:8px">
-        <div class="tip-card">
+        <div class="tip-card" style="cursor:pointer" data-jaction="nav-help">
           <h3><span class="tip-icon"><svg class="ti ti-help-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-help-circle"/></svg></span>Help &amp; Documentation</h3>
-          <p>The <strong style="color:var(--hover-accent)">Help</strong> page covers everything you need: a full feature list, hotkey reference, FAQ, tips for getting the most out of JumpKit, and plan comparison.</p>
+          <p>The <strong style="color:var(--hover-accent)">Help</strong> page covers everything you need: a full feature list, hotkey reference, FAQ, tips for getting the most out of JumpKit, and plan comparison. Click here to open it.</p>
         </div>
         <div class="tip-card" style="cursor:pointer" data-jaction="open-feedback-modal">
           <h3><span class="tip-icon"><svg class="ti ti-message-circle" style="color:var(--hover-accent)"><use href="img/tabler-sprite.min.svg#tabler-message-circle"/></svg></span>Send Feedback</h3>
@@ -3673,6 +3673,7 @@ document.addEventListener('click', e => {
     case 'open-tier-features':  openTierFeaturesModal(); break;
     case 'nav-stats':           navigateTo('stats'); break;
     case 'nav-teams':           navigateTo('teams'); break;
+    case 'nav-help':            navigateTo('help'); break;
     case 'force-backup':       forceBackup(); break;
     case 'import-jumps':       importJumps(); break;
     case 'save-account-prefs': saveAccountPrefs(); break;
