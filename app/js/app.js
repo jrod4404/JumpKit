@@ -2489,7 +2489,24 @@ function renderStatsDash() {
     yearly:  { label: 'Avg Jumps / Year',  denom: 5  },
   };
   const avg = avgMap[currentStatView] || avgMap.daily;
-  const avgVal = (n / avg.denom).toFixed(1);
+  // Average denominator: only count buckets that overlap [join date, now] —
+  // months/weeks before the user joined shouldn't drag the average down.
+  const joinTs = currentUser?.createdAt ? new Date(currentUser.createdAt).getTime() : 0;
+  let avgDenom = avg.denom;
+  if (joinTs) {
+    let c = 0;
+    if (currentStatView === 'daily') {
+      for (let i = 6; i >= 0; i--) if (startOf('day') - i*86400000 + 86400000 > joinTs) c++;
+    } else if (currentStatView === 'weekly') {
+      for (let w = 3; w >= 0; w--) if (startOf('week') - w*7*86400000 + 7*86400000 > joinTs) c++;
+    } else if (currentStatView === 'monthly') {
+      for (let i = 0; i <= now.getMonth(); i++) if (new Date(now.getFullYear(), i+1, 1).getTime() > joinTs) c++;
+    } else if (currentStatView === 'yearly') {
+      for (let yr = now.getFullYear()-4; yr <= now.getFullYear(); yr++) if (new Date(yr+1, 0, 1).getTime() > joinTs) c++;
+    }
+    if (c > 0) avgDenom = c;
+  }
+  const avgVal = (n / avgDenom).toFixed(1);
 
   // Legend only when the view actually mixes current + previous year bars
   const hasPrevYearBars = chartColors.some(c => c === 'rgba(245,158,11,0.85)');
@@ -2500,10 +2517,10 @@ function renderStatsDash() {
   dash.innerHTML = `
     <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
     <div class="stats-cards stats-cards-4">
-      <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
-      <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jumps · ${totalLabelMap[currentStatView]}</div></div>
-      <div class="stat-card"><div class="stat-card-value">${pHours} hrs</div><div class="stat-card-label">Time Saved · ${totalLabelMap[currentStatView]}</div></div>
-      <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label">Dollars Saved · ${totalLabelMap[currentStatView]}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label" style="white-space:nowrap">${avg.label}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label" style="white-space:nowrap">Total Jumps · ${totalLabelMap[currentStatView]}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${pHours} hrs</div><div class="stat-card-label" style="white-space:nowrap">Time Saved · ${totalLabelMap[currentStatView]}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label" style="white-space:nowrap">Dollars Saved · ${totalLabelMap[currentStatView]}</div></div>
     </div>
     <div class="stats-chart-row">
       <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${legendHtml}</div>
