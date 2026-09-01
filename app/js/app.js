@@ -2390,7 +2390,7 @@ function renderStatsDash() {
   }
 
   // ── Period views: time-series bar chart ──────────────────────
-  let chartLabels=[], chartData=[], chartTitle='';
+  let chartLabels=[], chartData=[], chartTitle='', chartColors=[];
 
   if (currentStatView === 'daily') {
     // Last 7 days - one bar per day
@@ -2403,25 +2403,35 @@ function renderStatsDash() {
       chartData.push(clicks.filter(e=>e.ts>=ds&&e.ts<de).length);
     }
   } else if (currentStatView === 'weekly') {
-    // Last 52 calendar weeks - one bar per week
-    chartTitle = `Launches by Week - Last 52 Weeks`;
-    const weekStart = startOf('week') - 51*7*86400000;
-    for (let w=0; w<52; w++) {
+    // Last 4 calendar weeks - one bar per week (landing-page logic)
+    chartTitle = `Launches by Week - Last 4 Weeks`;
+    const weekStart = startOf('week') - 3*7*86400000;
+    for (let w=0; w<4; w++) {
       const ws = weekStart + w*7*86400000;
       const we = ws + 7*86400000;
-      const d  = new Date(ws);
-      // Label every 4th week to avoid clutter
-      chartLabels.push(w%4===0 ? d.toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '');
+      chartLabels.push(new Date(ws).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
       chartData.push(log.filter(e=>e.ts>=ws&&e.ts<we).length);
+      // previous-year weeks in amber, matching the monthly view
+      chartColors.push(new Date(ws).getFullYear() < now.getFullYear() ? 'rgba(245,158,11,0.85)' : barClr);
     }
   } else if (currentStatView === 'monthly') {
-    // This year - one bar per month
+    // This year, with Sep–Dec showing same period last year (amber) — landing-page logic
     chartTitle = `Launches by Month - ${now.getFullYear()}`;
-    ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].forEach((_,i)=>{
+    const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    MONTHS.forEach((m,i)=>{
       const ms=new Date(now.getFullYear(),i,1).getTime();
       const me=new Date(now.getFullYear(),i+1,1).getTime();
-      chartLabels.push(['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][i]);
-      chartData.push(clicks.filter(e=>e.ts>=ms&&e.ts<me).length);
+      chartLabels.push(m);
+      if (i >= 8) {
+        // Sep–Dec: same period last year (amber) so the view isn't empty
+        const lms=new Date(now.getFullYear()-1,i,1).getTime();
+        const lme=new Date(now.getFullYear()-1,i+1,1).getTime();
+        chartData.push(log.filter(e=>e.ts>=lms&&e.ts<lme).length);
+        chartColors.push('rgba(245,158,11,0.85)');
+      } else {
+        chartData.push(clicks.filter(e=>e.ts>=ms&&e.ts<me).length);
+        chartColors.push(barClr);
+      }
     });
   } else if (currentStatView === 'yearly') {
     // Last 4 full years + current year YTD
@@ -2468,18 +2478,24 @@ function renderStatsDash() {
   const pDollars = fmtUSD((pSec / 3600) * (prefs.dollarsPerHour || 50));
   const totalLabelMap = {
     daily:   'Last 7 Days',
-    weekly:  'Last 52 Weeks',
-    monthly: 'This Year',
+    weekly:  'Last 4 Weeks',
+    monthly: 'Last 12 Months',
     yearly:  'Last 5 Years',
   };
   const avgMap = {
     daily:   { label: 'Avg Jumps / Day',   denom: 7  },
-    weekly:  { label: 'Avg Jumps / Week',  denom: 52 },
+    weekly:  { label: 'Avg Jumps / Week',  denom: 4 },
     monthly: { label: 'Avg Jumps / Month', denom: 12 },
     yearly:  { label: 'Avg Jumps / Year',  denom: 5  },
   };
   const avg = avgMap[currentStatView] || avgMap.daily;
   const avgVal = (n / avg.denom).toFixed(1);
+
+  // Legend only when the view actually mixes current + previous year bars
+  const hasPrevYearBars = chartColors.some(c => c === 'rgba(245,158,11,0.85)');
+  const legendHtml = hasPrevYearBars
+    ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year (Sep\u2013Dec)' : 'Last year') + '</div>'
+    : '';
 
   dash.innerHTML = `
     <div style="font-size:0.72rem;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:12px">Personal ROI</div>
@@ -2490,7 +2506,7 @@ function renderStatsDash() {
       <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label">Dollars Saved · ${totalLabelMap[currentStatView]}</div></div>
     </div>
     <div class="stats-chart-row">
-      <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div></div>
+      <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div>${legendHtml}</div>
     </div>
     <div class="stats-chart-row">
       <div class="stats-chart-box">
@@ -2505,7 +2521,7 @@ function renderStatsDash() {
 
   requestAnimationFrame(() => {
     mkChart('chPeriod','bar',
-      { labels:chartLabels, datasets:[{data:chartData,backgroundColor:barClr,borderRadius:3}] });
+      { labels:chartLabels, datasets:[{data:chartData,backgroundColor:chartColors.length ? chartColors : barClr,borderRadius:3}] });
     mkChart('chColP','doughnut',
       { labels:colEntriesP.map(e=>e[0]), datasets:[{data:colEntriesP.map(e=>e[1]),backgroundColor:doughColors.slice(0,colEntriesP.length),borderWidth:0}] },
       { scales:{}, plugins:{ legend:{ display:true, position:'bottom', labels:{ color:tc, boxWidth:10, font:{size:11}, padding:10 } } } });
