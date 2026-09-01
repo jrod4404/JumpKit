@@ -80,3 +80,8 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 - FIXES: (1) app css/app.css: columns-area left padding 8px→0 (aligns first column left border with Add Jump btn); col-header position:sticky top:0 + removed overflow:hidden from jump-column (kills sticky) and moved corner-clip to col-items. (2) Fixed build-win.yml paths Topics/JumpKit/app → app (7 refs), so the CI build works again.
 - Shipped: bumped v5.1.50, commits 4853c0a + 336c502 pushed, tag v5.1.50, dispatched build-win on tag, published release on jrod4404/jumpkit-releases (was Draft → set latest). latest.yml now points to 5.1.50. Jeff can in-app update.
 - NOTE: build-win.yml HAD been broken by repo re-root since some point; any future in-app update requires the fixed paths. Watch next build.
+
+## 2026-09-01 — v5.1.51: landing-style stats cards + sticky-header revert
+- Stats page (period views): replaced 3 cards (Jumps Clicked / Time / $) with landing-page stats-demo.js logic — 4 cards: Avg Jumps per Day|Week|Month|Year, Total Jumps · period (= sum of chart bars), Time Saved · period (hrs), Dollars Saved · period. Weekly avg uses /52 (app chart = 52 weeks vs landing demo 4); per-jump timeSaved preserved via avg-seconds-per-click. Added .stats-cards-4 grid rule.
+- Reverted v5.1.50 sticky column headers (per Jeff); alignment fix kept.
+- Tests 33/33. Tagged v5.1.51, build-win OK, release published+Latest on jumpkit-releases.
