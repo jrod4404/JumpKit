@@ -2458,11 +2458,35 @@ function renderStatsDash() {
       <span style="font-weight:700;color:var(--hover-accent)">${j.ct}</span>
     </div>`).join('');
 
+  // ── Landing-style stat cards (replicated from landing/assets/stats-demo.js) ──
+  // Total = sum of the chart bars (the period the graph actually shows),
+  // Time/$ derived from that total using avg seconds-per-click (per-jump timeSaved weighted)
+  const periodTotal = chartData.reduce((a, b) => a + b, 0);
+  const avgSecPerClick = n > 0 ? totalSecondsSaved / n : (prefs.timePerClick || 10);
+  const pSec = periodTotal * avgSecPerClick;
+  const pHours = (pSec / 3600).toFixed(1);
+  const pDollars = fmtUSD((pSec / 3600) * (prefs.dollarsPerHour || 50));
+  const totalLabelMap = {
+    daily:   'Last 7 Days',
+    weekly:  'Last 52 Weeks',
+    monthly: 'This Year',
+    yearly:  'Last 5 Years',
+  };
+  const avgMap = {
+    daily:   { label: 'Avg Jumps / Day',   denom: 7  },
+    weekly:  { label: 'Avg Jumps / Week',  denom: 52 },
+    monthly: { label: 'Avg Jumps / Month', denom: 12 },
+    yearly:  { label: 'Avg Jumps / Year',  denom: 5  },
+  };
+  const avg = avgMap[currentStatView] || avgMap.daily;
+  const avgVal = (n / avg.denom).toFixed(1);
+
   dash.innerHTML = `
-    <div class="stats-cards">
-      <div class="stat-card"><div class="stat-card-value">${n.toLocaleString()}</div><div class="stat-card-label">Jumps Clicked</div></div>
-      <div class="stat-card"><div class="stat-card-value">${mins} min</div><div class="stat-card-label">Time Saved</div></div>
-      <div class="stat-card"><div class="stat-card-value">${fmtUSD(dollars)}</div><div class="stat-card-label">Dollars Saved</div></div>
+    <div class="stats-cards stats-cards-4">
+      <div class="stat-card"><div class="stat-card-value">${avgVal}</div><div class="stat-card-label">${avg.label}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${periodTotal.toLocaleString()}</div><div class="stat-card-label">Total Jumps · ${totalLabelMap[currentStatView]}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${pHours} hrs</div><div class="stat-card-label">Time Saved · ${totalLabelMap[currentStatView]}</div></div>
+      <div class="stat-card"><div class="stat-card-value">${pDollars}</div><div class="stat-card-label">Dollars Saved · ${totalLabelMap[currentStatView]}</div></div>
     </div>
     <div class="stats-chart-row">
       <div class="stats-chart-box full"><div class="stats-chart-title">${chartTitle}</div><div style="height:220px"><canvas id="chPeriod"></canvas></div></div>
