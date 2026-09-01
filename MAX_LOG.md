@@ -91,3 +91,6 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 
 ## 2026-09-01 — v5.1.53: app stats chart = landing view logic
 - Weekly now last 4 weeks (was 52); Monthly = current year Jan–Aug + same period last year Sep–Dec in amber with "This year / Same period last year" legend. Avg/denominators + card period labels updated to match (Last 4 Weeks, Last 12 Months). Tests 33/33; tagged, built, published+Latest.
+
+## 2026-09-01 — v5.1.54: home Help card clickable
+- Help & Documentation tip-card now navigates to Help page (nav-help action, matches feedback-card pattern). Tests 33/33; tagged, built, published+Latest.
