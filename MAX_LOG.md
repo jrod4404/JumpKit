@@ -97,3 +97,7 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 
 ## 2026-09-01 — v5.1.55: monthly view current-month fix
 - Jeff caught monthly total (112) < weekly (119): landing port showed last-year data for Sep–Dec, hiding current September launches. Fixed: months up to current month = this year actual data; only future months (Oct–Dec) show last-year amber. Legend text generalized; card label back to "This Year". Tests 33/33; tagged, built, published+Latest.
+
+## 2026-09-01 — v5.1.56: join-date-aware averages + no-wrap labels
+- Avg Jumps cards now divide only by buckets (days/weeks/months/years) overlapping [join date, now] — pre-join zero months no longer dilute the average.
+- Period stat card labels set to nowrap (Dollars Saved · Last 5 Years fits one line). Tests 33/33; tagged, built, published+Latest.
