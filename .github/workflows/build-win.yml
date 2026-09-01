@@ -12,16 +12,16 @@ jobs:
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: Topics/JumpKit/app/package-lock.json
+          cache-dependency-path: app/package-lock.json
       - name: Install deps
         run: npm ci
-        working-directory: Topics/JumpKit/app
+        working-directory: app
       - name: Rebuild native for Electron (Windows)
         run: npx electron-builder install-app-deps
-        working-directory: Topics/JumpKit/app
+        working-directory: app
       - name: Build Windows installer
         run: npm run build:win
-        working-directory: Topics/JumpKit/app
+        working-directory: app
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
@@ -30,7 +30,7 @@ jobs:
         with:
           name: jumpkit-win
           path: |
-            Topics/JumpKit/app/dist/JumpKit-Setup-*-Prod-x64.exe
-            Topics/JumpKit/app/dist/JumpKit-Setup-*-Prod-x64.exe.blockmap
-            Topics/JumpKit/app/dist/latest.yml
+            app/dist/JumpKit-Setup-*-Prod-x64.exe
+            app/dist/JumpKit-Setup-*-Prod-x64.exe.blockmap
+            app/dist/latest.yml
           if-no-files-found: error
