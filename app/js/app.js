@@ -2422,8 +2422,8 @@ function renderStatsDash() {
       const ms=new Date(now.getFullYear(),i,1).getTime();
       const me=new Date(now.getFullYear(),i+1,1).getTime();
       chartLabels.push(m);
-      if (i >= 8) {
-        // Sep–Dec: same period last year (amber) so the view isn't empty
+      if (i > now.getMonth()) {
+        // Future months this year: same period last year (amber) so the view isn't empty
         const lms=new Date(now.getFullYear()-1,i,1).getTime();
         const lme=new Date(now.getFullYear()-1,i+1,1).getTime();
         chartData.push(log.filter(e=>e.ts>=lms&&e.ts<lme).length);
@@ -2479,7 +2479,7 @@ function renderStatsDash() {
   const totalLabelMap = {
     daily:   'Last 7 Days',
     weekly:  'Last 4 Weeks',
-    monthly: 'Last 12 Months',
+    monthly: 'This Year',
     yearly:  'Last 5 Years',
   };
   const avgMap = {
@@ -2494,7 +2494,7 @@ function renderStatsDash() {
   // Legend only when the view actually mixes current + previous year bars
   const hasPrevYearBars = chartColors.some(c => c === 'rgba(245,158,11,0.85)');
   const legendHtml = hasPrevYearBars
-    ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year (Sep\u2013Dec)' : 'Last year') + '</div>'
+    ? '<div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:0.72rem;color:var(--text-muted)"><span style="width:10px;height:10px;border-radius:2px;background:rgba(0,194,199,0.75)"></span> This year<span style="width:10px;height:10px;border-radius:2px;background:rgba(245,158,11,0.85);margin-left:14px"></span> ' + (currentStatView === 'monthly' ? 'Same period last year' : 'Last year') + '</div>'
     : '';
 
   dash.innerHTML = `
