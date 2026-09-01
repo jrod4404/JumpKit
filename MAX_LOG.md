@@ -88,3 +88,6 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 
 ## 2026-09-01 — v5.1.52: "Personal ROI" label on all stats tabs
 - Added the summary-tab section label to daily/weekly/monthly/yearly views above the stat cards. Tests 33/33; tagged, built, published+Latest.
+
+## 2026-09-01 — v5.1.53: app stats chart = landing view logic
+- Weekly now last 4 weeks (was 52); Monthly = current year Jan–Aug + same period last year Sep–Dec in amber with "This year / Same period last year" legend. Avg/denominators + card period labels updated to match (Last 4 Weeks, Last 12 Months). Tests 33/33; tagged, built, published+Latest.
