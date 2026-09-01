@@ -176,9 +176,10 @@
 .toast-danger  .toast-icon { color: #e53e3e; }
 
 /* ── Centered pages ── */
-.stats-wrap { max-width: 960px; margin: 0 auto; }
+.stats-wrap { max-width: 1056px; margin: 0 auto; }
 .stats-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
 .stats-cards-4 { grid-template-columns: repeat(4, 1fr); }
+.stats-cards-4 .stat-card { height: 96px; justify-content: center; }
 .stat-card {
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
   padding: 18px 20px; display: flex; flex-direction: column; gap: 4px;
