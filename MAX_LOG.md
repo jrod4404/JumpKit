@@ -101,3 +101,6 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 ## 2026-09-01 — v5.1.56: join-date-aware averages + no-wrap labels
 - Avg Jumps cards now divide only by buckets (days/weeks/months/years) overlapping [join date, now] — pre-join zero months no longer dilute the average.
 - Period stat card labels set to nowrap (Dollars Saved · Last 5 Years fits one line). Tests 33/33; tagged, built, published+Latest.
+
+## 2026-09-01 — v5.1.57: stats page wider + fixed card size
+- stats-wrap max-width 960→1056px (+10%, chart & cards wider). Period stat cards fixed height 96px, centered — identical size on daily/weekly/monthly/yearly. Tests 33/33; tagged, built, published+Latest.
