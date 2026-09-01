@@ -85,3 +85,6 @@ _Granular log of tasks and actions Max has executed. Updated continuously._
 - Stats page (period views): replaced 3 cards (Jumps Clicked / Time / $) with landing-page stats-demo.js logic — 4 cards: Avg Jumps per Day|Week|Month|Year, Total Jumps · period (= sum of chart bars), Time Saved · period (hrs), Dollars Saved · period. Weekly avg uses /52 (app chart = 52 weeks vs landing demo 4); per-jump timeSaved preserved via avg-seconds-per-click. Added .stats-cards-4 grid rule.
 - Reverted v5.1.50 sticky column headers (per Jeff); alignment fix kept.
 - Tests 33/33. Tagged v5.1.51, build-win OK, release published+Latest on jumpkit-releases.
+
+## 2026-09-01 — v5.1.52: "Personal ROI" label on all stats tabs
+- Added the summary-tab section label to daily/weekly/monthly/yearly views above the stat cards. Tests 33/33; tagged, built, published+Latest.
