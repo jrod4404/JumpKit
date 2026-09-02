@@ -1509,6 +1509,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>`}
             </div>
           </div>
+          ${window._supabaseProfile?.role === 'admin' ? `
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
             <div class="acct-row" style="border:none;padding:12px 16px 10px;margin-top:4px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
@@ -1520,7 +1521,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>ClipKit in Sidebar</span><span class="acct-row-hint">Show or hide the ClipKit/Captures entry in the sidebar navigation</span></div>
               <label class="toggle"><input type="checkbox" id="prefClipkit" ${p.showClipkit!==false?'checked':''}/><span class="toggle-slider"></span></label>
             </div>
-          </div>
+          </div>` : ''}
           <div class="acct-save-row">
           </div>
         </div>`;

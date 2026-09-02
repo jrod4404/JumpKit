@@ -50,6 +50,7 @@ function renderJumps() {
       <div class="jumps-toolbar">
         <button class="btn btn-subtle btn-sm" id="btnAddJump"><svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Jump</button>
         <button class="btn btn-subtle btn-sm" id="btnConfigCols"><svg class="ti ti-layout-columns"><use href="img/tabler-sprite.min.svg#tabler-layout-columns"/></svg> Configure Columns</button>
+        <button class="btn btn-subtle btn-sm" id="btnHotkeys"><svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Hotkeys</button>
       </div>
       <div class="jump-filter-bar" id="jumpFilterBar">
         <div class="jfb-slider" id="jfbSlider"></div>
@@ -64,6 +65,7 @@ function renderJumps() {
 
   document.getElementById('btnAddJump').addEventListener('click', () => openAddJumpModal());
   document.getElementById('btnConfigCols').addEventListener('click', () => openConfigColumnsModal());
+  document.getElementById('btnHotkeys').addEventListener('click', () => openHotkeyViewerModal());
 
   document.getElementById('jumpFilterBar').addEventListener('click', e => {
     const tab = e.target.closest('.jfb-tab');
@@ -964,6 +966,59 @@ function doArchive(id) { DB.updateJump(currentUser.id, id, { isArchived: true })
 // Team name cache for Configure Columns status labels
 let _colConfigTeamNames = {}; // { teamId: teamName }
 let _colConfigOwnedTeamIds = new Set(); // teamIds owned by current user
+
+// Read-only hotkey quick view — lists the full hotkey pool (Ctrl+Shift+A-Z, 0-9),
+// marking used combos with jump name + URL. No editing from here.
+function openHotkeyViewerModal() {
+  const allJumps = DB.getJumps(currentUser.id);
+  const used = new Map();
+  allJumps.forEach(j => {
+    if (!j.hotkey) return;
+    const norm = j.hotkey.toLowerCase().replace(/\s/g,'');
+    if (!used.has(norm)) used.set(norm, j);
+  });
+  const ownerOf = (combo) => {
+    const norm = combo.toLowerCase();
+    const swapped = norm.replace(/^cmd/, 'ctrl').replace(/^ctrl/, 'cmd');
+    return used.get(norm) || used.get(swapped) || null;
+  };
+  const combos = [];
+  for (let i = 65; i <= 90; i++) combos.push(`Ctrl+Shift+${String.fromCharCode(i)}`);
+  for (let i = 0; i <= 9; i++) combos.push(`Ctrl+Shift+${i}`);
+
+  const usedCount = combos.filter(c => ownerOf(c)).length;
+  const body = `
+    <div style="margin-bottom:10px;font-size:0.78rem;color:var(--text-dim)">
+      <strong style="color:var(--text)">${usedCount} used</strong> · ${combos.length - usedCount} available — read-only view; assign hotkeys when adding or editing a jump.
+    </div>
+    <div style="max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:10px">
+      <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Hotkey</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Status</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Jump</th>
+            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${combos.map(c => {
+            const j = ownerOf(c);
+            return `<tr style="border-bottom:1px solid var(--border)">
+              <td style="padding:7px 12px;font-family:var(--font-mono,monospace);font-weight:600;white-space:nowrap">${c}</td>
+              <td style="padding:7px 12px">${j
+                ? '<span style="color:#ef4444;font-weight:700">Used</span>'
+                : '<span style="color:#22c55e;font-weight:700">Available</span>'}</td>
+              <td style="padding:7px 12px;color:var(--text)">${j ? esc(j.name) : '<span style="color:var(--text-dim)">—</span>'}</td>
+              <td style="padding:7px 12px;color:var(--text-muted);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${j ? esc(j.url) : ''}">${j ? esc(j.url) : '<span style="color:var(--text-dim)">—</span>'}</td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+  Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Hotkeys', body,
+    '<button class="btn btn-save" onclick="Modal.close()">Close</button>');
+}
 
 async function openConfigColumnsModal() {
   let cols = DB.getColumns(currentUser.id);
