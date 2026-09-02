@@ -34,3 +34,23 @@ jobs:
             app/dist/JumpKit-Setup-*-Prod-x64.exe.blockmap
             app/dist/latest.yml
           if-no-files-found: error
+      # Safety net: electron-builder sometimes leaves the GitHub release in DRAFT
+      # state, which electron-updater cannot see. Explicitly publish it.
+      - name: Ensure release is published (not draft)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          echo "Ensuring release $TAG is published on jrod4404/jumpkit-releases..."
+          RID=$(curl -s -H "Authorization: token $GH_TOKEN" \
+            "https://api.github.com/repos/jrod4404/jumpkit-releases/releases?per_page=20" \
+            | python -c "import json,sys; rs=[r for r in json.load(sys.stdin) if r['tag_name']=='$TAG']; print(rs[0]['id'] if rs else '')")
+          if [ -z "$RID" ]; then
+            echo "No release found for $TAG (publish may have failed entirely)"; exit 1
+          fi
+          curl -s -X PATCH -H "Authorization: token $GH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            -d '{"draft": false}' \
+            "https://api.github.com/repos/jrod4404/jumpkit-releases/releases/$RID" \
+            | python -c "import json,sys; r=json.load(sys.stdin); print('release', r.get('tag_name'), 'draft:', r.get('draft'), 'published:', r.get('published_at'))"
