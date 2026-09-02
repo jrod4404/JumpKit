@@ -57,7 +57,7 @@ function renderJumps() {
       </div>
       <div class="jump-search-wrap">
         <svg class="ti ti-search jump-search-icon"><use href="img/tabler-sprite.min.svg#tabler-search"/></svg>
-        <input class="jump-search-input" id="jumpSearch" type="text" placeholder="Search jumps…" autocomplete="off">
+        <input class="jump-search-input" id="jumpSearch" type="text" placeholder="Search jumps…" autocomplete="off"><button type="button" class="jump-search-clear" id="jumpSearchClear" aria-label="Clear search" style="display:none;"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg></button>
       </div>
     </div>
     <div class="columns-area" id="columnsArea"></div>`;
@@ -77,7 +77,20 @@ function renderJumps() {
 
   positionFilterSlider();
 
-  document.getElementById('jumpSearch').addEventListener('input', () => applyJumpFilter());
+  document.getElementById('jumpSearch').addEventListener('input', (e) => {
+    applyJumpFilter();
+    const _c = document.getElementById('jumpSearchClear');
+    if (_c) _c.style.display = e.target.value ? 'flex' : 'none';
+  });
+  const _jsc = document.getElementById('jumpSearchClear');
+  if (_jsc) {
+    _jsc.addEventListener('click', () => {
+      const inp = document.getElementById('jumpSearch');
+      if (inp) { inp.value = ''; inp.focus(); }
+      _jsc.style.display = 'none';
+      applyJumpFilter();
+    });
+  }
 
   document.getElementById('columnsArea').addEventListener('contextmenu', e => {
     if (e.target.closest('.jump-item')) return;
@@ -893,7 +906,7 @@ function saveJump(editId) {
       if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '<svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> ' + (editId ? 'Save Changes' : 'Add Jump'); }
       Toast.danger('Failed to save jump: ' + (err.message || 'Unknown error'));
     }
-  }, 1000);
+  }, 600);
 }
 
 // ── Details Modal ──────────────────────────────────────────────────
