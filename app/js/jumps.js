@@ -1017,7 +1017,7 @@ function openHotkeyViewerModal() {
       </table>
     </div>`;
   Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Hotkeys', body,
-    '<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>', 'config-cols-modal');
+    '<button type="button" class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>', 'config-cols-modal');
 }
 
 async function openConfigColumnsModal() {
