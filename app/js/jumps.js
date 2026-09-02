@@ -991,7 +991,7 @@ function openHotkeyViewerModal() {
     <div style="margin-bottom:10px;font-size:0.78rem;color:var(--text-dim)">
       <strong style="color:var(--text)">${usedCount} used</strong> · ${combos.length - usedCount} available — read-only view; assign hotkeys when adding or editing a jump.
     </div>
-    <div style="max-height:52vh;overflow-y:auto;border:1px solid var(--border);border-radius:10px">
+    <div style="max-height:52vh;overflow-y:auto">
       <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
         <thead>
           <tr>
@@ -1017,7 +1017,7 @@ function openHotkeyViewerModal() {
       </table>
     </div>`;
   Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Hotkeys', body,
-    '<button class="btn btn-save" onclick="Modal.close()">Close</button>');
+    '<button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>', 'config-cols-modal');
 }
 
 async function openConfigColumnsModal() {
