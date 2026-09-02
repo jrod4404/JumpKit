@@ -995,10 +995,10 @@ function openHotkeyViewerModal() {
       <table style="width:100%;border-collapse:collapse;font-size:0.8rem">
         <thead>
           <tr>
-            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Hotkey</th>
-            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Status</th>
-            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Jump</th>
-            <th style="text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Link</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--bg-modal);text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Hotkey</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--bg-modal);text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Status</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--bg-modal);text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Jump</th>
+            <th style="position:sticky;top:0;z-index:1;background:var(--bg-modal);text-align:left;padding:8px 12px;color:var(--text-muted);font-weight:600;font-size:0.7rem;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)">Link</th>
           </tr>
         </thead>
         <tbody>
@@ -1017,7 +1017,7 @@ function openHotkeyViewerModal() {
       </table>
     </div>`;
   Modal.open('<svg class="ti ti-keyboard"><use href="img/tabler-sprite.min.svg#tabler-keyboard"/></svg> Hotkeys', body,
-    '<button type="button" class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>', 'config-cols-modal');
+    '<button type="button" class="btn btn-subtle" onclick="Modal.close()"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Close</button>', 'hotkeys-modal');
 }
 
 async function openConfigColumnsModal() {

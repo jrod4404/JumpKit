@@ -548,6 +548,7 @@ kbd { display: inline-block; padding: 1px 6px; font-size: 0.75rem; font-family: 
 .modal-box.lg { max-width: 680px; }
 .modal-box.config-cols-modal { max-width: 782px; }
 .modal-box.xl { max-width: 864px; }
+.modal-box.hotkeys-modal { max-width: 1017px; }
 .modal-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 24px; border-bottom: 1px solid var(--border);
