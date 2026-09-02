@@ -1310,9 +1310,12 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
   const timePerClick = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).timePerClick || 10) : 10;
   const dollarsPerHour  = DB.getPrefs && currentUser ? (DB.getPrefs(currentUser.id).dollarsPerHour || 50) : 50;
   const lifetimeSeconds = lifetimeLaunches * timePerClick;
-  const lifetimeHours   = Math.floor(lifetimeSeconds / 3600);
-  const lifetimeMins    = Math.floor((lifetimeSeconds % 3600) / 60);
-  const lifetimeTimeStr = lifetimeHours > 0 ? `${lifetimeHours}h ${lifetimeMins}m` : `${lifetimeMins}m`;
+  // Account page: single-unit display with one decimal (hrs / min / sec)
+  const lifetimeTimeStr = lifetimeSeconds >= 3600
+    ? `${(lifetimeSeconds / 3600).toFixed(1)} hrs`
+    : lifetimeSeconds >= 60
+      ? `${(lifetimeSeconds / 60).toFixed(1)} min`
+      : `${lifetimeSeconds.toFixed(1)} sec`;
   const lifetimeDollars = (lifetimeSeconds / 3600) * dollarsPerHour;
   const lifetimeDollarStr = lifetimeDollars >= 1000
     ? `$${(lifetimeDollars / 1000).toFixed(1)}k`
@@ -1366,7 +1369,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               <div class="acct-row-label"><span>Email</span></div>
               <span class="acct-profile-email" style="font-size:0.88rem;color:var(--text-muted)">${email || '-'}</span>
             </div>
-            <div class="acct-row" style="border-bottom:none">
+            <div class="acct-row">
               <div class="acct-row-label"><span>Member Since</span></div>
               <span style="font-size:0.88rem;color:var(--text-muted)">${memberSince}</span>
             </div>
