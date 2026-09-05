@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desktop Bookmark Manager 2026: Organize Browser Bookmarks, Links &amp; Files on Windows/Mac | JumpKit</title>
+  <meta name="description" content="A desktop bookmark manager keeps your links, local folders, and files local-first and one click away. Learn why web-only tools fail and how JumpKit works on Windows & Mac in 2026." />
+  <link rel="canonical" href="https://jumpkit.app/blog/desktop-bookmark-manager" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Desktop Bookmark Manager 2026: Organize Browser Bookmarks, Links & Files on Windows/Mac" />
+  <meta property="og:description" content="A desktop bookmark manager keeps your links, local folders, and files local-first and one click away. Learn why web-only tools fail and how JumpKit works on Windows & Mac in 2026." />
+  <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+  <meta property="og:url" content="https://jumpkit.app/blog/desktop-bookmark-manager" />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="JumpKit" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Desktop Bookmark Manager 2026: Organize Browser Bookmarks, Links & Files on Windows/Mac" />
+  <meta name="twitter:description" content="A desktop bookmark manager keeps your links, local folders, and files local-first and one click away. Learn why web-only tools fail and how JumpKit works on Windows & Mac in 2026." />
+  <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
+
+  <!-- JSON-LD: Article -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Desktop Bookmark Manager 2026: Organize Browser Bookmarks, Links & Files on Windows/Mac",
+    "description": "A desktop bookmark manager keeps your links, local folders, and files local-first and one click away. Learn why web-only tools fail and how JumpKit works on Windows & Mac in 2026.",
+    "url": "https://jumpkit.app/blog/desktop-bookmark-manager",
+    "image": "https://jumpkit.app/assets/Jumpkit-hero-light.png",
+    "author": {
+      "@type": "Organization",
+      "name": "JumpKit"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "JumpKit",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://jumpkit.app/assets/logo-light.png"
+      }
+    },
+    "datePublished": "2026-09-05",
+    "dateModified": "2026-09-05"
+  }
+  </script>
+
+  <!-- JSON-LD: FAQPage -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is JumpKit a desktop bookmark manager?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JumpKit is a local-first desktop bookmark manager and link launcher that runs on Windows and Mac. Instead of storing URLs in a browser or on a cloud server, it keeps web links, local folders, files, and network paths organized on your machine and one click away."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does it work offline?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Absolutely. JumpKit is a desktop application that runs locally, so your links, folders, and files stay accessible even with no internet. The only time you need a connection is when you actually launch a web URL."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can it open local folders and network drives?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes — this is where JumpKit beats ordinary bookmark managers. Alongside web URLs, it launches local folders, individual files, and network paths like \\\\server\\shared\\clients with a single click, right in Finder or File Explorer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is my data stored locally?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. JumpKit stores 100% of your data locally on your machine by default. Nothing is uploaded to a server unless you explicitly enable optional cloud backup, so your links and local resources never leave your computer."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/site.webmanifest" />
+  <meta name="theme-color" content="#00C2C7" />
+  <style>
+    svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  </style>
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    /* ── Sticky footer ── */
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+    .footer { margin-top: auto; }
+    /* ── Article styles ── */
+    .article-hero {
+      padding: 120px 24px 56px;
+      text-align: center;
+      background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg) 100%);
+    }
+    .article-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--turq);
+      background: rgba(0,194,199,0.1);
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 20px;
+    }
+    .article-title {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--grad-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .article-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .article-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1A4FD6, #00C2C7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .article-meta-divider { opacity: 0.4; }
+
+    .article-body {
+      max-width: 740px;
+      margin: 0 auto;
+      padding: 12px 24px 100px;
+    }
+
+    /* Article typography */
+    .article-body p {
+      font-size: 1.02rem;
+      line-height: 1.78;
+      color: var(--text);
+      margin-bottom: 1.4rem;
+    }
+    .article-body h2 {
+      font-size: 1.5rem;
+      font-weight: 750;
+      letter-spacing: -0.015em;
+      color: var(--turq);
+      margin: 2.8rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .article-body h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2rem 0 0.7rem;
+    }
+    .article-body ul, .article-body ol {
+      margin: 0 0 1.4rem 1.4rem;
+    }
+    .article-body li {
+      font-size: 1.02rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 0.45rem;
+    }
+    .article-body li strong {
+      color: var(--text);
+    }
+    .article-body strong { font-weight: 700; }
+
+    .article-body .callout {
+      background: rgba(0,194,199,0.07);
+      border-left: 3px solid var(--turq);
+      border-radius: 0 10px 10px 0;
+      padding: 18px 22px;
+      margin: 1.6rem 0;
+    }
+    .article-body .callout p {
+      margin: 0;
+      font-size: 0.97rem;
+      color: var(--text);
+    }
+
+    .article-cta-box {
+      background: linear-gradient(135deg, rgba(26,79,214,0.15) 0%, rgba(0,194,199,0.1) 100%);
+      border: 1px solid rgba(0,194,199,0.25);
+      border-radius: 16px;
+      padding: 36px 32px;
+      text-align: center;
+      margin-top: 3rem;
+    }
+    .article-cta-box h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      border: none;
+      padding: 0;
+    }
+    .article-cta-box p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin: 0 0 22px;
+    }
+    .article-cta-box .btn {
+      background: linear-gradient(135deg,#50CACC,#1A4FD6);
+      color: #fff;
+      font-weight: 700;
+      padding: 11px 28px;
+      border-radius: 9px;
+      border: none;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .article-cta-box .btn:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    .article-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 20px;
+      transition: color 0.15s;
+    }
+    .article-back:hover { color: var(--turq); }
+
+    .pricing-table {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 1.4rem 0;
+    }
+    .pricing-table table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .pricing-table th, .pricing-table td {
+      padding: 12px 18px;
+      font-size: 0.9rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-table th {
+      background: rgba(0,194,199,0.07);
+      font-weight: 700;
+      color: var(--text);
+    }
+    .pricing-table tr:last-child td { border-bottom: none; }
+    .pricing-table td { color: var(--text-muted); }
+    .pricing-table td:first-child { font-weight: 600; color: var(--text); }
+    .price-highlight { color: var(--turq); font-weight: 700; }
+
+    @media (max-width: 600px) {
+      .article-body { padding: 40px 18px 80px; }
+      .article-hero { padding: 100px 18px 44px; }
+    }
+  </style>
+</head>
+<body>
+  <svg style="position:absolute;width:0;height:0"><defs><linearGradient id="jumpIconGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00C2C7"/><stop offset="100%" stop-color="#1A4FD6"/></linearGradient></defs></svg>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo"><a href="/"><img id="navLogo" src="../logo-dark-mode.png" alt="JumpKit" class="nav-logo-img" /></a></div>
+      <div class="nav-right">
+        <a href="/blog" class="nav-link" style="font-size:.85rem;font-weight:600;color:var(--turq);padding:5px 8px;border-radius:6px;background:rgba(0,194,199,0.08)">Blog</a>
+        <a href="/#pricing" class="btn btn-primary nav-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:.78rem;padding:5px 12px;border-radius:7px;text-decoration:none;white-space:nowrap;align-items:center;gap:5px;border:none;box-shadow:none"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+        <div class="nav-theme-toggle">
+          <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+          <label class="theme-switch">
+            <input type="checkbox" id="navThemeSwitch" />
+            <span class="theme-slider"></span>
+          </label>
+          <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+        </div>
+        <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- OFFCANVAS -->
+  <aside class="offcanvas" id="offcanvasMenu">
+    <div class="offcanvas-head">
+      <span class="offcanvas-title">Menu</span>
+      <button class="offcanvas-close" id="menuClose" aria-label="Close menu"><svg class="ti ti-x"><use href="../assets/tabler-sprite.svg#tabler-x"/></svg></button>
+    </div>
+    <nav class="offcanvas-links">
+      <a href="/" class="offcanvas-link"><svg class="ti ti-home"><use href="../assets/tabler-sprite.svg#tabler-home"/></svg> Home</a>
+      <a href="/#problem" class="offcanvas-link"><svg class="ti ti-alert-circle"><use href="../assets/tabler-sprite.svg#tabler-alert-circle"/></svg> The Problem</a>
+      <a href="/#solution" class="offcanvas-link"><svg class="ti ti-bulb"><use href="../assets/tabler-sprite.svg#tabler-bulb"/></svg> The Solution</a>
+      <a href="/#testimonialCarousel" class="offcanvas-link"><svg class="ti ti-quote"><use href="../assets/tabler-sprite.svg#tabler-quote"/></svg> Testimonials</a>
+      <a href="/#features" class="offcanvas-link"><svg class="ti ti-sparkles"><use href="../assets/tabler-sprite.svg#tabler-sparkles"/></svg> Features</a>
+      <a href="/#statistics" class="offcanvas-link"><svg class="ti ti-chart-bar"><use href="../assets/tabler-sprite.svg#tabler-chart-bar"/></svg> Dashboard</a>
+      <a href="/#how" class="offcanvas-link"><svg class="ti ti-list-check"><use href="../assets/tabler-sprite.svg#tabler-list-check"/></svg> How It Works</a>
+      <a href="/#pricing" class="offcanvas-link offcanvas-divider"><svg class="ti ti-tag"><use href="../assets/tabler-sprite.svg#tabler-tag"/></svg> Pricing</a>
+      <a href="/blog" class="offcanvas-link"><svg class="ti ti-notebook"><use href="../assets/tabler-sprite.svg#tabler-notebook"/></svg> Blog</a>
+      <div class="theme-switch-row">
+        <svg class="ti ti-sun"><use href="../assets/tabler-sprite.svg#tabler-sun"/></svg>
+        <label class="theme-switch" id="themeSwitchLabel">
+          <input type="checkbox" id="themeSwitch" />
+          <span class="theme-slider"></span>
+        </label>
+        <svg class="ti ti-moon"><use href="../assets/tabler-sprite.svg#tabler-moon"/></svg>
+      </div>
+      <a href="/#pricing" class="btn btn-primary offcanvas-cta" style="background:linear-gradient(135deg,#50CACC,#1A4FD6);color:#fff;font-weight:600;font-size:0.85rem;white-space:nowrap;padding:9px 18px;border-radius:8px;text-decoration:none;border:none;display:flex;align-items:center;justify-content:center;gap:7px;margin-top:4px"><svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>Start Jumping Free!</a>
+    </nav>
+  </aside>
+  <div class="offcanvas-backdrop" id="offcanvasBackdrop"></div>
+
+  <!-- ARTICLE HERO -->
+  <div class="article-hero">
+    <span class="article-tag">
+      <svg class="ti ti-book-2" style="width:.85em;height:.85em"><use href="../assets/tabler-sprite.svg#tabler-book-2"/></svg>
+      Guide
+    </span>
+    <h1 class="article-title">Desktop Bookmark Manager 2026: Keep Links, Files &amp; Folders One Click Away</h1>
+    <div class="article-meta">
+      <div class="article-avatar">JR</div>
+      <span><strong>Jeff R.</strong></span>
+      <span class="article-meta-divider">·</span>
+      <span>September 5, 2026</span>
+      <span class="article-meta-divider">·</span>
+      <span>6 min read</span>
+    </div>
+  </div>
+
+  <!-- ARTICLE BODY -->
+  <article class="article-body">
+    <a href="/blog" class="article-back">
+      <svg class="ti ti-arrow-left" style="width:.95em;height:.95em"><use href="../assets/tabler-sprite.svg#tabler-arrow-left"/></svg>
+      Back to Blog
+    </a>
+
+    <p>You probably think of a bookmark manager as something that lives inside your browser. But the tools that actually tame link chaos in 2026 live on your <strong>desktop</strong> — and here's why that matters more than you'd expect. A <strong>desktop bookmark manager</strong> organizes your web links, local folders, files, and network paths in one local-first place, then launches any of them in a single click. Browser bookmarks and cloud bookmark apps simply can't do that. In this guide, we'll explain what a desktop bookmark manager does, why cloud-only and browser-based tools fall short, and how a launcher like JumpKit bundles everything into one fast, private, offline-friendly tool for Windows and Mac.</p>
+
+    <h2>What Is a Desktop Bookmark Manager?</h2>
+
+    <p>A desktop bookmark manager is an application that runs natively on your computer (Windows or Mac) rather than inside a browser tab or a cloud dashboard. Instead of merely saving a list of URLs, a good one acts as a <strong>launcher</strong> for the resources you use every day. Here's what that means in practice:</p>
+
+    <ul>
+      <li><strong>Web links:</strong> Open any homepage, dashboard, doc, or tool in your default browser with one click.</li>
+      <li><strong>Local folders:</strong> Jump straight into a project folder or a directory full of assets without clicking through File Explorer or Finder.</li>
+      <li><strong>Files:</strong> Launch a specific spreadsheet, PDF, or config file in its default app.</li>
+      <li><strong>Network paths:</strong> Reach a shared drive like <code>\\server\shared\clients</code> the same way you'd open a bookmark.</li>
+      <li><strong>Global hotkeys:</strong> Assign a keyboard shortcut to anything so it fires from any app, not just when the manager is in focus.</li>
+    </ul>
+
+    <p>In short, a desktop bookmark manager pushes past the limits of "saving a URL." It becomes the universal remote control for everything you reach for repeatedly. The full difference between plain bookmarks and a launcher is broken down on our <a href="/compare/bookmarks">jumps vs. bookmarks</a> page if you want the deep dive.</p>
+
+    <h2>Why Browser and Cloud Bookmark Managers Fail</h2>
+
+    <p>Most people default to browser bookmarks or a cloud bookmark manager like Raindrop.io or Pocket. Both have a role, but both hit hard walls for professionals who work across local and web resources:</p>
+
+    <ul>
+      <li><strong>No local folder or file access:</strong> Browser and cloud tools can only save <em>web URLs</em>. They can't open a network drive, a folder of proposals, or a file on your desktop — which is exactly where your most-used resources often live.</li>
+      <li><strong>Privacy leaks:</strong> Cloud bookmark managers upload every URL you save to a third-party server. Fine for a personal reading list; dangerous for internal paths, client links, and confidential resources.</li>
+      <li><strong>Browser-lock:</strong> Native bookmarks tie you to Chrome, Edge, Safari, or Brave. Switch browsers and you're exporting, importing, and hoping nothing breaks.</li>
+      <li><strong>Subscription fatigue:</strong> Many cloud tools charge $3–$10 per month for what is, at heart, a list of links. Over years that adds up — and if you stop paying, you can lose access to your own data.</li>
+      <li><strong>No hotkeys:</strong> A bookmark buried in a dropdown menu is never faster than a keyboard shortcut. Cloud tools treat links as things to <em>click through menus</em>, not things to <em>launch instantly</em>.</li>
+    </ul>
+
+    <p>If you want a full rundown of what to look for in any manager — plus why most options frustrate serious users — our <a href="/blog/bookmark-manager-ultimate-guide">ultimate bookmark manager guide</a> covers it end to end.</p>
+
+    <h2>JumpKit: The Desktop Bookmark Manager That Actually Launches</h2>
+
+    <p>JumpKit was built to close exactly the gap above. It's a <strong>local-first desktop bookmark manager and launcher</strong> that fuses web links, local folders, files, and network paths into one searchable, hotkey-friendly library on Windows and Mac. Instead of parking URLs in a browser sidebar or a server somewhere, everything stays on your machine — organized, instantly findable, and one click away.</p>
+
+    <p>Why people switch from a plain bookmark manager to JumpKit:</p>
+
+    <ul>
+      <li><strong>Mixed resources in one place:</strong> Keep your CRM dashboard, your local proposal template, and your shared drive side by side in the same category.</li>
+      <li><strong>One-click launch:</strong> URLs open in your browser, folders open in Explorer or Finder, and files open in their default app — all from the same screen.</li>
+      <li><strong>Global hotkeys:</strong> Your top resources are a single keystroke away, no matter which app has focus.</li>
+      <li><strong>Team sharing:</strong> Build shared packs to onboard teammates or keep whole sales and engineering orgs aligned.</li>
+      <li><strong>Offline by design:</strong> Links, folders, and files work with zero internet; you only need a connection to open a web URL.</li>
+      <li><strong>100% local data:</strong> Nothing leaves your machine unless you turn on optional cloud backup. No tracking, no analytics on your links.</li>
+    </ul>
+
+    <div class="callout">
+      <p>JumpKit is a desktop bookmark manager with a launcher's reflexes. You don't open a menu and click a saved link — you <strong>hit a hotkey or type to search, and the resource opens where it needs to open</strong>, whether that's a browser tab, a Finder window, or a folder on a shared drive.</p>
+    </div>
+
+    <p>Curious where a link launcher excels beyond bookmarking? Browse <a href="/use-cases">real-world JumpKit use cases</a> for sales, engineering, and executive workflows — and compare JumpKit to a browser-native setup on our <a href="/compare/bookmarks">jumps vs. bookmarks</a> page.</p>
+
+    <h2>How to Choose a Desktop Bookmark Manager</h2>
+
+    <p>Not every desktop bookmark manager is worth your time. Use this checklist to shortlist the ones that are:</p>
+
+    <div class="callout">
+      <p><strong>Desktop Bookmark Manager Buying Checklist:</strong></p>
+      <p>✅ Runs natively on Windows and Mac (not just a browser extension)?<br />
+      ✅ Launches web URLs <em>and</em> local folders/files/network paths?<br />
+      ✅ Offers global hotkeys for instant access?<br />
+      ✅ Keeps your data local-first by default?<br />
+      ✅ Works fully offline?<br />
+      ✅ Lets you search across everything in real time?<br />
+      ✅ Supports team sharing and onboarding packs?<br />
+      ✅ Has a free tier so you can try before paying?</p>
+      <p>If a tool clears most of those boxes, it's worth a trial. If it only stores URLs in a cloud, you'll be shopping for a replacement before long.</p>
+    </div>
+
+    <h2>Frequently Asked Questions</h2>
+
+    <h3>Is JumpKit a desktop bookmark manager?</h3>
+    <p>Yes. JumpKit is a local-first desktop bookmark manager and link launcher for Windows and Mac. It organizes web links, local folders, files, and network paths on your machine and launches any of them with one click or a global hotkey.</p>
+
+    <h3>Does it work offline?</h3>
+    <p>Absolutely. Because JumpKit is a desktop application with local-first data, your links, folders, and files stay accessible with no internet at all. You only need a connection when you launch a web URL.</p>
+
+    <h3>Can it open local folders and network drives?</h3>
+    <p>Yes — that's the big upgrade over browser and cloud bookmark managers. JumpKit opens local folders, individual files, and network paths like <code>\\server\shared\clients</code> in File Explorer or Finder with a single click.</p>
+
+    <h3>Is my data stored locally?</h3>
+    <p>Yes. JumpKit keeps 100% of your data on your machine by default. Nothing is uploaded unless you explicitly enable optional cloud backup, and there's no tracking, analytics, or third-party access to your links. For more on keeping your library organized and private, see the <a href="/blog/link-organizer-guide">link organizer guide</a>.</p>
+
+    <div class="article-cta-box">
+      <h3>Bring Your Bookmarks to the Desktop</h3>
+      <p>Download JumpKit free — organize web links, local folders, and files in one local-first launcher for Windows &amp; Mac. No credit card required.</p>
+      <a href="/#pricing" class="btn">
+        <svg class="ti ti-rocket" style="width:1.1em;height:1.1em;flex-shrink:0"><use href="../assets/tabler-sprite.svg#tabler-rocket"/></svg>
+        Start Jumping Free!
+      </a>
+    </div>
+
+  </article>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo"><img id="footerLogo" src="logo-dark-mode.png" alt="JumpKit" width="1638" height="596" loading="lazy" class="nav-logo-img footer-logo-img" /></div>
+      <p class="footer-tagline">Stop searching. Start jumping.</p>
+      <div class="footer-social footer-social-spaced" style="margin-bottom:24px">
+        <a href="https://x.com/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-x" aria-label="X / Twitter">
+          <svg class="ti ti-brand-x"><use href="assets/tabler-sprite.svg#tabler-brand-x"/></svg>
+        </a>
+        <a href="https://youtube.com/@jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-yt" aria-label="YouTube">
+          <svg class="ti ti-brand-youtube"><use href="assets/tabler-sprite.svg#tabler-brand-youtube"/></svg>
+        </a>
+        <a href="https://linkedin.com/company/jumpkitapp" target="_blank" rel="noopener" class="footer-social-link footer-social-li" aria-label="LinkedIn">
+          <svg class="ti ti-brand-linkedin"><use href="assets/tabler-sprite.svg#tabler-brand-linkedin"/></svg>
+        </a>
+      </div>
+      <div class="footer-links" style="margin-bottom:12px;display:flex;flex-direction:column;gap:8px;align-items:center">
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/" class="footer-page-link">Home</a>
+          <a href="/pricing" class="footer-page-link">Pricing</a>
+          <a href="/videos" class="footer-page-link">Videos</a>
+          <a href="/about" class="footer-page-link">About</a>
+          <a href="/blog" class="footer-page-link">Blog</a>
+          <a href="/affiliates" class="footer-page-link">Affiliates</a>
+        </div>
+        <div style="display:flex;gap:18px;justify-content:center">
+          <a href="/contact" class="footer-page-link">Contact</a>
+          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
+          <a href="/alternative" class="footer-page-link">Alternatives</a>
+          <a href="/use-cases" class="footer-page-link">Use Cases</a>
+          <a href="/privacy" class="footer-page-link">Privacy</a>
+          <a href="/terms" class="footer-page-link">Terms</a>
+        </div>
+      </div>
+      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <button id="scrollTopBtn" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+    <svg class="ti ti-arrow-up"><use href="../assets/tabler-sprite.svg#tabler-arrow-up"/></svg>
+  </button>
+
+  <script>
+    // Theme
+    (function(){
+      const stored = localStorage.getItem('jk-theme');
+      if (stored) document.documentElement.setAttribute('data-theme', stored);
+      const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark';
+      const updateSwitches = () => {
+        document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.checked = isDark());
+        const navLogo = document.getElementById('navLogo');
+        const footerLogo = document.getElementById('footerLogo');
+        if (navLogo) navLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+        if (footerLogo) footerLogo.src = isDark() ? '../logo-dark-mode.png' : '../logo-light.png';
+      };
+      const toggle = () => {
+        const next = isDark() ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('jk-theme', next);
+        updateSwitches();
+      };
+      document.querySelectorAll('#navThemeSwitch,#themeSwitch').forEach(el => el.addEventListener('change', toggle));
+      updateSwitches();
+    })();
+
+    // Offcanvas
+    const menuToggle = document.getElementById('menuToggle');
+    const menuClose = document.getElementById('menuClose');
+    const offcanvas = document.getElementById('offcanvasMenu');
+    const backdrop = document.getElementById('offcanvasBackdrop');
+    const openMenu = () => { offcanvas.classList.add('open'); backdrop.classList.add('open'); document.body.style.overflow='hidden'; };
+    const closeMenu = () => { offcanvas.classList.remove('open'); backdrop.classList.remove('open'); document.body.style.overflow=''; };
+    menuToggle.addEventListener('click', openMenu);
+    menuClose.addEventListener('click', closeMenu);
+    backdrop.addEventListener('click', closeMenu);
+
+    // Scroll top button
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => { scrollBtn.classList.toggle('visible', window.scrollY > 400); });
+  </script>
+</body>
+</html>
