@@ -668,6 +668,12 @@ let activePage = 'home';
 window.activePage = activePage;
 
 window.navigateTo = function navigateTo(page) {
+  // NoteKit + ClipKit are ADMIN-ONLY beta pages. Non-admin users must never
+  // open them even via direct route/history — force back to home.
+  const _isAdminNav = (window._supabaseProfile?.role === 'admin');
+  if ((page === 'notekit' || page === 'clipkit') && !_isAdminNav) {
+    page = 'home';
+  }
   // Kill any lingering tooltip before DOM swap
   document.documentElement.classList.add('hide-tooltips');
   activePage = page;
@@ -1738,29 +1744,23 @@ window.applySidebarModulePrefs = function applySidebarModulePrefs() {
   let prefs;
   try { prefs = DB.getPrefs(currentUser.id) || {}; } catch (e) { prefs = {}; }
 
-  const showNK = prefs.showNotekit !== false;
-  const showCK = prefs.showClipkit !== false;
+  // NoteKit + ClipKit are BETA modules shown to ADMINS ONLY. Non-admin users
+  // (e.g. family members / team members) must never see them in the sidebar,
+  // regardless of build feature flag or saved show/hide prefs.
+  const isAdmin = window._supabaseProfile?.role === 'admin';
+  const showNK = isAdmin && prefs.showNotekit !== false;
+  const showCK = isAdmin && prefs.showClipkit !== false;
 
   const nkLabel  = document.getElementById('notekitNavLabel');
   const nkWrap   = document.getElementById('notekitNavWrap');
   const ckLabel  = document.getElementById('clipkitNavLabel');
   const ckBtn    = document.getElementById('clipkitNavBtn');
 
-  // NoteKit: only hide if the feature is actually enabled in this build (init
-  // sets data-enabled='1' when it reveals the section). Checking the live
-  // display style here would lock the section hidden once the user turns it
-  // off (display stays 'none' → looks 'inactive' on the next call).
-  const nkActive = nkLabel && nkLabel.dataset.enabled === '1';
-  if (nkActive) {
-    nkLabel.style.display  = showNK ? 'block' : 'none';
-    if (nkWrap) nkWrap.style.display = showNK ? 'block' : 'none';
-  }
+  if (nkLabel) nkLabel.style.display = (showNK && nkLabel.dataset.enabled === '1') ? 'block' : 'none';
+  if (nkWrap)  nkWrap.style.display  = (showNK && nkLabel && nkLabel.dataset.enabled === '1') ? 'block' : 'none';
 
-  const ckActive = ckLabel && ckLabel.dataset.enabled === '1';
-  if (ckActive) {
-    if (ckLabel) ckLabel.style.display = showCK ? 'block' : 'none';
-    if (ckBtn)   ckBtn.style.display   = showCK ? 'flex'  : 'none';
-  }
+  if (ckLabel) ckLabel.style.display = (showCK && ckLabel.dataset.enabled === '1') ? 'block' : 'none';
+  if (ckBtn)   ckBtn.style.display   = showCK ? 'flex' : 'none';
 };
 
 // Auto-save: persist settings whenever any control changes (no Save button needed)
