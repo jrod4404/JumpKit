@@ -4,12 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>About JumpKit — Stop Searching. Start Jumping.</title>
-  <meta name="description" content="JumpKit was built by people who were tired of digging through bookmarks, folder trees, and chat histories to find the same links every day. So we built a better way." />
+  <meta name="description" content="JumpKit is a local-first desktop launcher for Windows and macOS that gives teams one-click access to the links, folders, and network shares they use every day. Free tier included." />
   <link rel="canonical" href="https://jumpkit.app/about" />
 
   <!-- Open Graph -->
   <meta property="og:title" content="About JumpKit" />
-  <meta property="og:description" content="Built by people tired of searching for the same links every day." />
+  <meta property="og:description" content="A local-first desktop launcher that gives you one-click access to the links, folders, and shares you use every day." />
   <meta property="og:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
   <meta property="og:url" content="https://jumpkit.app/about" />
   <meta property="og:type" content="website" />
@@ -18,7 +18,7 @@
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="About JumpKit" />
-  <meta name="twitter:description" content="Built by people tired of searching for the same links every day." />
+  <meta name="twitter:description" content="A local-first desktop launcher that gives you one-click access to the links, folders, and shares you use every day." />
   <meta name="twitter:image" content="https://jumpkit.app/assets/Jumpkit-hero-light.png" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -28,6 +28,15 @@
   <meta name="theme-color" content="#00C2C7" />
   <style>
     svg.ti { width: 1em; height: 1em; display: inline-block; vertical-align: -0.125em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+    .about-h2 { font-size:1.5rem; font-weight:800; letter-spacing:-0.01em; margin:56px 0 18px; color:var(--text,#E8F0FE); }
+    .about-h3 { font-size:1.05rem; font-weight:700; margin:22px 0 8px; color:var(--text,#E8F0FE); }
+    .about-p { color:var(--text-muted,#7A93B4); line-height:1.8; font-size:1rem; margin-bottom:14px; }
+    .about-ul { color:var(--text-muted,#7A93B4); line-height:2; font-size:1rem; padding-left:22px; list-style:disc; margin-bottom:8px; }
+    .keyfacts { display:grid; grid-template-columns:1fr; gap:10px; }
+    .keyfacts .row { display:flex; gap:12px; font-size:0.95rem; }
+    .keyfacts dt { min-width:150px; font-weight:700; color:var(--text,#E8F0FE); }
+    .keyfacts dd { margin:0; color:var(--text-muted,#7A93B4); }
+    @media (min-width:600px){ .keyfacts { grid-template-columns:1fr 1fr; gap:10px 32px; } }
   </style>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -45,32 +54,96 @@
     <span class="section-label">About</span>
     <h1 style="font-size:clamp(2rem,5vw,2.8rem);font-weight:800;letter-spacing:-0.02em;margin-bottom:24px">Stop searching. Start jumping.</h1>
 
-    <div style="color:var(--text-muted,#7A93B4);line-height:1.8;font-size:1.05rem">
+    <!-- 1. Value prop -->
+    <p class="about-p" style="font-size:1.15rem;color:var(--text,#E8F0FE)">
+      <strong>JumpKit</strong> is a local-first desktop launcher for Windows and macOS that gives you
+      one-click access to the web links, folders, and network shares you use every day — built for
+      knowledge workers, IT &amp; MSP teams, and small businesses.
+    </p>
+
+    <div style="color:var(--text-muted,#7A93B4);line-height:1.8;font-size:1.05rem;margin-top:28px">
       <p style="margin-bottom:20px">JumpKit was born out of a simple frustration: <strong style="color:var(--text,#E8F0FE)">we spend too much time looking for things we've already found.</strong></p>
-
       <p style="margin-bottom:20px">Every day, knowledge workers navigate the same web links, the same shared folders, the same internal resources — over and over. Some live in browser bookmarks. Some in chat messages. Some in email signatures. Some in Notion docs. The result is wasted time, fragmented workflows, and the constant question: <em>"Where did I put that link?"</em></p>
-
-      <p style="margin-bottom:20px">We built JumpKit to be the answer. A single, lightweight desktop app that sits on your machine and gives you <strong style="color:var(--text,#E8F0FE)">one-click access to anywhere</strong> — web links, local folders, network shares, and team resources — all organized, searchable, and shareable.</p>
-
       <p style="margin-bottom:20px"><strong style="color:var(--text,#E8F0FE)">Our mission:</strong> give people their time back. Every unnecessary click, every folder dive, every "let me find that link" message — that's time stolen from real work. JumpKit tracks the savings so you can see exactly how much it matters.</p>
-
-      <p style="margin-bottom:20px">JumpKit is built for individuals, small teams, and organizations who value speed and simplicity. No bloat. No unnecessary features. Just a fast, clean launcher that gets out of your way.</p>
-
-      <p style="margin-bottom:20px"><strong style="color:var(--turq,#00C2C7)">Stop searching. Start jumping.</strong></p>
     </div>
 
-    <div style="margin-top:48px;padding:28px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;background:var(--bg-card,#0E1827)">
-      <h3 style="font-size:1.1rem;font-weight:700;margin-bottom:12px;color:var(--text,#E8F0FE)">Quick facts</h3>
-      <ul style="list-style:none;padding:0;color:var(--text-muted,#7A93B4);line-height:2;font-size:0.95rem">
-        <li>📦 Available for Windows and macOS</li>
-        <li>🔒 Local-first — your data stays on your machine</li>
-        <li>🆓 Free tier with core features</li>
-        <li>👥 Team sync for shared resource hubs</li>
-        <li>⏱️ Automatic time-saved tracking</li>
-      </ul>
+    <!-- 2. What JumpKit does -->
+    <h2 class="about-h2">What JumpKit Does</h2>
+    <h3 class="about-h3">Jumps — your links and folders, organized</h3>
+    <p class="about-p">Save any web address, local folder, or network share as a "jump," group jumps into kits, and launch them with one click or a keyboard shortcut. The outcome: the resources you use daily are always exactly one action away.</p>
+    <h3 class="about-h3">Team sync — shared resource hubs</h3>
+    <p class="about-p">Share kits across your team so everyone works from the same set of links and shares — new hires get productive in minutes instead of asking where things live.</p>
+    <h3 class="about-h3">Time-saved tracking</h3>
+    <p class="about-p">JumpKit counts the clicks and minutes you didn't spend digging, so the value shows up in a number, not a feeling.</p>
+
+    <!-- 3. Differentiators -->
+    <h2 class="about-h2">What Makes JumpKit Different</h2>
+    <h3 class="about-h3">Local-first — your data stays on your machine</h3>
+    <p class="about-p">Cloud bookmark managers like Toby and Raindrop sync your entire workspace through their servers. JumpKit runs locally on your desktop; nothing about your links or file paths leaves your machine unless you choose team sync.</p>
+    <h3 class="about-h3">Files and folders, not just bookmarks</h3>
+    <p class="about-p">Browser bookmarks only handle URLs. JumpKit launches network shares, mapped drives, and local folders alongside web links — one tool for everything you open daily.</p>
+    <h3 class="about-h3">Built for teams, priced for everyone</h3>
+    <p class="about-p">Launchers like Raycast and Alfred are powerful but per-person power-user tools with paid tiers. JumpKit's core features — including the jumps organizer and launcher — are free, with paid plans adding team sync.</p>
+    <h3 class="about-h3">No bloat, nothing to learn</h3>
+    <p class="about-p">JumpKit installs in minutes and has no learning curve. It's a launcher that gets out of your way — not another workspace app demanding a workflow change.</p>
+    <h3 class="about-h3">Made for MSPs and IT teams</h3>
+    <p class="about-p">IT service providers use JumpKit to give every client a clean, organized set of resources — and partners can earn recurring commission on the seats they deploy.</p>
+
+    <!-- 4. Who uses JumpKit -->
+    <h2 class="about-h2">Who Uses JumpKit</h2>
+    <ul class="about-ul">
+      <li>Knowledge workers who open the same 20 links and folders every day</li>
+      <li>IT &amp; MSP teams organizing client resources and internal tools</li>
+      <li>Engineers navigating build servers, repos, test environments, and shares</li>
+      <li>Sales and ops teams juggling CRM links, dashboards, and document libraries</li>
+      <li>Small businesses that want one shared place for "where everything is"</li>
+    </ul>
+
+    <!-- 5. Team -->
+    <h2 class="about-h2">The Team Behind JumpKit</h2>
+    <p class="about-p">JumpKit is built by founder <strong style="color:var(--text,#E8F0FE)">Jeff Roder</strong> — an electrical engineer (BS/MS, University of Michigan) with a background in embedded systems and enterprise software. Like most builders, he got tired of digging through bookmarks and folder trees to find the same things every day, and decided the fix should take one click.</p>
+    <p class="about-p">Find JumpKit on <a href="https://x.com/jumpkitapp" style="color:var(--turq,#00C2C7)">X</a>, <a href="https://youtube.com/@jumpkitapp" style="color:var(--turq,#00C2C7)">YouTube</a>, and <a href="https://linkedin.com/company/jumpkitapp" style="color:var(--turq,#00C2C7)">LinkedIn</a>.</p>
+
+    <!-- 6. How JumpKit works -->
+    <h2 class="about-h2">How JumpKit Works</h2>
+    <ol class="about-ul" style="list-style:decimal">
+      <li><strong style="color:var(--text,#E8F0FE)">Install</strong> the desktop app for Windows or macOS — takes about a minute.</li>
+      <li><strong style="color:var(--text,#E8F0FE)">Add jumps</strong>: any URL, local folder, or network share, grouped into kits however your team thinks.</li>
+      <li><strong style="color:var(--text,#E8F0FE)">Launch</strong> with one click or a hotkey — from the app or the system tray.</li>
+      <li><strong style="color:var(--text,#E8F0FE)">Share (optional)</strong>: publish a kit for your team so everyone has the same set.</li>
+    </ol>
+
+    <!-- 7. Key facts -->
+    <h2 class="about-h2">Key Facts</h2>
+    <div style="padding:28px;border:1px solid rgba(255,255,255,0.08);border-radius:14px;background:var(--bg-card,#0E1827)">
+      <dl class="keyfacts">
+        <div class="row"><dt>Company Name</dt><dd>JumpKit</dd></div>
+        <div class="row"><dt>Type</dt><dd>Desktop software (SaaS with team sync)</dd></div>
+        <div class="row"><dt>Platforms</dt><dd>Windows, macOS</dd></div>
+        <div class="row"><dt>Website</dt><dd>jumpkit.app</dd></div>
+        <div class="row"><dt>Core Offering</dt><dd>Local-first launcher for links, folders &amp; shares</dd></div>
+        <div class="row"><dt>Pricing</dt><dd>Free tier with core features; paid plans add team sync</dd></div>
+        <div class="row"><dt>Contract Terms</dt><dd>Month-to-month, no lock-in</dd></div>
+        <div class="row"><dt>Data Handling</dt><dd>Local-first; nothing leaves your machine unless team sync is enabled</dd></div>
+        <div class="row"><dt>Founder</dt><dd>Jeff Roder</dd></div>
+        <div class="row"><dt>Social</dt><dd>X, YouTube, LinkedIn (@jumpkitapp)</dd></div>
+        <div class="row"><dt>Competitors</dt><dd>Browser bookmarks, Toby, Raindrop, Raycast, Alfred</dd></div>
+        <div class="row"><dt>Partners</dt><dd>IT &amp; MSP partner program with recurring commission</dd></div>
+      </dl>
     </div>
 
-    <div style="text-align:center;margin-top:48px">
+    <!-- 8. FAQ -->
+    <h2 class="about-h2">Frequently Asked Questions</h2>
+    <h3 class="about-h3">Does my data leave my computer?</h3>
+    <p class="about-p">No. JumpKit is local-first — your jumps, folders, and usage history stay on your machine. Data only syncs if you explicitly enable team sharing.</p>
+    <h3 class="about-h3">What can a "jump" point to?</h3>
+    <p class="about-p">Any web URL, local folder, or network share. If you can open it on your machine, you can make it a jump.</p>
+    <h3 class="about-h3">Is JumpKit free?</h3>
+    <p class="about-p">The core features — jumps, kits, launcher, and time tracking — are free. Paid plans add team sync and sharing.</p>
+    <h3 class="about-h3">Which platforms are supported?</h3>
+    <p class="about-p">Windows and macOS. Both use the same kits and settings via team sync.</p>
+
+    <div style="text-align:center;margin-top:64px">
       <a href="/" style="display:inline-block;background:linear-gradient(135deg,#50CACC,#1A4FD6);color:white;font-weight:600;font-size:1rem;padding:14px 32px;border-radius:10px;text-decoration:none">Try JumpKit Free</a>
     </div>
   </section>
@@ -98,19 +171,24 @@
           <a href="/videos" class="footer-page-link">Videos</a>
           <a href="/about" class="footer-page-link">About</a>
           <a href="/blog" class="footer-page-link">Blog</a>
-          <a href="/affiliates" class="footer-page-link">Affiliates</a>
-        </div>
-        <div style="display:flex;gap:18px;justify-content:center">
-          <a href="/contact" class="footer-page-link">Contact</a>
-          <a href="/compare/bookmarks" class="footer-page-link">Jumps vs Bookmarks</a>
-          <a href="/alternative" class="footer-page-link">Alternatives</a>
-          <a href="/use-cases" class="footer-page-link">Use Cases</a>
-          <a href="/privacy" class="footer-page-link">Privacy</a>
-          <a href="/terms" class="footer-page-link">Terms</a>
         </div>
       </div>
-      <p class="footer-copy">© 2026 JumpKit. All rights reserved.</p>
+      <p style="font-size:.8rem;opacity:.5">© 2026 JumpKit. All rights reserved.</p>
     </div>
   </footer>
+
+  <!-- FAQ structured data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      { "@type": "Question", "name": "Does my data leave my computer?", "acceptedAnswer": { "@type": "Answer", "text": "No. JumpKit is local-first — your jumps, folders, and usage history stay on your machine. Data only syncs if you explicitly enable team sharing." } },
+      { "@type": "Question", "name": "What can a jump point to?", "acceptedAnswer": { "@type": "Answer", "text": "Any web URL, local folder, or network share. If you can open it on your machine, you can make it a jump." } },
+      { "@type": "Question", "name": "Is JumpKit free?", "acceptedAnswer": { "@type": "Answer", "text": "The core features — jumps, kits, launcher, and time tracking — are free. Paid plans add team sync and sharing." } },
+      { "@type": "Question", "name": "Which platforms are supported?", "acceptedAnswer": { "@type": "Answer", "text": "Windows and macOS. Both use the same kits and settings via team sync." } }
+    ]
+  }
+  </script>
 </body>
 </html>
