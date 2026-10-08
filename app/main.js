@@ -1674,9 +1674,9 @@ app.whenReady().then(() => {
 
   // NoteKit feature flag: OFF for regular users. Flip to true for Jeff's test
   // build (electron-builder --config … or env). Renderer reads via IPC.
-  process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'true';
+  process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'false';
   // ClipKit feature flag (screen capture tool).
-  process.env.CLIPKIT_ENABLED = process.env.CLIPKIT_ENABLED || 'true';
+  process.env.CLIPKIT_ENABLED = process.env.CLIPKIT_ENABLED || 'false';
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer
   const { session } = require('electron');
