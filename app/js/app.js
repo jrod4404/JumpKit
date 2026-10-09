@@ -1,4 +1,11 @@
 // ── Guard (Supabase session) ───────────────────────────────────────
+// ── Build feature flags ──────────────────────────────────────────
+// NoteKit + ClipKit are DISABLED — they must never appear anywhere in the UI
+// (nav, sidebar, routing, settings) for ANY user, admin included. This is the
+// single renderer-side kill switch; the main-process flags are also forced off.
+// Flip to true only for a dedicated dev/test build.
+window.BETA_NAV_MODULES_ENABLED = false;
+
 let _supabaseUser = null;
 let currentUser = null;
 let _sessionLockInterval = null;
@@ -668,10 +675,9 @@ let activePage = 'home';
 window.activePage = activePage;
 
 window.navigateTo = function navigateTo(page) {
-  // NoteKit + ClipKit are ADMIN-ONLY beta pages. Non-admin users must never
-  // open them even via direct route/history — force back to home.
-  const _isAdminNav = (window._supabaseProfile?.role === 'admin');
-  if ((page === 'notekit' || page === 'clipkit') && !_isAdminNav) {
+  // NoteKit + ClipKit are DISABLED. Nobody can open them, even via direct
+  // route/history/deep-link — force back to home.
+  if ((page === 'notekit' || page === 'clipkit') && window.BETA_NAV_MODULES_ENABLED !== true) {
     page = 'home';
   }
   // Kill any lingering tooltip before DOM swap
@@ -1518,7 +1524,7 @@ window.renderAccount = function renderAccount(initialTab = 'account') {
               </div>`}
             </div>
           </div>
-          ${window._supabaseProfile?.role === 'admin' ? `
+          ${(window.BETA_NAV_MODULES_ENABLED === true && window._supabaseProfile?.role === 'admin') ? `
           <div class="acct-section">
             <div class="acct-section-title"><svg class="ti ti-layout-grid"><use href="img/tabler-sprite.min.svg#tabler-layout-grid"/></svg> Sidebar Modules</div>
             <div class="acct-row" style="border:none;padding:12px 16px 10px;margin-top:4px"><span style="font-size:0.78rem;color:var(--text-dim);line-height:1.4"><badge style="display:inline-block;background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.35);border-radius:6px;padding:1px 8px;font-size:0.7rem;font-weight:800;letter-spacing:0.02em;text-transform:uppercase;margin-right:6px">Beta</badge>NoteKit and ClipKit are in beta — you can show or hide each from the sidebar below.</span></div>
@@ -1744,12 +1750,11 @@ window.applySidebarModulePrefs = function applySidebarModulePrefs() {
   let prefs;
   try { prefs = DB.getPrefs(currentUser.id) || {}; } catch (e) { prefs = {}; }
 
-  // NoteKit + ClipKit are BETA modules shown to ADMINS ONLY. Non-admin users
-  // (e.g. family members / team members) must never see them in the sidebar,
-  // regardless of build feature flag or saved show/hide prefs.
+  // NoteKit + ClipKit are DISABLED everywhere — never shown for any user.
+  const _betaOn = window.BETA_NAV_MODULES_ENABLED === true;
   const isAdmin = window._supabaseProfile?.role === 'admin';
-  const showNK = isAdmin && prefs.showNotekit !== false;
-  const showCK = isAdmin && prefs.showClipkit !== false;
+  const showNK = _betaOn && isAdmin && prefs.showNotekit !== false;
+  const showCK = _betaOn && isAdmin && prefs.showClipkit !== false;
 
   const nkLabel  = document.getElementById('notekitNavLabel');
   const nkWrap   = document.getElementById('notekitNavWrap');
@@ -1761,6 +1766,16 @@ window.applySidebarModulePrefs = function applySidebarModulePrefs() {
 
   if (ckLabel) ckLabel.style.display = (showCK && ckLabel.dataset.enabled === '1') ? 'block' : 'none';
   if (ckBtn)   ckBtn.style.display   = showCK ? 'flex' : 'none';
+
+  // Belt-and-suspenders: when the beta modules are off, force them fully hidden
+  // and revoke any 'enabled' marker a module may have set, so nothing can reveal
+  // them later in the session.
+  if (!_betaOn) {
+    if (nkLabel) { nkLabel.style.display = 'none'; nkLabel.dataset.enabled = '0'; }
+    if (nkWrap)  nkWrap.style.display  = 'none';
+    if (ckLabel) { ckLabel.style.display = 'none'; ckLabel.dataset.enabled = '0'; }
+    if (ckBtn)   ckBtn.style.display   = 'none';
+  }
 };
 
 // Auto-save: persist settings whenever any control changes (no Save button needed)

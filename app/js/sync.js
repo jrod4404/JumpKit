@@ -167,9 +167,17 @@ async function syncSharedJumps() {
     if (teamIds.length === 0) {
       const localUser = DB.getCurrentUser();
       if (localUser) {
+        // Never treat columns from teams we OWN as stale — an owner whose team_members
+        // row is missing (insert failure / RLS) would otherwise lose their own columns.
+        const { data: _owned = [] } = await supabaseClient
+          .from('teams').select('id').eq('owner_id', userId).limit(200);
+        const ownedIds = new Set((_owned || []).map(t => t.id));
         const existingCols = DB.getColumns(localUser.id);
         // Only old-format columns (teamId set, no sharedTeams) are stale in this context
-        const staleCols = existingCols.filter(c => c.isShared && c.teamId && !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0));
+        const staleCols = existingCols.filter(c =>
+          c.isShared && c.teamId && !ownedIds.has(c.teamId) &&
+          !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0)
+        );
         if (staleCols.length > 0) {
           await _cleanStaleSharedColumns(staleCols, localUser.id);
         }
@@ -262,14 +270,19 @@ async function syncSharedJumps() {
     // Detect stale local shared columns — split by reason for correct modal wording.
     // Stale detection only applies to old single-team format (c.teamId set, sharedTeams empty).
     // New multi-team format (sharedTeams) is owner-managed and doesn't go stale via sync.
+    // IMPORTANT: columns belonging to teams we OWN must never be treated as stale here.
+    // remoteColIds deliberately excludes owned teams (owner columns are local source of
+    // truth), so without this guard an owner's old-format column always looks "unshared"
+    // and gets wiped from the owner's own machine. (Bug fix 2026-10-09)
     const _isOldFormat = c => c.isShared && c.teamId && !(Array.isArray(c.sharedTeams) && c.sharedTeams.length > 0);
     // Case 1: team no longer in membership (team deleted or removed from team)
     const staleByTeamGone = existingCols.filter(c =>
-      _isOldFormat(c) && !teamIds.includes(c.teamId)
+      _isOldFormat(c) && !ownedTeamIds.has(c.teamId) && !teamIds.includes(c.teamId)
     );
     // Case 2: still a member of the team but column was removed from shared_columns (owner unshared)
     const staleByUnshared = existingCols.filter(c =>
-      _isOldFormat(c) && teamIds.includes(c.teamId) && c.supabaseId && !remoteColIds.has(c.supabaseId)
+      _isOldFormat(c) && !ownedTeamIds.has(c.teamId) &&
+      teamIds.includes(c.teamId) && c.supabaseId && !remoteColIds.has(c.supabaseId)
     );
 
     // Fetch team name + owner name for modal context
@@ -707,6 +720,143 @@ async function rebuildOwnerSharedTeams() {
   }
 }
 
+// ── recoverOwnerSharedColumns ─────────────────────────────────────
+// One-time recovery for the 2026-10-09 stale-detection bug that removed
+// (or flipped to personal) an owner's own shared columns locally while
+// members kept seeing them. Non-destructive: only re-links or re-creates
+// columns, never deletes anything.
+//
+// For each owned team:
+//   a) re-link local columns (shared OR personal) that correspond to a
+//      remote shared_columns row (match by supabaseId, then by name),
+//   b) if a remote column has NO local counterpart, re-create it and import
+//      its jumps from Supabase.
+// Idempotent — safe to run on every login.
+async function recoverOwnerSharedColumns() {
+  try {
+    const res = await supabaseClient.auth.getSession();
+    const userId = res?.data?.session?.user?.id;
+    if (!userId) return;
+
+    const localUser = DB.getCurrentUser();
+    if (!localUser) return;
+
+    const { data: ownedTeams = [] } = await supabaseClient
+      .from('teams').select('id, name').eq('owner_id', userId);
+    if (!ownedTeams.length) return;
+    const ownedTeamIds = ownedTeams.map(t => t.id);
+
+    const { data: remoteRows = [] } = await supabaseClient
+      .from('shared_columns').select('id, name, team_id, position')
+      .in('team_id', ownedTeamIds);
+    if (!remoteRows.length) return;
+
+    // Dedupe by row id
+    const remoteById = {};
+    for (const r of remoteRows) remoteById[r.id] = r;
+    const remotes = Object.values(remoteById);
+
+    // Fetch jumps for these shared columns
+    const { data: remoteJumps = [] } = await supabaseClient
+      .from('shared_jumps')
+      .select('id, shared_column_id, team_id, name, url, description, reason, position')
+      .in('team_id', ownedTeamIds)
+      .limit(2000);
+
+    let anyChanged = false;
+    const claimedRemote = new Set();
+
+    for (const teamId of ownedTeamIds) {
+      const teamRemotes = remotes.filter(r => r.team_id === teamId);
+      if (!teamRemotes.length) continue;
+
+      for (const remote of teamRemotes) {
+        if (claimedRemote.has(remote.id)) continue;
+        const cols = DB.getColumns(localUser.id);
+
+        // Is it already properly linked?
+        const linked = cols.find(c =>
+          (c.supabaseId && c.supabaseId === remote.id) ||
+          (Array.isArray(c.sharedTeams) && c.sharedTeams.some(st => st.supabaseId === remote.id))
+        );
+        if (linked) {
+          // Ensure it is actually marked shared for this team
+          if (!linked.isShared || linked.teamId !== teamId) {
+            linked.isShared = 1;
+            linked.teamId = teamId;
+            if (!Array.isArray(linked.sharedTeams)) linked.sharedTeams = [];
+            if (!linked.sharedTeams.some(st => st.teamId === teamId)) {
+              linked.sharedTeams.push({ teamId, supabaseId: remote.id });
+            }
+            anyChanged = true;
+          }
+          claimedRemote.add(remote.id);
+          continue;
+        }
+
+        // Try to re-link a local column that lost its shared flag (personal copy)
+        const orphan = cols.find(c =>
+          !claimedRemote.has(c.supabaseId) &&
+          (c.supabaseId === remote.id ||
+           (c.name === remote.name && (!c.teamId || c.teamId === teamId)))
+        );
+        if (orphan) {
+          orphan.isShared = 1;
+          orphan.teamId = teamId;
+          orphan.supabaseId = remote.id;
+          orphan.visible = orphan.visible !== 0 ? 1 : orphan.visible;
+          if (!Array.isArray(orphan.sharedTeams)) orphan.sharedTeams = [];
+          if (!orphan.sharedTeams.some(st => st.teamId === teamId)) {
+            orphan.sharedTeams.push({ teamId, supabaseId: remote.id });
+          }
+          console.warn(`[recoverOwnerSharedColumns] re-linked column "${remote.name}" to team ${teamId}`);
+          anyChanged = true;
+          claimedRemote.add(remote.id);
+          continue;
+        }
+
+        // No local counterpart → re-create the column locally
+        const usedOrders = new Set(DB.getColumns(localUser.id).map(c => c.order));
+        let newOrder = (remote.position ?? 0);
+        while (usedOrders.has(newOrder)) newOrder++;
+        const newCol = DB.createColumn(localUser.id, remote.name, newOrder);
+        Object.assign(newCol, {
+          isShared: 1,
+          teamId,
+          supabaseId: remote.id,
+          sharedTeams: [{ teamId, supabaseId: remote.id }],
+        });
+        // Import its jumps
+        const colJumps = remoteJumps.filter(j => j.shared_column_id === remote.id);
+        for (const rj of colJumps) {
+          if (!rj.name || !rj.url) continue;
+          if (DB.getJumps(localUser.id).some(j => j.supabaseId === rj.id)) continue;
+          DB.createJump(localUser.id, {
+            name: rj.name,
+            url: rj.url,
+            description: rj.description || '',
+            reason: rj.reason || '',
+            columnId: newCol.id,
+            isShared: true,
+            teamId,
+            supabaseId: rj.id,
+          });
+        }
+        console.warn(`[recoverOwnerSharedColumns] re-created column "${remote.name}" (+${colJumps.length} jumps) for team ${teamId}`);
+        anyChanged = true;
+        claimedRemote.add(remote.id);
+      }
+    }
+
+    if (anyChanged) {
+      DB.saveColumns(localUser.id, DB.getColumns(localUser.id));
+      if (typeof renderColumns === 'function' && document.getElementById('columnsArea')) renderColumns();
+    }
+  } catch (err) {
+    console.warn('[recoverOwnerSharedColumns] error:', err.message);
+  }
+}
+
 // Helper: assign a remote shared_columns row to a local column for a given team
 function _applyMatch(col, remote, teamId) {
   if (!Array.isArray(col.sharedTeams)) col.sharedTeams = [];
@@ -812,4 +962,8 @@ async function syncPersonalStats() {
 // Kick off sync after a short delay to let the page initialize
 setTimeout(startSyncLoop, 2000);
 // Run owner sharedTeams rebuild shortly after sync settles
-setTimeout(() => rebuildOwnerSharedTeams().catch(e => console.warn('[rebuildOwnerSharedTeams]', e)), 4000);
+// First recover any owner columns wiped/flipped by the stale-detection bug, then
+// rebuild sharedTeams for the rest.
+setTimeout(() => recoverOwnerSharedColumns()
+  .then(() => rebuildOwnerSharedTeams())
+  .catch(e => console.warn('[owner column recovery]', e)), 4000);

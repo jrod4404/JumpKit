@@ -1672,11 +1672,14 @@ app.whenReady().then(() => {
   initDB();
   initNoteKitDB();
 
-  // NoteKit feature flag: OFF for regular users. Flip to true for Jeff's test
-  // build (electron-builder --config … or env). Renderer reads via IPC.
-  process.env.NOTEKIT_ENABLED = process.env.NOTEKIT_ENABLED || 'false';
-  // ClipKit feature flag (screen capture tool).
-  process.env.CLIPKIT_ENABLED = process.env.CLIPKIT_ENABLED || 'false';
+  // ── Beta nav modules (NoteKit + ClipKit) — DISABLED ───────────────
+  // These modules must NEVER appear in the shipped UI. Single kill switch:
+  // set ENABLE_BETA_NAV_MODULES = true (dev builds only) to re-enable.
+  // Any NOTEKIT_ENABLED / CLIPKIT_ENABLED env var is ignored so a stray
+  // shell env can never leak the modules into a user-facing build.
+  const ENABLE_BETA_NAV_MODULES = false;
+  process.env.NOTEKIT_ENABLED = ENABLE_BETA_NAV_MODULES ? 'true' : 'false';
+  process.env.CLIPKIT_ENABLED = ENABLE_BETA_NAV_MODULES ? 'true' : 'false';
 
   // Allow fetch() to Supabase and CDN resources from Electron renderer
   const { session } = require('electron');

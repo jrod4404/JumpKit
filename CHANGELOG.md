@@ -2,6 +2,18 @@
 
 ---
 
+## v5.1.70 — October 9, 2026
+
+### Fixes
+- **Team owner's shared columns no longer disappear from the owner's own machine.** Root cause: `syncSharedJumps()` builds the live remote-column set (`remoteColIds`) by *excluding* teams the user owns — owner columns are treated as local source of truth. But the `staleByUnshared` check did not exclude owned teams, so an owner's legacy single-team column (`isShared` + `teamId` + `supabaseId`, no `sharedTeams[]`) always appeared to be "unshared by the owner" → recovery modal → column deleted or flipped to personal **on the owner's side only**, while members (who sync through the new-format path) kept seeing it. Fixed by excluding owned teams from both stale filters (`staleByTeamGone` + `staleByUnshared`), plus the zero-membership early-return path.
+- **Owner column recovery on login.** Added `recoverOwnerSharedColumns()`, which runs before `rebuildOwnerSharedTeams()`. For each owned team it re-links local columns (shared or flipped-to-personal) to their Supabase `shared_columns` rows by `supabaseId`/name, and re-creates any column that vanished locally — re-importing its jumps from `shared_jumps`. Non-destructive (never deletes) and idempotent.
+- Regression test added: `test/owner-shared-column-stale.test.mjs` (4 cases).
+
+### Changes
+- **NoteKit + ClipKit fully removed from the UI.** They were previously shown to admins (and could leak via the `NOTEKIT_ENABLED`/`CLIPKIT_ENABLED` env vars). Now hard-disabled behind a single `window.BETA_NAV_MODULES_ENABLED` renderer flag and a matching `ENABLE_BETA_NAV_MODULES` main-process flag (env vars ignored). Sidebar sections, the Captures nav button, routing (deep-links → home), and the admin Settings "Sidebar Modules" card are all suppressed for every user. Regression test: `test/beta-nav-modules.test.mjs`.
+
+---
+
 ## v5.1.49 — August 22, 2026
 
 ### Fixes
