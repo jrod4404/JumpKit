@@ -2364,7 +2364,7 @@ function renderStatsDash() {
       data30.push(log.filter(e=>new Date(e.ts).toISOString().slice(0,10)===key).length);
     }
 
-    const colEntries=Object.entries(byCol);
+    const colEntries=Object.entries(byCol).sort((a,b)=>b[1]-a[1]);
     const favCount=jumps.filter(j=>j.favorite).length;
 
     // Top jumps table rows
