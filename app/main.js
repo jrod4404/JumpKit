@@ -129,6 +129,7 @@ function initDB() {
       { tableInfo: 'table_info(columns)',    column: 'supabaseId',          sql: 'ALTER TABLE columns ADD COLUMN supabaseId TEXT DEFAULT NULL' },
       { tableInfo: 'table_info(columns)',    column: 'sharedTeams',         sql: 'ALTER TABLE columns ADD COLUMN sharedTeams TEXT DEFAULT NULL' }, // JSON array: [{teamId, supabaseId}]
       { tableInfo: 'table_info(jumps)',      column: 'supabaseId',          sql: 'ALTER TABLE jumps ADD COLUMN supabaseId TEXT DEFAULT NULL' },
+      { tableInfo: 'table_info(jumps)',      column: 'appIcon',             sql: 'ALTER TABLE jumps ADD COLUMN appIcon TEXT DEFAULT NULL' }, // data-URL of the app's icon (5.2.0 app picker)
     ];
     for (const migration of sqliteMigrations) {
       try {
@@ -808,6 +809,74 @@ ipcMain.handle('update-sync-state', (_e, userId, key, value) => {
 });
 
 // ── IPC: get-jumps ─────────────────────────────────────────────────
+// ── IPC: installed-app picker (5.2.0) ─────────────────────────────────
+// Lists installed applications so a jump can be added without hunting for the
+// .exe / .app path. Icons are fetched separately (get-app-icon) because
+// extracting a few hundred icons up front would make the scan take minutes.
+ipcMain.handle('list-installed-apps', async () => {
+  try {
+    const results = [];
+    const seen = new Set();
+    const push = (name, exePath) => {
+      const key = name.toLowerCase() + '|' + exePath.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      results.push({ name, path: exePath });
+    };
+
+    if (process.platform === 'win32') {
+      // Start Menu shortcuts give friendly names + resolve to the real exe.
+      const roots = [
+        path.join(process.env.ProgramData || 'C:\\ProgramData', 'Microsoft\\Windows\\Start Menu\\Programs'),
+        path.join(app.getPath('appData'), 'Microsoft\\Windows\\Start Menu\\Programs'),
+      ];
+      const walk = (dir, depth) => {
+        if (depth > 4 || results.length > 600) return;
+        let entries;
+        try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return; }
+        for (const ent of entries) {
+          const full = path.join(dir, ent.name);
+          if (ent.isDirectory()) { walk(full, depth + 1); continue; }
+          if (!ent.name.toLowerCase().endsWith('.lnk')) continue;
+          try {
+            const lnk = shell.readShortcutLink(full);   //throws on broken shortcuts
+            if (!lnk.target || !fs.existsSync(lnk.target)) continue;
+            const name = ent.name.replace(/\.lnk$/i, '');
+            push(name, lnk.target);
+          } catch (_) { /* broken/uninstall leftovers are skipped silently */ }
+        }
+      };
+      roots.forEach(r => walk(r, 0));
+    } else if (process.platform === 'darwin') {
+      const roots = ['/Applications', path.join(app.getPath('home'), 'Applications'), '/System/Applications'];
+      for (const root of roots) {
+        let entries;
+        try { entries = fs.readdirSync(root, { withFileTypes: true }); } catch (_) { continue; }
+        for (const ent of entries) {
+          if (!ent.name.endsWith('.app')) continue;
+          const full = path.join(root, ent.name);
+          push(ent.name.replace(/\.app$/, ''), full);
+        }
+      }
+    }
+    results.sort((a, b) => a.name.localeCompare(b.name));
+    return { ok: true, platform: process.platform, apps: results };
+  } catch (err) {
+    return { ok: false, reason: err.message || String(err) };
+  }
+});
+
+// One icon at a time, on demand. 32px PNG is plenty for a 1.1rem grid icon.
+ipcMain.handle('get-app-icon', async (_e, appPath) => {
+  try {
+    if (typeof appPath !== 'string' || !appPath) return { ok: false };
+    const icon = await app.getFileIcon(appPath, { size: 'normal' }); //32x32
+    return { ok: true, dataUrl: icon.toDataURL() };
+  } catch (err) {
+    return { ok: false, reason: err.message || String(err) };
+  }
+});
+
 ipcMain.handle('get-jumps', (_e, userId) => {
   if (!db) return [];
   return db.prepare('SELECT * FROM jumps WHERE userId = ?').all(userId);
@@ -820,10 +889,10 @@ ipcMain.handle('save-jump', (_e, userId, jump) => {
     db.prepare(`
       INSERT OR REPLACE INTO jumps
         (id, userId, name, url, description, reason, columnId, hotkey, favorite,
-         isArchived, clickCount, lastUsed, createdAt, updatedAt, isShared, teamId, timeSaved, timeSavedUnit, supabaseId)
+         isArchived, clickCount, lastUsed, createdAt, updatedAt, isShared, teamId, timeSaved, timeSavedUnit, supabaseId, appIcon)
       VALUES
         (@id, @userId, @name, @url, @description, @reason, @columnId, @hotkey, @favorite,
-         @isArchived, @clickCount, @lastUsed, @createdAt, @updatedAt, @isShared, @teamId, @timeSaved, @timeSavedUnit, @supabaseId)
+         @isArchived, @clickCount, @lastUsed, @createdAt, @updatedAt, @isShared, @teamId, @timeSaved, @timeSavedUnit, @supabaseId, @appIcon)
     `).run({
       id:          jump.id,
       userId:      userId,
@@ -844,6 +913,7 @@ ipcMain.handle('save-jump', (_e, userId, jump) => {
       timeSaved:     jump.timeSaved != null ? jump.timeSaved : null,
       timeSavedUnit: jump.timeSavedUnit || null,
       supabaseId:    jump.supabaseId || null,
+      appIcon:     typeof jump.appIcon === 'string' ? jump.appIcon : null,
     });
     return { ok: true };
   } catch (e) {

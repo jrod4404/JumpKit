@@ -969,3 +969,49 @@ body.nk-dragging .nk-block, body.nk-dragging .nk-block * { cursor: grabbing; }
 .ck-del { position: absolute; top: 8px; right: 8px; width: 22px; height: 22px; border: none; border-radius: 6px; background: transparent; color: var(--text-dim); font-size: 0.8rem; cursor: pointer; display: none; align-items: center; justify-content: center; }
 .ck-card:hover .ck-del { display: flex; }
 .ck-del:hover { color: #f87171; background: rgba(248,113,113,0.12); }
+
+/* ── 5.2.0: drag-and-drop between columns + app picker ───────────────── */
+.jump-item-draggable { cursor: grab; }
+.jump-item-dragging { opacity: 0.45; }
+.jump-column.drop-target {
+  outline: 2px dashed var(--hover-accent);
+  outline-offset: -4px;
+  border-radius: var(--radius, 10px);
+  background: color-mix(in srgb, var(--hover-accent) 6%, transparent);
+}
+.jump-icon-app {
+  width: 1.1rem;
+  height: 1.1rem;
+  object-fit: contain;
+  display: block;
+  -webkit-user-drag: none;
+}
+
+/* Installed-app picker modal */
+.app-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 2px;
+}
+.app-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg-input);
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--transition), background var(--transition);
+  min-width: 0;
+}
+.app-picker-item:hover { border-color: var(--hover-accent); background: var(--bg-hover); }
+.app-picker-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.4rem; height: 1.4rem; flex-shrink: 0; color: var(--text-muted); }
+.app-picker-icon img { width: 1.4rem; height: 1.4rem; object-fit: contain; }
+.app-picker-name { font-size: 0.85rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.app-picker-empty { grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 24px 8px; font-size: 0.9rem; }

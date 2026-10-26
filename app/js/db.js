@@ -660,6 +660,7 @@ const DB = (() => {
         isShared:    data.isShared || false,
         teamId:      data.teamId || null,
         supabaseId:  data.supabaseId || null,
+        appIcon:     data.appIcon || null,
       };
       this._cache.jumps.push(jump);
       this._persistJump(userId, jump);

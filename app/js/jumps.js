@@ -95,12 +95,25 @@ function renderJumps() {
   }
 
   document.getElementById('columnsArea').addEventListener('contextmenu', e => {
-    if (e.target.closest('.jump-item')) return;
+    if (e.target.closest('.jump-item')) return;  //jump cards have their own menu
     e.preventDefault();
-    CtxMenu.show(e.clientX, e.clientY, [
-      { icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg>',     label: 'Add Jump',          action: openAddJumpModal },
-      { icon: '<svg class="ti ti-settings"><use href="img/tabler-sprite.min.svg#tabler-settings"/></svg>',  label: 'Configure Columns', action: openConfigColumnsModal },
-    ]);
+    // Which column was right-clicked? (5.2.0) — "Add Jump" pre-selects it
+    const colEl = e.target.closest('.jump-column');
+    const colItems = colEl?.querySelector('.col-items');
+    const colId = colItems?.id?.startsWith('col-') ? colItems.id.slice(4) : null;
+    const col = colId ? DB.getColumns(currentUser.id).find(c => c.id === colId) : null;
+    const items = [];
+    if (col) {
+      items.push({
+        icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg>',
+        label: `Add Jump to ${col.name}`,
+        action: () => openJumpFormModal(null, col.id),
+      });
+    } else {
+      items.push({ icon: '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg>', label: 'Add Jump', action: openAddJumpModal });
+    }
+    items.push({ icon: '<svg class="ti ti-settings"><use href="img/tabler-sprite.min.svg#tabler-settings"/></svg>', label: 'Configure Columns', action: openConfigColumnsModal });
+    CtxMenu.show(e.clientX, e.clientY, items);
   });
 
   applyJumpFilter();
@@ -342,6 +355,7 @@ function renderColumns() {
     // Use same column width as active view (based on total visible columns, not rendered count)
     area.style.gridTemplateColumns = `repeat(${columns.length}, minmax(0, 1fr))`;
     bindJumpEvents();
+    bindJumpDragAndDrop();
     return;
   }
 
@@ -392,6 +406,7 @@ function renderColumns() {
   });
 
   bindJumpEvents();
+  bindJumpDragAndDrop();
 }
 
 function bindJumpEvents() {
@@ -455,14 +470,176 @@ function jumpItemHTML(j, colIndex) {
   const prefs = DB.getPrefs(currentUser.id);
   const isShared = j.isShared || j.teamId;
   const displayName = esc(j.name || j.url || 'Untitled');
-  return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}${j.favorite ? ' jump-item-fav' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}">
-    <span class="jump-icon"><svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg></span>
+  const canDrag = !isShared || (j.userId === currentUser.id);
+  const iconHtml = j.appIcon
+    ? `<img class="jump-icon-app" src="${j.appIcon}" alt="" draggable="false" style="${iconColor ? 'filter:none' : ''}"/>`
+    : `<svg class="ti ti-${iconName}" style="${iconColor};width:1.1rem;height:1.1rem"><use href="img/tabler-sprite.min.svg#tabler-${iconName}"/></svg>`;
+  return `<div class="jump-item${isShared ? ' jump-item-shared' : ''}${j.favorite ? ' jump-item-fav' : ''}${canDrag ? ' jump-item-draggable' : ''}" data-id="${j.id}" data-shared="${isShared ? '1' : '0'}"${canDrag ? ' draggable="true"' : ''}>
+    <span class="jump-icon">${iconHtml}</span>
     <div class="jump-info">
       <div class="jump-name">${displayName}</div>
       ${prefs.showHotkey && j.hotkey ? `<div class="jump-hotkey-inline">${esc(j.hotkey)}</div>` : ''}
       ${prefs.showDescription && j.description ? `<div class="jump-desc">${esc(j.description)}</div>` : ''}
     </div>
   </div>`;
+}
+
+
+// ── Installed App Picker modal (5.2.0) ─────────────────────────────
+// Lists installed apps (Start Menu on Windows, /Applications on macOS) in a
+// searchable grid; icons stream in lazily via get-app-icon so the list appears
+// instantly. Selecting one calls onPick({name, path}).
+function openAppPickerModal(onPick) {
+  const body = `
+    <div class="form-group" style="margin-bottom:10px">
+      <input class="form-input" id="appSearch" placeholder="Search installed apps…" autocomplete="off"/>
+    </div>
+    <div id="appGrid" class="app-picker-grid"><div class="app-picker-empty">Scanning installed apps…</div></div>`;
+  const footer = `
+    <button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>`;
+  Modal.open('<svg class="ti ti-apps"><use href="img/tabler-sprite.min.svg#tabler-apps"/></svg> Pick an App', body, footer);
+
+  window.electronAPI.listInstalledApps().then(res => {
+    const grid = document.getElementById('appGrid');
+    if (!grid) return; // modal closed during scan
+    if (!res || !res.ok || !Array.isArray(res.apps)) {
+      grid.innerHTML = `<div class="app-picker-empty">Could not list installed apps${res && res.reason ? ': ' + esc(res.reason) : ''}.</div>`;
+      return;
+    }
+    if (res.apps.length === 0) {
+      grid.innerHTML = `<div class="app-picker-empty">No installed apps found. Add the jump manually with its path.</div>`;
+      return;
+    }
+
+    const render = (term) => {
+      const t = (term || '').trim().toLowerCase();
+      const list = t ? res.apps.filter(a => a.name.toLowerCase().includes(t)) : res.apps;
+      if (list.length === 0) {
+        grid.innerHTML = `<div class="app-picker-empty">No apps match "${esc(term)}".</div>`;
+        return;
+      }
+      grid.innerHTML = list.slice(0, 200).map(a => `
+        <button type="button" class="app-picker-item" data-path="${esc(a.path)}" data-name="${esc(a.name)}" title="${esc(a.path)}">
+          <span class="app-picker-icon"><svg class="ti ti-apps" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.min.svg#tabler-apps"/></svg></span>
+          <span class="app-picker-name">${esc(a.name)}</span>
+        </button>`).join('');
+      // lazy icons: only for items currently visible-ish (first 60 — keeps the
+      // IPC traffic sane on machines with hundreds of Start Menu entries)
+      grid.querySelectorAll('.app-picker-item').forEach((el, i) => {
+        if (i >= 60) return;
+        window.electronAPI.getAppIcon(el.dataset.path).then(r => {
+          if (r && r.ok && r.dataUrl) {
+            const slot = el.querySelector('.app-picker-icon');
+            if (slot) slot.innerHTML = `<img src="${r.dataUrl}" alt="" draggable="false"/>`;
+          }
+        }).catch(() => {});
+      });
+      grid.querySelectorAll('.app-picker-item').forEach(el => {
+        el.addEventListener('click', () => {
+          Modal.close();
+          onPick({ name: el.dataset.name, path: el.dataset.path });
+        });
+      });
+    };
+    render('');
+    const search = document.getElementById('appSearch');
+    if (search) {
+      search.focus();
+      let deb;
+      search.addEventListener('input', () => {
+        clearTimeout(deb);
+        deb = setTimeout(() => render(search.value), 120);
+      });
+    }
+  }).catch(err => {
+    const grid = document.getElementById('appGrid');
+    if (grid) grid.innerHTML = `<div class="app-picker-empty">Could not list installed apps: ${esc(err.message || String(err))}</div>`;
+  });
+}
+
+// ── Drag a jump to another column (5.2.0) ───────────────────────────
+// Membership only: the canonical order inside every column stays alphabetical,
+// so a move is just a columnId update + shared-column bookkeeping (same rules
+// as editing a jump's column by hand).
+function moveJumpToColumn(id, newColId) {
+  const jump = DB.getJumps(currentUser.id).find(j => j.id === id);
+  if (!jump || jump.columnId === newColId) return false;
+  const prevCol = DB.getColumns(currentUser.id).find(c => c.id === jump.columnId);
+  const nextCol = DB.getColumns(currentUser.id).find(c => c.id === newColId);
+  if (!nextCol) return false;
+
+  // Dragging out of a shared column removes it from the team copy (mirrors edit path)
+  const movingOutOfShared = prevCol?.isShared && prevCol.id !== nextCol.id;
+  if (movingOutOfShared && jump.supabaseId) {
+    supabaseClient.from('shared_jumps').delete().eq('id', jump.supabaseId)
+      .then(({ error }) => { if (error) console.warn('shared_jumps remove (drag out):', error.message); });
+    DB.updateJump(currentUser.id, id, { columnId: newColId, supabaseId: null, isShared: false, teamId: null });
+  } else {
+    DB.updateJump(currentUser.id, id, { columnId: newColId });
+  }
+
+  // Dragging into a shared column publishes it to the team (mirrors edit path)
+  const updated = DB.getJumps(currentUser.id).find(j => j.id === id);
+  if (nextCol?.isShared && nextCol?.teamId && nextCol?.supabaseId && !updated?.supabaseId) {
+    const supabaseId = crypto.randomUUID();
+    DB.updateJump(currentUser.id, id, { supabaseId, isShared: true, teamId: nextCol.teamId });
+    supabaseClient.from('shared_jumps').insert({
+      id: supabaseId, shared_column_id: nextCol.supabaseId, team_id: nextCol.teamId,
+      name: updated.name, url: updated.url,
+      description: updated.description || '', reason: updated.reason || '',
+      position: 0, created_by: window._supabaseUser?.id || currentUser.id,
+    }).then(({ error }) => { if (error) console.warn('shared_jumps insert (drag in):', error.message); });
+  }
+  return true;
+}
+
+function bindJumpDragAndDrop() {
+  const area = document.getElementById('columnsArea');
+  if (!area || area.dataset.ddBound === '1') return;  //renderColumns re-runs; bind once
+  area.dataset.ddBound = '1';
+  let draggedId = null;
+
+  area.addEventListener('dragstart', e => {
+    const item = e.target.closest('.jump-item');
+    if (!item || !item.classList.contains('jump-item-draggable')) { e.preventDefault(); return; }
+    draggedId = item.dataset.id;
+    item.classList.add('jump-item-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', draggedId); } catch (_) {}
+  });
+  area.addEventListener('dragend', () => {
+    draggedId = null;
+    area.querySelectorAll('.jump-item-dragging').forEach(el => el.classList.remove('jump-item-dragging'));
+    area.querySelectorAll('.jump-column.drop-target').forEach(el => el.classList.remove('drop-target'));
+  });
+  area.addEventListener('dragover', e => {
+    if (!draggedId) return;
+    const col = e.target.closest('.jump-column');
+    if (!col) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    area.querySelectorAll('.jump-column.drop-target').forEach(el => { if (el !== col) el.classList.remove('drop-target'); });
+    col.classList.add('drop-target');
+  });
+  area.addEventListener('dragleave', e => {
+    const col = e.target.closest('.jump-column');
+    if (col && !col.contains(e.relatedTarget)) col.classList.remove('drop-target');
+  });
+  area.addEventListener('drop', e => {
+    if (!draggedId) return;
+    const col = e.target.closest('.jump-column');
+    e.preventDefault();
+    area.querySelectorAll('.jump-column.drop-target').forEach(el => el.classList.remove('drop-target'));
+    if (!col) return;
+    const colItems = col.querySelector('.col-items');
+    const newColId = colItems?.id?.startsWith('col-') ? colItems.id.slice(4) : null;
+    if (!newColId) return;
+    const jump = DB.getJumps(currentUser.id).find(j => j.id === draggedId);
+    if (moveJumpToColumn(draggedId, newColId)) {
+      renderColumns();
+      Toast.success(`Moved "${jump?.name || 'jump'}" to ${DB.getColumns(currentUser.id).find(c => c.id === newColId)?.name || 'column'}`);
+    }
+  });
 }
 
 function isURL(url) { return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('www.'); }
@@ -587,9 +764,11 @@ function saveSharedHotkey(id) {
 // ── Add / Edit Jump Modal ──────────────────────────────────────────
 function openAddJumpModal()    { openJumpFormModal(null); }
 function openEditJumpModal(id) { openJumpFormModal(id); }
-
-function openJumpFormModal(editId) {
+//presetColId (5.2.0): pre-selects the column for a NEW jump, e.g. from a column
+//right-click. Ignored when editing an existing jump.
+function openJumpFormModal(editId, presetColId) {
   const jump = editId ? DB.getJumps(currentUser.id).find(j => j.id === editId) : null;
+  const initialColId = jump?.columnId || presetColId || '';
   const cols = DB.getColumns(currentUser.id);
   const colOptions = cols.length
     ? cols.map(c => `<option value="${esc(c.id)}" ${jump?.columnId === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')
@@ -606,12 +785,20 @@ function openJumpFormModal(editId) {
       <input class="form-input" id="jUrl" tabindex="2" value="${esc(jump?.url || '')}" placeholder="https://... or \\\\server\\share\\folder"/>
       <span class="form-error" id="jUrlErr">URL or path is required.</span>
     </div>
+    <div class="form-group" id="jAppPickerGroup" style="margin-bottom:2px">
+      <button type="button" id="btnPickApp" class="btn btn-subtle" style="width:100%;justify-content:center;gap:8px">
+        <svg class="ti ti-apps"><use href="img/tabler-sprite.min.svg#tabler-apps"/></svg>
+        <span id="btnPickAppLabel">Pick an installed app instead…</span>
+      </button>
+      <input type="hidden" id="jAppIcon" value="${esc(jump?.appIcon || '')}"/>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:4px;display:none" id="jAppIconNote">This jump will use the app's icon.</div>
+    </div>
     <div class="form-group">
       <label class="form-label">Column *</label>
-      <input type="hidden" id="jCol" value="${esc(jump?.columnId || '')}"/>
+      <input type="hidden" id="jCol" value="${esc(initialColId)}"/>
       <div class="custom-select" id="jColDrop">
         <div class="custom-select-trigger" id="jColTrigger" tabindex="3">
-          <span id="jColLabel" style="${jump?.columnId ? '' : 'color:var(--text-dim)'}">${ jump?.columnId ? esc(DB.getColumns(currentUser.id).find(c=>c.id===jump.columnId)?.name || 'Select Column') : 'Select Column'}</span>
+          <span id="jColLabel" style="${initialColId ? '' : 'color:var(--text-dim)'}">${ initialColId ? esc(DB.getColumns(currentUser.id).find(c=>c.id===initialColId)?.name || 'Select Column') : 'Select Column'}</span>
           <svg class="ti ti-chevron-down" style="font-size:.8rem;color:var(--text-dim)"><use href="img/tabler-sprite.min.svg#tabler-chevron-down"/></svg>
         </div>
         <div class="custom-select-menu" id="jColMenu">
@@ -673,6 +860,50 @@ function openJumpFormModal(editId) {
     <button class="btn btn-save" id="btnSaveJump" data-jaction="save-jump" data-id="${esc(editId || '')}"><svg class="ti ti-check"><use href="img/tabler-sprite.min.svg#tabler-check"/></svg> ${editId ? 'Save Changes' : 'Add Jump'}</button>`;
 
   Modal.open(editId ? '<svg class="ti ti-pencil"><use href="img/tabler-sprite.min.svg#tabler-pencil"/></svg> Edit Jump' : '<svg class="ti ti-plus"><use href="img/tabler-sprite.min.svg#tabler-plus"/></svg> Add Jump', body, footer);
+
+  // Installed-app picker (5.2.0) — Electron only; the button is hidden in browser mode.
+  (function() {
+    const btn   = document.getElementById('btnPickApp');
+    const group = document.getElementById('jAppPickerGroup');
+    if (!btn || !group) return;
+    if (!window.electronAPI?.isElectron || !window.electronAPI.listInstalledApps) {
+      group.style.display = 'none';
+      return;
+    }
+    if (document.getElementById('jAppIcon')?.value) {
+      document.getElementById('jAppIconNote').style.display = 'block';
+      document.getElementById('btnPickAppLabel').textContent = 'Change picked app…';
+    }
+    // A hand-typed URL invalidates a previously picked app icon
+    const urlEl2 = document.getElementById('jUrl');
+    urlEl2?.addEventListener('input', () => {
+      if (document.getElementById('jAppIcon')?.value) {
+        document.getElementById('jAppIcon').value = '';
+        document.getElementById('jAppIconNote').style.display = 'none';
+        document.getElementById('btnPickAppLabel').textContent = 'Pick an installed app instead…';
+      }
+    });
+    btn.addEventListener('click', () => openAppPickerModal((app) => {
+      const nameEl = document.getElementById('jName');
+      const urlEl  = document.getElementById('jUrl');
+      if (nameEl && !nameEl.value.trim()) nameEl.value = app.name;
+      if (urlEl) { urlEl.value = app.path; urlEl.classList.remove('error'); }
+      const errEl = document.getElementById('jUrlErr');
+      if (errEl) errEl.classList.remove('show');
+      document.getElementById('jAppIcon').value = '';
+      // icon arrives async from get-app-icon; show the note immediately
+      document.getElementById('jAppIconNote').style.display = 'block';
+      document.getElementById('btnPickAppLabel').textContent = 'Picked: ' + app.name;
+      window.electronAPI.getAppIcon(app.path).then(r => {
+        if (r && r.ok && r.dataUrl) {
+          document.getElementById('jAppIcon').value = r.dataUrl;
+        } else {
+          // icon extraction failed — the jump just keeps the default folder icon
+          document.getElementById('jAppIconNote').textContent = 'Could not read this app\u2019s icon; the default icon will be used.';
+        }
+      });
+    }));
+  })();
 
   // Time Saved unit slider
   (function() {
@@ -808,6 +1039,7 @@ function saveJump(editId) {
     description: document.getElementById('jDesc').value.trim(),
     reason:      document.getElementById('jReason').value.trim(),
     columnId:    document.getElementById('jCol').value,
+    appIcon:     document.getElementById('jAppIcon')?.value || null,
     hotkey:      document.getElementById('jHotkey').value.trim(),
     favorite:    document.getElementById('jFavorite').checked,
     timeSaved:   (() => {

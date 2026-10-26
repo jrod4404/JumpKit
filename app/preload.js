@@ -14,6 +14,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   writeTestResults:  (content)         => ipcRenderer.invoke('write-test-results', content),
   saveBackup:        (jsonStr)         => ipcRenderer.invoke('save-backup', jsonStr),
 
+  // Installed-app picker (5.2.0)
+  listInstalledApps: ()                 => ipcRenderer.invoke('list-installed-apps'),
+  getAppIcon:       (appPath)           => ipcRenderer.invoke('get-app-icon', appPath),
+
   // SQLite data access
   getJumps:          (userId)          => ipcRenderer.invoke('get-jumps', userId),
   saveJump:          (userId, jump)    => ipcRenderer.invoke('save-jump', userId, jump),
