@@ -817,6 +817,7 @@ ipcMain.handle('list-installed-apps', async () => {
   try {
     const results = [];
     const seen = new Set();
+    const t0 = Date.now();
     const push = (name, exePath) => {
       const key = name.toLowerCase() + '|' + exePath.toLowerCase();
       if (seen.has(key)) return;
@@ -825,6 +826,8 @@ ipcMain.handle('list-installed-apps', async () => {
     };
 
     if (process.platform === 'win32') {
+      console.log('[app-picker] scanning Start Menu…');
+      const t0 = Date.now();
       // Start Menu shortcuts give friendly names + resolve to the real exe.
       const roots = [
         path.join(process.env.ProgramData || 'C:\\ProgramData', 'Microsoft\\Windows\\Start Menu\\Programs'),
@@ -860,6 +863,7 @@ ipcMain.handle('list-installed-apps', async () => {
       }
     }
     results.sort((a, b) => a.name.localeCompare(b.name));
+    console.log(`[app-picker] scan done: ${results.length} apps in ${Date.now() - t0}ms`);
     return { ok: true, platform: process.platform, apps: results };
   } catch (err) {
     return { ok: false, reason: err.message || String(err) };

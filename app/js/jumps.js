@@ -94,12 +94,21 @@ function renderJumps() {
     });
   }
 
+  // Right-click menu lives on the column HEADER only (Jeff 2026-10-26 feedback):
+  // not on the body background and not on jump cards. stopPropagation is essential —
+  // app.js has a document-level contextmenu listener that calls CtxMenu.hide() for
+  // anything that isn't a .jump-item, which is exactly why this menu never appeared
+  // in v5.2.0: it was shown here, then immediately hidden by the document handler.
   document.getElementById('columnsArea').addEventListener('contextmenu', e => {
-    if (e.target.closest('.jump-item')) return;  //jump cards have their own menu
+    if (e.target.closest('.jump-item')) return;         //jump cards have their own menu
+    const colHeader = e.target.closest('.col-header');
+    const colEl     = e.target.closest('.jump-column');
+    if (!colHeader || !colEl) return;                    //body background / not a column
+
     e.preventDefault();
-    // Which column was right-clicked? (5.2.0) — "Add Jump" pre-selects it
-    const colEl = e.target.closest('.jump-column');
-    const colItems = colEl?.querySelector('.col-items');
+    e.stopPropagation();
+
+    const colItems = colEl.querySelector('.col-items');
     const colId = colItems?.id?.startsWith('col-') ? colItems.id.slice(4) : null;
     const col = colId ? DB.getColumns(currentUser.id).find(c => c.id === colId) : null;
     const items = [];
@@ -485,23 +494,51 @@ function jumpItemHTML(j, colIndex) {
 }
 
 
-// ── Installed App Picker modal (5.2.0) ─────────────────────────────
-// Lists installed apps (Start Menu on Windows, /Applications on macOS) in a
-// searchable grid; icons stream in lazily via get-app-icon so the list appears
-// instantly. Selecting one calls onPick({name, path}).
+// ── Installed App Picker modal (5.2.0, fixed after Win feedback 2026-10-26) ──
+// v5.2.0 bug: this used Modal.open() while the Add/Edit Jump modal was open.
+// app.js patches Modal with a QUEUE (one modal at a time) — our open() call was
+// queued, so the picker DOM didn't exist yet when the scan resolved, the
+// populate callback silently bailed on a missing #appGrid, and the picker later
+// appeared from the queue stuck on "Scanning installed apps…" forever.
+//
+// Fix: don't fight the queue. Render the picker as an overlay INSIDE the open
+// Add/Edit Jump modal (covers the form, same modal frame). No second modal, no
+// lost form state, no listener re-wiring — pick/cancel just removes the overlay.
 function openAppPickerModal(onPick) {
-  const body = `
-    <div class="form-group" style="margin-bottom:10px">
+  const box = document.getElementById('modalBox');
+  if (!box) return;
+
+  // Remove any stale overlay first
+  box.querySelector('.app-picker-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'app-picker-overlay';
+  overlay.innerHTML = `
+    <div class="app-picker-top">
       <input class="form-input" id="appSearch" placeholder="Search installed apps…" autocomplete="off"/>
+      <button type="button" class="btn btn-subtle" id="appPickerCancel"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>
     </div>
     <div id="appGrid" class="app-picker-grid"><div class="app-picker-empty">Scanning installed apps…</div></div>`;
-  const footer = `
-    <button class="btn btn-subtle" data-jaction="modal-close"><svg class="ti ti-x"><use href="img/tabler-sprite.min.svg#tabler-x"/></svg> Cancel</button>`;
-  Modal.open('<svg class="ti ti-apps"><use href="img/tabler-sprite.min.svg#tabler-apps"/></svg> Pick an App', body, footer);
+  box.appendChild(overlay);
+  document.getElementById('appSearch')?.focus();
+
+  const close = () => overlay.remove();
+  overlay.querySelector('#appPickerCancel').addEventListener('click', close);
+
+  // Safety net: never spin forever again — surface an error after 30s
+  let done = false;
+  const timeout = setTimeout(() => {
+    const grid = document.getElementById('appGrid');
+    if (!done && grid && overlay.isConnected) {
+      grid.innerHTML = '<div class="app-picker-empty">App scan timed out. Check the app logs (F12 console) and add the jump manually if needed.</div>';
+    }
+  }, 30000);
 
   window.electronAPI.listInstalledApps().then(res => {
+    done = true;
+    clearTimeout(timeout);
     const grid = document.getElementById('appGrid');
-    if (!grid) return; // modal closed during scan
+    if (!grid || !overlay.isConnected) return; //overlay closed during scan
     if (!res || !res.ok || !Array.isArray(res.apps)) {
       grid.innerHTML = `<div class="app-picker-empty">Could not list installed apps${res && res.reason ? ': ' + esc(res.reason) : ''}.</div>`;
       return;
@@ -523,12 +560,12 @@ function openAppPickerModal(onPick) {
           <span class="app-picker-icon"><svg class="ti ti-apps" style="width:1.4rem;height:1.4rem"><use href="img/tabler-sprite.min.svg#tabler-apps"/></svg></span>
           <span class="app-picker-name">${esc(a.name)}</span>
         </button>`).join('');
-      // lazy icons: only for items currently visible-ish (first 60 — keeps the
-      // IPC traffic sane on machines with hundreds of Start Menu entries)
+      // lazy icons: first 60 items only (keeps IPC traffic sane with hundreds
+      // of Start Menu entries); the rest keep the generic apps glyph
       grid.querySelectorAll('.app-picker-item').forEach((el, i) => {
         if (i >= 60) return;
         window.electronAPI.getAppIcon(el.dataset.path).then(r => {
-          if (r && r.ok && r.dataUrl) {
+          if (r && r.ok && r.dataUrl && el.isConnected) {
             const slot = el.querySelector('.app-picker-icon');
             if (slot) slot.innerHTML = `<img src="${r.dataUrl}" alt="" draggable="false"/>`;
           }
@@ -536,7 +573,7 @@ function openAppPickerModal(onPick) {
       });
       grid.querySelectorAll('.app-picker-item').forEach(el => {
         el.addEventListener('click', () => {
-          Modal.close();
+          close();
           onPick({ name: el.dataset.name, path: el.dataset.path });
         });
       });
@@ -552,8 +589,10 @@ function openAppPickerModal(onPick) {
       });
     }
   }).catch(err => {
+    done = true;
+    clearTimeout(timeout);
     const grid = document.getElementById('appGrid');
-    if (grid) grid.innerHTML = `<div class="app-picker-empty">Could not list installed apps: ${esc(err.message || String(err))}</div>`;
+    if (grid && overlay.isConnected) grid.innerHTML = `<div class="app-picker-empty">Could not list installed apps: ${esc(err.message || String(err))}</div>`;
   });
 }
 
