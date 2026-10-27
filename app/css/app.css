@@ -1032,3 +1032,6 @@ body.nk-dragging .nk-block, body.nk-dragging .nk-block * { cursor: grabbing; }
 }
 .app-picker-top { display: flex; gap: 10px; flex-shrink: 0; }
 .app-picker-top .form-input { flex: 1; }
+
+/* Breathing room below the app-picker button in Add/Edit Jump (Jeff 2026-10-26) */
+#btnPickApp { margin-bottom: 16px; }
