@@ -871,11 +871,77 @@ ipcMain.handle('list-installed-apps', async () => {
 });
 
 // One icon at a time, on demand. 32px PNG is plenty for a 1.1rem grid icon.
+// macOS note: app.getFileIcon is Windows-oriented — on darwin it returns a
+// GENERIC document icon, not the app's real icon (that's why v5.2.1 showed
+// blanks on Mac). For .app bundles we instead read the bundle's own .icns
+// (CFBundleIconFile from Info.plist) and convert it with the built-in
+// `iconutil`, then pick the best-sized PNG. Results are cached for the session.
+const _iconCache = new Map();
+function macAppIconDataUrl(appPath) {
+  return new Promise((resolve) => {
+    try {
+      const resources = path.join(appPath, 'Contents', 'Resources');
+      if (!fs.existsSync(resources)) return resolve(null);
+
+      // 1) Find the bundle's icon: Info.plist CFBundleIconFile, else first .icns in Resources
+      let icns = null;
+      const plistPath = path.join(appPath, 'Contents', 'Info.plist');
+      if (fs.existsSync(plistPath)) {
+        const xml = require('child_process').execSync(
+          `plutil -convert xml1 -o - "${plistPath.replace(/"/g, '\"')}"`, { encoding: 'utf8', timeout: 5000 });
+        const m = xml.match(/CFBundleIconFile\s*<\/key>\s*<string>([^<]+)<\/string>/);
+        if (m && m[1]) {
+          const name = m[1].endsWith('.icns') ? m[1] : m[1] + '.icns';
+          const p = path.join(resources, name);
+          if (fs.existsSync(p)) icns = p;
+        }
+      }
+      if (!icns) {
+        const first = fs.readdirSync(resources).find(f => f.toLowerCase().endsWith('.icns'));
+        if (first) icns = path.join(resources, first);
+      }
+      if (!icns) return resolve(null);
+
+      // 2) Convert .icns → .iconset (PNGs) with iconutil, pick best size
+      const tmp = fs.mkdtempSync(path.join(require('os').tmpdir(), 'jk-icon-'));
+      require('child_process').execSync(`iconutil -c iconset "${icns.replace(/"/g, '\"')}" -o "${tmp}/i.iconset"`, { timeout: 8000 });
+      // Preference order: 32@2x(64px) → 128 → 64 → 16@2x(32px) → 256 → whatever's largest
+      const pref = ['icon_32x32@2x.png', 'icon_128x128.png', 'icon_64x64.png', 'icon_16x16@2x.png', 'icon_256x256.png', 'icon_128x128@2x.png'];
+      const files = fs.readdirSync(path.join(tmp, 'i.iconset'));
+      let pick = pref.map(p => files.includes(p) ? p : null).find(Boolean);
+      if (!pick) {
+        pick = files.filter(f => f.endsWith('.png')).sort((a, b) => {
+          const px = f => parseInt((f.match(/(\d+)x\d+/) || [0, 0])[1], 10);
+          return px(a) - px(b);
+        })[0];
+      }
+      if (!pick) { fs.rmSync(tmp, { recursive: true, force: true }); return resolve(null); }
+      const png = fs.readFileSync(path.join(tmp, 'i.iconset', pick));
+      fs.rmSync(tmp, { recursive: true, force: true });
+      resolve('data:image/png;base64,' + png.toString('base64'));
+    } catch (err) {
+      console.warn('[app-picker] mac icon failed for', appPath, err.message);
+      resolve(null);
+    }
+  });
+}
+
 ipcMain.handle('get-app-icon', async (_e, appPath) => {
   try {
     if (typeof appPath !== 'string' || !appPath) return { ok: false };
-    const icon = await app.getFileIcon(appPath, { size: 'normal' }); //32x32
-    return { ok: true, dataUrl: icon.toDataURL() };
+    if (_iconCache.has(appPath)) {
+      const c = _iconCache.get(appPath);
+      return c ? { ok: true, dataUrl: c } : { ok: false };
+    }
+    let dataUrl = null;
+    if (process.platform === 'darwin' && appPath.endsWith('.app')) {
+      dataUrl = await macAppIconDataUrl(appPath);          //real bundle icon
+    } else {
+      const icon = await app.getFileIcon(appPath, { size: 'normal' }); //32x32 (Windows)
+      dataUrl = icon.toDataURL();
+    }
+    _iconCache.set(appPath, dataUrl);
+    return dataUrl ? { ok: true, dataUrl } : { ok: false };
   } catch (err) {
     return { ok: false, reason: err.message || String(err) };
   }
